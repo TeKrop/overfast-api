@@ -1,0 +1,78 @@
+{
+    "name": "Zarya",
+    "role": "tank",
+    "difficulty": 3,
+    "description": "Deploying powerful personal barriers that convert incoming damage into energy for her massive Particle Cannon, Zarya is an invaluable asset on the front lines of any battle.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/02aebadea29904eca48f514437522f9f3a52ea266e6c2b2688dad39641071bda.png",
+            "primary_fire": {
+                "name": "Particle Cannon",
+                "description": "Short-range linear beam weapon."
+            },
+            "secondary_fire": {
+                "name": "Particle Cannon",
+                "description": "Energy grenade launcher."
+            }
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Particle Barrier",
+            "description": "Create a damage barrier around you.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/2d462e28ae2fc60b3ef9c32702bbc88936885dd7d20746a31dd2e3c51c20f199.png"
+        },
+        {
+            "name": "Projected Barrier",
+            "description": "Create a damage barrier around an ally.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/6e42984ee8329a50e9c2460ae2df7670d7be9846a093c336e4576d1eea1fb2f1.png"
+        },
+        {
+            "name": "Graviton Surge",
+            "description": "Launch a gravity well that pulls enemies to it.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/e58e60f939026f3d0ee95cf3a0b5fc8091da3c35a178d34c358700f3720a70d3.png"
+        },
+        {
+            "name": "Energy",
+            "description": "Damage blocked by barriers increases Particle Cannon damage.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/0df3be06b67b4a1a1788681f3b2e6795f4c76bef3870b9e3ad6eb2787c4fcc2c.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Zarya",
+            "age": "28",
+            "occupation": "Soldier",
+            "base_of_operations": "Krasnoyarsk Front, Russia",
+            "affiliation": "Russian Defense Forces"
+        },
+        "catch_phrase": "Together we are strong.",
+        "back_story": "Aleksandra Zaryanova is one of the world's strongest women, a celebrated athlete who sacrificed personal glory to protect her family, friends, and country in a time of war. Aleksandra was born in a remote Siberian village that was on the front lines of the Omnic Crisis, which began some thirty years ago. Although Russian forces defeated the robots and shut down their omnium, the region was devastated by the conflict. Only a child at the time, Aleksandra was surrounded by the post-war destruction, and as she grew older, she swore that she would gain the strength to help her people recover. Focusing on weightlifting and bodybuilding, Aleksandra was identified by the national athletics program as a potential star. She trained extensively, moving up the ranks while representing her country, and was expected to shatter longstanding records in the upcoming world championships. But on the eve of the tournament, an attack came from the long-dormant Siberian omnium, and her village was thrust into war once again. Aleksandra immediately withdrew from the competition and rushed home to enlist in the local defense forces, sacrificing the life of fame and fortune she might have had. Now she serves—a symbol to some, a stalwart fellow soldier to others. But for Aleksandra, it is a chance to use her great strength to protect the ones she loves."
+    },
+    "medias": [
+        {
+            "title": "Zarya Gameplay Preview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt39b5d1ef8d17c9d7/5cef2169486d1c3d0af72386/zarya-preview.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=E2Jzt0HGixY"
+        },
+        {
+            "title": "Zarya Ability Overview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltc4814e0a6d4a6116/5cef2168cf7aa6330ac6650d/zarya-gameplay.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=gTcKbsKDkWk"
+        },
+        {
+            "title": "Searching",
+            "type": "pdf",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt9f4bd394058b17bb/5d03c62972eb37ee0992294a/comic-thumb_15-Searching_EN.jpg?auto=webp",
+            "link": "https://playoverwatch.com/media/stories/searching"
+        },
+        {
+            "title": "Zarya",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt7646d110386e1273/5cef2168486d1c3d0af72382/zarya-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blte000920c5fccce9c/5d0285d67b48be290a7f95d5/zarya-concept.jpg?auto=webp"
+        }
+    ]
+}

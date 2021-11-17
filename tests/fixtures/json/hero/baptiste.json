@@ -1,0 +1,96 @@
+{
+    "name": "Baptiste",
+    "role": "support",
+    "difficulty": 3,
+    "description": "Baptiste wields an assortment of experimental devices and weaponry to keep allies alive and eliminate threats under fierce conditions. A battle-hardened combat medic, he is just as capable of saving lives as he is taking out the enemy.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/af62dfb3476b6389472188ce9e6e0e296928a5cb3ae87a4ed5133c8330e46f0d.png",
+            "primary_fire": {
+                "name": "Biotic Launcher",
+                "description": "Three-round burst gun."
+            },
+            "secondary_fire": {
+                "name": "Biotic Launcher",
+                "description": "Lob a healing projectile that heals all allies near the impact."
+            }
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Regenerative Burst",
+            "description": "Activate to heal yourself and nearby allies over time.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/d887d165f7b0eb98a30af8f274ff740c6c7735af719b93e95dd9da17558815d8.png"
+        },
+        {
+            "name": "Immortality Field",
+            "description": "Toss a device that prevents allies from dying. The device can be destroyed.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/d66d82bab88fc813080dd15e31629cc3aa7c8b41cfb41d5b962b628dd345e433.png"
+        },
+        {
+            "name": "Amplification Matrix",
+            "description": "Project a matrix that doubles the damage and healing effects of allied projectiles.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/0a31371b55e4007e67a86f8495949970d20f64b2f0166e78d3fd16217e090a83.png"
+        },
+        {
+            "name": "Exo Boots",
+            "description": "Hold crouch to jump higher.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/0d598afba5a03761d617d735d5435323c56108655b5017ddf8c36c4af36b9b73.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Baptiste",
+            "age": "36",
+            "occupation": "Combat Medic",
+            "base_of_operations": "Tortuga, Haiti (formerly)",
+            "affiliation": "Caribbean Coalition (formerly), Talon (formerly)"
+        },
+        "catch_phrase": "No dying on my watch.",
+        "back_story": "An elite combat medic and ex-Talon operative, Baptiste now uses his skills to help those whose lives have been impacted by war. Jean-Baptiste Augustin was one of the 30 million children orphaned by the Omnic Crisis. With limited opportunities and resources, he enlisted in the military. The Caribbean Coalition, a pan-island force formed in response to the Crisis, became his new home. Guided by his innate desire to help people, Baptiste chose the path of a combat medic and served in an elite branch of the Caribbean Coalition’s special ops. After his service was complete, Baptiste struggled to find a demand for his unique skills. He turned to one of the few opportunities open to him: joining the Talon mercenary group, one of the many organizations that were poised to profit off the chaos in the war's aftermath. For the first time ever, Baptiste had a taste of the good life. Talon's missions were easy and paid well, and he put aside some of his earnings to set up a clinic in his hometown. But slowly, his unit's orders escalated in brutality, expanding into assassinations and operations with civilian casualties. Confronted by his team's actions, Baptiste realized he was perpetuating a cycle of violence like the one that had destroyed his own community. He abandoned Talon, disgusted with what he had done and determined to forge a new path for himself. But Talon would not let him go. Baptiste knew too much, and they sent operatives after him to silence him. Agent after agent came for him, including Baptiste's former comrades. To stay under the radar, Baptiste drifted from place to place, aiding in humanitarian efforts around the globe. The few Talon members who managed to track him down were never seen again. Now, Baptiste works toward a better world, healing where he can and fighting when he must. He knows that he cannot undo his past—but that making a difference now is what matters."
+    },
+    "medias": [
+        {
+            "title": "Introducing Baptiste",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt2ce29198a67ab7dd/5cef20bb4e4776020a333ec1/baptiste-sizzle-reel.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=uxdy2SMf9CE"
+        },
+        {
+            "title": "Origin Story: Baptiste",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt2a6b0c6443e3d9a4/5cef20b672eb37ee099218d0/baptiste-origins-video.png?auto=webp",
+            "link": "https://www.youtube.com/watch?v=ZfWgcjeG83E"
+        },
+        {
+            "title": "What You Left Behind",
+            "type": "pdf",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltea79c18635c8dab5/5d5f02decd4bff10737c905b/shortstory-thumb_Baptiste_EN.jpg?auto=webp",
+            "link": "https://playoverwatch.com/media/stories/what-you-left-behind"
+        },
+        {
+            "title": "Baptiste",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt4c75489bb802d905/5cef20bb425980470abca493/baptiste-screenshot-003.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt9184393f5571ca85/5cef22644e4776020a333fed/baptiste-screenshot-003.jpg?auto=webp"
+        },
+        {
+            "title": "Baptiste",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltcc4806f1599c36b0/5cef20b5a812cef4091494b4/baptiste-screenshot-001.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltf3ea26b29120218e/5cef2264a812cef4091495d4/baptiste-screenshot-001.jpg?auto=webp"
+        },
+        {
+            "title": "Baptiste",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltf227c3ad646ab531/5cef20bbcf7aa6330ac66441/baptiste-screenshot-002.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt07c08e0dce1d197a/5cef226472eb37ee099219fe/baptiste-screenshot-002.jpg?auto=webp"
+        },
+        {
+            "title": "Baptiste",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltf02bf19cde44c5f6/5cef20b5cf7aa6330ac6643b/baptiste-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt6d1dfa8bb17c7716/5d0285bb425980470abcb3c0/baptiste-concept.jpg?auto=webp"
+        }
+    ]
+}

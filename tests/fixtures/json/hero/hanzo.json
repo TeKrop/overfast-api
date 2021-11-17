@@ -1,0 +1,74 @@
+{
+    "name": "Hanzo",
+    "role": "damage",
+    "difficulty": 3,
+    "description": "Hanzo’s versatile arrows can reveal his enemies or fragment to strike multiple targets. He can scale walls to fire his bow from on high, or summon a titanic spirit dragon.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/1aa4358e8a1d423dd55669780908b856141a783d053224b629b064c66288469e.png",
+            "primary_fire": {
+                "name": "Storm Bow",
+                "description": "Hold to charge then release to launch arrows further."
+            },
+            "secondary_fire": null
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Storm Arrows",
+            "description": "The next 5 arrows fire instantly at reduced damage.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/92c56621ba267d94f16baacda3f10ba7777b475935981b02e5026449d8e3d79c.png"
+        },
+        {
+            "name": "Sonic Arrow",
+            "description": "Reveals enemies for a short time upon impact.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/6a71d18cc52e49380aa9eb57f979524033a3e79bd3153900a12bb553d5a0e6f0.png"
+        },
+        {
+            "name": "Lunge",
+            "description": "Double Jump.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/cd1390347345e7825dff95758b3d5ed02a3497a013400a4faaefb2c77f07ee14.png"
+        },
+        {
+            "name": "Dragonstrike",
+            "description": "Launch a deadly Dragon Spirit that devastates enemies it passes through.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/f2d63b8f0e19e91d2c1199ed3ac0f20bb180dabe9ad1ffc7d1f1e880e58f0220.png"
+        },
+        {
+            "name": "Wall Climb",
+            "description": "Jump at walls to climb up them.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/c14b2c5652526a006233965b176fb2b5af9e7c5d44045fad3844267303f07091.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Hanzo",
+            "age": "38",
+            "occupation": "Mercenary, Assassin",
+            "base_of_operations": "Hanamura, Japan (formerly)",
+            "affiliation": "Shimada Clan"
+        },
+        "catch_phrase": "With every death comes honor. With honor, redemption.",
+        "back_story": "Mastering his skills as a bowman and an assassin, Hanzo Shimada strives to prove himself as a warrior without peer. The Shimada family was established centuries ago, a clan of assassins whose power grew over the years, enabling them to build a vast criminal empire that profited from lucrative trade in arms and illegal substances. As the eldest son of the family's head, Hanzo was bound by duty to succeed his father and rule the Shimada empire. From a young age, he was trained for that responsibility, displaying a natural aptitude for leadership and possessing an innate understanding of strategy and tactics. He also excelled in more practical areas: he was a prodigy in martial arts, swordplay, and bowmanship. Upon the death of his father, the clan elders instructed Hanzo to straighten out his wayward younger brother so that he, too, might help rule the Shimada empire. When his brother refused, Hanzo was forced to kill him. This act broke Hanzo's heart and drove him to reject his father's legacy, ultimately leading him to abandon the clan and all that he had worked so hard to attain. Now, Hanzo travels the world, perfecting his skills as a warrior, attempting to restore his honor and put the ghosts of his past to rest."
+    },
+    "medias": [
+        {
+            "title": "Animated Short: \"Dragons\"",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt6a9d52e3557a8c96/5cef20d04e4776020a333ed9/dragons-animated-short.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=oJ09xdxzIJQ"
+        },
+        {
+            "title": "Hanzo Gameplay Preview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt55cd5d964b85669a/5cef20e5425980470abca4d3/hanzo-preview.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=4PB4g3TVRuQ"
+        },
+        {
+            "title": "Hanzo",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt02f67cd0887e7747/5cef20e5cf7aa6330ac66477/hanzo-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt4fda10d47658c815/5d0285bb486d1c3d0af731e6/hanzo-concept.jpg?auto=webp"
+        }
+    ]
+}

@@ -1,0 +1,75 @@
+{
+    "name": "Soldier: 76",
+    "role": "damage",
+    "difficulty": 1,
+    "description": "Armed with cutting-edge weaponry, including an experimental pulse rifle that’s capable of firing spirals of high-powered Helix Rockets, Soldier: 76 has the speed and support know-how of a highly trained warrior.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/69eaf669cd646a617439592615f023cfec82c27f4a3e19f48188941b3feaf55f.png",
+            "primary_fire": {
+                "name": "Heavy Pulse Rifle",
+                "description": "Automatic assault weapon."
+            },
+            "secondary_fire": null
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Sprint",
+            "description": "Run faster while moving forward.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/8408bacddfb4ac7b971dd14f6d8c9d211459fb159b459c3e6eaf06bc0a38bcb2.png"
+        },
+        {
+            "name": "Biotic Field",
+            "description": "Deploy a field that heals you and your allies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/aaadd3dee89ac8797ecb7a1e647f574a034b1930726296fd17946d343254bdf0.png"
+        },
+        {
+            "name": "Helix Rockets",
+            "description": "Launch a volley of explosive rockets.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/8fedb348952552227b6e2ec85cf14214106b901afce2a9657267153bb2a8cac3.png"
+        },
+        {
+            "name": "Tactical Visor",
+            "description": "Automatically aims your weapon at targets in view.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/5e8d4b8fb5cd1271314b8462012e9894c811a7c4857739e73bde53f2431e673d.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Soldier: 76",
+            "age": "Unknown",
+            "occupation": "Vigilante",
+            "base_of_operations": "Unknown",
+            "affiliation": "Overwatch (formerly)"
+        },
+        "catch_phrase": "We're all soldiers now.",
+        "back_story": "Currently the target of an international manhunt, the vigilante known as Soldier: 76 wages a personal war to expose the truth behind Overwatch's collapse. Soldier: 76 revealed himself in a string of attacks that crisscrossed the globe, targeting financial institutions, shadowy corporations, and secure Overwatch facilities. Though to the outside world his motives are inscrutable, there are those who claim that he is a former Overwatch agent, determined to shed light on the conspiracy that brought down the organization. While his true identity remains a mystery, he is believed to have been trained as a member of the American \"soldier enhancement program.\" He possesses physical capabilities exceeding those of a conventional soldier's, as well as other augmentations that make him a peerless combatant. In addition, he utilizes a cutting-edge arsenal, much of it stolen in raids on Overwatch installations. Unrelenting in his search to find those responsible for Overwatch's fall, Soldier: 76 will stop at nothing to bring them to justice."
+    },
+    "medias": [
+        {
+            "title": "Animated Short: “HERO”",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt27015f4d0ffb68dd/5cef2139cf7aa6330ac664d1/soldier-animated-short.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=cPRRupAM4DI"
+        },
+        {
+            "title": "Soldier: 76 Gameplay Preview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltba49474471e92289/5cef2139578308e40945736a/soldier-76-preview.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=YBbWxfEbZFc"
+        },
+        {
+            "title": "Soldier: 76 Ability Overview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt7ae6d96854521ea8/5cef2139425980470abca53f/soldier-76-gameplay.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=V_0eqEbG7yA"
+        },
+        {
+            "title": "Soldier: 76",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt6f15b31235b0fa7a/5cef2139425980470abca53b/soldier-76-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt71c1633144ceed2b/5d0285d6486d1c3d0af731f2/soldier-76-concept.jpg?auto=webp"
+        }
+    ]
+}

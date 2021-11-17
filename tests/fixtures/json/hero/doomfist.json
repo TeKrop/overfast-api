@@ -1,0 +1,104 @@
+{
+    "name": "Doomfist",
+    "role": "damage",
+    "difficulty": 3,
+    "description": "Doomfist’s cybernetics make him a highly-mobile, powerful frontline fighter. In addition to dealing ranged damage with his Hand Cannon, Doomfist can slam the ground, knock enemies into the air and off balance, or charge into the fray with his Rocket Punch. When facing a tightly packed group, Doomfist leaps out of view, then crashes down to earth with a spectacular Meteor Strike.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/49c404d5887c562cdb5aafb55979c5589a450c0e18fa9d62a3c8cc0ac585886e.png",
+            "primary_fire": {
+                "name": "Hand Cannon",
+                "description": "Short-range weapon with spread. Reloads automatically."
+            },
+            "secondary_fire": null
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Seismic Slam",
+            "description": "Leap forward and smash the ground.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/20f721d5fd05f91e203d6e0007a137bdc90a161356f85d5aa88b2ab02b8da22b.png"
+        },
+        {
+            "name": "Rising Uppercut",
+            "description": "Knock an enemy into the air.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/848cefbe4a5fa35c2f62f31118262532e6414bbe80fc5e1d8d2f198ebdae9d60.png"
+        },
+        {
+            "name": "Rocket Punch",
+            "description": "Hold to charge then release to launch forward and knock an enemy back. Damage increases if the enemy hits a wall.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/aa2a067fe151ac2795fe77546711c07be5f0880d9ae5dce554cab0c933d927f0.png"
+        },
+        {
+            "name": "Meteor Strike",
+            "description": "Press Q to leap up into the air. Move the targeting circle, then press ABILITY 3 to strike the targeted area.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/fa96b2650987b3784a725a0fb1704f7191a686a4f42c9ccf61c404e2f08b158c.png"
+        },
+        {
+            "name": "The Best Defense...",
+            "description": "Dealing damage with abilities creates temporary personal shields.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/e60ad8d06a44f829f6110b528751d2e5a1840e0a72bed4a9c848970ba6ebae80.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Doomfist",
+            "age": "45",
+            "occupation": "Mercenary",
+            "base_of_operations": "Oyo, Nigeria",
+            "affiliation": "Talon"
+        },
+        "catch_phrase": "Only through conflict do we evolve.",
+        "back_story": "Recently freed from imprisonment, Doomfist is determined to plunge the world into a new conflict that he believes will make humanity stronger. Akande Ogundimu was born into a well-regarded Nigerian family, heir to its prosthetic-technology company. A highly intelligent and charismatic figure, Ogundimu helped to expand his family's business and position it for the future while dedicating his free time to his first love: competitive martial arts. He trained in traditional African fighting styles, including Dambe and Gidigbo, as well as in wrestling and other modern combat systems, incorporating the most effective techniques into his repertoire. Ogundimu competed in tournaments all over the continent, utilizing his intuition and ability to read opponents alongside his tremendous speed and strength. But when he lost his right arm in the aftermath of the Omnic Crisis, it seemed his martial arts career was finished before he had reached his prime. His company's cybernetic prosthetics allowed him to recover from his injuries, even making him stronger, but these enhancements rendered him ineligible for competition. He tried to devote himself to his business with the same zeal that he had for fighting, but he found nothing that could fill the void… until he was given a new opportunity by Akinjide Adeyemi, better known to the world as the second Doomfist, the Scourge of Numbani. Adeyemi offered Ogundimu the chance to fight with him as a mercenary. Initially wary, Ogundimu accepted, and discovered that he now had an arena in which he could unleash his enhanced capabilities. Eventually, Adeyemi brought him into the Talon organization. Talon's belief that humanity would be made stronger through conflict resonated with Ogundimu's personal experiences. Moreover, Talon's power struggles presented a new challenge that allowed him to use his talent in the boardroom along with his cunning as a combatant. Adeyemi was a useful asset to Talon, but the organization saw far greater potential in Ogundimu, with his intelligence and his ability to inspire as a commander. While Adeyemi was content to profit from raids on Numbani, Ogundimu had a grander vision. This difference in aspiration would lead Ogundimu to kill his teacher and take on the mantle of Doomfist, along with the eponymous gauntlet. As the new Doomfist, Ogundimu rose high in Talon and helped to orchestrate a conflict that the organization hoped would someday engulf the world. However, before their plan came to fruition, Ogundimu was defeated and captured by an Overwatch strike team that included Tracer, Winston, and Genji. He was imprisoned in a maximum-security facility for years, where he waited patiently for events he had incited to play out. Finally, he sensed that the time had come for him to return. He broke out of his prison and recovered Doomfist's gauntlet in a one-sided battle with Numbani's newly unveiled OR15 defense robots. Now, he has retaken his place in Talon's inner council, ready to spark a war that will consume the world once again."
+    },
+    "medias": [
+        {
+            "title": "Introducing Doomfist",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltf93a60145715619a/5cef20d0486d1c3d0af722aa/doomfist-sizzle-video.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=-pLpQwjGAnA"
+        },
+        {
+            "title": "Origin Story: Doomfist",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt55335da1c821bd1b/5cef20c872eb37ee099218e2/doomfist-origins-video.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=vaZfZFNuOpI"
+        },
+        {
+            "title": "Masquerade",
+            "type": "pdf",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt478432640a06b41a/5d03c629578308e40945836e/comic-thumb_13-Masquerade_EN.jpg?auto=webp",
+            "link": "https://playoverwatch.com/media/stories/masquerade"
+        },
+        {
+            "title": "Doomfist",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt5b13d2e180d9fa34/5cef20d0425980470abca4ab/doomfist-screenshot-003.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt47cb21151cce3500/5cef2273cf7aa6330ac66555/doomfist-screenshot-003.jpg?auto=webp"
+        },
+        {
+            "title": "Doomfist",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltfa722ae5f92583f5/5cef20c8578308e4094572e0/doomfist-screenshot-001.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blteaa0e1b882291a8d/5cef2273425980470abca5b9/doomfist-screenshot-001.jpg?auto=webp"
+        },
+        {
+            "title": "Doomfist",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt604662e2dae0822a/5cef20d0a812cef4091494cc/doomfist-screenshot-004.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt4c26c94bec87dc9a/5cef227372eb37ee09921a10/doomfist-screenshot-004.jpg?auto=webp"
+        },
+        {
+            "title": "Doomfist",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltd3ace4b68e4a9b9d/5cef20d07b48be290a7f8704/doomfist-screenshot-002.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltc0236f50b1bd6abe/5cef2273a812cef4091495e0/doomfist-screenshot-002.jpg?auto=webp"
+        },
+        {
+            "title": "Doomfist",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt0ca93938cb9b64c4/5cef20c8cf7aa6330ac66453/doomfist-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt3ad2688a606078ef/5d0285bba812cef40914a44a/doomfist-concept.jpg?auto=webp"
+        }
+    ]
+}

@@ -1,0 +1,93 @@
+{
+    "name": "Sigma",
+    "role": "tank",
+    "difficulty": 3,
+    "description": "Sigma is an eccentric astrophysicist and volatile tank who gained the power to control gravity in an orbital experiment gone wrong. Manipulated by Talon and deployed as a living weapon, Sigma’s presence on the battlefield cannot be ignored.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/b6b9f77a52419e542ae8e20afc12035443fb96b99cadb0765694a8f5b41eeb74.png",
+            "primary_fire": {
+                "name": "Hyperspheres",
+                "description": "Launch two charges which implode after a short duration, dealing damage in an area."
+            },
+            "secondary_fire": null
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Kinetic Grasp",
+            "description": "Absorb projectiles in front of you and convert them into shields.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a7401d18a391bc0eafddd8fc47a31ccc7f277190ab61ed14ae98408f576d6a23.png"
+        },
+        {
+            "name": "Accretion",
+            "description": "Gather a mass of debris and throw it at an enemy to knock them down.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/594b0ecbb34b41b288c08bc7b040b273f25289ef0afc2d00828d6a30a0687236.png"
+        },
+        {
+            "name": "Experimental Barrier",
+            "description": "Hold to propel a floating barrier; release to stop. Press again to recall the barrier to you.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/ae2c31f159331f73739932e85dc21bdfa8eb4f2b2d2de4e89c1488445da34ffb.png"
+        },
+        {
+            "name": "Gravitic Flux",
+            "description": "Manipulate gravity to lift enemies into the air and slam them back down.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/7140d3eaf82e580ab465dcdb04bd1faaf77ac54550a12d17ecde7c4e87e963e0.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Sigma",
+            "age": "62",
+            "occupation": "Astrophysicist",
+            "base_of_operations": "The Hague, Netherlands (formerly)",
+            "affiliation": "Talon"
+        },
+        "catch_phrase": "There is no obligation for the universe to make sense to you.",
+        "back_story": "Brilliant astrophysicist Dr. Siebren de Kuiper's life changed forever when an experiment gone wrong gave him the ability to control gravity; now, Talon manipulates him to their own ends. De Kuiper was considered a pioneer in his field. His life's work involved devising a way to harness the power of gravity. Equally known for his groundbreaking research and eccentric personality, he conducted most of his studies from his lab in The Hague. Believing that he was close to achieving his goal, he performed his most important experiment on an international space station. But something went wrong, triggering the brief formation of a black hole. De Kuiper was only exposed to its power for a moment, but he suffered serious psychological damage. The area around him began to experience strange fluctuations in gravity, peaking and dropping in time with his reactions. He had to be evacuated immediately. Upon returning to Earth, De Kuiper was quarantined in a secret government facility. Between his ravings about the patterns of the universe, the psychic damage he sustained, and the gravitic anomalies happening around him, he was deemed unsafe and detained for years under the name \"Subject Sigma.\" Isolated and unable to control his powers, De Kuiper retreated into his own mind. He thought he would never see the outside world again. When Talon discovered De Kuiper's existence, they infiltrated the facility and broke him out, planning to use his brilliance and research to further their plans. In their custody, De Kuiper slowly gained control of his powers. Now, gravity moved according to his will, and he was closer than ever to achieving his life's goal. But the same experiment that had opened his mind had also fractured it, and he struggled to keep the pieces together. De Kuiper continues to develop his powers in hopes of unlocking the secrets of the universe, unaware that Talon is using both him and his research."
+    },
+    "medias": [
+        {
+            "title": "Introducing Sigma",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt1a63ca8ea509354b/5d5ed2445f9bd51c40851e02/sigma-sizzle-reel.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=nWEpjzgMqyU"
+        },
+        {
+            "title": "Origin Story: Sigma",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltd7a0061f37f5164a/5d5ed2453471931c451d2b9a/sigma-origins-video.png?auto=webp",
+            "link": "https://www.youtube.com/watch?v=onplsJSdp4A"
+        },
+        {
+            "title": "Sigma",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt42f608cb9f57f46b/5d5ece67a909ec1ccfcfa746/sigma-screenshot-001.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt75d1fbbd0197a852/5d5ece9ccd4bff10737c9003/sigma-screenshot-001.jpg?auto=webp"
+        },
+        {
+            "title": "Sigma",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltb5f48181f173079a/5d5ece67cfdefb1cd5f95cb8/sigma-screenshot-002.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blte7ecf066990e298c/5d5ece9c5f9bd51c40851df4/sigma-screenshot-002.jpg?auto=webp"
+        },
+        {
+            "title": "Sigma",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt25252c9561f59a8b/5d5ece67c6ec8a10fc77094a/sigma-screenshot-003.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt0b16134161bff3cb/5d5ece9ca909ec1ccfcfa74c/sigma-screenshot-003.jpg?auto=webp"
+        },
+        {
+            "title": "Sigma",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt36f8d2a14e909a1b/5d5ece675f9bd51c40851dee/sigma-screenshot-004.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt7d9969a81035a076/5d5ece9ca1306e110698e5a9/sigma-screenshot-004.jpg?auto=webp"
+        },
+        {
+            "title": "Sigma",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt61424b7c889deb2a/5d5ec7647c931b106e8af42f/sigma-concept-thumbnail.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt65e3918120aa6440/5d5ec75fa909ec1ccfcfa73c/sigma-concept.jpg?auto=webp"
+        }
+    ]
+}

@@ -1,0 +1,72 @@
+{
+    "name": "Genji",
+    "role": "damage",
+    "difficulty": 3,
+    "description": "Genji flings precise and deadly Shuriken at his targets, and uses his technologically-advanced katana to deflect projectiles or deliver a Swift Strike that cuts down enemies.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/8d0916035141abd9ab2bf72dbcfd0460b7a0019529e023d259ad4340890b34b3.png",
+            "primary_fire": {
+                "name": "Shuriken",
+                "description": "Throw an accurate burst of 3 projectiles."
+            },
+            "secondary_fire": {
+                "name": "Fan of Blades",
+                "description": "Throw a fan of 3 projectiles in an arc."
+            }
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Deflect",
+            "description": "Deflect incoming projectiles towards the direction you are aiming and block melee attacks.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/9e46bda733749ddd6512b61c021b4487b6201338a9ff39c716e4ee06e5d63a58.png"
+        },
+        {
+            "name": "Swift Strike",
+            "description": "Rapidly dash forward and inflict damage on enemies. Eliminations reset the cooldown.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a6639d5240b77967a734fc5e2af960fd38dccd834430a4a3409add345bb7e21e.png"
+        },
+        {
+            "name": "Dragonblade",
+            "description": "Unsheathe a deadly melee weapon.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/e9c3c82c08ce1a6006dbdf6905591040ed83ddceba81efb2e526c217cd57c931.png"
+        },
+        {
+            "name": "Cyber-Agility",
+            "description": "Climb on walls and double jump.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/c14b2c5652526a006233965b176fb2b5af9e7c5d44045fad3844267303f07091.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Genji",
+            "age": "35",
+            "occupation": "Adventurer",
+            "base_of_operations": "Shambali Monastery, Nepal",
+            "affiliation": "Shimada Clan (formerly), Overwatch (formerly)"
+        },
+        "catch_phrase": "Even if I sacrifice my body, I will never sacrifice my honor.",
+        "back_story": "The cyborg Genji Shimada has made peace with the augmented body he once rejected, and in doing so, he has discovered a higher humanity. As the youngest son of the master of the Shimada ninja clan, Genji lived a life of luxury and privilege. He had little interest in the family's illegal businesses, and although he excelled at and enjoyed his ninja training, he spent most of his time pursuing a playboy lifestyle. Many within the clan considered the carefree Genji to be a dangerous liability, and they resented his father for coddling and protecting him. Following the clan leader's untimely death, Genji's older brother, Hanzo, demanded that Genji take a more active role in their late father's empire. Genji refused, enraging Hanzo. The tension between the brothers built to a violent confrontation that left Genji on the verge of dying. Hanzo believed that he had killed his brother, but Genji was rescued by Overwatch and the intervention of Dr. Angela Ziegler. The global security force saw Genji as a potential asset in its ongoing operations to combat the Shimada clan. As Genji's injuries left him clinging to life, Overwatch offered to rebuild his body in exchange for his help. He was put through an extensive process of cyberization, which enhanced his natural speed and agility and augmented his superlative ninja skills. Transformed into a living weapon, Genji single-mindedly set about the task of dismantling his family's criminal empire. But as time passed, Genji felt increasingly at war with himself. He was repulsed by the mechanical parts of his body and could not come to grips with what he had become. When his mission was complete, he abandoned Overwatch and wandered the world in search of meaning. He drifted for many years before crossing paths with the omnic monk Zenyatta. Though Genji initially rejected Zenyatta's wisdom, the benevolent omnic would not be deterred. In time, Zenyatta became his mentor, and under the monk's tutelage, Genji reconciled his dual existence as both man and machine. He learned to accept that although he had a cyborg body, his human soul was intact, and he came to see his new form as a gift and a unique strength. Now, for the first time in his life, Genji is free. Even he cannot say where his path will ultimately lead."
+    },
+    "medias": [
+        {
+            "title": "Animated Short: \"Dragons\"",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt6a9d52e3557a8c96/5cef20d04e4776020a333ed9/dragons-animated-short.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=oJ09xdxzIJQ"
+        },
+        {
+            "title": "Genji Ability Overview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt0c2313013b468ac8/5cef20da486d1c3d0af722bc/genji-gameplay.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=lYOjIDhJIG0"
+        },
+        {
+            "title": "Genji",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltaa5740bb92dc952f/5cef20da7b48be290a7f8710/genji-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltd20a4370e1aecc85/5d0285bb7b48be290a7f95c9/genji-concept.jpg?auto=webp"
+        }
+    ]
+}

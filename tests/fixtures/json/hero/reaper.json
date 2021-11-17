@@ -1,0 +1,75 @@
+{
+    "name": "Reaper",
+    "role": "damage",
+    "difficulty": 1,
+    "description": "Hellfire Shotguns, the ghostly ability to become immune to damage, and the power to step between shadows make Reaper one of the deadliest beings on Earth.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/76b6866587871744aca310645f66d2d07755c5a55093eb8734ed0898b17efc51.png",
+            "primary_fire": {
+                "name": "Hellfire Shotguns",
+                "description": "Short-range spread weapons."
+            },
+            "secondary_fire": null
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Shadow Step",
+            "description": "Teleport to a targeted location.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/bad9345de1f04a46f219364952464c38d2b2a9afa335df6894cde81565816fa4.png"
+        },
+        {
+            "name": "Wraith Form",
+            "description": "Move faster and become invulnerable, but you cannot shoot.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/dbcceb2a764dcf8bb808078f7a32a039fd259c72e557dcde3fb70b2041247c9a.png"
+        },
+        {
+            "name": "Death Blossom",
+            "description": "Damage all nearby enemies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/e35595575880a304e14d427a0f9f5f04dc0886ba0f4cadd731ac935174f031e2.png"
+        },
+        {
+            "name": "The Reaping",
+            "description": "Dealing damage heals you.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/21fb34e5a009987c73f686336cd61d4e4b771a8a2d9b6753e62f65b41e6b6c51.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Reaper",
+            "age": "Unknown",
+            "occupation": "Mercenary",
+            "base_of_operations": "Unknown",
+            "affiliation": "Unknown"
+        },
+        "catch_phrase": "Death walks among you.",
+        "back_story": "Some speak of a black-robed terrorist known only as the Reaper. His identity and motives are a mystery. What is known is that where he appears, death follows. The Reaper is an extremely volatile mercenary, a ruthless and remorseless killer responsible for terrorist attacks across the world. He has fought in many armed conflicts in the last decades, showing no loyalty to any cause or organization. Survivors have described a black shadow ghosting unscathed through the most hellish battlefields. The few bodies recovered of those he kills are pale, empty husks drained of life, their cells showing signs of intense degradation. It is possible that he is a byproduct of failed genetic alteration which forces his cells to simultaneously decay and regenerate at a hyper-accelerated rate. Those attempting to track his movements have begun to see a pattern in his appearances. They believe that Reaper is hunting former Overwatch agents and systematically eliminating them."
+    },
+    "medias": [
+        {
+            "title": "Reaper Gameplay Preview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt2c0e6106c771be3b/5cef2128578308e409457356/reaper-preview.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=NQMuuCzsv-g"
+        },
+        {
+            "title": "Reaper Ability Overview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt3b0c6d92201158ef/5cef2128cf7aa6330ac664bf/reaper-gameplay.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=uK4WSF0rCcM"
+        },
+        {
+            "title": "Retribution",
+            "type": "pdf",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltc023ad8000a756eb/5d03c629a812cef40914a5a4/comic-thumb_16-Retribution_EN.jpg?auto=webp",
+            "link": "https://playoverwatch.com/media/stories/retribution"
+        },
+        {
+            "title": "Reaper",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltb0b46e235ac92ef5/5cef2128578308e409457352/reaper-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt35588a9289e4b32e/5d0285ca4e4776020a334db2/reaper-concept.jpg?auto=webp"
+        }
+    ]
+}

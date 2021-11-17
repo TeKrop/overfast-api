@@ -1,0 +1,97 @@
+{
+    "name": "Brigitte",
+    "role": "support",
+    "difficulty": 1,
+    "description": "Brigitte specializes in armor. She can throw Repair Packs to heal teammates, or automatically heal nearby allies when she damages foes with her Flail. Her Flail is capable of a wide swing to strike multiple targets, or a Whip Shot that stuns an enemy at range. When entering the fray, Barrier Shield provides personal defense while she attacks enemies with Shield Bash. Brigitte’s ultimate ability, Rally, gives her a substantial short-term boost of speed and provides long-lasting armor to all her nearby allies.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/1304eead9caa02eb2057c7f9a3eb758bd438086223a8d6c475bb6912da5b8132.png",
+            "primary_fire": {
+                "name": "Rocket Flail",
+                "description": "Melee weapon with extended range."
+            },
+            "secondary_fire": null
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Repair Pack",
+            "description": "Heals an ally for a short duration.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/5f9f1e00af992f4a090cafc8e83821dd2848f22cb9e0205fafcedacb26bd7335.png"
+        },
+        {
+            "name": "Whip Shot",
+            "description": "Launch your flail forward to knock an enemy away from you.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/50af1a0bc61a1f022fe2ee69aa460f151aba3c0ccde41377bfb0d5c45b2c55a3.png"
+        },
+        {
+            "name": "Barrier Shield",
+            "description": "Hold  to deploy a frontal energy barrier.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/2b1bb6338180161e55c5f2184879dce395eca9e58f974befe729293fcc3dfdca.png"
+        },
+        {
+            "name": "Shield Bash",
+            "description": "Available when Barrier Shield is deployed. Dash forward to knock back and stun an enemy.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/79f145b07b35e744fd0400dceff5fb11a06f9a73c48809f1cfb462fe82fe1185.png"
+        },
+        {
+            "name": "Rally",
+            "description": "Move faster and provide armor to nearby allies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/08552423da53faa55238bd66a2a72d32d1038e42f2eebc911921bc9d5d575432.png"
+        },
+        {
+            "name": "Inspire",
+            "description": "Striking enemies with your flail heals nearby allies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/487545fb37163e4029e1e8483266180fbcc59b7e8482062563168998774615f8.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Brigitte",
+            "age": "23",
+            "occupation": "Mechanical Engineer, Adventurer",
+            "base_of_operations": "Gothenburg, Sweden (formerly)",
+            "affiliation": "None"
+        },
+        "catch_phrase": "I will prove myself!",
+        "back_story": "No longer sitting on the sidelines, Brigitte Lindholm has taken up arms to defend those in need of protection. The youngest daughter of weapons designer, Torbjörn Lindholm, Brigitte was the first of his children to show an interest in mechanical engineering. Brigitte spent much of her spare time in her father's workshop, learning the trade and honing her skills. Her aptitude for engineering mirrored that of her father's, but Brigitte's primary interest was in armor fabrication and defensive systems, unlike Torbjörn, who was world renowned (and perhaps infamous) for the weapons he created. Everyone expected that Brigitte would continue her apprenticeship and follow in her father's footsteps. But her plans changed due to influence of another prominent figure in her life, her father's close friend and fellow Overwatch agent, Reinhardt Wilhelm. A close friend of the family and Brigitte's godfather, Reinhardt told Brigitte tales of heroes and chivalry as she grew up. After his retirement and Overwatch's fall, Reinhardt declared that he would become a knight-errant on a quest to bring justice. Before he left on his adventures, Brigitte surprised him by asking to join him as his squire. Reinhardt accepted. As a squire, Brigitte had many responsibilities, the most important of which was the upkeep of Reinhardt's Crusader armor (a design she was familiar with as the current version was designed by her father). But more and more, she found her main job was taking care of Reinhardt himself, trying to protect him from his overenthusiasm even as his body was breaking down from years of combat. Eventually, she realized that serving only as a mechanic wasn't enough, and that the best way she could aid Reinhardt was to become a warrior in her own right. While Reinhardt trained her in combat, Brigitte began to build her own suit of armor in secret. Now Brigitte fights at Reinhardt's side to protect him, and any others in need as knight and squire journey to make the world a better place, one battle at a time."
+    },
+    "medias": [
+        {
+            "title": "Introducing Brigitte",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltaae7976325121034/5cef20c3cf7aa6330ac6644d/brigitte-intro.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=msFq8_IRebI"
+        },
+        {
+            "title": "Origin Story: Brigitte",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltbf90fcb0591010e7/5cef20c3425980470abca49f/brigitte-origins-video.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=K_m8fcJb5tE"
+        },
+        {
+            "title": "Brigitte",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltfcdf08acecd10b7b/5cef20c3486d1c3d0af72298/brigitte-screenshot-002.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltba30938e47db14bf/5cef226bcf7aa6330ac66549/brigitte-screenshot-002.jpg?auto=webp"
+        },
+        {
+            "title": "Brigitte",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt05042fed16b11778/5cef20c372eb37ee099218dc/brigitte-screenshot-003.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt597c0ef3345dec01/5cef226b4e4776020a333ff3/brigitte-screenshot-003.jpg?auto=webp"
+        },
+        {
+            "title": "Brigitte",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt9c8464931e27089b/5cef20c3a812cef4091494c0/brigitte-screenshot-001.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt90ed75fd5d125f23/5cef226b72eb37ee09921a0a/brigitte-screenshot-001.jpg?auto=webp"
+        },
+        {
+            "title": "Brigitte",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt43596b3b48df2449/5cef20c3578308e4094572da/brigitte-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltb4f3ce052ba1f282/5d0285bca812cef40914a450/brigitte-concept.jpg?auto=webp"
+        }
+    ]
+}

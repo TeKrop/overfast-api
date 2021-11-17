@@ -1,0 +1,85 @@
+{
+    "name": "Ashe",
+    "role": "damage",
+    "difficulty": 2,
+    "description": "Ashe quickly fires her rifle from the hip or uses her weapon’s aim-down sights to line up a high damage shot. She blasts enemies by throwing dynamite, and her coach gun packs enough punch to put some distance between her and her foes. And Ashe is not alone, as she can call on her omnic ally Bob, to join the fray when the need arises.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/cca8472a3e966de2b9985cee492e527eac5063e9881797dded4ca1e32e292bc0.png",
+            "primary_fire": {
+                "name": "The Viper",
+                "description": "Semi-automatic rifle."
+            },
+            "secondary_fire": {
+                "name": "Take Aim",
+                "description": "Hold to zoom in, increasing damage and accuracy but slowing rate of fire."
+            }
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Coach Gun",
+            "description": "Blast enemies in front of you and knock yourself backwards.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/e18f7b6e464f0cf34789babf7a76b7e1d851e62102dccfe10769bcf8716e5554.png"
+        },
+        {
+            "name": "Dynamite",
+            "description": "Throw an explosive that detonates after a short delay or immediately when shot.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a326b202a821ab3e196d1faab6144460f470001b26a8b6f2ab96cb3af5f325b3.png"
+        },
+        {
+            "name": "B.O.B.",
+            "description": "Deploy Bob. He charges forward and knocks enemies into the air, then attacks with his arm cannons.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/e788b12d476e896dac3831bbc0842fb3b4d07a89b3c337959d9a6cd6ea5a7df5.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Ashe",
+            "age": "39",
+            "occupation": "Thief, Gang Leader",
+            "base_of_operations": "Deadlock Gorge, Arizona, USA",
+            "affiliation": "Deadlock Gang"
+        },
+        "catch_phrase": "My business, my rules.",
+        "back_story": "Ashe is the ambitious and calculating leader of the Deadlock Gang and a respected figure in the criminal underworld. Born into a wealthy family, Ashe grew up surrounded by privilege. Her parents were highly sought-after business consultants and coaches for powerful CEOs around the world. Though her parents paid little attention to her (mostly leaving her in the care of the family’s omnic butler, Bob), they ensured that Ashe had every opportunity to succeed. But a chance meeting with a local ruffian, named Cole Cassidy, and an impromptu string of crimes committed together opened her eyes to her true calling. The satisfaction of outwitting her targets and the thrill of getting away with it set her on the outlaw path. Along with the other three founders of the Deadlock Gang, Ashe started to make a name for herself with bigger and more extravagant heists. The Deadlock Gang’s rapid rise to prominence put them at odds with the other criminal organizations in the American Southwest; the encounters often became violent. After years of skirmishes and bloodshed, Ashe called the heads of the major groups together. Ashe saw the potential to grow the influence of all. She used what she’d learned from her parents’ business to bring order to these groups. Her proposal was that the gangs could work together (or at least, not work against each other). Her principles: keep your word, don’t work with the law, respect each other’s territory, and always punish betrayal. No longer having to focus her energies on squabbles with the other gangs, Ashe is now writing her name across the American Southwest with a string of audacious heists and operations that has put her at top of the authorities’ most-wanted lists and cemented her legacy as an outlaw legend."
+    },
+    "medias": [
+        {
+            "title": "Introducing Ashe",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt7817478178e8f044/5cef20b5486d1c3d0af7228c/ashe-sizzle-reel.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=G8LbOecWGug"
+        },
+        {
+            "title": "Origin Story: Ashe",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltf1b688755d8c1703/5cef20af72eb37ee099218c2/ashe-origins-video.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=yvT9wKCrEyo"
+        },
+        {
+            "title": "Animated Short: \"Reunion\"",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt78c1e7affe32e542/5cef20fc425980470abca4ed/mccree-animated-short.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=PKYVvPNhRR0"
+        },
+        {
+            "title": "Ashe",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt33f25b377c0fe339/5cef20b5425980470abca48d/ashe-screenshot-002.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt363a2e79218c1906/5cef225a578308e4094573d0/ashe-screenshot-002.jpg?auto=webp"
+        },
+        {
+            "title": "Ashe",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt94018578b157e1e2/5cef20b5a812cef4091494ae/ashe-screenshot-001.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltaeed540b9c3bf4e2/5cef225acf7aa6330ac6653d/ashe-screenshot-001.jpg?auto=webp"
+        },
+        {
+            "title": "Ashe",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blta851be57594c3e45/5cef20b572eb37ee099218ca/ashe-screenshot-003.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt6d42e4ebe2d8653a/5cef225a425980470abca5a1/ashe-screenshot-003.jpg?auto=webp"
+        }
+    ]
+}

@@ -1,0 +1,67 @@
+{
+    "name": "Mei",
+    "role": "damage",
+    "difficulty": 3,
+    "description": "Mei’s weather-altering devices slow opponents and protect locations. Her Endothermic Blaster unleashes damaging icicles and frost streams, and she can Cryo-Freeze herself to guard against counterattacks, or obstruct the opposing team's movements with an Ice Wall.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a6e33c5a9c29cbb15d67b9dbd02de11cdf61d3b943c479d678cad0fa94ef4217.png",
+            "primary_fire": {
+                "name": "Endothermic Blaster",
+                "description": "Short-range spray weapon that freezes."
+            },
+            "secondary_fire": {
+                "name": "Icicle",
+                "description": "Long-range icicle launcher."
+            }
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Cryo-Freeze",
+            "description": "Become invulnerable and heal yourself.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/b9507f892676c729768b3cb9eec4fb2195bbadb1f229a6a332d282ffa32410db.png"
+        },
+        {
+            "name": "Ice Wall",
+            "description": "Create a wall in front of you.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/0608319e5f26acafd19a0afd682f3c73c5b70cbfc93d59f58f28eef5cd0eb2e7.png"
+        },
+        {
+            "name": "Blizzard",
+            "description": "Launch a weather control drone that freezes enemies in a wide area.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/892fd12cc3f8bd3b54bbc175b6d8caecdedaa819c819c5fc216c3c2b4f486a3f.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Mei",
+            "age": "31",
+            "occupation": "Climatologist, Adventurer",
+            "base_of_operations": "Xi’an, China (formerly)",
+            "affiliation": "Overwatch (formerly)"
+        },
+        "catch_phrase": "Our world is worth fighting for.",
+        "back_story": "Mei is a scientist who has taken the fight to preserve the environment into her own hands. Though many blamed the planet's escalating, unexplained climate phenomena on the advent of new technologies, the rapidly growing omnic population, and drastically increased consumption of resources, the true cause remained unknown. To find a solution, Overwatch established a series of eco-Watchpoints at remote, critical locations worldwide. Mei-Ling Zhou was a member of this multiyear initiative. A peerless climatologist, she had introduced cutting-edge innovations in the field of climate manipulation that protected at-risk areas in Asia and beyond. She was assigned to the program's monitoring station at Watchpoint: Antarctica when disaster struck: a sudden, catastrophic polar storm battered the installation and cut it off from the outside world, leaving the facility damaged and the scientists stranded. As their supplies dwindled, they entered cryostasis in a last-ditch effort to survive until a rescue attempt could be made. But that rescue never came. It was years later when the team's cryogenics chamber was finally discovered. Mei, still in hibernation, was the only survivor. The world Mei awoke to had gone through considerable changes: Overwatch was no more, the serious climate issues had worsened, and none of the eco-Watchpoints were in operation. Any clues that they had uncovered were lost. Mei has decided to continue her work on her own. Equipped with a portable version of her climate-manipulation technology, she travels around the world, hoping to re-establish the eco-network and track down the causes of the threats to the planet's ecosystem."
+    },
+    "medias": [
+        {
+            "title": "Animated Short: \"Rise and Shine\"",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blte6ac856b164e38c3/5cef21024e4776020a333f2b/mei-animated-short.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=8tjcm_kI0n0"
+        },
+        {
+            "title": "Mei Ability Overview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt6e01a92112d78688/5cef21094e4776020a333f33/mei-gameplay.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=J4hB88uMY8k"
+        },
+        {
+            "title": "Mei",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt7df2c327d3bb71d7/5cef2101486d1c3d0af722f2/mei-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltfaf67ba28d43d366/5d0285caa812cef40914a456/mei-concept.jpg?auto=webp"
+        }
+    ]
+}

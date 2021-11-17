@@ -1,0 +1,42 @@
+[
+    {
+        "key": "control",
+        "name": "Control",
+        "description": "Teams fight to hold a single objective; the first team to win two rounds wins the map."
+    },
+    {
+        "key": "assault",
+        "name": "Assault",
+        "description": "Attackers fight to capture a series of objectives; defenders hold them off until time runs out."
+    },
+    {
+        "key": "escort",
+        "name": "Escort",
+        "description": "Attackers escort a payload to a delivery point, while defenders strive to stop them."
+    },
+    {
+        "key": "ctf",
+        "name": "Capture the Flag",
+        "description": "Teams compete to capture the enemy team’s flag while defending their own."
+    },
+    {
+        "key": "hybrid",
+        "name": "Hybrid",
+        "description": "Attackers capture a payload, then escort it to its destination; defenders try to hold them back."
+    },
+    {
+        "key": "elimination",
+        "name": "Elimination",
+        "description": "Eliminate all enemies to win the round; win three rounds to win the map. Available with teams of one, three, or six."
+    },
+    {
+        "key": "deathmatch",
+        "name": "Deathmatch",
+        "description": "Players race to score the most kills in a free-for-all format."
+    },
+    {
+        "key": "team-deathmatch",
+        "name": "Team Deathmatch",
+        "description": "Players race to score the most kills in a team-based format."
+    }
+]

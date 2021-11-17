@@ -3,9 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
-*.so
-
 # Distribution / packaging
 .Python
 build/
@@ -127,3 +124,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Redis dump
+dump.rdb
+
+# OverFast API
+overfastapi/config.py

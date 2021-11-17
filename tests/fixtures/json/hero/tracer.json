@@ -1,0 +1,76 @@
+{
+    "name": "Tracer",
+    "role": "damage",
+    "difficulty": 2,
+    "description": "Toting twin pulse pistols, energy-based time bombs, and rapid-fire banter, Tracer is able to \"blink\" through space and rewind her personal timeline as she battles to right wrongs the world over.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/400eb87506839326001fef9376a977e01febc73dc11afb153c49c0c49042e8f9.png",
+            "primary_fire": {
+                "name": "Pulse Pistols",
+                "description": "Short-range automatic weapons."
+            },
+            "secondary_fire": null
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Blink",
+            "description": "Teleport in the direction you are moving.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/ce6f7a05967a422d81325c87d74414a50beac1649c7e14033207f77aafb6bd1b.png"
+        },
+        {
+            "name": "Recall",
+            "description": "Travel back in time to your previous location and health.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/30939502a8576da1fdcad8c7d21881e32066fb28847fc7df874b1436689e3425.png"
+        },
+        {
+            "name": "Pulse Bomb",
+            "description": "Throw out a powerful sticky explosive.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/383e9b039efb93da77bb91fbeb3654ef50724e0cea0de76b2cc1c4db43de9a6d.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Tracer",
+            "age": "26",
+            "occupation": "Adventurer",
+            "base_of_operations": "London, England",
+            "affiliation": "Overwatch (formerly)"
+        },
+        "catch_phrase": "Cheers, love! The cavalry’s here!",
+        "back_story": "The former Overwatch agent known as Tracer is a time-jumping adventurer and an irrepressible force for good. Lena Oxton (call sign: \"Tracer\") was the youngest person ever inducted into Overwatch's experimental flight program. Known for her fearless piloting skills, she was handpicked to test the prototype of a teleporting fighter, the Slipstream. But during its first flight, the aircraft's teleportation matrix malfunctioned, and it disappeared. Lena was presumed dead. She reappeared months later, but her ordeal had greatly changed her: her molecules had been desynchronized from the flow of time. Suffering from \"chronal disassociation,\" she was a living ghost, disappearing for hours and days at a time. Even for the brief moments she was present, she was unable to maintain physical form. Overwatch's doctors and scientists were stumped, and Tracer's case seemed hopeless until a scientist named Winston  designed the chronal accelerator, a device capable of keeping Tracer anchored in the present. In addition, it gave Tracer the ability to control her own time, allowing her to speed it up and slow it down at will. With her newfound skills, she became one of Overwatch's most effective agents. Since Overwatch's dissolution, Tracer has continued to right wrongs and fight the good fight wherever the opportunity presents itself."
+    },
+    "medias": [
+        {
+            "title": "Tracer Gameplay Preview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltbe6f1d752a5ca6de/5cef2153cf7aa6330ac664e9/tracer-preview.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=zNq4nTA3eMg"
+        },
+        {
+            "title": "Tracer Ability Overview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt148fb39e27eda6b4/5cef21534e4776020a333f93/tracer-gameplay.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=_SvYmsNCWsw"
+        },
+        {
+            "title": "Uprising",
+            "type": "pdf",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltbf90b8fee38bcb43/5d03c629cf7aa6330ac673ca/comic-thumb_12-Uprising_EN.jpg?auto=webp",
+            "link": "https://playoverwatch.com/media/stories/uprising"
+        },
+        {
+            "title": "Reflections",
+            "type": "pdf",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt499afdc5c8d41f0b/5d03c624cf7aa6330ac673be/comic-thumb_10-Reflections_EN.jpg?auto=webp",
+            "link": "https://playoverwatch.com/media/stories/reflections"
+        },
+        {
+            "title": "Tracer",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt1fd383a93d8bcccb/5cef2153425980470abca559/tracer-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt9c4cf1e759f3c2f3/5d0285d6578308e40945823e/tracer-concept.jpg?auto=webp"
+        }
+    ]
+}

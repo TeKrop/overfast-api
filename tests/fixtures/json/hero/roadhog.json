@@ -1,0 +1,97 @@
+{
+    "name": "Roadhog",
+    "role": "tank",
+    "difficulty": 1,
+    "description": "Roadhog uses his signature Chain Hook to pull his enemies close before shredding them with blasts from his Scrap Gun. He’s hardy enough to withstand tremendous damage, and can recover his health with a short breather.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/50b6e388a6693ce31b5a1889e53037970a1b884b8265834f33dd6f7a3dedce44.png",
+            "primary_fire": {
+                "name": "Scrap Gun",
+                "description": "Short-range spread weapon."
+            },
+            "secondary_fire": {
+                "name": "Scrap Gun",
+                "description": "Medium-range spread weapon."
+            }
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Chain Hook",
+            "description": "Drag a targeted enemy to you.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/139deabeb3d62c451b558367bf5e64641583355d99ed90fe42107a5716fdca3b.png"
+        },
+        {
+            "name": "Take a Breather",
+            "description": "Heal yourself and reduce damage taken over a short time.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/9cb8d867671bf917a9ba5d4a28ab6cb6ceeb10de2813567fcad97aca32c58499.png"
+        },
+        {
+            "name": "Whole Hog",
+            "description": "Damage and knock back enemies in front of you.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/4da2a0d46056c6570af1e85be8697eb6e912f09c840d6702bbf5feb2f0bccb23.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Roadhog",
+            "age": "48",
+            "occupation": "Enforcer (formerly), Bodyguard",
+            "base_of_operations": "Junkertown, Australia (formerly)",
+            "affiliation": "Junkers (formerly)"
+        },
+        "catch_phrase": "I'm a one-man apocalypse.",
+        "back_story": "Roadhog is a ruthless killer with a well-earned reputation for cruelty and wanton destruction. After the Omnic Crisis, government officials gifted the Australian omnium and the surrounding area to the omnics that had nearly destroyed their country, hoping to establish a long-term peace accord. This arrangement permanently displaced Mako Rutledge and a large number of the Outback's residents, a scattered collection of survivalists, solar farmers, and people who just wanted to be left alone. Furious over the loss of their homes, Mako and others turned to violent rebellion. They formed the Australian Liberation Front and struck against the omnium and its robot population to take back the lands that had been stolen. Events continued to escalate until the rebels sabotaged the omnium's fusion core, resulting in an explosion that destroyed the facility, irradiated the region, and littered the Outback with twisted metal and wreckage for kilometers around. Mako watched as his home became an apocalyptic wasteland, and he was forever changed. Adapting to his environment, he donned a mask and took to the broken highways of the Outback on his ramshackle chopper. Little by little, his humanity was forgotten. The last vestiges of Mako faded away and the ruthless killer Roadhog was born."
+    },
+    "medias": [
+        {
+            "title": "Roadhog Ability Overview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt86c4687e5721a92c/5cef21324e4776020a333f69/roadhog-gameplay.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=5URzijwRPfk"
+        },
+        {
+            "title": "Wasted Land",
+            "type": "pdf",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt0acd3fd49ff75708/5d03c629425980470abcb532/comic-thumb_14-WastedLand_EN.jpg?auto=webp",
+            "link": "https://playoverwatch.com/media/stories/wasted-land"
+        },
+        {
+            "title": "Junkertown",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt6b5fca909650413d/5cef20eb72eb37ee09921912/junkertown-screenshot-001.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt8a381f93b24a3780/5cef22b4cf7aa6330ac66573/junkertown-screenshot-001.jpg?auto=webp"
+        },
+        {
+            "title": "Junkertown",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt9d9bec7bf0ad1041/5cef20eb486d1c3d0af722c8/junkertown-screenshot-002.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt93b85600fe63d0f8/5cef22b472eb37ee09921a2e/junkertown-screenshot-002.jpg?auto=webp"
+        },
+        {
+            "title": "Junkertown",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt13ef85fdca2e1485/5cef20f172eb37ee0992191c/junkertown-screenshot-004.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt0e88f40c428f5396/5cef22b4a812cef4091495fe/junkertown-screenshot-004.jpg?auto=webp"
+        },
+        {
+            "title": "Junkertown",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt08e6c689a53fa235/5cef20f172eb37ee09921918/junkertown-screenshot-003.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltab9457baf3f3d01a/5cef22b4425980470abca5d1/junkertown-screenshot-003.jpg?auto=webp"
+        },
+        {
+            "title": "Junkertown",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt4f6a5159e062e61f/5cef20f1578308e409457316/junkertown-screenshot-005.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt809d4c0f2254cdd1/5cef22bc4e4776020a33401d/junkertown-screenshot-005.jpg?auto=webp"
+        },
+        {
+            "title": "Roadhog",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt04db8276632b905a/5cef2132578308e409457364/roadhog-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt3cf39434fcfbd684/5d0285ca72eb37ee099227f2/roadhog-concept.jpg?auto=webp"
+        }
+    ]
+}

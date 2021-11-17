@@ -1,0 +1,74 @@
+{
+    "name": "Lúcio",
+    "role": "support",
+    "difficulty": 2,
+    "description": "On the battlefield, Lúcio’s cutting-edge Sonic Amplifier buffets enemies with projectiles and knocks foes back with blasts of sound. His songs can both heal his team or boost their movement speed, and he can switch between tracks on the fly.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/7586f41f0ea473e8f5efd885d8afdbc6c36ace65565d1f3aaaa90eb6d5bf92fc.png",
+            "primary_fire": {
+                "name": "Sonic Amplifier",
+                "description": "Sonic projectile launcher."
+            },
+            "secondary_fire": null
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Crossfade",
+            "description": "Switches between two songs: Healing Boost heals nearby allies, and Speed Boost makes nearby allies move faster.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/9f4ab602b5e8be4a9b8d6312ae22e7b9f23f73d132f7955bfe7c1e838ca5ef9f.png"
+        },
+        {
+            "name": "Amp It Up",
+            "description": "Increase the effectiveness of your current song.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/023a4fcb7ff780b15f62a894fa4ee07f13428c3f1cee17d575884dbe820e0c13.png"
+        },
+        {
+            "name": "Soundwave",
+            "description": "Create a short-range blast wave to knock enemies away from you.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/823df4a08aa7246adfca12a6ee4432cf73280abdf2aee4efc6995bdbadd977a8.png"
+        },
+        {
+            "name": "Sound Barrier",
+            "description": "Create temporary shields for nearby allies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/21c5a17be341a3c0da2dcc9372f4f3c88ef622c80776360bd844d0fba3eb88a7.png"
+        },
+        {
+            "name": "Wall Ride",
+            "description": "Jump onto a wall to ride along it.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/c14b2c5652526a006233965b176fb2b5af9e7c5d44045fad3844267303f07091.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Lúcio",
+            "age": "26",
+            "occupation": "DJ, Freedom Fighter",
+            "base_of_operations": "Rio de Janeiro, Brazil",
+            "affiliation": "None"
+        },
+        "catch_phrase": "Come on, let’s bring it together!",
+        "back_story": "Lúcio is an international celebrity who inspires social change through his music and actions. Lúcio Correia dos Santos grew up in Rio de Janeiro, in a poor and crowded favela that was hit hard by the financial upheaval following the Omnic Crisis. As Brazil began the long process of recovery, he wanted to find a way to lift the spirits of those around him. He found his answer in music and its power to bring people together and even help them forget their troubles, if only for a short time. He performed on street corners, in block parties, and as he got older, at a string of legendary underground shows. But Lúcio's close-knit community was thrown into chaos when the multinational Vishkar Corporation secured a contract to redevelop large tracts of the city. Lúcio and his neighbors had been told that the development would improve their lives. However, that promise never became a reality. Vishkar imposed controls on the residents in the name of building a more orderly society: enforcing curfews, cracking down on what the company perceived as lawless behavior, and exploiting the populace as a cheap labor force. Lúcio wouldn't stand for it. He stole Vishkar sonic technology that had been used to suppress the people, and he converted it into a tool to rally them to action. In a popular uprising, they drove Vishkar out of their neighborhoods. Lúcio's leadership made him a star overnight and a symbol for positive social change. His music skyrocketed in popularity. Whereas he had once performed locally, he was now filling arenas across the world. With his newfound fame, Lúcio realizes that he has an opportunity to make a difference and change the world for the better."
+    },
+    "medias": [
+        {
+            "title": "Lúcio Gameplay Preview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt0db48fa6e9c3e7ee/5cef20fc72eb37ee09921934/lucio-preview.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=-j6vpuRfdfU"
+        },
+        {
+            "title": "Lúcio Ability Overview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt22ebd67d3c26542d/5cef20fc486d1c3d0af722ec/lucio-gameplay.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=ywTNgR3ldFc"
+        },
+        {
+            "title": "Lúcio",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt3120f2e4066ad567/5cef20f6486d1c3d0af722e0/lucio-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltc2fe78e1e288ba1d/5d0285bbcf7aa6330ac67298/lucio-concept.jpg?auto=webp"
+        }
+    ]
+}

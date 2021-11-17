@@ -1,0 +1,67 @@
+{
+    "name": "Zenyatta",
+    "role": "support",
+    "difficulty": 3,
+    "description": "Zenyatta calls upon orbs of harmony and discord to heal his teammates and weaken his opponents, all while pursuing a transcendent state of immunity to damage.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/5740abd7e5f0de513ebcb32b073f27ba8f5625804598d5762cefd0c7331c1437.png",
+            "primary_fire": {
+                "name": "Orb of Destruction",
+                "description": "Energy projectile weapon."
+            },
+            "secondary_fire": {
+                "name": "Orb of Destruction",
+                "description": "Charge to release more projectiles."
+            }
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Orb of Discord",
+            "description": "Launch this orb at an enemy to increase the damage they take.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/f416ae3c602c4f920551057176a3618441f943a0faea5e3cf77dc5db0e5128a5.png"
+        },
+        {
+            "name": "Orb of Harmony",
+            "description": "Launch this orb at an ally to heal them.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/999f5d34dd3c8dfb045bc69129d1b6aac547b98e252b68f2599b878d15d841cb.png"
+        },
+        {
+            "name": "Transcendence",
+            "description": "Become invulnerable, move faster, and heal nearby allies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/6ac5d4f08023cafc9f5412e45141cddecfdb2cb43ecf8415c12d1d161cce4678.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Zenyatta",
+            "age": "20",
+            "occupation": "Wandering Guru, Adventurer",
+            "base_of_operations": "Shambali Monastery, Nepal (formerly)",
+            "affiliation": "The Shambali (formerly)"
+        },
+        "catch_phrase": "True self is without form.",
+        "back_story": "Zenyatta is an omnic monk who wanders the world in search of spiritual enlightenment. It is said that those who cross his path are never the same again. Years ago, following the Omnic Crisis, a group of outcast omnic robots experienced what they described as a spiritual awakening. They abandoned their preprogrammed lives to establish a communal monastery deep in the Himalayas. After many years of meditation on the nature of existence, they came to the belief that they were more than artificial intelligences and that, like humans, they possessed the essence of a soul. Recognizing the spiritual equality they held with humans, the monks, led by the enigmatic robot known as Tekhartha Mondatta, sought to heal the wounds caused by the Omnic Crisis a generation earlier and bring humans and robots back into societal harmony. Their message was embraced by millions around the world, and they became global celebrities. But one monk, Zenyatta, disagreed with this new direction. He believed that the way to repair the problems between humans and omnics was not through dogmatic teaching but through interpersonal connection and engagement. Ultimately, Zenyatta followed his own path. He chose to leave the monastery and wander the world, helping those he meets to overcome their personal struggles and find inner peace. But, when necessary, he will fight to protect the innocent, be they omnic or human."
+    },
+    "medias": [
+        {
+            "title": "Zenyatta Gameplay Preview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt23d293fb4908b470/5cef216d7b48be290a7f87a6/zenyatta-preview.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=K7Yh_YywD-U"
+        },
+        {
+            "title": "Zenyatta Ability Overview",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltae84c4d329cdbe86/5cef216da812cef409149592/zenyatta-gameplay.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=SBXpKdmJBLU"
+        },
+        {
+            "title": "Zenyatta",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blta2c5adf49c7b5a87/5cef21684e4776020a333fb5/zenyatta-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt37339dbe95e337c6/5d0285d6425980470abcb3cc/zenyatta-concept.jpg?auto=webp"
+        }
+    ]
+}

@@ -1,0 +1,93 @@
+{
+    "name": "Orisa",
+    "role": "tank",
+    "difficulty": 2,
+    "description": "Orisa serves as the central anchor of her team, and defends her teammates from the frontline with a protective barrier. She can attack from long range, fortify her own defenses, launch graviton charges to slow and move enemies, and deploy a Supercharger to boost the damage output of multiple allies at once.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/8bf67f548fb8dd8fde4dd07ae567e635f8d6229c330a3656134697b9ecbd9140.png",
+            "primary_fire": {
+                "name": "Fusion Driver",
+                "description": "Automatic projectile weapon. Slows Orisa while firing."
+            },
+            "secondary_fire": null
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Protective Barrier",
+            "description": "Throw a device that creates a barrier.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/dd5eae0eb278e6f844f2694ea349cadd782c4e17535dc29e23ba5cd461b85c6a.png"
+        },
+        {
+            "name": "Fortify",
+            "description": "Reduce damage taken and you cannot be stopped.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/d697fa90726cf683222920822d2ee00a85e0420c6cbc6ec2365573f313d06357.png"
+        },
+        {
+            "name": "Halt!",
+            "description": "Launch a graviton charge with  then detonate it with SECONDARY FIRE. The sphere slows and pulls nearby enemies to it.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/0ccf984506779d8ac96eb75f386fcfd8a781e1b01fcfd42da90343ff75888d33.png"
+        },
+        {
+            "name": "Supercharger",
+            "description": "Deploy a device that increases damage inflicted by your allies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/613c5ce0514904872b7d7ef026222a34a691674255c4c132acf6ecf276b80640.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Orisa",
+            "age": "1 month",
+            "occupation": "Guardian Robot",
+            "base_of_operations": "Numbani",
+            "affiliation": "None"
+        },
+        "catch_phrase": "Your safety is my primary concern.",
+        "back_story": "Built from parts of one of Numbani's short-lived OR15 defense robots, Orisa is the city's newest protector, though she still has much to learn. Originally put into service before the Omnic Crisis, the OR14 \"Idina\" line of security robots was built in Nigeria's massive manufacturing omnium. After the war, they were taken out of production, along with many of the other models used during the crisis. Twenty years later, Numbani revived and recommissioned the OR14 program to protect the city from external threats. These new OR15s were deployed for a short time before they were destroyed in an attack by Doomfist. Following the attack, the program was scrapped, and the civic government sold off the remaining OR15 inventory. Some parts were purchased by eleven-year-old Efi Oladele, a brilliant girl whose early accomplishments in robotics and artificial intelligence had already earned her the Adawe Foundation's \"genius grant.\" With the approval of her understanding and open-minded parents, Efi spent the bulk of her grant money to acquire one of the decommissioned OR15 bots. She believed that Numbani needed a protector and that an upgraded OR15 could do just that. Efi repaired and reconfigured the robot and installed a personality core that she had designed herself. She named Numbani's newest hero Orisa. Orisa has shown that she can be of service to the city, but she is still working toward finding her optimal protocols. The omnic's inexperience can cause her to be an occasional liability. Fortunately, between Efi's willingness to make the necessary modifications and Orisa's adaptive artificial intelligence, both robot and creator have always been able to set things right. As Orisa starts her career as a guardian, she has much to learn about the world and her functionality. But as long as she is guided by Efi's boundless optimism and her own growing sense of honor and duty, Orisa stands ready to protect Numbani and her creator at any cost."
+    },
+    "medias": [
+        {
+            "title": "Introducing Orisa",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt1d75e00b4c4e4b4b/5cef211da812cef409149520/orisa-sizzle-video.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=KNBmyM6Ievc"
+        },
+        {
+            "title": "Origin Story: Orisa",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltcb60f4246f638734/5cef211d486d1c3d0af72316/orisa-origins-video.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=Lvm0of3iDUU"
+        },
+        {
+            "title": "Orisa",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt8924b24114b240a9/5cef211d4e4776020a333f51/orisa-screenshot-004.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltcd0d4f0fd047e78d/5cef22d6486d1c3d0af7240c/orisa-screenshot-004.jpg?auto=webp"
+        },
+        {
+            "title": "Orisa",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt72838b45d0a18d19/5cef211d7b48be290a7f8752/orisa-screenshot-003.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt535ede003852aebb/5cef22d6a812cef409149616/orisa-screenshot-003.jpg?auto=webp"
+        },
+        {
+            "title": "Orisa",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt37293fcc4a6b9391/5cef211d425980470abca517/orisa-screenshot-001.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt6d3294733615e47c/5cef22d64e4776020a33402f/orisa-screenshot-001.jpg?auto=webp"
+        },
+        {
+            "title": "Orisa",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt87d94189e144c70b/5cef211d578308e409457346/orisa-screenshot-002.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt9d5fec1c800c9cb9/5cef22d6578308e409457424/orisa-screenshot-002.jpg?auto=webp"
+        },
+        {
+            "title": "Orisa",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt3b9e0d1b4179f6d9/5cef211d4e4776020a333f4b/orisa-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt55bfff7d1ffecb2e/5d0285ca486d1c3d0af731ec/orisa-concept.jpg?auto=webp"
+        }
+    ]
+}

@@ -1,0 +1,91 @@
+{
+    "name": "Moira",
+    "role": "support",
+    "difficulty": 2,
+    "description": "Moira’s biotic abilities enable her to contribute healing or damage in any crisis. While Biotic Grasp gives Moira short-range options, her Biotic Orbs contribute longer-range, hands-off damage and healing; she can also Fade to escape groups or remain close to allies in need of support. Once she’s charged Coalescence, Moira can save multiple allies from elimination at once or finish off weakened enemies.",
+    "weapons": [
+        {
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/9721148061d528df7b3b5a90f746a82dc2b53b191add15e0962f8dcaf0777aa0.png",
+            "primary_fire": {
+                "name": "Biotic Grasp",
+                "description": "Hold to heal all allies in front of you. Consumes biotic energy."
+            },
+            "secondary_fire": {
+                "name": "Biotic Grasp - Alt Fire",
+                "description": "Long range beam weapon. Damage dealt heals you and replenishes your biotic energy."
+            }
+        }
+    ],
+    "abilities": [
+        {
+            "name": "Biotic Orb",
+            "description": "Launch a bouncing sphere that either heals nearby allies or damages nearby enemies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a5a235623aeb7fce1ce8e545e5be2d95b48fddf609c174fc5067efd7681ac72f.png"
+        },
+        {
+            "name": "Fade",
+            "description": "Disappear, move faster, and become invulnerable, but you cannot shoot.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/ba44615a7e3799d50bc2194079dd88177f98d4050a28acba6cd33ad1daaf7b5b.png"
+        },
+        {
+            "name": "Coalescence",
+            "description": "Fire a beam that heals allies and damages enemies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/23d3ef53fd21d04e7e7b137b38e87c61b3d65394393dc00759ceb65d406e37b9.png"
+        }
+    ],
+    "story": {
+        "biography": {
+            "real_name": "Moira",
+            "age": "48",
+            "occupation": "Geneticist",
+            "base_of_operations": "Dublin, Ireland; Oasis, Iraq",
+            "affiliation": "Talon; Blackwatch (formerly)"
+        },
+        "catch_phrase": "Science will reveal the truth.",
+        "back_story": "Equal parts brilliant and controversial, scientist Moira O'Deorain is on the cutting edge of genetic engineering, searching for a way to rewrite the fundamental building blocks of life. Over a decade ago, O'Deorain made waves when she published a controversial paper detailing a methodology for creating custom genetic programs that could alter DNA at a cellular level. It seemed like a promising step toward overcoming diseases and disorders and maximizing human potential. Dissent among her peers soon followed. Many considered her work to be dangerous because of its perceived ethical shortfalls, and O'Deorain was even accused of having the same unchecked desire for scientific advancement that some believed had caused the Omnic Crisis. In addition, other geneticists were unable to reproduce the results of Moira's research, which further called her discoveries into question. Instead of kickstarting her career, her paper seriously damaged her reputation. She received a lifeline in an offer from an unlikely source: Overwatch's covert ops division, Blackwatch. She continued her work in the shadows while developing new weapons and technologies for the organization. Her employment was a closely kept secret, until it was uncovered during inquiries following the Venice incident. Many high-ranking Overwatch officials disavowed all knowledge of her affiliation with them. After Overwatch was disbanded, O'Deorain was forced to turn to unconventional sources of funding. This time, she was invited to join the scientific collective that had founded the city of Oasis. Yet some have whispered that the shadowy Talon organization had already been supporting her for years, aiding her experiments in exchange for utilizing the results for their own purposes. Though O'Deorain will go to any lengths to make scientific breakthroughs, her work is still unknown to most of the world. But now that she has been freed from all constraints, it is only a matter of time before everything changes."
+    },
+    "medias": [
+        {
+            "title": "Introducing Moira",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blte1eaa1734eb5121f/5cef2118486d1c3d0af7230e/moira-sizzle-reel.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=8tLopqeL9s8"
+        },
+        {
+            "title": "Origin Story: Moira",
+            "type": "video",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt8202520b4d915789/5cef210f4e4776020a333f3d/moira-origins-video.jpg?auto=webp",
+            "link": "https://www.youtube.com/watch?v=6ETybQd4uRE"
+        },
+        {
+            "title": "Moira",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blte0a496120a497243/5cef210f7b48be290a7f8746/moira-screenshot-001.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt3c818c5f861f47bf/5cef22cd486d1c3d0af72400/moira-screenshot-001.jpg?auto=webp"
+        },
+        {
+            "title": "Moira",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltdce6b928e2226d04/5cef210f578308e40945733a/moira-screenshot-002.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt99637cfe29d65afa/5cef22cd72eb37ee09921a46/moira-screenshot-002.jpg?auto=webp"
+        },
+        {
+            "title": "Moira",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt2fa189dfe9a2eb99/5cef210fcf7aa6330ac664a7/moira-screenshot-003.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltb8c4e3ce0416eac4/5cef22cd4e4776020a334029/moira-screenshot-003.jpg?auto=webp"
+        },
+        {
+            "title": "Moira",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt24fe6619f5ed5df9/5cef210f4e4776020a333f39/moira-screenshot-004.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltf18a64d8ec09ffdb/5cef22cd7b48be290a7f8830/moira-screenshot-004.jpg?auto=webp"
+        },
+        {
+            "title": "Moira",
+            "type": "image",
+            "thumbnail": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt370abbbfffeefafb/5cef210f486d1c3d0af72304/moira-concept.jpg?auto=webp",
+            "link": "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt2e7112a1acc4c85c/5d0285ca578308e409458238/moira-concept.jpg?auto=webp"
+        }
+    ]
+}

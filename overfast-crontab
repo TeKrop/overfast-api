@@ -1,0 +1,2 @@
+* * * * * cd /code && python -m overfastapi.commands.check_and_update_cache
+0 2 * * * cd /code && python -m overfastapi.commands.check_new_hero
