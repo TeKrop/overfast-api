@@ -96,7 +96,7 @@ def custom_openapi():  # pragma: no cover
         version=OVERFAST_API_VERSION,
         contact={
             "name": 'Valentin "TeKrop" PORCHET',
-            "url": "https://valentinporchet.fr/",
+            "url": "https://github.com/TeKrop/overfast-api",
             "email": "vporchet@gmail.com",
         },
         license_info={
