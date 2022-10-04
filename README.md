@@ -1,5 +1,8 @@
 # ⚡ OverFast API
 
+> **Warning**
+> I'm currently working on a 2.0 version, compatible with Overwatch 2 data. Thank you for your patience.
+
 ![Python](https://img.shields.io/badge/python-v3.10-blue)
 ![Pylint](https://img.shields.io/badge/pylint-10%2F10-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
