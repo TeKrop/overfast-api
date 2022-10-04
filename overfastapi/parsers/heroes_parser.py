@@ -10,16 +10,12 @@ class HeroesParser(APIParser):
     def parse_data(self) -> list:
         return [
             {
-                "key": hero.find("a", class_="hero-portrait-detailed")["data-hero-id"],
-                "name": hero.find("span", class_="portrait-title").get_text(),
-                "portrait": hero.find("img", class_="portrait")["src"],
-                "role": json.loads(hero["data-groups"])[0].lower(),
+                "key": hero["data-hero-id"],
+                "name": hero.find("div", class_="heroCardName").get_text(),
+                "portrait": hero.find("blz-image")["src"],
+                "role": hero["data-role"],
             }
-            for hero in self.root_tag.find(
-                "div", id="heroes-selector-container"
-            ).find_all("div", class_="hero-portrait-detailed-container")
+            for hero in self.root_tag.find("blz-media-gallery").find_all(
+                "blz-hero-card"
+            )
         ]
-
-    @property
-    def root_tag_params(self) -> dict:
-        return {"name": "div", "id": "heroes-index"}

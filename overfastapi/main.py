@@ -59,6 +59,16 @@ scraping Blizzard pages. It was built with **FastAPI** and **Beautiful Soup**, a
 as reverse proxy and **Redis** for caching. By using a specific cache system, it minimizes
 calls to Blizzard pages (which can be very slow), and quickly returns accurate data to users.
 
+## 🚧 Work in progress 🚧
+
+I'm currently rewriting the API for new Overwatch 2 pages. So far, here is the progress :
+- Heroes list : ✅
+- Hero specific data : ✅
+- Maps list : ❌ (doesn't exist anymore on Blizzard pages)
+- Maps gamemodes list : ⌨️ (in progress)
+- Players career : 😴 (waiting for Blizzard to put them back)
+- Players search : 😴 (waiting for Blizzard to put the page back)
+
 ## Cache System
 
 ![Python + Redis + Nginx](https://files.tekrop.fr/classic_schema_nginx_cache.png)
@@ -110,25 +120,9 @@ def custom_openapi():  # pragma: no cover
                 "description": "Overwatch heroes details : lore, abilities, etc.",
                 "externalDocs": {
                     "description": "Blizzard heroes page, source of the information",
-                    "url": "https://playoverwatch.com/en-us/heroes/",
+                    "url": "https://overwatch.blizzard.com/en-us/heroes/",
                 },
-            },
-            {
-                "name": "Maps",
-                "description": "Overwatch maps details",
-                "externalDocs": {
-                    "description": "Blizzard maps page, source of the information",
-                    "url": "https://playoverwatch.com/en-us/maps/",
-                },
-            },
-            {
-                "name": "Players",
-                "description": "Overwatch players data : level, statistics, achievements, etc.",
-                "externalDocs": {
-                    "description": "Blizzard profile pages, source of the information",
-                    "url": "https://playoverwatch.com/en-us/search/",
-                },
-            },
+            }
         ],
     )
     openapi_schema["info"]["x-logo"] = {
@@ -227,245 +221,5 @@ async def get_hero(
     )
     try:
         return Hero(**hero_details)
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error
-
-
-@app.get(
-    "/maps",
-    response_model=list[Map],
-    responses=routes_responses,
-    tags=["Maps"],
-    summary="Get a list of maps",
-    description=(
-        "Get a list of Overwatch maps, which can be filtered "
-        "by gamemodes they can be played on"
-    ),
-)
-async def list_maps(
-    background_tasks: BackgroundTasks,
-    request: Request,
-    gamemode: Optional[MapGamemode] = Query(
-        None,
-        title="Map Gamemode",
-        description="Filter maps playable on a specific gamemode.",
-    ),
-):
-    maps_list = ListMapsRequestHandler(request).process_request(
-        background_tasks=background_tasks, gamemode=gamemode
-    )
-    try:
-        return [Map(**ow_map) for ow_map in maps_list]
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error
-
-
-@app.get(
-    "/maps/gamemodes",
-    response_model=list[MapGamemodeDetails],
-    responses=routes_responses,
-    tags=["Maps"],
-    summary="Get a list of maps gamemodes",
-    description="Get a list of Overwatch maps gamemodes : Assault, Escort, Hybrid, etc.",
-)
-async def list_map_gamemodes(
-    background_tasks: BackgroundTasks,
-    request: Request,
-):
-    gamemodes = ListMapGamemodesRequestHandler(request).process_request(
-        background_tasks=background_tasks
-    )
-    try:
-        return [MapGamemodeDetails(**gamemode) for gamemode in gamemodes]
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error
-
-
-@app.get(
-    "/players",
-    response_model=PlayerSearchResult,
-    responses=routes_responses,
-    tags=["Players"],
-    summary="Search for a specific player",
-)
-async def search_players(
-    request: Request,
-    name: str = Query(
-        ...,
-        title="Player nickname to search",
-        example="TeKrop",
-    ),
-    min_level: Optional[int] = Query(
-        None, title="Minimum level of the player (included)", example=42, gt=0
-    ),
-    max_level: Optional[int] = Query(
-        None, title="Maximum level of the player (included)", example=42, gt=0
-    ),
-    platform: Optional[PlayerPlatform] = Query(
-        None, title="Platform on which the player is", example="pc"
-    ),
-    privacy: Optional[PlayerPrivacy] = Query(
-        None, title="Privacy settings of the player career", example="public"
-    ),
-    order_by: Optional[str] = Query(
-        "name:asc",
-        title="Ordering field and the way it's arranged (asc[ending]/desc[ending])",
-        regex="^(player_id|name|level|platform|privacy):(asc|desc)$",
-    ),
-    offset: Optional[int] = Query(0, title="Offset of the results", ge=0),
-    limit: Optional[int] = Query(20, title="Limit of results per page", gt=0),
-):
-    player_search_result = SearchPlayersRequestHandler(request).process_request(
-        name=name,
-        min_level=min_level,
-        max_level=max_level,
-        privacy=privacy,
-        platform=platform,
-        order_by=order_by,
-        offset=offset,
-        limit=limit,
-    )
-    try:
-        return PlayerSearchResult(**player_search_result)
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error
-
-
-async def get_player_common_parameters(
-    platform: PlayerPlatform = Path(
-        ..., title="Platform on which the player is", example="pc"
-    ),
-    player_id: str = Path(
-        ...,
-        title="Player unique name",
-        description=(
-            'Identifier of the player : BattleTag (with "#" replaced by "-") for '
-            "PC players, nickname for PSN/XBL players, nickname followed by "
-            "hexadecimal id for Nintendo Switch."
-        ),
-        example="TeKrop-2217",
-    ),
-):
-    return {"platform": platform, "player_id": player_id}
-
-
-@app.get(
-    "/players/{platform}/{player_id}",
-    response_model=Player,
-    responses=player_career_routes_responses,
-    tags=["Players"],
-    summary="Get player career data",
-    description="Get all player data : summary, statistics and achievements",
-)
-async def get_player_career(
-    background_tasks: BackgroundTasks,
-    request: Request,
-    commons: dict = Depends(get_player_common_parameters),
-):
-    player_career = GetPlayerCareerRequestHandler(request).process_request(
-        background_tasks=background_tasks,
-        platform=commons.get("platform"),
-        player_id=commons.get("player_id"),
-    )
-    try:
-        return Player(**player_career)
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error
-
-
-@app.get(
-    "/players/{platform}/{player_id}/summary",
-    response_model=PlayerSummary,
-    responses=player_career_routes_responses,
-    tags=["Players"],
-    summary="Get player summary",
-)
-async def get_player_summary(
-    background_tasks: BackgroundTasks,
-    request: Request,
-    commons: dict = Depends(get_player_common_parameters),
-):
-    player_summary = GetPlayerCareerRequestHandler(request).process_request(
-        summary=True,
-        background_tasks=background_tasks,
-        platform=commons.get("platform"),
-        player_id=commons.get("player_id"),
-    )
-    try:
-        return PlayerSummary(**player_summary)
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error
-
-
-@app.get(
-    "/players/{platform}/{player_id}/stats",
-    response_model=CareerStats,
-    response_model_exclude_unset=True,
-    responses=player_career_routes_responses,
-    tags=["Players"],
-    summary="Get player statistics about heroes",
-    description=(
-        "Career contains numerous statistics "
-        "grouped by heroes and categories (combat, game, best, hero specific, "
-        "average, etc.), while heroes comparisons contains generic details grouped "
-        "by main categories (time played, games won, objective kills, etc.)"
-    ),
-)
-async def get_player_stats(
-    background_tasks: BackgroundTasks,
-    request: Request,
-    commons: dict = Depends(get_player_common_parameters),
-    gamemode: PlayerGamemode = Query(
-        ...,
-        title="Gamemode",
-        description="Filter on a specific gamemode.",
-    ),
-    hero: Optional[HeroKey] = Query(
-        None,
-        title="Hero key",
-        description="Filter on a specific hero in order to only get his statistics.",
-    ),
-):
-    player_career_stats = GetPlayerCareerRequestHandler(request).process_request(
-        stats=True,
-        background_tasks=background_tasks,
-        platform=commons.get("platform"),
-        player_id=commons.get("player_id"),
-        gamemode=gamemode,
-        hero=hero,
-    )
-    try:
-        return CareerStats(**player_career_stats)
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error
-
-
-@app.get(
-    "/players/{platform}/{player_id}/achievements",
-    response_model=PlayerAchievementsContainer,
-    response_model_exclude_unset=True,
-    responses=player_career_routes_responses,
-    tags=["Players"],
-    summary="Get player achievements",
-)
-async def get_player_achievements(
-    background_tasks: BackgroundTasks,
-    request: Request,
-    commons: dict = Depends(get_player_common_parameters),
-    category: Optional[PlayerAchievementCategory] = Query(
-        None,
-        title="Achievements category",
-        description="Filter on specific achievements category",
-    ),
-):
-    player_achievements = GetPlayerCareerRequestHandler(request).process_request(
-        achievements=True,
-        background_tasks=background_tasks,
-        platform=commons.get("platform"),
-        player_id=commons.get("player_id"),
-        category=category,
-    )
-    try:
-        return PlayerAchievementsContainer(**player_achievements)
     except ValidationError as error:
         raise overfast_internal_error(request.url.path, error) from error

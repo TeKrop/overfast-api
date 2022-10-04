@@ -49,7 +49,9 @@ class HeroKey(StrEnum):
     ECHO = "echo"
     GENJI = "genji"
     HANZO = "hanzo"
+    JUNKER_QUEEN = "junker-queen"
     JUNKRAT = "junkrat"
+    KIRIKO = "kiriko"
     LUCIO = "lucio"
     MEI = "mei"
     MERCY = "mercy"
@@ -60,6 +62,7 @@ class HeroKey(StrEnum):
     REINHARDT = "reinhardt"
     ROADHOG = "roadhog"
     SIGMA = "sigma"
+    SOJOURN = "sojourn"
     SOLDIER_76 = "soldier-76"
     SOMBRA = "sombra"
     SYMMETRA = "symmetra"
@@ -88,9 +91,9 @@ class MapGamemode(StrEnum):
 class MediaType(StrEnum):
     """Media types for heroes pages"""
 
+    COMIC = "comic"
+    SHORT_STORY = "short-story"
     VIDEO = "video"
-    IMAGE = "image"
-    PDF = "pdf"
 
 
 class PlayerAchievementCategory(StrEnum):

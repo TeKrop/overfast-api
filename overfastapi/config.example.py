@@ -3,7 +3,7 @@
 """Project constants module"""
 import os
 
-OVERFAST_API_VERSION = "1.0.0"
+OVERFAST_API_VERSION = "2.0.0"
 
 OVERFAST_API_BASE_URL = "https://overfast-api.tekrop.fr"
 
@@ -61,7 +61,7 @@ SEARCH_ACCOUNT_PATH_CACHE_TIMEOUT = 3600
 ############
 
 # Blizzard base url for Overwatch website
-BLIZZARD_HOST = "https://playoverwatch.com"
+BLIZZARD_HOST = "https://overwatch.blizzard.com"
 
 # Route for players career pages
 CAREER_PATH = "/en-us/career"
