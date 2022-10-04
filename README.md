@@ -1,8 +1,5 @@
 # ⚡ OverFast API
 
-> **Warning**
-> I'm currently working on a 2.0 version, compatible with Overwatch 2 data. Thank you for your patience.
-
 ![Python](https://img.shields.io/badge/python-v3.10-blue)
 ![Pylint](https://img.shields.io/badge/pylint-10%2F10-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
@@ -12,6 +9,16 @@
 ![Mockup OverFast API](https://files.tekrop.fr/overfast_api_logo_full_1000.png)
 
 > OverFastAPI gives data about Overwatch heroes, maps, and players statistics by scraping Blizzard pages. It was built with **FastAPI** and **Beautiful Soup**, and uses **nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate data to users.
+
+## 🚧 Work in progress 🚧
+
+I'm currently rewriting the API for new Overwatch 2 pages. So far, here is the progress :
+- Heroes list : ✅
+- Hero specific data : ✅
+- Maps list : ❌ (doesn't exist anymore on Blizzard pages)
+- Maps gamemodes list : ⌨️ (in progress)
+- Players career : 😴 (waiting for Blizzard to put them back)
+- Players search : 😴 (waiting for Blizzard to put the page back)
 
 ## Table of contents
 * [✨ Demo](#-demo)
