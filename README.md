@@ -15,10 +15,11 @@
 I'm currently rewriting the API for new Overwatch 2 pages. So far, here is the progress :
 - Heroes list : ✅
 - Hero specific data : ✅
-- Maps list : ❌ (doesn't exist anymore on Blizzard pages)
-- Maps gamemodes list : ⌨️ (in progress)
+- Gamemodes list : ✅
 - Players career : 😴 (waiting for Blizzard to put them back)
 - Players search : 😴 (waiting for Blizzard to put the page back)
+- Maps list : ❌ (doesn't exist anymore on Blizzard pages)
+- Maybe some new data : roles, news, patch notes, medias, ...
 
 ## Table of contents
 * [✨ Demo](#-demo)
