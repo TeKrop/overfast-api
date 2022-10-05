@@ -65,15 +65,13 @@ class HeroParser(APIParser):
 
     @staticmethod
     def __get_media(showcase_section: Tag) -> Optional[dict]:
-        video = showcase_section.find("blz-video")
-        if video:
+        if video := showcase_section.find("blz-video"):
             return {
                 "type": MediaType.VIDEO,
                 "link": f"https://youtu.be/{video['youtube-id']}",
             }
 
-        button = showcase_section.find("blz-button")
-        if button:
+        if button := showcase_section.find("blz-button"):
             return {
                 "type": (
                     MediaType.SHORT_STORY

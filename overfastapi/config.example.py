@@ -63,6 +63,9 @@ SEARCH_ACCOUNT_PATH_CACHE_TIMEOUT = 3600
 # Blizzard base url for Overwatch website
 BLIZZARD_HOST = "https://overwatch.blizzard.com"
 
+# Blizzard home page with some details
+HOME_PATH = "/en-us"
+
 # Route for players career pages
 CAREER_PATH = "/en-us/career"
 

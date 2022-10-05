@@ -3,51 +3,15 @@
 
 from typing import Optional
 
-from fastapi import BackgroundTasks, Depends, FastAPI, Path, Query, Request, status
+from fastapi import FastAPI, Request
 from fastapi.openapi.docs import get_redoc_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
-from pydantic import ValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from overfastapi.common.enums import (
-    HeroKey,
-    MapGamemode,
-    PlayerAchievementCategory,
-    PlayerGamemode,
-    PlayerPlatform,
-    PlayerPrivacy,
-    Role,
-)
-from overfastapi.common.helpers import overfast_internal_error
 from overfastapi.common.logging import logger
 from overfastapi.config import OVERFAST_API_VERSION
-from overfastapi.handlers.get_hero_request_handler import GetHeroRequestHandler
-from overfastapi.handlers.get_player_career_request_handler import (
-    GetPlayerCareerRequestHandler,
-)
-from overfastapi.handlers.list_heroes_request_handler import ListHeroesRequestHandler
-from overfastapi.handlers.list_map_gamemodes_request_handler import (
-    ListMapGamemodesRequestHandler,
-)
-from overfastapi.handlers.list_maps_request_handler import ListMapsRequestHandler
-from overfastapi.handlers.search_players_request_handler import (
-    SearchPlayersRequestHandler,
-)
-from overfastapi.models.errors import (
-    BlizzardErrorMessage,
-    InternalServerErrorMessage,
-    ParserInitErrorMessage,
-)
-from overfastapi.models.heroes import Hero, HeroShort
-from overfastapi.models.maps import Map, MapGamemodeDetails
-from overfastapi.models.players import (
-    CareerStats,
-    Player,
-    PlayerAchievementsContainer,
-    PlayerSearchResult,
-    PlayerSummary,
-)
+from overfastapi.routers import gamemodes, heroes
 
 app = FastAPI(
     title="OverFast API",
@@ -64,10 +28,11 @@ calls to Blizzard pages (which can be very slow), and quickly returns accurate d
 I'm currently rewriting the API for new Overwatch 2 pages. So far, here is the progress :
 - Heroes list : ✅
 - Hero specific data : ✅
-- Maps list : ❌ (doesn't exist anymore on Blizzard pages)
-- Maps gamemodes list : ⌨️ (in progress)
+- Gamemodes list : ✅
 - Players career : 😴 (waiting for Blizzard to put them back)
 - Players search : 😴 (waiting for Blizzard to put the page back)
+- Maps list : ❌ (doesn't exist anymore on Blizzard pages)
+- Maybe some new data : roles, news, patch notes, medias, ...
 
 ## Cache System
 
@@ -82,10 +47,7 @@ OverFast API introduces a very specific cache system, stored on a **Redis** serv
 ### API Cache TTL values
 * Heroes list : 1 day
 * Hero specific data : 1 day
-* Maps list : 1 day
-* Maps gamemodes list : 1 day
-* Players career : 30 minutes
-* Players search : 1 hour
+* Gamemodes list : 1 day
 
 ### Automatic cache refresh
 
@@ -122,7 +84,15 @@ def custom_openapi():  # pragma: no cover
                     "description": "Blizzard heroes page, source of the information",
                     "url": "https://overwatch.blizzard.com/en-us/heroes/",
                 },
-            }
+            },
+            {
+                "name": "Maps",
+                "description": "Overwatch maps details",
+                "externalDocs": {
+                    "description": "Overwatch home page, source of the information",
+                    "url": "https://overwatch.blizzard.com/en-us/",
+                },
+            },
         ],
     )
     openapi_schema["info"]["x-logo"] = {
@@ -138,25 +108,6 @@ app.openapi = custom_openapi
 app.logger = logger
 logger.info("OverFast API... Online !")
 logger.info("Version : {}", OVERFAST_API_VERSION)
-
-routes_responses = {
-    status.HTTP_500_INTERNAL_SERVER_ERROR: {
-        "model": InternalServerErrorMessage,
-        "description": "Internal Server Error",
-    },
-    status.HTTP_504_GATEWAY_TIMEOUT: {
-        "model": BlizzardErrorMessage,
-        "description": "Blizzard Server Error",
-    },
-}
-
-player_career_routes_responses = {
-    status.HTTP_404_NOT_FOUND: {
-        "model": ParserInitErrorMessage,
-        "description": "Player Not Found",
-    },
-    **routes_responses,
-}
 
 
 @app.exception_handler(StarletteHTTPException)
@@ -175,51 +126,6 @@ def overridden_redoc():
     )
 
 
-@app.get(
-    "/heroes",
-    response_model=list[HeroShort],
-    responses=routes_responses,
-    tags=["Heroes"],
-    summary="Get a list of heroes",
-    description="Get a list of Overwatch heroes, which can be filtered using roles",
-)
-async def list_heroes(
-    background_tasks: BackgroundTasks,
-    request: Request,
-    role: Optional[Role] = Query(None, title="Role filter"),
-):
-    heroes_list = ListHeroesRequestHandler(request).process_request(
-        background_tasks=background_tasks, role=role
-    )
-    try:
-        return [HeroShort(**hero) for hero in heroes_list]
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error
-
-
-@app.get(
-    "/heroes/{hero_key}",
-    response_model=Hero,
-    responses=routes_responses,
-    tags=["Heroes"],
-    summary="Get detailed data about a specific hero",
-    description=(
-        "Get details data about a specific Overwatch hero : "
-        "weapons, abilities, story, medias, etc."
-    ),
-)
-async def get_hero(
-    background_tasks: BackgroundTasks,
-    request: Request,
-    hero_key: HeroKey = Path(
-        ...,
-        title="Key name of the hero",
-    ),
-):
-    hero_details = GetHeroRequestHandler(request).process_request(
-        background_tasks=background_tasks, hero_key=hero_key
-    )
-    try:
-        return Hero(**hero_details)
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error
+# Add application routers
+app.include_router(heroes.router, prefix="/heroes")
+app.include_router(gamemodes.router, prefix="/gamemodes")

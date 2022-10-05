@@ -75,19 +75,6 @@ class HeroKey(StrEnum):
     ZENYATTA = "zenyatta"
 
 
-class MapGamemode(StrEnum):
-    """Overwatch gamemodes"""
-
-    ASSAULT = "assault"
-    CONTROL = "control"
-    CTF = "ctf"
-    DEATHMATCH = "deathmatch"
-    ELIMINATION = "elimination"
-    ESCORT = "escort"
-    HYBRID = "hybrid"
-    TEAM_DEATHMATCH = "team-deathmatch"
-
-
 class MediaType(StrEnum):
     """Media types for heroes pages"""
 
