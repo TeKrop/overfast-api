@@ -75,7 +75,7 @@ class Hero(BaseModel):
 class HeroShort(BaseModel):
     key: HeroKey = Field(
         ...,
-        description=("Key name of the hero"),
+        description="Key name of the hero",
         example="ana",
     )
     name: str = Field(..., description="Name of the hero", example="Ana")
@@ -88,4 +88,19 @@ class HeroShort(BaseModel):
         ...,
         description="Role of the hero",
         example="support",
+    )
+
+
+class RoleDetail(BaseModel):
+    key: Role = Field(..., description="Key name of the role", example="damage")
+    name: str = Field(..., description="Name of the role", example="Damage")
+    icon: HttpUrl = Field(
+        ...,
+        description="Icon URL of the role",
+        example="https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltc1d840ba007f88a8/62ea89572fdd1011027e605d/Damage.svg",
+    )
+    description: str = Field(
+        ...,
+        description="Description of the role",
+        example="Damage heroes seek out, engage, and obliterate the enemy with wide-ranging tools, abilities, and play styles. Fearsome but fragile, these heroes require backup to survive.",
     )
