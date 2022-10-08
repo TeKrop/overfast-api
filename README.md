@@ -38,10 +38,8 @@ OverFast API introduces a very specific cache system, stored on a **Redis** serv
 Here is the list of all TTL values configured for API Cache :
 * Heroes list : 1 day
 * Hero specific data : 1 day
-* Maps list : 1 day
-* Maps gamemodes list : 1 day
-* Players career : 30 minutes
-* Players search : 1 hour
+* Roles list : 1 day
+* Gamemodes list : 1 day
 
 ### Automatic cache refresh
 
@@ -120,22 +118,21 @@ python -m overfastapi.commands.check_new_hero
 
 #### Update test fixtures
 
-Generic command (update heroes, player careers and maps)
+Generic command (update heroes, gamemodes and roles)
 ```
 python -m overfastapi.commands.update_test_fixtures
 ```
 
 Help message (with different options)
 ```
-usage: update_test_fixtures.py [-h] [-H] [-P] [-M]
+usage: update_test_fixtures.py [-h] [-He] [-Ho]
 
 Update test data fixtures by retrieving Blizzard pages directly. By default, all the tests data will be updated.
 
 options:
   -h, --help     show this help message and exit
-  -H, --heroes   update heroes test data
-  -P, --players  update players test data
-  -M, --maps     update maps test data
+  -He, --heroes  update heroes test data
+  -Ho, --home    update home test data (gamemodes, roles)
 ```
 
 ### Code Quality
