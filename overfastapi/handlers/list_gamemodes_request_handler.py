@@ -1,5 +1,5 @@
-"""List Map Gamemodes Request Handler module"""
-from overfastapi.config import HOME_PATH, MAPS_PATH_CACHE_TIMEOUT
+"""List Gamemodes Request Handler module"""
+from overfastapi.config import HOME_PATH, HOME_PATH_CACHE_TIMEOUT
 from overfastapi.handlers.api_request_handler import APIRequestHandler
 from overfastapi.parsers.gamemodes_parser import GamemodesParser
 
@@ -12,4 +12,4 @@ class ListGamemodesRequestHandler(APIRequestHandler):
     api_root_url = "/gamemodes"
     root_path = HOME_PATH
     parser_class = GamemodesParser
-    timeout = MAPS_PATH_CACHE_TIMEOUT
+    timeout = HOME_PATH_CACHE_TIMEOUT

@@ -1,0 +1,43 @@
+{
+    "name": "Wrecking Ball",
+    "description": "Hammond, the genetically-engineered hamster, rolls across the battlefield in his highly mobile Wrecking Ball mech. With an arsenal of weapons and the power of momentum, he will crush any enemies who get in his way",
+    "role": "tank",
+    "location": "Horizon Lunar Colony (formerly), Junkertown (formerly)",
+    "abilities": [
+        {
+            "name": "Quad Cannons",
+            "description": "Automatic assault weapons.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/12339775bfc5bfb8a4ad735a2eef452992e90f5374d341baf09f19bc9968147a.png"
+        },
+        {
+            "name": "Grappling Claw",
+            "description": "Launch a grappling claw to rapidly swing around the area. Enables high speed collisions to damage and knockback enemies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/e81e6ba9fb3391f29528021e453a0d3c16da1fc5e378994e6d00783356e0f2c9.png"
+        },
+        {
+            "name": "Roll",
+            "description": "Transform into a ball and increase maximum movement speed.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/b7f7e90bf3c3f26704133263896bded18e523e29dad2fe04c5f3c1bfa4472579.png"
+        },
+        {
+            "name": "Piledriver",
+            "description": "Slam into the ground below to damage and launch enemies upward.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/3e884373721448d109c1646599cfe651a5bccdbc7a12d5062372c91b28acd80c.png"
+        },
+        {
+            "name": "Adaptive Shield",
+            "description": "Create temporary personal extra health. Amount increases with more enemies nearby.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/fa65af9c692405f968fafbeedcdfc9092b38a050dc3562bd41280390ccd7a21d.png"
+        },
+        {
+            "name": "Minefield",
+            "description": "Deploy a massive field of proximity mines.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/17a54a345b715bc4301b330d8eb394f57e1c66308a8cba67f426de76a71ba868.png"
+        }
+    ],
+    "story": "This hamster’s genetic therapy on the Horizon Lunar Colony resulted in his greatly increased size and intellect. Hammond taught himself engineering and mechanics, and escaped to earth, landing amidst the Junkers of the Australian Outback. There, he modified his escape pod into a battle mech called Wrecking Ball and became a champion gladiator and the bodyguard of the notorious Junker Queen.",
+    "media": {
+        "type": "video",
+        "link": "https://youtu.be/ZEnC_N06Uxc"
+    }
+}

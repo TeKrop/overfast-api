@@ -1,0 +1,38 @@
+{
+    "name": "Soldier: 76",
+    "description": "Armed with cutting-edge weaponry, including an experimental pulse rifle that’s capable of firing spirals of high-powered rockets, Soldier: 76 has the speed and support know-how of a highly trained warrior.",
+    "role": "damage",
+    "location": "Unknown",
+    "abilities": [
+        {
+            "name": "Heavy Pulse Rifle",
+            "description": "Automatic assault weapon.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/69eaf669cd646a617439592615f023cfec82c27f4a3e19f48188941b3feaf55f.png"
+        },
+        {
+            "name": "Sprint",
+            "description": "Run faster while moving forward.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/8408bacddfb4ac7b971dd14f6d8c9d211459fb159b459c3e6eaf06bc0a38bcb2.png"
+        },
+        {
+            "name": "Biotic Field",
+            "description": "Deploy a field that heals you and your allies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/aaadd3dee89ac8797ecb7a1e647f574a034b1930726296fd17946d343254bdf0.png"
+        },
+        {
+            "name": "Helix Rockets",
+            "description": "Launch a volley of explosive rockets.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/8fedb348952552227b6e2ec85cf14214106b901afce2a9657267153bb2a8cac3.png"
+        },
+        {
+            "name": "Tactical Visor",
+            "description": "Automatically aims your weapon at targets in view.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/5e8d4b8fb5cd1271314b8462012e9894c811a7c4857739e73bde53f2431e673d.png"
+        }
+    ],
+    "story": "The former commander of Overwatch turned physically-enhanced vigilante, Jack Morrison travels the world hunting those responsible for the downfall of Overwatch. It is unknown whether he seeks justice... or revenge.",
+    "media": {
+        "type": "video",
+        "link": "https://youtu.be/cPRRupAM4DI"
+    }
+}

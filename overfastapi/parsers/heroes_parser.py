@@ -1,6 +1,4 @@
 """Heroes page Parser module"""
-import json
-
 from overfastapi.parsers.api_parser import APIParser
 
 

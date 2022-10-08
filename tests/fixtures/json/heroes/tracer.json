@@ -1,0 +1,33 @@
+{
+    "name": "Tracer",
+    "description": "The Overwatch agent known as Tracer is a time-jumping adventurer and an irrepressible force for good. Toting twin pulse pistols and time bombs, Tracer is able to \"blink\" through space and rewind her personal timeline as she battles to right wrongs the world over.",
+    "role": "damage",
+    "location": "London, England",
+    "abilities": [
+        {
+            "name": "Pulse Pistols",
+            "description": "Short-range automatic weapons.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/82520ccd791a5befa5ac74a6b5263471de44b0674abb07fbf1568c149c88a91a.png"
+        },
+        {
+            "name": "Blink",
+            "description": "Teleport in the direction you are moving.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/f0dcf74b87793e8b56fc56c62974846a769b2d62cb5dc69bdc92cc7ee3a1d025.png"
+        },
+        {
+            "name": "Recall",
+            "description": "Travel back in time to your previous location and health.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/30939502a8576da1fdcad8c7d21881e32066fb28847fc7df874b1436689e3425.png"
+        },
+        {
+            "name": "Pulse Bomb",
+            "description": "Throw out a powerful sticky explosive.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/383e9b039efb93da77bb91fbeb3654ef50724e0cea0de76b2cc1c4db43de9a6d.png"
+        }
+    ],
+    "story": "Tracer is a time-jumping adventurer and an irrepressible force for good. With a chronal harness that lets her control her flow of time, she was one of Overwatch’s top agents, and she continues to try to make the world a better place wherever – and whenever – she can. Tracer brings her skill and optimism to help the new Overwatch keep the world safe.",
+    "media": {
+        "type": "comic",
+        "link": "https://overwatch.blizzard.com/media/stories/tracer-london-calling-1/"
+    }
+}

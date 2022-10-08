@@ -1,0 +1,50 @@
+[
+    {
+        "name": "Push",
+        "icon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt054b513cd6e95acf/62fd5b4a8972f93d1e325243/Push.svg",
+        "description": "Teams battle to take control of a robot and push it toward the enemy base.",
+        "screenshot": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt93eefb6e91347639/62fc2d9eda42240856c1459c/Toronto_Push.jpg"
+    },
+    {
+        "name": "Control",
+        "icon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt5ea0d3baf0e2d03f/62fc2d8bda42240856c14598/Control.svg",
+        "description": "Teams fight to hold a single objective. The first team to win two rounds wins the map.",
+        "screenshot": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blta3f8e647a52bb9e9/62fc312456388515882767ed/Oasis_Control.jpg"
+    },
+    {
+        "name": "Escort",
+        "icon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltba08041a1eb32c43/62fc2d8bc317e303559ab5b1/Escort.svg",
+        "description": "One team escorts a payload to its delivery point, while the other races to stop them.",
+        "screenshot": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt7d04bb6ad434cafa/62fc332a7ea1d970140fa139/Monte_Carlo_Escort.jpg"
+    },
+    {
+        "name": "Hybrid",
+        "icon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltd55839866311dd1e/62fc2d8bd62b1d3a8d1e5318/Hybrid.svg",
+        "description": "Attackers capture a payload, then escort it to its destination; defenders try to hold them back.",
+        "screenshot": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt253b3f05c32db72b/62fc2d9e947fcf14cd224b18/Rio_de_Janeiro_Hybrid.jpg"
+    },
+    {
+        "name": "Capture the Flag",
+        "icon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt81ca1f07a1cf5a6e/62fc2d8bc8d34f7f53197dc6/Capture_the_Flag.svg",
+        "description": "Teams compete to capture the enemy team’s flag while defending their own.",
+        "screenshot": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt42d587e346415db3/62fc2d9e8282cd7f515e855b/Lijang_Tower_Capture_the_Flag.jpg"
+    },
+    {
+        "name": "Elimination",
+        "icon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt4a8d26b9e2ae0739/62fc2d8b7198180857a9e75d/Elimination.svg",
+        "description": "Dispatch all enemies to win the round. Win three rounds to claim victory. Available with teams of one, three, or six.",
+        "screenshot": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt4ccc6acd0dbed78a/62fc2d9eb60eb7158600e04c/Black_Forest_Elimination.jpg"
+    },
+    {
+        "name": "Deathmatch",
+        "icon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt9b57125d24705a16/62fc2d8b8972f93d1e32520e/Deathmatch.svg",
+        "description": "Race to reach 20 points first by racking up kills in a free-for-all format.",
+        "screenshot": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt88ad6ddb9de11b3e/62fc2d9e26d7fa3ee92d03e2/Eichenwalde_Deathmatch.png"
+    },
+    {
+        "name": "Team Deathmatch",
+        "icon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blta97d85f157469bd5/62fc2d8b3a2b8b6d5939b85a/Team_Deathmatch.svg",
+        "description": "Team up and triumph over your enemies by scoring the most kills.",
+        "screenshot": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt63df614431a3f554/62fc2d9ead1dcd16f35de8e9/Kanezaka_Team_Deathmatch.jpg"
+    }
+]

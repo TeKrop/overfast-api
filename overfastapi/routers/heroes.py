@@ -1,14 +1,16 @@
+# pylint: disable=R0913,C0116
+"""Heroes endpoints router : heroes list, heroes details, roles list, etc."""
 from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Path, Query, Request
+from pydantic import ValidationError
 
 from overfastapi.common.enums import HeroKey, Role
-from overfastapi.common.helpers import routes_responses, value_with_validation_check
+from overfastapi.common.helpers import overfast_internal_error, routes_responses
 from overfastapi.handlers.get_hero_request_handler import GetHeroRequestHandler
 from overfastapi.handlers.list_heroes_request_handler import ListHeroesRequestHandler
 from overfastapi.handlers.list_roles_request_handler import ListRolesRequestHandler
 from overfastapi.models.heroes import Hero, HeroShort, RoleDetail
-
 
 router = APIRouter()
 
@@ -29,7 +31,10 @@ async def list_heroes(
     heroes_list = ListHeroesRequestHandler(request).process_request(
         background_tasks=background_tasks, role=role
     )
-    return value_with_validation_check([HeroShort(**hero) for hero in heroes_list])
+    try:
+        return [HeroShort(**hero) for hero in heroes_list]
+    except ValidationError as error:
+        raise overfast_internal_error(request.url.path, error) from error
 
 
 @router.get(
@@ -40,11 +45,14 @@ async def list_heroes(
     summary="Get a list of roles",
     description=("Get a list of available Overwatch roles"),
 )
-async def get_roles(background_tasks: BackgroundTasks, request: Request):
+async def list_roles(background_tasks: BackgroundTasks, request: Request):
     roles_list = ListRolesRequestHandler(request).process_request(
         background_tasks=background_tasks
     )
-    return value_with_validation_check([RoleDetail(**role) for role in roles_list])
+    try:
+        return [RoleDetail(**role) for role in roles_list]
+    except ValidationError as error:
+        raise overfast_internal_error(request.url.path, error) from error
 
 
 @router.get(
@@ -69,4 +77,7 @@ async def get_hero(
     hero_details = GetHeroRequestHandler(request).process_request(
         background_tasks=background_tasks, hero_key=hero_key
     )
-    return value_with_validation_check(Hero(**hero_details))
+    try:
+        return Hero(**hero_details)
+    except ValidationError as error:
+        raise overfast_internal_error(request.url.path, error) from error

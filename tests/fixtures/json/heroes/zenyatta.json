@@ -1,0 +1,38 @@
+{
+    "name": "Zenyatta",
+    "description": "Zenyatta is an omnic monk who wanders the world in search of spiritual enlightenment. Wielding mysterious and powerful orbs, he heals allies and weakens enemies.",
+    "role": "support",
+    "location": "Shambali Monastery, Nepal (formerly)",
+    "abilities": [
+        {
+            "name": "Orb of Destruction",
+            "description": "Energy projectile weapon.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/5740abd7e5f0de513ebcb32b073f27ba8f5625804598d5762cefd0c7331c1437.png"
+        },
+        {
+            "name": "Orb of Discord",
+            "description": "Launch this orb at an enemy to increase the damage they take.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/f416ae3c602c4f920551057176a3618441f943a0faea5e3cf77dc5db0e5128a5.png"
+        },
+        {
+            "name": "Orb of Harmony",
+            "description": "Launch this orb at an ally to heal them.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/999f5d34dd3c8dfb045bc69129d1b6aac547b98e252b68f2599b878d15d841cb.png"
+        },
+        {
+            "name": "Transcendence",
+            "description": "Become invulnerable, move faster, and heal nearby allies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/6ac5d4f08023cafc9f5412e45141cddecfdb2cb43ecf8415c12d1d161cce4678.png"
+        },
+        {
+            "name": "Snap Kick",
+            "description": "Quick melee damage increased by 50%, and its knockback is significantly increased.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/c14b2c5652526a006233965b176fb2b5af9e7c5d44045fad3844267303f07091.png"
+        }
+    ],
+    "story": "Zenyatta is an omnic monk who wanders the world in search of spiritual enlightenment, helping those he meets to overcome their personal struggles and find inner peace. When necessary, however, he will fight to protect the innocent, be they omnic or human. It is said that those who cross his path are never the same again.",
+    "media": {
+        "type": "short-story",
+        "link": "https://overwatch.blizzard.com/media/stories/stone-by-stone/"
+    }
+}

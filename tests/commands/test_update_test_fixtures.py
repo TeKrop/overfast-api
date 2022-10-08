@@ -21,40 +21,19 @@ def setup_update_test_fixtures_test():
 heroes_calls = [
     f"Updating {TEST_FIXTURES_ROOT_PATH}/html/heroes.html...",
     *[
-        f"Updating {TEST_FIXTURES_ROOT_PATH}/html/hero/{hero.value}.html..."
+        f"Updating {TEST_FIXTURES_ROOT_PATH}/html/heroes/{hero.value}.html..."
         for hero in HeroKey
     ],
 ]
-players_calls = [
-    f"Updating {TEST_FIXTURES_ROOT_PATH}/html/player/{player}.html..."
-    for player in [
-        "TeKrop-2217",
-        "Player-162460",
-        "test-1337",
-        "Unknown-1234",
-        "test-325d682072d7a4c61c33b6bbaa83b859",
-        "test-e66c388f13a7f408a6e1738f3d5161e2",
-        "xJaymog",
-        "Ka1zen_x",
-        "mightyy_Brig",
-    ]
-]
-maps_calls = [f"Updating {TEST_FIXTURES_ROOT_PATH}/html/maps.html..."]
+home_calls = [f"Updating {TEST_FIXTURES_ROOT_PATH}/html/home.html..."]
 
 
 @pytest.mark.parametrize(
     "parameters,expected_calls",
     [
-        (Mock(heroes=True, players=False, maps=False), heroes_calls),
-        (Mock(heroes=False, players=True, maps=False), players_calls),
-        (Mock(heroes=False, players=False, maps=True), maps_calls),
-        (Mock(heroes=True, players=True, maps=False), heroes_calls + players_calls),
-        (Mock(heroes=True, players=False, maps=True), heroes_calls + maps_calls),
-        (Mock(heroes=False, players=True, maps=True), players_calls + maps_calls),
-        (
-            Mock(heroes=True, players=True, maps=True),
-            heroes_calls + players_calls + maps_calls,
-        ),
+        (Mock(heroes=True, home=False), heroes_calls),
+        (Mock(heroes=False, home=True), home_calls),
+        (Mock(heroes=True, home=True), heroes_calls + home_calls),
     ],
 )
 def test_update_with_different_options(parameters, expected_calls: list[str]):

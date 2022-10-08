@@ -1,7 +1,5 @@
-# pylint: disable=R0913,C0103,C0116,W0613
+# pylint: disable=C0103,C0116,W0613
 """Project main file containing FastAPI app and routes definitions"""
-
-from typing import Optional
 
 from fastapi import FastAPI, Request
 from fastapi.openapi.docs import get_redoc_html
@@ -18,14 +16,16 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None,
 )
-description = """OverFast API gives data about Overwatch heroes, maps, and players statistics by
-scraping Blizzard pages. It was built with **FastAPI** and **Beautiful Soup**, and uses **nginx**
-as reverse proxy and **Redis** for caching. By using a specific cache system, it minimizes
-calls to Blizzard pages (which can be very slow), and quickly returns accurate data to users.
+description = """OverFast API gives data about Overwatch heroes, gamemodes, and (soon) players
+statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses
+**nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it
+minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate
+data to users.
 
 ## 🚧 Work in progress 🚧
 
-I'm currently rewriting the API for new Overwatch 2 pages. So far, here is the progress :
+I'm currently rewriting the API for Overwatch 2, by scrapping new Blizzard pages.
+So far, here is the progress :
 - Heroes list : ✅
 - Hero specific data : ✅
 - Roles list : ✅
@@ -46,6 +46,7 @@ OverFast API introduces a very specific cache system, stored on a **Redis** serv
 ### API Cache TTL values
 * Heroes list : 1 day
 * Hero specific data : 1 day
+* Roles list : 1 day
 * Gamemodes list : 1 day
 
 ### Automatic cache refresh

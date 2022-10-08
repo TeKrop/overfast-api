@@ -1,0 +1,38 @@
+{
+    "name": "Genji",
+    "description": "The cyborg ninja Genji Shimada has made peace with the augmented body he once rejected, and in doing so, he has discovered a higher humanity.",
+    "role": "damage",
+    "location": "Shambali Monastery, Nepal",
+    "abilities": [
+        {
+            "name": "Shuriken",
+            "description": "Throw an accurate burst of 3 projectiles.  Throw a fan of 3 projectiles in an arc.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/8d0916035141abd9ab2bf72dbcfd0460b7a0019529e023d259ad4340890b34b3.png"
+        },
+        {
+            "name": "Deflect",
+            "description": "Deflect incoming projectiles towards the direction you are aiming and block melee attacks.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/9e46bda733749ddd6512b61c021b4487b6201338a9ff39c716e4ee06e5d63a58.png"
+        },
+        {
+            "name": "Swift Strike",
+            "description": "Rapidly dash forward and inflict damage on enemies. Eliminations reset the cooldown.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a6639d5240b77967a734fc5e2af960fd38dccd834430a4a3409add345bb7e21e.png"
+        },
+        {
+            "name": "Dragonblade",
+            "description": "Unsheathe a deadly melee weapon.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/e9c3c82c08ce1a6006dbdf6905591040ed83ddceba81efb2e526c217cd57c931.png"
+        },
+        {
+            "name": "Cyber-Agility",
+            "description": "Climb on walls and double jump.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/c14b2c5652526a006233965b176fb2b5af9e7c5d44045fad3844267303f07091.png"
+        }
+    ],
+    "story": "Near death at the hands of his own brother, ninja Genji Shimada was rescued by Overwatch. To save his life, they made him a living weapon with cybernetic upgrades. Struggling with his nature and purpose after Overwatch’s fall, Genji sought peace through study with the omnic monk Zenyatta before answering Winston’s call.",
+    "media": {
+        "type": "video",
+        "link": "https://youtu.be/oJ09xdxzIJQ"
+    }
+}

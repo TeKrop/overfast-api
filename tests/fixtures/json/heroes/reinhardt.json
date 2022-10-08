@@ -1,0 +1,38 @@
+{
+    "name": "Reinhardt",
+    "description": "Reinhardt is champion who lives by the knightly codes of valor, justice, and courage. Clad in powered armor and swinging his hammer, he leads a rocket-propelled charge across the battleground and defends his comrades with a massive energy barrier.",
+    "role": "tank",
+    "location": "Stuttgart, Germany",
+    "abilities": [
+        {
+            "name": "Rocket Hammer",
+            "description": "Devastating melee weapon.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/f116232be8cdbfd5e5ebd7ac13731f928e3b56e72fa0337e5ede414cc5944b08.png"
+        },
+        {
+            "name": "Charge",
+            "description": "Charge forward and smash an enemy against a wall.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/40c9f1c060033e58120c9ec174008b8f5d833412923f7f351a32e5df47fe8166.png"
+        },
+        {
+            "name": "Fire Strike",
+            "description": "Launch a fiery projectile.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/568a5f49875557f735af36dce68474a923f7e8582a7be20fb68b6ee66ac077e6.png"
+        },
+        {
+            "name": "Barrier Field",
+            "description": "Hold  to deploy a frontal energy barrier.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/121f13903665417446ee4673d9740080a3bc117e285cf3dcf6547861a0bc7d43.png"
+        },
+        {
+            "name": "Earthshatter",
+            "description": "Knock down all enemies in front of you.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a63041a68d81c202a47a95035878edcfa75d5aa3f72414a7e84e1b1a68594bed.png"
+        }
+    ],
+    "story": "Reinhardt Wilhelm lives by the knightly codes of valor, justice, and courage. One of the founders of Overwatch, for decades he was a force for good the world over. After the organization’s fall, he travelled Europe like a knight of old, defending the innocent alongside his squire, Brigitte, until Winston’s call brought them back into the arms of Overwatch.",
+    "media": {
+        "type": "video",
+        "link": "https://youtu.be/sQfk5HykiEk"
+    }
+}

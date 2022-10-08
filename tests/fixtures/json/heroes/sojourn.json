@@ -1,0 +1,33 @@
+{
+    "name": "Sojourn",
+    "description": "A brilliant tactician and a fierce soldier, Vivian Chase--callsign \"Sojourn\"--is an indispensable resource on any battlefield. Her cybernetic augmentations and railgun grant her the speed, precision, and firepower to sway the fight in her favor.",
+    "role": "damage",
+    "location": "Toronto, Canada",
+    "abilities": [
+        {
+            "name": "Railgun",
+            "description": "Rapid firing projectiles that generate energy on hit.  High impact shot that consumes stored energy.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/3d7f261e05e3abda155cede4409ec8348490e286805c123d54d7f81fdd50d077.png"
+        },
+        {
+            "name": "Power Slide",
+            "description": "Ground slide that can cancel into a high jump.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/5e94ae14aee5e5054a6347e25f1c7ddd284b0cb73925dbc716e358970ec94f0d.png"
+        },
+        {
+            "name": "Disruptor Shot",
+            "description": "Launch an energy burst that snares and deals damage to enemies within it.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/7e903d13474df377216191c5b5c128fc6d20befdc611af9f7baedfdfa3b59295.png"
+        },
+        {
+            "name": "Overclock",
+            "description": "Railgun energy auto-charges for a short duration and charged shots pierce enemies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/83bd9d101e779075fadaed194d1964897794c49ce56c59ccc34799753b55efeb.png"
+        }
+    ],
+    "story": "From soldier to Overwatch Captain to veteran, Sojourn has devoted her life to helping those who would be made victims by the evils of the world. Her extensive cybernetic augmentations enhanced her innate strategic skills and prowess on the battlefield made her Overwatch’s most skilled tactician. \nNow on her own, she faces new challenges... and new dangers.",
+    "media": {
+        "type": "video",
+        "link": "https://youtu.be/yrOQs_8litU"
+    }
+}

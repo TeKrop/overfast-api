@@ -1,9 +1,6 @@
 """Parser Helpers module"""
-from typing import Any
-
 import requests
 from fastapi import HTTPException, Request, status
-from pydantic import ValidationError
 
 from overfastapi.common.logging import logger
 from overfastapi.config import (
@@ -11,10 +8,7 @@ from overfastapi.config import (
     DISCORD_WEBHOOK_URL,
     OVERFAST_API_VERSION,
 )
-from overfastapi.models.errors import (
-    BlizzardErrorMessage,
-    InternalServerErrorMessage,
-)
+from overfastapi.models.errors import BlizzardErrorMessage, InternalServerErrorMessage
 
 # Typical routes responses to return
 routes_responses = {
@@ -95,11 +89,3 @@ def send_discord_webhook_message(message: str) -> requests.Response | None:
         if DISCORD_WEBHOOK_ENABLED
         else None
     )
-
-
-def value_with_validation_check(response_data: Any) -> Any:
-    """Return response data by doing a Validation check before"""
-    try:
-        return response_data
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error

@@ -1,4 +1,4 @@
-"""Map Gamemodes Parser module"""
+"""Gamemodes Parser module"""
 from overfastapi.parsers.api_parser import APIParser
 
 

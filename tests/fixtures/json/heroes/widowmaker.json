@@ -1,0 +1,33 @@
+{
+    "name": "Widowmaker",
+    "description": "Widowmaker is the perfect assassin, armed with a precise rifle, venom mines, and the ability to grapple to sniping spots in the blink of an eye.",
+    "role": "damage",
+    "location": "Annecy, France",
+    "abilities": [
+        {
+            "name": "Widow's Kiss",
+            "description": "Automatic assault weapon.  Hold for long-ranged sniper weapon.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/13a1e7903c23a5e140aa01fa930f585c1ea69e1e24378c0462f42053085f7ad9.png"
+        },
+        {
+            "name": "Grappling Hook",
+            "description": "Launch a hook that pulls you towards a ledge.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/72fec7acac37ad840835839e72f368134498583686e91f7e30fe5d48aa44f7a1.png"
+        },
+        {
+            "name": "Venom Mine",
+            "description": "Launch a poison trap.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/82bb61b02224901170d8dc2fae143e695649cdfd7f5173a0e63a7742fd45bd84.png"
+        },
+        {
+            "name": "Infra-Sight",
+            "description": "Provide your team with a view of the enemy's location.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/b7783e8f83afc45dac37b80d0801a5b8200727e3dde299510d2f1886e0c7237b.png"
+        }
+    ],
+    "story": "A lifetime ago, Amélie Lacroix, wife of an Overwatch agent, was kidnapped by Talon. Shortly after returning home, she killed her husband and vanished. Now, “Widowmaker” is Talon's most effective weapon, a patient, ruthlessly efficient operative who rarely shows emotion and remorse, and revels only in the moment of the kill.",
+    "media": {
+        "type": "video",
+        "link": "https://youtu.be/U130wnpi-C0"
+    }
+}

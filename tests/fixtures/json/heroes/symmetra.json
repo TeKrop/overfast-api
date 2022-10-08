@@ -1,0 +1,33 @@
+{
+    "name": "Symmetra",
+    "description": "A Vishkar architech, Symmetra uses light to reshape her reality. She forms turrets to disrupt her foes, teleporters to move her allies, and an protective hard-light barrier to control the flow of combat.",
+    "role": "damage",
+    "location": "Utopaea, India",
+    "abilities": [
+        {
+            "name": "Photon Projector",
+            "description": "Short-range beam weapon with increasing damage.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/1b3f003d2ba6bba4f3d44f167cd1b03469c4e3c4d3900805b8adddffeedd2c56.png"
+        },
+        {
+            "name": "Sentry Turret",
+            "description": "Deploy a small turret that damages and slows enemies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/6ca1ad903ec0121026994bd2318dd5f2488ba40e5dbf5bdb2d5fad8474359253.png"
+        },
+        {
+            "name": "Teleporter",
+            "description": "Create two temporary teleporters that enable instant travel between them.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/13b45663f441144ded977e8ccf9ed180c213176206a9f6f9e189e29f09a03b64.png"
+        },
+        {
+            "name": "Photon Barrier",
+            "description": "Deploy a massive energy barrier.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/366a8cb1fd0718d4e2307674c713277b2a6c095c1997ddb7f4b9d9779063adb1.png"
+        }
+    ],
+    "story": "As an “architech” for the Vishkar Corporation, Symmetra weaves hard-light architectural constructs, creating buildings and infrastructure from thin air. Vishkar also sends her on clandestine missions around the world to uphold their corporate interests, leading her to wonder whether the control and order she desires--and Vishkar represents--are truly best for humanity.",
+    "media": {
+        "type": "short-story",
+        "link": "https://overwatch.blizzard.com/media/stories/stone-by-stone/"
+    }
+}
