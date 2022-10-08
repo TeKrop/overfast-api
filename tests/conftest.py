@@ -46,18 +46,13 @@ def heroes_html_data():
 
 
 @pytest.fixture(scope="session")
-def maps_html_data():
-    return read_html_file("maps.html")
-
-
-@pytest.fixture(scope="session")
 def hero_html_data(request: SubRequest):
-    return read_html_file(f"hero/{request.param}.html")
+    return read_html_file(f"heroes/{request.param}.html")
 
 
 @pytest.fixture(scope="session")
-def player_html_data(request: SubRequest):
-    return read_html_file(f"player/{request.param}.html")
+def home_html_data():
+    return read_html_file("home.html")
 
 
 def read_json_file(filepath: str) -> dict | list:
@@ -73,30 +68,15 @@ def heroes_json_data():
 
 
 @pytest.fixture(scope="session")
-def maps_json_data():
-    return read_json_file("maps.json")
-
-
-@pytest.fixture(scope="session")
-def map_gamemodes_json_data():
-    return read_json_file("map_gamemodes.json")
-
-
-@pytest.fixture(scope="session")
 def hero_json_data(request: SubRequest):
-    return read_json_file(f"hero/{request.param}.json")
+    return read_json_file(f"heroes/{request.param}.json")
 
 
 @pytest.fixture(scope="session")
-def player_json_data(request: SubRequest):
-    return read_json_file(f"player/{request.param}.json")
+def gamemodes_json_data():
+    return read_json_file("gamemodes.json")
 
 
 @pytest.fixture(scope="session")
-def search_players_blizzard_json_data():
-    return read_json_file("search_players/search_players_blizzard_result.json")
-
-
-@pytest.fixture(scope="session")
-def search_players_api_json_data():
-    return read_json_file("search_players/search_players_api_result.json")
+def roles_json_data():
+    return read_json_file("roles.json")

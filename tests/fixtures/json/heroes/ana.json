@@ -1,0 +1,33 @@
+{
+    "name": "Ana",
+    "description": "One of the founding members of Overwatch, Ana uses her skills and expertise to defend her home and the people she cares for. Equipped with a versatile arsenal, she wields her sniper rifle to aid allies and damage enemies from across the battlefield.",
+    "role": "support",
+    "location": "Cairo, Egypt",
+    "abilities": [
+        {
+            "name": "Biotic Rifle",
+            "description": "Long-range rifle that heals allies and damages enemies.  Hold to zoom in.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/efe0ebb135e87dc26b60f0d20500dcd7553ad121ab2b10cd4ffb5db17be9c977.png"
+        },
+        {
+            "name": "Sleep Dart",
+            "description": "Fires a dart that puts an enemy to sleep.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/20707fd82265412fdc6d2353daa88ec7558cd71c89aa3ac6cf0e78bbbfcabd80.png"
+        },
+        {
+            "name": "Biotic Grenade",
+            "description": "Throws a grenade that heals and increases healing on allies, while damaging and preventing healing on enemies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/c8190b234bf0a0e28eecffe162d0c942e6b8656e95f4688c6ca3b025fa5a487d.png"
+        },
+        {
+            "name": "Nano Boost",
+            "description": "Increases an ally's damage, while reducing damage taken.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/6fda18b343f3fd0e8dc50fa5a91589e1ca9ed7471a354f61dfc9f22b27b19497.png"
+        }
+    ],
+    "story": "A founding member of Overwatch and once renowned as the greatest sniper in the world, Ana Amari comes from a long line of decorated military veterans. Though she was thought to have perished in a firefight with Talon, Ana has rejoined the fray to protect her country, family, and closest allies.",
+    "media": {
+        "type": "video",
+        "link": "https://youtu.be/yzFWIw7wV8Q"
+    }
+}

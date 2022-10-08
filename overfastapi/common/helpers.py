@@ -8,6 +8,19 @@ from overfastapi.config import (
     DISCORD_WEBHOOK_URL,
     OVERFAST_API_VERSION,
 )
+from overfastapi.models.errors import BlizzardErrorMessage, InternalServerErrorMessage
+
+# Typical routes responses to return
+routes_responses = {
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {
+        "model": InternalServerErrorMessage,
+        "description": "Internal Server Error",
+    },
+    status.HTTP_504_GATEWAY_TIMEOUT: {
+        "model": BlizzardErrorMessage,
+        "description": "Blizzard Server Error",
+    },
+}
 
 
 def overfast_request(url: str) -> requests.Response:
@@ -19,7 +32,7 @@ def overfast_request(url: str) -> requests.Response:
         ),
         "From": "vporchet@gmail.com",
     }
-    return requests.get(url, headers=headers)
+    return requests.get(url, headers=headers, timeout=10)
 
 
 def overfast_internal_error(url: str, error: Exception) -> HTTPException:
@@ -72,7 +85,7 @@ def blizzard_response_error(req: Request) -> HTTPException:
 def send_discord_webhook_message(message: str) -> requests.Response | None:
     """Helper method for sending a Discord webhook message"""
     return (
-        requests.post(DISCORD_WEBHOOK_URL, data={"content": message})
+        requests.post(DISCORD_WEBHOOK_URL, data={"content": message}, timeout=10)
         if DISCORD_WEBHOOK_ENABLED
         else None
     )

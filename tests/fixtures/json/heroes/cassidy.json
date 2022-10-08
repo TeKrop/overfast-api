@@ -1,0 +1,33 @@
+{
+    "name": "Cassidy",
+    "description": "Armed with his Peacekeeper revolver, Cassidy takes out targets with deadeye precision and dives out of danger with eagle-like speed.",
+    "role": "damage",
+    "location": "Santa Fe, New Mexico, USA",
+    "abilities": [
+        {
+            "name": "Peacekeeper",
+            "description": "Accurate, powerful revolver.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/afb27d71eeb6f3635ac1ff236c7b3f9e3c6d017360ce022d5d384288ff95bce7.png"
+        },
+        {
+            "name": "Combat Roll",
+            "description": "Roll in the direction you're moving and reload.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/24a3f2f619859812bba6b6374513fa971b6b19ccb34950c02118b41cc4f93142.png"
+        },
+        {
+            "name": "Magnetic Grenade",
+            "description": "Throw a short range grenade that homes in on nearby enemies and deals additional damage if it sticks to them.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/47a593ad7f83394b011161e67a6f414e49f2221c5e014ea909fdcd9df4f94371.png"
+        },
+        {
+            "name": "Deadeye",
+            "description": "Face off against your enemies. Press Q to lock on, then Q or ABILITY 3 to fire.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/346cb576a19f978a7b2c52859c5639423f076d66ca740658da0d46955ab2c97d.png"
+        }
+    ],
+    "story": "A founding member of the notorious Deadlock Gang, Cassidy was eventually coerced into joining Blackwatch, Overwatch’s covert-ops division. He came to believe he could make amends for his past by righting the world’s injustices. But when Overwatch fell, Cassidy went underground, resurfacing later as a gunslinger for hire, fighting only for causes he believes are just.",
+    "media": {
+        "type": "video",
+        "link": "https://youtu.be/PKYVvPNhRR0"
+    }
+}

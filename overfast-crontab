@@ -1,2 +1,3 @@
 * * * * * cd /code && python -m overfastapi.commands.check_and_update_cache
 0 2 * * * cd /code && python -m overfastapi.commands.check_new_hero
+0 * * * * cd /code && python -m overfastapi.commands.check_career_pages

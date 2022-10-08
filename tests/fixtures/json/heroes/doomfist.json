@@ -1,0 +1,38 @@
+{
+    "name": "Doomfist",
+    "description": "Recently freed from imprisonment, Doomfist is determined to plunge the world into a new conflict that he believes will make humanity stronger. His cybernetics make him a powerful and highly-mobile frontline fighter capable of dealing ranged damage, knocking enemies into the air, and charging boldly into the fray.",
+    "role": "tank",
+    "location": "Oyo, Nigeria",
+    "abilities": [
+        {
+            "name": "Hand Cannon",
+            "description": "Short-range weapon with spread. Reloads automatically.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/49c404d5887c562cdb5aafb55979c5589a450c0e18fa9d62a3c8cc0ac585886e.png"
+        },
+        {
+            "name": "Rocket Punch",
+            "description": "Hold to charge then release to launch forward and knock an enemy back. Damage increases if the enemy hits a wall.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/aa2a067fe151ac2795fe77546711c07be5f0880d9ae5dce554cab0c933d927f0.png"
+        },
+        {
+            "name": "Seismic Slam",
+            "description": "Leap and smash the ground.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/20f721d5fd05f91e203d6e0007a137bdc90a161356f85d5aa88b2ab02b8da22b.png"
+        },
+        {
+            "name": "Power Block",
+            "description": "Protect yourself from frontal attacks. Blocking heavy damage empowers Rocket Punch.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/56267df764931eadeae09513e0f1b9594ae238eebba84878c501ba4b69acb71f.png"
+        },
+        {
+            "name": "Meteor Strike",
+            "description": "Press Q to leap up into the air. Move the targeting circle, then press ABILITY 3 to strike the targeted area.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/fa96b2650987b3784a725a0fb1704f7191a686a4f42c9ccf61c404e2f08b158c.png"
+        }
+    ],
+    "story": "A highly trained fighter and born leader, Akande Ogundimu lost his right arm in the Omnic Crisis, then joined Talon. Rising through the ranks, he killed his boss – the previous Doomfist – taking his eponymous weapon and title. Now, he is determined to plunge the world into a new conflict for his own mysterious purposes.",
+    "media": {
+        "type": "video",
+        "link": "https://youtu.be/vaZfZFNuOpI"
+    }
+}

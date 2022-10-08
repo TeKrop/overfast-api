@@ -1,0 +1,38 @@
+{
+    "name": "Bastion",
+    "description": "Once a frontline combatant in the devastating Omnic Crisis, this curious Bastion unit is fascinated by nature but wary of a fearful humanity. His ability to transform between configurations makes him a versatile ally .",
+    "role": "damage",
+    "location": "Unknown",
+    "abilities": [
+        {
+            "name": "Configuration: Assault",
+            "description": "A slow-moving tank with a powerful rotary cannon.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/5cf3fc40ec6eeee9716f66a934d9bf7f0803a924e72c12c5d1a6c74e57c933bd.png"
+        },
+        {
+            "name": "Configuration: Recon",
+            "description": "Mobile, with a lightweight and highly accurate weapon.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a2a15d0b50a53e0477ab65e55ed46248cf86ac976e5cef7c64078470dfa59807.png"
+        },
+        {
+            "name": "A-36 Tactical Grenade",
+            "description": "Fire a bomb that bounces off walls and explodes when it impacts enemies or the ground.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/22f9f8c043e1746011d7dcee2e811e0d24470bd0eb5128fca9c3aea2f2dcfe69.png"
+        },
+        {
+            "name": "Reconfigure",
+            "description": "Switch between weapon configurations.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/56bef8912e83cac59dc0acb08bcaef591ff2ed52385424e8d753c03bbb77e4e9.png"
+        },
+        {
+            "name": "Configuration: Artillery",
+            "description": "Become immobile and fire up to 3 powerful artillery shells.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/06c377aef476bfb21ee1dca3d4d1151f8a4131b388a5489f3dfce6fb232a2711.png"
+        }
+    ],
+    "story": "Left abandoned and dormant after the devastating Omnic Crisis, this curious Bastion unit has reawakened in a changed world. The once-hostile machine now possesses curiosity and a fascination for nature. Along with his bird companion, Ganymede, Bastion has found his way into the care of Torbjorn Lindholm, where he now works to help the humans he once fought against.",
+    "media": {
+        "type": "video",
+        "link": "https://youtu.be/to8yh83jlXg"
+    }
+}

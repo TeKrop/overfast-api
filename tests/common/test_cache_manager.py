@@ -23,10 +23,6 @@ def cache_manager():
             Mock(url=Mock(path="/heroes"), query_params="role=damage"),
             "/heroes?role=damage",
         ),
-        (
-            Mock(url=Mock(path="/players"), query_params="name=TeKrop&platform=pc"),
-            "/players?name=TeKrop&platform=pc",
-        ),
     ],
 )
 def test_get_cache_key_from_request(
@@ -136,8 +132,7 @@ def test_update_and_get_parser_cache(
         (
             True,
             {
-                f"{API_CACHE_KEY_PREFIX}:/players?name=TeKrop",
-                f"{API_CACHE_KEY_PREFIX}:/maps",
+                f"{API_CACHE_KEY_PREFIX}:/gamemodes",
             },
         ),
         (False, set()),
@@ -151,18 +146,11 @@ def test_get_soon_expired_api_cache_keys(
         is_redis_server_up,
     ):
         cache_manager.update_api_cache(
-            "/players?name=TeKrop", "[...]", EXPIRED_CACHE_REFRESH_LIMIT - 1
-        )
-        cache_manager.update_api_cache(
             "/heroes/ana", "{}", EXPIRED_CACHE_REFRESH_LIMIT + 5
         )
         cache_manager.update_api_cache(
-            "/maps", "[...]", EXPIRED_CACHE_REFRESH_LIMIT - 5
+            "/gamemodes", "[...]", EXPIRED_CACHE_REFRESH_LIMIT - 5
         )
-        cache_manager.update_api_cache(
-            "/maps/gamemodes", "{}", EXPIRED_CACHE_REFRESH_LIMIT + 100
-        )
-
         cache_manager.update_parser_cache(
             "/heroes",
             {

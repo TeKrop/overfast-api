@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)
 ![Mockup OverFast API](https://files.tekrop.fr/overfast_api_logo_full_1000.png)
 
-> OverFastAPI gives data about Overwatch heroes, maps, and players statistics by scraping Blizzard pages. It was built with **FastAPI** and **Beautiful Soup**, and uses **nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate data to users.
+> OverFast API gives data about Overwatch heroes, gamemodes, and (soon) players statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses **nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate data to users.
 
 ## 🚧 Work in progress 🚧
 
@@ -48,10 +48,8 @@ OverFast API introduces a very specific cache system, stored on a **Redis** serv
 Here is the list of all TTL values configured for API Cache :
 * Heroes list : 1 day
 * Hero specific data : 1 day
-* Maps list : 1 day
-* Maps gamemodes list : 1 day
-* Players career : 30 minutes
-* Players search : 1 hour
+* Roles list : 1 day
+* Gamemodes list : 1 day
 
 ### Automatic cache refresh
 
@@ -130,22 +128,21 @@ python -m overfastapi.commands.check_new_hero
 
 #### Update test fixtures
 
-Generic command (update heroes, player careers and maps)
+Generic command (update heroes, gamemodes and roles)
 ```
 python -m overfastapi.commands.update_test_fixtures
 ```
 
 Help message (with different options)
 ```
-usage: update_test_fixtures.py [-h] [-H] [-P] [-M]
+usage: update_test_fixtures.py [-h] [-He] [-Ho]
 
 Update test data fixtures by retrieving Blizzard pages directly. By default, all the tests data will be updated.
 
 options:
   -h, --help     show this help message and exit
-  -H, --heroes   update heroes test data
-  -P, --players  update players test data
-  -M, --maps     update maps test data
+  -He, --heroes  update heroes test data
+  -Ho, --home    update home test data (gamemodes, roles)
 ```
 
 ### Code Quality

@@ -29,7 +29,7 @@ class APIParser(ABC):
         on the page which will be used for searching and hashing (for cache). We
         don't want to calculate an hash and do the data parsing on all the HTML.
         """
-        return {"name": "section", "id": "site", "recursive": False}
+        return {"name": "div", "class_": "main-content", "recursive": False}
 
     def parse(self) -> None:
         """Main parsing method, calling the main submethod and catching

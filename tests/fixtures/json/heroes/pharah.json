@@ -1,0 +1,38 @@
+{
+    "name": "Pharah",
+    "description": "Having come from a long line of highly decorated soldiers, Pharah's commitment to duty and honor runs in her blood. She soars through the air in her Raptora combat suit, armed with a launcher that bombards enemies with high-explosive rockets.",
+    "role": "damage",
+    "location": "Giza, Egypt",
+    "abilities": [
+        {
+            "name": "Rocket Launcher",
+            "description": "Long-range explosive projectile weapon.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/c5fee4019276f284dc81e3eaa4f6244a3a7477fbcebc2b5e70a1b9bdfc0fab9b.png"
+        },
+        {
+            "name": "Jump Jet",
+            "description": "Fly rapidly upwards.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/ab8ffe4008a1c257f1014d55a5306fcd3d81cde8ffad569b240f74c4c13a4130.png"
+        },
+        {
+            "name": "Concussive Blast",
+            "description": "Launch an explosive blast to knock back enemies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/9747b440730824756ae2d17e4d1f38468f36c985c35f56cf1f175a613279479a.png"
+        },
+        {
+            "name": "Barrage",
+            "description": "Launch a continuous volley of mini-rockets.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/0708775beda1d200b586ae1d019522ea5ad8baa9bdcbbe076854102830f9fdae.png"
+        },
+        {
+            "name": "Hover Jets",
+            "description": "Hold to hover.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/c14b2c5652526a006233965b176fb2b5af9e7c5d44045fad3844267303f07091.png"
+        }
+    ],
+    "story": "Fareeha Amari dreamed of being part of Overwatch with her mother Ana, only to see it disbanded before she had the chance. She found success as “Pharah”, head of an elite security squad guarding the rogue AI that started the Omnic Crisis. But now that a new Overwatch has returned, Pharah's dreams are finally becoming a reality.",
+    "media": {
+        "type": "comic",
+        "link": "https://overwatch.blizzard.com/media/stories/mission-statement/"
+    }
+}

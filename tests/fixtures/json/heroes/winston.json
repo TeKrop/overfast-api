@@ -1,0 +1,33 @@
+{
+    "name": "Winston",
+    "description": "A super-intelligent, genetically engineered gorilla, Winston is a brilliant scientist and a champion for humanity's potential. He wields impressive inventions—a jump pack, electricity-blasting Tesla Cannon, portable shield projector, and more—with literal gorilla strength.",
+    "role": "tank",
+    "location": "Horizon Lunar Colony (formerly)",
+    "abilities": [
+        {
+            "name": "Tesla Cannon",
+            "description": "Electric frontal-cone weapon.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/050de92c7ce31e42368c796d9c246210a40bb1bd4a5273b2d64d8a980e1f9f9a.png"
+        },
+        {
+            "name": "Jump Pack",
+            "description": "Leap forward into the air. Landing on an enemy damages them.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/dbad1fe535da5b932ad706a0ca06373d530f1210cbbb095ef1bc8b3a7cc64172.png"
+        },
+        {
+            "name": "Barrier Projector",
+            "description": "Deploy a protective energy dome.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/469c290ded9fd33ce4ed927fc2da12c97483711e155f73bd7eaa05a399d5dbff.png"
+        },
+        {
+            "name": "Primal Rage",
+            "description": "Gain immense health, but you can only leap and punch enemies.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/685608721cb914e0412a090eb1e89c0f5d10edfb3dbc34218ba3acd35611c990.png"
+        }
+    ],
+    "story": "A super-intelligent, genetically engineered gorilla, mild-mannered Winston is a brilliant scientist and mighty champion. Fleeing the Horizon Lunar Colony, Winston found a home with Overwatch and became the hero he’d always dreamed of being... until Overwatch fell. Now, with the world facing a rising threat from Null Sector, Winston has recalled some of his friends and former allies. \n\nA new Overwatch has been born.",
+    "media": {
+        "type": "video",
+        "link": "https://youtu.be/sB5zlHMsM7k"
+    }
+}

@@ -1,0 +1,38 @@
+{
+    "name": "Torbjörn",
+    "description": "Overwatch once possessed one of the most advanced armaments on the planet, thanks to Torbjörn. His extensive arsenal includes a rivet gun, hammer, and a personal forge that he can use to build turrets.",
+    "role": "damage",
+    "location": "Gothenburg, Sweden",
+    "abilities": [
+        {
+            "name": "Rivet Gun",
+            "description": "Slow firing, long-ranged weapon.  Inaccurate but powerful short-range weapon.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/6fd3a8b1e1c43cd3c6f1a03d6ff9e76d9394d537235bc7b57380e78937e991ff.png"
+        },
+        {
+            "name": "Forge Hammer",
+            "description": "Swing to repair your turret or damage an enemy.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/8bd2b7524b29cbe97cbc99b8df6faff559aae4cb9053ca6f7ae5bf86fa5ec711.png"
+        },
+        {
+            "name": "Deploy Turret",
+            "description": "Deploy a self-building turret.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a3791d6155a72f1dd4109d99a7d730b5f489f0442abd6582b429bcca36a2dc75.png"
+        },
+        {
+            "name": "Overload",
+            "description": "Gain additional extra health as well as improved attack, movement, and reload speed.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/b59687c0dd86bbc41b754388e7b21deba5397c61808c0d9b375c062c9eaf85ac.png"
+        },
+        {
+            "name": "Molten Core",
+            "description": "Create pools of molten slag that damage enemies. Deals additional damage to armor.",
+            "icon": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/640e2363d97cfe133716bb2811d5dedb18faddb50ebbf77c415163ea50e87b41.png"
+        }
+    ],
+    "story": "As one of the world’s top engineers, Torbjörn Lindholm’s inventions were crucial to ending the Omnic Crisis, and kept Overwatch at the cutting edge of weapons technology for decades. In recent years, his “adoption” of a curious Bastion unit has led him to question his antipathy to robots and omnics, even as he works to stop his creations from falling into the wrong hands.",
+    "media": {
+        "type": "comic",
+        "link": "https://overwatch.blizzard.com/media/stories/destroyer"
+    }
+}

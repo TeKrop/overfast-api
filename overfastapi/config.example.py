@@ -3,7 +3,7 @@
 """Project constants module"""
 import os
 
-OVERFAST_API_VERSION = "1.0.0"
+OVERFAST_API_VERSION = "2.0.0"
 
 OVERFAST_API_BASE_URL = "https://overfast-api.tekrop.fr"
 
@@ -48,32 +48,20 @@ HEROES_PATH_CACHE_TIMEOUT = 86400
 HERO_PATH_CACHE_TIMEOUT = 86400
 
 # Once a day
-MAPS_PATH_CACHE_TIMEOUT = 86400
-
-# Once every 30 minutes
-CAREER_PATH_CACHE_TIMEOUT = 1800
-
-# Once every hour
-SEARCH_ACCOUNT_PATH_CACHE_TIMEOUT = 3600
+HOME_PATH_CACHE_TIMEOUT = 86400
 
 ############
 # BLIZZARD
 ############
 
 # Blizzard base url for Overwatch website
-BLIZZARD_HOST = "https://playoverwatch.com"
+BLIZZARD_HOST = "https://overwatch.blizzard.com"
 
-# Route for players career pages
-CAREER_PATH = "/en-us/career"
+# Blizzard home page with some details
+HOME_PATH = "/en-us"
 
 # Route for Overwatch heroes pages
 HEROES_PATH = "/en-us/heroes"
-
-# Route for Overwatch maps
-MAPS_PATH = "/en-us/maps"
-
-# Route for searching Overwatch accounts by name
-SEARCH_ACCOUNT_PATH = "/en-us/search/account-by-name"
 
 ############
 # CRITICAL ERROR DISCORD WEBHOOK
