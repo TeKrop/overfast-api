@@ -3,10 +3,10 @@
 from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Path, Query, Request
-from pydantic import ValidationError
 
+from overfastapi.common.decorators import validation_error_handler
 from overfastapi.common.enums import HeroKey, Role
-from overfastapi.common.helpers import overfast_internal_error, routes_responses
+from overfastapi.common.helpers import routes_responses
 from overfastapi.handlers.get_hero_request_handler import GetHeroRequestHandler
 from overfastapi.handlers.list_heroes_request_handler import ListHeroesRequestHandler
 from overfastapi.handlers.list_roles_request_handler import ListRolesRequestHandler
@@ -23,18 +23,15 @@ router = APIRouter()
     summary="Get a list of heroes",
     description="Get a list of Overwatch heroes, which can be filtered using roles",
 )
+@validation_error_handler(response_model=HeroShort)
 async def list_heroes(
     background_tasks: BackgroundTasks,
     request: Request,
     role: Optional[Role] = Query(None, title="Role filter"),
 ):
-    heroes_list = ListHeroesRequestHandler(request).process_request(
+    return ListHeroesRequestHandler(request).process_request(
         background_tasks=background_tasks, role=role
     )
-    try:
-        return [HeroShort(**hero) for hero in heroes_list]
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error
 
 
 @router.get(
@@ -45,14 +42,11 @@ async def list_heroes(
     summary="Get a list of roles",
     description=("Get a list of available Overwatch roles"),
 )
+@validation_error_handler(response_model=RoleDetail)
 async def list_roles(background_tasks: BackgroundTasks, request: Request):
-    roles_list = ListRolesRequestHandler(request).process_request(
+    return ListRolesRequestHandler(request).process_request(
         background_tasks=background_tasks
     )
-    try:
-        return [RoleDetail(**role) for role in roles_list]
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error
 
 
 @router.get(
@@ -66,18 +60,12 @@ async def list_roles(background_tasks: BackgroundTasks, request: Request):
         "weapons, abilities, story, medias, etc."
     ),
 )
+@validation_error_handler(response_model=Hero)
 async def get_hero(
     background_tasks: BackgroundTasks,
     request: Request,
-    hero_key: HeroKey = Path(
-        ...,
-        title="Key name of the hero",
-    ),
+    hero_key: HeroKey = Path(title="Key name of the hero"),
 ):
-    hero_details = GetHeroRequestHandler(request).process_request(
+    return GetHeroRequestHandler(request).process_request(
         background_tasks=background_tasks, hero_key=hero_key
     )
-    try:
-        return Hero(**hero_details)
-    except ValidationError as error:
-        raise overfast_internal_error(request.url.path, error) from error

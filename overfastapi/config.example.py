@@ -3,7 +3,7 @@
 """Project constants module"""
 import os
 
-OVERFAST_API_VERSION = "2.0.0"
+OVERFAST_API_VERSION = "2.0.1"
 
 OVERFAST_API_BASE_URL = "https://overfast-api.tekrop.fr"
 
