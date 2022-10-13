@@ -6,31 +6,21 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from overfastapi.common.enums import RouteTag
 from overfastapi.common.logging import logger
 from overfastapi.config import OVERFAST_API_VERSION
-from overfastapi.routers import gamemodes, heroes
+from overfastapi.routers import gamemodes, heroes, players
 
 app = FastAPI(
     title="OverFast API",
     docs_url=None,
     redoc_url=None,
 )
-description = """OverFast API gives data about Overwatch heroes, gamemodes, and (soon) players
+description = """OverFast API gives data about Overwatch heroes, gamemodes, and players
 statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses
 **nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it
 minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate
 data to users.
-
-## 🚧 Work in progress 🚧
-
-I'm currently rewriting the API for Overwatch 2, by scrapping new Blizzard pages.
-So far, here is the progress :
-- Heroes list : ✅
-- Hero specific data : ✅
-- Roles list : ✅
-- Gamemodes list : ✅
-- Players career : 👷 (working on it, Blizzard pages are back since season 2 update)
-- Players search : 👷 (working on it, Blizzard pages are back since season 2 update)
 
 ## Cache System
 
@@ -47,6 +37,8 @@ OverFast API introduces a very specific cache system, stored on a **Redis** serv
 * Hero specific data : 1 day
 * Roles list : 1 day
 * Gamemodes list : 1 day
+* Players career : 30 minutes
+* Players search : 1 hour
 
 ### Automatic cache refresh
 
@@ -77,7 +69,7 @@ def custom_openapi():  # pragma: no cover
         routes=app.routes,
         tags=[
             {
-                "name": "Heroes",
+                "name": RouteTag.HEROES,
                 "description": "Overwatch heroes details : lore, abilities, etc.",
                 "externalDocs": {
                     "description": "Blizzard heroes page, source of the information",
@@ -85,11 +77,19 @@ def custom_openapi():  # pragma: no cover
                 },
             },
             {
-                "name": "Maps",
+                "name": RouteTag.MAPS,
                 "description": "Overwatch maps details",
                 "externalDocs": {
                     "description": "Overwatch home page, source of the information",
                     "url": "https://overwatch.blizzard.com/en-us/",
+                },
+            },
+            {
+                "name": RouteTag.PLAYERS,
+                "description": "Overwatch players data : statistics, achievements, etc.",
+                "externalDocs": {
+                    "description": "Blizzard profile pages, source of the information",
+                    "url": "https://overwatch.blizzard.com/en-us/search/",
                 },
             },
         ],
@@ -128,3 +128,4 @@ def overridden_redoc():
 # Add application routers
 app.include_router(heroes.router, prefix="/heroes")
 app.include_router(gamemodes.router, prefix="/gamemodes")
+app.include_router(players.router, prefix="/players")

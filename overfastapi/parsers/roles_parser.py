@@ -14,7 +14,7 @@ class RolesParser(APIParser):
     def cache_key(self) -> str:
         return f"roles-{self.blizzard_url}"
 
-    def parse_data(self) -> list:
+    def parse_data(self) -> list[dict]:
         roles_container = self.root_tag.find(
             "div", class_="homepage-features-heroes", recursive=False
         ).find("blz-feature-carousel-section", recursive=False)

@@ -22,6 +22,10 @@ def cache_manager():
             Mock(url=Mock(path="/heroes"), query_params="role=damage"),
             "/heroes?role=damage",
         ),
+        (
+            Mock(url=Mock(path="/players"), query_params="name=TeKrop&platform=pc"),
+            "/players?name=TeKrop&platform=pc",
+        ),
     ],
 )
 def test_get_cache_key_from_request(

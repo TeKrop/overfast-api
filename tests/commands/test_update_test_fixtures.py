@@ -24,15 +24,37 @@ heroes_calls = [
         for hero in HeroKey
     ],
 ]
+players_calls = [
+    f"Updating {TEST_FIXTURES_ROOT_PATH}/html/player/{player}.html..."
+    for player in [
+        "TeKrop-2217",
+        "Player-162460",
+        "test-1337",
+        "Unknown-1234",
+        "test-325d682072d7a4c61c33b6bbaa83b859",
+        "test-e66c388f13a7f408a6e1738f3d5161e2",
+        "xJaymog",
+        "Ka1zen_x",
+        "mightyy_Brig",
+    ]
+]
 home_calls = [f"Updating {TEST_FIXTURES_ROOT_PATH}/html/home.html..."]
 
 
 @pytest.mark.parametrize(
     "parameters,expected_calls",
     [
-        (Mock(heroes=True, home=False), heroes_calls),
-        (Mock(heroes=False, home=True), home_calls),
-        (Mock(heroes=True, home=True), heroes_calls + home_calls),
+        (Mock(heroes=True, home=False, players=False), heroes_calls),
+        (Mock(heroes=False, home=True, players=False), home_calls),
+        (Mock(heroes=False, home=False, players=True), players_calls),
+        (Mock(heroes=True, home=True, players=False), heroes_calls + home_calls),
+        (Mock(heroes=True, home=False, players=True), heroes_calls + players_calls),
+        (Mock(heroes=False, home=True, players=True), home_calls + players_calls),
+        (
+            Mock(heroes=True, home=True, players=True),
+            heroes_calls,
+            home_calls + players_calls,
+        ),
     ],
 )
 def test_update_with_different_options(parameters, expected_calls: list[str]):

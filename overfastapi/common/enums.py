@@ -5,6 +5,14 @@ heroes, gamemodes, etc.
 from enum import StrEnum
 
 
+class RouteTag(StrEnum):
+    """Tags used to classify API routes"""
+
+    HEROES = "Heroes"
+    MAPS = "Maps"
+    PLAYERS = "Players"
+
+
 class HeroKey(StrEnum):
     """Hero keys used to identify Overwatch heroes in general"""
 
@@ -60,3 +68,49 @@ class Role(StrEnum):
     DAMAGE = "damage"
     SUPPORT = "support"
     TANK = "tank"
+
+
+class PlayerAchievementCategory(StrEnum):
+    """Categories of achievements displayed in the players API"""
+
+    GENERAL = "general"
+    DAMAGE = "damage"
+    TANK = "tank"
+    SUPPORT = "support"
+    MAPS = "maps"
+    EVENTS = "events"
+
+
+class PlayerGamemode(StrEnum):
+    """Gamemodes associated with players statistics"""
+
+    QUICKPLAY = "quickplay"
+    COMPETITIVE = "competitive"
+
+
+class PlayerPlatform(StrEnum):
+    """Players platforms"""
+
+    PC = "pc"
+    PSN = "psn"
+    XBL = "xbl"
+    NINTENDO_SWITCH = "nintendo-switch"
+
+
+class PlayerPrivacy(StrEnum):
+    """Players career privacy"""
+
+    PUBLIC = "public"
+    PRIVATE = "private"
+
+
+class CompetitiveDivision(StrEnum):
+    """Competitive division of a rank"""
+
+    BRONZE = "bronze"
+    SILVER = "silver"
+    GOLD = "gold"
+    PLATINUM = "platinum"
+    DIAMOND = "diamond"
+    MASTER = "master"
+    GRANDMASTER = "grandmaster"

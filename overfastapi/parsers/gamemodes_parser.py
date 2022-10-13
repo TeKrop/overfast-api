@@ -14,7 +14,7 @@ class GamemodesParser(APIParser):
     def cache_key(self) -> str:
         return f"gamemodes-{self.blizzard_url}"
 
-    def parse_data(self) -> list:
+    def parse_data(self) -> list[dict]:
         gamemodes_container = (
             self.root_tag.find("div", class_="maps", recursive=False)
             .find("blz-carousel-section", recursive=False)

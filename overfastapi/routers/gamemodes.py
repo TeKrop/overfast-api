@@ -2,6 +2,7 @@
 from fastapi import APIRouter, BackgroundTasks, Request
 
 from overfastapi.common.decorators import validation_error_handler
+from overfastapi.common.enums import RouteTag
 from overfastapi.common.helpers import routes_responses
 from overfastapi.handlers.list_gamemodes_request_handler import (
     ListGamemodesRequestHandler,
@@ -15,7 +16,7 @@ router = APIRouter()
     "",
     response_model=list[GamemodeDetails],
     responses=routes_responses,
-    tags=["Maps"],
+    tags=[RouteTag.MAPS],
     summary="Get a list of gamemodes",
     description="Get a list of Overwatch gamemodes : Assault, Escort, Hybrid, etc.",
 )

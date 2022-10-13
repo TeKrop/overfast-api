@@ -8,7 +8,7 @@ class HeroesParser(APIParser):
 
     root_path = HEROES_PATH
 
-    def parse_data(self) -> list:
+    def parse_data(self) -> list[dict]:
         return [
             {
                 "key": hero["data-hero-id"],

@@ -53,6 +53,12 @@ HERO_PATH_CACHE_TIMEOUT = 86400
 # Once a day
 HOME_PATH_CACHE_TIMEOUT = 86400
 
+# Once every 30 minutes
+CAREER_PATH_CACHE_TIMEOUT = 1800
+
+# Once every hour
+SEARCH_ACCOUNT_PATH_CACHE_TIMEOUT = 3600
+
 ############
 # BLIZZARD
 ############
@@ -65,6 +71,12 @@ HOME_PATH = "/en-us"
 
 # Route for Overwatch heroes pages
 HEROES_PATH = "/en-us/heroes"
+
+# Route for players career pages
+CAREER_PATH = "/en-us/career"
+
+# Route for searching Overwatch accounts by name
+SEARCH_ACCOUNT_PATH = "/en-us/search/account-by-name"
 
 ############
 # CRITICAL ERROR DISCORD WEBHOOK

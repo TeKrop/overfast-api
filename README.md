@@ -8,17 +8,7 @@
 [![License: MIT](https://img.shields.io/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)
 ![Mockup OverFast API](https://files.tekrop.fr/overfast_api_logo_full_1000.png)
 
-> OverFast API gives data about Overwatch heroes, gamemodes, and (soon) players statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses **nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate data to users.
-
-## 🚧 Work in progress 🚧
-
-I'm currently rewriting the API for new Overwatch 2 pages. So far, here is the progress :
-- Heroes list : ✅
-- Hero specific data : ✅
-- Roles list : ✅
-- Gamemodes list : ✅
-- Players career : 👷 (working on it, Blizzard pages are back since season 2 update)
-- Players search : 👷 (working on it, Blizzard pages are back since season 2 update)
+> OverFast API gives data about Overwatch heroes, gamemodes, and players statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses **nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate data to users.
 
 ## Table of contents
 * [✨ Demo](#-demo)
@@ -50,6 +40,8 @@ Here is the list of all TTL values configured for API Cache :
 * Hero specific data : 1 day
 * Roles list : 1 day
 * Gamemodes list : 1 day
+* Players career : 30 minutes
+* Players search : 1 hour
 
 ### Automatic cache refresh
 
@@ -194,6 +186,7 @@ options:
   -h, --help     show this help message and exit
   -He, --heroes  update heroes test data
   -Ho, --home    update home test data (gamemodes, roles)
+  -P, --players  update players test data
 ```
 
 ### Code Quality
