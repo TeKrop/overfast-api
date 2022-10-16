@@ -77,7 +77,7 @@ class OverFastAPILogger:
         )
         logging.basicConfig(handlers=[InterceptHandler()], level=0)
         logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
-        for _log in ["uvicorn", "uvicorn.error", "fastapi"]:
+        for _log in ("uvicorn", "uvicorn.error", "fastapi"):
             _logger = logging.getLogger(_log)
             _logger.handlers = [InterceptHandler()]
 

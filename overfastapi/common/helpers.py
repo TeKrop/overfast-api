@@ -52,7 +52,7 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
     send_discord_webhook_message(
         f"* **URL** : {url}\n"
         f"* **Error type** : {type(error).__name__}\n"
-        f"* **Message** : {str(error)}"
+        f"* **Message** : {error}"
     )
 
     return HTTPException(

@@ -26,7 +26,7 @@ heroes_calls = [
 ]
 players_calls = [
     f"Updating {TEST_FIXTURES_ROOT_PATH}/html/player/{player}.html..."
-    for player in [
+    for player in (
         "TeKrop-2217",
         "Player-162460",
         "test-1337",
@@ -36,7 +36,7 @@ players_calls = [
         "xJaymog",
         "Ka1zen_x",
         "mightyy_Brig",
-    ]
+    )
 ]
 home_calls = [f"Updating {TEST_FIXTURES_ROOT_PATH}/html/home.html..."]
 
