@@ -2,32 +2,28 @@
 import json
 from unittest.mock import patch
 
+import fakeredis
 import pytest
-import redis
 from _pytest.fixtures import SubRequest
 
-from overfastapi.config import REDIS_HOST, REDIS_PORT, TEST_FIXTURES_ROOT_PATH
+from overfastapi.config import TEST_FIXTURES_ROOT_PATH
 
 
 @pytest.fixture(scope="session")
 def redis_server():
-    # Connect to Redis server, and stop tests if no Redis Server is running
-    server = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
-
-    try:
-        server.ping()
-    except redis.exceptions.RedisError as err:
-        pytest.exit(f"Redis server error : {str(err)}", 0)
-
-    return server
+    return fakeredis.FakeStrictRedis()
 
 
 @pytest.fixture(scope="function", autouse=True)
-def patch_before_every_test(redis_server: redis.Redis):  # pylint: disable=W0621
+def patch_before_every_test(
+    redis_server: fakeredis.FakeStrictRedis,
+):  # pylint: disable=W0621
     # Flush Redis before and after every tests
     redis_server.flushdb()
 
-    with patch("overfastapi.common.helpers.DISCORD_WEBHOOK_ENABLED", False):
+    with patch("overfastapi.common.helpers.DISCORD_WEBHOOK_ENABLED", False), patch(
+        "overfastapi.common.cache_manager.CacheManager.redis_server", redis_server
+    ):
         yield
 
     redis_server.flushdb()
