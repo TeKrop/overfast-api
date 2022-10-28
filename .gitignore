@@ -130,3 +130,6 @@ dump.rdb
 
 # OverFast API
 overfastapi/config.py
+
+# Poetry
+poetry.lock
