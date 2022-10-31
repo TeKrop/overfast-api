@@ -47,10 +47,10 @@ def main():
     # Compare both sets. If we have a difference, notify the developer
     new_hero_keys = distant_hero_keys - local_hero_keys
     if len(new_hero_keys) > 0:
-        logger.info("New hero keys were found : {}", str(new_hero_keys))
+        logger.info("New hero keys were found : {}", new_hero_keys)
         send_discord_webhook_message(
             "New Overwatch heroes detected, please add the following "
-            f"keys into the configuration : {str(new_hero_keys)}"
+            f"keys into the configuration : {new_hero_keys}"
         )
     else:
         logger.info("No new hero found. Exiting.")

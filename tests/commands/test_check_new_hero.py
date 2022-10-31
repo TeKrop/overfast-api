@@ -58,7 +58,7 @@ def test_check_new_heroes(distant_heroes: set[str], expected: set[str]):
     ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
         check_new_hero_main()
 
-    logger_info_mock.assert_called_with("New hero keys were found : {}", str(expected))
+    logger_info_mock.assert_called_with("New hero keys were found : {}", expected)
 
 
 def test_check_error_from_blizzard():

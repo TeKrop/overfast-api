@@ -1,6 +1,6 @@
 # ⚡ OverFast API
 
-![Python](https://img.shields.io/badge/python-v3.10-blue)
+![Python](https://img.shields.io/badge/python-v3.11-blue)
 ![Pylint](https://img.shields.io/badge/pylint-10%2F10-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
 [![Issues](https://img.shields.io/github/issues/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/issues)
@@ -78,7 +78,7 @@ Using this way (only using the image built with the `Dockerfile` alone), there w
 ## 💽 Installation
 
 ### Requirements
-* Python 3.10
+* Python 3.11
 * Poetry
 * Docker & Docker Compose (production)
 

@@ -1,4 +1,4 @@
-FROM python:3.10-alpine
+FROM python:3.11-alpine
 
 # Environment variables
 ENV PYTHONFAULTHANDLER=1 \

@@ -2,11 +2,7 @@
 heroes, gamemodes, etc.
 
 """
-from enum import Enum
-
-
-class StrEnum(str, Enum):
-    """Generic Enum which will be casted easily as a string"""
+from enum import StrEnum
 
 
 class HeroKey(StrEnum):
