@@ -29,6 +29,16 @@ jobs:
         python-version: ${{ matrix.python-version }}
         poetry-version: ${{ matrix.poetry-version }}
 
+    - name: Update python version badge
+      uses: schneegans/dynamic-badges-action@v1.6.0
+      with:
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: 15a234815aa74059953a766a10e92688
+        filename: python-version.json
+        label: python
+        message: v${{ matrix.python-version }}
+        color: blue
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2

@@ -1,8 +1,7 @@
 # ⚡ OverFast API
-
-![Python](https://img.shields.io/badge/python-v3.11-blue)
-![Pylint](https://img.shields.io/badge/pylint-10%2F10-brightgreen)
-![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)
+![Python](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/TeKrop/15a234815aa74059953a766a10e92688/raw/python-version.json)
+![Pylint](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/TeKrop/969758d5b339b656c327846a324fa34d/raw/pylint.json)
+![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/TeKrop/1362ebafcd51d3f65dae7935b1d322eb/raw/pytest.json)
 [![Issues](https://img.shields.io/github/issues/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/issues)
 [![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)](https://overfast-api.tekrop.fr)
 [![License: MIT](https://img.shields.io/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)

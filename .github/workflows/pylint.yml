@@ -26,4 +26,17 @@ jobs:
     - name: Analyse the code with pylint
       run: |
         cp overfastapi/config.example.py overfastapi/config.py
-        pylint $(git ls-files '*.py')
+        pylint $(git ls-files '*.py') | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' > score.txt
+        echo "NOTE=$(cat score.txt)" >> $GITHUB_ENV
+
+    - name: Update pylint note badge
+      uses: schneegans/dynamic-badges-action@v1.6.0
+      with:
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: 969758d5b339b656c327846a324fa34d
+        filename: pylint.json
+        label: pylint
+        message: ${{ env.NOTE }}/10
+        minColorRange: 5
+        maxColorRange: 9
+        valColorRange: ${{ env.NOTE }}

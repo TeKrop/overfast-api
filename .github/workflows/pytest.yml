@@ -26,4 +26,18 @@ jobs:
     - name: Run tests
       run: |
         cp overfastapi/config.example.py overfastapi/config.py
-        PYTHONPATH=overfastapi/ python -m pytest -v --cov=overfastapi/ tests/
+        PYTHONPATH=overfastapi/ python -m pytest -v --cov-fail-under=80 --cov-report=html --cov=overfastapi/ tests/
+        PERCENT=$(cat htmlcov/index.html | grep "pc_cov" | awk -F '>' '{print $2}' | awk -F '%' '{print $1}')
+        echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
+
+    - name: Update test coverage badge
+      uses: schneegans/dynamic-badges-action@v1.6.0
+      with:
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: 1362ebafcd51d3f65dae7935b1d322eb
+        filename: pytest.json
+        label: coverage
+        message: ${{ env.COVERAGE }}%
+        minColorRange: 50
+        maxColorRange: 90
+        valColorRange: ${{ env.COVERAGE }}
