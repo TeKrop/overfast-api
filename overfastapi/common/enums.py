@@ -28,6 +28,7 @@ class HeroKey(StrEnum):
     MOIRA = "moira"
     ORISA = "orisa"
     PHARAH = "pharah"
+    RAMATTRA = "ramattra"
     REAPER = "reaper"
     REINHARDT = "reinhardt"
     ROADHOG = "roadhog"
