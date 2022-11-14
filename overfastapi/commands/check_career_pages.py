@@ -33,6 +33,6 @@ def main():
     send_discord_webhook_message("Blizzard career pages are back 🥳")
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     logger = logger.patch(lambda record: record.update(name="check_career_pages"))
     main()

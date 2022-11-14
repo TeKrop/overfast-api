@@ -7,13 +7,14 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.85.0"
+fastapi = "^0.87.0"
 beautifulsoup4 = "^4.11.1"
 lxml = "^4.9.1"
 redis = "^4.3.4"
 requests = "^2.27.1"
 uvicorn = {extras = ["standard"], version = "^0.18.3"}
 loguru = "^0.6.0"
+httpx = "^0.23.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.10.0"
