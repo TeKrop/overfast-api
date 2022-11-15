@@ -11,7 +11,7 @@ from overfastapi.common.exceptions import ParserParsingError
 class APIParser(ABC):
     """Abstract Parser class used to define generic behavior for parsers"""
 
-    def __init__(self, html_content: str, **kwargs):  # pylint: disable=W0613
+    def __init__(self, html_content: str, **kwargs):
         self.root_tag = BeautifulSoup(html_content, "lxml").body.find(
             **self.root_tag_params
         )

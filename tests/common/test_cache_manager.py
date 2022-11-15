@@ -1,4 +1,3 @@
-# pylint: disable=C0114,C0116,R0913,W0621
 from time import sleep
 from unittest.mock import Mock, patch
 

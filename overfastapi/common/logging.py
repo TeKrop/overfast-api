@@ -1,4 +1,3 @@
-# pylint: disable=C0115,C0116,R0913
 """Custom Logger Using Loguru, inspired by Riki-1mg gist custom_logging.py"""
 
 import logging

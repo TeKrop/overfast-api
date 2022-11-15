@@ -1,6 +1,7 @@
 # ⚡ OverFast API
 ![Python](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/TeKrop/15a234815aa74059953a766a10e92688/raw/python-version.json)
-![Pylint](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/TeKrop/969758d5b339b656c327846a324fa34d/raw/pylint.json)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+[![Code Quality](https://github.com/TeKrop/overfast-api/actions/workflows/ruff.yml/badge.svg)](https://github.com/TeKrop/overfast-api/actions/workflows/ruff.yml)
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/TeKrop/1362ebafcd51d3f65dae7935b1d322eb/raw/pytest.json)
 [![Issues](https://img.shields.io/github/issues/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/issues)
 [![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)](https://overfast-api.tekrop.fr)
@@ -145,11 +146,10 @@ options:
 ```
 
 ### Code Quality
-The code quality is checked using the `pylint` command. I also used the `isort` utility for imports ordering, and `black` to enforce PEP-8 convention on my code. To check the quality of the code, you just have to run the following commands :
+The code quality is checked using the `ruff` command. I'm also using the `isort` utility for imports ordering, and `black` to enforce PEP-8 convention on my code. To check the quality of the code, you just have to run the following command :
 
 ```
-pylint overfastapi
-pylint tests
+ruff .
 ```
 
 ### Testing

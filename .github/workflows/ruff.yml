@@ -1,0 +1,29 @@
+name: "Code Quality"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Ruff
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+        poetry-version: [1.2.2]
+
+    steps:
+    - name: Build project
+      uses: TeKrop/install-python-poetry-project@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+        poetry-version: ${{ matrix.poetry-version }}
+
+    - name: Analyse the code using ruff
+      run: |
+        cp overfastapi/config.example.py overfastapi/config.py
+        ruff .

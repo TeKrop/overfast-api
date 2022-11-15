@@ -1,4 +1,3 @@
-# pylint: disable=R0913,C0116
 """Gamemodes endpoints router : gamemodes list, etc."""
 from fastapi import APIRouter, BackgroundTasks, Request
 

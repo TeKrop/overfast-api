@@ -1,4 +1,3 @@
-# pylint: disable=C0103,C0116,W0613
 """Project main file containing FastAPI app and routes definitions"""
 
 from fastapi import FastAPI, Request

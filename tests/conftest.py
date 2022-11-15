@@ -1,4 +1,3 @@
-# pylint: disable=C0114,C0116
 import json
 from unittest.mock import patch
 
@@ -15,9 +14,7 @@ def redis_server():
 
 
 @pytest.fixture(scope="function", autouse=True)
-def patch_before_every_test(
-    redis_server: fakeredis.FakeStrictRedis,
-):  # pylint: disable=W0621
+def patch_before_every_test(redis_server: fakeredis.FakeStrictRedis):
     # Flush Redis before and after every tests
     redis_server.flushdb()
 

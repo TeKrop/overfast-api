@@ -1,4 +1,3 @@
-# pylint: disable=C0114,C0116
 from overfastapi.parsers.gamemodes_parser import GamemodesParser
 
 

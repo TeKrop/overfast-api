@@ -1,4 +1,3 @@
-# pylint: disable=C0114,C0116
 from overfastapi.parsers.heroes_parser import HeroesParser
 
 

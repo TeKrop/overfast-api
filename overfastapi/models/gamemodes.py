@@ -1,4 +1,3 @@
-# pylint: disable=C0301,C0115
 """Set of pydantic models used for Gamemodes API routes"""
 from pydantic import BaseModel, Field, HttpUrl
 

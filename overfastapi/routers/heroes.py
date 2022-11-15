@@ -1,6 +1,4 @@
-# pylint: disable=R0913,C0116
 """Heroes endpoints router : heroes list, heroes details, roles list, etc."""
-from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Path, Query, Request
 
@@ -27,7 +25,7 @@ router = APIRouter()
 async def list_heroes(
     background_tasks: BackgroundTasks,
     request: Request,
-    role: Optional[Role] = Query(None, title="Role filter"),
+    role: Role | None = Query(None, title="Role filter"),
 ):
     return ListHeroesRequestHandler(request).process_request(
         background_tasks=background_tasks, role=role

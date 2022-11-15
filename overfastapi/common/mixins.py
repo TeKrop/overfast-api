@@ -1,5 +1,3 @@
-# pylint: disable=R0903
-
 """Set of mixins for the project"""
 import json
 

@@ -1,9 +1,0 @@
-[MASTER]
-# Minimum lines number of a similarity.
-min-similarity-lines=30
-
-# Ignore config file
-ignore=config.py
-
-# Prevent pylint issues with pydantic
-extension-pkg-whitelist=pydantic

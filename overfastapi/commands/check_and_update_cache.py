@@ -23,11 +23,11 @@ def get_soon_expired_cache_keys() -> set[str]:
     """Get a set of URIs for values in API Cache which will expire soon
     without taking subroutes and query parameters"""
     cache_manager = CacheManager()
-    return set(
+    return {
         # api-cache:/heroes?role=damage => /heroes?role=damage => /heroes
         key.split(":")[1].split("?")[0]
         for key in cache_manager.get_soon_expired_api_cache_keys()
-    )
+    }
 
 
 def get_request_handler_class_and_kwargs(cache_key: str) -> tuple[type, dict]:

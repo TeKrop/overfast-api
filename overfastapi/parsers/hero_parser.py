@@ -1,5 +1,4 @@
 """Hero page Parser module"""
-from typing import Optional
 
 from bs4 import Tag
 
@@ -64,7 +63,7 @@ class HeroParser(APIParser):
         return story_section.find("p").get_text()
 
     @staticmethod
-    def __get_media(showcase_section: Tag) -> Optional[dict]:
+    def __get_media(showcase_section: Tag) -> dict | None:
         if video := showcase_section.find("blz-video"):
             return {
                 "type": MediaType.VIDEO,

@@ -1,7 +1,5 @@
-# pylint: disable=C0301,C0115
 """Set of pydantic models used for Heroes API routes"""
 
-from typing import Optional
 
 from pydantic import BaseModel, Field, HttpUrl
 
@@ -66,7 +64,7 @@ class Hero(BaseModel):
             "fighting only for causes he believes are just."
         ),
     )
-    media: Optional[Media] = Field(
+    media: Media | None = Field(
         None,
         description="Media concerning the hero (YouTube video, pdf story, etc.)",
     )

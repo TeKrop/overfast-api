@@ -2,16 +2,16 @@
 from fastapi import status
 
 
-class OverfastException(Exception):
+class OverfastError(Exception):
     """Generic OverFast API Exception"""
 
-    message = "OverFast API Exception"
+    message = "OverFast API Error"
 
     def __str__(self):
         return self.message
 
 
-class ParserInitError(OverfastException):
+class ParserInitError(OverfastError):
     """Exception raised when there was an error in a Parser class
     initialization, usually when the data is not available
     """
@@ -25,7 +25,7 @@ class ParserInitError(OverfastException):
         self.message = message
 
 
-class ParserParsingError(OverfastException):
+class ParserParsingError(OverfastError):
     """Exception raised when there was an error during data parsing"""
 
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR

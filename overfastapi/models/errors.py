@@ -1,4 +1,3 @@
-# pylint: disable=C0115
 """Set of pydantic models describing errors returned by the API"""
 from pydantic import BaseModel, Field
 

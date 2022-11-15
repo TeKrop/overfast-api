@@ -21,7 +21,7 @@ parser-cache:/heroes => {"hash": "12345abcdef", "data": "[{...}]"}
 parser-cache:/heroes?role=damage => {"hash": "12345abcdef", "data": "[{...}]"}
 """
 
-from typing import Callable, Iterator, Optional
+from typing import Callable, Iterator
 
 import redis
 from fastapi import Request
@@ -77,12 +77,12 @@ class CacheManager(metaclass=Singleton):
         return wrapper
 
     @redis_connection_handler
-    def get_api_cache(self, cache_key: str) -> Optional[str]:
+    def get_api_cache(self, cache_key: str) -> str | None:
         """Get the API Cache value associated with a given cache key"""
         return self.redis_server.get(f"{API_CACHE_KEY_PREFIX}:{cache_key}")
 
     @redis_connection_handler
-    def get_parser_cache(self, cache_key: str) -> Optional[str]:
+    def get_parser_cache(self, cache_key: str) -> str | None:
         """Get the Parser Cache value associated with a given cache key"""
         return self.redis_server.hgetall(f"{PARSER_CACHE_KEY_PREFIX}:{cache_key}")
 

@@ -1,5 +1,3 @@
-# pylint: disable=C0301
-
 """Project constants module"""
 import os
 

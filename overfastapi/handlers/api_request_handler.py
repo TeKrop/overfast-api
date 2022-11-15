@@ -177,9 +177,7 @@ class APIRequestHandler(ApiRequestMixin, ABC):
         logger.info("Cache update done !")
 
     @staticmethod
-    def filter_request_using_query(
-        parsed_data: dict | list, **kwargs  # pylint: disable=W0613
-    ) -> dict | list:
+    def filter_request_using_query(parsed_data: dict | list, **kwargs) -> dict | list:
         """If the route contains subroutes accessible using GET queries, this method
         will filter Blizzard data using the query data. This method should be
         redefined in child classes if needed. The default behaviour is to return
@@ -192,7 +190,7 @@ class APIRequestHandler(ApiRequestMixin, ABC):
         """Property containing Root URL for requesting data to Blizzard"""
         return f"{BLIZZARD_HOST}{self.root_path}"
 
-    def get_blizzard_url(self, **kwargs) -> str:  # pylint: disable=W0613
+    def get_blizzard_url(self, **kwargs) -> str:
         """URL used when requesting data to Blizzard. It usually is a concatenation
         of root url and query data (kwargs) if the RequestHandler supports it.
         For example : single hero page (hero key), player career page (platform and
@@ -200,7 +198,7 @@ class APIRequestHandler(ApiRequestMixin, ABC):
         """
         return self.blizzard_root_url
 
-    def get_api_request_url(self, **kwargs) -> str:  # pylint: disable=W0613
+    def get_api_request_url(self, **kwargs) -> str:
         """OverFast API Request URL for this Request Handler. It usually
         is a concatenation of API root url and query data (kwargs) if the
         RequestHandler supports it.
