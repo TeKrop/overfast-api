@@ -1,4 +1,3 @@
-# pylint: disable=C0114,C0116
 import json
 from unittest.mock import Mock, patch
 
@@ -188,7 +187,7 @@ def test_search_players_ordering_desc(search_players_api_json_data: dict):
 
 def test_search_players_internal_error():
     with patch(
-        "overfastapi.handlers.search_players_request_handler.SearchPlayersRequestHandler.process_request",  # pylint: disable=C0301
+        "overfastapi.handlers.search_players_request_handler.SearchPlayersRequestHandler.process_request",
         return_value={"invalid_key": "invalid_value"},
     ):
         response = client.get("/players?name=Test")

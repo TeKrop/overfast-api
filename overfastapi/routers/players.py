@@ -1,7 +1,4 @@
-# pylint: disable=R0913,C0116
 """Players endpoints router : players search, players career, statistics, etc."""
-from typing import Optional
-
 from fastapi import APIRouter, BackgroundTasks, Depends, Path, Query, Request, status
 
 from overfastapi.common.decorators import validation_error_handler
@@ -73,19 +70,20 @@ async def search_players(
         title="Player nickname to search",
         example="TeKrop",
     ),
-    platform: Optional[PlayerPlatform] = Query(
-        None, title="Platform on which the player is", example="pc"
-    ),
-    privacy: Optional[PlayerPrivacy] = Query(
+    platform: PlayerPlatform
+    | None = Query(None, title="Platform on which the player is", example="pc"),
+    privacy: PlayerPrivacy
+    | None = Query(
         None, title="Privacy settings of the player career", example="public"
     ),
-    order_by: Optional[str] = Query(
+    order_by: str
+    | None = Query(
         "name:asc",
         title="Ordering field and the way it's arranged (asc[ending]/desc[ending])",
         regex="^(player_id|name|platform|privacy):(asc|desc)$",
     ),
-    offset: Optional[int] = Query(0, title="Offset of the results", ge=0),
-    limit: Optional[int] = Query(20, title="Limit of results per page", gt=0),
+    offset: int | None = Query(0, title="Offset of the results", ge=0),
+    limit: int | None = Query(20, title="Limit of results per page", gt=0),
 ):
     return SearchPlayersRequestHandler(request).process_request(
         name=name,
@@ -163,7 +161,8 @@ async def get_player_stats(
         title="Gamemode",
         description="Filter on a specific gamemode.",
     ),
-    hero: Optional[HeroKey] = Query(
+    hero: HeroKey
+    | None = Query(
         None,
         title="Hero key",
         description="Filter on a specific hero in order to only get his statistics.",
@@ -192,7 +191,8 @@ async def get_player_achievements(
     background_tasks: BackgroundTasks,
     request: Request,
     commons: dict = Depends(get_player_common_parameters),
-    category: Optional[PlayerAchievementCategory] = Query(
+    category: PlayerAchievementCategory
+    | None = Query(
         None,
         title="Achievements category",
         description="Filter on specific achievements category",

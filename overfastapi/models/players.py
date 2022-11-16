@@ -1,13 +1,13 @@
-# pylint: disable=C0301,C0115
 """Set of pydantic models used for Players API routes"""
-
 from pydantic import AnyHttpUrl, BaseModel, Field, HttpUrl, StrictFloat, StrictInt
 
 from overfastapi.common.enums import (
     CareerStatCategory,
+    CompetitiveDivision,
     HeroKey,
     PlayerPlatform,
     PlayerPrivacy,
+    Role,
 )
 
 
@@ -84,14 +84,14 @@ class PlayerCompetitiveRank(BaseModel):
 
 
 class PlayerCompetitiveRanksContainer(BaseModel):
-    tank: Optional[PlayerCompetitiveRank] = Field(None, description="Tank role details")
-    damage: Optional[PlayerCompetitiveRank] = Field(
+    tank: PlayerCompetitiveRank | None = Field(None, description="Tank role details")
+    damage: PlayerCompetitiveRank | None = Field(
         None, description="Damage role details"
     )
-    support: Optional[PlayerCompetitiveRank] = Field(
+    support: PlayerCompetitiveRank | None = Field(
         None, description="Support role details"
     )
-    open_queue: Optional[PlayerCompetitiveRank] = Field(
+    open_queue: PlayerCompetitiveRank | None = Field(
         None, description="Open queue rank details"
     )
 
@@ -113,7 +113,7 @@ class PlayerEndorsement(BaseModel):
 
 class HeroStat(BaseModel):
     hero: HeroKey = Field(...)
-    value: Union[StrictInt, StrictFloat] = Field(
+    value: StrictInt | StrictFloat = Field(
         ...,
         description=(
             "Value of the statistic for the given hero. "
@@ -147,7 +147,7 @@ class OverwatchOneLevel(BaseModel):
         description="URL of the border image of the player (without stars)",
         example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/ac14208753baf77110880020450fa4aa0121df0c344c32a2d20f77c18ba75db5.png",
     )
-    rank: Optional[HttpUrl] = Field(
+    rank: HttpUrl | None = Field(
         None,
         description="If any, URL of the border stars image of the player",
         example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/8de2fe5d938256a5725abe4b3655ee5e9067b7a1f4d5ff637d974eb9c2e4a1ea.png",
@@ -167,11 +167,11 @@ class PlayerSummary(BaseModel):
         example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/daeddd96e58a2150afa6ffc3c5503ae7f96afc2e22899210d444f45dee508c6c.png",
     )
     title: str = Field(None, description="Title of the player if any")
-    competitive: Optional[PlayerCompetitiveRanksContainer] = Field(
+    competitive: PlayerCompetitiveRanksContainer | None = Field(
         None, description="Competitive ranking in different roles"
     )
     endorsement: PlayerEndorsement = Field(...)
-    games_won: Optional[int] = Field(
+    games_won: int | None = Field(
         None,
         title="Games Won",
         description="Number of games won by the player",
@@ -228,14 +228,14 @@ class HeroesComparisons(BaseModel):
         None, description="Total number of objective kills for each hero (integer)"
     )
 
-    # class Config:  # pylint: disable=R0903
+    # class Config:
     #     schema_extra = {"example": HeroesComparisonsExample}
 
 
 class SingleCareerStat(BaseModel):
     key: str = Field(..., description="Statistic key")
     label: str = Field(..., description="Statistic label")
-    value: Union[StrictInt, StrictFloat] = Field(..., description="Statistic value")
+    value: StrictInt | StrictFloat = Field(..., description="Statistic value")
 
 
 class HeroCareerStats(BaseModel):
@@ -247,128 +247,128 @@ class HeroCareerStats(BaseModel):
 
 
 class CareerStats(BaseModel):
-    all_heroes: Optional[list[HeroCareerStats]] = Field(
+    all_heroes: list[HeroCareerStats] | None = Field(
         None,
         description="Total of statistics for all heroes",
         alias="all-heroes",
         min_items=1,
     )
-    ana: Optional[list[HeroCareerStats]] = Field(
+    ana: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Ana", min_items=1
     )
-    ashe: Optional[list[HeroCareerStats]] = Field(
+    ashe: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Ashe", min_items=1
     )
-    baptiste: Optional[list[HeroCareerStats]] = Field(
+    baptiste: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Baptiste", min_items=1
     )
-    bastion: Optional[list[HeroCareerStats]] = Field(
+    bastion: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Bastion", min_items=1
     )
-    brigitte: Optional[list[HeroCareerStats]] = Field(
+    brigitte: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Brigitte", min_items=1
     )
-    cassidy: Optional[list[HeroCareerStats]] = Field(
+    cassidy: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Cassidy", min_items=1
     )
-    dva: Optional[list[HeroCareerStats]] = Field(
+    dva: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for D.Va", min_items=1
     )
-    doomfist: Optional[list[HeroCareerStats]] = Field(
+    doomfist: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Doomfist", min_items=1
     )
-    echo: Optional[list[HeroCareerStats]] = Field(
+    echo: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Echo", min_items=1
     )
-    genji: Optional[list[HeroCareerStats]] = Field(
+    genji: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Genji", min_items=1
     )
-    hanzo: Optional[list[HeroCareerStats]] = Field(
+    hanzo: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Hanzo", min_items=1
     )
-    junker_queen: Optional[list[HeroCareerStats]] = Field(
+    junker_queen: list[HeroCareerStats] | None = Field(
         None,
         description="Career statistics for Junker Queen",
         alias="junker-queen",
         min_items=1,
     )
-    junkrat: Optional[list[HeroCareerStats]] = Field(
+    junkrat: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Junkrat", min_items=1
     )
-    kiriko: Optional[list[HeroCareerStats]] = Field(
+    kiriko: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Kiriko", min_items=1
     )
-    lucio: Optional[list[HeroCareerStats]] = Field(
+    lucio: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Lúcio", min_items=1
     )
-    mei: Optional[list[HeroCareerStats]] = Field(
+    mei: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Mei", min_items=1
     )
-    mercy: Optional[list[HeroCareerStats]] = Field(
+    mercy: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Mercy", min_items=1
     )
-    moira: Optional[list[HeroCareerStats]] = Field(
+    moira: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Moira", min_items=1
     )
-    orisa: Optional[list[HeroCareerStats]] = Field(
+    orisa: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Orisa", min_items=1
     )
-    pharah: Optional[list[HeroCareerStats]] = Field(
+    pharah: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Pharah", min_items=1
     )
-    reaper: Optional[list[HeroCareerStats]] = Field(
+    reaper: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Reaper", min_items=1
     )
-    reinhardt: Optional[list[HeroCareerStats]] = Field(
+    reinhardt: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Reinhardt", min_items=1
     )
-    roadhog: Optional[list[HeroCareerStats]] = Field(
+    roadhog: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Roadhog", min_items=1
     )
-    sigma: Optional[list[HeroCareerStats]] = Field(
+    sigma: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Sigma", min_items=1
     )
-    soldier_76: Optional[list[HeroCareerStats]] = Field(
+    soldier_76: list[HeroCareerStats] | None = Field(
         None,
         description="Career statistics for Soldier: 76",
         alias="soldier-76",
         min_items=1,
     )
-    sojourn: Optional[list[HeroCareerStats]] = Field(
+    sojourn: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Sojourn", min_items=1
     )
-    sombra: Optional[list[HeroCareerStats]] = Field(
+    sombra: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Sombra", min_items=1
     )
-    symmetra: Optional[list[HeroCareerStats]] = Field(
+    symmetra: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Symmetra", min_items=1
     )
-    torbjorn: Optional[list[HeroCareerStats]] = Field(
+    torbjorn: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Torbjörn", min_items=1
     )
-    tracer: Optional[list[HeroCareerStats]] = Field(
+    tracer: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Tracer", min_items=1
     )
-    widowmaker: Optional[list[HeroCareerStats]] = Field(
+    widowmaker: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Widowmaker", min_items=1
     )
-    winston: Optional[list[HeroCareerStats]] = Field(
+    winston: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Winston", min_items=1
     )
-    wrecking_ball: Optional[list[HeroCareerStats]] = Field(
+    wrecking_ball: list[HeroCareerStats] | None = Field(
         None,
         description="Career statistics for Wrecking Ball",
         alias="wrecking-ball",
         min_items=1,
     )
-    zarya: Optional[list[HeroCareerStats]] = Field(
+    zarya: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Zarya", min_items=1
     )
-    zenyatta: Optional[list[HeroCareerStats]] = Field(
+    zenyatta: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Zenyatta", min_items=1
     )
 
-    # class Config:  # pylint: disable=R0903
+    # class Config:
     #     schema_extra = {"example": CareerStatsExample}
 
 
@@ -407,26 +407,26 @@ class PlayerAchievement(BaseModel):
 
 
 class PlayerAchievementsContainer(BaseModel):
-    general: Optional[list[PlayerAchievement]] = Field(
+    general: list[PlayerAchievement] | None = Field(
         None, description="General achievements (player level, generic skills, etc.)"
     )
-    damage: Optional[list[PlayerAchievement]] = Field(
+    damage: list[PlayerAchievement] | None = Field(
         None, description="Achievements concerning damage heroes"
     )
-    tank: Optional[list[PlayerAchievement]] = Field(
+    tank: list[PlayerAchievement] | None = Field(
         None, description="Achievements concerning tank heroes"
     )
-    support: Optional[list[PlayerAchievement]] = Field(
+    support: list[PlayerAchievement] | None = Field(
         None, description="Achievements concerning support heroes"
     )
-    maps: Optional[list[PlayerAchievement]] = Field(
+    maps: list[PlayerAchievement] | None = Field(
         None, description="Achievements concerning Overwatch maps"
     )
-    events: Optional[list[PlayerAchievement]] = Field(
+    events: list[PlayerAchievement] | None = Field(
         None, description="Achievements concerning Overwatch events"
     )
 
-    # class Config:  # pylint: disable=R0903
+    # class Config:
     #     schema_extra = {"example": PlayerAchievementsContainerExample}
 
 
@@ -434,21 +434,21 @@ class Player(BaseModel):
     summary: PlayerSummary = Field(
         ..., description="Player summary (level, avatar, etc.)"
     )
-    quickplay: Optional[PlayerStats] = Field(
+    quickplay: PlayerStats | None = Field(
         None,
         description=(
             "Quickplay statistics about heroes. "
             "If the player career is private, it's null."
         ),
     )
-    competitive: Optional[PlayerStats] = Field(
+    competitive: PlayerStats | None = Field(
         None,
         description=(
             "Competitive statistics about heroes. "
             "If the player career is private, it's null."
         ),
     )
-    achievements: Optional[PlayerAchievementsContainer] = Field(
+    achievements: PlayerAchievementsContainer | None = Field(
         None,
         description=(
             "Achievements unlocked by the player. "

@@ -1,4 +1,3 @@
-# pylint: disable=C0114,C0116
 from unittest.mock import Mock, patch
 
 import pytest
@@ -84,7 +83,7 @@ def test_get_player_stats_blizzard_error():
 
 def test_get_player_stats_internal_error():
     with patch(
-        "overfastapi.handlers.get_player_career_request_handler.GetPlayerCareerRequestHandler.process_request",  # pylint: disable=C0301
+        "overfastapi.handlers.get_player_career_request_handler.GetPlayerCareerRequestHandler.process_request",
         return_value={
             "ana": [{"category": "invalid_value", "stats": [{"key": "test"}]}]
         },

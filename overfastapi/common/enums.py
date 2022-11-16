@@ -5,6 +5,19 @@ heroes, gamemodes, etc.
 from enum import StrEnum
 
 
+class CareerStatCategory(StrEnum):
+    """Categories of general statistics displayed in the players API"""
+
+    ASSISTS = "assists"
+    AVERAGE = "average"
+    BEST = "best"
+    COMBAT = "combat"
+    GAME = "game"
+    HERO_SPECIFIC = "hero_specific"
+    MATCH_AWARDS = "match_awards"
+    MISCELLANEOUS = "miscellaneous"
+
+
 class RouteTag(StrEnum):
     """Tags used to classify API routes"""
 

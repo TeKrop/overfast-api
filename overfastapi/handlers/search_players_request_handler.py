@@ -88,13 +88,16 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
         """Apply query params filters on a list of players (platform, career
         privacy), and return the results accordingly as an iterable.
         """
-        filter_platform = lambda p: not kwargs.get("platform") or p[
-            "platform"
-        ] == kwargs.get("platform")
 
-        filter_privacy = lambda p: not kwargs.get("privacy") or p["isPublic"] == (
-            kwargs.get("privacy") == "public"
-        )
+        def filter_platform(player: dict) -> bool:
+            return not kwargs.get("platform") or player["platform"] == kwargs.get(
+                "platform"
+            )
+
+        def filter_privacy(player: dict) -> bool:
+            return not kwargs.get("privacy") or player["isPublic"] == (
+                kwargs.get("privacy") == "public"
+            )
 
         filters = (filter_platform, filter_privacy)
         return filter(lambda x: all(f(x) for f in filters), players)

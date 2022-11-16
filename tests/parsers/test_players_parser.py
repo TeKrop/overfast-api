@@ -1,4 +1,3 @@
-# pylint: disable=C0114,C0116
 import re
 from unittest.mock import Mock, patch
 
