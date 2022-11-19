@@ -32,7 +32,7 @@ def get_soon_expired_cache_keys() -> set[str]:
 
 def get_request_handler_class_and_kwargs(cache_key: str) -> tuple[type, dict]:
     """Get the request handler class and cache kwargs (to give to the
-    update_all_cache() method) associated with a given cache key
+    update_all_api_cache() method) associated with a given cache key
     """
     cache_request_handler_class = None
     cache_kwargs = {}
@@ -59,7 +59,7 @@ def main():
     for key in soon_expired_cache_keys:
         logger.info("Updating all cache for {} key...", key)
         request_handler_class, kwargs = get_request_handler_class_and_kwargs(key)
-        request_handler_class().update_all_cache(parser=None, **kwargs)
+        request_handler_class().update_all_api_cache(parsers=[], **kwargs)
 
     logger.info("Redis cache update finished !")
 

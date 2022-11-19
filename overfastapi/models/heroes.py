@@ -39,6 +39,11 @@ class Hero(BaseModel):
             "deadeye precision and dives out of danger with eagle-like speed."
         ),
     )
+    portrait: HttpUrl = Field(
+        ...,
+        description="Portrait picture URL of the hero",
+        example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/6cfb48b5597b657c2eafb1277dc5eef4a07eae90c265fcd37ed798189619f0a5.png",
+    )
     role: Role = Field(
         ...,
         description="Role of the hero",
@@ -80,7 +85,7 @@ class HeroShort(BaseModel):
     portrait: HttpUrl = Field(
         ...,
         description="Portrait picture URL of the hero",
-        example="https://d1u1mce87gyfbn.cloudfront.net/hero/ana/hero-select-portrait.png",
+        example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/3429c394716364bbef802180e9763d04812757c205e1b4568bc321772096ed86.png",
     )
     role: Role = Field(
         ...,

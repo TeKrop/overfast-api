@@ -3,12 +3,18 @@
 from bs4 import Tag
 
 from overfastapi.common.enums import MediaType
+from overfastapi.config import HEROES_PATH
 from overfastapi.parsers.api_parser import APIParser
 from overfastapi.parsers.helpers import get_full_url
 
 
 class HeroParser(APIParser):
     """Overwatch single hero page Parser class"""
+
+    root_path = HEROES_PATH
+
+    def get_blizzard_url(self, **kwargs) -> str:
+        return f"{self.blizzard_root_url}/{kwargs.get('hero_key')}"
 
     def parse_data(self) -> dict:
         overview_section = self.root_tag.find("blz-page-header", recursive=False)

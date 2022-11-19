@@ -11,49 +11,18 @@ client = TestClient(app)
 
 @pytest.mark.parametrize(
     "hero_name,hero_html_data,hero_json_data",
-    [
-        ("ana", "ana", "ana"),
-        ("ashe", "ashe", "ashe"),
-        ("baptiste", "baptiste", "baptiste"),
-        ("bastion", "bastion", "bastion"),
-        ("brigitte", "brigitte", "brigitte"),
-        ("cassidy", "cassidy", "cassidy"),
-        ("dva", "dva", "dva"),
-        ("doomfist", "doomfist", "doomfist"),
-        ("echo", "echo", "echo"),
-        ("genji", "genji", "genji"),
-        ("hanzo", "hanzo", "hanzo"),
-        ("junkrat", "junkrat", "junkrat"),
-        ("lucio", "lucio", "lucio"),
-        ("mei", "mei", "mei"),
-        ("mercy", "mercy", "mercy"),
-        ("moira", "moira", "moira"),
-        ("orisa", "orisa", "orisa"),
-        ("pharah", "pharah", "pharah"),
-        ("reaper", "reaper", "reaper"),
-        ("reinhardt", "reinhardt", "reinhardt"),
-        ("roadhog", "roadhog", "roadhog"),
-        ("sigma", "sigma", "sigma"),
-        ("soldier-76", "soldier-76", "soldier-76"),
-        ("sombra", "sombra", "sombra"),
-        ("symmetra", "symmetra", "symmetra"),
-        ("torbjorn", "torbjorn", "torbjorn"),
-        ("tracer", "tracer", "tracer"),
-        ("widowmaker", "widowmaker", "widowmaker"),
-        ("winston", "winston", "winston"),
-        ("wrecking-ball", "wrecking-ball", "wrecking-ball"),
-        ("zarya", "zarya", "zarya"),
-        ("zenyatta", "zenyatta", "zenyatta"),
-    ],
+    [(h.value, h.value, h.value) for h in HeroKey],
     indirect=["hero_html_data", "hero_json_data"],
 )
-def test_get_hero(hero_name: str, hero_html_data: str, hero_json_data: dict):
+def test_get_hero(
+    hero_name: str, hero_html_data: str, hero_json_data: dict, heroes_html_data: str
+):
     with patch(
         "requests.get",
-        return_value=Mock(
-            status_code=200,
-            text=hero_html_data,
-        ),
+        side_effect=[
+            Mock(status_code=200, text=hero_html_data),
+            Mock(status_code=200, text=heroes_html_data),
+        ],
     ):
         response = client.get(f"/heroes/{hero_name}")
     assert response.status_code == 200
