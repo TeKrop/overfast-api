@@ -100,7 +100,11 @@ def test_player_page_parsing(
     player_html_data: str,
     player_json_data: dict,
 ):
-    parser = PlayerParser(player_html_data, player_id=player_id)
+    with patch(
+        "requests.get",
+        return_value=Mock(status_code=200, text=player_html_data),
+    ):
+        parser = PlayerParser(player_id=player_id)
     assert parser.hash == player_hash
 
     with patch(
@@ -114,7 +118,11 @@ def test_player_page_parsing(
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
 def test_unknown_player_parser_init_error(player_html_data: str):
     with pytest.raises(ParserInitError):
-        PlayerParser(player_html_data, player_id="Unknown-1234")
+        with patch(
+            "requests.get",
+            return_value=Mock(status_code=200, text=player_html_data),
+        ):
+            PlayerParser(player_id="Unknown-1234")
 
 
 @patch(
@@ -128,6 +136,7 @@ def test_unknown_player_parser_init_error(player_html_data: str):
 )
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 def test_player_parser_parsing_error(player_html_data: str):
+    # TODO : refacto
     # AttributeError
     with pytest.raises(ParserParsingError) as error:
         player_attr_error = player_html_data.replace(

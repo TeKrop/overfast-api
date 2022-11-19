@@ -29,14 +29,8 @@ def test_get_player_stats(
     with patch(
         "requests.get",
         side_effect=[
-            Mock(
-                status_code=200,
-                text=player_html_data,
-            ),
-            Mock(
-                status_code=200,
-                json=lambda: [{"urlName": "TeKrop-2217"}],
-            ),
+            Mock(status_code=200, text=player_html_data),
+            Mock(status_code=200, json=lambda: [{"urlName": "TeKrop-2217"}]),
         ],
     ):
         query_params = "&".join(

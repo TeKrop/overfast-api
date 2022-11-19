@@ -41,14 +41,8 @@ def test_get_player_career(
     with patch(
         "requests.get",
         side_effect=[
-            Mock(
-                status_code=200,
-                text=player_html_data,
-            ),
-            Mock(
-                status_code=200,
-                json=lambda: [{"urlName": player_id}],
-            ),
+            Mock(status_code=200, text=player_html_data),
+            Mock(status_code=200, json=lambda: [{"urlName": player_id}]),
         ],
     ):
         response = client.get(f"/players/{platform}/{player_id}")

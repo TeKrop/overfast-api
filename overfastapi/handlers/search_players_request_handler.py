@@ -33,7 +33,7 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
     def process_request(self, **kwargs) -> dict:
         """Main method used to process the request from user and return final data.
 
-        The process uses API/Parser Cache if available and needed, the main steps are :
+        The process uses API Cache if available and needed, the main steps are :
         - Make a request to Blizzard URL (if not using Cache API)
         - Instanciate the dedicated parser class with Blizzard response
         - Parse the page completely, apply filters, transformation and ordering

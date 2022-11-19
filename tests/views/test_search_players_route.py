@@ -43,11 +43,7 @@ def test_search_players_missing_name():
 def test_search_players_no_result():
     with patch(
         "requests.get",
-        return_value=Mock(
-            status_code=200,
-            text="[]",
-            json=lambda: [],
-        ),
+        return_value=Mock(status_code=200, text="[]", json=lambda: []),
     ):
         response = client.get("/players?name=Player")
 

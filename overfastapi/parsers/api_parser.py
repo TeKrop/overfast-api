@@ -92,7 +92,7 @@ class APIParser(ABC):
         )
 
     @abstractmethod
-    def parse_data(self) -> dict | list:
+    def parse_data(self) -> dict | list[dict]:
         """Main submethod of the parser, mainly doing the parsing of input data and
         returning a dict, which will be cached and used by the API. Can
         raise an error if there is an issue when parsing the data.

@@ -30,14 +30,8 @@ def test_get_player_achievements(
     with patch(
         "requests.get",
         side_effect=[
-            Mock(
-                status_code=200,
-                text=player_html_data,
-            ),
-            Mock(
-                status_code=200,
-                json=lambda: [{"urlName": "TeKrop-2217"}],
-            ),
+            Mock(status_code=200, text=player_html_data),
+            Mock(status_code=200, json=lambda: [{"urlName": "TeKrop-2217"}]),
         ],
     ):
         response = client.get(
