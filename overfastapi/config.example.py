@@ -1,7 +1,12 @@
 """Project constants module"""
-import os
+from pathlib import Path
 
-OVERFAST_API_VERSION = "2.0.3"
+import tomllib
+
+with open(f"{Path.cwd()}/pyproject.toml", "rb") as project_file:
+    project_data = tomllib.load(project_file)
+
+OVERFAST_API_VERSION = project_data["tool"]["poetry"]["version"]
 
 OVERFAST_API_BASE_URL = "https://overfast-api.tekrop.fr"
 
@@ -76,7 +81,7 @@ DISCORD_WEBHOOK_URL = ""
 ############
 
 # Root path for test fixtures, used to update test data when Blizzard pages are updated
-TEST_FIXTURES_ROOT_PATH = f"{os.getcwd()}/tests/fixtures"
+TEST_FIXTURES_ROOT_PATH = f"{Path.cwd()}/tests/fixtures"
 
 # Root path for Loguru access logs
-LOGS_ROOT_PATH = f"{os.getcwd()}/logs"
+LOGS_ROOT_PATH = f"{Path.cwd()}/logs"

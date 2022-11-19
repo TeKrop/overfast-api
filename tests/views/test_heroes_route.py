@@ -12,13 +12,10 @@ client = TestClient(app)
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_heroes_test(heroes_html_data):
+def setup_heroes_test(heroes_html_data: str):
     with patch(
         "requests.get",
-        return_value=Mock(
-            status_code=200,
-            text=heroes_html_data,
-        ),
+        return_value=Mock(status_code=200, text=heroes_html_data),
     ):
         yield
 

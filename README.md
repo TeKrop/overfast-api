@@ -43,7 +43,7 @@ If you want to use the API, and you have the possibility to host your own instan
 
 OverFast API introduces a very specific cache system, stored on a **Redis** server, and divided in two parts :
 * **API Cache** : a very high level cache, linking URIs (cache key) to raw JSON data. When first doing a request, if a cache is available, the JSON data is returned as-is by the **nginx** server. The cached values are stored with an arbitrary TTL (time to leave) parameter depending on the called route.
-* **Parser Cache** : a specific cache for the parser system of the OverFast API. When an HTML Blizzard page is parsed, we store the MD5 hash of the HTML content and the parsing result (as a JSON string), in order to minimize the heavy parsing process if the page hasn't changed since the last API call. There is no TTL on this cache.
+* **Parser Cache** : a specific cache for the parser system of the OverFast API. When an HTML Blizzard page is parsed, a hash of the HTML content and the parsing result (as a JSON string) are stored, in order to minimize the heavy parsing process if the page hasn't changed since the last API call. There is no TTL on this cache.
 
 Here is the list of all TTL values configured for API Cache :
 * Heroes list : 1 day
@@ -61,18 +61,68 @@ I know that this system is rudimentary, and could be memory consuming if a lot o
 You can run the project in several ways, though I would advise the first one for better user experience.
 
 ### Python (uvicorn) + Redis server (caching) + nginx
-![Python + Redis + Nginx](https://files.tekrop.fr/classic_schema_nginx_cache.png)
+```mermaid
+sequenceDiagram
+    participant User
+    User->>Nginx: Make an API request
+    Nginx->>Redis: Make an API Cache request
+    alt API Cache is available
+        Redis-->>Nginx: Return API Cache data
+        Nginx-->>User: Return API Cache data
+    else
+        Redis-->>Nginx: Return no result
+        Nginx->>Python: Transmit the request to Python server
+        Python->>Redis: Make Parser Cache request
+        alt Parser Cache is available
+            Redis-->>Python: Return Parser Cache
+            alt Parser Cache is outdated
+               Python->>Python: Parse HTML page
+            end
+        else
+            Redis-->>Python: Return no result
+            Python->>Python: Parse HTML page
+        end
+        Python-->>Nginx: Return API data
+        Nginx-->>User: Return API data
+    end
+```
 
-Using this way (via `docker-compose`), all the responses will be cached into Redis, and will be sent by nginx directly for the next times without requesting the Python server at all. It's the best performance compromise as nginx is the best for serving static content.
+Using this way (via `docker-compose`), all the responses will be cached into Redis, and will be sent by nginx directly for the next times without requesting the Python server at all. It's the best performance compromise as nginx is the best for serving static content. A single request can lead to several Parser Cache requests, depending on configured Blizzard pages.
 
 ### Python (uvicorn) + Redis server (caching)
-![Python + Redis](https://files.tekrop.fr/schema_without_nginx.png)
+```mermaid
+sequenceDiagram
+    participant User
+    User->>Python: Make an API request
+    Python->>Redis: Make an API Cache request
+    alt API Cache is available
+        Redis-->>Python: Return API Cache data
+        Python-->>User: Return API Cache data
+    else
+        Redis-->>Python: Return no result
+        Python->>Redis: Make Parser Cache request
+        alt Parser Cache is available
+            Redis-->>Python: Return Parser Cache
+            alt Parser Cache is outdated
+               Python->>Python: Parse HTML page
+            end
+        else
+            Redis-->>Python: Return no result
+            Python->>Python: Parse HTML page
+        end
+        Python-->>User: Return API data
+    end
+```
 
 Using this way (by manually doing it), all the responses will be cached into Redis, and the cache will be checked by the Python server (`USE_API_CACHE_IN_APP` setting in `config.py` must be set to `True`). It's an acceptable compromise.
 
 ### Python (uvicorn) only
-![Only Python](https://files.tekrop.fr/schema_only_python.png)
-
+```mermaid
+sequenceDiagram
+    participant User
+    User->>Python: Make an API request
+    Python-->>User: Return API data after parsing
+```
 Using this way (only using the image built with the `Dockerfile` alone), there will be no cache at all, and every call will make requests to Blizzard pages. I advise not to use this way unless for debugging eventually.
 
 ## 💽 Installation
@@ -116,7 +166,7 @@ The following commands are either used :
 - In an automated way, for checking if cache values need to be updated, or if a new hero has been published on Blizzard pages (the code needs to be updated if this is the case)
 - In a manual way, in order to update the test fixtures used in the test suite
 
-#### Check and update Redis cache which needs to be updated (API and Parser)
+#### Check and update Redis cache which needs to be updated
 ```
 python -m overfastapi.commands.check_and_update_cache
 ```

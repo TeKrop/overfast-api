@@ -13,12 +13,15 @@ api-cache:/heroes?role=damage => "[{...}]"
 ----
 
 Parser Cache data will never expire and just be invalidated using MD5 hash check.
-MD5 hash is calculated using ALL the HTML ready to be parsed (not filtered with querystring),
-and the data corresponds to filtered data, ready to be sent.
+It simply contains a JSON string representation of parsed data of a given Blizzard
+HTML page. MD5 hash is calculated using the HTML ready to be parsed
+(only the part used for parsing).
 
 Examples :
-parser-cache:/heroes => {"hash": "12345abcdef", "data": "[{...}]"}
-parser-cache:/heroes?role=damage => {"hash": "12345abcdef", "data": "[{...}]"}
+parser-cache:https://overwatch.blizzard.com/en-us/heroes
+=> {"hash": "12345abcdef", "data": "[{...}]"}
+parser-cache:https://overwatch.blizzard.com/en-us/heroes/ana
+=> {"hash": "12345abcdef", "data": "[{...}]"}
 """
 
 from typing import Callable, Iterator
@@ -86,7 +89,9 @@ class CacheManager(metaclass=Singleton):
         """Get the Parser Cache value associated with a given cache key"""
         return self.redis_server.hgetall(f"{PARSER_CACHE_KEY_PREFIX}:{cache_key}")
 
-    def get_unchanged_parser_cache(self, cache_key: str, parser_hash: str) -> bool:
+    def get_unchanged_parser_cache(
+        self, cache_key: str, parser_hash: str
+    ) -> str | None:
         """Get the Parser Cache HTML data if the cached hash matches the given
         parser hash (it means the data has not changed since the last parsing)
         """

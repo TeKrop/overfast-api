@@ -12,10 +12,7 @@ client = TestClient(app)
 def setup_roles_test(home_html_data: str):
     with patch(
         "requests.get",
-        return_value=Mock(
-            status_code=200,
-            text=home_html_data,
-        ),
+        return_value=Mock(status_code=200, text=home_html_data),
     ):
         yield
 

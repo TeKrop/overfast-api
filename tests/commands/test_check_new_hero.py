@@ -19,10 +19,7 @@ def test_check_no_new_hero(heroes_html_data: str):
     logger_info_mock = Mock()
     with patch(
         "requests.get",
-        return_value=Mock(
-            status_code=200,
-            text=heroes_html_data,
-        ),
+        return_value=Mock(status_code=200, text=heroes_html_data),
     ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
         check_new_hero_main()
 
@@ -64,10 +61,7 @@ def test_check_error_from_blizzard():
     logger_error_mock = Mock()
     with patch(
         "requests.get",
-        return_value=Mock(
-            status_code=500,
-            text="Internal Server Error",
-        ),
+        return_value=Mock(status_code=500, text="Internal Server Error"),
     ), patch(
         "overfastapi.common.logging.logger.error", logger_error_mock
     ), pytest.raises(

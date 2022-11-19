@@ -34,13 +34,13 @@ So far, here is the progress :
 
 ## Cache System
 
-![Python + Redis + Nginx](https://files.tekrop.fr/classic_schema_nginx_cache.png)
+![Python + Redis + Nginx](https://files.tekrop.fr/classic_schema_nginx_cache.svg)
 
 ### Functioning
 
 OverFast API introduces a very specific cache system, stored on a **Redis** server, and divided in two parts :
 * **API Cache** : a very high level cache, linking URIs (cache key) to raw JSON data. When first doing a request, if a cache is available, the JSON data is returned as-is by the **nginx** server. The cached values are stored with an arbitrary TTL (time to leave) parameter depending on the called route.
-* **Parser Cache** : a specific cache for the parser system of the OverFast API. When an HTML Blizzard page is parsed, we store the MD5 hash of the HTML content and the parsing result (as a JSON string), in order to minimize the heavy parsing process if the page hasn't changed since the last API call. There is no TTL on this cache.
+* **Parser Cache** : a specific cache for the parser system of the OverFast API. When an HTML Blizzard page is parsed, a hash of the HTML content and the parsing result (as a JSON string) are stored, in order to minimize the heavy parsing process if the page hasn't changed since the last API call. There is no TTL on this cache.
 
 ### API Cache TTL values
 * Heroes list : 1 day

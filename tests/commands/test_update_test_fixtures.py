@@ -45,10 +45,7 @@ def test_update_with_different_options(parameters, expected_calls: list[str]):
     ), patch.object(
         Session,
         "get",
-        return_value=Mock(
-            status_code=200,
-            text="HTML_DATA",
-        ),
+        return_value=Mock(status_code=200, text="HTML_DATA"),
     ), patch(
         "overfastapi.common.logging.logger.info", logger_info_mock
     ), patch(
@@ -70,10 +67,7 @@ def test_update_with_blizzard_error():
     ), patch.object(
         Session,
         "get",
-        return_value=Mock(
-            status_code=500,
-            text="BLIZZARD_ERROR",
-        ),
+        return_value=Mock(status_code=500, text="BLIZZARD_ERROR"),
     ), patch(
         "overfastapi.common.logging.logger.info", Mock()
     ), patch(

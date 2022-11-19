@@ -2,28 +2,22 @@
 to the internal heroes list. If this is a case, a Discord notification is sent to the
 developer.
 """
+from fastapi import HTTPException
+
 from overfastapi.common.enums import HeroKey
-from overfastapi.common.helpers import overfast_request, send_discord_webhook_message
+from overfastapi.common.helpers import send_discord_webhook_message
 from overfastapi.common.logging import logger
 from overfastapi.config import DISCORD_WEBHOOK_ENABLED
-from overfastapi.handlers.list_heroes_request_handler import ListHeroesRequestHandler
 from overfastapi.parsers.heroes_parser import HeroesParser
 
 
 def get_distant_hero_keys() -> set[str]:
     """Get a set of Overwatch hero keys from the Blizzard heroes page"""
-
-    heroes_url = ListHeroesRequestHandler().get_blizzard_url()
-    req = overfast_request(heroes_url)
-    if req.status_code != 200:
-        logger.error(
-            "Received an error from Blizzard. HTTP {} : {}",
-            req.status_code,
-            req.text,
-        )
+    try:
+        heroes_parser = HeroesParser()
+    except HTTPException:
         raise SystemExit
 
-    heroes_parser = HeroesParser(req.text)
     heroes_parser.parse()
     return {hero["key"] for hero in heroes_parser.data}
 
