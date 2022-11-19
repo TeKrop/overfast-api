@@ -48,6 +48,11 @@ class APIParser(ABC):
         """Returns an MD5 hash of the input data, used for caching"""
         return md5(str(self.root_tag).encode("utf-8")).hexdigest()
 
+    @cached_property
+    def cache_key(self) -> str:
+        """Key used for caching using Parser Cache. Blizzard URL is the default"""
+        return self.blizzard_url
+
     @property
     def root_tag_params(self) -> dict:
         """Returns the BeautifulSoup params kwargs, used to find the root Tag
@@ -64,7 +69,7 @@ class APIParser(ABC):
         # Check the Parser cache with received page calculated hash
         logger.info("Checking Parser Cache...")
         parser_cache_data = self.cache_manager.get_unchanged_parser_cache(
-            self.blizzard_url, self.hash
+            self.cache_key, self.hash
         )
         if parser_cache_data:
 
@@ -83,7 +88,7 @@ class APIParser(ABC):
         # Update the Parser Cache
         dumped_parsed_data = json.dumps(self.data)
         self.cache_manager.update_parser_cache(
-            self.blizzard_url, {"hash": self.hash, "data": dumped_parsed_data}
+            self.cache_key, {"hash": self.hash, "data": dumped_parsed_data}
         )
 
     @abstractmethod

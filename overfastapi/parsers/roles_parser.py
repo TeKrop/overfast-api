@@ -1,4 +1,6 @@
 """Roles Parser module"""
+from functools import cached_property
+
 from overfastapi.config import HOME_PATH
 from overfastapi.parsers.api_parser import APIParser
 
@@ -7,6 +9,10 @@ class RolesParser(APIParser):
     """Overwatch map gamemodes list page Parser class"""
 
     root_path = HOME_PATH
+
+    @cached_property
+    def cache_key(self) -> str:
+        return f"roles-{self.blizzard_url}"
 
     def parse_data(self) -> list:
         roles_container = self.root_tag.find(

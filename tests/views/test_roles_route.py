@@ -23,6 +23,15 @@ def test_get_roles(roles_json_data: list):
     assert response.json() == roles_json_data
 
 
+def test_get_roles_after_get_gamemodes(roles_json_data: list):
+    # Used to check we don't have any conflict between parsers
+    # using the same Blizzard URL and associated Parser caches
+    client.get("/gamemodes")
+    response = client.get("/heroes/roles")
+    assert response.status_code == 200
+    assert response.json() == roles_json_data
+
+
 def test_get_roles_blizzard_error():
     with patch(
         "requests.get",

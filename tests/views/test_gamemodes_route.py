@@ -23,6 +23,15 @@ def test_get_gamemodes(gamemodes_json_data: list):
     assert response.json() == gamemodes_json_data
 
 
+def test_get_gamemodes_after_get_roles(gamemodes_json_data: list):
+    # Used to check we don't have any conflict between parsers
+    # using the same Blizzard URL and associated Parser caches
+    client.get("/heroes/roles")
+    response = client.get("/gamemodes")
+    assert response.status_code == 200
+    assert response.json() == gamemodes_json_data
+
+
 def test_get_gamemodes_blizzard_error():
     with patch(
         "requests.get",
