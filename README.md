@@ -149,6 +149,7 @@ uvicorn overfastapi.main:app --reload
 
 Standalone (no cache system)
 ```
+cp overfastapi/config.example.py overfastapi/config.py
 docker build . -t tekrop/overfast-api:latest
 docker run -d -p 80:80 --name overfast-api tekrop/overfast-api
 ```
