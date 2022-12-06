@@ -29,6 +29,59 @@ class Media(BaseModel):
     )
 
 
+class StoryChapter(BaseModel):
+    title: str = Field(..., description="Title of the chapter", example="Blackwatch")
+    content: str = Field(
+        ...,
+        description="Content of the chapter",
+        example=(
+            "Cassidy had already made a name for himself as a member of the "
+            "notorious Deadlock Rebels Gang, when he and his associates were "
+            "busted in an Overwatch sting operation. With his expert marksmanship "
+            "and resourcefulness, he was given the choice between rotting in a "
+            "maximum-security lockup and joining Blackwatch, Overwatch's covert "
+            "ops division. He chose the latter. Although he was initially cynical, "
+            "he came to believe that he could make amends for his past sins by "
+            "righting the injustices of the world. Cassidy appreciated the "
+            "flexibility afforded to the clandestine Blackwatch, unhindered by "
+            "bureaucracy and red tape. But as Overwatch's influence waned, rogue "
+            "elements within Blackwatch sought to bring down the organization and "
+            "turn it to their own ends. After the destruction of Overwatch's Swiss "
+            "HQ, Cassidy wanted no part of the infighting. He set off alone and "
+            "went underground."
+        ),
+    )
+    picture: HttpUrl = Field(
+        ...,
+        description="URL of the picture illustrating the chapter",
+        example="https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt1683656b69bedff7/638808d0273de01068bb2806/cassidy-01.jpg",
+    )
+
+
+class Story(BaseModel):
+    summary: str = Field(
+        ...,
+        description="Brief summary of the origin story of the hero",
+        example=(
+            "A founding member of the notorious Deadlock Gang, Cassidy was "
+            "eventually coerced into joining Blackwatch, Overwatch’s covert-ops "
+            "division. He came to believe he could make amends for his past by "
+            "righting the world’s injustices. But when Overwatch fell, Cassidy "
+            "went underground, resurfacing later as a gunslinger for hire, "
+            "fighting only for causes he believes are just."
+        ),
+    )
+    media: Media | None = Field(
+        None,
+        description="Media concerning the hero (YouTube video, pdf story, etc.)",
+    )
+    chapters: list[StoryChapter] = Field(
+        ...,
+        title="Chapters of the story",
+        description="List of chapters concerning the story of the hero",
+    )
+
+
 class Hero(BaseModel):
     name: str = Field(..., description="Name of the hero", example="Cassidy")
     description: str = Field(
@@ -57,22 +110,7 @@ class Hero(BaseModel):
     abilities: list[Ability] = Field(
         ..., description="List of hero abilities", min_items=1
     )
-    story: str = Field(
-        ...,
-        description="Long description of the story of the hero",
-        example=(
-            "A founding member of the notorious Deadlock Gang, Cassidy was "
-            "eventually coerced into joining Blackwatch, Overwatch’s covert-ops "
-            "division. He came to believe he could make amends for his past by "
-            "righting the world’s injustices. But when Overwatch fell, Cassidy "
-            "went underground, resurfacing later as a gunslinger for hire, "
-            "fighting only for causes he believes are just."
-        ),
-    )
-    media: Media | None = Field(
-        None,
-        description="Media concerning the hero (YouTube video, pdf story, etc.)",
-    )
+    story: Story = Field(...)
 
 
 class HeroShort(BaseModel):

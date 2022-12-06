@@ -116,7 +116,7 @@ def test_check_and_update_from_parser(
     cache_manager.update_api_cache("/heroes/ana", "{}", EXPIRED_CACHE_REFRESH_LIMIT - 5)
 
     blizzard_ana_url = f"{BLIZZARD_HOST}{HEROES_PATH}/ana"
-    blizzard_page_hash = "efb81d6e2b0b9f1eb7e8667446fc44b1"
+    blizzard_page_hash = "8b466193105afbdb774a210e042938fe"
 
     cache_manager.update_parser_cache(
         blizzard_ana_url,
@@ -126,12 +126,13 @@ def test_check_and_update_from_parser(
         },
     )
 
-    # Check data in db (assert no Parser Cache data)
+    # Check data in db
     assert cache_manager.get_api_cache("/heroes/ana")
     assert cache_manager.get_parser_cache(blizzard_ana_url)
     assert cache_manager.get_unchanged_parser_cache(
         blizzard_ana_url, blizzard_page_hash
     )
+
     assert get_soon_expired_cache_keys() == {"/heroes/ana"}
 
     # check and update (only maps should be updated)
