@@ -17,8 +17,8 @@ I'm currently rewriting the API for new Overwatch 2 pages. So far, here is the p
 - Hero specific data : ✅
 - Roles list : ✅
 - Gamemodes list : ✅
-- Players career : 😴 (waiting for Blizzard to put them back)
-- Players search : 😴 (waiting for Blizzard to put the page back)
+- Players career : 👷 (working on it, Blizzard pages are back since season 2 update)
+- Players search : 👷 (working on it, Blizzard pages are back since season 2 update)
 
 ## Table of contents
 * [✨ Demo](#-demo)
