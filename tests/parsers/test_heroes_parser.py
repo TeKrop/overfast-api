@@ -9,7 +9,7 @@ def test_heroes_page_parsing(heroes_html_data: str, heroes_json_data: list):
         return_value=Mock(status_code=200, text=heroes_html_data),
     ):
         parser = HeroesParser()
-    assert parser.hash == "ef946f23ec35caadf53cefc0ea812f25"
+    assert parser.hash == "fbb263bf3226f784c841d3d5964474cc"
 
     parser.parse()
     assert parser.data == heroes_json_data
