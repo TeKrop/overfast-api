@@ -66,16 +66,16 @@ SEARCH_ACCOUNT_PATH_CACHE_TIMEOUT = 3600
 BLIZZARD_HOST = "https://overwatch.blizzard.com"
 
 # Blizzard home page with some details
-HOME_PATH = "/en-us"
+HOME_PATH = "/"
 
 # Route for Overwatch heroes pages
-HEROES_PATH = "/en-us/heroes"
+HEROES_PATH = "/heroes"
 
 # Route for players career pages
-CAREER_PATH = "/en-us/career"
+CAREER_PATH = "/career"
 
 # Route for searching Overwatch accounts by name
-SEARCH_ACCOUNT_PATH = "/en-us/search/account-by-name"
+SEARCH_ACCOUNT_PATH = "/search/account-by-name"
 
 ############
 # CRITICAL ERROR DISCORD WEBHOOK

@@ -3,7 +3,7 @@
 from fastapi import APIRouter, BackgroundTasks, Path, Query, Request
 
 from overfastapi.common.decorators import validation_error_handler
-from overfastapi.common.enums import HeroKey, Role, RouteTag
+from overfastapi.common.enums import HeroKey, Locale, Role, RouteTag
 from overfastapi.common.helpers import routes_responses
 from overfastapi.handlers.get_hero_request_handler import GetHeroRequestHandler
 from overfastapi.handlers.list_heroes_request_handler import ListHeroesRequestHandler
@@ -27,9 +27,10 @@ async def list_heroes(
     background_tasks: BackgroundTasks,
     request: Request,
     role: Role | None = Query(None, title="Role filter"),
+    locale: Locale = Query(Locale.ENGLISH_US, title="Locale to be displayed"),
 ) -> list[HeroShort]:
     return ListHeroesRequestHandler(request).process_request(
-        background_tasks=background_tasks, role=role
+        background_tasks=background_tasks, role=role, locale=locale
     )
 
 
@@ -48,7 +49,8 @@ async def get_hero(
     background_tasks: BackgroundTasks,
     request: Request,
     hero_key: HeroKey = Path(title="Key name of the hero"),
+    locale: Locale = Query(Locale.ENGLISH_US, title="Locale to be displayed"),
 ) -> Hero:
     return GetHeroRequestHandler(request).process_request(
-        background_tasks=background_tasks, hero_key=hero_key
+        background_tasks=background_tasks, hero_key=hero_key, locale=locale
     )

@@ -4,6 +4,7 @@ from typing import Iterable
 from fastapi import Request
 
 from overfastapi.common.cache_manager import CacheManager
+from overfastapi.common.enums import Locale
 from overfastapi.common.helpers import (
     blizzard_response_error_from_request,
     overfast_request,
@@ -128,4 +129,5 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
     @staticmethod
     def get_blizzard_url(**kwargs) -> str:
         """URL used when requesting data to Blizzard."""
-        return f"{BLIZZARD_HOST}{SEARCH_ACCOUNT_PATH}/{kwargs.get('name')}"
+        locale = Locale.ENGLISH_US
+        return f"{BLIZZARD_HOST}/{locale}{SEARCH_ACCOUNT_PATH}/{kwargs.get('name')}"

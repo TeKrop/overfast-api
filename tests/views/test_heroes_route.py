@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from overfastapi.common.cache_manager import CacheManager
-from overfastapi.common.enums import Role
+from overfastapi.common.enums import Locale, Role
 from overfastapi.config import BLIZZARD_HOST, HEROES_PATH
 from overfastapi.main import app
 
@@ -46,7 +46,9 @@ def test_get_heroes_from_api_cache(heroes_json_data: list):
 def test_get_heroes_from_parser_cache(heroes_json_data: list):
     cache_manager = CacheManager()
     cache_manager.update_parser_cache(
-        f"HeroesParser-{BLIZZARD_HOST}{HEROES_PATH}", heroes_json_data, 100
+        f"HeroesParser-{BLIZZARD_HOST}/{Locale.ENGLISH_US}{HEROES_PATH}",
+        heroes_json_data,
+        100,
     )
 
     response = client.get("/heroes")

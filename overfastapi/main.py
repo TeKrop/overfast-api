@@ -24,7 +24,6 @@ data to users. All duration values are also returned in seconds for convenience.
 
 ## 👷 W.I.P. 👷
 
-- Translations for specific heroes pages (will be available using a query parameter)
 - Additional data about gamemodes and maps
 """
 

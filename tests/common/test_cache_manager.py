@@ -6,6 +6,7 @@ from fastapi import Request
 from redis.exceptions import RedisError
 
 from overfastapi.common.cache_manager import CacheManager
+from overfastapi.common.enums import Locale
 from overfastapi.config import (
     BLIZZARD_HOST,
     EXPIRED_CACHE_REFRESH_LIMIT,
@@ -18,6 +19,11 @@ from overfastapi.config import (
 @pytest.fixture(scope="function")
 def cache_manager():
     return CacheManager()
+
+
+@pytest.fixture(scope="function")
+def locale():
+    return Locale.ENGLISH_US
 
 
 @pytest.mark.parametrize(
@@ -118,8 +124,8 @@ def test_update_and_get_parser_cache(
         (
             True,
             {
-                f"{PARSER_CACHE_KEY_PREFIX}:GamemodesParser-{BLIZZARD_HOST}{HOME_PATH}",
-                f"{PARSER_CACHE_KEY_PREFIX}:HeroesParser-{BLIZZARD_HOST}{HEROES_PATH}",
+                f"{PARSER_CACHE_KEY_PREFIX}:GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}",
+                f"{PARSER_CACHE_KEY_PREFIX}:HeroesParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}",
             },
         ),
         (False, set()),
@@ -133,17 +139,17 @@ def test_get_soon_expired_parser_cache_keys(
         is_redis_server_up,
     ):
         cache_manager.update_parser_cache(
-            f"HeroParser-{BLIZZARD_HOST}{HEROES_PATH}/ana",
+            f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
             {},
             EXPIRED_CACHE_REFRESH_LIMIT + 5,
         )
         cache_manager.update_parser_cache(
-            f"GamemodesParser-{BLIZZARD_HOST}{HOME_PATH}",
+            f"GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}",
             [],
             EXPIRED_CACHE_REFRESH_LIMIT - 5,
         )
         cache_manager.update_parser_cache(
-            f"HeroesParser-{BLIZZARD_HOST}{HEROES_PATH}",
+            f"HeroesParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}",
             [{"name": "Sojourn"}],
             EXPIRED_CACHE_REFRESH_LIMIT - 10,
         )
@@ -155,7 +161,7 @@ def test_redis_connection_error(cache_manager: CacheManager):
     redis_connection_error = RedisError(
         "Error 111 connecting to 127.0.0.1:6379. Connection refused."
     )
-    heroes_cache_key = f"HeroesParser-{BLIZZARD_HOST}{HEROES_PATH}"
+    heroes_cache_key = f"HeroesParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}"
     with patch(
         "overfastapi.common.cache_manager.redis.Redis.get",
         side_effect=redis_connection_error,
