@@ -7,6 +7,7 @@ import argparse
 import requests
 
 from overfastapi.common.enums import HeroKey
+from overfastapi.common.helpers import players_ids
 from overfastapi.common.logging import logger
 from overfastapi.config import (
     BLIZZARD_HOST,
@@ -77,27 +78,10 @@ def list_routes_to_update(args: argparse.Namespace) -> dict[str, str]:
 
     if args.players:
         logger.info("Adding player careers routes...")
-        players_list = (
-            {"platform": "pc", "id": "TeKrop-2217"},
-            {"platform": "pc", "id": "Player-162460"},
-            {"platform": "pc", "id": "test-1337"},
-            {"platform": "pc", "id": "Unknown-1234"},
-            {
-                "platform": "nintendo-switch",
-                "id": "test-325d682072d7a4c61c33b6bbaa83b859",
-            },
-            {
-                "platform": "nintendo-switch",
-                "id": "test-e66c388f13a7f408a6e1738f3d5161e2",
-            },
-            {"platform": "xbl", "id": "xJaymog"},
-            {"platform": "psn", "id": "Ka1zen_x"},
-            {"platform": "psn", "id": "mightyy_Brig"},
-        )
         route_file_mapping.update(
             **{
-                f"{CAREER_PATH}/{player['platform']}/{player['id']}": f"/players/{player['id']}.html"
-                for player in players_list
+                f"{CAREER_PATH}/{player_id}/": f"/players/{player_id}.html"
+                for player_id in players_ids
             }
         )
 
@@ -136,7 +120,7 @@ def main():
             logger.debug(
                 f"HTTP {response.status_code} / Time : {response.elapsed.total_seconds()}"
             )
-            if response.status_code == 200:
+            if response.status_code in (200, 404):
                 save_fixture_file(f"{test_data_path}{filepath}", response.text)
             else:
                 logger.error("Error while getting the page : {}", response.text)

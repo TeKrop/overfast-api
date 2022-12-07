@@ -5,7 +5,10 @@ from typing import Iterable
 from fastapi import Request
 
 from overfastapi.common.cache_manager import CacheManager
-from overfastapi.common.helpers import blizzard_response_error, overfast_request
+from overfastapi.common.helpers import (
+    blizzard_response_error_from_request,
+    overfast_request,
+)
 from overfastapi.common.logging import logger
 from overfastapi.common.mixins import ApiRequestMixin
 from overfastapi.config import (
@@ -18,7 +21,7 @@ from overfastapi.config import (
 
 class SearchPlayersRequestHandler(ApiRequestMixin):
     """Search Players Request Handler used in order to find an Overwatch player
-    using some filters : platform, career privacy, etc.
+    using some filters : career privacy, etc.
 
     The APIRequestHandler class is not used here, as this is a very specific request,
     depending on a Blizzard endpoint returning JSON Data, and without needing any parser.
@@ -47,9 +50,10 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
 
         # No API Cache or not using it in app, we request the data from Blizzard URL
         logger.info("No API Cache, requesting the data to Blizzard...")
+
         req = overfast_request(self.get_blizzard_url(**kwargs))
         if req.status_code != 200:
-            raise blizzard_response_error(req)
+            raise blizzard_response_error_from_request(req)
 
         players = req.json()
 
@@ -85,21 +89,16 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
 
     @staticmethod
     def apply_filters(players: list[dict], **kwargs) -> Iterable[dict]:
-        """Apply query params filters on a list of players (platform, career
-        privacy), and return the results accordingly as an iterable.
+        """Apply query params filters on a list of players (only career
+        privacy for now), and return the results accordingly as an iterable.
         """
-
-        def filter_platform(player: dict) -> bool:
-            return not kwargs.get("platform") or player["platform"] == kwargs.get(
-                "platform"
-            )
 
         def filter_privacy(player: dict) -> bool:
             return not kwargs.get("privacy") or player["isPublic"] == (
                 kwargs.get("privacy") == "public"
             )
 
-        filters = (filter_platform, filter_privacy)
+        filters = [filter_privacy]
         return filter(lambda x: all(f(x) for f in filters), players)
 
     @staticmethod
@@ -107,21 +106,18 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
         """Apply transformations to found players in order to return the data
         in the OverFast API format.
         """
-        return [
-            {
-                "player_id": player["urlName"],
-                "name": player["name"],
-                "platform": player["platform"],
-                "privacy": "public" if player["isPublic"] else "private",
-                "career_url": (
-                    f"{OVERFAST_API_BASE_URL}"
-                    "/players"
-                    f"/{player['platform']}"
-                    f"/{player['urlName']}"
-                ),
-            }
-            for player in players
-        ]
+        transformed_players = []
+        for player in players:
+            player_id = player["battleTag"].replace("#", "-")
+            transformed_players.append(
+                {
+                    "player_id": player_id,
+                    "name": player["battleTag"],
+                    "privacy": "public" if player["isPublic"] else "private",
+                    "career_url": f"{OVERFAST_API_BASE_URL}/players/{player_id}",
+                }
+            )
+        return transformed_players
 
     @staticmethod
     def apply_ordering(players: list[dict], order_by: str) -> list[dict]:
@@ -135,4 +131,4 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
     @staticmethod
     def get_blizzard_url(**kwargs) -> str:
         """URL used when requesting data to Blizzard."""
-        return f"{BLIZZARD_HOST}/{SEARCH_ACCOUNT_PATH}/{kwargs.get('name')}"
+        return f"{BLIZZARD_HOST}{SEARCH_ACCOUNT_PATH}/{kwargs.get('name')}"

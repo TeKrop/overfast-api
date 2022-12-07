@@ -3,8 +3,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Path, Query, Request, s
 
 from overfastapi.common.decorators import validation_error_handler
 from overfastapi.common.enums import (
-    HeroKey,
-    PlayerAchievementCategory,
+    HeroKeyCareerFilter,
     PlayerGamemode,
     PlayerPlatform,
     PlayerPrivacy,
@@ -21,7 +20,6 @@ from overfastapi.models.errors import ParserInitErrorMessage
 from overfastapi.models.players import (
     CareerStats,
     Player,
-    PlayerAchievementsContainer,
     PlayerSearchResult,
     PlayerSummary,
 )
@@ -37,20 +35,13 @@ career_routes_responses = {
 
 
 async def get_player_common_parameters(
-    platform: PlayerPlatform = Path(
-        title="Platform on which the player is", example="pc"
-    ),
     player_id: str = Path(
         title="Player unique name",
-        description=(
-            'Identifier of the player : BattleTag (with "#" replaced by "-") for '
-            "PC players, nickname for PSN/XBL players, nickname followed by "
-            "hexadecimal id for Nintendo Switch."
-        ),
+        description='Identifier of the player : BattleTag (with "#" replaced by "-")',
         example="TeKrop-2217",
     ),
 ):
-    return {"platform": platform, "player_id": player_id}
+    return {"player_id": player_id}
 
 
 router = APIRouter()
@@ -65,13 +56,12 @@ router = APIRouter()
 )
 @validation_error_handler(response_model=PlayerSearchResult)
 async def search_players(
+    background_tasks: BackgroundTasks,
     request: Request,
     name: str = Query(
         title="Player nickname to search",
         example="TeKrop",
     ),
-    platform: PlayerPlatform
-    | None = Query(None, title="Platform on which the player is", example="pc"),
     privacy: PlayerPrivacy
     | None = Query(
         None, title="Privacy settings of the player career", example="public"
@@ -80,7 +70,7 @@ async def search_players(
     | None = Query(
         "name:asc",
         title="Ordering field and the way it's arranged (asc[ending]/desc[ending])",
-        regex="^(player_id|name|platform|privacy):(asc|desc)$",
+        regex="^(player_id|name|privacy):(asc|desc)$",
     ),
     offset: int | None = Query(0, title="Offset of the results", ge=0),
     limit: int | None = Query(20, title="Limit of results per page", gt=0),
@@ -88,7 +78,6 @@ async def search_players(
     return SearchPlayersRequestHandler(request).process_request(
         name=name,
         privacy=privacy,
-        platform=platform,
         order_by=order_by,
         offset=offset,
         limit=limit,
@@ -96,12 +85,12 @@ async def search_players(
 
 
 @router.get(
-    "/{platform}/{player_id}",
+    "/{player_id}",
     response_model=Player,
     responses=career_routes_responses,
     tags=[RouteTag.PLAYERS],
     summary="Get player career data",
-    description="Get all player data : summary, statistics and achievements",
+    description="Get all player data : summary and statistics",
 )
 @validation_error_handler(response_model=Player)
 async def get_player_career(
@@ -111,17 +100,17 @@ async def get_player_career(
 ):
     return GetPlayerCareerRequestHandler(request).process_request(
         background_tasks=background_tasks,
-        platform=commons.get("platform"),
         player_id=commons.get("player_id"),
     )
 
 
 @router.get(
-    "/{platform}/{player_id}/summary",
+    "/{player_id}/summary",
     response_model=PlayerSummary,
     responses=career_routes_responses,
     tags=[RouteTag.PLAYERS],
     summary="Get player summary",
+    description="Get player summary : name, avatar, competitive ranks, etc.",
 )
 @validation_error_handler(response_model=PlayerSummary)
 async def get_player_summary(
@@ -132,23 +121,22 @@ async def get_player_summary(
     return GetPlayerCareerRequestHandler(request).process_request(
         summary=True,
         background_tasks=background_tasks,
-        platform=commons.get("platform"),
         player_id=commons.get("player_id"),
     )
 
 
 @router.get(
-    "/{platform}/{player_id}/stats",
+    "/{player_id}/stats",
     response_model=CareerStats,
     response_model_exclude_unset=True,
     responses=career_routes_responses,
     tags=[RouteTag.PLAYERS],
-    summary="Get player statistics about heroes",
+    summary="Get player statistics",
     description=(
-        "Career contains numerous statistics "
-        "grouped by heroes and categories (combat, game, best, hero specific, "
-        "average, etc.), while heroes comparisons contains generic details grouped "
-        "by main categories (time played, games won, objective kills, etc.)"
+        "Career contains numerous statistics grouped by heroes and categories "
+        "(combat, game, best, hero specific, average, etc.). Filter them on "
+        "specific platform and gamemode (mandatory). You can even retrieve "
+        "data about a specific hero of your choice."
     ),
 )
 @validation_error_handler(response_model=CareerStats)
@@ -160,48 +148,34 @@ async def get_player_stats(
         ...,
         title="Gamemode",
         description="Filter on a specific gamemode.",
+        example="competitive",
     ),
-    hero: HeroKey
+    platform: PlayerPlatform
+    | None = Query(
+        None,
+        title="Platform",
+        description=(
+            "Filter on a specific platform. If not specified, the only platform the "
+            "player played on will be selected. If the player has already played on "
+            "both PC and console, the PC stats will be displayed by default."
+        ),
+        example="pc",
+    ),
+    hero: HeroKeyCareerFilter
     | None = Query(
         None,
         title="Hero key",
-        description="Filter on a specific hero in order to only get his statistics.",
+        description=(
+            "Filter on a specific hero in order to only get his statistics. "
+            "You also can specify 'all-heroes' for general stats."
+        ),
     ),
 ):
     return GetPlayerCareerRequestHandler(request).process_request(
         stats=True,
         background_tasks=background_tasks,
-        platform=commons.get("platform"),
         player_id=commons.get("player_id"),
+        platform=platform,
         gamemode=gamemode,
         hero=hero,
-    )
-
-
-@router.get(
-    "/{platform}/{player_id}/achievements",
-    response_model=PlayerAchievementsContainer,
-    response_model_exclude_unset=True,
-    responses=career_routes_responses,
-    tags=[RouteTag.PLAYERS],
-    summary="Get player achievements",
-)
-@validation_error_handler(response_model=PlayerAchievementsContainer)
-async def get_player_achievements(
-    background_tasks: BackgroundTasks,
-    request: Request,
-    commons: dict = Depends(get_player_common_parameters),
-    category: PlayerAchievementCategory
-    | None = Query(
-        None,
-        title="Achievements category",
-        description="Filter on specific achievements category",
-    ),
-):
-    return GetPlayerCareerRequestHandler(request).process_request(
-        achievements=True,
-        background_tasks=background_tasks,
-        platform=commons.get("platform"),
-        player_id=commons.get("player_id"),
-        category=category,
     )

@@ -5,6 +5,7 @@ from requests import Session
 
 from overfastapi.commands.update_test_fixtures import main as update_test_fixtures_main
 from overfastapi.common.enums import HeroKey
+from overfastapi.common.helpers import players_ids
 from overfastapi.config import TEST_FIXTURES_ROOT_PATH
 
 
@@ -25,18 +26,8 @@ heroes_calls = [
     ],
 ]
 players_calls = [
-    f"Updating {TEST_FIXTURES_ROOT_PATH}/html/player/{player}.html..."
-    for player in (
-        "TeKrop-2217",
-        "Player-162460",
-        "test-1337",
-        "Unknown-1234",
-        "test-325d682072d7a4c61c33b6bbaa83b859",
-        "test-e66c388f13a7f408a6e1738f3d5161e2",
-        "xJaymog",
-        "Ka1zen_x",
-        "mightyy_Brig",
-    )
+    f"Updating {TEST_FIXTURES_ROOT_PATH}/html/players/{player}.html..."
+    for player in players_ids
 ]
 home_calls = [f"Updating {TEST_FIXTURES_ROOT_PATH}/html/home.html..."]
 
@@ -52,8 +43,7 @@ home_calls = [f"Updating {TEST_FIXTURES_ROOT_PATH}/html/home.html..."]
         (Mock(heroes=False, home=True, players=True), home_calls + players_calls),
         (
             Mock(heroes=True, home=True, players=True),
-            heroes_calls,
-            home_calls + players_calls,
+            heroes_calls + home_calls + players_calls,
         ),
     ],
 )

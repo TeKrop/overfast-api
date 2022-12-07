@@ -2,14 +2,14 @@ import json
 from unittest.mock import Mock, patch
 
 import pytest
+import requests
 from fastapi.testclient import TestClient
 
 from overfastapi.common.cache_manager import CacheManager
-from overfastapi.common.enums import PlayerPlatform, PlayerPrivacy
+from overfastapi.common.enums import PlayerPrivacy
 from overfastapi.main import app
 
 client = TestClient(app)
-platforms = {p.value for p in PlayerPlatform}
 privacies = {p.value for p in PlayerPrivacy}
 
 
@@ -27,7 +27,7 @@ def setup_search_players_test(search_players_blizzard_json_data: list[dict]):
 
 
 def test_search_players_missing_name():
-    response = client.get("/players?platform=pc")
+    response = client.get("/players?privacy=public")
     assert response.status_code == 422
     assert response.json() == {
         "detail": [
@@ -51,16 +51,42 @@ def test_search_players_no_result():
     assert response.json() == {"total": 0, "results": []}
 
 
-def test_search_players_blizzard_error():
+@pytest.mark.parametrize(
+    "status_code,text",
+    [
+        (503, "Service Unavailable"),
+        (500, '{"error":"searchByName error"}'),
+    ],
+)
+def test_search_players_blizzard_error(status_code: int, text: str):
     with patch(
         "requests.get",
-        return_value=Mock(status_code=503, text="Service Unavailable"),
+        return_value=Mock(status_code=status_code, text=text),
     ):
         response = client.get("/players?name=Player")
 
     assert response.status_code == 504
     assert response.json() == {
-        "error": "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable"
+        "error": f"Couldn't get Blizzard page (HTTP {status_code} error) : {text}"
+    }
+
+
+def test_search_players_blizzard_timeout():
+    with patch(
+        "requests.get",
+        side_effect=requests.exceptions.Timeout(
+            "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
+            "Read timed out. (read timeout=10)"
+        ),
+    ):
+        response = client.get("/players?name=Player")
+
+    assert response.status_code == 504
+    assert response.json() == {
+        "error": (
+            "Couldn't get Blizzard page (HTTP 0 error) : "
+            "Blizzard took more than 10 seconds to respond, resulting in a timeout"
+        )
     }
 
 
@@ -91,27 +117,23 @@ def test_search_players_with_cache(search_players_api_json_data: list):
 
 
 @pytest.mark.parametrize(
-    "platform",
-    [*[p.value for p in PlayerPlatform], "invalid_platform", 1234],
+    "offset,limit",
+    [
+        (0, 10),
+        (10, 20),
+        (0, 100),
+        (100, 20),
+    ],
 )
-def test_search_players_filter_by_platform(
-    platform: PlayerPlatform, search_players_api_json_data: dict
+def test_search_players_with_offset_and_limit(
+    search_players_api_json_data: dict, offset: int, limit: int
 ):
-    response = client.get(f"/players?name=Test&platform={platform}")
-
-    if platform in platforms:
-        filtered_players = [
-            player
-            for player in search_players_api_json_data["results"]
-            if player["platform"] == platform
-        ]
-        assert response.status_code == 200
-        assert response.json() == {
-            "total": len(filtered_players),
-            "results": filtered_players[0:20],
-        }
-    else:
-        assert response.status_code == 422
+    response = client.get(f"/players?name=Test&offset={offset}&limit={limit}")
+    assert response.status_code == 200
+    assert response.json() == {
+        "total": search_players_api_json_data["total"],
+        "results": search_players_api_json_data["results"][offset:limit],
+    }
 
 
 @pytest.mark.parametrize(
@@ -138,40 +160,13 @@ def test_search_players_filter_by_privacy(
         assert response.status_code == 422
 
 
-def test_search_players_filter_multiple(search_players_api_json_data: dict):
-    response = client.get("/players?name=Test&platform=pc&privacy=public")
+@pytest.mark.parametrize("order_by", ["name:asc", "name:desc"])
+def test_search_players_ordering(search_players_api_json_data: dict, order_by: str):
+    response = client.get(f"/players?name=Test&order_by={order_by}")
 
-    filtered_players = [
-        player
-        for player in search_players_api_json_data["results"]
-        if (player["platform"] == "pc" and player["privacy"] == "public")
-    ]
-    assert response.status_code == 200
-    assert response.json() == {
-        "total": len(filtered_players),
-        "results": filtered_players[0:20],
-    }
-
-
-def test_search_players_ordering_asc(search_players_api_json_data: dict):
-    response = client.get("/players?name=Test&order_by=name:asc")
-
+    order_field, order_arrangement = order_by.split(":")
     search_players_api_json_data["results"].sort(
-        key=lambda player: player["name"], reverse=False
-    )
-
-    assert response.status_code == 200
-    assert response.json() == {
-        "total": search_players_api_json_data["total"],
-        "results": search_players_api_json_data["results"][0:20],
-    }
-
-
-def test_search_players_ordering_desc(search_players_api_json_data: dict):
-    response = client.get("/players?name=Test&order_by=platform:desc")
-
-    search_players_api_json_data["results"].sort(
-        key=lambda player: player["platform"], reverse=True
+        key=lambda player: player[order_field], reverse=order_arrangement == "desc"
     )
 
     assert response.status_code == 200

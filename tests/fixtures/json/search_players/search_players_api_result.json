@@ -1,0 +1,83 @@
+{
+    "total": 13,
+    "results": [
+        {
+            "player_id": "DEKK-11775",
+            "name": "DEKK#11775",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/DEKK-11775"
+        },
+        {
+            "player_id": "Dekk-11904",
+            "name": "Dekk#11904",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/Dekk-11904"
+        },
+        {
+            "player_id": "Dekk-11906",
+            "name": "Dekk#11906",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/Dekk-11906"
+        },
+        {
+            "player_id": "Dekk-1380",
+            "name": "Dekk#1380",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/Dekk-1380"
+        },
+        {
+            "player_id": "Dekk-1637",
+            "name": "Dekk#1637",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/Dekk-1637"
+        },
+        {
+            "player_id": "Dekk-1766",
+            "name": "Dekk#1766",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/Dekk-1766"
+        },
+        {
+            "player_id": "Dekk-21129",
+            "name": "Dekk#21129",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/Dekk-21129"
+        },
+        {
+            "player_id": "Dekk-21260",
+            "name": "Dekk#21260",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/Dekk-21260"
+        },
+        {
+            "player_id": "Dekk-21386",
+            "name": "Dekk#21386",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/Dekk-21386"
+        },
+        {
+            "player_id": "Dekk-2162",
+            "name": "Dekk#2162",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/Dekk-2162"
+        },
+        {
+            "player_id": "Dekk-21771",
+            "name": "Dekk#21771",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/Dekk-21771"
+        },
+        {
+            "player_id": "Dekk-2677",
+            "name": "Dekk#2677",
+            "privacy": "public",
+            "career_url": "https://overfast-api.tekrop.fr/players/Dekk-2677"
+        },
+        {
+            "player_id": "dekk-2548",
+            "name": "dekk#2548",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/dekk-2548"
+        }
+    ]
+}

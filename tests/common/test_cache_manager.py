@@ -23,8 +23,8 @@ def cache_manager():
             "/heroes?role=damage",
         ),
         (
-            Mock(url=Mock(path="/players"), query_params="name=TeKrop&platform=pc"),
-            "/players?name=TeKrop&platform=pc",
+            Mock(url=Mock(path="/players"), query_params="name=TeKrop&privacy=public"),
+            "/players?name=TeKrop&privacy=public",
         ),
     ],
 )

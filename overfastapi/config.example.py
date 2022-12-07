@@ -20,7 +20,7 @@ OVERFAST_API_BASE_URL = "https://overfast-api.tekrop.fr"
 REDIS_CACHING_ENABLED = True
 
 # Redis server host
-REDIS_HOST = "127.0.0.1"
+REDIS_HOST = "redis"
 
 # Redis server port
 REDIS_PORT = 6379
@@ -42,7 +42,7 @@ PARSER_CACHE_KEY_PREFIX = "parser-cache"
 
 # When a cache value is about the expire (less than the configured value), we will
 # refresh it in the automatic cronjob "check_and_update_cache" (launched every minute)
-EXPIRED_CACHE_REFRESH_LIMIT = 300
+EXPIRED_CACHE_REFRESH_LIMIT = 3600
 
 # Once a day
 HEROES_PATH_CACHE_TIMEOUT = 86400
@@ -53,11 +53,11 @@ HERO_PATH_CACHE_TIMEOUT = 86400
 # Once a day
 HOME_PATH_CACHE_TIMEOUT = 86400
 
-# Once every 30 minutes
-CAREER_PATH_CACHE_TIMEOUT = 1800
+# Two hours (but we try to refresh after one hour)
+CAREER_PATH_CACHE_TIMEOUT = 7200
 
-# Once every hour
-SEARCH_ACCOUNT_PATH_CACHE_TIMEOUT = 3600
+# Two hours (but we try to refresh after one hour)
+SEARCH_ACCOUNT_PATH_CACHE_TIMEOUT = 7200
 
 ############
 # BLIZZARD

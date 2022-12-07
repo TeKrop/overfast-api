@@ -20,7 +20,17 @@ description = """OverFast API gives data about Overwatch 2 heroes, gamemodes, an
 statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses
 **nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it
 minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate
-data to users.
+data to users. All duration values are also returned in seconds for convenience.
+
+## ⚠️ Disclaimer concerning career pages ⚠️
+
+Players statistics are cached for performance purposes, as Blizzard pages take ~2-3 seconds to load. Since the pages are back, I noticed it's very unstable on their side, we often have a "504 Gateway Time-out" error, either on players search or career pages, sometimes a "404 Page Not Found" error even if the player exists and its profile is public.
+
+As a consequence, I configured my cache system in order to prevent (in most cases) any issue regarding pages load :
+- Career data is cached for ~2 hours
+- Instead of trying to update the cache 5 min before its expiration, it's trying to update it starting from one hour before its expiration (one try per minute).
+
+I'll try to adjust these values depending on Blizzard pages stability, but don't hesitate to contact me if you have a recurring issue concerning career endpoints loading time (only the first time should be long).
 
 ## Cache System
 
@@ -37,7 +47,7 @@ OverFast API introduces a very specific cache system, stored on a **Redis** serv
 * Hero specific data : 1 day
 * Roles list : 1 day
 * Gamemodes list : 1 day
-* Players career : 30 minutes
+* Players career : 1 hour
 * Players search : 1 hour
 
 ### Automatic cache refresh
@@ -86,7 +96,7 @@ def custom_openapi():  # pragma: no cover
             },
             {
                 "name": RouteTag.PLAYERS,
-                "description": "Overwatch players data : statistics, achievements, etc.",
+                "description": "Overwatch players data : summary, statistics, etc.",
                 "externalDocs": {
                     "description": "Blizzard profile pages, source of the information",
                     "url": "https://overwatch.blizzard.com/en-us/search/",

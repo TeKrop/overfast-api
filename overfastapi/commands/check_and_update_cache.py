@@ -31,6 +31,8 @@ def get_soon_expired_cache_keys() -> set[str]:
         # api-cache:/heroes?role=damage => /heroes?role=damage => /heroes
         key.split(":")[1].split("?")[0]
         for key in cache_manager.get_soon_expired_api_cache_keys()
+        # Avoid players subroutes
+        if key.split("/")[-1].split("?")[0] not in ("summary", "stats")
     }
 
 
@@ -43,9 +45,9 @@ def get_request_handler_class_and_kwargs(cache_key: str) -> tuple[type, dict]:
 
     uri = cache_key.split("/")
     if cache_key.startswith("/players"):
-        # /players/pc/Player-1234 => ["", "players", "pc" "Player-1234"]
+        # /players/Player-1234 => ["", "players", "Player-1234"]
         cache_request_handler_class = PREFIXES_HANDLERS_MAPPING["/players"]
-        cache_kwargs = {"platform": uri[2], "player_id": uri[3]}
+        cache_kwargs = {"player_id": uri[2]}
     elif cache_key.startswith("/heroes") and len(uri) > 2 and uri[2] != "roles":
         cache_request_handler_class = PREFIXES_HANDLERS_MAPPING[cache_key]
         cache_kwargs = {"hero_key": uri[2]}

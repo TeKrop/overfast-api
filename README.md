@@ -8,10 +8,20 @@
 [![License: MIT](https://img.shields.io/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)
 ![Mockup OverFast API](https://files.tekrop.fr/overfast_api_logo_full_1000.png)
 
-> OverFast API gives data about Overwatch 2 heroes, gamemodes, and players statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses **nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate data to users.
+> OverFast API gives data about Overwatch 2 heroes, gamemodes, and players statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses **nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate data to users. All duration values are also returned in seconds for convenience.
+
+## ⚠️ Disclaimer concerning career pages ⚠️
+
+Players statistics are cached for performance purposes, as Blizzard pages take ~2-3 seconds to load. Since the pages are back, I noticed it's very unstable on their side, we often have a "504 Gateway Time-out" error, either on players search or career pages, sometimes a "404 Page Not Found" error even if the player exists and its profile is public.
+
+As a consequence, I configured my cache system in order to prevent (in most cases) any issue regarding pages load :
+- Career data is cached for ~2 hours
+- Instead of trying to update the cache 5 min before its expiration, it's trying to update it starting from one hour before its expiration (one try per minute).
+
+I'll try to adjust these values depending on Blizzard pages stability, but don't hesitate to contact me if you have a recurring issue concerning career endpoints loading time (only the first time should be long).
 
 ## Table of contents
-* [✨ Demo](#-demo)
+* [✨ Live instance](#-live-instance)
 * [🛠️ Cache System](#%EF%B8%8F-cache-system)
 * [🐍 Architecture](#-architecture)
 * [💽 Installation](#-installation)
@@ -21,11 +31,11 @@
 * [📝 License](#-license)
 
 
-## ✨ [Demo](https://overfast-api.tekrop.fr)
+## ✨ [Live instance](https://overfast-api.tekrop.fr)
 
 You can see and use a live version of the API here, the root URL being the Redoc documentation : https://overfast-api.tekrop.fr/.
 
-If you want to use the API, and you have the possibility to host your own instance, please do it (at least for production environment), in order to not overload the live version i'm hosting.
+If you want to use the API, and you have the possibility to host your own instance, don't hesitate do it (at least for production environment), in order to not overload the live version i'm hosting.
 
 ## 🛠️ Cache System
 
@@ -40,7 +50,7 @@ Here is the list of all TTL values configured for API Cache :
 * Hero specific data : 1 day
 * Roles list : 1 day
 * Gamemodes list : 1 day
-* Players career : 30 minutes
+* Players career : 1 hour
 * Players search : 1 hour
 
 ### Automatic cache refresh
@@ -139,19 +149,45 @@ uvicorn overfastapi.main:app --reload
 
 ## 🐋 Docker
 
-Standalone (no cache system)
+### Standalone (no cache system)
 ```
 cp overfastapi/config.example.py overfastapi/config.py
 docker build . -t tekrop/overfast-api:latest
 docker run -d -p 80:80 --name overfast-api tekrop/overfast-api
 ```
 
-Definitive edition (with cache system)
+### Definitive edition (with cache system)
+First, you need to create a dotenv file (`.env`) from the `.env.example` file. You'll need to modify it following your needs in order to configure the volumes used by OverFast API, here are the configuration steps.
+
+- `APP_VOLUME_PATH` will be a folder containing shared data for the app :
+    - the app logs folders
+    - the configuration file (`config.py`). You need to copy the `overfastapi/config.example.py` file into the folder, default values should suit your needs
+    - crontab configurations for background cache update, you just need to copy the `overfast-crontab` file from the repo into your folder
+
+- `REDIS_VOLUME_PATH` will be a folder containing shared data for the Redis server. It will mainly a `dump.rdb` save file whenever the server has been stopped.
+
+- `NGINX_VOLUME_PATH` will be a folder containing shared data for the nginx server. All files can be retrieve in the `nginx` folder of the project :
+    - the `ngx_http_redis_module.so` library file, allowing nginx to directly communicate with the redis server
+    - the main nginx configuration (`nginx.conf`), modified in order to use the `ngx_http_redis_module` and to define the two backends used (redis and uvicorn)
+    - the app configuration file (`overfast-api.conf`), implementing the caching system (call redis backend, then if error call uvicorn backend)
+
+- `APP_PORT` is the port used by the app. Default is `80`.
+
+- Once you set the right values in your dotenv, and you copied all the needed files in the respective folders, you can finally use the docker compose command to build everything and run the app
 ```
 docker-compose up
 ```
 
+- The server will be running on the port you set (`APP_PORT`).
+
 ## 👨‍💻 Technical details
+
+### Computed statistics values
+
+In players career statistics, several conversions are made for convenience :
+- all duration values are converted into seconds (int)
+- percent values are exposed as integers instead of a string with a percent symbol
+- integer and float string representations are converted into the concerned type
 
 ### Commands
 
@@ -178,7 +214,7 @@ python -m overfastapi.commands.update_test_fixtures
 
 Help message (with different options)
 ```
-usage: update_test_fixtures.py [-h] [-He] [-Ho]
+usage: update_test_fixtures.py [-h] [-He] [-Ho] [-P]
 
 Update test data fixtures by retrieving Blizzard pages directly. By default, all the tests data will be updated.
 

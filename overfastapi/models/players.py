@@ -1,13 +1,12 @@
 """Set of pydantic models used for Players API routes"""
 from pydantic import AnyHttpUrl, BaseModel, Field, HttpUrl, StrictFloat, StrictInt
 
+from overfastapi.common.api_examples import CareerStatsExample, HeroesComparisonsExample
 from overfastapi.common.enums import (
     CareerStatCategory,
     CompetitiveDivision,
     HeroKey,
-    PlayerPlatform,
     PlayerPrivacy,
-    Role,
 )
 
 
@@ -16,28 +15,18 @@ class PlayerShort(BaseModel):
     player_id: str = Field(
         ...,
         title="Player unique name",
-        description=(
-            'Identifier of the player : BattleTag (with "#" replaced by "-") for '
-            "PC players, nickname for PSN/XBL players, nickname followed by "
-            "hexadecimal id for Nintendo Switch."
-        ),
+        description='Identifier of the player : BattleTag (with "#" replaced by "-")',
         example="TeKrop-2217",
     )
     name: str = Field(
         ..., description="Player nickname displayed in the game", example="TeKrop#2217"
-    )
-    platform: PlayerPlatform = Field(
-        ...,
-        title="Platform",
-        description="Platform on which the player is playing Overwatch",
-        example="pc",
     )
     privacy: PlayerPrivacy = Field(
         ...,
         title="Privacy",
         description=(
             "Privacy of the player career. If private, only some basic informations "
-            "are available on player details endpoint (level, avatar, endorsement)"
+            "are available on player details endpoint (avatar, endorsement)"
         ),
         example="public",
     )
@@ -45,7 +34,7 @@ class PlayerShort(BaseModel):
         ...,
         title="Career URL",
         description="Player's career OverFast API URL (Get player career data)",
-        example="https://overfast-api.tekrop.fr/players/pc/TeKrop-2217",
+        example="https://overfast-api.tekrop.fr/players/TeKrop-2217",
     )
 
 
@@ -56,11 +45,6 @@ class PlayerSearchResult(BaseModel):
 
 # Player career
 class PlayerCompetitiveRank(BaseModel):
-    role: Role = Field(
-        ...,
-        description="Role concerned by the rank",
-        example="damage",
-    )
     division: CompetitiveDivision = Field(
         ..., description="Division of the rank", example="diamond"
     )
@@ -74,16 +58,16 @@ class PlayerCompetitiveRank(BaseModel):
     role_icon: HttpUrl = Field(
         ...,
         description="URL the role icon",
-        example="https://static.playoverwatch.com/img/pages/career/icon-tank-8a52daaf01.png",
+        example="https://static.playoverwatch.com/img/pages/career/icons/role/tank-f64702b684.svg#icon",
     )
-    division_icon: HttpUrl = Field(
+    rank_icon: HttpUrl = Field(
         ...,
-        description="URL of the division icon associated with the player rank",
-        example="https://d1u1mce87gyfbn.cloudfront.net/game/rank-icons/rank-MasterTier.png",
+        description="URL of the rank icon associated with the player rank (division + tier)",
+        example="https://static.playoverwatch.com/img/pages/career/icons/rank/GrandmasterTier-3-e55e61f68f.png",
     )
 
 
-class PlayerCompetitiveRanksContainer(BaseModel):
+class PlatformCompetitiveRanksContainer(BaseModel):
     tank: PlayerCompetitiveRank | None = Field(None, description="Tank role details")
     damage: PlayerCompetitiveRank | None = Field(
         None, description="Damage role details"
@@ -91,8 +75,22 @@ class PlayerCompetitiveRanksContainer(BaseModel):
     support: PlayerCompetitiveRank | None = Field(
         None, description="Support role details"
     )
-    open_queue: PlayerCompetitiveRank | None = Field(
-        None, description="Open queue rank details"
+
+
+class PlayerCompetitiveRanksContainer(BaseModel):
+    pc: PlatformCompetitiveRanksContainer | None = Field(
+        None,
+        description=(
+            "Competitive ranks for PC. "
+            "If the player doesn't play on this platform, it's null."
+        ),
+    )
+    console: PlatformCompetitiveRanksContainer | None = Field(
+        None,
+        description=(
+            "Competitive ranks for console. "
+            "If the player doesn't play on this platform, it's null."
+        ),
     )
 
 
@@ -107,7 +105,7 @@ class PlayerEndorsement(BaseModel):
     frame: HttpUrl = Field(
         ...,
         description="URL of the endorsement frame corresponding to the level",
-        example="https://static.playoverwatch.com/svg/icons/endorsement-frames-3c9292c49d.svg#_2",
+        example="https://static.playoverwatch.com/img/pages/career/icons/endorsement/3-8ccb5f0aef.svg#icon",
     )
 
 
@@ -134,26 +132,6 @@ class HeroesStats(BaseModel):
     )
 
 
-class OverwatchOneLevel(BaseModel):
-    value: int = Field(
-        ...,
-        title="Level",
-        description="Player level value on Overwatch 1",
-        example=2415,
-        ge=1,
-    )
-    border: HttpUrl = Field(
-        ...,
-        description="URL of the border image of the player (without stars)",
-        example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/ac14208753baf77110880020450fa4aa0121df0c344c32a2d20f77c18ba75db5.png",
-    )
-    rank: HttpUrl | None = Field(
-        None,
-        description="If any, URL of the border stars image of the player",
-        example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/8de2fe5d938256a5725abe4b3655ee5e9067b7a1f4d5ff637d974eb9c2e4a1ea.png",
-    )
-
-
 class PlayerSummary(BaseModel):
     username: str = Field(..., description="Username of the player", example="TeKrop")
     avatar: HttpUrl = Field(
@@ -161,39 +139,22 @@ class PlayerSummary(BaseModel):
         description="URL of the player's avatar",
         example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/daeddd96e58a2150afa6ffc3c5503ae7f96afc2e22899210d444f45dee508c6c.png",
     )
-    banner: HttpUrl = Field(
-        ...,
-        description="URL of the player's banner",
-        example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/daeddd96e58a2150afa6ffc3c5503ae7f96afc2e22899210d444f45dee508c6c.png",
-    )
     title: str = Field(None, description="Title of the player if any")
-    competitive: PlayerCompetitiveRanksContainer | None = Field(
-        None, description="Competitive ranking in different roles"
-    )
     endorsement: PlayerEndorsement = Field(...)
-    games_won: int | None = Field(
+    competitive: PlayerCompetitiveRanksContainer | None = Field(
         None,
-        title="Games Won",
-        description="Number of games won by the player",
-        example=7143,
-    )
-    platforms: list[PlayerPlatform] = Field(
-        ...,
-        title="Platform",
-        description="List of platforms the player is playing Overwatch on",
-        min_items=1,
-    )
-    overwatch_one_level: OverwatchOneLevel = Field(
-        None,
-        title="Overwatch 1 Level",
-        description="Overwatch 1 Level details if the player played it",
+        description=(
+            "Competitive ranking in different roles depending on the platform. "
+            "If the career is private or if the player doesn't play competitive "
+            "at all, it's null."
+        ),
     )
     privacy: PlayerPrivacy = Field(
         ...,
         title="Privacy",
         description=(
             "Privacy of the player career. If private, only some basic informations "
-            "are available (level, avatar, endorsement)"
+            "are available (avatar, endorsement)"
         ),
         example="public",
     )
@@ -228,8 +189,8 @@ class HeroesComparisons(BaseModel):
         None, description="Total number of objective kills for each hero (integer)"
     )
 
-    # class Config:
-    #     schema_extra = {"example": HeroesComparisonsExample}
+    class Config:
+        schema_extra = {"example": HeroesComparisonsExample}
 
 
 class SingleCareerStat(BaseModel):
@@ -316,6 +277,9 @@ class CareerStats(BaseModel):
     pharah: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Pharah", min_items=1
     )
+    ramattra: list[HeroCareerStats] | None = Field(
+        None, description="Career statistics for Ramattra", min_items=1
+    )
     reaper: list[HeroCareerStats] | None = Field(
         None, description="Career statistics for Reaper", min_items=1
     )
@@ -368,11 +332,11 @@ class CareerStats(BaseModel):
         None, description="Career statistics for Zenyatta", min_items=1
     )
 
-    # class Config:
-    #     schema_extra = {"example": CareerStatsExample}
+    class Config:
+        schema_extra = {"example": CareerStatsExample}
 
 
-class PlayerStats(BaseModel):
+class PlayerGamemodeStats(BaseModel):
     heroes_comparisons: HeroesComparisons = Field(
         ...,
         description=(
@@ -387,71 +351,53 @@ class PlayerStats(BaseModel):
         description=(
             "List of career statistics for every hero the player played :"
             " best statistics (most in game), combat (damage, kills, etc.), average "
-            "(per 10 minutes), match awards (cards and medals), hero specific, etc.)"
+            "(per 10 minutes), match awards (cards), hero specific, etc.)"
         ),
     )
 
 
-class PlayerAchievement(BaseModel):
-    title: str = Field(..., description="Title of the achievement", example="Centenary")
-    description: str = Field(
-        ...,
-        description="Description of the achievement",
-        example="Win 100 games in Quick or Competitive Play.",
+class PlayerPlatformStats(BaseModel):
+    quickplay: PlayerGamemodeStats | None = Field(
+        None,
+        description=(
+            "Quickplay statistics about heroes. "
+            "If the player doesn't have stats for this gamemode, it's null."
+        ),
     )
-    image: HttpUrl = Field(
-        ...,
-        description="Picture URL of the achievement",
-        example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/f5e73717ac598860557894a25d764adc86be9e8a39e19cba6680845d30545e8b.png",
-    )
-
-
-class PlayerAchievementsContainer(BaseModel):
-    general: list[PlayerAchievement] | None = Field(
-        None, description="General achievements (player level, generic skills, etc.)"
-    )
-    damage: list[PlayerAchievement] | None = Field(
-        None, description="Achievements concerning damage heroes"
-    )
-    tank: list[PlayerAchievement] | None = Field(
-        None, description="Achievements concerning tank heroes"
-    )
-    support: list[PlayerAchievement] | None = Field(
-        None, description="Achievements concerning support heroes"
-    )
-    maps: list[PlayerAchievement] | None = Field(
-        None, description="Achievements concerning Overwatch maps"
-    )
-    events: list[PlayerAchievement] | None = Field(
-        None, description="Achievements concerning Overwatch events"
+    competitive: PlayerGamemodeStats | None = Field(
+        None,
+        description=(
+            "Competitive statistics about heroes. "
+            "If the player doesn't have stats for this gamemode, it's null."
+        ),
     )
 
-    # class Config:
-    #     schema_extra = {"example": PlayerAchievementsContainerExample}
+
+class PlayerStats(BaseModel):
+    pc: PlayerPlatformStats | None = Field(
+        None,
+        description=(
+            "Player statistics on PC. "
+            "If the player doesn't play on this platform, it's null."
+        ),
+    )
+    console: PlayerPlatformStats | None = Field(
+        None,
+        description=(
+            "Player statistics on console. "
+            "If the player doesn't play on this platform, it's null."
+        ),
+    )
 
 
 class Player(BaseModel):
     summary: PlayerSummary = Field(
-        ..., description="Player summary (level, avatar, etc.)"
+        ..., description="Player summary (avatar, endorsement, competitive ranks, etc.)"
     )
-    quickplay: PlayerStats | None = Field(
+    stats: PlayerStats | None = Field(
         None,
         description=(
-            "Quickplay statistics about heroes. "
-            "If the player career is private, it's null."
-        ),
-    )
-    competitive: PlayerStats | None = Field(
-        None,
-        description=(
-            "Competitive statistics about heroes. "
-            "If the player career is private, it's null."
-        ),
-    )
-    achievements: PlayerAchievementsContainer | None = Field(
-        None,
-        description=(
-            "Achievements unlocked by the player. "
-            "If the player career is private, it's null."
+            "Player statistics (heroes comparisons, career stats, etc.). "
+            "If the player career is private or has no stat at all, it's null."
         ),
     )

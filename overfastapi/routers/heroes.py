@@ -52,7 +52,7 @@ async def list_roles(background_tasks: BackgroundTasks, request: Request):
     response_model=Hero,
     responses=routes_responses,
     tags=[RouteTag.HEROES],
-    summary="Get detailed data about a specific hero",
+    summary="Get specific hero data",
     description=(
         "Get details data about a specific Overwatch hero : "
         "weapons, abilities, story, medias, etc."

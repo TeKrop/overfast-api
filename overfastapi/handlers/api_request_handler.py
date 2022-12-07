@@ -138,7 +138,13 @@ class APIRequestHandler(ApiRequestMixin, ABC):
                     parser = parser_class(**kwargs)
                 except HTTPException:
                     return
-                parser.parse()
+
+                try:
+                    parser.parse()
+                except ParserParsingError as error:
+                    overfast_internal_error(parser.blizzard_url, error)
+                    return
+
                 parsers.append(parser)
 
         request_path = self.get_api_request_url(**kwargs)
