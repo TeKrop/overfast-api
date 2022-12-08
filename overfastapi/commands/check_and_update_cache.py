@@ -5,6 +5,9 @@ from overfastapi.common.cache_manager import CacheManager
 from overfastapi.common.enums import HeroKey
 from overfastapi.common.logging import logger
 from overfastapi.handlers.get_hero_request_handler import GetHeroRequestHandler
+from overfastapi.handlers.get_player_career_request_handler import (
+    GetPlayerCareerRequestHandler,
+)
 from overfastapi.handlers.list_gamemodes_request_handler import (
     ListGamemodesRequestHandler,
 )
@@ -16,6 +19,7 @@ PREFIXES_HANDLERS_MAPPING = {
     "/heroes/roles": ListRolesRequestHandler,
     **{f"/heroes/{hero_key}": GetHeroRequestHandler for hero_key in HeroKey},
     "/gamemodes": ListGamemodesRequestHandler,
+    "/players": GetPlayerCareerRequestHandler,
 }
 
 
@@ -27,6 +31,8 @@ def get_soon_expired_cache_keys() -> set[str]:
         # api-cache:/heroes?role=damage => /heroes?role=damage => /heroes
         key.split(":")[1].split("?")[0]
         for key in cache_manager.get_soon_expired_api_cache_keys()
+        # Avoid players subroutes
+        if key.split("/")[-1].split("?")[0] not in ("summary", "stats")
     }
 
 
@@ -38,7 +44,11 @@ def get_request_handler_class_and_kwargs(cache_key: str) -> tuple[type, dict]:
     cache_kwargs = {}
 
     uri = cache_key.split("/")
-    if cache_key.startswith("/heroes") and len(uri) > 2 and uri[2] != "roles":
+    if cache_key.startswith("/players"):
+        # /players/Player-1234 => ["", "players", "Player-1234"]
+        cache_request_handler_class = PREFIXES_HANDLERS_MAPPING["/players"]
+        cache_kwargs = {"player_id": uri[2]}
+    elif cache_key.startswith("/heroes") and len(uri) > 2 and uri[2] != "roles":
         cache_request_handler_class = PREFIXES_HANDLERS_MAPPING[cache_key]
         cache_kwargs = {"hero_key": uri[2]}
     else:

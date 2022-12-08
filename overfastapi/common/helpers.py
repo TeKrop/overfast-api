@@ -22,6 +22,16 @@ routes_responses = {
     },
 }
 
+# List of players used for testing
+players_ids = [
+    "Dekk-2677",  # Classic profile without rank
+    "Player-1112937",  # Console player
+    "Player-137712",  # Private profile
+    "SoSucre-2795",  # Top player Open Queue
+    "TeKrop-2217",  # Classic profile
+    "Unknown-1234",  # No player
+]
+
 
 def overfast_request(url: str) -> requests.Response:
     """Make an HTTP GET request with custom headers and retrieve the result"""
@@ -32,7 +42,13 @@ def overfast_request(url: str) -> requests.Response:
         ),
         "From": "vporchet@gmail.com",
     }
-    return requests.get(url, headers=headers, timeout=10)
+    try:
+        return requests.get(url, headers=headers, timeout=10)
+    except requests.exceptions.Timeout:
+        raise blizzard_response_error(
+            status_code=0,
+            error="Blizzard took more than 10 seconds to respond, resulting in a timeout",
+        )
 
 
 def overfast_internal_error(url: str, error: Exception) -> HTTPException:
@@ -52,7 +68,7 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
     send_discord_webhook_message(
         f"* **URL** : {url}\n"
         f"* **Error type** : {type(error).__name__}\n"
-        f"* **Message** : {str(error)}"
+        f"* **Message** : {error}"
     )
 
     return HTTPException(
@@ -66,20 +82,23 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
     )
 
 
-def blizzard_response_error(req: Request) -> HTTPException:
+def blizzard_response_error(status_code: int, error: str) -> HTTPException:
     """Retrieve a generic error response when a Blizzard page doesn't load"""
     logger.error(
         "Received an error from Blizzard. HTTP {} : {}",
-        req.status_code,
-        req.text,
+        status_code,
+        error,
     )
 
     return HTTPException(
         status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-        detail=(
-            f"Couldn't get Blizzard page (HTTP {req.status_code} error) : {req.text}"
-        ),
+        detail=(f"Couldn't get Blizzard page (HTTP {status_code} error) : {error}"),
     )
+
+
+def blizzard_response_error_from_request(req: Request) -> HTTPException:
+    """Alias for sending Blizzard error from a request directly"""
+    return blizzard_response_error(req.status_code, req.text)
 
 
 def send_discord_webhook_message(message: str) -> requests.Response | None:

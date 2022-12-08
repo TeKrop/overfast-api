@@ -8,7 +8,10 @@ from bs4 import BeautifulSoup
 
 from overfastapi.common.cache_manager import CacheManager
 from overfastapi.common.exceptions import ParserParsingError
-from overfastapi.common.helpers import blizzard_response_error, overfast_request
+from overfastapi.common.helpers import (
+    blizzard_response_error_from_request,
+    overfast_request,
+)
 from overfastapi.common.logging import logger
 from overfastapi.config import BLIZZARD_HOST
 
@@ -23,13 +26,16 @@ class APIParser(ABC):
 
     cache_manager = CacheManager()
 
+    # List of valid HTTP codes when retrieving Blizzard pages
+    valid_http_codes = [200]
+
     def __init__(self, **kwargs):
         self.blizzard_url = self.get_blizzard_url(**kwargs)
 
         # Retrieve the HTML content from the Blizzard page
         req = overfast_request(self.blizzard_url)
-        if req.status_code != 200:
-            raise blizzard_response_error(req)
+        if req.status_code not in self.valid_http_codes:
+            raise blizzard_response_error_from_request(req)
 
         # Initialize BeautifulSoup object
         self.root_tag = BeautifulSoup(req.text, "lxml").body.find(
@@ -92,7 +98,7 @@ class APIParser(ABC):
         )
 
     @abstractmethod
-    def parse_data(self) -> dict | list:
+    def parse_data(self) -> dict | list[dict]:
         """Main submethod of the parser, mainly doing the parsing of input data and
         returning a dict, which will be cached and used by the API. Can
         raise an error if there is an issue when parsing the data.
@@ -106,8 +112,8 @@ class APIParser(ABC):
     def get_blizzard_url(self, **kwargs) -> str:
         """URL used when requesting data to Blizzard. It usually is a concatenation
         of root url and query data (kwargs) if the RequestHandler supports it.
-        For example : single hero page (hero key), player career page (platform and
-        player id, etc.). Default is just the blizzard root url.
+        For example : single hero page (hero key), player career page
+        (player id, etc.). Default is just the blizzard root url.
         """
         return self.blizzard_root_url
 

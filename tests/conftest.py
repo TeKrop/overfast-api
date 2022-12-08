@@ -48,6 +48,11 @@ def home_html_data():
     return read_html_file("home.html")
 
 
+@pytest.fixture(scope="session")
+def player_html_data(request: SubRequest):
+    return read_html_file(f"players/{request.param}.html")
+
+
 def read_json_file(filepath: str) -> dict | list:
     with open(
         f"{TEST_FIXTURES_ROOT_PATH}/json/{filepath}", "r", encoding="utf-8"
@@ -73,3 +78,18 @@ def gamemodes_json_data():
 @pytest.fixture(scope="session")
 def roles_json_data():
     return read_json_file("roles.json")
+
+
+@pytest.fixture(scope="session")
+def player_json_data(request: SubRequest):
+    return read_json_file(f"players/{request.param}.json")
+
+
+@pytest.fixture(scope="session")
+def search_players_blizzard_json_data():
+    return read_json_file("search_players/search_players_blizzard_result.json")
+
+
+@pytest.fixture(scope="session")
+def search_players_api_json_data():
+    return read_json_file("search_players/search_players_api_result.json")

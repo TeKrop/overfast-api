@@ -5,6 +5,7 @@ from requests import Session
 
 from overfastapi.commands.update_test_fixtures import main as update_test_fixtures_main
 from overfastapi.common.enums import HeroKey
+from overfastapi.common.helpers import players_ids
 from overfastapi.config import TEST_FIXTURES_ROOT_PATH
 
 
@@ -24,15 +25,26 @@ heroes_calls = [
         for hero in HeroKey
     ],
 ]
+players_calls = [
+    f"Updating {TEST_FIXTURES_ROOT_PATH}/html/players/{player}.html..."
+    for player in players_ids
+]
 home_calls = [f"Updating {TEST_FIXTURES_ROOT_PATH}/html/home.html..."]
 
 
 @pytest.mark.parametrize(
     "parameters,expected_calls",
     [
-        (Mock(heroes=True, home=False), heroes_calls),
-        (Mock(heroes=False, home=True), home_calls),
-        (Mock(heroes=True, home=True), heroes_calls + home_calls),
+        (Mock(heroes=True, home=False, players=False), heroes_calls),
+        (Mock(heroes=False, home=True, players=False), home_calls),
+        (Mock(heroes=False, home=False, players=True), players_calls),
+        (Mock(heroes=True, home=True, players=False), heroes_calls + home_calls),
+        (Mock(heroes=True, home=False, players=True), heroes_calls + players_calls),
+        (Mock(heroes=False, home=True, players=True), home_calls + players_calls),
+        (
+            Mock(heroes=True, home=True, players=True),
+            heroes_calls + home_calls + players_calls,
+        ),
     ],
 )
 def test_update_with_different_options(parameters, expected_calls: list[str]):
