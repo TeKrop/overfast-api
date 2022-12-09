@@ -13,7 +13,7 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
     """
 
     # Duration format in hour:min:sec => seconds
-    result = re.match(r"^([0-9]+[,]?[0-9]*?):([0-9]+):([0-9]+)$", input_str)
+    result = re.match(r"^([-]?[0-9]+[,]?[0-9]*?):([0-9]+):([0-9]+)$", input_str)
     if result:
         return (
             int(result.group(1).replace(",", "")) * 3600
@@ -22,7 +22,7 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
         )
 
     # Duration format in min:sec => seconds
-    result = re.match(r"^([0-9]+):([0-9]+)$", input_str)
+    result = re.match(r"^([-]?[0-9]+):([0-9]+)$", input_str)
     if result:
         return int(result.group(1)) * 60 + int(result.group(2))
 
