@@ -78,7 +78,6 @@ class APIParser(ABC):
             self.cache_key, self.hash
         )
         if parser_cache_data:
-
             # Parser cache is already valid, no need to do anything
             logger.info("Parser Cache found !")
             self.data = json.loads(parser_cache_data)

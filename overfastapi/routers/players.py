@@ -37,7 +37,10 @@ career_routes_responses = {
 async def get_player_common_parameters(
     player_id: str = Path(
         title="Player unique name",
-        description='Identifier of the player : BattleTag (with "#" replaced by "-")',
+        description=(
+            'Identifier of the player : BattleTag (with "#" replaced by "-"). '
+            "Be careful, letter case (capital/non-capital letters) is important !"
+        ),
         example="TeKrop-2217",
     ),
 ):

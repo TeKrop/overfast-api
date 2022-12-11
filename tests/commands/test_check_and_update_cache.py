@@ -288,7 +288,7 @@ def test_check_and_update_specific_player_to_update(
     )
 
 
-def test_check_error_from_blizzard(cache_manager: CacheManager):
+def test_check_internal_error_from_blizzard(cache_manager: CacheManager):
     # Add some data (to update and not to update)
     cache_manager.update_api_cache("/heroes/ana", "{}", EXPIRED_CACHE_REFRESH_LIMIT - 5)
 
@@ -326,7 +326,7 @@ def test_check_timeout_from_blizzard(cache_manager: CacheManager):
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
-def test_check_parsing_error(cache_manager: CacheManager, player_html_data: str):
+def test_check_parser_parsing_error(cache_manager: CacheManager, player_html_data: str):
     # Add some data (to update and not to update)
     cache_manager.update_api_cache(
         "/players/TeKrop-2217", "{}", EXPIRED_CACHE_REFRESH_LIMIT - 5
@@ -348,3 +348,32 @@ def test_check_parsing_error(cache_manager: CacheManager, player_html_data: str)
         "https://overwatch.blizzard.com/en-us/career/TeKrop-2217/",
         "AttributeError(\"'NoneType' object has no attribute 'find'\")",
     )
+
+
+@pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
+def test_check_parser_init_error(cache_manager: CacheManager, player_html_data: str):
+    # Add some data (to update and not to update)
+    cache_manager.update_api_cache(
+        "/players/TeKrop-2217", "{}", EXPIRED_CACHE_REFRESH_LIMIT - 5
+    )
+
+    logger_error_mock = Mock()
+    with patch(
+        "requests.get",
+        return_value=Mock(status_code=200, text=player_html_data),
+    ), patch("overfastapi.common.logging.logger.error", logger_error_mock):
+        check_and_update_cache_main()
+
+    logger_error_mock.assert_any_call(
+        "Failed to instanciate Parser when refreshing : {}", "Player not found"
+    )
+
+
+def test_check_players_search_never_to_refresh(cache_manager: CacheManager):
+    # The key will expire soon but shouldn't be in the list of keys to refresh
+    cache_manager.update_api_cache(
+        "/players?name=TeKrop", "{}", EXPIRED_CACHE_REFRESH_LIMIT - 5
+    )
+    # Another one that should be
+    cache_manager.update_api_cache("/heroes", "{}", EXPIRED_CACHE_REFRESH_LIMIT - 5)
+    assert get_soon_expired_cache_keys() == {"/heroes"}

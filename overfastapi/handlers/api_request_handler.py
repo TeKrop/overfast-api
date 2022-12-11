@@ -136,6 +136,12 @@ class APIRequestHandler(ApiRequestMixin, ABC):
                 # page and use the kwargs to generate the appropriate URL
                 try:
                     parser = parser_class(**kwargs)
+                except ParserInitError as error:
+                    logger.error(
+                        "Failed to instanciate Parser when refreshing : {}",
+                        error.message,
+                    )
+                    return
                 except HTTPException:
                     return
 

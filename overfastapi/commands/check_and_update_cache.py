@@ -1,6 +1,8 @@
 """Command used in order to check and update Redis API Cache depending on
 the expired cache refresh limit configuration. It can be run in the background.
 """
+import re
+
 from overfastapi.common.cache_manager import CacheManager
 from overfastapi.common.enums import HeroKey
 from overfastapi.common.logging import logger
@@ -14,6 +16,8 @@ from overfastapi.handlers.list_gamemodes_request_handler import (
 from overfastapi.handlers.list_heroes_request_handler import ListHeroesRequestHandler
 from overfastapi.handlers.list_roles_request_handler import ListRolesRequestHandler
 
+# Mapping of cache_key prefixes to the associated
+# request handler used for cache refresh
 PREFIXES_HANDLERS_MAPPING = {
     "/heroes": ListHeroesRequestHandler,
     "/heroes/roles": ListRolesRequestHandler,
@@ -22,18 +26,32 @@ PREFIXES_HANDLERS_MAPPING = {
     "/players": GetPlayerCareerRequestHandler,
 }
 
+# Regular expressions for keys we don't want to refresh the cache explicitely
+# from here (either will be done in another process or not at all because not
+# relevant)
+EXCEPTION_KEYS_REGEX = {
+    r"^\/players\/[^\/]+\/(summary|stats)$",  # players summary or search
+    r"^\/players$",  # players search
+}
+
 
 def get_soon_expired_cache_keys() -> set[str]:
     """Get a set of URIs for values in API Cache which will expire soon
     without taking subroutes and query parameters"""
     cache_manager = CacheManager()
-    return {
+
+    expiring_keys = set()
+    for key in cache_manager.get_soon_expired_api_cache_keys():
         # api-cache:/heroes?role=damage => /heroes?role=damage => /heroes
-        key.split(":")[1].split("?")[0]
-        for key in cache_manager.get_soon_expired_api_cache_keys()
-        # Avoid players subroutes
-        if key.split("/")[-1].split("?")[0] not in ("summary", "stats")
-    }
+        cache_key = key.split(":")[1].split("?")[0]
+        # Avoid keys we don't want to refresh from here
+        if any(
+            re.match(exception_key, cache_key) for exception_key in EXCEPTION_KEYS_REGEX
+        ):
+            continue
+        # Add the key to the set
+        expiring_keys.add(cache_key)
+    return expiring_keys
 
 
 def get_request_handler_class_and_kwargs(cache_key: str) -> tuple[type, dict]:
