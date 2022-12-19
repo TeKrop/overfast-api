@@ -24,11 +24,11 @@ routes_responses = {
 
 # List of players used for testing
 players_ids = [
+    "copypasting-1216",  # Player with an empty hero career stats (lucio)
     "Dekk-2677",  # Classic profile without rank
     "KIRIKO-21253",  # Profile with rank on only two roles
     "Player-1112937",  # Console player
     "Player-137712",  # Private profile
-    "SoSucre-2795",  # Top player Open Queue
     "TeKrop-2217",  # Classic profile
     "Unknown-1234",  # No player
 ]

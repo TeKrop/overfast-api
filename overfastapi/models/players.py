@@ -212,124 +212,120 @@ class CareerStats(BaseModel):
         None,
         description="Total of statistics for all heroes",
         alias="all-heroes",
-        min_items=1,
     )
     ana: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Ana", min_items=1
+        None, description="Career statistics for Ana"
     )
     ashe: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Ashe", min_items=1
+        None, description="Career statistics for Ashe"
     )
     baptiste: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Baptiste", min_items=1
+        None, description="Career statistics for Baptiste"
     )
     bastion: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Bastion", min_items=1
+        None, description="Career statistics for Bastion"
     )
     brigitte: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Brigitte", min_items=1
+        None, description="Career statistics for Brigitte"
     )
     cassidy: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Cassidy", min_items=1
+        None, description="Career statistics for Cassidy"
     )
     dva: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for D.Va", min_items=1
+        None, description="Career statistics for D.Va"
     )
     doomfist: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Doomfist", min_items=1
+        None, description="Career statistics for Doomfist"
     )
     echo: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Echo", min_items=1
+        None, description="Career statistics for Echo"
     )
     genji: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Genji", min_items=1
+        None, description="Career statistics for Genji"
     )
     hanzo: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Hanzo", min_items=1
+        None, description="Career statistics for Hanzo"
     )
     junker_queen: list[HeroCareerStats] | None = Field(
         None,
         description="Career statistics for Junker Queen",
         alias="junker-queen",
-        min_items=1,
     )
     junkrat: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Junkrat", min_items=1
+        None, description="Career statistics for Junkrat"
     )
     kiriko: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Kiriko", min_items=1
+        None, description="Career statistics for Kiriko"
     )
     lucio: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Lúcio", min_items=1
+        None, description="Career statistics for Lúcio"
     )
     mei: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Mei", min_items=1
+        None, description="Career statistics for Mei"
     )
     mercy: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Mercy", min_items=1
+        None, description="Career statistics for Mercy"
     )
     moira: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Moira", min_items=1
+        None, description="Career statistics for Moira"
     )
     orisa: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Orisa", min_items=1
+        None, description="Career statistics for Orisa"
     )
     pharah: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Pharah", min_items=1
+        None, description="Career statistics for Pharah"
     )
     ramattra: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Ramattra", min_items=1
+        None, description="Career statistics for Ramattra"
     )
     reaper: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Reaper", min_items=1
+        None, description="Career statistics for Reaper"
     )
     reinhardt: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Reinhardt", min_items=1
+        None, description="Career statistics for Reinhardt"
     )
     roadhog: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Roadhog", min_items=1
+        None, description="Career statistics for Roadhog"
     )
     sigma: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Sigma", min_items=1
+        None, description="Career statistics for Sigma"
     )
     soldier_76: list[HeroCareerStats] | None = Field(
         None,
         description="Career statistics for Soldier: 76",
         alias="soldier-76",
-        min_items=1,
     )
     sojourn: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Sojourn", min_items=1
+        None, description="Career statistics for Sojourn"
     )
     sombra: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Sombra", min_items=1
+        None, description="Career statistics for Sombra"
     )
     symmetra: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Symmetra", min_items=1
+        None, description="Career statistics for Symmetra"
     )
     torbjorn: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Torbjörn", min_items=1
+        None, description="Career statistics for Torbjörn"
     )
     tracer: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Tracer", min_items=1
+        None, description="Career statistics for Tracer"
     )
     widowmaker: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Widowmaker", min_items=1
+        None, description="Career statistics for Widowmaker"
     )
     winston: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Winston", min_items=1
+        None, description="Career statistics for Winston"
     )
     wrecking_ball: list[HeroCareerStats] | None = Field(
         None,
         description="Career statistics for Wrecking Ball",
         alias="wrecking-ball",
-        min_items=1,
     )
     zarya: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Zarya", min_items=1
+        None, description="Career statistics for Zarya"
     )
     zenyatta: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Zenyatta", min_items=1
+        None, description="Career statistics for Zenyatta"
     )
 
     class Config:
