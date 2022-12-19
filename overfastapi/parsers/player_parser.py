@@ -378,6 +378,12 @@ class PlayerParser(APIParser):
                         }
                     )
 
+            # For a reason, sometimes the hero is in the dropdown but there
+            # is no stat to show. In this case, return None as if there was
+            # no stat at all
+            if len(career_stats[hero_key]) == 0:
+                career_stats[hero_key] = None
+
         for hero_key in HeroKey:
             if hero_key.value not in career_stats:
                 career_stats[hero_key.value] = None
