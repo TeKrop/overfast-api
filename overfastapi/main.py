@@ -22,6 +22,11 @@ statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful So
 minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate
 data to users. All duration values are also returned in seconds for convenience.
 
+## 👷 W.I.P. 👷
+
+- Players stats summary endpoint (essential stats often used for tracking progress, including total stats and average stats per 10 min)
+- Translations for specific heroes pages (will be available using a query parameter)
+
 ## ⚠️ Disclaimer concerning career pages ⚠️
 
 Players statistics are cached for performance purposes, as Blizzard pages take ~2-3 seconds to load. Since the pages are back, I noticed it's very unstable on their side, we often have a "504 Gateway Time-out" error, either on players search or career pages, sometimes a "404 Page Not Found" error even if the player exists and its profile is public, resulting in a "404 Player Not Found" response from the API.
