@@ -34,9 +34,9 @@ class CareerHeroesComparisonsCategory(StrEnum):
 class RouteTag(StrEnum):
     """Tags used to classify API routes"""
 
-    HEROES = "Heroes"
-    MAPS = "Maps"
-    PLAYERS = "Players"
+    HEROES = "🦸 Heroes"
+    MAPS = "🗺️ Maps"
+    PLAYERS = "🎮 Players"
 
 
 class HeroKey(StrEnum):

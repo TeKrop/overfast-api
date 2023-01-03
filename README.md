@@ -14,16 +14,7 @@
 
 - Players stats summary endpoint (essential stats often used for tracking progress, including total stats and average stats per 10 min)
 - Translations for specific heroes pages (will be available using a query parameter)
-
-## ⚠️ Disclaimer concerning career pages ⚠️
-
-Players statistics are cached for performance purposes, as Blizzard pages take ~2-3 seconds to load. Since the pages are back, I noticed it's very unstable on their side, we often have a "504 Gateway Time-out" error, either on players search or career pages, sometimes a "404 Page Not Found" error even if the player exists and its profile is public, resulting in a "404 Player Not Found" response from the API.
-
-As a consequence, I configured my cache system in order to prevent (in most cases) any issue regarding pages load :
-- Career data is cached for ~2 hours
-- Instead of trying to update the cache 5 min before its expiration, it's trying to update it starting from one hour before its expiration (one try per minute).
-
-I'll try to adjust these values depending on Blizzard pages stability, but don't hesitate to contact me if you have a recurring issue concerning career endpoints loading time (only the first time should be long).
+- Various improvements on caching system
 
 ## Table of contents
 * [✨ Live instance](#-live-instance)
@@ -58,7 +49,7 @@ Here is the list of all TTL values configured for API Cache :
 * Players career : 1 hour
 * Players search : 1 hour
 
-### Automatic cache refresh
+### Background cache refresh
 
 In order to reduce the number of requests to Blizzard that API users can make, I introduced a specific cache refresh system. The main idea is to update the API Cache in the background (server side) when needed, just before its expiration. For example, if a user requests its player career page, it will be slow for the first call (2-3s in total), but very fast for all the next times, thanks to this system.
 
@@ -257,6 +248,6 @@ Feel free to check [issues page](https://github.com/TeKrop/overfast-api/issues).
 
 ## 📝 License
 
-Copyright © 2021-2022 [Valentin PORCHET](https://github.com/TeKrop).
+Copyright © 2021-2023 [Valentin PORCHET](https://github.com/TeKrop).
 
 This project is [MIT](https://github.com/TeKrop/overfast-api/blob/master/LICENSE) licensed.

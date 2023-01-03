@@ -19,7 +19,15 @@ heroes = {h.value for h in HeroKeyCareerFilter}
         ("TeKrop-2217", "TeKrop-2217", gamemode, platform, hero)
         for gamemode in (None, Mock(value="invalid_gamemode"), *PlayerGamemode)
         for platform in (None, Mock(value="invalid_platform"), *PlayerPlatform)
-        for hero in (None, Mock(value="invalid_hero"), *HeroKeyCareerFilter)
+        for hero in (
+            None,
+            Mock(value="invalid_hero"),
+            *[
+                HeroKeyCareerFilter.ANA,
+                HeroKeyCareerFilter.GENJI,
+                HeroKeyCareerFilter.REINHARDT,
+            ],
+        )
     ],
     indirect=["player_html_data", "player_json_data"],
 )

@@ -30,7 +30,7 @@ PREFIXES_HANDLERS_MAPPING = {
 # from here (either will be done in another process or not at all because not
 # relevant)
 EXCEPTION_KEYS_REGEX = {
-    r"^\/players\/[^\/]+\/(summary|stats)$",  # players summary or search
+    r"^\/players\/[^\/]+\/(summary|stats)$",  # players summary or stats
     r"^\/players$",  # players search
 }
 

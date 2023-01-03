@@ -26,18 +26,9 @@ data to users. All duration values are also returned in seconds for convenience.
 
 - Players stats summary endpoint (essential stats often used for tracking progress, including total stats and average stats per 10 min)
 - Translations for specific heroes pages (will be available using a query parameter)
+- Various improvements on caching system
 
-## ⚠️ Disclaimer concerning career pages ⚠️
-
-Players statistics are cached for performance purposes, as Blizzard pages take ~2-3 seconds to load. Since the pages are back, I noticed it's very unstable on their side, we often have a "504 Gateway Time-out" error, either on players search or career pages, sometimes a "404 Page Not Found" error even if the player exists and its profile is public, resulting in a "404 Player Not Found" response from the API.
-
-As a consequence, I configured my cache system in order to prevent (in most cases) any issue regarding pages load :
-- Career data is cached for ~2 hours
-- Instead of trying to update the cache 5 min before its expiration, it's trying to update it starting from one hour before its expiration (one try per minute).
-
-I'll try to adjust these values depending on Blizzard pages stability, but don't hesitate to contact me if you have a recurring issue concerning career endpoints loading time (only the first time should be long).
-
-## Cache System
+## 🛠️ Cache System
 
 ![Python + Redis + Nginx](https://files.tekrop.fr/classic_schema_nginx_cache.svg)
 
@@ -55,7 +46,7 @@ OverFast API introduces a very specific cache system, stored on a **Redis** serv
 * Players career : 1 hour
 * Players search : 1 hour
 
-### Automatic cache refresh
+### Background cache refresh
 
 In order to reduce the number of requests to Blizzard that API users can make,
 I introduced a specific cache refresh system. The main idea is to update the API Cache
