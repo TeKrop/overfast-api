@@ -13,6 +13,9 @@ from overfastapi.common.helpers import routes_responses as common_routes_respons
 from overfastapi.handlers.get_player_career_request_handler import (
     GetPlayerCareerRequestHandler,
 )
+from overfastapi.handlers.get_player_stats_summary_request_handler import (
+    GetPlayerStatsSummaryRequestHandler,
+)
 from overfastapi.handlers.search_players_request_handler import (
     SearchPlayersRequestHandler,
 )
@@ -21,6 +24,7 @@ from overfastapi.models.players import (
     CareerStats,
     Player,
     PlayerSearchResult,
+    PlayerStatsSummary,
     PlayerSummary,
 )
 
@@ -56,6 +60,11 @@ router = APIRouter()
     responses=common_routes_responses,
     tags=[RouteTag.PLAYERS],
     summary="Search for a specific player",
+    description=(
+        "Search for a given player by using his username. You should be able to "
+        "find the associated player_id to use in order to request career data."
+        "<br />**Cache TTL : 1 hour.**"
+    ),
 )
 @validation_error_handler(response_model=PlayerSearchResult)
 async def search_players(
@@ -88,32 +97,15 @@ async def search_players(
 
 
 @router.get(
-    "/{player_id}",
-    response_model=Player,
-    responses=career_routes_responses,
-    tags=[RouteTag.PLAYERS],
-    summary="Get player career data",
-    description="Get all player data : summary and statistics",
-)
-@validation_error_handler(response_model=Player)
-async def get_player_career(
-    background_tasks: BackgroundTasks,
-    request: Request,
-    commons: dict = Depends(get_player_common_parameters),
-):
-    return GetPlayerCareerRequestHandler(request).process_request(
-        background_tasks=background_tasks,
-        player_id=commons.get("player_id"),
-    )
-
-
-@router.get(
     "/{player_id}/summary",
     response_model=PlayerSummary,
     responses=career_routes_responses,
     tags=[RouteTag.PLAYERS],
     summary="Get player summary",
-    description="Get player summary : name, avatar, competitive ranks, etc.",
+    description=(
+        "Get player summary : name, avatar, competitive ranks, etc. "
+        "<br />**Cache TTL : 1 hour.**"
+    ),
 )
 @validation_error_handler(response_model=PlayerSummary)
 async def get_player_summary(
@@ -123,6 +115,80 @@ async def get_player_summary(
 ):
     return GetPlayerCareerRequestHandler(request).process_request(
         summary=True,
+        background_tasks=background_tasks,
+        player_id=commons.get("player_id"),
+    )
+
+
+@router.get(
+    "/{player_id}/stats/summary",
+    response_model=PlayerStatsSummary,
+    response_model_exclude_unset=True,
+    responses=career_routes_responses,
+    tags=[RouteTag.PLAYERS],
+    summary="Get player stats summary",
+    description=(
+        "Get player statistics summary, with stats usually used for tracking "
+        "progress : winrate, kda, damage, healing, etc. "
+        "<br /> Data is regrouped in 3 sections : general (sum of all stats), "
+        "roles (sum of stats for each role) and heroes (stats for each hero)."
+        "<br /> Depending on filters, data from both competitive and quickplay, "
+        "and/or pc and console will be merged."
+        "<br />Default behaviour : all gamemodes and platforms are taken in account."
+        "<br />**Cache TTL : 1 hour.**"
+    ),
+)
+@validation_error_handler(response_model=PlayerStatsSummary)
+async def get_player_stats_summary(
+    background_tasks: BackgroundTasks,
+    request: Request,
+    commons: dict = Depends(get_player_common_parameters),
+    gamemode: PlayerGamemode
+    | None = Query(
+        None,
+        title="Gamemode",
+        description=(
+            "Filter on a specific gamemode. If not specified, the data of "
+            "every gamemode will be combined."
+        ),
+        example="competitive",
+    ),
+    platform: PlayerPlatform
+    | None = Query(
+        None,
+        title="Platform",
+        description=(
+            "Filter on a specific platform. If not specified, the data of "
+            "every platform will be combined."
+        ),
+        example="pc",
+    ),
+):
+    return GetPlayerStatsSummaryRequestHandler(request).process_request(
+        background_tasks=background_tasks,
+        player_id=commons.get("player_id"),
+        platform=platform,
+        gamemode=gamemode,
+    )
+
+
+@router.get(
+    "/{player_id}",
+    response_model=Player,
+    responses=career_routes_responses,
+    tags=[RouteTag.PLAYERS],
+    summary="Get player career data",
+    description=(
+        "Get all player data : summary and statistics.<br />**Cache TTL : 1 hour.**"
+    ),
+)
+@validation_error_handler(response_model=Player)
+async def get_player_career(
+    background_tasks: BackgroundTasks,
+    request: Request,
+    commons: dict = Depends(get_player_common_parameters),
+):
+    return GetPlayerCareerRequestHandler(request).process_request(
         background_tasks=background_tasks,
         player_id=commons.get("player_id"),
     )
@@ -140,6 +206,7 @@ async def get_player_summary(
         "(combat, game, best, hero specific, average, etc.). Filter them on "
         "specific platform and gamemode (mandatory). You can even retrieve "
         "data about a specific hero of your choice."
+        "<br />**Cache TTL : 1 hour.**"
     ),
 )
 @validation_error_handler(response_model=CareerStats)

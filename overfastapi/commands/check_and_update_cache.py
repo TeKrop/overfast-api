@@ -10,6 +10,9 @@ from overfastapi.handlers.get_hero_request_handler import GetHeroRequestHandler
 from overfastapi.handlers.get_player_career_request_handler import (
     GetPlayerCareerRequestHandler,
 )
+from overfastapi.handlers.get_player_stats_summary_request_handler import (
+    GetPlayerStatsSummaryRequestHandler,
+)
 from overfastapi.handlers.list_gamemodes_request_handler import (
     ListGamemodesRequestHandler,
 )
@@ -24,6 +27,7 @@ PREFIXES_HANDLERS_MAPPING = {
     **{f"/heroes/{hero_key}": GetHeroRequestHandler for hero_key in HeroKey},
     "/gamemodes": ListGamemodesRequestHandler,
     "/players": GetPlayerCareerRequestHandler,
+    "/players_stats": GetPlayerStatsSummaryRequestHandler,
 }
 
 # Regular expressions for keys we don't want to refresh the cache explicitely
@@ -63,8 +67,12 @@ def get_request_handler_class_and_kwargs(cache_key: str) -> tuple[type, dict]:
 
     uri = cache_key.split("/")
     if cache_key.startswith("/players"):
+        # Specific case for stats summary
+        specific_cache_key = (
+            "/players_stats" if cache_key.endswith("/stats/summary") else "/players"
+        )
+        cache_request_handler_class = PREFIXES_HANDLERS_MAPPING[specific_cache_key]
         # /players/Player-1234 => ["", "players", "Player-1234"]
-        cache_request_handler_class = PREFIXES_HANDLERS_MAPPING["/players"]
         cache_kwargs = {"player_id": uri[2]}
     elif cache_key.startswith("/heroes") and len(uri) > 2 and uri[2] != "roles":
         cache_request_handler_class = PREFIXES_HANDLERS_MAPPING[cache_key]

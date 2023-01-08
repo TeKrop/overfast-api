@@ -35,6 +35,7 @@ class RouteTag(StrEnum):
     """Tags used to classify API routes"""
 
     HEROES = "🦸 Heroes"
+    GAMEMODES = "🎲 Gamemodes"
     MAPS = "🗺️ Maps"
     PLAYERS = "🎮 Players"
 

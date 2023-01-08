@@ -18,7 +18,7 @@ def setup_roles_test(home_html_data: str):
 
 
 def test_get_roles(roles_json_data: list):
-    response = client.get("/heroes/roles")
+    response = client.get("/roles")
     assert response.status_code == 200
     assert response.json() == roles_json_data
 
@@ -27,7 +27,7 @@ def test_get_roles_after_get_gamemodes(roles_json_data: list):
     # Used to check we don't have any conflict between parsers
     # using the same Blizzard URL and associated Parser caches
     client.get("/gamemodes")
-    response = client.get("/heroes/roles")
+    response = client.get("/roles")
     assert response.status_code == 200
     assert response.json() == roles_json_data
 
@@ -37,7 +37,7 @@ def test_get_roles_blizzard_error():
         "requests.get",
         return_value=Mock(status_code=503, text="Service Unavailable"),
     ):
-        response = client.get("/heroes/roles")
+        response = client.get("/roles")
 
     assert response.status_code == 504
     assert response.json() == {
@@ -50,7 +50,7 @@ def test_get_roles_internal_error():
         "overfastapi.handlers.list_roles_request_handler.ListRolesRequestHandler.process_request",
         return_value=[{"invalid_key": "invalid_value"}],
     ):
-        response = client.get("/heroes/roles")
+        response = client.get("/roles")
         assert response.status_code == 500
         assert response.json() == {
             "error": (
