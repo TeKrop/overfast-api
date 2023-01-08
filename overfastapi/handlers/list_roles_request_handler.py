@@ -9,6 +9,6 @@ class ListRolesRequestHandler(APIRequestHandler):
     retrieve a list of available Overwatch roles.
     """
 
-    api_root_url = "/heroes/roles"
+    api_root_url = "/roles"
     parser_classes = [RolesParser]
     timeout = HEROES_PATH_CACHE_TIMEOUT

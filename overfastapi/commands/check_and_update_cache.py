@@ -23,7 +23,7 @@ from overfastapi.handlers.list_roles_request_handler import ListRolesRequestHand
 # request handler used for cache refresh
 PREFIXES_HANDLERS_MAPPING = {
     "/heroes": ListHeroesRequestHandler,
-    "/heroes/roles": ListRolesRequestHandler,
+    "/roles": ListRolesRequestHandler,
     **{f"/heroes/{hero_key}": GetHeroRequestHandler for hero_key in HeroKey},
     "/gamemodes": ListGamemodesRequestHandler,
     "/players": GetPlayerCareerRequestHandler,
@@ -74,7 +74,7 @@ def get_request_handler_class_and_kwargs(cache_key: str) -> tuple[type, dict]:
         cache_request_handler_class = PREFIXES_HANDLERS_MAPPING[specific_cache_key]
         # /players/Player-1234 => ["", "players", "Player-1234"]
         cache_kwargs = {"player_id": uri[2]}
-    elif cache_key.startswith("/heroes") and len(uri) > 2 and uri[2] != "roles":
+    elif cache_key.startswith("/heroes") and len(uri) > 2:
         cache_request_handler_class = PREFIXES_HANDLERS_MAPPING[cache_key]
         cache_kwargs = {"hero_key": uri[2]}
     else:
