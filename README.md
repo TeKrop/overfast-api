@@ -12,9 +12,9 @@
 
 ## 👷 W.I.P. 👷
 
-- Players stats summary endpoint (essential stats often used for tracking progress, including total stats and average stats per 10 min)
-- Translations for specific heroes pages (will be available using a query parameter)
 - Various improvements on caching system
+- Translations for specific heroes pages (will be available using a query parameter)
+- Additional data about gamemodes and maps
 
 ## Table of contents
 * [✨ Live instance](#-live-instance)

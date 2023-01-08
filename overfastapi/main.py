@@ -9,7 +9,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from overfastapi.common.enums import RouteTag
 from overfastapi.common.logging import logger
 from overfastapi.config import OVERFAST_API_VERSION
-from overfastapi.routers import gamemodes, heroes, players
+from overfastapi.routers import gamemodes, heroes, players, roles
 
 app = FastAPI(
     title="OverFast API",
@@ -24,35 +24,10 @@ data to users. All duration values are also returned in seconds for convenience.
 
 ## 👷 W.I.P. 👷
 
-- Players stats summary endpoint (essential stats often used for tracking progress, including total stats and average stats per 10 min)
-- Translations for specific heroes pages (will be available using a query parameter)
 - Various improvements on caching system
-
-## 🛠️ Cache System
-
-![Python + Redis + Nginx](https://files.tekrop.fr/classic_schema_nginx_cache.svg)
-
-### Functioning
-
-OverFast API introduces a very specific cache system, stored on a **Redis** server, and divided in two parts :
-* **API Cache** : a very high level cache, linking URIs (cache key) to raw JSON data. When first doing a request, if a cache is available, the JSON data is returned as-is by the **nginx** server. The cached values are stored with an arbitrary TTL (time to leave) parameter depending on the called route.
-* **Parser Cache** : a specific cache for the parser system of the OverFast API. When an HTML Blizzard page is parsed, a hash of the HTML content and the parsing result (as a JSON string) are stored, in order to minimize the heavy parsing process if the page hasn't changed since the last API call. There is no TTL on this cache.
-
-### API Cache TTL values
-* Heroes list : 1 day
-* Hero specific data : 1 day
-* Roles list : 1 day
-* Gamemodes list : 1 day
-* Players career : 1 hour
-* Players search : 1 hour
-
-### Background cache refresh
-
-In order to reduce the number of requests to Blizzard that API users can make,
-I introduced a specific cache refresh system. The main idea is to update the API Cache
-in the background (server side) when needed, just before its expiration. For example,
-if a user requests its player career page, it will be slow for the first call
-(2-3s in total), but very fast for all the next times, thanks to this system."""
+- Translations for specific heroes pages (will be available using a query parameter)
+- Additional data about gamemodes and maps
+"""
 
 
 def custom_openapi():  # pragma: no cover
@@ -83,8 +58,8 @@ def custom_openapi():  # pragma: no cover
                 },
             },
             {
-                "name": RouteTag.MAPS,
-                "description": "Overwatch maps details",
+                "name": RouteTag.GAMEMODES,
+                "description": "Overwatch gamemodes details",
                 "externalDocs": {
                     "description": "Overwatch home page, source of the information",
                     "url": "https://overwatch.blizzard.com/en-us/",
@@ -133,5 +108,6 @@ def overridden_redoc():
 
 # Add application routers
 app.include_router(heroes.router, prefix="/heroes")
+app.include_router(roles.router, prefix="/roles")
 app.include_router(gamemodes.router, prefix="/gamemodes")
 app.include_router(players.router, prefix="/players")

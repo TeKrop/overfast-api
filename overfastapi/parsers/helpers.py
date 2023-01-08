@@ -2,7 +2,7 @@
 import re
 import unicodedata
 
-from overfastapi.common.enums import CompetitiveDivision, Role
+from overfastapi.common.enums import CompetitiveDivision, HeroKey, Role
 from overfastapi.config import BLIZZARD_HOST
 
 
@@ -102,3 +102,33 @@ def string_to_snakecase(input_str: str) -> str:
     return (
         re.sub(r"(?<=[a-z])(?=[A-Z])|[^a-zA-Z0-9]", "_", cleaned_str).strip("_").lower()
     )
+
+
+def get_hero_role(hero_key: HeroKey) -> Role:
+    """Returns the role of a given hero"""
+    if hero_key in [
+        HeroKey.ANA,
+        HeroKey.BAPTISTE,
+        HeroKey.BRIGITTE,
+        HeroKey.KIRIKO,
+        HeroKey.LUCIO,
+        HeroKey.MERCY,
+        HeroKey.MOIRA,
+        HeroKey.ZENYATTA,
+    ]:
+        return Role.SUPPORT
+    elif hero_key in [
+        HeroKey.DVA,
+        HeroKey.DOOMFIST,
+        HeroKey.JUNKER_QUEEN,
+        HeroKey.ORISA,
+        HeroKey.RAMATTRA,
+        HeroKey.REINHARDT,
+        HeroKey.ROADHOG,
+        HeroKey.SIGMA,
+        HeroKey.WINSTON,
+        HeroKey.WRECKING_BALL,
+        HeroKey.ZARYA,
+    ]:
+        return Role.TANK
+    return Role.DAMAGE

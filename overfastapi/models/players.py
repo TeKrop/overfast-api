@@ -1,7 +1,11 @@
 """Set of pydantic models used for Players API routes"""
 from pydantic import AnyHttpUrl, BaseModel, Field, HttpUrl, StrictFloat, StrictInt
 
-from overfastapi.common.api_examples import CareerStatsExample, HeroesComparisonsExample
+from overfastapi.common.api_examples import (
+    CareerStatsExample,
+    HeroesComparisonsExample,
+    PlayerStatsSummaryExample,
+)
 from overfastapi.common.enums import (
     CareerStatCategory,
     CompetitiveDivision,
@@ -401,3 +405,302 @@ class Player(BaseModel):
             "If the player career is private or has no stat at all, it's null."
         ),
     )
+
+
+# Player stats summary
+class TotalStatsSummary(BaseModel):
+    eliminations: int = Field(..., description="Total number of eliminations", ge=0)
+    assists: int = Field(..., description="Total number of assists", ge=0)
+    deaths: int = Field(..., description="Total number of deaths", ge=0)
+    damage: int = Field(..., description="Total damage done", ge=0)
+    healing: int = Field(..., description="Total healing done", ge=0)
+
+
+class AverageStatsSummary(BaseModel):
+    eliminations: float = Field(
+        ..., description="Average eliminations per 10 minutes", ge=0.0
+    )
+    assists: float = Field(..., description="Average assists per 10 minutes", ge=0.0)
+    deaths: float = Field(..., description="Average deaths per 10 minutes", ge=0.0)
+    damage: float = Field(..., description="Average damage done per 10 minutes", ge=0.0)
+    healing: float = Field(
+        ..., description="Average healing done per 10 minutes", ge=0.0
+    )
+
+
+class StatsSummary(BaseModel):
+    games_played: int = Field(..., description="Number of games played", ge=0)
+    time_played: int = Field(..., description="Time played (in seconds)", ge=0)
+    winrate: float = Field(..., description="Winrate (in percent)", ge=0.0, le=100.0)
+    kda: float = Field(..., description="Kill / Death / Assist ratio", ge=0.0)
+    total: TotalStatsSummary = Field(
+        ...,
+        description=(
+            "Total values for generic stats : eliminations, assists, "
+            "deaths, damage, healing"
+        ),
+    )
+    average: AverageStatsSummary = Field(
+        ...,
+        description=(
+            "Average values per 10 minutes for generic stats : eliminations, "
+            "assists, deaths, damage, healing"
+        ),
+    )
+
+
+class PlayerRolesStats(BaseModel):
+    tank: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary of all tank heroes played by the player. "
+            "Not defined if he never played this role."
+        ),
+    )
+    damage: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary of all damage heroes played by the player"
+            "Not defined if he never played this role."
+        ),
+    )
+    support: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary of all support heroes played by the player"
+            "Not defined if he never played this role."
+        ),
+    )
+
+
+class PlayerHeroesStats(BaseModel):
+    ana: StatsSummary | None = Field(
+        None,
+        description="Stats summary for Ana. Not defined if he never played the hero.",
+    )
+    ashe: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Ashe. Not defined if he never played the hero."
+        ),
+    )
+    baptiste: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Baptiste. Not defined if he never played the hero."
+        ),
+    )
+    bastion: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Bastion. Not defined if he never played the hero."
+        ),
+    )
+    brigitte: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Brigitte. Not defined if he never played the hero."
+        ),
+    )
+    cassidy: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Cassidy. Not defined if he never played the hero."
+        ),
+    )
+    dva: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for D.Va. Not defined if he never played the hero."
+        ),
+    )
+    doomfist: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Doomfist. Not defined if he never played the hero."
+        ),
+    )
+    echo: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Echo. Not defined if he never played the hero."
+        ),
+    )
+    genji: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Genji. Not defined if he never played the hero."
+        ),
+    )
+    hanzo: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Hanzo. Not defined if he never played the hero."
+        ),
+    )
+    junker_queen: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Junker Queen. Not defined if he never played the hero."
+        ),
+        alias="junker-queen",
+    )
+    junkrat: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Junkrat. Not defined if he never played the hero."
+        ),
+    )
+    kiriko: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Kiriko. Not defined if he never played the hero."
+        ),
+    )
+    lucio: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Lúcio. Not defined if he never played the hero."
+        ),
+    )
+    mei: StatsSummary | None = Field(
+        None,
+        description="Stats summary for Mei. Not defined if he never played the hero.",
+    )
+    mercy: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Mercy. Not defined if he never played the hero."
+        ),
+    )
+    moira: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Lúcio. Not defined if he never played the hero."
+        ),
+    )
+    orisa: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Orisa. Not defined if he never played the hero."
+        ),
+    )
+    pharah: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Pharah. Not defined if he never played the hero."
+        ),
+    )
+    ramattra: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Ramattra. Not defined if he never played the hero."
+        ),
+    )
+    reaper: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Reaper. Not defined if he never played the hero."
+        ),
+    )
+    reinhardt: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Reinhardt. Not defined if he never played the hero."
+        ),
+    )
+    roadhog: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Roadhog. Not defined if he never played the hero."
+        ),
+    )
+    sigma: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Sigma. Not defined if he never played the hero."
+        ),
+    )
+    soldier_76: StatsSummary | None = Field(
+        None,
+        description="Stats summary for Soldier: 76. Not defined if he never played the hero.",
+        alias="soldier-76",
+    )
+    sojourn: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Sojourn. Not defined if he never played the hero."
+        ),
+    )
+    sombra: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Sombra. Not defined if he never played the hero."
+        ),
+    )
+    symmetra: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Symmetra. Not defined if he never played the hero."
+        ),
+    )
+    torbjorn: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Torbjörn. Not defined if he never played the hero."
+        ),
+    )
+    tracer: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Tracer. Not defined if he never played the hero."
+        ),
+    )
+    widowmaker: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Widowmaker. Not defined if he never played the hero."
+        ),
+    )
+    winston: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Winston. Not defined if he never played the hero."
+        ),
+    )
+    wrecking_ball: StatsSummary | None = Field(
+        None,
+        description="Stats summary for Wrecking Ball. Not defined if he never played the hero.",
+        alias="wrecking-ball",
+    )
+    zarya: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Zarya. Not defined if he never played the hero."
+        ),
+    )
+    zenyatta: StatsSummary | None = Field(
+        None,
+        description=(
+            "Stats summary for Zenyatta. Not defined if he never played the hero."
+        ),
+    )
+
+
+class PlayerStatsSummary(BaseModel):
+    general: StatsSummary | None = Field(
+        None,
+        description="Sum of the stats of all the heroes played by the player",
+    )
+    roles: PlayerRolesStats | None = Field(
+        None,
+        description=(
+            "Sum of the stats of all the heroes played by the player, regrouped by roles"
+        ),
+    )
+    heroes: PlayerHeroesStats | None = Field(
+        None, description="Stats of all the heroes played by the player"
+    )
+
+    class Config:
+        schema_extra = {"example": PlayerStatsSummaryExample}

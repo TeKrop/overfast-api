@@ -1,4 +1,6 @@
 """Parser Helpers module"""
+import json
+
 import requests
 from fastapi import HTTPException, Request, status
 
@@ -7,6 +9,7 @@ from overfastapi.config import (
     DISCORD_WEBHOOK_ENABLED,
     DISCORD_WEBHOOK_URL,
     OVERFAST_API_VERSION,
+    TEST_FIXTURES_ROOT_PATH,
 )
 from overfastapi.models.errors import BlizzardErrorMessage, InternalServerErrorMessage
 
@@ -109,3 +112,19 @@ def send_discord_webhook_message(message: str) -> requests.Response | None:
         if DISCORD_WEBHOOK_ENABLED
         else None
     )
+
+
+def read_html_file(filepath: str) -> str:
+    """Helper method for retrieving fixture HTML file data"""
+    with open(
+        f"{TEST_FIXTURES_ROOT_PATH}/html/{filepath}", "r", encoding="utf-8"
+    ) as html_file:
+        return html_file.read()
+
+
+def read_json_file(filepath: str) -> dict | list:
+    """Helper method for retrieving fixture JSON file data"""
+    with open(
+        f"{TEST_FIXTURES_ROOT_PATH}/json/{filepath}", "r", encoding="utf-8"
+    ) as json_file:
+        return json.load(json_file)

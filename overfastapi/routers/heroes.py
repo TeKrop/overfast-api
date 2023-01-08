@@ -1,4 +1,4 @@
-"""Heroes endpoints router : heroes list, heroes details, roles list, etc."""
+"""Heroes endpoints router : heroes list, heroes details, etc."""
 
 from fastapi import APIRouter, BackgroundTasks, Path, Query, Request
 
@@ -7,8 +7,7 @@ from overfastapi.common.enums import HeroKey, Role, RouteTag
 from overfastapi.common.helpers import routes_responses
 from overfastapi.handlers.get_hero_request_handler import GetHeroRequestHandler
 from overfastapi.handlers.list_heroes_request_handler import ListHeroesRequestHandler
-from overfastapi.handlers.list_roles_request_handler import ListRolesRequestHandler
-from overfastapi.models.heroes import Hero, HeroShort, RoleDetail
+from overfastapi.models.heroes import Hero, HeroShort
 
 router = APIRouter()
 
@@ -19,7 +18,10 @@ router = APIRouter()
     responses=routes_responses,
     tags=[RouteTag.HEROES],
     summary="Get a list of heroes",
-    description="Get a list of Overwatch heroes, which can be filtered using roles",
+    description=(
+        "Get a list of Overwatch heroes, which can be filtered using roles. "
+        "<br />**Cache TTL : 1 day.**"
+    ),
 )
 @validation_error_handler(response_model=HeroShort)
 async def list_heroes(
@@ -33,29 +35,14 @@ async def list_heroes(
 
 
 @router.get(
-    "/roles",
-    response_model=list[RoleDetail],
-    responses=routes_responses,
-    tags=[RouteTag.HEROES],
-    summary="Get a list of roles",
-    description=("Get a list of available Overwatch roles"),
-)
-@validation_error_handler(response_model=RoleDetail)
-async def list_roles(background_tasks: BackgroundTasks, request: Request):
-    return ListRolesRequestHandler(request).process_request(
-        background_tasks=background_tasks
-    )
-
-
-@router.get(
     "/{hero_key}",
     response_model=Hero,
     responses=routes_responses,
     tags=[RouteTag.HEROES],
-    summary="Get specific hero data",
+    summary="Get hero data",
     description=(
-        "Get details data about a specific Overwatch hero : "
-        "weapons, abilities, story, medias, etc."
+        "Get data about an Overwatch hero : description, abilities, story, etc. "
+        "<br />**Cache TTL : 1 day.**"
     ),
 )
 @validation_error_handler(response_model=Hero)

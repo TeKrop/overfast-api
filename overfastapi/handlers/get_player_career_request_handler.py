@@ -15,7 +15,9 @@ class GetPlayerCareerRequestHandler(APIRequestHandler):
     parser_classes = [PlayerParser]
     timeout = CAREER_PATH_CACHE_TIMEOUT
     route_filters = [
+        # Player summary
         {"uri": "/summary", "kwargs": {"summary": True}},
+        # Player stats
         *[
             {
                 "uri": f"/stats?gamemode={gamemode.value}",

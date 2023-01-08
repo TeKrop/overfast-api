@@ -1,11 +1,10 @@
-import json
 from unittest.mock import patch
 
 import fakeredis
 import pytest
 from _pytest.fixtures import SubRequest
 
-from overfastapi.config import TEST_FIXTURES_ROOT_PATH
+from overfastapi.common.helpers import read_html_file, read_json_file
 
 
 @pytest.fixture(scope="session")
@@ -26,13 +25,6 @@ def patch_before_every_test(redis_server: fakeredis.FakeStrictRedis):
     redis_server.flushdb()
 
 
-def read_html_file(filepath: str) -> str:
-    with open(
-        f"{TEST_FIXTURES_ROOT_PATH}/html/{filepath}", "r", encoding="utf-8"
-    ) as html_file:
-        return html_file.read()
-
-
 @pytest.fixture(scope="session")
 def heroes_html_data():
     return read_html_file("heroes.html")
@@ -51,13 +43,6 @@ def home_html_data():
 @pytest.fixture(scope="session")
 def player_html_data(request: SubRequest):
     return read_html_file(f"players/{request.param}.html")
-
-
-def read_json_file(filepath: str) -> dict | list:
-    with open(
-        f"{TEST_FIXTURES_ROOT_PATH}/json/{filepath}", "r", encoding="utf-8"
-    ) as json_file:
-        return json.load(json_file)
 
 
 @pytest.fixture(scope="session")
@@ -83,6 +68,11 @@ def roles_json_data():
 @pytest.fixture(scope="session")
 def player_json_data(request: SubRequest):
     return read_json_file(f"players/{request.param}.json")
+
+
+@pytest.fixture(scope="session")
+def player_stats_json_data(request: SubRequest):
+    return read_json_file(f"players/stats/{request.param}.json")
 
 
 @pytest.fixture(scope="session")

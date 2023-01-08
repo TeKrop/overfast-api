@@ -99,7 +99,7 @@ class PlayerParser(APIParser):
         return self.data
 
     def parse_data(self) -> dict:
-        return {"summary": self.__get_summary(), "stats": self.__get_stats()}
+        return {"summary": self.__get_summary(), "stats": self.get_stats()}
 
     def __get_summary(self) -> dict:
         profile_div = self.root_tag.find(
@@ -215,7 +215,7 @@ class PlayerParser(APIParser):
             else PlayerPrivacy.PUBLIC
         ).value
 
-    def __get_stats(self) -> dict | None:
+    def get_stats(self) -> dict | None:
         stats = {
             platform.value: self.__get_platform_stats(platform_class)
             for platform, platform_class in platforms_div_mapping.items()

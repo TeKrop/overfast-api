@@ -65,7 +65,7 @@ class APIRequestHandler(ApiRequestMixin, ABC):
 
         # If we are using API Cache from inside the app
         # (no reverse proxy configured), check the API Cache
-        if api_cache_data := self.get_api_cache_data():
+        if (api_cache_data := self.get_api_cache_data()) is not None:
             return api_cache_data
 
         # No API Cache or not using it in app, we request the data from Blizzard page
@@ -155,7 +155,8 @@ class APIRequestHandler(ApiRequestMixin, ABC):
 
         request_path = self.get_api_request_url(**kwargs)
         computed_data = self.merge_parsers_data(
-            [parser.data for parser in parsers], **kwargs
+            [parser.filter_request_using_query() for parser in parsers],
+            **kwargs,
         )
 
         # Generic route update
