@@ -1,5 +1,4 @@
 """Search Players Request Handler module"""
-import json
 from typing import Iterable
 
 from fastapi import Request
@@ -45,7 +44,7 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
 
         # If we are using API Cache from inside the app
         # (no reverse proxy configured), check the API Cache
-        if api_cache_data := self.get_api_cache_data():
+        if (api_cache_data := self.get_api_cache_data()) is not None:
             return api_cache_data
 
         # No API Cache or not using it in app, we request the data from Blizzard URL
@@ -79,9 +78,7 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
 
         # Update API Cache
         logger.info("Updating API Cache...")
-        self.cache_manager.update_api_cache(
-            self.cache_key, json.dumps(players_list), self.timeout
-        )
+        self.cache_manager.update_api_cache(self.cache_key, players_list, self.timeout)
 
         # Return filtered list
         logger.info("Done ! Returning players list...")

@@ -1,6 +1,8 @@
-from functools import cached_property
+"""Player stats summary Parser module"""
+from fastapi import status
 
 from overfastapi.common.enums import HeroKey, PlayerGamemode, PlayerPlatform, Role
+from overfastapi.common.exceptions import ParserBlizzardError
 from overfastapi.parsers.helpers import get_hero_role
 from overfastapi.parsers.player_parser import PlayerParser
 
@@ -10,10 +12,6 @@ class PlayerStatsSummaryParser(PlayerParser):
 
     generic_stats_names = ["games_played", "games_lost", "time_played"]
     total_stats_names = ["eliminations", "assists", "deaths", "damage", "healing"]
-
-    @cached_property
-    def cache_key(self) -> str:
-        return f"stats-summary-{self.blizzard_url}"
 
     def filter_request_using_query(self, **kwargs) -> dict:
         gamemodes = (
@@ -34,6 +32,13 @@ class PlayerStatsSummaryParser(PlayerParser):
         return self.__compute_stats(general_stats, roles_stats, heroes_stats)
 
     def parse_data(self) -> dict | None:
+        # We must check if we have the expected section for profile. If not,
+        # it means the player doesn't exist or hasn't been found.
+        if not self.root_tag.find("blz-section", class_="Profile-masthead"):
+            raise ParserBlizzardError(
+                status_code=status.HTTP_404_NOT_FOUND, message="Player not found"
+            )
+
         # Only return heroes stats, which will be used for calculation
         # depending on the parameters
         return self.__get_heroes_stats(self.get_stats())

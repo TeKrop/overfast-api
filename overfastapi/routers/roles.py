@@ -13,14 +13,15 @@ router = APIRouter()
 
 @router.get(
     "",
-    response_model=list[RoleDetail],
     responses=routes_responses,
     tags=[RouteTag.HEROES],
     summary="Get a list of roles",
     description="Get a list of available Overwatch roles.<br />**Cache TTL : 1 day.**",
 )
 @validation_error_handler(response_model=RoleDetail)
-async def list_roles(background_tasks: BackgroundTasks, request: Request):
+async def list_roles(
+    background_tasks: BackgroundTasks, request: Request
+) -> list[RoleDetail]:
     return ListRolesRequestHandler(request).process_request(
         background_tasks=background_tasks
     )

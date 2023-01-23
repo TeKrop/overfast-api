@@ -24,6 +24,8 @@ parser-cache:https://overwatch.blizzard.com/en-us/heroes/ana
 => {"hash": "12345abcdef", "data": "[{...}]"}
 """
 
+import json
+import zlib
 from typing import Callable, Iterator
 
 import redis
@@ -85,47 +87,53 @@ class CacheManager(metaclass=Singleton):
         return self.redis_server.get(f"{API_CACHE_KEY_PREFIX}:{cache_key}")
 
     @redis_connection_handler
-    def get_parser_cache(self, cache_key: str) -> str | None:
+    def get_parser_cache(self, cache_key: str) -> dict | None:
         """Get the Parser Cache value associated with a given cache key"""
-        return self.redis_server.hgetall(f"{PARSER_CACHE_KEY_PREFIX}:{cache_key}")
-
-    def get_unchanged_parser_cache(
-        self, cache_key: str, parser_hash: str
-    ) -> str | None:
-        """Get the Parser Cache HTML data if the cached hash matches the given
-        parser hash (it means the data has not changed since the last parsing)
-        """
-        parser_cache = self.get_parser_cache(cache_key)
+        parser_cache = self.redis_server.get(f"{PARSER_CACHE_KEY_PREFIX}:{cache_key}")
         return (
-            parser_cache[b"data"].decode("utf-8")
-            if parser_cache and parser_cache[b"hash"].decode("utf-8") == parser_hash
+            json.loads(zlib.decompress(parser_cache).decode("utf-8"))
+            if parser_cache
             else None
         )
 
     @redis_connection_handler
-    def update_api_cache(self, cache_key: str, value: str, expire: int) -> None:
+    def update_api_cache(self, cache_key: str, value: dict | list, expire: int) -> None:
         """Update or set an API Cache value with an expiration value (in seconds)"""
-        self.redis_server.set(f"{API_CACHE_KEY_PREFIX}:{cache_key}", value, ex=expire)
+
+        # Compress the JSON string
+        str_value = json.dumps(value, separators=(",", ":"))
+
+        # Store it in API Cache
+        self.redis_server.set(
+            f"{API_CACHE_KEY_PREFIX}:{cache_key}", str_value, ex=expire
+        )
 
     @redis_connection_handler
-    def update_parser_cache(self, cache_key: str, value: dict) -> None:
+    def update_parser_cache(self, cache_key: str, value: dict, expire: int) -> None:
         """Update or set a Parser Cache value with an expire value"""
-        self.redis_server.hset(f"{PARSER_CACHE_KEY_PREFIX}:{cache_key}", mapping=value)
+        compressed_value = zlib.compress(
+            json.dumps(value, separators=(",", ":")).encode("utf-8")
+        )
+        self.redis_server.set(
+            f"{PARSER_CACHE_KEY_PREFIX}:{cache_key}", value=compressed_value, ex=expire
+        )
 
-    def get_soon_expired_api_cache_keys(self) -> Iterator[str]:
-        """Get a set of cache keys for values in API Cache which will expire soon"""
+    def get_soon_expired_parser_cache_keys(self) -> Iterator[str]:
+        """Get a set of cache keys for values in Parser Cache which will expire soon"""
         if not self.is_redis_server_up:
             yield from ()
             return
 
         try:
-            api_cache_keys = self.redis_server.keys(pattern=f"{API_CACHE_KEY_PREFIX}:*")
+            parser_cache_keys = self.redis_server.keys(
+                pattern=f"{PARSER_CACHE_KEY_PREFIX}:*"
+            )
         except redis.exceptions.RedisError as err:
             logger.warning("Redis server error : {}", str(err))
             yield from ()
             return
 
-        for key in api_cache_keys:
+        for key in parser_cache_keys:
             # Get key TTL in redis
             try:
                 key_ttl = self.redis_server.ttl(key)

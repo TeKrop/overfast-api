@@ -1,4 +1,3 @@
-import json
 from unittest.mock import Mock, patch
 
 import pytest
@@ -6,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from overfastapi.common.cache_manager import CacheManager
 from overfastapi.common.enums import Role
+from overfastapi.config import BLIZZARD_HOST, HEROES_PATH
 from overfastapi.main import app
 
 client = TestClient(app)
@@ -36,7 +36,7 @@ def test_get_heroes_when_no_cache(heroes_json_data: list):
 def test_get_heroes_from_api_cache(heroes_json_data: list):
     with patch("overfastapi.common.mixins.USE_API_CACHE_IN_APP", True):
         cache_manager = CacheManager()
-        cache_manager.update_api_cache("/heroes", json.dumps(heroes_json_data), 100)
+        cache_manager.update_api_cache("/heroes", heroes_json_data, 100)
 
         response = client.get("/heroes")
         assert response.status_code == 200
@@ -46,11 +46,7 @@ def test_get_heroes_from_api_cache(heroes_json_data: list):
 def test_get_heroes_from_parser_cache(heroes_json_data: list):
     cache_manager = CacheManager()
     cache_manager.update_parser_cache(
-        "/heroes",
-        {
-            "hash": "5c5dbe354c50edd1c90422005a546c7c",
-            "data": json.dumps(heroes_json_data),
-        },
+        f"HeroesParser-{BLIZZARD_HOST}{HEROES_PATH}", heroes_json_data, 100
     )
 
     response = client.get("/heroes")

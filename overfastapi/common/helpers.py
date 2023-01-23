@@ -48,11 +48,11 @@ def overfast_request(url: str) -> requests.Response:
     }
     try:
         return requests.get(url, headers=headers, timeout=10)
-    except requests.exceptions.Timeout:
+    except requests.exceptions.Timeout as error:
         raise blizzard_response_error(
             status_code=0,
             error="Blizzard took more than 10 seconds to respond, resulting in a timeout",
-        )
+        ) from error
 
 
 def overfast_internal_error(url: str, error: Exception) -> HTTPException:
@@ -117,7 +117,7 @@ def send_discord_webhook_message(message: str) -> requests.Response | None:
 def read_html_file(filepath: str) -> str:
     """Helper method for retrieving fixture HTML file data"""
     with open(
-        f"{TEST_FIXTURES_ROOT_PATH}/html/{filepath}", "r", encoding="utf-8"
+        f"{TEST_FIXTURES_ROOT_PATH}/html/{filepath}", encoding="utf-8"
     ) as html_file:
         return html_file.read()
 
@@ -125,6 +125,6 @@ def read_html_file(filepath: str) -> str:
 def read_json_file(filepath: str) -> dict | list:
     """Helper method for retrieving fixture JSON file data"""
     with open(
-        f"{TEST_FIXTURES_ROOT_PATH}/json/{filepath}", "r", encoding="utf-8"
+        f"{TEST_FIXTURES_ROOT_PATH}/json/{filepath}", encoding="utf-8"
     ) as json_file:
         return json.load(json_file)

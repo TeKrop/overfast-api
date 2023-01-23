@@ -15,9 +15,6 @@ class GetHeroRequestHandler(APIRequestHandler):
     parser_classes = [HeroParser, HeroesParser]
     timeout = HERO_PATH_CACHE_TIMEOUT
 
-    def get_api_request_url(self, **kwargs) -> str:
-        return f"{self.api_root_url}/{kwargs.get('hero_key')}"
-
     def merge_parsers_data(self, parsers_data: list[dict], **kwargs) -> dict:
         """Merge parsers data together : HeroParser for detailed data,
         and HeroParser for portrait (not here in the specific page)

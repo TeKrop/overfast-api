@@ -1,8 +1,6 @@
 """Abstract API Parser module"""
-import json
 from abc import ABC, abstractmethod
 from functools import cached_property
-from hashlib import md5
 
 from bs4 import BeautifulSoup
 
@@ -31,17 +29,6 @@ class APIParser(ABC):
 
     def __init__(self, **kwargs):
         self.blizzard_url = self.get_blizzard_url(**kwargs)
-
-        # Retrieve the HTML content from the Blizzard page
-        req = overfast_request(self.blizzard_url)
-        if req.status_code not in self.valid_http_codes:
-            raise blizzard_response_error_from_request(req)
-
-        # Initialize BeautifulSoup object
-        self.root_tag = BeautifulSoup(req.text, "lxml").body.find(
-            **self.root_tag_params
-        )
-        # Attribute containing parsed data
         self.data = None
 
     @property
@@ -49,15 +36,17 @@ class APIParser(ABC):
     def root_path(self) -> str:
         """Root path of the Blizzard URL containing the data (/en-us/career/, etc."""
 
-    @cached_property
-    def hash(self) -> str:
-        """Returns an MD5 hash of the input data, used for caching"""
-        return md5(str(self.root_tag).encode("utf-8")).hexdigest()
+    @property
+    @abstractmethod
+    def timeout(self) -> int:
+        """Timeout used for Parser Cache storage for this specific parser"""
 
     @cached_property
     def cache_key(self) -> str:
-        """Key used for caching using Parser Cache. Blizzard URL is the default"""
-        return self.blizzard_url
+        """Key used for caching using Parser Cache. Blizzard URL
+        concatenated with the Parser class name is the default.
+        """
+        return f"{type(self).__name__}-{self.blizzard_url}"
 
     @property
     def root_tag_params(self) -> dict:
@@ -68,33 +57,43 @@ class APIParser(ABC):
         return {"name": "div", "class_": "main-content", "recursive": False}
 
     def parse(self) -> None:
-        """Main parsing method, calling the main submethod and catching
-        BeautifulSoup exceptions. If there is any, a ParserParsingError is raised.
+        """Main parsing method, first checking if there is any Parser Cache. If
+        not, it's calling the main submethod and catching BeautifulSoup exceptions.
+        If there is any, a ParserParsingError is raised.
         """
-
-        # Check the Parser cache with received page calculated hash
         logger.info("Checking Parser Cache...")
-        parser_cache_data = self.cache_manager.get_unchanged_parser_cache(
-            self.cache_key, self.hash
-        )
-        if parser_cache_data:
-            # Parser cache is already valid, no need to do anything
+        parser_cache = self.cache_manager.get_parser_cache(self.cache_key)
+        if parser_cache is not None:
+            # Parser cache is here
             logger.info("Parser Cache found !")
-            self.data = json.loads(parser_cache_data)
+            self.data = parser_cache
             return
 
-        # No cache is valid, we need to parse the data and update the cache
-        logger.info("No valid Parser Cache found, parsing the page...")
+        # No cache is available, it's the first time the user requested the
+        # data or the Parser Cache has expired : retrieve and parse Blizzard page
+        self.retrieve_and_parse_blizzard_data()
+
+    def retrieve_and_parse_blizzard_data(self) -> None:
+        """Method used to retrieve data from Blizzard (HTML data), parsing it
+        and storing it into self.data attribute.
+        """
+        req = overfast_request(self.blizzard_url)
+        if req.status_code not in self.valid_http_codes:
+            raise blizzard_response_error_from_request(req)
+
+        # Initialize BeautifulSoup object
+        self.root_tag = BeautifulSoup(req.text, "lxml").body.find(
+            **self.root_tag_params
+        )
+
+        # Parse retrieved HTML data
         try:
             self.data = self.parse_data()
         except (AttributeError, KeyError, IndexError, TypeError) as error:
             raise ParserParsingError(repr(error)) from error
 
         # Update the Parser Cache
-        dumped_parsed_data = json.dumps(self.data)
-        self.cache_manager.update_parser_cache(
-            self.cache_key, {"hash": self.hash, "data": dumped_parsed_data}
-        )
+        self.cache_manager.update_parser_cache(self.cache_key, self.data, self.timeout)
 
     @abstractmethod
     def parse_data(self) -> dict | list[dict]:

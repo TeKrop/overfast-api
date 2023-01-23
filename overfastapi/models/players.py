@@ -460,14 +460,14 @@ class PlayerRolesStats(BaseModel):
     damage: StatsSummary | None = Field(
         None,
         description=(
-            "Stats summary of all damage heroes played by the player"
+            "Stats summary of all damage heroes played by the player. "
             "Not defined if he never played this role."
         ),
     )
     support: StatsSummary | None = Field(
         None,
         description=(
-            "Stats summary of all support heroes played by the player"
+            "Stats summary of all support heroes played by the player. "
             "Not defined if he never played this role."
         ),
     )

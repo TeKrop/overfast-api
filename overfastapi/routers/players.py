@@ -19,7 +19,7 @@ from overfastapi.handlers.get_player_stats_summary_request_handler import (
 from overfastapi.handlers.search_players_request_handler import (
     SearchPlayersRequestHandler,
 )
-from overfastapi.models.errors import ParserInitErrorMessage
+from overfastapi.models.errors import ParserErrorMessage
 from overfastapi.models.players import (
     CareerStats,
     Player,
@@ -31,7 +31,7 @@ from overfastapi.models.players import (
 # Custom route responses for player careers
 career_routes_responses = {
     status.HTTP_404_NOT_FOUND: {
-        "model": ParserInitErrorMessage,
+        "model": ParserErrorMessage,
         "description": "Player Not Found",
     },
     **common_routes_responses,
@@ -56,7 +56,6 @@ router = APIRouter()
 
 @router.get(
     "",
-    response_model=PlayerSearchResult,
     responses=common_routes_responses,
     tags=[RouteTag.PLAYERS],
     summary="Search for a specific player",
@@ -86,7 +85,7 @@ async def search_players(
     ),
     offset: int | None = Query(0, title="Offset of the results", ge=0),
     limit: int | None = Query(20, title="Limit of results per page", gt=0),
-):
+) -> PlayerSearchResult:
     return SearchPlayersRequestHandler(request).process_request(
         name=name,
         privacy=privacy,
@@ -98,7 +97,6 @@ async def search_players(
 
 @router.get(
     "/{player_id}/summary",
-    response_model=PlayerSummary,
     responses=career_routes_responses,
     tags=[RouteTag.PLAYERS],
     summary="Get player summary",
@@ -112,7 +110,7 @@ async def get_player_summary(
     background_tasks: BackgroundTasks,
     request: Request,
     commons: dict = Depends(get_player_common_parameters),
-):
+) -> PlayerSummary:
     return GetPlayerCareerRequestHandler(request).process_request(
         summary=True,
         background_tasks=background_tasks,
@@ -122,7 +120,6 @@ async def get_player_summary(
 
 @router.get(
     "/{player_id}/stats/summary",
-    response_model=PlayerStatsSummary,
     response_model_exclude_unset=True,
     responses=career_routes_responses,
     tags=[RouteTag.PLAYERS],
@@ -163,7 +160,7 @@ async def get_player_stats_summary(
         ),
         example="pc",
     ),
-):
+) -> PlayerStatsSummary:
     return GetPlayerStatsSummaryRequestHandler(request).process_request(
         background_tasks=background_tasks,
         player_id=commons.get("player_id"),
@@ -174,7 +171,6 @@ async def get_player_stats_summary(
 
 @router.get(
     "/{player_id}",
-    response_model=Player,
     responses=career_routes_responses,
     tags=[RouteTag.PLAYERS],
     summary="Get player career data",
@@ -187,7 +183,7 @@ async def get_player_career(
     background_tasks: BackgroundTasks,
     request: Request,
     commons: dict = Depends(get_player_common_parameters),
-):
+) -> Player:
     return GetPlayerCareerRequestHandler(request).process_request(
         background_tasks=background_tasks,
         player_id=commons.get("player_id"),
@@ -196,7 +192,6 @@ async def get_player_career(
 
 @router.get(
     "/{player_id}/stats",
-    response_model=CareerStats,
     response_model_exclude_unset=True,
     responses=career_routes_responses,
     tags=[RouteTag.PLAYERS],
@@ -240,7 +235,7 @@ async def get_player_stats(
             "You also can specify 'all-heroes' for general stats."
         ),
     ),
-):
+) -> CareerStats:
     return GetPlayerCareerRequestHandler(request).process_request(
         stats=True,
         background_tasks=background_tasks,

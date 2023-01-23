@@ -23,7 +23,7 @@ class InternalServerErrorMessage(BaseModel):
     )
 
 
-class ParserInitErrorMessage(BaseModel):
+class ParserErrorMessage(BaseModel):
     error: str = Field(
         ...,
         description="Message describing the error",

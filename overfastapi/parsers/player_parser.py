@@ -1,5 +1,4 @@
 """Player profile page Parser module"""
-
 from bs4 import Tag
 from fastapi import status
 
@@ -11,8 +10,8 @@ from overfastapi.common.enums import (
     PlayerPrivacy,
     Role,
 )
-from overfastapi.common.exceptions import ParserInitError
-from overfastapi.config import CAREER_PATH
+from overfastapi.common.exceptions import ParserBlizzardError
+from overfastapi.config import CAREER_PATH, CAREER_PATH_CACHE_TIMEOUT
 from overfastapi.parsers.api_parser import APIParser
 from overfastapi.parsers.helpers import (
     get_computed_stat_value,
@@ -39,6 +38,7 @@ class PlayerParser(APIParser):
     """Overwatch player profile page Parser class"""
 
     root_path = CAREER_PATH
+    timeout = CAREER_PATH_CACHE_TIMEOUT
     valid_http_codes = [
         200,  # Classic response
         404,  # Player Not Found response, we want to handle it here
@@ -47,12 +47,6 @@ class PlayerParser(APIParser):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.player_id = kwargs.get("player_id")
-
-        # We must check if we have expected section
-        if not self.root_tag.find("blz-section", class_="Profile-masthead"):
-            raise ParserInitError(
-                status_code=status.HTTP_404_NOT_FOUND, message="Player not found"
-            )
 
     def get_blizzard_url(self, **kwargs) -> str:
         return f"{self.blizzard_root_url}/{kwargs.get('player_id')}/"
@@ -99,6 +93,13 @@ class PlayerParser(APIParser):
         return self.data
 
     def parse_data(self) -> dict:
+        # We must check if we have the expected section for profile. If not,
+        # it means the player doesn't exist or hasn't been found.
+        if not self.root_tag.find("blz-section", class_="Profile-masthead"):
+            raise ParserBlizzardError(
+                status_code=status.HTTP_404_NOT_FOUND, message="Player not found"
+            )
+
         return {"summary": self.__get_summary(), "stats": self.get_stats()}
 
     def __get_summary(self) -> dict:

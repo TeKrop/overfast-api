@@ -13,12 +13,13 @@ from overfastapi.parsers.heroes_parser import HeroesParser
 
 def get_distant_hero_keys() -> set[str]:
     """Get a set of Overwatch hero keys from the Blizzard heroes page"""
-    try:
-        heroes_parser = HeroesParser()
-    except HTTPException:
-        raise SystemExit
+    heroes_parser = HeroesParser()
 
-    heroes_parser.parse()
+    try:
+        heroes_parser.retrieve_and_parse_blizzard_data()
+    except HTTPException as error:
+        raise SystemExit from error
+
     return {hero["key"] for hero in heroes_parser.data}
 
 

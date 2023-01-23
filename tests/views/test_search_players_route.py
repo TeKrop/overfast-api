@@ -107,9 +107,7 @@ def test_search_players_with_cache(search_players_api_json_data: list):
         }
 
         cache_manager = CacheManager()
-        cache_manager.update_api_cache(
-            "/players?name=Test", json.dumps(players_response_data), 100
-        )
+        cache_manager.update_api_cache("/players?name=Test", players_response_data, 100)
 
         response = client.get("/players?name=Test")
         assert response.status_code == 200

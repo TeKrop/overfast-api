@@ -1,7 +1,6 @@
 """Project constants module"""
-from pathlib import Path
-
 import tomllib
+from pathlib import Path
 
 with open(f"{Path.cwd()}/pyproject.toml", "rb") as project_file:
     project_data = tomllib.load(project_file)
@@ -42,7 +41,7 @@ PARSER_CACHE_KEY_PREFIX = "parser-cache"
 
 # When a cache value is about the expire (less than the configured value), we will
 # refresh it in the automatic cronjob "check_and_update_cache" (launched every minute)
-EXPIRED_CACHE_REFRESH_LIMIT = 3600
+EXPIRED_CACHE_REFRESH_LIMIT = 1800
 
 # Once a day
 HEROES_PATH_CACHE_TIMEOUT = 86400
@@ -53,11 +52,11 @@ HERO_PATH_CACHE_TIMEOUT = 86400
 # Once a day
 HOME_PATH_CACHE_TIMEOUT = 86400
 
-# Two hours (but we try to refresh after one hour)
-CAREER_PATH_CACHE_TIMEOUT = 7200
+# One hour
+CAREER_PATH_CACHE_TIMEOUT = 3600
 
-# Two hours (but we try to refresh after one hour)
-SEARCH_ACCOUNT_PATH_CACHE_TIMEOUT = 7200
+# One hour
+SEARCH_ACCOUNT_PATH_CACHE_TIMEOUT = 3600
 
 ############
 # BLIZZARD

@@ -1,5 +1,5 @@
 """Heroes page Parser module"""
-from overfastapi.config import HEROES_PATH
+from overfastapi.config import HEROES_PATH, HEROES_PATH_CACHE_TIMEOUT
 from overfastapi.parsers.api_parser import APIParser
 
 
@@ -7,6 +7,7 @@ class HeroesParser(APIParser):
     """Overwatch heroes list page Parser class"""
 
     root_path = HEROES_PATH
+    timeout = HEROES_PATH_CACHE_TIMEOUT
 
     def parse_data(self) -> list[dict]:
         return [
