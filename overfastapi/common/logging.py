@@ -4,7 +4,7 @@ import logging
 import sys
 from pathlib import Path
 
-from loguru import logger
+from loguru import logger as loguru_logger
 
 from overfastapi.config import LOGS_ROOT_PATH
 
@@ -58,15 +58,15 @@ class OverFastAPILogger:
     def customize_logging(
         cls, filepath: Path, level: str, rotation: str, retention: str, log_format: str
     ):
-        logger.remove()
-        logger.add(
+        loguru_logger.remove()
+        loguru_logger.add(
             sys.stdout,
             enqueue=True,
             backtrace=True,
             level=level.upper(),
             format=log_format,
         )
-        logger.add(
+        loguru_logger.add(
             str(filepath),
             rotation=rotation,
             retention=retention,
@@ -81,7 +81,7 @@ class OverFastAPILogger:
             _logger = logging.getLogger(_log)
             _logger.handlers = [InterceptHandler()]
 
-        return logger.bind(method=None)
+        return loguru_logger.bind(method=None)
 
 
 # Instanciate generic logger for all the app

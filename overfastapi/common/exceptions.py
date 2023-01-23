@@ -11,13 +11,13 @@ class OverfastError(Exception):
         return self.message
 
 
-class ParserInitError(OverfastError):
+class ParserBlizzardError(OverfastError):
     """Exception raised when there was an error in a Parser class
     initialization, usually when the data is not available
     """
 
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-    message = "Parser Init Error"
+    message = "Parser Blizzard Error"
 
     def __init__(self, status_code: int, message: str):
         super().__init__()

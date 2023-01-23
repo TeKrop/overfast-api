@@ -14,7 +14,6 @@ router = APIRouter()
 
 @router.get(
     "",
-    response_model=list[GamemodeDetails],
     responses=routes_responses,
     tags=[RouteTag.GAMEMODES],
     summary="Get a list of gamemodes",
@@ -27,7 +26,7 @@ router = APIRouter()
 async def list_map_gamemodes(
     background_tasks: BackgroundTasks,
     request: Request,
-):
+) -> list[GamemodeDetails]:
     return ListGamemodesRequestHandler(request).process_request(
         background_tasks=background_tasks
     )

@@ -1,101 +1,86 @@
 """Command used in order to check and update Redis API Cache depending on
 the expired cache refresh limit configuration. It can be run in the background.
 """
-import re
+from fastapi import HTTPException
 
 from overfastapi.common.cache_manager import CacheManager
-from overfastapi.common.enums import HeroKey
+from overfastapi.common.exceptions import ParserBlizzardError, ParserParsingError
+from overfastapi.common.helpers import overfast_internal_error
 from overfastapi.common.logging import logger
-from overfastapi.handlers.get_hero_request_handler import GetHeroRequestHandler
-from overfastapi.handlers.get_player_career_request_handler import (
-    GetPlayerCareerRequestHandler,
-)
-from overfastapi.handlers.get_player_stats_summary_request_handler import (
-    GetPlayerStatsSummaryRequestHandler,
-)
-from overfastapi.handlers.list_gamemodes_request_handler import (
-    ListGamemodesRequestHandler,
-)
-from overfastapi.handlers.list_heroes_request_handler import ListHeroesRequestHandler
-from overfastapi.handlers.list_roles_request_handler import ListRolesRequestHandler
+from overfastapi.config import BLIZZARD_HOST, PARSER_CACHE_KEY_PREFIX
+from overfastapi.parsers.gamemodes_parser import GamemodesParser
+from overfastapi.parsers.hero_parser import HeroParser
+from overfastapi.parsers.heroes_parser import HeroesParser
+from overfastapi.parsers.player_parser import PlayerParser
+from overfastapi.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
+from overfastapi.parsers.roles_parser import RolesParser
 
-# Mapping of cache_key prefixes to the associated
-# request handler used for cache refresh
-PREFIXES_HANDLERS_MAPPING = {
-    "/heroes": ListHeroesRequestHandler,
-    "/roles": ListRolesRequestHandler,
-    **{f"/heroes/{hero_key}": GetHeroRequestHandler for hero_key in HeroKey},
-    "/gamemodes": ListGamemodesRequestHandler,
-    "/players": GetPlayerCareerRequestHandler,
-    "/players_stats": GetPlayerStatsSummaryRequestHandler,
+# Mapping of parser class names to linked classes
+PARSER_CLASSES_MAPPING = {
+    "GamemodesParser": GamemodesParser,
+    "HeroParser": HeroParser,
+    "HeroesParser": HeroesParser,
+    "PlayerParser": PlayerParser,
+    "PlayerStatsSummaryParser": PlayerStatsSummaryParser,
+    "RolesParser": RolesParser,
 }
 
-# Regular expressions for keys we don't want to refresh the cache explicitely
-# from here (either will be done in another process or not at all because not
-# relevant)
-EXCEPTION_KEYS_REGEX = {
-    r"^\/players\/[^\/]+\/(summary|stats)$",  # players summary or stats
-    r"^\/players$",  # players search
-}
+# Generic cache manager used in the process
+cache_manager = CacheManager()
 
 
 def get_soon_expired_cache_keys() -> set[str]:
-    """Get a set of URIs for values in API Cache which will expire soon
-    without taking subroutes and query parameters"""
-    cache_manager = CacheManager()
-
-    expiring_keys = set()
-    for key in cache_manager.get_soon_expired_api_cache_keys():
-        # api-cache:/heroes?role=damage => /heroes?role=damage => /heroes
-        cache_key = key.split(":")[1].split("?")[0]
-        # Avoid keys we don't want to refresh from here
-        if any(
-            re.match(exception_key, cache_key) for exception_key in EXCEPTION_KEYS_REGEX
-        ):
-            continue
-        # Add the key to the set
-        expiring_keys.add(cache_key)
-    return expiring_keys
-
-
-def get_request_handler_class_and_kwargs(cache_key: str) -> tuple[type, dict]:
-    """Get the request handler class and cache kwargs (to give to the
-    update_all_api_cache() method) associated with a given cache key
+    """Get a set of URIs for values in Parser Cache which are obsolete
+    or will need to be updated.
     """
-    cache_request_handler_class = None
+    return set(cache_manager.get_soon_expired_parser_cache_keys())
+
+
+def get_request_parser_class(cache_key: str) -> tuple[type, dict]:
+    """Get the request parser class and cache kwargs to use for instanciation"""
     cache_kwargs = {}
 
-    uri = cache_key.split("/")
-    if cache_key.startswith("/players"):
-        # Specific case for stats summary
-        specific_cache_key = (
-            "/players_stats" if cache_key.endswith("/stats/summary") else "/players"
-        )
-        cache_request_handler_class = PREFIXES_HANDLERS_MAPPING[specific_cache_key]
-        # /players/Player-1234 => ["", "players", "Player-1234"]
-        cache_kwargs = {"player_id": uri[2]}
-    elif cache_key.startswith("/heroes") and len(uri) > 2:
-        cache_request_handler_class = PREFIXES_HANDLERS_MAPPING[cache_key]
-        cache_kwargs = {"hero_key": uri[2]}
-    else:
-        cache_request_handler_class = PREFIXES_HANDLERS_MAPPING[cache_key]
+    specific_cache_key = cache_key.removeprefix(f"{PARSER_CACHE_KEY_PREFIX}:")
+    parser_class_name = specific_cache_key.split("-")[0]
+    uri = specific_cache_key.removeprefix(f"{parser_class_name}-{BLIZZARD_HOST}").split(
+        "/"
+    )
+    cache_parser_class = PARSER_CLASSES_MAPPING[parser_class_name]
 
-    return cache_request_handler_class, cache_kwargs
+    if parser_class_name in ["PlayerParser", "PlayerStatsSummaryParser"]:
+        cache_kwargs = {"player_id": uri[3]}
+    elif parser_class_name == "HeroParser":
+        cache_kwargs = {"hero_key": uri[3]}
+
+    return cache_parser_class, cache_kwargs
 
 
 def main():
     """Main method of the script"""
-    logger.info(
-        "Starting Redis cache update...\n"
-        "Retrieving cache keys which will expire soon..."
-    )
-    soon_expired_cache_keys = get_soon_expired_cache_keys()
-    logger.info("Done ! Retrieved keys : {}", len(soon_expired_cache_keys))
+    logger.info("Starting Redis cache update...")
 
-    for key in soon_expired_cache_keys:
-        logger.info("Updating all cache for {} key...", key)
-        request_handler_class, kwargs = get_request_handler_class_and_kwargs(key)
-        request_handler_class().update_all_api_cache(parsers=[], **kwargs)
+    keys_to_update = get_soon_expired_cache_keys()
+    logger.info("Done ! Retrieved keys : {}", len(keys_to_update))
+
+    for key in keys_to_update:
+        logger.info("Updating data for {} key...", key)
+        parser_class, kwargs = get_request_parser_class(key)
+
+        parser = parser_class(**kwargs)
+
+        try:
+            parser.retrieve_and_parse_blizzard_data()
+        except ParserBlizzardError as error:
+            logger.error(
+                "Failed to instanciate Parser when refreshing : {}",
+                error.message,
+            )
+            continue
+        except ParserParsingError as error:
+            overfast_internal_error(parser.blizzard_url, error)
+            continue
+        except HTTPException:
+            continue
 
     logger.info("Redis cache update finished !")
 

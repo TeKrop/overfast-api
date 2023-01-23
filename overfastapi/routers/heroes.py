@@ -14,7 +14,6 @@ router = APIRouter()
 
 @router.get(
     "",
-    response_model=list[HeroShort],
     responses=routes_responses,
     tags=[RouteTag.HEROES],
     summary="Get a list of heroes",
@@ -28,7 +27,7 @@ async def list_heroes(
     background_tasks: BackgroundTasks,
     request: Request,
     role: Role | None = Query(None, title="Role filter"),
-):
+) -> list[HeroShort]:
     return ListHeroesRequestHandler(request).process_request(
         background_tasks=background_tasks, role=role
     )
@@ -36,7 +35,6 @@ async def list_heroes(
 
 @router.get(
     "/{hero_key}",
-    response_model=Hero,
     responses=routes_responses,
     tags=[RouteTag.HEROES],
     summary="Get hero data",
@@ -50,7 +48,7 @@ async def get_hero(
     background_tasks: BackgroundTasks,
     request: Request,
     hero_key: HeroKey = Path(title="Key name of the hero"),
-):
+) -> Hero:
     return GetHeroRequestHandler(request).process_request(
         background_tasks=background_tasks, hero_key=hero_key
     )

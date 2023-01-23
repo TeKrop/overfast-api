@@ -1,7 +1,5 @@
 """Gamemodes Parser module"""
-from functools import cached_property
-
-from overfastapi.config import HOME_PATH
+from overfastapi.config import HOME_PATH, HOME_PATH_CACHE_TIMEOUT
 from overfastapi.parsers.api_parser import APIParser
 
 
@@ -9,10 +7,7 @@ class GamemodesParser(APIParser):
     """Overwatch map gamemodes list page Parser class"""
 
     root_path = HOME_PATH
-
-    @cached_property
-    def cache_key(self) -> str:
-        return f"gamemodes-{self.blizzard_url}"
+    timeout = HOME_PATH_CACHE_TIMEOUT
 
     def parse_data(self) -> list[dict]:
         gamemodes_container = (

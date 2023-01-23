@@ -18,13 +18,12 @@ app = FastAPI(
 )
 description = """OverFast API gives data about Overwatch 2 heroes, gamemodes, and players
 statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses
-**nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it
+**nginx** as reverse proxy and **Redis** for caching. By using a Refresh-Ahead cache system, it
 minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate
 data to users. All duration values are also returned in seconds for convenience.
 
 ## 👷 W.I.P. 👷
 
-- Various improvements on caching system
 - Translations for specific heroes pages (will be available using a query parameter)
 - Additional data about gamemodes and maps
 """
