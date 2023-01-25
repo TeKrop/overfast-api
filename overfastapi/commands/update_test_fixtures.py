@@ -6,7 +6,7 @@ import argparse
 
 import requests
 
-from overfastapi.common.enums import HeroKey
+from overfastapi.common.enums import HeroKey, Locale
 from overfastapi.common.helpers import players_ids
 from overfastapi.common.logging import logger
 from overfastapi.config import (
@@ -109,14 +109,15 @@ def main():
 
     # Initialize data
     route_file_mapping = list_routes_to_update(args)
+    locale = Locale.ENGLISH_US
 
     # Do the job
     test_data_path = f"{TEST_FIXTURES_ROOT_PATH}/html"
     with requests.Session() as session:
         for route, filepath in route_file_mapping.items():
             logger.info(f"Updating {test_data_path}{filepath}...")
-            logger.info(f"GET {BLIZZARD_HOST}{route}...")
-            response = session.get(f"{BLIZZARD_HOST}{route}")
+            logger.info(f"GET {BLIZZARD_HOST}/{locale}{route}...")
+            response = session.get(f"{BLIZZARD_HOST}/{locale}{route}")
             logger.debug(
                 f"HTTP {response.status_code} / Time : {response.elapsed.total_seconds()}"
             )

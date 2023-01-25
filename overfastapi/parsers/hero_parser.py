@@ -4,7 +4,7 @@ from bs4 import Tag
 from overfastapi.common.enums import MediaType
 from overfastapi.config import HERO_PATH_CACHE_TIMEOUT, HEROES_PATH
 from overfastapi.parsers.api_parser import APIParser
-from overfastapi.parsers.helpers import get_full_url
+from overfastapi.parsers.helpers import get_full_url, get_role_from_icon_url
 
 
 class HeroParser(APIParser):
@@ -14,7 +14,7 @@ class HeroParser(APIParser):
     timeout = HERO_PATH_CACHE_TIMEOUT
 
     def get_blizzard_url(self, **kwargs) -> str:
-        return f"{self.blizzard_root_url}/{kwargs.get('hero_key')}"
+        return f"{super().get_blizzard_url(**kwargs)}/{kwargs.get('hero_key')}"
 
     def parse_data(self) -> dict:
         overview_section = self.root_tag.find("blz-page-header", recursive=False)
@@ -33,12 +33,13 @@ class HeroParser(APIParser):
     def __get_summary(overview_section: Tag) -> dict:
         header_section = overview_section.find("blz-header")
         extra_list_items = overview_section.find("blz-list").find_all("blz-list-item")
+
         return {
             "name": header_section.find("h2").get_text(),
             "description": (
                 header_section.find("p", slot="description").get_text().strip()
             ),
-            "role": extra_list_items[0].get_text().lower(),
+            "role": get_role_from_icon_url(extra_list_items[0].find("image")["href"]),
             "location": extra_list_items[1].get_text(),
         }
 

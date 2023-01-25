@@ -1,6 +1,7 @@
 """Roles Parser module"""
 from overfastapi.config import HEROES_PATH_CACHE_TIMEOUT, HOME_PATH
 from overfastapi.parsers.api_parser import APIParser
+from overfastapi.parsers.helpers import get_role_from_icon_url
 
 
 class RolesParser(APIParser):
@@ -23,7 +24,7 @@ class RolesParser(APIParser):
 
         return [
             {
-                "key": role_div.find("blz-header").find("h2").get_text().lower(),
+                "key": get_role_from_icon_url(roles_icons[role_index]),
                 "name": role_div.find("blz-header").find("h2").get_text().capitalize(),
                 "icon": roles_icons[role_index],
                 "description": (

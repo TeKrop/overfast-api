@@ -12,7 +12,6 @@
 
 ## 👷 W.I.P. 👷
 
-- Translations for specific heroes pages (will be available using a query parameter)
 - Additional data about gamemodes and maps
 
 ## Table of contents

@@ -5,6 +5,7 @@ from functools import cached_property
 from bs4 import BeautifulSoup
 
 from overfastapi.common.cache_manager import CacheManager
+from overfastapi.common.enums import Locale
 from overfastapi.common.exceptions import ParserParsingError
 from overfastapi.common.helpers import (
     blizzard_response_error_from_request,
@@ -102,18 +103,14 @@ class APIParser(ABC):
         raise an error if there is an issue when parsing the data.
         """
 
-    @cached_property
-    def blizzard_root_url(self) -> str:
-        """Property containing Root URL for requesting data to Blizzard"""
-        return f"{BLIZZARD_HOST}{self.root_path}"
-
     def get_blizzard_url(self, **kwargs) -> str:
         """URL used when requesting data to Blizzard. It usually is a concatenation
         of root url and query data (kwargs) if the RequestHandler supports it.
         For example : single hero page (hero key), player career page
         (player id, etc.). Default is just the blizzard root url.
         """
-        return self.blizzard_root_url
+        locale = kwargs.get("locale") or Locale.ENGLISH_US
+        return f"{BLIZZARD_HOST}/{locale}{self.root_path}"
 
     def filter_request_using_query(self, **kwargs) -> dict | list:
         """If the route contains subroutes accessible using GET queries, this method

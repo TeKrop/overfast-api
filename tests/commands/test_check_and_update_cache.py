@@ -8,6 +8,7 @@ from overfastapi.commands.check_and_update_cache import (
     main as check_and_update_cache_main,
 )
 from overfastapi.common.cache_manager import CacheManager
+from overfastapi.common.enums import Locale
 from overfastapi.config import (
     BLIZZARD_HOST,
     CAREER_PATH,
@@ -23,20 +24,28 @@ def cache_manager():
     return CacheManager()
 
 
+@pytest.fixture(scope="function")
+def locale():
+    return Locale.ENGLISH_US
+
+
 def test_check_and_update_gamemodes_cache_to_update(
-    cache_manager: CacheManager, home_html_data: list, gamemodes_json_data: dict
+    cache_manager: CacheManager,
+    locale: str,
+    home_html_data: list,
+    gamemodes_json_data: dict,
 ):
-    gamemodes_cache_key = f"GamemodesParser-{BLIZZARD_HOST}{HOME_PATH}"
+    gamemodes_cache_key = f"GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}"
     complete_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{gamemodes_cache_key}"
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"PlayerParser-{BLIZZARD_HOST}{CAREER_PATH}/TeKrop-2217",
+        f"PlayerParser-{BLIZZARD_HOST}/{locale}{CAREER_PATH}/TeKrop-2217",
         {},
         EXPIRED_CACHE_REFRESH_LIMIT + 30,
     )
     cache_manager.update_parser_cache(
-        f"HeroParser-{BLIZZARD_HOST}{HEROES_PATH}/ana",
+        f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
         {},
         EXPIRED_CACHE_REFRESH_LIMIT + 5,
     )
@@ -67,9 +76,9 @@ def test_check_and_update_gamemodes_cache_to_update(
     indirect=["hero_html_data", "hero_json_data"],
 )
 def test_check_and_update_specific_hero_to_update(
-    cache_manager: CacheManager, hero_html_data: str, hero_json_data: dict
+    cache_manager: CacheManager, locale: str, hero_html_data: str, hero_json_data: dict
 ):
-    ana_cache_key = f"HeroParser-{BLIZZARD_HOST}{HEROES_PATH}/ana"
+    ana_cache_key = f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana"
     complete_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{ana_cache_key}"
 
     # Add some data (to update and not to update)
@@ -100,20 +109,20 @@ def test_check_and_update_specific_hero_to_update(
     assert cache_manager.get_parser_cache(ana_cache_key) == hero_data
 
 
-def test_check_and_update_cache_no_update(cache_manager: CacheManager):
+def test_check_and_update_cache_no_update(cache_manager: CacheManager, locale: str):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"PlayerParser-{BLIZZARD_HOST}{CAREER_PATH}/TeKrop-2217",
+        f"PlayerParser-{BLIZZARD_HOST}/{locale}{CAREER_PATH}/TeKrop-2217",
         {},
         EXPIRED_CACHE_REFRESH_LIMIT + 30,
     )
     cache_manager.update_parser_cache(
-        f"HeroParser-{BLIZZARD_HOST}{HEROES_PATH}/ana",
+        f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
         {},
         EXPIRED_CACHE_REFRESH_LIMIT + 5,
     )
     cache_manager.update_parser_cache(
-        f"GamemodesParser-{BLIZZARD_HOST}{HOME_PATH}",
+        f"GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}",
         [],
         EXPIRED_CACHE_REFRESH_LIMIT + 10,
     )
@@ -135,11 +144,14 @@ def test_check_and_update_cache_no_update(cache_manager: CacheManager):
 )
 def test_check_and_update_specific_player_to_update(
     cache_manager: CacheManager,
+    locale: str,
     player_id: str,
     player_html_data: str,
     player_json_data: dict,
 ):
-    player_cache_key = f"PlayerParser-{BLIZZARD_HOST}{CAREER_PATH}/TeKrop-2217/"
+    player_cache_key = (
+        f"PlayerParser-{BLIZZARD_HOST}/{locale}{CAREER_PATH}/TeKrop-2217/"
+    )
     complete_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{player_cache_key}"
 
     # Add some data (to update and not to update)
@@ -147,12 +159,12 @@ def test_check_and_update_specific_player_to_update(
         player_cache_key, {}, EXPIRED_CACHE_REFRESH_LIMIT - 5
     )
     cache_manager.update_parser_cache(
-        f"HeroParser-{BLIZZARD_HOST}{HEROES_PATH}/ana",
+        f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
         {},
         EXPIRED_CACHE_REFRESH_LIMIT + 5,
     )
     cache_manager.update_parser_cache(
-        f"GamemodesParser-{BLIZZARD_HOST}{HOME_PATH}",
+        f"GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}",
         [],
         EXPIRED_CACHE_REFRESH_LIMIT + 10,
     )
@@ -186,12 +198,13 @@ def test_check_and_update_specific_player_to_update(
 )
 def test_check_and_update_player_stats_summary_to_update(
     cache_manager: CacheManager,
+    locale: str,
     player_id: str,
     player_html_data: str,
     player_stats_json_data: dict,
 ):
     player_stats_cache_key = (
-        f"PlayerStatsSummaryParser-{BLIZZARD_HOST}{CAREER_PATH}/TeKrop-2217/"
+        f"PlayerStatsSummaryParser-{BLIZZARD_HOST}/{locale}{CAREER_PATH}/TeKrop-2217/"
     )
     complete_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{player_stats_cache_key}"
 
@@ -200,12 +213,12 @@ def test_check_and_update_player_stats_summary_to_update(
         player_stats_cache_key, {}, EXPIRED_CACHE_REFRESH_LIMIT - 5
     )
     cache_manager.update_parser_cache(
-        f"HeroParser-{BLIZZARD_HOST}{HEROES_PATH}/ana",
+        f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
         {},
         EXPIRED_CACHE_REFRESH_LIMIT + 5,
     )
     cache_manager.update_parser_cache(
-        f"GamemodesParser-{BLIZZARD_HOST}{HOME_PATH}",
+        f"GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}",
         [],
         EXPIRED_CACHE_REFRESH_LIMIT + 10,
     )
@@ -234,10 +247,10 @@ def test_check_and_update_player_stats_summary_to_update(
     )
 
 
-def test_check_internal_error_from_blizzard(cache_manager: CacheManager):
+def test_check_internal_error_from_blizzard(cache_manager: CacheManager, locale: str):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"HeroParser-{BLIZZARD_HOST}{HEROES_PATH}/ana",
+        f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
         {},
         EXPIRED_CACHE_REFRESH_LIMIT - 5,
     )
@@ -254,10 +267,10 @@ def test_check_internal_error_from_blizzard(cache_manager: CacheManager):
     )
 
 
-def test_check_timeout_from_blizzard(cache_manager: CacheManager):
+def test_check_timeout_from_blizzard(cache_manager: CacheManager, locale: str):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"HeroParser-{BLIZZARD_HOST}{HEROES_PATH}/ana",
+        f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
         {},
         EXPIRED_CACHE_REFRESH_LIMIT - 5,
     )
@@ -280,10 +293,12 @@ def test_check_timeout_from_blizzard(cache_manager: CacheManager):
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
-def test_check_parser_parsing_error(cache_manager: CacheManager, player_html_data: str):
+def test_check_parser_parsing_error(
+    cache_manager: CacheManager, locale: str, player_html_data: str
+):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"PlayerParser-{BLIZZARD_HOST}{CAREER_PATH}/TeKrop-2217",
+        f"PlayerParser-{BLIZZARD_HOST}/{locale}{CAREER_PATH}/TeKrop-2217",
         {},
         EXPIRED_CACHE_REFRESH_LIMIT - 5,
     )
@@ -307,10 +322,12 @@ def test_check_parser_parsing_error(cache_manager: CacheManager, player_html_dat
 
 
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
-def test_check_parser_init_error(cache_manager: CacheManager, player_html_data: str):
+def test_check_parser_init_error(
+    cache_manager: CacheManager, locale: str, player_html_data: str
+):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"PlayerParser-{BLIZZARD_HOST}{CAREER_PATH}/TeKrop-2217",
+        f"PlayerParser-{BLIZZARD_HOST}/{locale}{CAREER_PATH}/TeKrop-2217",
         {},
         EXPIRED_CACHE_REFRESH_LIMIT - 5,
     )

@@ -47,10 +47,11 @@ def get_request_parser_class(cache_key: str) -> tuple[type, dict]:
     )
     cache_parser_class = PARSER_CLASSES_MAPPING[parser_class_name]
 
+    cache_kwargs["locale"] = uri[1]
     if parser_class_name in ["PlayerParser", "PlayerStatsSummaryParser"]:
-        cache_kwargs = {"player_id": uri[3]}
+        cache_kwargs["player_id"] = uri[3]
     elif parser_class_name == "HeroParser":
-        cache_kwargs = {"hero_key": uri[3]}
+        cache_kwargs["hero_key"] = uri[3]
 
     return cache_parser_class, cache_kwargs
 
