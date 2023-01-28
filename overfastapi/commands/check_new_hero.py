@@ -16,7 +16,7 @@ def get_distant_hero_keys() -> set[str]:
     heroes_parser = HeroesParser()
 
     try:
-        heroes_parser.retrieve_and_parse_blizzard_data()
+        heroes_parser.retrieve_and_parse_data()
     except HTTPException as error:
         raise SystemExit from error
 

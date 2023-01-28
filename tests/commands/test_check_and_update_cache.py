@@ -109,6 +109,32 @@ def test_check_and_update_specific_hero_to_update(
     assert cache_manager.get_parser_cache(ana_cache_key) == hero_data
 
 
+def test_check_and_update_maps_to_update(
+    cache_manager: CacheManager, maps_json_data: dict
+):
+    cache_key = "MapsParser"
+    complete_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{cache_key}"
+
+    # Add some data (to update and not to update)
+    cache_manager.update_parser_cache(cache_key, [], EXPIRED_CACHE_REFRESH_LIMIT - 5)
+
+    # Check data in db (assert no Parser Cache data)
+    assert cache_manager.get_parser_cache(cache_key) == []
+    assert get_soon_expired_cache_keys() == {complete_cache_key}
+
+    # check and update (only maps should be updated)
+    logger_info_mock = Mock()
+
+    with patch("overfastapi.common.logging.logger.info", logger_info_mock):
+        check_and_update_cache_main()
+
+    # Check data in db (assert we created API Cache for subroutes)
+    logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
+    logger_info_mock.assert_any_call("Updating data for {} key...", complete_cache_key)
+
+    assert cache_manager.get_parser_cache(cache_key) == maps_json_data
+
+
 def test_check_and_update_cache_no_update(cache_manager: CacheManager, locale: str):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(

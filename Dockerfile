@@ -22,8 +22,9 @@ COPY pyproject.toml app-start.sh favicon.png /code/
 RUN poetry config virtualenvs.create false && \
 	poetry install --only main --no-interaction --no-ansi
 
-# Copy the code
+# Copy code and static folders
 COPY ./overfastapi /code/overfastapi
+COPY ./static /code/static
 
 # Configure the command
 CMD ["sh", "/code/app-start.sh"]

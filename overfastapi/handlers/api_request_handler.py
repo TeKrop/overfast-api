@@ -25,11 +25,6 @@ class APIRequestHandler(ApiRequestMixin, ABC):
 
     @property
     @abstractmethod
-    def api_root_url(self) -> str:
-        """Root URL used for this specific handler (/players, /heroes, etc.)"""
-
-    @property
-    @abstractmethod
     def parser_classes(self) -> type:
         """Parser classes used for parsing the Blizzard page retrieved with this handler"""
 

@@ -1,0 +1,38 @@
+key;name;gamemodes;location;country_code
+hanamura;Hanamura;assault;Tokyo, Japan;JP
+horizon;Horizon Lunar Colony;assault;Earth's moon;
+paris;Paris;assault;Paris, France;FR
+anubis;Temple of Anubis;assault;Giza Plateau, Egypt;EG
+volskaya;Volskaya Industries;assault;St. Petersburg, Russia;RU
+ayutthaya;Ayutthaya;capture-the-flag;Thailand;TH
+busan;Busan;control;South Korea;KR
+nepal;Nepal;control;Nepal;NP
+ilios;Ilios;control;Greece;GR
+oasis;Oasis;control;Iraq;IQ
+lijiang;Lijiang Tower;control;China;CN
+chateau_guillard;Château Guillard;deathmatch,team-deathmatch;Annecy, France;FR
+kanezaka;Kanezaka;deathmatch,team-deathmatch;Tokyo, Japan;JP
+malevento;Malevento;deathmatch,team-deathmatch;Italy;IT
+petra;Petra;deathmatch,team-deathmatch;Southern Jordan;JO
+black_forest;Black Forest;elimination;Germany;DE
+castillo;Castillo;elimination;Mexico;MX
+ecopoint_antarctica;Ecopoint: Antarctica;elimination;Antarctica;AQ
+necropolis;Necropolis;elimination;Egypt;EG
+circuit_royal;Circuit Royal;escort;Monte Carlo, Monaco;MC
+dorado;Dorado;escort;Mexico;MX
+route_66;Route 66;escort;Albuquerque, New Mexico, United States;US
+junkertown;Junkertown;escort;Central Australia;AU
+rialto;Rialto;escort;Venice, Italy;IT
+havana;Havana;escort;Havana, Cuba;CU
+gibraltar;Watchpoint: Gibraltar;escort;Gibraltar;GI
+shambali;Shambali Monastery;escort;Nepal;NP
+blizzard_world;Blizzard World;hybrid;Irvine, California, United States;US
+numbani;Numbani;hybrid;Numbani (near Nigeria);
+hollywood;Hollywood;hybrid;Los Angeles, United States;US
+eichenwalde;Eichenwalde;hybrid;Stuttgart, Germany;DE
+kings_row;King’s Row;hybrid;London, United Kingdom;UK
+midtown;Midtown;hybrid;New York, United States;US
+paraiso;Paraíso;hybrid;Rio de Janeiro, Brazil;BR
+colosseo;Colosseo;push;Rome, Italy;IT
+esperanca;Esperança;push;Portugal;PT
+new_queen_street;New Queen Street;push;Toronto, Canada;CA

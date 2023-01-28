@@ -18,6 +18,7 @@ class GamemodesParser(APIParser):
 
         gamemodes_extras = [
             {
+                "key": feature_div["label"],
                 "description": (
                     feature_div.find("blz-header")
                     .find("div", slot="description")
@@ -31,6 +32,7 @@ class GamemodesParser(APIParser):
 
         return [
             {
+                "key": gamemodes_extras[gamemode_index]["key"],
                 "name": gamemode_div.get_text(),
                 "icon": gamemode_div.find("blz-image")["src:min-plus"],
                 "description": gamemodes_extras[gamemode_index]["description"],
