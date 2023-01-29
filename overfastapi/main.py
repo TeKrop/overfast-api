@@ -9,7 +9,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from overfastapi.common.enums import RouteTag
 from overfastapi.common.logging import logger
-from overfastapi.config import OVERFAST_API_VERSION
+from overfastapi.config import OVERFAST_API_BASE_URL, OVERFAST_API_VERSION
 from overfastapi.routers import gamemodes, heroes, maps, players, roles
 
 app = FastAPI(
@@ -72,6 +72,7 @@ def custom_openapi():  # pragma: no cover
                 },
             },
         ],
+        servers=[{"url": OVERFAST_API_BASE_URL, "description": "Production server"}],
     )
     openapi_schema["info"]["x-logo"] = {
         "url": "https://files.tekrop.fr/overfast_api_logo_full_1000.png",
