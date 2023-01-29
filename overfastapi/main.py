@@ -4,28 +4,24 @@ from fastapi import FastAPI, Request
 from fastapi.openapi.docs import get_redoc_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from overfastapi.common.enums import RouteTag
 from overfastapi.common.logging import logger
 from overfastapi.config import OVERFAST_API_VERSION
-from overfastapi.routers import gamemodes, heroes, players, roles
+from overfastapi.routers import gamemodes, heroes, maps, players, roles
 
 app = FastAPI(
     title="OverFast API",
     docs_url=None,
     redoc_url=None,
 )
-description = """OverFast API gives data about Overwatch 2 heroes, gamemodes, and players
+description = """OverFast API gives data about Overwatch 2 heroes, gamemodes, maps and players
 statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses
 **nginx** as reverse proxy and **Redis** for caching. By using a Refresh-Ahead cache system, it
 minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate
-data to users. All duration values are also returned in seconds for convenience.
-
-## 👷 W.I.P. 👷
-
-- Additional data about gamemodes and maps
-"""
+data to users. All duration values are also returned in seconds for convenience."""
 
 
 def custom_openapi():  # pragma: no cover
@@ -64,6 +60,10 @@ def custom_openapi():  # pragma: no cover
                 },
             },
             {
+                "name": RouteTag.MAPS,
+                "description": "Overwatch maps details",
+            },
+            {
                 "name": RouteTag.PLAYERS,
                 "description": "Overwatch players data : summary, statistics, etc.",
                 "externalDocs": {
@@ -82,6 +82,8 @@ def custom_openapi():  # pragma: no cover
 
 
 app.openapi = custom_openapi
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.logger = logger
 logger.info("OverFast API... Online !")
@@ -108,4 +110,5 @@ def overridden_redoc():
 app.include_router(heroes.router, prefix="/heroes")
 app.include_router(roles.router, prefix="/roles")
 app.include_router(gamemodes.router, prefix="/gamemodes")
+app.include_router(maps.router, prefix="/maps")
 app.include_router(players.router, prefix="/players")

@@ -8,11 +8,7 @@
 [![License: MIT](https://img.shields.io/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)
 ![Mockup OverFast API](https://files.tekrop.fr/overfast_api_logo_full_1000.png)
 
-> OverFast API gives data about Overwatch 2 heroes, gamemodes, and players statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses **nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate data to users. All duration values are also returned in seconds for convenience.
-
-## 👷 W.I.P. 👷
-
-- Additional data about gamemodes and maps
+> OverFast API gives data about Overwatch 2 heroes, gamemodes, maps and players statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses **nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate data to users. All duration values are also returned in seconds for convenience.
 
 ## Table of contents
 * [✨ Live instance](#-live-instance)
@@ -22,6 +18,7 @@
 * [🐋 Docker](#-docker)
 * [👨‍💻 Technical details](#-technical-details)
 * [🤝 Contributing](#-contributing)
+* [🙏 Credits](#-credits)
 * [📝 License](#-license)
 
 
@@ -44,6 +41,7 @@ Here is the list of all TTL values configured for API Cache :
 * Hero specific data : 1 day
 * Roles list : 1 day
 * Gamemodes list : 1 day
+* Maps list : 1 day
 * Players career : 1 hour
 * Players search : 1 hour
 
@@ -239,6 +237,14 @@ python -m pytest --cov=overfastapi --cov-report html
 Contributions, issues and feature requests are welcome!
 
 Feel free to check [issues page](https://github.com/TeKrop/overfast-api/issues).
+
+
+## 🙏 Credits
+
+All maps screenshots hosted by the API are owned by Blizzard. Sources :
+- Blizzard Press Center (https://blizzard.gamespress.com)
+- Overwatch Wiki (https://overwatch.fandom.com/wiki/)
+
 
 ## 📝 License
 

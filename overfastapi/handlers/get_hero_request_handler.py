@@ -11,7 +11,6 @@ class GetHeroRequestHandler(APIRequestHandler):
     should be used to display data about a specific hero.
     """
 
-    api_root_url = "/heroes"
     parser_classes = [HeroParser, HeroesParser]
     timeout = HERO_PATH_CACHE_TIMEOUT
 

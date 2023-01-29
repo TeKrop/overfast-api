@@ -188,3 +188,17 @@ class Locale(StrEnum):
     PORTUGUESE_BRAZIL = "pt-br"
     RUSSIAN = "ru-ru"
     CHINESE_TAIWAN = "zh-tw"
+
+
+class MapGamemode(StrEnum):
+    """Maps gamemodes keys"""
+
+    ASSAULT = "assault"
+    CAPTURE_THE_FLAG = "capture-the-flag"
+    CONTROL = "control"
+    DEATHMATCH = "deathmatch"
+    ELIMINATION = "elimination"
+    ESCORT = "escort"
+    HYBRID = "hybrid"
+    PUSH = "push"
+    TEAM_DEATHMATCH = "team-deathmatch"

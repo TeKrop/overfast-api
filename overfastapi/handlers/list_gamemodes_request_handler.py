@@ -9,6 +9,5 @@ class ListGamemodesRequestHandler(APIRequestHandler):
     available Overwatch gamemodes, using the GamemodesParser class.
     """
 
-    api_root_url = "/gamemodes"
     parser_classes = [GamemodesParser]
     timeout = HOME_PATH_CACHE_TIMEOUT

@@ -1,5 +1,7 @@
 """Parser Helpers module"""
+import csv
 import json
+from pathlib import Path
 
 import requests
 from fastapi import HTTPException, Request, status
@@ -128,3 +130,10 @@ def read_json_file(filepath: str) -> dict | list:
         f"{TEST_FIXTURES_ROOT_PATH}/json/{filepath}", encoding="utf-8"
     ) as json_file:
         return json.load(json_file)
+
+
+def read_csv_data_file(filepath: str) -> csv.DictReader:
+    with open(
+        f"{Path.cwd()}/overfastapi/data/{filepath}", encoding="utf-8"
+    ) as csv_file:
+        yield from csv.DictReader(csv_file, delimiter=";")

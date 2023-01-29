@@ -1,8 +1,18 @@
 """Set of pydantic models used for Gamemodes API routes"""
 from pydantic import BaseModel, Field, HttpUrl
 
+from overfastapi.common.enums import MapGamemode
+
 
 class GamemodeDetails(BaseModel):
+    key: MapGamemode = Field(
+        ...,
+        description=(
+            "Key corresponding to the gamemode. Can be "
+            "used as filter on the maps endpoint."
+        ),
+        example="push",
+    )
     name: str = Field(..., description="Name of the gamemode", example="Push")
     icon: HttpUrl = Field(
         ...,

@@ -9,6 +9,5 @@ class ListHeroesRequestHandler(APIRequestHandler):
     retrieve a list of available Overwatch heroes.
     """
 
-    api_root_url = "/heroes"
     parser_classes = [HeroesParser]
     timeout = HEROES_PATH_CACHE_TIMEOUT

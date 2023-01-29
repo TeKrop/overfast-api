@@ -10,6 +10,5 @@ class GetPlayerCareerRequestHandler(APIRequestHandler):
     PlayerParser class.
     """
 
-    api_root_url = "/players"
     parser_classes = [PlayerParser]
     timeout = CAREER_PATH_CACHE_TIMEOUT

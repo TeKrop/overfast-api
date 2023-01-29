@@ -11,6 +11,7 @@ from overfastapi.config import BLIZZARD_HOST, PARSER_CACHE_KEY_PREFIX
 from overfastapi.parsers.gamemodes_parser import GamemodesParser
 from overfastapi.parsers.hero_parser import HeroParser
 from overfastapi.parsers.heroes_parser import HeroesParser
+from overfastapi.parsers.maps_parser import MapsParser
 from overfastapi.parsers.player_parser import PlayerParser
 from overfastapi.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
 from overfastapi.parsers.roles_parser import RolesParser
@@ -20,6 +21,7 @@ PARSER_CLASSES_MAPPING = {
     "GamemodesParser": GamemodesParser,
     "HeroParser": HeroParser,
     "HeroesParser": HeroesParser,
+    "MapsParser": MapsParser,
     "PlayerParser": PlayerParser,
     "PlayerStatsSummaryParser": PlayerStatsSummaryParser,
     "RolesParser": RolesParser,
@@ -42,11 +44,15 @@ def get_request_parser_class(cache_key: str) -> tuple[type, dict]:
 
     specific_cache_key = cache_key.removeprefix(f"{PARSER_CACHE_KEY_PREFIX}:")
     parser_class_name = specific_cache_key.split("-")[0]
+    cache_parser_class = PARSER_CLASSES_MAPPING[parser_class_name]
+
+    # If the cache is related to local data
+    if BLIZZARD_HOST not in specific_cache_key:
+        return cache_parser_class, cache_kwargs
+
     uri = specific_cache_key.removeprefix(f"{parser_class_name}-{BLIZZARD_HOST}").split(
         "/"
     )
-    cache_parser_class = PARSER_CLASSES_MAPPING[parser_class_name]
-
     cache_kwargs["locale"] = uri[1]
     if parser_class_name in ["PlayerParser", "PlayerStatsSummaryParser"]:
         cache_kwargs["player_id"] = uri[3]
@@ -70,7 +76,7 @@ def main():
         parser = parser_class(**kwargs)
 
         try:
-            parser.retrieve_and_parse_blizzard_data()
+            parser.retrieve_and_parse_data()
         except ParserBlizzardError as error:
             logger.error(
                 "Failed to instanciate Parser when refreshing : {}",
