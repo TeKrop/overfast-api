@@ -138,9 +138,9 @@ class HeroesStats(BaseModel):
 
 class PlayerSummary(BaseModel):
     username: str = Field(..., description="Username of the player", example="TeKrop")
-    avatar: HttpUrl = Field(
-        ...,
-        description="URL of the player's avatar",
+    avatar: HttpUrl | None = Field(
+        None,
+        description="URL of the player's avatar. Can be null if couldn't retrieve any",
         example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/daeddd96e58a2150afa6ffc3c5503ae7f96afc2e22899210d444f45dee508c6c.png",
     )
     title: str = Field(None, description="Title of the player if any")
