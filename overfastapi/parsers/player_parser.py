@@ -119,7 +119,7 @@ class PlayerParser(APIParser):
             "avatar": (
                 summary_div.find(
                     "img", class_="Profile-player--portrait", recursive=False
-                )["src"]
+                ).get("src")
             ),
             "title": (
                 profile_div.find(

@@ -70,8 +70,8 @@ def test_player_parser_parsing_error_attribute_error(player_html_data: str):
 def test_player_parser_parsing_error_key_error(player_html_data: str):
     with pytest.raises(ParserParsingError) as error:
         player_key_error = re.sub(
-            'class="Profile-player--portrait" src="[^"]*"',
-            'class="Profile-player--portrait"',
+            'class="Profile-playerSummary--endorsement" src="[^"]*"',
+            'class="Profile-playerSummary--endorsement"',
             player_html_data,
         )
         parser = PlayerParser(player_id="TeKrop-2217")
@@ -88,7 +88,7 @@ def test_player_parser_parsing_error_key_error(player_html_data: str):
 def test_player_parser_parsing_error_type_error(player_html_data: str):
     with pytest.raises(ParserParsingError) as error:
         player_type_error = player_html_data.replace(
-            'class="Profile-player--portrait"', ""
+            'class="Profile-playerSummary--endorsement"', ""
         )
         parser = PlayerParser(player_id="TeKrop-2217")
         with patch(
