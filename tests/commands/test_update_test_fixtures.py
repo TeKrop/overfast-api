@@ -1,7 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from requests import Session
+from httpx import Client
 
 from overfastapi.commands.update_test_fixtures import main as update_test_fixtures_main
 from overfastapi.common.enums import HeroKey
@@ -55,7 +55,7 @@ def test_update_with_different_options(parameters, expected_calls: list[str]):
         "overfastapi.commands.update_test_fixtures.parse_parameters",
         return_value=parameters,
     ), patch.object(
-        Session,
+        Client,
         "get",
         return_value=Mock(status_code=200, text="HTML_DATA"),
     ), patch(
@@ -77,7 +77,7 @@ def test_update_with_blizzard_error():
         "overfastapi.commands.update_test_fixtures.parse_parameters",
         return_value=Mock(heroes=False, players=False, maps=True),
     ), patch.object(
-        Session,
+        Client,
         "get",
         return_value=Mock(status_code=500, text="BLIZZARD_ERROR"),
     ), patch(

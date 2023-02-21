@@ -4,7 +4,7 @@ download and update parsers test HTML fixtures
 """
 import argparse
 
-import requests
+import httpx
 
 from overfastapi.common.enums import HeroKey, Locale
 from overfastapi.common.helpers import players_ids
@@ -113,7 +113,7 @@ def main():
 
     # Do the job
     test_data_path = f"{TEST_FIXTURES_ROOT_PATH}/html"
-    with requests.Session() as session:
+    with httpx.Client() as session:
         for route, filepath in route_file_mapping.items():
             logger.info(f"Updating {test_data_path}{filepath}...")
             logger.info(f"GET {BLIZZARD_HOST}/{locale}{route}...")

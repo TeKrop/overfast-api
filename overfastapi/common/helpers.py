@@ -3,7 +3,7 @@ import csv
 import json
 from pathlib import Path
 
-import requests
+import httpx
 from fastapi import HTTPException, Request, status
 
 from overfastapi.common.logging import logger
@@ -38,19 +38,26 @@ players_ids = [
     "Unknown-1234",  # No player
 ]
 
-
-def overfast_request(url: str) -> requests.Response:
-    """Make an HTTP GET request with custom headers and retrieve the result"""
-    headers = {
+# Instanciate global httpx client
+overfast_client = httpx.Client(
+    headers={
         "User-Agent": (
             f"OverFastAPI v{OVERFAST_API_VERSION} - "
             "https://github.com/TeKrop/overfast-api"
         ),
         "From": "vporchet@gmail.com",
-    }
+    },
+    http2=True,
+    timeout=10,
+    follow_redirects=True,
+)
+
+
+def overfast_request(url: str) -> httpx.Response:
+    """Make an HTTP GET request with custom headers and retrieve the result"""
     try:
-        return requests.get(url, headers=headers, timeout=10)
-    except requests.exceptions.Timeout as error:
+        return overfast_client.get(url)
+    except httpx.TimeoutException as error:
         raise blizzard_response_error(
             status_code=0,
             error="Blizzard took more than 10 seconds to respond, resulting in a timeout",
@@ -107,10 +114,10 @@ def blizzard_response_error_from_request(req: Request) -> HTTPException:
     return blizzard_response_error(req.status_code, req.text)
 
 
-def send_discord_webhook_message(message: str) -> requests.Response | None:
+def send_discord_webhook_message(message: str) -> httpx.Response | None:
     """Helper method for sending a Discord webhook message"""
     return (
-        requests.post(DISCORD_WEBHOOK_URL, data={"content": message}, timeout=10)
+        httpx.post(DISCORD_WEBHOOK_URL, data={"content": message}, timeout=10)
         if DISCORD_WEBHOOK_ENABLED
         else None
     )

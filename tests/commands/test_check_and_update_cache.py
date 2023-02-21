@@ -1,7 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
-import requests
+from httpx import TimeoutException
 
 from overfastapi.commands.check_and_update_cache import get_soon_expired_cache_keys
 from overfastapi.commands.check_and_update_cache import (
@@ -9,6 +9,7 @@ from overfastapi.commands.check_and_update_cache import (
 )
 from overfastapi.common.cache_manager import CacheManager
 from overfastapi.common.enums import Locale
+from overfastapi.common.helpers import overfast_client
 from overfastapi.config import (
     BLIZZARD_HOST,
     CAREER_PATH,
@@ -57,8 +58,9 @@ def test_check_and_update_gamemodes_cache_to_update(
 
     # check and update (only gamemodes should be updated)
     logger_info_mock = Mock()
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=home_html_data),
     ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
         check_and_update_cache_main()
@@ -92,8 +94,9 @@ def test_check_and_update_specific_hero_to_update(
 
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=hero_html_data),
     ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
         check_and_update_cache_main()
@@ -201,8 +204,9 @@ def test_check_and_update_specific_player_to_update(
 
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(
             status_code=200,
             text=player_html_data,
@@ -255,8 +259,9 @@ def test_check_and_update_player_stats_summary_to_update(
 
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(
             status_code=200,
             text=player_html_data,
@@ -282,8 +287,9 @@ def test_check_internal_error_from_blizzard(cache_manager: CacheManager, locale:
     )
 
     logger_error_mock = Mock()
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=500, text="Internal Server Error"),
     ), patch("overfastapi.common.logging.logger.error", logger_error_mock):
         check_and_update_cache_main()
@@ -302,9 +308,10 @@ def test_check_timeout_from_blizzard(cache_manager: CacheManager, locale: str):
     )
 
     logger_error_mock = Mock()
-    with patch(
-        "requests.get",
-        side_effect=requests.exceptions.Timeout(
+    with patch.object(
+        overfast_client,
+        "get",
+        side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)"
         ),
@@ -334,8 +341,9 @@ def test_check_parser_parsing_error(
     player_attr_error = player_html_data.replace(
         'class="Profile-player--summaryWrapper"', 'class="blabla"'
     )
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=player_attr_error),
     ), patch("overfastapi.common.logging.logger.critical", logger_critical_mock):
         check_and_update_cache_main()
@@ -359,8 +367,9 @@ def test_check_parser_init_error(
     )
 
     logger_error_mock = Mock()
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=player_html_data),
     ), patch("overfastapi.common.logging.logger.error", logger_error_mock):
         check_and_update_cache_main()

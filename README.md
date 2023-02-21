@@ -12,11 +12,11 @@
 
 ## Table of contents
 * [✨ Live instance](#-live-instance)
-* [🛠️ Cache System](#%EF%B8%8F-cache-system)
-* [🐍 Architecture](#-architecture)
 * [💽 Installation](#-installation)
 * [🐋 Docker](#-docker)
 * [👨‍💻 Technical details](#-technical-details)
+* [🛠️ Cache System](#%EF%B8%8F-cache-system)
+* [🐍 Architecture](#-architecture)
 * [🤝 Contributing](#-contributing)
 * [🙏 Credits](#-credits)
 * [📝 License](#-license)
@@ -27,6 +27,123 @@
 You can see and use a live version of the API here, the root URL being the Redoc documentation : https://overfast-api.tekrop.fr/.
 
 If you want to use the API, and you have the possibility to host your own instance, don't hesitate do it (at least for production environment), in order to not overload the live version i'm hosting.
+
+## 💽 Installation
+
+### Requirements
+* Python 3.11
+* Poetry
+* Docker & Docker Compose (production)
+
+### Install process
+
+- Clone the project
+- Create a `config.py` file from the `config.example.py` template file (inside `overfastapi` folder)
+- Edit the configuration file to match your needs
+- Finally, simply run `poetry install` to install all the dependencies (+ dev dependencies)
+
+### Launch
+
+```
+uvicorn overfastapi.main:app --reload
+```
+
+## 🐋 Docker
+
+### Standalone (no cache system)
+```
+cp overfastapi/config.example.py overfastapi/config.py
+docker build . -t tekrop/overfast-api:latest
+docker run -d -p 80:80 --name overfast-api tekrop/overfast-api
+```
+
+### Definitive edition (with cache system)
+First, you need to create a dotenv file (`.env`) from the `.env.example` file. You'll need to modify it following your needs in order to configure the volumes used by OverFast API, here are the configuration steps.
+
+- `APP_VOLUME_PATH` will be a folder containing shared data for the app :
+    - the app logs folders
+    - the configuration file (`config.py`). You need to copy the `overfastapi/config.example.py` file into the folder, default values should suit your needs
+    - crontab configurations for background cache update, you just need to copy the `overfast-crontab` file from the repo into your folder
+
+- `REDIS_VOLUME_PATH` will be a folder containing shared data for the Redis server. It will mainly a `dump.rdb` save file whenever the server has been stopped.
+
+- `NGINX_VOLUME_PATH` will be a folder containing shared data for the nginx server. All files can be retrieve in the `nginx` folder of the project :
+    - the `ngx_http_redis_module.so` library file, allowing nginx to directly communicate with the redis server
+    - the main nginx configuration (`nginx.conf`), modified in order to use the `ngx_http_redis_module` and to define the two backends used (redis and uvicorn)
+    - the app configuration file (`overfast-api.conf`), implementing the caching system (call redis backend, then if error call uvicorn backend)
+
+- `APP_PORT` is the port used by the app. Default is `80`.
+
+- Once you set the right values in your dotenv, and you copied all the needed files in the respective folders, you can finally use the docker compose command to build everything and run the app
+```
+docker-compose up
+```
+
+- The server will be running on the port you set (`APP_PORT`).
+
+## 👨‍💻 Technical details
+
+### Computed statistics values
+
+In players career statistics, several conversions are made for convenience :
+- all **duration values** are converted into **seconds** (integer)
+- **percent values** are exposed as **integers** instead of a string with a percent symbol
+- integer and float string representations are converted into the concerned type
+
+### Commands
+
+The following commands are either used :
+- In an automated way, for checking if cache values need to be updated, or if a new hero has been published on Blizzard pages (the code needs to be updated if this is the case)
+- In a manual way, in order to update the test fixtures used in the test suite
+
+#### Check and update Redis cache which needs to be updated
+```
+python -m overfastapi.commands.check_and_update_cache
+```
+
+#### Check if there is a new hero available, and notify the developer if there is one
+```
+python -m overfastapi.commands.check_new_hero
+```
+
+#### Update test fixtures
+
+Generic command (update heroes, gamemodes and roles)
+```
+python -m overfastapi.commands.update_test_fixtures
+```
+
+Help message (with different options)
+```
+usage: update_test_fixtures.py [-h] [-He] [-Ho] [-P]
+
+Update test data fixtures by retrieving Blizzard pages directly. By default, all the tests data will be updated.
+
+options:
+  -h, --help     show this help message and exit
+  -He, --heroes  update heroes test data
+  -Ho, --home    update home test data (gamemodes, roles)
+  -P, --players  update players test data
+```
+
+### Code Quality
+The code quality is checked using the `ruff` command. I'm also using the `isort` utility for imports ordering, and `black` to enforce PEP-8 convention on my code. To check the quality of the code, you just have to run the following command :
+
+```
+ruff .
+```
+
+### Testing
+The code has been tested using (a lot of) unit testing, except some rare parts which are not relevant to test. There are tests on the parsers classes, the common classes, but also on the commands (run in CLI) and the API views (using FastAPI TestClient class).
+
+Running tests (simple)
+```
+python -m pytest
+```
+Running tests (with coverage)
+```
+python -m pytest --cov=overfastapi --cov-report html
+```
 
 ## 🛠️ Cache System
 
@@ -114,123 +231,6 @@ sequenceDiagram
     Python-->>User: Return API data after parsing
 ```
 Using this way (only using the image built with the `Dockerfile` alone), there will be no cache at all, and every call will make requests to Blizzard pages. I advise not to use this way unless for debugging.
-
-## 💽 Installation
-
-### Requirements
-* Python 3.11
-* Poetry
-* Docker & Docker Compose (production)
-
-### Install process
-
-- Clone the project
-- Create a `config.py` file from the `config.example.py` template file (inside `overfastapi` folder)
-- Edit the configuration file to match your needs
-- Finally, simply run `poetry install` to install all the dependencies (+ dev dependencies)
-
-### Launch
-
-```
-uvicorn overfastapi.main:app --reload
-```
-
-## 🐋 Docker
-
-### Standalone (no cache system)
-```
-cp overfastapi/config.example.py overfastapi/config.py
-docker build . -t tekrop/overfast-api:latest
-docker run -d -p 80:80 --name overfast-api tekrop/overfast-api
-```
-
-### Definitive edition (with cache system)
-First, you need to create a dotenv file (`.env`) from the `.env.example` file. You'll need to modify it following your needs in order to configure the volumes used by OverFast API, here are the configuration steps.
-
-- `APP_VOLUME_PATH` will be a folder containing shared data for the app :
-    - the app logs folders
-    - the configuration file (`config.py`). You need to copy the `overfastapi/config.example.py` file into the folder, default values should suit your needs
-    - crontab configurations for background cache update, you just need to copy the `overfast-crontab` file from the repo into your folder
-
-- `REDIS_VOLUME_PATH` will be a folder containing shared data for the Redis server. It will mainly a `dump.rdb` save file whenever the server has been stopped.
-
-- `NGINX_VOLUME_PATH` will be a folder containing shared data for the nginx server. All files can be retrieve in the `nginx` folder of the project :
-    - the `ngx_http_redis_module.so` library file, allowing nginx to directly communicate with the redis server
-    - the main nginx configuration (`nginx.conf`), modified in order to use the `ngx_http_redis_module` and to define the two backends used (redis and uvicorn)
-    - the app configuration file (`overfast-api.conf`), implementing the caching system (call redis backend, then if error call uvicorn backend)
-
-- `APP_PORT` is the port used by the app. Default is `80`.
-
-- Once you set the right values in your dotenv, and you copied all the needed files in the respective folders, you can finally use the docker compose command to build everything and run the app
-```
-docker-compose up
-```
-
-- The server will be running on the port you set (`APP_PORT`).
-
-## 👨‍💻 Technical details
-
-### Computed statistics values
-
-In players career statistics, several conversions are made for convenience :
-- all duration values are converted into seconds (int)
-- percent values are exposed as integers instead of a string with a percent symbol
-- integer and float string representations are converted into the concerned type
-
-### Commands
-
-The following commands are either used :
-- In an automated way, for checking if cache values need to be updated, or if a new hero has been published on Blizzard pages (the code needs to be updated if this is the case)
-- In a manual way, in order to update the test fixtures used in the test suite
-
-#### Check and update Redis cache which needs to be updated
-```
-python -m overfastapi.commands.check_and_update_cache
-```
-
-#### Check if there is a new hero available, and notify the developer if there is one
-```
-python -m overfastapi.commands.check_new_hero
-```
-
-#### Update test fixtures
-
-Generic command (update heroes, gamemodes and roles)
-```
-python -m overfastapi.commands.update_test_fixtures
-```
-
-Help message (with different options)
-```
-usage: update_test_fixtures.py [-h] [-He] [-Ho] [-P]
-
-Update test data fixtures by retrieving Blizzard pages directly. By default, all the tests data will be updated.
-
-options:
-  -h, --help     show this help message and exit
-  -He, --heroes  update heroes test data
-  -Ho, --home    update home test data (gamemodes, roles)
-  -P, --players  update players test data
-```
-
-### Code Quality
-The code quality is checked using the `ruff` command. I'm also using the `isort` utility for imports ordering, and `black` to enforce PEP-8 convention on my code. To check the quality of the code, you just have to run the following command :
-
-```
-ruff .
-```
-
-### Testing
-The code has been tested using (a lot of) unit testing, except some rare parts which are not relevant to test. There are tests on the parsers classes, the common classes, but also on the commands (run in CLI) and the API views (using FastAPI TestClient class).
-
-Running tests (simple)
-```
-python -m pytest
-```
-Running tests (with coverage)
-```
-python -m pytest --cov=overfastapi --cov-report html
-```
 
 ## 🤝 Contributing
 

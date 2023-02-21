@@ -82,10 +82,8 @@ def main():
                 "Failed to instanciate Parser when refreshing : {}",
                 error.message,
             )
-            continue
         except ParserParsingError as error:
             overfast_internal_error(parser.blizzard_url, error)
-            continue
         except HTTPException:
             continue
 

@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from overfastapi.common.cache_manager import CacheManager
 from overfastapi.common.enums import Locale, Role
+from overfastapi.common.helpers import overfast_client
 from overfastapi.config import BLIZZARD_HOST, HEROES_PATH
 from overfastapi.main import app
 
@@ -13,8 +14,9 @@ client = TestClient(app)
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_heroes_test(heroes_html_data: str):
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=heroes_html_data),
     ):
         yield
@@ -87,8 +89,9 @@ def test_get_heroes_invalid_role():
 
 
 def test_get_heroes_blizzard_error():
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=503, text="Service Unavailable"),
     ):
         response = client.get("/heroes")

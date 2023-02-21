@@ -1,10 +1,11 @@
 from unittest.mock import Mock, patch
 
 import pytest
-import requests
 from fastapi.testclient import TestClient
+from httpx import TimeoutException
 
 from overfastapi.common.enums import HeroKeyCareerFilter, PlayerGamemode, PlayerPlatform
+from overfastapi.common.helpers import overfast_client
 from overfastapi.main import app
 
 client = TestClient(app)
@@ -38,8 +39,9 @@ def test_get_player_stats(
     platform: PlayerPlatform | None,
     hero: HeroKeyCareerFilter | None,
 ):
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=player_html_data),
     ):
         query_params = "&".join(
@@ -90,8 +92,9 @@ def test_get_player_stats(
 
 
 def test_get_player_stats_blizzard_error():
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=503, text="Service Unavailable"),
     ):
         response = client.get(
@@ -105,9 +108,10 @@ def test_get_player_stats_blizzard_error():
 
 
 def test_get_player_stats_blizzard_timeout():
-    with patch(
-        "requests.get",
-        side_effect=requests.exceptions.Timeout(
+    with patch.object(
+        overfast_client,
+        "get",
+        side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)"
         ),

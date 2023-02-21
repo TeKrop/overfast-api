@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from overfastapi.common.enums import HeroKey
+from overfastapi.common.helpers import overfast_client
 from overfastapi.parsers.hero_parser import HeroParser
 
 
@@ -20,9 +21,8 @@ def test_hero_page_parsing(
 
     parser = HeroParser()
 
-    with patch(
-        "requests.get",
-        return_value=Mock(status_code=200, text=hero_html_data),
+    with patch.object(
+        overfast_client, "get", return_value=Mock(status_code=200, text=hero_html_data)
     ):
         parser.parse()
 

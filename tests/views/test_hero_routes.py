@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from overfastapi.common.enums import HeroKey
+from overfastapi.common.helpers import overfast_client
 from overfastapi.main import app
 
 client = TestClient(app)
@@ -20,8 +21,9 @@ client = TestClient(app)
 def test_get_hero(
     hero_name: str, hero_html_data: str, hero_json_data: dict, heroes_html_data: str
 ):
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         side_effect=[
             Mock(status_code=200, text=hero_html_data),
             Mock(status_code=200, text=heroes_html_data),
@@ -33,8 +35,9 @@ def test_get_hero(
 
 
 def test_get_hero_blizzard_error():
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=503, text="Service Unavailable"),
     ):
         response = client.get(f"/heroes/{HeroKey.ANA}")
