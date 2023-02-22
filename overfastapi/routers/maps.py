@@ -29,6 +29,6 @@ async def list_maps(
         description="Filter maps available for a specific gamemode",
     ),
 ) -> list[Map]:
-    return ListMapsRequestHandler(request).process_request(
+    return await ListMapsRequestHandler(request).process_request(
         background_tasks=background_tasks, gamemode=gamemode
     )

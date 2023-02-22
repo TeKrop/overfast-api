@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import Mock, patch
 
 import pytest
@@ -24,6 +25,6 @@ def test_hero_page_parsing(
     with patch.object(
         overfast_client, "get", return_value=Mock(status_code=200, text=hero_html_data)
     ):
-        parser.parse()
+        asyncio.run(parser.parse())
 
     assert parser.data == hero_data

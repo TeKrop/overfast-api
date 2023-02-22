@@ -1,6 +1,8 @@
 """Command used in order to check and update Redis API Cache depending on
 the expired cache refresh limit configuration. It can be run in the background.
 """
+import asyncio
+
 from fastapi import HTTPException
 
 from overfastapi.common.cache_manager import CacheManager
@@ -8,6 +10,7 @@ from overfastapi.common.exceptions import ParserBlizzardError, ParserParsingErro
 from overfastapi.common.helpers import overfast_internal_error
 from overfastapi.common.logging import logger
 from overfastapi.config import BLIZZARD_HOST, PARSER_CACHE_KEY_PREFIX
+from overfastapi.parsers.abstract_parser import AbstractParser
 from overfastapi.parsers.gamemodes_parser import GamemodesParser
 from overfastapi.parsers.hero_parser import HeroParser
 from overfastapi.parsers.heroes_parser import HeroesParser
@@ -29,6 +32,10 @@ PARSER_CLASSES_MAPPING = {
 
 # Generic cache manager used in the process
 cache_manager = CacheManager()
+
+# Semaphore to limit concurrent requests for async processes
+max_concurrent_requests = 5
+sem = asyncio.Semaphore(max_concurrent_requests)
 
 
 def get_soon_expired_cache_keys() -> set[str]:
@@ -62,21 +69,15 @@ def get_request_parser_class(cache_key: str) -> tuple[type, dict]:
     return cache_parser_class, cache_kwargs
 
 
-def main():
-    """Main method of the script"""
-    logger.info("Starting Redis cache update...")
-
-    keys_to_update = get_soon_expired_cache_keys()
-    logger.info("Done ! Retrieved keys : {}", len(keys_to_update))
-
-    for key in keys_to_update:
+async def retrieve_data(key: str, parser: AbstractParser):
+    """Coroutine for retrieving data for a single parser. We're using a semaphore
+    to limit the number of concurrent requests.
+    """
+    async with sem:
         logger.info("Updating data for {} key...", key)
-        parser_class, kwargs = get_request_parser_class(key)
-
-        parser = parser_class(**kwargs)
 
         try:
-            parser.retrieve_and_parse_data()
+            await parser.retrieve_and_parse_data()
         except ParserBlizzardError as error:
             logger.error(
                 "Failed to instanciate Parser when refreshing : {}",
@@ -85,11 +86,27 @@ def main():
         except ParserParsingError as error:
             overfast_internal_error(parser.blizzard_url, error)
         except HTTPException:
-            continue
+            pass
+
+
+async def main():
+    """Main coroutine of the script"""
+    logger.info("Starting Redis cache update...")
+
+    keys_to_update = get_soon_expired_cache_keys()
+    logger.info("Done ! Retrieved keys : {}", len(keys_to_update))
+
+    tasks = []
+    for key in keys_to_update:
+        parser_class, kwargs = get_request_parser_class(key)
+        parser = parser_class(**kwargs)
+        tasks.append(retrieve_data(key, parser))
+
+    await asyncio.gather(*tasks)
 
     logger.info("Redis cache update finished !")
 
 
 if __name__ == "__main__":  # pragma: no cover
     logger = logger.patch(lambda record: record.update(name="check_and_update_cache"))
-    main()
+    asyncio.run(main())

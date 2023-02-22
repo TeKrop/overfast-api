@@ -28,6 +28,6 @@ async def list_map_gamemodes(
     request: Request,
     locale: Locale = Query(Locale.ENGLISH_US, title="Locale to be displayed"),
 ) -> list[GamemodeDetails]:
-    return ListGamemodesRequestHandler(request).process_request(
+    return await ListGamemodesRequestHandler(request).process_request(
         background_tasks=background_tasks, locale=locale
     )

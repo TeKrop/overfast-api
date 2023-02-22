@@ -38,25 +38,31 @@ players_ids = [
     "Unknown-1234",  # No player
 ]
 
-# Instanciate global httpx client
-overfast_client = httpx.Client(
-    headers={
+# httpx client settings
+overfast_client_settings = {
+    "headers": {
         "User-Agent": (
             f"OverFastAPI v{OVERFAST_API_VERSION} - "
             "https://github.com/TeKrop/overfast-api"
         ),
         "From": "vporchet@gmail.com",
     },
-    http2=True,
-    timeout=10,
-    follow_redirects=True,
-)
+    "http2": True,
+    "timeout": 10,
+    "follow_redirects": True,
+}
+
+# Instanciate global httpx client
+overfast_client = httpx.AsyncClient(**overfast_client_settings)
 
 
-def overfast_request(url: str) -> httpx.Response:
+async def overfast_request(url: str) -> httpx.Response:
     """Make an HTTP GET request with custom headers and retrieve the result"""
     try:
-        return overfast_client.get(url)
+        logger.info("Requesting {}...", url)
+        response = await overfast_client.get(url)
+        logger.info("OverFast request done !")
+        return response
     except httpx.TimeoutException as error:
         raise blizzard_response_error(
             status_code=0,

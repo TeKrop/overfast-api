@@ -46,11 +46,11 @@ class APIParser(AbstractParser):
         """
         return {"name": "div", "class_": "main-content", "recursive": False}
 
-    def retrieve_and_parse_data(self) -> None:
+    async def retrieve_and_parse_data(self) -> None:
         """Method used to retrieve data from Blizzard (HTML data), parsing it
         and storing it into self.data attribute.
         """
-        req = overfast_request(self.blizzard_url)
+        req = await overfast_request(self.blizzard_url)
         if req.status_code not in self.valid_http_codes:
             raise blizzard_response_error_from_request(req)
 

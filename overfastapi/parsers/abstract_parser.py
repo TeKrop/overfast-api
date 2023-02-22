@@ -1,4 +1,5 @@
 """Abstract API Parser module"""
+
 from abc import ABC, abstractmethod
 from functools import cached_property
 
@@ -29,12 +30,12 @@ class AbstractParser(ABC):
         return type(self).__name__
 
     @abstractmethod
-    def retrieve_and_parse_data(self) -> None:
+    async def retrieve_and_parse_data(self) -> None:
         """Method used to retrieve data, parsing it and
         storing it into self.data attribute.
         """
 
-    def parse(self) -> None:
+    async def parse(self) -> None:
         """Main parsing method, first checking if there is any Parser Cache. If
         not, it's calling the main submethod to retrieve and parse data.
         """
@@ -49,7 +50,7 @@ class AbstractParser(ABC):
         # No cache is available, it's the first time the user requested the
         # data or the Parser Cache has expired : retrieve and parse data (
         # Blizzard page for API Parser or local file for others parsers)
-        self.retrieve_and_parse_data()
+        await self.retrieve_and_parse_data()
 
     def filter_request_using_query(self, **kwargs) -> dict | list:
         """If the route contains subroutes accessible using GET queries, this method

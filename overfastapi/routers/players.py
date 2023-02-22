@@ -86,7 +86,7 @@ async def search_players(
     offset: int | None = Query(0, title="Offset of the results", ge=0),
     limit: int | None = Query(20, title="Limit of results per page", gt=0),
 ) -> PlayerSearchResult:
-    return SearchPlayersRequestHandler(request).process_request(
+    return await SearchPlayersRequestHandler(request).process_request(
         name=name,
         privacy=privacy,
         order_by=order_by,
@@ -111,7 +111,7 @@ async def get_player_summary(
     request: Request,
     commons: dict = Depends(get_player_common_parameters),
 ) -> PlayerSummary:
-    return GetPlayerCareerRequestHandler(request).process_request(
+    return await GetPlayerCareerRequestHandler(request).process_request(
         summary=True,
         background_tasks=background_tasks,
         player_id=commons.get("player_id"),
@@ -161,7 +161,7 @@ async def get_player_stats_summary(
         example="pc",
     ),
 ) -> PlayerStatsSummary:
-    return GetPlayerStatsSummaryRequestHandler(request).process_request(
+    return await GetPlayerStatsSummaryRequestHandler(request).process_request(
         background_tasks=background_tasks,
         player_id=commons.get("player_id"),
         platform=platform,
@@ -184,7 +184,7 @@ async def get_player_career(
     request: Request,
     commons: dict = Depends(get_player_common_parameters),
 ) -> Player:
-    return GetPlayerCareerRequestHandler(request).process_request(
+    return await GetPlayerCareerRequestHandler(request).process_request(
         background_tasks=background_tasks,
         player_id=commons.get("player_id"),
     )
@@ -236,7 +236,7 @@ async def get_player_stats(
         ),
     ),
 ) -> CareerStats:
-    return GetPlayerCareerRequestHandler(request).process_request(
+    return await GetPlayerCareerRequestHandler(request).process_request(
         stats=True,
         background_tasks=background_tasks,
         player_id=commons.get("player_id"),

@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import Mock, patch
 
 import pytest
@@ -26,7 +27,7 @@ def test_player_page_parsing(
         "get",
         return_value=Mock(status_code=200, text=player_html_data),
     ):
-        parser.parse()
+        asyncio.run(parser.parse())
 
     assert parser.data == player_stats_json_data
 
@@ -39,4 +40,4 @@ def test_unknown_player_parser_blizzard_error(player_html_data: str):
         "get",
         return_value=Mock(status_code=200, text=player_html_data),
     ):
-        parser.parse()
+        asyncio.run(parser.parse())

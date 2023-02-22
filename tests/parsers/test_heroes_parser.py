@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import Mock, patch
 
 from overfastapi.common.helpers import overfast_client
@@ -12,6 +13,6 @@ def test_heroes_page_parsing(heroes_html_data: str, heroes_json_data: list):
         "get",
         return_value=Mock(status_code=200, text=heroes_html_data),
     ):
-        parser.parse()
+        asyncio.run(parser.parse())
 
     assert parser.data == heroes_json_data

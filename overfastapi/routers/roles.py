@@ -24,6 +24,6 @@ async def list_roles(
     request: Request,
     locale: Locale = Query(Locale.ENGLISH_US, title="Locale to be displayed"),
 ) -> list[RoleDetail]:
-    return ListRolesRequestHandler(request).process_request(
+    return await ListRolesRequestHandler(request).process_request(
         background_tasks=background_tasks, locale=locale
     )

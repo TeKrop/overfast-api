@@ -1,7 +1,8 @@
+import asyncio
 from unittest.mock import Mock, patch
 
 import pytest
-from httpx import Client
+from httpx import AsyncClient
 
 from overfastapi.commands.update_test_fixtures import main as update_test_fixtures_main
 from overfastapi.common.enums import HeroKey
@@ -55,7 +56,7 @@ def test_update_with_different_options(parameters, expected_calls: list[str]):
         "overfastapi.commands.update_test_fixtures.parse_parameters",
         return_value=parameters,
     ), patch.object(
-        Client,
+        AsyncClient,
         "get",
         return_value=Mock(status_code=200, text="HTML_DATA"),
     ), patch(
@@ -63,7 +64,7 @@ def test_update_with_different_options(parameters, expected_calls: list[str]):
     ), patch(
         "overfastapi.common.logging.logger.error", logger_error_mock
     ):
-        update_test_fixtures_main()
+        asyncio.run(update_test_fixtures_main())
 
     for expected in expected_calls:
         logger_info_mock.assert_any_call(expected)
@@ -77,7 +78,7 @@ def test_update_with_blizzard_error():
         "overfastapi.commands.update_test_fixtures.parse_parameters",
         return_value=Mock(heroes=False, players=False, maps=True),
     ), patch.object(
-        Client,
+        AsyncClient,
         "get",
         return_value=Mock(status_code=500, text="BLIZZARD_ERROR"),
     ), patch(
@@ -85,7 +86,7 @@ def test_update_with_blizzard_error():
     ), patch(
         "overfastapi.common.logging.logger.error", logger_error_mock
     ):
-        update_test_fixtures_main()
+        asyncio.run(update_test_fixtures_main())
 
     logger_error_mock.assert_called_with(
         "Error while getting the page : {}", "BLIZZARD_ERROR"
