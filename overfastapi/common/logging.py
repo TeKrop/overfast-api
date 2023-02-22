@@ -44,7 +44,7 @@ class OverFastAPILogger:
     def make_logger(cls):
         return cls.customize_logging(
             f"{LOGS_ROOT_PATH}/access.log",
-            level="debug",
+            level="info",
             retention="1 year",
             rotation="1 day",
             log_format=(

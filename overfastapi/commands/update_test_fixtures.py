@@ -3,8 +3,9 @@ Using Blizzard real data about heroes, some players and maps,
 download and update parsers test HTML fixtures
 """
 import argparse
+import asyncio
 
-import requests
+import httpx
 
 from overfastapi.common.enums import HeroKey, Locale
 from overfastapi.common.helpers import players_ids
@@ -100,7 +101,7 @@ def save_fixture_file(filepath: str, content: str):  # pragma: no cover
         logger.info("File saved !")
 
 
-def main():
+async def main():
     """Main method of the script"""
     logger.info("Updating test fixtures...")
 
@@ -113,11 +114,11 @@ def main():
 
     # Do the job
     test_data_path = f"{TEST_FIXTURES_ROOT_PATH}/html"
-    with requests.Session() as session:
+    async with httpx.AsyncClient() as client:
         for route, filepath in route_file_mapping.items():
             logger.info(f"Updating {test_data_path}{filepath}...")
             logger.info(f"GET {BLIZZARD_HOST}/{locale}{route}...")
-            response = session.get(f"{BLIZZARD_HOST}/{locale}{route}")
+            response = await client.get(f"{BLIZZARD_HOST}/{locale}{route}")
             logger.debug(
                 f"HTTP {response.status_code} / Time : {response.elapsed.total_seconds()}"
             )
@@ -131,4 +132,4 @@ def main():
 
 if __name__ == "__main__":  # pragma: no cover
     logger = logger.patch(lambda record: record.update(name="update_test_fixtures"))
-    main()
+    asyncio.run(main())

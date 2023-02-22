@@ -9,7 +9,7 @@ class MapsParser(AbstractParser):
 
     timeout = HOME_PATH_CACHE_TIMEOUT
 
-    def retrieve_and_parse_data(self) -> None:
+    async def retrieve_and_parse_data(self) -> None:
         maps_data = read_csv_data_file("maps.csv")
 
         self.data = [

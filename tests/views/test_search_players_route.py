@@ -2,11 +2,12 @@ import json
 from unittest.mock import Mock, patch
 
 import pytest
-import requests
 from fastapi.testclient import TestClient
+from httpx import TimeoutException
 
 from overfastapi.common.cache_manager import CacheManager
 from overfastapi.common.enums import PlayerPrivacy
+from overfastapi.common.helpers import overfast_client
 from overfastapi.main import app
 
 client = TestClient(app)
@@ -15,8 +16,9 @@ privacies = {p.value for p in PlayerPrivacy}
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_search_players_test(search_players_blizzard_json_data: list[dict]):
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(
             status_code=200,
             text=json.dumps(search_players_blizzard_json_data),
@@ -41,8 +43,9 @@ def test_search_players_missing_name():
 
 
 def test_search_players_no_result():
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text="[]", json=lambda: []),
     ):
         response = client.get("/players?name=Player")
@@ -59,9 +62,8 @@ def test_search_players_no_result():
     ],
 )
 def test_search_players_blizzard_error(status_code: int, text: str):
-    with patch(
-        "requests.get",
-        return_value=Mock(status_code=status_code, text=text),
+    with patch.object(
+        overfast_client, "get", return_value=Mock(status_code=status_code, text=text)
     ):
         response = client.get("/players?name=Player")
 
@@ -72,9 +74,10 @@ def test_search_players_blizzard_error(status_code: int, text: str):
 
 
 def test_search_players_blizzard_timeout():
-    with patch(
-        "requests.get",
-        side_effect=requests.exceptions.Timeout(
+    with patch.object(
+        overfast_client,
+        "get",
+        side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)"
         ),

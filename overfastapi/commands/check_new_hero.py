@@ -2,6 +2,8 @@
 to the internal heroes list. If this is a case, a Discord notification is sent to the
 developer.
 """
+import asyncio
+
 from fastapi import HTTPException
 
 from overfastapi.common.enums import HeroKey
@@ -16,7 +18,7 @@ def get_distant_hero_keys() -> set[str]:
     heroes_parser = HeroesParser()
 
     try:
-        heroes_parser.retrieve_and_parse_data()
+        asyncio.run(heroes_parser.retrieve_and_parse_data())
     except HTTPException as error:
         raise SystemExit from error
 

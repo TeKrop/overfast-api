@@ -1,9 +1,10 @@
+import asyncio
 from unittest.mock import Mock, patch
 
 import pytest
 
 from overfastapi.common.exceptions import ParserBlizzardError
-from overfastapi.common.helpers import players_ids
+from overfastapi.common.helpers import overfast_client, players_ids
 from overfastapi.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
 
 
@@ -21,11 +22,12 @@ def test_player_page_parsing(
 ):
     parser = PlayerStatsSummaryParser(player_id=player_id)
 
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=player_html_data),
     ):
-        parser.parse()
+        asyncio.run(parser.parse())
 
     assert parser.data == player_stats_json_data
 
@@ -33,8 +35,9 @@ def test_player_page_parsing(
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
 def test_unknown_player_parser_blizzard_error(player_html_data: str):
     parser = PlayerStatsSummaryParser(player_id="Unknown-1234")
-    with pytest.raises(ParserBlizzardError), patch(
-        "requests.get",
+    with pytest.raises(ParserBlizzardError), patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=player_html_data),
     ):
-        parser.parse()
+        asyncio.run(parser.parse())

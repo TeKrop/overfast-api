@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 from fastapi.testclient import TestClient
 
+from overfastapi.common.helpers import overfast_client
 from overfastapi.main import app
 
 client = TestClient(app)
@@ -10,9 +11,8 @@ client = TestClient(app)
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_gamemodes_test(home_html_data: str):
-    with patch(
-        "requests.get",
-        return_value=Mock(status_code=200, text=home_html_data),
+    with patch.object(
+        overfast_client, "get", return_value=Mock(status_code=200, text=home_html_data)
     ):
         yield
 
@@ -33,8 +33,9 @@ def test_get_gamemodes_after_get_roles(gamemodes_json_data: list):
 
 
 def test_get_gamemodes_blizzard_error():
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=503, text="Service Unavailable"),
     ):
         response = client.get("/gamemodes")

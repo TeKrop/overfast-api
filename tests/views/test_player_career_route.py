@@ -1,10 +1,10 @@
 from unittest.mock import Mock, patch
 
 import pytest
-import requests
 from fastapi.testclient import TestClient
+from httpx import TimeoutException
 
-from overfastapi.common.helpers import players_ids
+from overfastapi.common.helpers import overfast_client, players_ids
 from overfastapi.main import app
 
 client = TestClient(app)
@@ -24,8 +24,9 @@ def test_get_player_career(
     player_html_data: str,
     player_json_data: dict,
 ):
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=player_html_data),
     ):
         response = client.get(f"/players/{player_id}")
@@ -34,8 +35,9 @@ def test_get_player_career(
 
 
 def test_get_player_career_blizzard_error():
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=503, text="Service Unavailable"),
     ):
         response = client.get("/players/TeKrop-2217")
@@ -47,9 +49,10 @@ def test_get_player_career_blizzard_error():
 
 
 def test_get_player_career_blizzard_timeout():
-    with patch(
-        "requests.get",
-        side_effect=requests.exceptions.Timeout(
+    with patch.object(
+        overfast_client,
+        "get",
+        side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)"
         ),
@@ -84,12 +87,10 @@ def test_get_player_career_internal_error():
 
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
 def test_get_player_parser_init_error(player_html_data: str):
-    with patch(
-        "requests.get",
-        return_value=Mock(
-            status_code=200,
-            text=player_html_data,
-        ),
+    with patch.object(
+        overfast_client,
+        "get",
+        return_value=Mock(status_code=200, text=player_html_data),
     ):
         response = client.get("/players/TeKrop-2217")
         assert response.status_code == 404
@@ -101,12 +102,10 @@ def test_get_player_parser_parsing_error(player_html_data: str):
     player_attr_error = player_html_data.replace(
         'class="Profile-player--summaryWrapper"', 'class="blabla"'
     )
-    with patch(
-        "requests.get",
-        return_value=Mock(
-            status_code=200,
-            text=player_attr_error,
-        ),
+    with patch.object(
+        overfast_client,
+        "get",
+        return_value=Mock(status_code=200, text=player_attr_error),
     ):
         response = client.get("/players/TeKrop-2217")
         assert response.status_code == 500

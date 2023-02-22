@@ -1,7 +1,8 @@
+import asyncio
 from unittest.mock import Mock, patch
 
 import pytest
-import requests
+from httpx import TimeoutException
 
 from overfastapi.commands.check_and_update_cache import get_soon_expired_cache_keys
 from overfastapi.commands.check_and_update_cache import (
@@ -9,6 +10,7 @@ from overfastapi.commands.check_and_update_cache import (
 )
 from overfastapi.common.cache_manager import CacheManager
 from overfastapi.common.enums import Locale
+from overfastapi.common.helpers import overfast_client
 from overfastapi.config import (
     BLIZZARD_HOST,
     CAREER_PATH,
@@ -57,11 +59,12 @@ def test_check_and_update_gamemodes_cache_to_update(
 
     # check and update (only gamemodes should be updated)
     logger_info_mock = Mock()
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=home_html_data),
     ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
-        check_and_update_cache_main()
+        asyncio.run(check_and_update_cache_main())
 
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
@@ -92,11 +95,12 @@ def test_check_and_update_specific_hero_to_update(
 
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=hero_html_data),
     ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
-        check_and_update_cache_main()
+        asyncio.run(check_and_update_cache_main())
 
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
@@ -126,7 +130,7 @@ def test_check_and_update_maps_to_update(
     logger_info_mock = Mock()
 
     with patch("overfastapi.common.logging.logger.info", logger_info_mock):
-        check_and_update_cache_main()
+        asyncio.run(check_and_update_cache_main())
 
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
@@ -158,7 +162,7 @@ def test_check_and_update_cache_no_update(cache_manager: CacheManager, locale: s
     # check and update (no update)
     logger_info_mock = Mock()
     with patch("overfastapi.common.logging.logger.info", logger_info_mock):
-        check_and_update_cache_main()
+        asyncio.run(check_and_update_cache_main())
 
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 0)
 
@@ -201,14 +205,15 @@ def test_check_and_update_specific_player_to_update(
 
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(
             status_code=200,
             text=player_html_data,
         ),
     ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
-        check_and_update_cache_main()
+        asyncio.run(check_and_update_cache_main())
 
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
@@ -255,14 +260,15 @@ def test_check_and_update_player_stats_summary_to_update(
 
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(
             status_code=200,
             text=player_html_data,
         ),
     ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
-        check_and_update_cache_main()
+        asyncio.run(check_and_update_cache_main())
 
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
@@ -282,11 +288,12 @@ def test_check_internal_error_from_blizzard(cache_manager: CacheManager, locale:
     )
 
     logger_error_mock = Mock()
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=500, text="Internal Server Error"),
     ), patch("overfastapi.common.logging.logger.error", logger_error_mock):
-        check_and_update_cache_main()
+        asyncio.run(check_and_update_cache_main())
 
     logger_error_mock.assert_any_call(
         "Received an error from Blizzard. HTTP {} : {}", 500, "Internal Server Error"
@@ -302,14 +309,15 @@ def test_check_timeout_from_blizzard(cache_manager: CacheManager, locale: str):
     )
 
     logger_error_mock = Mock()
-    with patch(
-        "requests.get",
-        side_effect=requests.exceptions.Timeout(
+    with patch.object(
+        overfast_client,
+        "get",
+        side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)"
         ),
     ), patch("overfastapi.common.logging.logger.error", logger_error_mock):
-        check_and_update_cache_main()
+        asyncio.run(check_and_update_cache_main())
 
     logger_error_mock.assert_any_call(
         "Received an error from Blizzard. HTTP {} : {}",
@@ -334,11 +342,12 @@ def test_check_parser_parsing_error(
     player_attr_error = player_html_data.replace(
         'class="Profile-player--summaryWrapper"', 'class="blabla"'
     )
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=player_attr_error),
     ), patch("overfastapi.common.logging.logger.critical", logger_critical_mock):
-        check_and_update_cache_main()
+        asyncio.run(check_and_update_cache_main())
 
     logger_critical_mock.assert_called_with(
         "Internal server error for URL {} : {}",
@@ -359,12 +368,61 @@ def test_check_parser_init_error(
     )
 
     logger_error_mock = Mock()
-    with patch(
-        "requests.get",
+    with patch.object(
+        overfast_client,
+        "get",
         return_value=Mock(status_code=200, text=player_html_data),
     ), patch("overfastapi.common.logging.logger.error", logger_error_mock):
-        check_and_update_cache_main()
+        asyncio.run(check_and_update_cache_main())
 
     logger_error_mock.assert_any_call(
         "Failed to instanciate Parser when refreshing : {}", "Player not found"
     )
+
+
+def test_check_and_update_several_to_update(
+    cache_manager: CacheManager,
+    locale: str,
+    home_html_data: list,
+    gamemodes_json_data: dict,
+    maps_json_data: dict,
+):
+    gamemodes_cache_key = f"GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}"
+    maps_cache_key = "MapsParser"
+
+    complete_gamemodes_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{gamemodes_cache_key}"
+    complete_map_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{maps_cache_key}"
+
+    # Add some data to update
+    cache_manager.update_parser_cache(
+        gamemodes_cache_key, [], EXPIRED_CACHE_REFRESH_LIMIT - 5
+    )
+    cache_manager.update_parser_cache(
+        maps_cache_key, [], EXPIRED_CACHE_REFRESH_LIMIT - 5
+    )
+
+    assert get_soon_expired_cache_keys() == {
+        complete_gamemodes_cache_key,
+        complete_map_cache_key,
+    }
+
+    # check and update (only gamemodes should be updated)
+    logger_info_mock = Mock()
+    with patch.object(
+        overfast_client,
+        "get",
+        return_value=Mock(status_code=200, text=home_html_data),
+    ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
+        asyncio.run(check_and_update_cache_main())
+
+    # Check data in db (assert we created API Cache for subroutes)
+    logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 2)
+    logger_info_mock.assert_any_call(
+        "Updating data for {} key...", complete_gamemodes_cache_key
+    )
+    logger_info_mock.assert_any_call(
+        "Updating data for {} key...", complete_map_cache_key
+    )
+
+    assert cache_manager.get_parser_cache(gamemodes_cache_key) == gamemodes_json_data
+    assert cache_manager.get_parser_cache(maps_cache_key) == maps_json_data

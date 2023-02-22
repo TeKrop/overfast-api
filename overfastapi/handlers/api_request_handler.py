@@ -33,7 +33,7 @@ class APIRequestHandler(ApiRequestMixin, ABC):
     def timeout(self) -> int:
         """Timeout used for API Cache storage for this specific handler"""
 
-    def process_request(self, **kwargs) -> dict:
+    async def process_request(self, **kwargs) -> dict:
         """Main method used to process the request from user and return final data. Raises
         an HTTPException in case of error when retrieving or parsing data.
 
@@ -64,7 +64,7 @@ class APIRequestHandler(ApiRequestMixin, ABC):
             # Do the parsing. Internally, it will check for Parser Cache
             # before doing a real parsing using BeautifulSoup
             try:
-                parser.parse()
+                await parser.parse()
             except ParserBlizzardError as error:
                 raise HTTPException(
                     status_code=error.status_code, detail=error.message

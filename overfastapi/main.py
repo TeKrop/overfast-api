@@ -21,7 +21,12 @@ description = """OverFast API gives data about Overwatch 2 heroes, gamemodes, ma
 statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses
 **nginx** as reverse proxy and **Redis** for caching. By using a Refresh-Ahead cache system, it
 minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate
-data to users. All duration values are also returned in seconds for convenience."""
+data to users.
+
+In players statistics endpoints, several conversions are made for convenience :
+- all **duration values** are converted into **seconds** (integer)
+- **percent values** are exposed as **integers** instead of a string with a percent symbol
+- integer and float string representations are converted into the concerned type"""
 
 
 def custom_openapi():  # pragma: no cover

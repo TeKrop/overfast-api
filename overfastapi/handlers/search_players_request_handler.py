@@ -33,7 +33,7 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
     def __init__(self, request: Request):
         self.cache_key = CacheManager.get_cache_key_from_request(request)
 
-    def process_request(self, **kwargs) -> dict:
+    async def process_request(self, **kwargs) -> dict:
         """Main method used to process the request from user and return final data.
 
         The process uses API Cache if available and needed, the main steps are :
@@ -51,7 +51,7 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
         # No API Cache or not using it in app, we request the data from Blizzard URL
         logger.info("No API Cache, requesting the data to Blizzard...")
 
-        req = overfast_request(self.get_blizzard_url(**kwargs))
+        req = await overfast_request(self.get_blizzard_url(**kwargs))
         if req.status_code != 200:
             raise blizzard_response_error_from_request(req)
 
