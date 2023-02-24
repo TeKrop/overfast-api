@@ -191,6 +191,13 @@ class PlayerStatsSummaryParser(PlayerParser):
                     time_played = self._get_stat_value("time_played", game_stats)
                     games_lost = self._get_stat_value("games_lost", game_stats)
 
+                    # Sometimes, games lost are negative on Blizzard page. To not
+                    # disturbate too much the winrate, I decided to put a value
+                    # in order for the player to have 50% winrate
+                    games_lost = (
+                        round(games_played / 2) if games_lost < 0 else games_lost
+                    )
+
                     combat_stats = self._get_category_stats("combat", hero_stats)
                     eliminations = self._get_stat_value("eliminations", combat_stats)
                     deaths = self._get_stat_value("deaths", combat_stats)
