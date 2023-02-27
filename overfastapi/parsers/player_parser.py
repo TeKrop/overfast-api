@@ -291,6 +291,7 @@ class PlayerParser(APIParser):
                 .find("select")
                 .find_all("option")
             )
+            if option.get("option-id")
         }
 
         heroes_comparisons = {
@@ -341,6 +342,7 @@ class PlayerParser(APIParser):
                 .find("select")
                 .find_all("option")
             )
+            if option.get("option-id")
         }
 
         career_stats = {}
@@ -349,6 +351,13 @@ class PlayerParser(APIParser):
             "span", class_="stats-container", recursive=False
         ):
             stats_hero_class = get_stats_hero_class(hero_container["class"])
+
+            # Sometimes, Blizzard makes some weird things and options don't
+            # have any label, so we can't know for sure which hero it is about.
+            # So we have to skip this field
+            if stats_hero_class not in heroes_options:
+                continue
+
             hero_key = get_hero_keyname(heroes_options[stats_hero_class])
 
             career_stats[hero_key] = []
