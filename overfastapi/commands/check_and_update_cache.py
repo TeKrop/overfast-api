@@ -9,7 +9,11 @@ from overfastapi.common.cache_manager import CacheManager
 from overfastapi.common.exceptions import ParserBlizzardError, ParserParsingError
 from overfastapi.common.helpers import overfast_internal_error
 from overfastapi.common.logging import logger
-from overfastapi.config import BLIZZARD_HOST, PARSER_CACHE_KEY_PREFIX
+from overfastapi.config import (
+    BLIZZARD_HOST,
+    MAX_CONCURRENT_REQUESTS,
+    PARSER_CACHE_KEY_PREFIX,
+)
 from overfastapi.parsers.abstract_parser import AbstractParser
 from overfastapi.parsers.gamemodes_parser import GamemodesParser
 from overfastapi.parsers.hero_parser import HeroParser
@@ -33,9 +37,9 @@ PARSER_CLASSES_MAPPING = {
 # Generic cache manager used in the process
 cache_manager = CacheManager()
 
+
 # Semaphore to limit concurrent requests for async processes
-max_concurrent_requests = 5
-sem = asyncio.Semaphore(max_concurrent_requests)
+sem = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
 
 
 def get_soon_expired_cache_keys() -> set[str]:
@@ -79,7 +83,7 @@ async def retrieve_data(key: str, parser: AbstractParser):
         try:
             await parser.retrieve_and_parse_data()
         except ParserBlizzardError as error:
-            logger.error(
+            logger.exception(
                 "Failed to instanciate Parser when refreshing : {}",
                 error.message,
             )

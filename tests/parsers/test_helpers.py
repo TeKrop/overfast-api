@@ -17,7 +17,7 @@ from overfastapi.parsers.helpers import (
 
 
 @pytest.mark.parametrize(
-    "input_str,result",
+    ("input_str", "result"),
     [
         # Time format in hour:min:sec => seconds
         ("1,448:50:56", 5215856),
@@ -54,7 +54,7 @@ def test_get_computed_stat_value(input_str: str, result: int | float | str):
 
 
 @pytest.mark.parametrize(
-    "rank_url,division",
+    ("rank_url", "division"),
     [
         (
             "https://static.playoverwatch.com/img/pages/career/icons/rank/BronzeTier-4-6b6e7959d4.png",
@@ -91,7 +91,7 @@ def test_get_division_from_rank_icon(rank_url: str, division: CompetitiveDivisio
 
 
 @pytest.mark.parametrize(
-    "frame_url,endorsement_value",
+    ("frame_url", "endorsement_value"),
     [
         (
             "https://static.playoverwatch.com/img/pages/career/icons/endorsement/0.svg#icon",
@@ -124,7 +124,7 @@ def test_get_endorsement_value_from_frame(frame_url: str, endorsement_value: int
 
 
 @pytest.mark.parametrize(
-    "url,full_url",
+    ("url", "full_url"),
     [
         (
             "https://www.youtube.com/watch?v=yzFWIw7wV8Q",
@@ -138,7 +138,7 @@ def test_get_full_url(url: str, full_url: str):
 
 
 @pytest.mark.parametrize(
-    "input_str,result",
+    ("input_str", "result"),
     [
         ("Cassidy", "cassidy"),
         ("D.Va", "dva"),
@@ -157,7 +157,7 @@ def test_get_hero_keyname(input_str: str, result: str):
 
 
 @pytest.mark.parametrize(
-    "icon_url,role",
+    ("icon_url", "role"),
     [
         (
             "https://static.playoverwatch.com/img/pages/career/icons/role/offense-ab1756f419.svg#icon",
@@ -178,7 +178,7 @@ def test_get_role_key_from_icon(icon_url: str, role: Role):
 
 
 @pytest.mark.parametrize(
-    "hero_classes,result",
+    ("hero_classes", "result"),
     [
         (["stats-container", "option-0", "is-active"], "option-0"),
         (["stats-container", "option-1"], "option-1"),
@@ -189,7 +189,7 @@ def test_get_stats_hero_class(hero_classes: list[str], result: str):
 
 
 @pytest.mark.parametrize(
-    "rank_url,tier",
+    ("rank_url", "tier"),
     [
         (
             "https://static.playoverwatch.com/img/pages/career/icons/rank/PlatinumTier-2-2251fd0f3e.png",
@@ -214,7 +214,7 @@ def test_get_tier_from_rank_icon(rank_url: str, tier: int):
 
 
 @pytest.mark.parametrize(
-    "input_str,result",
+    ("input_str", "result"),
     [
         ("test_string_without_accents", "test_string_without_accents"),
         ("ÀÁÂÃÄÅàáâãäå", "AAAAAAaaaaaa"),
@@ -230,7 +230,7 @@ def test_remove_accents(input_str: str, result: str):
 
 
 @pytest.mark.parametrize(
-    "input_str,result",
+    ("input_str", "result"),
     [
         ("test_string", "test_string"),
         ("All Heroes", "all_heroes"),

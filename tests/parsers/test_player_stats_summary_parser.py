@@ -9,7 +9,7 @@ from overfastapi.parsers.player_stats_summary_parser import PlayerStatsSummaryPa
 
 
 @pytest.mark.parametrize(
-    "player_id,player_html_data,player_stats_json_data",
+    ("player_id", "player_html_data", "player_stats_json_data"),
     [
         (player_id, player_id, player_id)
         for player_id in players_ids

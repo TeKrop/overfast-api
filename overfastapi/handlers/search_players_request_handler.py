@@ -1,7 +1,7 @@
 """Search Players Request Handler module"""
-from typing import Iterable
+from collections.abc import Iterable
 
-from fastapi import Request
+from fastapi import Request, status
 
 from overfastapi.common.cache_manager import CacheManager
 from overfastapi.common.enums import Locale
@@ -52,7 +52,7 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
         logger.info("No API Cache, requesting the data to Blizzard...")
 
         req = await overfast_request(self.get_blizzard_url(**kwargs))
-        if req.status_code != 200:
+        if req.status_code != status.HTTP_200_OK:
             raise blizzard_response_error_from_request(req)
 
         players = req.json()

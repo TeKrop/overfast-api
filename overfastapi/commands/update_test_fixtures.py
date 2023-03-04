@@ -4,6 +4,7 @@ download and update parsers test HTML fixtures
 """
 import argparse
 import asyncio
+from pathlib import Path
 
 import httpx
 
@@ -95,7 +96,7 @@ def list_routes_to_update(args: argparse.Namespace) -> dict[str, str]:
 
 def save_fixture_file(filepath: str, content: str):  # pragma: no cover
     """Method used to save the fixture file on the disk"""
-    with open(filepath, "w", encoding="utf-8") as html_file:
+    with Path(filepath).open(mode="w", encoding="utf-8") as html_file:
         html_file.write(content)
         html_file.close()
         logger.info("File saved !")
@@ -116,11 +117,13 @@ async def main():
     test_data_path = f"{TEST_FIXTURES_ROOT_PATH}/html"
     async with httpx.AsyncClient() as client:
         for route, filepath in route_file_mapping.items():
-            logger.info(f"Updating {test_data_path}{filepath}...")
-            logger.info(f"GET {BLIZZARD_HOST}/{locale}{route}...")
+            logger.info("Updating {}{}...", test_data_path, filepath)
+            logger.info("GET {}/{}{}...", BLIZZARD_HOST, locale, route)
             response = await client.get(f"{BLIZZARD_HOST}/{locale}{route}")
             logger.debug(
-                f"HTTP {response.status_code} / Time : {response.elapsed.total_seconds()}"
+                "HTTP {} / Time : {}",
+                response.status_code,
+                response.elapsed.total_seconds(),
             )
             if response.status_code in (200, 404):
                 save_fixture_file(f"{test_data_path}{filepath}", response.text)

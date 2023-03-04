@@ -11,7 +11,7 @@ from overfastapi.config import TEST_FIXTURES_ROOT_PATH
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_update_test_fixtures_test():
+def _setup_update_test_fixtures_test():
     with patch(
         "overfastapi.commands.update_test_fixtures.save_fixture_file",
         return_value=Mock(),
@@ -19,22 +19,23 @@ def setup_update_test_fixtures_test():
         yield
 
 
+test_data_path = f"{TEST_FIXTURES_ROOT_PATH}/html"
 heroes_calls = [
-    f"Updating {TEST_FIXTURES_ROOT_PATH}/html/heroes.html...",
+    ("Updating {}{}...", test_data_path, "/heroes.html"),
     *[
-        f"Updating {TEST_FIXTURES_ROOT_PATH}/html/heroes/{hero.value}.html..."
+        ("Updating {}{}...", test_data_path, f"/heroes/{hero.value}.html")
         for hero in HeroKey
     ],
 ]
 players_calls = [
-    f"Updating {TEST_FIXTURES_ROOT_PATH}/html/players/{player}.html..."
+    ("Updating {}{}...", test_data_path, f"/players/{player}.html")
     for player in players_ids
 ]
-home_calls = [f"Updating {TEST_FIXTURES_ROOT_PATH}/html/home.html..."]
+home_calls = [("Updating {}{}...", test_data_path, "/home.html")]
 
 
 @pytest.mark.parametrize(
-    "parameters,expected_calls",
+    ("parameters", "expected_calls"),
     [
         (Mock(heroes=True, home=False, players=False), heroes_calls),
         (Mock(heroes=False, home=True, players=False), home_calls),
@@ -67,7 +68,7 @@ def test_update_with_different_options(parameters, expected_calls: list[str]):
         asyncio.run(update_test_fixtures_main())
 
     for expected in expected_calls:
-        logger_info_mock.assert_any_call(expected)
+        logger_info_mock.assert_any_call(*expected)
     logger_error_mock.assert_not_called()
 
 

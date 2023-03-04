@@ -12,8 +12,8 @@ def redis_server():
     return fakeredis.FakeStrictRedis()
 
 
-@pytest.fixture(scope="function", autouse=True)
-def patch_before_every_test(redis_server: fakeredis.FakeStrictRedis):
+@pytest.fixture(autouse=True)
+def _patch_before_every_test(redis_server: fakeredis.FakeStrictRedis):
     # Flush Redis before and after every tests
     redis_server.flushdb()
 

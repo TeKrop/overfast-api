@@ -1,6 +1,6 @@
 """Roles endpoints router : roles list, etc."""
 
-from fastapi import APIRouter, BackgroundTasks, Query, Request
+from fastapi import APIRouter, Query, Request
 
 from overfastapi.common.decorators import validation_error_handler
 from overfastapi.common.enums import Locale, RouteTag
@@ -20,10 +20,7 @@ router = APIRouter()
 )
 @validation_error_handler(response_model=RoleDetail)
 async def list_roles(
-    background_tasks: BackgroundTasks,
     request: Request,
     locale: Locale = Query(Locale.ENGLISH_US, title="Locale to be displayed"),
 ) -> list[RoleDetail]:
-    return await ListRolesRequestHandler(request).process_request(
-        background_tasks=background_tasks, locale=locale
-    )
+    return await ListRolesRequestHandler(request).process_request(locale=locale)

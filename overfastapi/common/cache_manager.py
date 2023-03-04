@@ -26,7 +26,7 @@ parser-cache:https://overwatch.blizzard.com/en-us/heroes/ana
 
 import json
 import zlib
-from typing import Callable, Iterator
+from collections.abc import Callable, Iterator
 
 import redis
 from fastapi import Request

@@ -2,7 +2,7 @@
 import tomllib
 from pathlib import Path
 
-with open(f"{Path.cwd()}/pyproject.toml", "rb") as project_file:
+with Path(f"{Path.cwd()}/pyproject.toml").open(mode="rb") as project_file:
     project_data = tomllib.load(project_file)
 
 OVERFAST_API_VERSION = project_data["tool"]["poetry"]["version"]
@@ -27,6 +27,9 @@ REDIS_PORT = 6379
 ############
 # CACHE CONFIGURATION
 ############
+
+# Max HTTPX concurrent requests for cache updates
+MAX_CONCURRENT_REQUESTS = 5
 
 # Whether or not you want to use the API Cache directly in the app (GET). Disabled by default,
 # because we are using the reverse proxy (nginx) to request the API Cache first, before
@@ -96,3 +99,6 @@ TEST_FIXTURES_ROOT_PATH = f"{Path.cwd()}/tests/fixtures"
 
 # Root path for Loguru access logs
 LOGS_ROOT_PATH = f"{Path.cwd()}/logs"
+
+# Log level for Loguru
+LOG_LEVEL = "info"

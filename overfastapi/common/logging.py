@@ -6,7 +6,7 @@ from pathlib import Path
 
 from loguru import logger as loguru_logger
 
-from overfastapi.config import LOGS_ROOT_PATH
+from overfastapi.config import LOG_LEVEL, LOGS_ROOT_PATH
 
 
 class InterceptHandler(logging.Handler):
@@ -44,9 +44,10 @@ class OverFastAPILogger:
     def make_logger(cls):
         return cls.customize_logging(
             f"{LOGS_ROOT_PATH}/access.log",
-            level="info",
-            retention="1 year",
+            level=LOG_LEVEL,
             rotation="1 day",
+            retention="1 year",
+            compression="gz",
             log_format=(
                 "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
                 "<level>{level: <8}</level> | "
@@ -56,7 +57,13 @@ class OverFastAPILogger:
 
     @classmethod
     def customize_logging(
-        cls, filepath: Path, level: str, rotation: str, retention: str, log_format: str
+        cls,
+        filepath: Path,
+        level: str,
+        rotation: str,
+        retention: str,
+        compression: str,
+        log_format: str,
     ):
         loguru_logger.remove()
         loguru_logger.add(
@@ -70,6 +77,7 @@ class OverFastAPILogger:
             str(filepath),
             rotation=rotation,
             retention=retention,
+            compression=compression,
             enqueue=True,
             backtrace=True,
             level=level.upper(),

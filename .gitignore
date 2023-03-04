@@ -133,3 +133,6 @@ overfastapi/config.py
 
 # Poetry
 poetry.lock
+
+# Loguru gzipped logs
+*.log.gz

@@ -1,5 +1,5 @@
 """Gamemodes endpoints router : gamemodes list, etc."""
-from fastapi import APIRouter, BackgroundTasks, Query, Request
+from fastapi import APIRouter, Query, Request
 
 from overfastapi.common.decorators import validation_error_handler
 from overfastapi.common.enums import Locale, RouteTag
@@ -24,10 +24,7 @@ router = APIRouter()
 )
 @validation_error_handler(response_model=GamemodeDetails)
 async def list_map_gamemodes(
-    background_tasks: BackgroundTasks,
     request: Request,
     locale: Locale = Query(Locale.ENGLISH_US, title="Locale to be displayed"),
 ) -> list[GamemodeDetails]:
-    return await ListGamemodesRequestHandler(request).process_request(
-        background_tasks=background_tasks, locale=locale
-    )
+    return await ListGamemodesRequestHandler(request).process_request(locale=locale)

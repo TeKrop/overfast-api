@@ -29,6 +29,5 @@ class GetHeroRequestHandler(APIRequestHandler):
         role_pos = list(hero_data.keys()).index("role")
         hero_data_items = list(hero_data.items())
         hero_data_items.insert(role_pos, ("portrait", portrait_value))
-        hero_data = dict(hero_data_items)
 
-        return hero_data
+        return dict(hero_data_items)

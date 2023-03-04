@@ -25,5 +25,5 @@ jobs:
 
     - name: Analyse the code using ruff
       run: |
-        cp overfastapi/config.example.py overfastapi/config.py
+        cp overfastapi/config_example.py overfastapi/config.py
         ruff .

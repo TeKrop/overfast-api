@@ -59,15 +59,16 @@ overfast_client = httpx.AsyncClient(**overfast_client_settings)
 async def overfast_request(url: str) -> httpx.Response:
     """Make an HTTP GET request with custom headers and retrieve the result"""
     try:
-        logger.info("Requesting {}...", url)
+        logger.debug("Requesting {}...", url)
         response = await overfast_client.get(url)
-        logger.info("OverFast request done !")
-        return response
     except httpx.TimeoutException as error:
         raise blizzard_response_error(
             status_code=0,
             error="Blizzard took more than 10 seconds to respond, resulting in a timeout",
         ) from error
+    else:
+        logger.debug("OverFast request done !")
+        return response
 
 
 def overfast_internal_error(url: str, error: Exception) -> HTTPException:
@@ -131,22 +132,22 @@ def send_discord_webhook_message(message: str) -> httpx.Response | None:
 
 def read_html_file(filepath: str) -> str:
     """Helper method for retrieving fixture HTML file data"""
-    with open(
-        f"{TEST_FIXTURES_ROOT_PATH}/html/{filepath}", encoding="utf-8"
+    with Path(f"{TEST_FIXTURES_ROOT_PATH}/html/{filepath}").open(
+        encoding="utf-8"
     ) as html_file:
         return html_file.read()
 
 
 def read_json_file(filepath: str) -> dict | list:
     """Helper method for retrieving fixture JSON file data"""
-    with open(
-        f"{TEST_FIXTURES_ROOT_PATH}/json/{filepath}", encoding="utf-8"
+    with Path(f"{TEST_FIXTURES_ROOT_PATH}/json/{filepath}").open(
+        encoding="utf-8"
     ) as json_file:
         return json.load(json_file)
 
 
 def read_csv_data_file(filepath: str) -> csv.DictReader:
-    with open(
-        f"{Path.cwd()}/overfastapi/data/{filepath}", encoding="utf-8"
+    with Path(f"{Path.cwd()}/overfastapi/data/{filepath}").open(
+        encoding="utf-8"
     ) as csv_file:
         yield from csv.DictReader(csv_file, delimiter=";")

@@ -38,7 +38,7 @@ If you want to use the API, and you have the possibility to host your own instan
 ### Install process
 
 - Clone the project
-- Create a `config.py` file from the `config.example.py` template file (inside `overfastapi` folder)
+- Create a `config.py` file from the `config_example.py` template file (inside `overfastapi` folder)
 - Edit the configuration file to match your needs
 - Finally, simply run `poetry install` to install all the dependencies (+ dev dependencies)
 
@@ -52,7 +52,7 @@ uvicorn overfastapi.main:app --reload
 
 ### Standalone (no cache system)
 ```
-cp overfastapi/config.example.py overfastapi/config.py
+cp overfastapi/config_example.py overfastapi/config.py
 docker build . -t tekrop/overfast-api:latest
 docker run -d -p 80:80 --name overfast-api tekrop/overfast-api
 ```
@@ -62,7 +62,7 @@ First, you need to create a dotenv file (`.env`) from the `.env.example` file. Y
 
 - `APP_VOLUME_PATH` will be a folder containing shared data for the app :
     - the app logs folders
-    - the configuration file (`config.py`). You need to copy the `overfastapi/config.example.py` file into the folder, default values should suit your needs
+    - the configuration file (`config.py`). You need to copy the `overfastapi/config_example.py` file into the folder, default values should suit your needs
     - crontab configurations for background cache update, you just need to copy the `overfast-crontab` file from the repo into your folder
 
 - `REDIS_VOLUME_PATH` will be a folder containing shared data for the Redis server. It will mainly a `dump.rdb` save file whenever the server has been stopped.
@@ -221,7 +221,7 @@ sequenceDiagram
     end
 ```
 
-Using this way (by manually doing it), the response will be cached into Redis, and the cache will be checked by the Python server (`USE_API_CACHE_IN_APP` setting in `config.py` must be set to `True`). It's an acceptable compromise.
+Using this way (by manually doing it), the response will be cached into Redis, and the cache will be checked by the Python server (`USE_API_CACHE_IN_APP` setting in `config.py` must be set to `True`). It's an acceptable compromise, but keep in mind that cache retrieval is ~100 times slower than the previous solution (tested with [wrk](https://github.com/wg/wrk)).
 
 ### Python (uvicorn) only
 ```mermaid

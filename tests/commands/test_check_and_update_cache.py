@@ -21,12 +21,12 @@ from overfastapi.config import (
 )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def cache_manager():
     return CacheManager()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def locale():
     return Locale.ENGLISH_US
 
@@ -74,7 +74,7 @@ def test_check_and_update_gamemodes_cache_to_update(
 
 
 @pytest.mark.parametrize(
-    "hero_html_data,hero_json_data",
+    ("hero_html_data", "hero_json_data"),
     [("ana", "ana")],
     indirect=["hero_html_data", "hero_json_data"],
 )
@@ -168,14 +168,13 @@ def test_check_and_update_cache_no_update(cache_manager: CacheManager, locale: s
 
 
 @pytest.mark.parametrize(
-    "player_id,player_html_data,player_json_data",
-    [("TeKrop-2217", "TeKrop-2217", "TeKrop-2217")],
+    ("player_html_data", "player_json_data"),
+    [("TeKrop-2217", "TeKrop-2217")],
     indirect=["player_html_data", "player_json_data"],
 )
 def test_check_and_update_specific_player_to_update(
     cache_manager: CacheManager,
     locale: str,
-    player_id: str,
     player_html_data: str,
     player_json_data: dict,
 ):
@@ -223,14 +222,13 @@ def test_check_and_update_specific_player_to_update(
 
 
 @pytest.mark.parametrize(
-    "player_id,player_html_data,player_stats_json_data",
-    [("TeKrop-2217", "TeKrop-2217", "TeKrop-2217")],
+    ("player_html_data", "player_stats_json_data"),
+    [("TeKrop-2217", "TeKrop-2217")],
     indirect=["player_html_data", "player_stats_json_data"],
 )
 def test_check_and_update_player_stats_summary_to_update(
     cache_manager: CacheManager,
     locale: str,
-    player_id: str,
     player_html_data: str,
     player_stats_json_data: dict,
 ):
@@ -367,15 +365,15 @@ def test_check_parser_init_error(
         EXPIRED_CACHE_REFRESH_LIMIT - 5,
     )
 
-    logger_error_mock = Mock()
+    logger_exception_mock = Mock()
     with patch.object(
         overfast_client,
         "get",
         return_value=Mock(status_code=200, text=player_html_data),
-    ), patch("overfastapi.common.logging.logger.error", logger_error_mock):
+    ), patch("overfastapi.common.logging.logger.exception", logger_exception_mock):
         asyncio.run(check_and_update_cache_main())
 
-    logger_error_mock.assert_any_call(
+    logger_exception_mock.assert_any_call(
         "Failed to instanciate Parser when refreshing : {}", "Player not found"
     )
 

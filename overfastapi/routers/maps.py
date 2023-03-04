@@ -1,5 +1,5 @@
 """Maps endpoints router : maps list, etc."""
-from fastapi import APIRouter, BackgroundTasks, Query, Request
+from fastapi import APIRouter, Query, Request
 
 from overfastapi.common.decorators import validation_error_handler
 from overfastapi.common.enums import MapGamemode, RouteTag
@@ -20,7 +20,6 @@ router = APIRouter()
 )
 @validation_error_handler(response_model=Map)
 async def list_maps(
-    background_tasks: BackgroundTasks,
     request: Request,
     gamemode: MapGamemode
     | None = Query(
@@ -29,6 +28,4 @@ async def list_maps(
         description="Filter maps available for a specific gamemode",
     ),
 ) -> list[Map]:
-    return await ListMapsRequestHandler(request).process_request(
-        background_tasks=background_tasks, gamemode=gamemode
-    )
+    return await ListMapsRequestHandler(request).process_request(gamemode=gamemode)

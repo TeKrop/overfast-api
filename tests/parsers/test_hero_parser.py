@@ -9,13 +9,11 @@ from overfastapi.parsers.hero_parser import HeroParser
 
 
 @pytest.mark.parametrize(
-    "hero_html_data,hero_json_data",
+    ("hero_html_data", "hero_json_data"),
     [(h.value, h.value) for h in HeroKey],
     indirect=["hero_html_data", "hero_json_data"],
 )
-def test_hero_page_parsing(
-    hero_html_data: str, hero_json_data: dict, heroes_html_data: str
-):
+def test_hero_page_parsing(hero_html_data: str, hero_json_data: dict):
     # Remove "portrait" key from hero_json_data, it's been added from another page
     hero_data = hero_json_data.copy()
     del hero_data["portrait"]

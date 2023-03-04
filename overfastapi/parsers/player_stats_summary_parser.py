@@ -340,5 +340,5 @@ class PlayerStatsSummaryParser(PlayerParser):
                 if ten_minutes_played > 0
                 else 0
             )
-            for key in stat["total"].keys()
+            for key in stat["total"]
         }

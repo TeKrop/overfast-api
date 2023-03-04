@@ -64,9 +64,9 @@ class Story(BaseModel):
         description="Brief summary of the origin story of the hero",
         example=(
             "A founding member of the notorious Deadlock Gang, Cassidy was "
-            "eventually coerced into joining Blackwatch, Overwatch’s covert-ops "
+            "eventually coerced into joining Blackwatch, Overwatch's covert-ops "
             "division. He came to believe he could make amends for his past by "
-            "righting the world’s injustices. But when Overwatch fell, Cassidy "
+            "righting the world's injustices. But when Overwatch fell, Cassidy "
             "went underground, resurfacing later as a gunslinger for hire, "
             "fighting only for causes he believes are just."
         ),

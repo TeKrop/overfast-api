@@ -8,7 +8,7 @@ from overfastapi.common.helpers import overfast_client
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_check_new_hero_test():
+def _setup_check_new_hero_test():
     with patch(
         "overfastapi.commands.check_new_hero.DISCORD_WEBHOOK_ENABLED",
         return_value=True,
@@ -41,7 +41,7 @@ def test_check_discord_webhook_disabled():
 
 
 @pytest.mark.parametrize(
-    "distant_heroes,expected",
+    ("distant_heroes", "expected"),
     [
         ({"one_new_hero"}, {"one_new_hero"}),
         ({"one_new_hero", "two_new_heroes"}, {"one_new_hero", "two_new_heroes"}),

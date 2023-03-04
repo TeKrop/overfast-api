@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "overfast-api"
-version = "2.8.2"
+version = "2.8.3"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 authors = ["TeKrop <tekrop@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.89.1"
+fastapi = "^0.92.0"
 beautifulsoup4 = "^4.11.2"
 lxml = "^4.9.2"
 redis = "^4.5.1"
@@ -16,13 +16,13 @@ loguru = "^0.6.0"
 httpx = {extras = ["http2"], version = "^0.23.3"}
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.12.0"
-pytest = "^7.2.1"
+black = "^23.1.0"
+pytest = "^7.2.2"
 pytest-cov = "^4.0.0"
 isort = "^5.12.0"
 ipdb = "^0.13.11"
-fakeredis = "^2.9.2"
-ruff = "^0.0.229"
+fakeredis = "^2.10.0"
+ruff = "^0.0.254"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -33,20 +33,46 @@ build-backend = "poetry.core.masonry.api"
 line-length = 88
 
 select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "C",  # flake8-comprehensions
-    "B",  # flake8-bugbear
-    "T",  # flake8-print
-    "Q",  # flake8-quotes
-    "UP", # pyupgrade
-    "N",  # pep8-naming
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "C",   # flake8-comprehensions
+    "S",   # flake8-bandit
+    "BLE", # flake8-blind-except
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "DTZ", # flake8-datetimez
+    "T10", # flake8-debugger
+    "EM",  # flake8-errmsg
+    "ISC", # flake8-implicit-str-concat
+    "ICN", # flake8-import-conventions
+    "G",   # flake8-logging-format
+    "INP", # flake8-no-pep420
+    "PIE", # flake8-pie
+    "T20", # flake8-print
+    "PT",  # flake8-pytest-style
+    "Q",   # flake8-quotes
+    "RSE", # flake8-raise
+    "RET", # flake8-return
+    "SLF", # flake8-self
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "PTH", # flake8-use-pathlib
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "C90", # mccabe complexity checker
+    "ERA", # eradicate commented-out code
+    "PL",  # pylint
+    "TRY", # tryceratops
+    "RUF", # ruff-specific rules
 ]
 ignore = [
-    "E501",  # line too long, handled by black
-    "B008",  # do not perform function calls in argument defaults
-    "S101",  # using "assert" is not a security issue
+    "E501",    # line too long, handled by black
+    "B008",    # do not perform function calls in argument defaults
+    "S101",    # using "assert" is not a security issue
+    "RET505",  # allow using else after return statement
+    "PLE1205", # error checking doesn't support {} format
+    "PLR0913", # allow 6/7 arguments for some functions
 ]
 
 # Check app code and tests

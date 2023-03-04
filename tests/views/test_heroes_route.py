@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+from fastapi import status
 from fastapi.testclient import TestClient
 
 from overfastapi.common.cache_manager import CacheManager
@@ -13,25 +14,25 @@ client = TestClient(app)
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_heroes_test(heroes_html_data: str):
+def _setup_heroes_test(heroes_html_data: str):
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=200, text=heroes_html_data),
+        return_value=Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
     ):
         yield
 
 
 def test_get_heroes(heroes_json_data: list):
     response = client.get("/heroes")
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     assert response.json() == heroes_json_data
 
 
 def test_get_heroes_when_no_cache(heroes_json_data: list):
     with patch("overfastapi.common.mixins.USE_API_CACHE_IN_APP", True):
         response = client.get("/heroes")
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert response.json() == heroes_json_data
 
 
@@ -41,7 +42,7 @@ def test_get_heroes_from_api_cache(heroes_json_data: list):
         cache_manager.update_api_cache("/heroes", heroes_json_data, 100)
 
         response = client.get("/heroes")
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert response.json() == heroes_json_data
 
 
@@ -54,7 +55,7 @@ def test_get_heroes_from_parser_cache(heroes_json_data: list):
     )
 
     response = client.get("/heroes")
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     assert response.json() == heroes_json_data
 
 
@@ -64,7 +65,7 @@ def test_get_heroes_from_parser_cache(heroes_json_data: list):
 )
 def test_get_heroes_filter_by_role(role: Role, heroes_json_data: list):
     response = client.get(f"/heroes?role={role}")
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     assert response.json() == [
         hero for hero in heroes_json_data if hero["role"] == role
     ]
@@ -72,7 +73,7 @@ def test_get_heroes_filter_by_role(role: Role, heroes_json_data: list):
 
 def test_get_heroes_invalid_role():
     response = client.get("/heroes?role=invalid")
-    assert response.status_code == 422
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert response.json() == {
         "detail": [
             {
@@ -92,11 +93,13 @@ def test_get_heroes_blizzard_error():
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=503, text="Service Unavailable"),
+        return_value=Mock(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, text="Service Unavailable"
+        ),
     ):
         response = client.get("/heroes")
 
-    assert response.status_code == 504
+    assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
         "error": "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable"
     }
@@ -108,7 +111,7 @@ def test_get_heroes_internal_error():
         return_value=[{"invalid_key": "invalid_value"}],
     ):
         response = client.get("/heroes")
-        assert response.status_code == 500
+        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert response.json() == {
             "error": (
                 "An internal server error occurred during the process. The developer "

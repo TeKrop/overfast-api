@@ -2,6 +2,7 @@ import json
 from unittest.mock import Mock, patch
 
 import pytest
+from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
@@ -15,12 +16,12 @@ privacies = {p.value for p in PlayerPrivacy}
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_search_players_test(search_players_blizzard_json_data: list[dict]):
+def _setup_search_players_test(search_players_blizzard_json_data: list[dict]):
     with patch.object(
         overfast_client,
         "get",
         return_value=Mock(
-            status_code=200,
+            status_code=status.HTTP_200_OK,
             text=json.dumps(search_players_blizzard_json_data),
             json=lambda: search_players_blizzard_json_data,
         ),
@@ -30,7 +31,7 @@ def setup_search_players_test(search_players_blizzard_json_data: list[dict]):
 
 def test_search_players_missing_name():
     response = client.get("/players?privacy=public")
-    assert response.status_code == 422
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert response.json() == {
         "detail": [
             {
@@ -46,19 +47,19 @@ def test_search_players_no_result():
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=200, text="[]", json=lambda: []),
+        return_value=Mock(status_code=status.HTTP_200_OK, text="[]", json=list),
     ):
         response = client.get("/players?name=Player")
 
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"total": 0, "results": []}
 
 
 @pytest.mark.parametrize(
-    "status_code,text",
+    ("status_code", "text"),
     [
-        (503, "Service Unavailable"),
-        (500, '{"error":"searchByName error"}'),
+        (status.HTTP_503_SERVICE_UNAVAILABLE, "Service Unavailable"),
+        (status.HTTP_500_INTERNAL_SERVER_ERROR, '{"error":"searchByName error"}'),
     ],
 )
 def test_search_players_blizzard_error(status_code: int, text: str):
@@ -67,7 +68,7 @@ def test_search_players_blizzard_error(status_code: int, text: str):
     ):
         response = client.get("/players?name=Player")
 
-    assert response.status_code == 504
+    assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
         "error": f"Couldn't get Blizzard page (HTTP {status_code} error) : {text}"
     }
@@ -84,7 +85,7 @@ def test_search_players_blizzard_timeout():
     ):
         response = client.get("/players?name=Player")
 
-    assert response.status_code == 504
+    assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
         "error": (
             "Couldn't get Blizzard page (HTTP 0 error) : "
@@ -95,7 +96,7 @@ def test_search_players_blizzard_timeout():
 
 def test_search_players(search_players_api_json_data: dict):
     response = client.get("/players?name=Test")
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
         "total": search_players_api_json_data["total"],
         "results": search_players_api_json_data["results"][0:20],
@@ -113,12 +114,12 @@ def test_search_players_with_cache(search_players_api_json_data: list):
         cache_manager.update_api_cache("/players?name=Test", players_response_data, 100)
 
         response = client.get("/players?name=Test")
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert response.json() == players_response_data
 
 
 @pytest.mark.parametrize(
-    "offset,limit",
+    ("offset", "limit"),
     [
         (0, 10),
         (10, 20),
@@ -130,7 +131,7 @@ def test_search_players_with_offset_and_limit(
     search_players_api_json_data: dict, offset: int, limit: int
 ):
     response = client.get(f"/players?name=Test&offset={offset}&limit={limit}")
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
         "total": search_players_api_json_data["total"],
         "results": search_players_api_json_data["results"][offset:limit],
@@ -152,13 +153,13 @@ def test_search_players_filter_by_privacy(
             for player in search_players_api_json_data["results"]
             if player["privacy"] == privacy
         ]
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "total": len(filtered_players),
             "results": filtered_players[0:20],
         }
     else:
-        assert response.status_code == 422
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 @pytest.mark.parametrize("order_by", ["name:asc", "name:desc"])
@@ -170,7 +171,7 @@ def test_search_players_ordering(search_players_api_json_data: dict, order_by: s
         key=lambda player: player[order_field], reverse=order_arrangement == "desc"
     )
 
-    assert response.status_code == 200
+    assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
         "total": search_players_api_json_data["total"],
         "results": search_players_api_json_data["results"][0:20],
@@ -183,7 +184,7 @@ def test_search_players_internal_error():
         return_value={"invalid_key": "invalid_value"},
     ):
         response = client.get("/players?name=Test")
-        assert response.status_code == 500
+        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert response.json() == {
             "error": (
                 "An internal server error occurred during the process. The developer "

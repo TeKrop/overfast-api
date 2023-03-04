@@ -1,8 +1,8 @@
 """Decorators module"""
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable
 
-from fastapi import BackgroundTasks, Request
+from fastapi import Request
 from pydantic import ValidationError
 
 from overfastapi.common.helpers import overfast_internal_error
@@ -17,18 +17,18 @@ def validation_error_handler(response_model: type):
 
     def validation_error_handler_inner(func: Callable):
         @wraps(func)
-        async def wrapper(
-            background_tasks: BackgroundTasks, request: Request, *args, **kwargs
-        ):
+        async def wrapper(request: Request, *args, **kwargs):
             try:
-                result = await func(background_tasks, request, *args, **kwargs)
-                return (
+                result = await func(request, *args, **kwargs)
+                response = (
                     [response_model(**res) for res in result]
                     if isinstance(result, list)
                     else response_model(**result)
                 )
             except ValidationError as error:
                 raise overfast_internal_error(request.url.path, error) from error
+            else:
+                return response
 
         return wrapper
 

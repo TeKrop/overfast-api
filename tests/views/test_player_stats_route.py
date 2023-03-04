@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
@@ -15,7 +16,7 @@ heroes = {h.value for h in HeroKeyCareerFilter}
 
 
 @pytest.mark.parametrize(
-    "player_html_data,player_json_data,gamemode,platform,hero",
+    ("player_html_data", "player_json_data", "gamemode", "platform", "hero"),
     [
         ("TeKrop-2217", "TeKrop-2217", gamemode, platform, hero)
         for gamemode in (None, Mock(value="invalid_gamemode"), *PlayerGamemode)
@@ -42,7 +43,7 @@ def test_get_player_stats(
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=200, text=player_html_data),
+        return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
     ):
         query_params = "&".join(
             [
@@ -60,9 +61,9 @@ def test_get_player_stats(
         or (platform and platform not in platforms)
         or (hero and hero not in heroes)
     ):
-        assert response.status_code == 422
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     else:
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
 
         filtered_data = player_json_data["stats"] or {}
 
@@ -75,7 +76,8 @@ def test_get_player_stats(
             ]
             # If there is no data in any platform, just return nothing
             if not possible_platforms:
-                return {}
+                assert response.json() == {}
+                return
             # Take the first one of the list, usually there will be only one.
             # If there are two, the PC stats should come first
             platform = possible_platforms[0]
@@ -95,13 +97,15 @@ def test_get_player_stats_blizzard_error():
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=503, text="Service Unavailable"),
+        return_value=Mock(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, text="Service Unavailable"
+        ),
     ):
         response = client.get(
             f"/players/TeKrop-2217/stats?gamemode={PlayerGamemode.QUICKPLAY}"
         )
 
-    assert response.status_code == 504
+    assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
         "error": "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable"
     }
@@ -120,7 +124,7 @@ def test_get_player_stats_blizzard_timeout():
             f"/players/TeKrop-2217/stats?gamemode={PlayerGamemode.QUICKPLAY}"
         )
 
-    assert response.status_code == 504
+    assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
         "error": (
             "Couldn't get Blizzard page (HTTP 0 error) : "
@@ -139,7 +143,7 @@ def test_get_player_stats_internal_error():
         response = client.get(
             f"/players/TeKrop-2217/stats?gamemode={PlayerGamemode.QUICKPLAY}"
         )
-        assert response.status_code == 500
+        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert response.json() == {
             "error": (
                 "An internal server error occurred during the process. The developer "

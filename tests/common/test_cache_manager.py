@@ -16,18 +16,18 @@ from overfastapi.config import (
 )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def cache_manager():
     return CacheManager()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def locale():
     return Locale.ENGLISH_US
 
 
 @pytest.mark.parametrize(
-    "req,expected",
+    ("req", "expected"),
     [
         (Mock(url=Mock(path="/heroes"), query_params=None), "/heroes"),
         (
@@ -47,7 +47,7 @@ def test_get_cache_key_from_request(
 
 
 @pytest.mark.parametrize(
-    "is_redis_server_up,cache_key,value,expire,sleep_time,expected",
+    ("is_redis_server_up", "cache_key", "value", "expire", "sleep_time", "expected"),
     [
         (True, "/heroes", [{"name": "Sojourn"}], 10, None, b'[{"name":"Sojourn"}]'),
         (True, "/heroes", [{"name": "Sojourn"}], 1, 1, None),
@@ -82,7 +82,7 @@ def test_update_and_get_api_cache(
 
 
 @pytest.mark.parametrize(
-    "is_redis_server_up,cache_key,parser_data",
+    ("is_redis_server_up", "cache_key", "parser_data"),
     [
         (
             True,
@@ -119,7 +119,7 @@ def test_update_and_get_parser_cache(
 
 
 @pytest.mark.parametrize(
-    "is_redis_server_up,expected",
+    ("is_redis_server_up", "expected"),
     [
         (
             True,

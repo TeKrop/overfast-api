@@ -10,7 +10,7 @@ from overfastapi.parsers.player_parser import PlayerParser
 
 
 @pytest.mark.parametrize(
-    "player_id,player_html_data,player_json_data,kwargs_filter",
+    ("player_id", "player_html_data", "player_json_data", "kwargs_filter"),
     [
         (player_id, player_id, player_id, kwargs_filter)
         for player_id in players_ids
@@ -53,17 +53,18 @@ def test_unknown_player_parser_blizzard_error(player_html_data: str):
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 def test_player_parser_parsing_error_attribute_error(player_html_data: str):
-    with pytest.raises(ParserParsingError) as error:
-        player_attr_error = player_html_data.replace(
-            'class="Profile-player--summaryWrapper"', 'class="blabla"'
-        )
-        parser = PlayerParser(player_id="TeKrop-2217")
-        with patch.object(
-            overfast_client,
-            "get",
-            return_value=Mock(status_code=200, text=player_attr_error),
-        ):
-            asyncio.run(parser.parse())
+    player_attr_error = player_html_data.replace(
+        'class="Profile-player--summaryWrapper"', 'class="blabla"'
+    )
+    parser = PlayerParser(player_id="TeKrop-2217")
+
+    with patch.object(
+        overfast_client,
+        "get",
+        return_value=Mock(status_code=200, text=player_attr_error),
+    ), pytest.raises(ParserParsingError) as error:
+        asyncio.run(parser.parse())
+
     assert (
         error.value.message
         == "AttributeError(\"'NoneType' object has no attribute 'find'\")"
@@ -72,36 +73,37 @@ def test_player_parser_parsing_error_attribute_error(player_html_data: str):
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 def test_player_parser_parsing_error_key_error(player_html_data: str):
-    with pytest.raises(ParserParsingError) as error:
-        player_key_error = re.sub(
-            'class="Profile-playerSummary--endorsement" src="[^"]*"',
-            'class="Profile-playerSummary--endorsement"',
-            player_html_data,
-        )
-        parser = PlayerParser(player_id="TeKrop-2217")
-        with patch.object(
-            overfast_client,
-            "get",
-            return_value=Mock(status_code=200, text=player_key_error),
-        ):
-            asyncio.run(parser.parse())
+    player_key_error = re.sub(
+        'class="Profile-playerSummary--endorsement" src="[^"]*"',
+        'class="Profile-playerSummary--endorsement"',
+        player_html_data,
+    )
+    parser = PlayerParser(player_id="TeKrop-2217")
+
+    with patch.object(
+        overfast_client,
+        "get",
+        return_value=Mock(status_code=200, text=player_key_error),
+    ), pytest.raises(ParserParsingError) as error:
+        asyncio.run(parser.parse())
 
     assert error.value.message == "KeyError('src')"
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 def test_player_parser_parsing_error_type_error(player_html_data: str):
-    with pytest.raises(ParserParsingError) as error:
-        player_type_error = player_html_data.replace(
-            'class="Profile-playerSummary--endorsement"', ""
-        )
-        parser = PlayerParser(player_id="TeKrop-2217")
-        with patch.object(
-            overfast_client,
-            "get",
-            return_value=Mock(status_code=200, text=player_type_error),
-        ):
-            asyncio.run(parser.parse())
+    player_type_error = player_html_data.replace(
+        'class="Profile-playerSummary--endorsement"', ""
+    )
+    parser = PlayerParser(player_id="TeKrop-2217")
+
+    with patch.object(
+        overfast_client,
+        "get",
+        return_value=Mock(status_code=200, text=player_type_error),
+    ), pytest.raises(ParserParsingError) as error:
+        asyncio.run(parser.parse())
+
     assert (
         error.value.message == "TypeError(\"'NoneType' object is not subscriptable\")"
     )

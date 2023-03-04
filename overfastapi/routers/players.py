@@ -1,5 +1,5 @@
 """Players endpoints router : players search, players career, statistics, etc."""
-from fastapi import APIRouter, BackgroundTasks, Depends, Path, Query, Request, status
+from fastapi import APIRouter, Depends, Path, Query, Request, status
 
 from overfastapi.common.decorators import validation_error_handler
 from overfastapi.common.enums import (
@@ -67,7 +67,6 @@ router = APIRouter()
 )
 @validation_error_handler(response_model=PlayerSearchResult)
 async def search_players(
-    background_tasks: BackgroundTasks,
     request: Request,
     name: str = Query(
         title="Player nickname to search",
@@ -107,13 +106,11 @@ async def search_players(
 )
 @validation_error_handler(response_model=PlayerSummary)
 async def get_player_summary(
-    background_tasks: BackgroundTasks,
     request: Request,
     commons: dict = Depends(get_player_common_parameters),
 ) -> PlayerSummary:
     return await GetPlayerCareerRequestHandler(request).process_request(
         summary=True,
-        background_tasks=background_tasks,
         player_id=commons.get("player_id"),
     )
 
@@ -137,7 +134,6 @@ async def get_player_summary(
 )
 @validation_error_handler(response_model=PlayerStatsSummary)
 async def get_player_stats_summary(
-    background_tasks: BackgroundTasks,
     request: Request,
     commons: dict = Depends(get_player_common_parameters),
     gamemode: PlayerGamemode
@@ -162,7 +158,6 @@ async def get_player_stats_summary(
     ),
 ) -> PlayerStatsSummary:
     return await GetPlayerStatsSummaryRequestHandler(request).process_request(
-        background_tasks=background_tasks,
         player_id=commons.get("player_id"),
         platform=platform,
         gamemode=gamemode,
@@ -180,13 +175,11 @@ async def get_player_stats_summary(
 )
 @validation_error_handler(response_model=Player)
 async def get_player_career(
-    background_tasks: BackgroundTasks,
     request: Request,
     commons: dict = Depends(get_player_common_parameters),
 ) -> Player:
     return await GetPlayerCareerRequestHandler(request).process_request(
-        background_tasks=background_tasks,
-        player_id=commons.get("player_id"),
+        player_id=commons.get("player_id")
     )
 
 
@@ -206,7 +199,6 @@ async def get_player_career(
 )
 @validation_error_handler(response_model=CareerStats)
 async def get_player_stats(
-    background_tasks: BackgroundTasks,
     request: Request,
     commons: dict = Depends(get_player_common_parameters),
     gamemode: PlayerGamemode = Query(
@@ -238,7 +230,6 @@ async def get_player_stats(
 ) -> CareerStats:
     return await GetPlayerCareerRequestHandler(request).process_request(
         stats=True,
-        background_tasks=background_tasks,
         player_id=commons.get("player_id"),
         platform=platform,
         gamemode=gamemode,
