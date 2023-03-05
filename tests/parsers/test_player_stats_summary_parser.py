@@ -3,9 +3,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from overfastapi.common.exceptions import ParserBlizzardError
-from overfastapi.common.helpers import overfast_client, players_ids
-from overfastapi.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
+from app.common.exceptions import ParserBlizzardError
+from app.common.helpers import overfast_client, players_ids
+from app.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
 
 
 @pytest.mark.parametrize(

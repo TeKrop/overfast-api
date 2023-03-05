@@ -1,8 +1,8 @@
 import asyncio
 from unittest.mock import Mock, patch
 
-from overfastapi.common.helpers import overfast_client
-from overfastapi.parsers.gamemodes_parser import GamemodesParser
+from app.common.helpers import overfast_client
+from app.parsers.gamemodes_parser import GamemodesParser
 
 
 def test_gamemodes_page_parsing(home_html_data: str, gamemodes_json_data: list):

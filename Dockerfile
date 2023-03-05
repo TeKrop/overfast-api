@@ -16,14 +16,14 @@ RUN apk add build-base && \
 
 # Copy only requirements (caching in Docker layer)
 WORKDIR /code
-COPY pyproject.toml app-start.sh favicon.png /code/
+COPY pyproject.toml scripts/app-start.sh /code/
 
 # Install dependencies
 RUN poetry config virtualenvs.create false && \
 	poetry install --only main --no-interaction --no-ansi
 
 # Copy code and static folders
-COPY ./overfastapi /code/overfastapi
+COPY ./app /code/app
 COPY ./static /code/static
 
 # Configure the command

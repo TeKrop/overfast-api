@@ -2,9 +2,9 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from overfastapi.common.enums import MapGamemode
-from overfastapi.config import OVERFAST_API_BASE_URL
-from overfastapi.main import app
+from app.common.enums import MapGamemode
+from app.config import settings
+from app.main import app
 
 client = TestClient(app)
 
@@ -18,7 +18,7 @@ def test_get_maps(maps_json_data: list):
     # Check if all the images link are valid
     for map_dict in json_response:
         image_response = client.get(
-            map_dict["screenshot"].removeprefix(OVERFAST_API_BASE_URL)
+            map_dict["screenshot"].removeprefix(settings.app_base_url)
         )
         assert image_response.status_code == status.HTTP_200_OK
 

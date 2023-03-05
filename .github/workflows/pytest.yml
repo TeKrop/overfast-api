@@ -25,8 +25,7 @@ jobs:
 
     - name: Run tests
       run: |
-        cp overfastapi/config_example.py overfastapi/config.py
-        PYTHONPATH=overfastapi/ python -m pytest -v --cov-fail-under=80 --cov-report=html --cov=overfastapi/ tests/
+        PYTHONPATH=app/ python -m pytest -v --cov-fail-under=80 --cov-report=html --cov=app/ tests/
         PERCENT=$(cat htmlcov/index.html | grep "pc_cov" | awk -F '>' '{print $2}' | awk -F '%' '{print $1}')
         echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
 

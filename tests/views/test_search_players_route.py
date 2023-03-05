@@ -6,10 +6,10 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
-from overfastapi.common.cache_manager import CacheManager
-from overfastapi.common.enums import PlayerPrivacy
-from overfastapi.common.helpers import overfast_client
-from overfastapi.main import app
+from app.common.cache_manager import CacheManager
+from app.common.enums import PlayerPrivacy
+from app.common.helpers import overfast_client
+from app.main import app
 
 client = TestClient(app)
 privacies = {p.value for p in PlayerPrivacy}
@@ -104,7 +104,7 @@ def test_search_players(search_players_api_json_data: dict):
 
 
 def test_search_players_with_cache(search_players_api_json_data: list):
-    with patch("overfastapi.common.mixins.USE_API_CACHE_IN_APP", True):
+    with patch("app.common.mixins.settings.use_api_cache_in_app", True):
         players_response_data = {
             "total": search_players_api_json_data["total"],
             "results": search_players_api_json_data["results"][0:20],
@@ -180,7 +180,7 @@ def test_search_players_ordering(search_players_api_json_data: dict, order_by: s
 
 def test_search_players_internal_error():
     with patch(
-        "overfastapi.handlers.search_players_request_handler.SearchPlayersRequestHandler.process_request",
+        "app.handlers.search_players_request_handler.SearchPlayersRequestHandler.process_request",
         return_value={"invalid_key": "invalid_value"},
     ):
         response = client.get("/players?name=Test")

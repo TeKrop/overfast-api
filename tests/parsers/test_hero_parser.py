@@ -3,9 +3,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from overfastapi.common.enums import HeroKey
-from overfastapi.common.helpers import overfast_client
-from overfastapi.parsers.hero_parser import HeroParser
+from app.common.enums import HeroKey
+from app.common.helpers import overfast_client
+from app.parsers.hero_parser import HeroParser
 
 
 @pytest.mark.parametrize(

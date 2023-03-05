@@ -4,9 +4,9 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from overfastapi.common.enums import HeroKey
-from overfastapi.common.helpers import overfast_client
-from overfastapi.main import app
+from app.common.enums import HeroKey
+from app.common.helpers import overfast_client
+from app.main import app
 
 client = TestClient(app)
 
@@ -53,7 +53,7 @@ def test_get_hero_blizzard_error():
 
 def test_get_hero_internal_error():
     with patch(
-        "overfastapi.handlers.get_hero_request_handler.GetHeroRequestHandler.process_request",
+        "app.handlers.get_hero_request_handler.GetHeroRequestHandler.process_request",
         return_value={"invalid_key": "invalid_value"},
     ):
         response = client.get(f"/heroes/{HeroKey.ANA}")

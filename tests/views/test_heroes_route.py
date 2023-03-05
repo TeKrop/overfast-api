@@ -4,11 +4,11 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from overfastapi.common.cache_manager import CacheManager
-from overfastapi.common.enums import Locale, Role
-from overfastapi.common.helpers import overfast_client
-from overfastapi.config import BLIZZARD_HOST, HEROES_PATH
-from overfastapi.main import app
+from app.common.cache_manager import CacheManager
+from app.common.enums import Locale, Role
+from app.common.helpers import overfast_client
+from app.config import settings
+from app.main import app
 
 client = TestClient(app)
 
@@ -30,14 +30,14 @@ def test_get_heroes(heroes_json_data: list):
 
 
 def test_get_heroes_when_no_cache(heroes_json_data: list):
-    with patch("overfastapi.common.mixins.USE_API_CACHE_IN_APP", True):
+    with patch("app.common.mixins.settings.use_api_cache_in_app", True):
         response = client.get("/heroes")
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == heroes_json_data
 
 
 def test_get_heroes_from_api_cache(heroes_json_data: list):
-    with patch("overfastapi.common.mixins.USE_API_CACHE_IN_APP", True):
+    with patch("app.common.mixins.settings.use_api_cache_in_app", True):
         cache_manager = CacheManager()
         cache_manager.update_api_cache("/heroes", heroes_json_data, 100)
 
@@ -49,7 +49,7 @@ def test_get_heroes_from_api_cache(heroes_json_data: list):
 def test_get_heroes_from_parser_cache(heroes_json_data: list):
     cache_manager = CacheManager()
     cache_manager.update_parser_cache(
-        f"HeroesParser-{BLIZZARD_HOST}/{Locale.ENGLISH_US}{HEROES_PATH}",
+        f"HeroesParser-{settings.blizzard_host}/{Locale.ENGLISH_US}{settings.heroes_path}",
         heroes_json_data,
         100,
     )
@@ -107,7 +107,7 @@ def test_get_heroes_blizzard_error():
 
 def test_get_heroes_internal_error():
     with patch(
-        "overfastapi.handlers.list_heroes_request_handler.ListHeroesRequestHandler.process_request",
+        "app.handlers.list_heroes_request_handler.ListHeroesRequestHandler.process_request",
         return_value=[{"invalid_key": "invalid_value"}],
     ):
         response = client.get("/heroes")

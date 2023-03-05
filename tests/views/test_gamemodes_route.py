@@ -4,8 +4,8 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from overfastapi.common.helpers import overfast_client
-from overfastapi.main import app
+from app.common.helpers import overfast_client
+from app.main import app
 
 client = TestClient(app)
 
@@ -53,7 +53,7 @@ def test_get_gamemodes_blizzard_error():
 
 def test_get_gamemodes_internal_error():
     with patch(
-        "overfastapi.handlers.list_gamemodes_request_handler."
+        "app.handlers.list_gamemodes_request_handler."
         "ListGamemodesRequestHandler.process_request",
         return_value=[{"invalid_key": "invalid_value"}],
     ):

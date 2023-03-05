@@ -5,15 +5,9 @@ import pytest
 from fastapi import Request
 from redis.exceptions import RedisError
 
-from overfastapi.common.cache_manager import CacheManager
-from overfastapi.common.enums import Locale
-from overfastapi.config import (
-    BLIZZARD_HOST,
-    EXPIRED_CACHE_REFRESH_LIMIT,
-    HEROES_PATH,
-    HOME_PATH,
-    PARSER_CACHE_KEY_PREFIX,
-)
+from app.common.cache_manager import CacheManager
+from app.common.enums import Locale
+from app.config import settings
 
 
 @pytest.fixture()
@@ -65,7 +59,7 @@ def test_update_and_get_api_cache(
     expected: str | None,
 ):
     with patch(
-        "overfastapi.common.cache_manager.CacheManager.is_redis_server_up",
+        "app.common.cache_manager.CacheManager.is_redis_server_up",
         is_redis_server_up,
     ):
         # Assert the value is not here before update
@@ -103,7 +97,7 @@ def test_update_and_get_parser_cache(
     parser_data: str,
 ):
     with patch(
-        "overfastapi.common.cache_manager.CacheManager.is_redis_server_up",
+        "app.common.cache_manager.CacheManager.is_redis_server_up",
         is_redis_server_up,
     ):
         # Assert the value is not here before update
@@ -124,8 +118,8 @@ def test_update_and_get_parser_cache(
         (
             True,
             {
-                f"{PARSER_CACHE_KEY_PREFIX}:GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}",
-                f"{PARSER_CACHE_KEY_PREFIX}:HeroesParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}",
+                f"{settings.parser_cache_key_prefix}:GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}",
+                f"{settings.parser_cache_key_prefix}:HeroesParser-{settings.blizzard_host}/{locale}{settings.heroes_path}",
             },
         ),
         (False, set()),
@@ -135,23 +129,23 @@ def test_get_soon_expired_parser_cache_keys(
     cache_manager: CacheManager, is_redis_server_up: bool, expected: set[str]
 ):
     with patch(
-        "overfastapi.common.cache_manager.CacheManager.is_redis_server_up",
+        "app.common.cache_manager.CacheManager.is_redis_server_up",
         is_redis_server_up,
     ):
         cache_manager.update_parser_cache(
-            f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
+            f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
             {},
-            EXPIRED_CACHE_REFRESH_LIMIT + 5,
+            settings.expired_cache_refresh_limit + 5,
         )
         cache_manager.update_parser_cache(
-            f"GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}",
+            f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}",
             [],
-            EXPIRED_CACHE_REFRESH_LIMIT - 5,
+            settings.expired_cache_refresh_limit - 5,
         )
         cache_manager.update_parser_cache(
-            f"HeroesParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}",
+            f"HeroesParser-{settings.blizzard_host}/{locale}{settings.heroes_path}",
             [{"name": "Sojourn"}],
-            EXPIRED_CACHE_REFRESH_LIMIT - 10,
+            settings.expired_cache_refresh_limit - 10,
         )
 
         assert set(cache_manager.get_soon_expired_parser_cache_keys()) == expected
@@ -161,24 +155,28 @@ def test_redis_connection_error(cache_manager: CacheManager):
     redis_connection_error = RedisError(
         "Error 111 connecting to 127.0.0.1:6379. Connection refused."
     )
-    heroes_cache_key = f"HeroesParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}"
+    heroes_cache_key = (
+        f"HeroesParser-{settings.blizzard_host}/{locale}{settings.heroes_path}"
+    )
     with patch(
-        "overfastapi.common.cache_manager.redis.Redis.get",
+        "app.common.cache_manager.redis.Redis.get",
         side_effect=redis_connection_error,
     ):
         cache_manager.update_parser_cache(
-            heroes_cache_key, [{"name": "Sojourn"}], EXPIRED_CACHE_REFRESH_LIMIT - 1
+            heroes_cache_key,
+            [{"name": "Sojourn"}],
+            settings.expired_cache_refresh_limit - 1,
         )
         assert cache_manager.get_parser_cache(heroes_cache_key) is None
 
     with patch(
-        "overfastapi.common.cache_manager.redis.Redis.keys",
+        "app.common.cache_manager.redis.Redis.keys",
         side_effect=redis_connection_error,
     ):
         assert set(cache_manager.get_soon_expired_parser_cache_keys()) == set()
 
     with patch(
-        "overfastapi.common.cache_manager.redis.Redis.ttl",
+        "app.common.cache_manager.redis.Redis.ttl",
         side_effect=redis_connection_error,
     ):
         assert set(cache_manager.get_soon_expired_parser_cache_keys()) == set()

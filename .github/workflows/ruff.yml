@@ -24,6 +24,4 @@ jobs:
         poetry-version: ${{ matrix.poetry-version }}
 
     - name: Analyse the code using ruff
-      run: |
-        cp overfastapi/config_example.py overfastapi/config.py
-        ruff .
+      run: ruff .

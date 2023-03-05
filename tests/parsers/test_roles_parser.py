@@ -1,8 +1,8 @@
 import asyncio
 from unittest.mock import Mock, patch
 
-from overfastapi.common.helpers import overfast_client
-from overfastapi.parsers.roles_parser import RolesParser
+from app.common.helpers import overfast_client
+from app.parsers.roles_parser import RolesParser
 
 
 def test_roles_page_parsing(home_html_data: str, roles_json_data: list):

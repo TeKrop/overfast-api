@@ -1,6 +1,6 @@
 import asyncio
 
-from overfastapi.parsers.maps_parser import MapsParser
+from app.parsers.maps_parser import MapsParser
 
 
 def test_maps_page_parsing(maps_json_data: list):

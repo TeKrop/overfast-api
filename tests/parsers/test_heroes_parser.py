@@ -1,8 +1,8 @@
 import asyncio
 from unittest.mock import Mock, patch
 
-from overfastapi.common.helpers import overfast_client
-from overfastapi.parsers.heroes_parser import HeroesParser
+from app.common.helpers import overfast_client
+from app.parsers.heroes_parser import HeroesParser
 
 
 def test_heroes_page_parsing(heroes_html_data: str, heroes_json_data: list):

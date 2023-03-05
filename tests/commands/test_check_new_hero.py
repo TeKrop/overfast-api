@@ -2,16 +2,16 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from overfastapi.commands.check_new_hero import main as check_new_hero_main
-from overfastapi.common.enums import HeroKey
-from overfastapi.common.helpers import overfast_client
+from app.commands.check_new_hero import main as check_new_hero_main
+from app.common.enums import HeroKey
+from app.common.helpers import overfast_client
 
 
 @pytest.fixture(scope="module", autouse=True)
 def _setup_check_new_hero_test():
     with patch(
-        "overfastapi.commands.check_new_hero.DISCORD_WEBHOOK_ENABLED",
-        return_value=True,
+        "app.commands.check_new_hero.settings",
+        return_value=Mock(discord_webhook_enabled=True),
     ):
         yield
 
@@ -22,7 +22,7 @@ def test_check_no_new_hero(heroes_html_data: str):
         overfast_client,
         "get",
         return_value=Mock(status_code=200, text=heroes_html_data),
-    ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
+    ), patch("app.common.logging.logger.info", logger_info_mock):
         check_new_hero_main()
 
     logger_info_mock.assert_called_with("No new hero found. Exiting.")
@@ -31,8 +31,8 @@ def test_check_no_new_hero(heroes_html_data: str):
 def test_check_discord_webhook_disabled():
     logger_info_mock = Mock()
     with patch(
-        "overfastapi.commands.check_new_hero.DISCORD_WEBHOOK_ENABLED", False
-    ), patch("overfastapi.common.logging.logger.info", logger_info_mock), pytest.raises(
+        "app.commands.check_new_hero.settings.discord_webhook_enabled", False
+    ), patch("app.common.logging.logger.info", logger_info_mock), pytest.raises(
         SystemExit
     ):
         check_new_hero_main()
@@ -51,9 +51,9 @@ def test_check_discord_webhook_disabled():
 def test_check_new_heroes(distant_heroes: set[str], expected: set[str]):
     logger_info_mock = Mock()
     with patch(
-        "overfastapi.commands.check_new_hero.get_distant_hero_keys",
+        "app.commands.check_new_hero.get_distant_hero_keys",
         return_value={*HeroKey, *distant_heroes},
-    ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
+    ), patch("app.common.logging.logger.info", logger_info_mock):
         check_new_hero_main()
 
     logger_info_mock.assert_called_with("New hero keys were found : {}", expected)
@@ -65,9 +65,7 @@ def test_check_error_from_blizzard():
         overfast_client,
         "get",
         return_value=Mock(status_code=500, text="Internal Server Error"),
-    ), patch(
-        "overfastapi.common.logging.logger.error", logger_error_mock
-    ), pytest.raises(
+    ), patch("app.common.logging.logger.error", logger_error_mock), pytest.raises(
         SystemExit
     ):
         check_new_hero_main()

@@ -4,22 +4,22 @@ from unittest.mock import Mock, patch
 import pytest
 from httpx import AsyncClient
 
-from overfastapi.commands.update_test_fixtures import main as update_test_fixtures_main
-from overfastapi.common.enums import HeroKey
-from overfastapi.common.helpers import players_ids
-from overfastapi.config import TEST_FIXTURES_ROOT_PATH
+from app.commands.update_test_fixtures import main as update_test_fixtures_main
+from app.common.enums import HeroKey
+from app.common.helpers import players_ids
+from app.config import settings
 
 
 @pytest.fixture(scope="module", autouse=True)
 def _setup_update_test_fixtures_test():
     with patch(
-        "overfastapi.commands.update_test_fixtures.save_fixture_file",
+        "app.commands.update_test_fixtures.save_fixture_file",
         return_value=Mock(),
-    ), patch("overfastapi.common.logging.logger.debug"):
+    ), patch("app.common.logging.logger.debug"):
         yield
 
 
-test_data_path = f"{TEST_FIXTURES_ROOT_PATH}/html"
+test_data_path = f"{settings.test_fixtures_root_path}/html"
 heroes_calls = [
     ("Updating {}{}...", test_data_path, "/heroes.html"),
     *[
@@ -54,16 +54,16 @@ def test_update_with_different_options(parameters, expected_calls: list[str]):
     logger_error_mock = Mock()
 
     with patch(
-        "overfastapi.commands.update_test_fixtures.parse_parameters",
+        "app.commands.update_test_fixtures.parse_parameters",
         return_value=parameters,
     ), patch.object(
         AsyncClient,
         "get",
         return_value=Mock(status_code=200, text="HTML_DATA"),
     ), patch(
-        "overfastapi.common.logging.logger.info", logger_info_mock
+        "app.common.logging.logger.info", logger_info_mock
     ), patch(
-        "overfastapi.common.logging.logger.error", logger_error_mock
+        "app.common.logging.logger.error", logger_error_mock
     ):
         asyncio.run(update_test_fixtures_main())
 
@@ -76,16 +76,16 @@ def test_update_with_blizzard_error():
     logger_error_mock = Mock()
 
     with patch(
-        "overfastapi.commands.update_test_fixtures.parse_parameters",
+        "app.commands.update_test_fixtures.parse_parameters",
         return_value=Mock(heroes=False, players=False, maps=True),
     ), patch.object(
         AsyncClient,
         "get",
         return_value=Mock(status_code=500, text="BLIZZARD_ERROR"),
     ), patch(
-        "overfastapi.common.logging.logger.info", Mock()
+        "app.common.logging.logger.info", Mock()
     ), patch(
-        "overfastapi.common.logging.logger.error", logger_error_mock
+        "app.common.logging.logger.error", logger_error_mock
     ):
         asyncio.run(update_test_fixtures_main())
 

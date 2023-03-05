@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "overfast-api"
-version = "2.8.3"
+version = "2.9.0"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 authors = ["TeKrop <tekrop@gmail.com>"]
 license = "MIT"
@@ -76,7 +76,7 @@ ignore = [
 ]
 
 # Check app code and tests
-src = ["overfastapi", "tests"]
+src = ["app", "tests"]
 
 # Assume Python 3.11
 target-version = "py311"

@@ -24,9 +24,9 @@
 
 ## ✨ [Live instance](https://overfast-api.tekrop.fr)
 
-You can see and use a live version of the API here, the root URL being the Redoc documentation : https://overfast-api.tekrop.fr/.
+You can see and use a live version of the API here, the root URL being the Redoc documentation : https://overfast-api.tekrop.fr/
 
-If you want to use the API, and you have the possibility to host your own instance, don't hesitate do it (at least for production environment), in order to not overload the live version i'm hosting.
+You can also consult the Swagger UI documentation, useful for directly trying API calls : https://overfast-api.tekrop.fr/docs
 
 ## 💽 Installation
 
@@ -38,21 +38,19 @@ If you want to use the API, and you have the possibility to host your own instan
 ### Install process
 
 - Clone the project
-- Create a `config.py` file from the `config_example.py` template file (inside `overfastapi` folder)
-- Edit the configuration file to match your needs
-- Finally, simply run `poetry install` to install all the dependencies (+ dev dependencies)
+- [OPTIONAL] Rename `.env.example` into `.env`, and edit the configuration in order to match your needs
+- Run `poetry install` to install all the dependencies (+ dev dependencies)
 
 ### Launch
 
 ```
-uvicorn overfastapi.main:app --reload
+uvicorn app.main:app --reload
 ```
 
 ## 🐋 Docker
 
 ### Standalone (no cache system)
 ```
-cp overfastapi/config_example.py overfastapi/config.py
 docker build . -t tekrop/overfast-api:latest
 docker run -d -p 80:80 --name overfast-api tekrop/overfast-api
 ```
@@ -62,12 +60,12 @@ First, you need to create a dotenv file (`.env`) from the `.env.example` file. Y
 
 - `APP_VOLUME_PATH` will be a folder containing shared data for the app :
     - the app logs folders
-    - the configuration file (`config.py`). You need to copy the `overfastapi/config_example.py` file into the folder, default values should suit your needs
-    - crontab configurations for background cache update, you just need to copy the `overfast-crontab` file from the repo into your folder
+    - the settings file (`config.py`)
+    - crontab configurations for background cache update, you just need to copy the `overfast-crontab` file from the repo (`scripts` folder) into your folder
 
-- `REDIS_VOLUME_PATH` will be a folder containing shared data for the Redis server. It will mainly a `dump.rdb` save file whenever the server has been stopped.
+- `REDIS_VOLUME_PATH` will be a folder containing shared data for the Redis server. It will mainly contain a `dump.rdb` save file whenever the server has been stopped at least once.
 
-- `NGINX_VOLUME_PATH` will be a folder containing shared data for the nginx server. All files can be retrieve in the `nginx` folder of the project :
+- `NGINX_VOLUME_PATH` will be a folder containing shared data for the nginx server. All files can be retrieve in the `scripts/nginx` folder of the project :
     - the `ngx_http_redis_module.so` library file, allowing nginx to directly communicate with the redis server
     - the main nginx configuration (`nginx.conf`), modified in order to use the `ngx_http_redis_module` and to define the two backends used (redis and uvicorn)
     - the app configuration file (`overfast-api.conf`), implementing the caching system (call redis backend, then if error call uvicorn backend)
@@ -98,19 +96,19 @@ The following commands are either used :
 
 #### Check and update Redis cache which needs to be updated
 ```
-python -m overfastapi.commands.check_and_update_cache
+python -m app.commands.check_and_update_cache
 ```
 
 #### Check if there is a new hero available, and notify the developer if there is one
 ```
-python -m overfastapi.commands.check_new_hero
+python -m app.commands.check_new_hero
 ```
 
 #### Update test fixtures
 
 Generic command (update heroes, gamemodes and roles)
 ```
-python -m overfastapi.commands.update_test_fixtures
+python -m app.commands.update_test_fixtures
 ```
 
 Help message (with different options)
@@ -142,7 +140,7 @@ python -m pytest
 ```
 Running tests (with coverage)
 ```
-python -m pytest --cov=overfastapi --cov-report html
+python -m pytest --cov=app --cov-report html
 ```
 
 ## 🛠️ Cache System
@@ -173,7 +171,7 @@ Thanks to this system, user requests on the same career page will be very fast f
 ## 🐍 Architecture
 You can run the project in several ways, though I would advise the first one for better user experience.
 
-### Python (uvicorn) + Redis server (caching) + nginx
+### App (uvicorn) + Redis server (caching) + nginx
 ```mermaid
 sequenceDiagram
     participant User
@@ -184,51 +182,51 @@ sequenceDiagram
         Nginx-->>User: Return API Cache data
     else
         Redis-->>Nginx: Return no result
-        Nginx->>Python: Transmit the request to Python server
-        Python->>Redis: Make Parser Cache request
+        Nginx->>App: Transmit the request to Python server
+        App->>Redis: Make Parser Cache request
         alt Parser Cache is available
-            Redis-->>Python: Return Parser Cache
+            Redis-->>App: Return Parser Cache
         else
-            Redis-->>Python: Return no result
-            Python->>Python: Parse HTML page
+            Redis-->>App: Return no result
+            App->>App: Parse HTML page
         end
-        Python-->>Nginx: Return API data
+        App-->>Nginx: Return API data
         Nginx-->>User: Return API data
     end
 ```
 
 Using this way (via `docker-compose`), the response will be cached into Redis, and will be sent by nginx directly for the next times without requesting the Python server at all. It's the best performance compromise as nginx is the best for serving static content. A single request can lead to several Parser Cache requests, depending on configured Blizzard pages.
 
-### Python (uvicorn) + Redis server (caching)
+### App (uvicorn) + Redis server (caching)
 ```mermaid
 sequenceDiagram
     participant User
-    User->>Python: Make an API request
-    Python->>Redis: Make an API Cache request
+    User->>App: Make an API request
+    App->>Redis: Make an API Cache request
     alt API Cache is available
-        Redis-->>Python: Return API Cache data
-        Python-->>User: Return API Cache data
+        Redis-->>App: Return API Cache data
+        App-->>User: Return API Cache data
     else
-        Redis-->>Python: Return no result
-        Python->>Redis: Make Parser Cache request
+        Redis-->>App: Return no result
+        App->>Redis: Make Parser Cache request
         alt Parser Cache is available
-            Redis-->>Python: Return Parser Cache
+            Redis-->>App: Return Parser Cache
         else
-            Redis-->>Python: Return no result
-            Python->>Python: Parse HTML page
+            Redis-->>App: Return no result
+            App->>App: Parse HTML page
         end
-        Python-->>User: Return API data
+        App-->>User: Return API data
     end
 ```
 
 Using this way (by manually doing it), the response will be cached into Redis, and the cache will be checked by the Python server (`USE_API_CACHE_IN_APP` setting in `config.py` must be set to `True`). It's an acceptable compromise, but keep in mind that cache retrieval is ~100 times slower than the previous solution (tested with [wrk](https://github.com/wg/wrk)).
 
-### Python (uvicorn) only
+### App (uvicorn) only
 ```mermaid
 sequenceDiagram
     participant User
-    User->>Python: Make an API request
-    Python-->>User: Return API data after parsing
+    User->>App: Make an API request
+    App-->>User: Return API data after parsing
 ```
 Using this way (only using the image built with the `Dockerfile` alone), there will be no cache at all, and every call will make requests to Blizzard pages. I advise not to use this way unless for debugging.
 

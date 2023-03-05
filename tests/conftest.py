@@ -4,7 +4,7 @@ import fakeredis
 import pytest
 from _pytest.fixtures import SubRequest
 
-from overfastapi.common.helpers import read_html_file, read_json_file
+from app.common.helpers import read_html_file, read_json_file
 
 
 @pytest.fixture(scope="session")
@@ -17,8 +17,8 @@ def _patch_before_every_test(redis_server: fakeredis.FakeStrictRedis):
     # Flush Redis before and after every tests
     redis_server.flushdb()
 
-    with patch("overfastapi.common.helpers.DISCORD_WEBHOOK_ENABLED", False), patch(
-        "overfastapi.common.cache_manager.CacheManager.redis_server", redis_server
+    with patch("app.common.helpers.settings.discord_webhook_enabled", False), patch(
+        "app.common.cache_manager.CacheManager.redis_server", redis_server
     ):
         yield
 

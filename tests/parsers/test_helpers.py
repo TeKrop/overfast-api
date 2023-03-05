@@ -1,8 +1,8 @@
 import pytest
 
-from overfastapi.common.enums import CompetitiveDivision, Role
-from overfastapi.config import BLIZZARD_HOST
-from overfastapi.parsers.helpers import (
+from app.common.enums import CompetitiveDivision, Role
+from app.config import settings
+from app.parsers.helpers import (
     get_computed_stat_value,
     get_division_from_rank_icon,
     get_endorsement_value_from_frame,
@@ -130,7 +130,7 @@ def test_get_endorsement_value_from_frame(frame_url: str, endorsement_value: int
             "https://www.youtube.com/watch?v=yzFWIw7wV8Q",
             "https://www.youtube.com/watch?v=yzFWIw7wV8Q",
         ),
-        ("/media/stories/bastet", f"{BLIZZARD_HOST}/media/stories/bastet"),
+        ("/media/stories/bastet", f"{settings.blizzard_host}/media/stories/bastet"),
     ],
 )
 def test_get_full_url(url: str, full_url: str):

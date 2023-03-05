@@ -4,21 +4,12 @@ from unittest.mock import Mock, patch
 import pytest
 from httpx import TimeoutException
 
-from overfastapi.commands.check_and_update_cache import get_soon_expired_cache_keys
-from overfastapi.commands.check_and_update_cache import (
-    main as check_and_update_cache_main,
-)
-from overfastapi.common.cache_manager import CacheManager
-from overfastapi.common.enums import Locale
-from overfastapi.common.helpers import overfast_client
-from overfastapi.config import (
-    BLIZZARD_HOST,
-    CAREER_PATH,
-    EXPIRED_CACHE_REFRESH_LIMIT,
-    HEROES_PATH,
-    HOME_PATH,
-    PARSER_CACHE_KEY_PREFIX,
-)
+from app.commands.check_and_update_cache import get_soon_expired_cache_keys
+from app.commands.check_and_update_cache import main as check_and_update_cache_main
+from app.common.cache_manager import CacheManager
+from app.common.enums import Locale
+from app.common.helpers import overfast_client
+from app.config import settings
 
 
 @pytest.fixture()
@@ -37,22 +28,24 @@ def test_check_and_update_gamemodes_cache_to_update(
     home_html_data: list,
     gamemodes_json_data: dict,
 ):
-    gamemodes_cache_key = f"GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}"
-    complete_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{gamemodes_cache_key}"
+    gamemodes_cache_key = (
+        f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}"
+    )
+    complete_cache_key = f"{settings.parser_cache_key_prefix}:{gamemodes_cache_key}"
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"PlayerParser-{BLIZZARD_HOST}/{locale}{CAREER_PATH}/TeKrop-2217",
+        f"PlayerParser-{settings.blizzard_host}/{locale}{settings.career_path}/TeKrop-2217",
         {},
-        EXPIRED_CACHE_REFRESH_LIMIT + 30,
+        settings.expired_cache_refresh_limit + 30,
     )
     cache_manager.update_parser_cache(
-        f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
         {},
-        EXPIRED_CACHE_REFRESH_LIMIT + 5,
+        settings.expired_cache_refresh_limit + 5,
     )
     cache_manager.update_parser_cache(
-        gamemodes_cache_key, [], EXPIRED_CACHE_REFRESH_LIMIT - 5
+        gamemodes_cache_key, [], settings.expired_cache_refresh_limit - 5
     )
 
     assert get_soon_expired_cache_keys() == {complete_cache_key}
@@ -63,7 +56,7 @@ def test_check_and_update_gamemodes_cache_to_update(
         overfast_client,
         "get",
         return_value=Mock(status_code=200, text=home_html_data),
-    ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
+    ), patch("app.common.logging.logger.info", logger_info_mock):
         asyncio.run(check_and_update_cache_main())
 
     # Check data in db (assert we created API Cache for subroutes)
@@ -81,12 +74,14 @@ def test_check_and_update_gamemodes_cache_to_update(
 def test_check_and_update_specific_hero_to_update(
     cache_manager: CacheManager, locale: str, hero_html_data: str, hero_json_data: dict
 ):
-    ana_cache_key = f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana"
-    complete_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{ana_cache_key}"
+    ana_cache_key = (
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana"
+    )
+    complete_cache_key = f"{settings.parser_cache_key_prefix}:{ana_cache_key}"
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        ana_cache_key, {}, EXPIRED_CACHE_REFRESH_LIMIT - 5
+        ana_cache_key, {}, settings.expired_cache_refresh_limit - 5
     )
 
     # Check data in db (assert no Parser Cache data)
@@ -99,7 +94,7 @@ def test_check_and_update_specific_hero_to_update(
         overfast_client,
         "get",
         return_value=Mock(status_code=200, text=hero_html_data),
-    ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
+    ), patch("app.common.logging.logger.info", logger_info_mock):
         asyncio.run(check_and_update_cache_main())
 
     # Check data in db (assert we created API Cache for subroutes)
@@ -117,10 +112,12 @@ def test_check_and_update_maps_to_update(
     cache_manager: CacheManager, maps_json_data: dict
 ):
     cache_key = "MapsParser"
-    complete_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{cache_key}"
+    complete_cache_key = f"{settings.parser_cache_key_prefix}:{cache_key}"
 
     # Add some data (to update and not to update)
-    cache_manager.update_parser_cache(cache_key, [], EXPIRED_CACHE_REFRESH_LIMIT - 5)
+    cache_manager.update_parser_cache(
+        cache_key, [], settings.expired_cache_refresh_limit - 5
+    )
 
     # Check data in db (assert no Parser Cache data)
     assert cache_manager.get_parser_cache(cache_key) == []
@@ -129,7 +126,7 @@ def test_check_and_update_maps_to_update(
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
 
-    with patch("overfastapi.common.logging.logger.info", logger_info_mock):
+    with patch("app.common.logging.logger.info", logger_info_mock):
         asyncio.run(check_and_update_cache_main())
 
     # Check data in db (assert we created API Cache for subroutes)
@@ -142,26 +139,26 @@ def test_check_and_update_maps_to_update(
 def test_check_and_update_cache_no_update(cache_manager: CacheManager, locale: str):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"PlayerParser-{BLIZZARD_HOST}/{locale}{CAREER_PATH}/TeKrop-2217",
+        f"PlayerParser-{settings.blizzard_host}/{locale}{settings.career_path}/TeKrop-2217",
         {},
-        EXPIRED_CACHE_REFRESH_LIMIT + 30,
+        settings.expired_cache_refresh_limit + 30,
     )
     cache_manager.update_parser_cache(
-        f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
         {},
-        EXPIRED_CACHE_REFRESH_LIMIT + 5,
+        settings.expired_cache_refresh_limit + 5,
     )
     cache_manager.update_parser_cache(
-        f"GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}",
+        f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}",
         [],
-        EXPIRED_CACHE_REFRESH_LIMIT + 10,
+        settings.expired_cache_refresh_limit + 10,
     )
 
     assert get_soon_expired_cache_keys() == set()
 
     # check and update (no update)
     logger_info_mock = Mock()
-    with patch("overfastapi.common.logging.logger.info", logger_info_mock):
+    with patch("app.common.logging.logger.info", logger_info_mock):
         asyncio.run(check_and_update_cache_main())
 
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 0)
@@ -178,24 +175,22 @@ def test_check_and_update_specific_player_to_update(
     player_html_data: str,
     player_json_data: dict,
 ):
-    player_cache_key = (
-        f"PlayerParser-{BLIZZARD_HOST}/{locale}{CAREER_PATH}/TeKrop-2217/"
-    )
-    complete_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{player_cache_key}"
+    player_cache_key = f"PlayerParser-{settings.blizzard_host}/{locale}{settings.career_path}/TeKrop-2217/"
+    complete_cache_key = f"{settings.parser_cache_key_prefix}:{player_cache_key}"
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        player_cache_key, {}, EXPIRED_CACHE_REFRESH_LIMIT - 5
+        player_cache_key, {}, settings.expired_cache_refresh_limit - 5
     )
     cache_manager.update_parser_cache(
-        f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
         {},
-        EXPIRED_CACHE_REFRESH_LIMIT + 5,
+        settings.expired_cache_refresh_limit + 5,
     )
     cache_manager.update_parser_cache(
-        f"GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}",
+        f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}",
         [],
-        EXPIRED_CACHE_REFRESH_LIMIT + 10,
+        settings.expired_cache_refresh_limit + 10,
     )
 
     # Check data in db (assert no Parser Cache data)
@@ -211,7 +206,7 @@ def test_check_and_update_specific_player_to_update(
             status_code=200,
             text=player_html_data,
         ),
-    ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
+    ), patch("app.common.logging.logger.info", logger_info_mock):
         asyncio.run(check_and_update_cache_main())
 
     # Check data in db (assert we created API Cache for subroutes)
@@ -232,24 +227,22 @@ def test_check_and_update_player_stats_summary_to_update(
     player_html_data: str,
     player_stats_json_data: dict,
 ):
-    player_stats_cache_key = (
-        f"PlayerStatsSummaryParser-{BLIZZARD_HOST}/{locale}{CAREER_PATH}/TeKrop-2217/"
-    )
-    complete_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{player_stats_cache_key}"
+    player_stats_cache_key = f"PlayerStatsSummaryParser-{settings.blizzard_host}/{locale}{settings.career_path}/TeKrop-2217/"
+    complete_cache_key = f"{settings.parser_cache_key_prefix}:{player_stats_cache_key}"
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        player_stats_cache_key, {}, EXPIRED_CACHE_REFRESH_LIMIT - 5
+        player_stats_cache_key, {}, settings.expired_cache_refresh_limit - 5
     )
     cache_manager.update_parser_cache(
-        f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
         {},
-        EXPIRED_CACHE_REFRESH_LIMIT + 5,
+        settings.expired_cache_refresh_limit + 5,
     )
     cache_manager.update_parser_cache(
-        f"GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}",
+        f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}",
         [],
-        EXPIRED_CACHE_REFRESH_LIMIT + 10,
+        settings.expired_cache_refresh_limit + 10,
     )
 
     # Check data in db (assert no Parser Cache data)
@@ -265,7 +258,7 @@ def test_check_and_update_player_stats_summary_to_update(
             status_code=200,
             text=player_html_data,
         ),
-    ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
+    ), patch("app.common.logging.logger.info", logger_info_mock):
         asyncio.run(check_and_update_cache_main())
 
     # Check data in db (assert we created API Cache for subroutes)
@@ -280,9 +273,9 @@ def test_check_and_update_player_stats_summary_to_update(
 def test_check_internal_error_from_blizzard(cache_manager: CacheManager, locale: str):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
         {},
-        EXPIRED_CACHE_REFRESH_LIMIT - 5,
+        settings.expired_cache_refresh_limit - 5,
     )
 
     logger_error_mock = Mock()
@@ -290,7 +283,7 @@ def test_check_internal_error_from_blizzard(cache_manager: CacheManager, locale:
         overfast_client,
         "get",
         return_value=Mock(status_code=500, text="Internal Server Error"),
-    ), patch("overfastapi.common.logging.logger.error", logger_error_mock):
+    ), patch("app.common.logging.logger.error", logger_error_mock):
         asyncio.run(check_and_update_cache_main())
 
     logger_error_mock.assert_any_call(
@@ -301,9 +294,9 @@ def test_check_internal_error_from_blizzard(cache_manager: CacheManager, locale:
 def test_check_timeout_from_blizzard(cache_manager: CacheManager, locale: str):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"HeroParser-{BLIZZARD_HOST}/{locale}{HEROES_PATH}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
         {},
-        EXPIRED_CACHE_REFRESH_LIMIT - 5,
+        settings.expired_cache_refresh_limit - 5,
     )
 
     logger_error_mock = Mock()
@@ -314,7 +307,7 @@ def test_check_timeout_from_blizzard(cache_manager: CacheManager, locale: str):
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)"
         ),
-    ), patch("overfastapi.common.logging.logger.error", logger_error_mock):
+    ), patch("app.common.logging.logger.error", logger_error_mock):
         asyncio.run(check_and_update_cache_main())
 
     logger_error_mock.assert_any_call(
@@ -330,9 +323,9 @@ def test_check_parser_parsing_error(
 ):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"PlayerParser-{BLIZZARD_HOST}/{locale}{CAREER_PATH}/TeKrop-2217",
+        f"PlayerParser-{settings.blizzard_host}/{locale}{settings.career_path}/TeKrop-2217",
         {},
-        EXPIRED_CACHE_REFRESH_LIMIT - 5,
+        settings.expired_cache_refresh_limit - 5,
     )
 
     logger_critical_mock = Mock()
@@ -344,7 +337,7 @@ def test_check_parser_parsing_error(
         overfast_client,
         "get",
         return_value=Mock(status_code=200, text=player_attr_error),
-    ), patch("overfastapi.common.logging.logger.critical", logger_critical_mock):
+    ), patch("app.common.logging.logger.critical", logger_critical_mock):
         asyncio.run(check_and_update_cache_main())
 
     logger_critical_mock.assert_called_with(
@@ -360,9 +353,9 @@ def test_check_parser_init_error(
 ):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"PlayerParser-{BLIZZARD_HOST}/{locale}{CAREER_PATH}/TeKrop-2217",
+        f"PlayerParser-{settings.blizzard_host}/{locale}{settings.career_path}/TeKrop-2217",
         {},
-        EXPIRED_CACHE_REFRESH_LIMIT - 5,
+        settings.expired_cache_refresh_limit - 5,
     )
 
     logger_exception_mock = Mock()
@@ -370,7 +363,7 @@ def test_check_parser_init_error(
         overfast_client,
         "get",
         return_value=Mock(status_code=200, text=player_html_data),
-    ), patch("overfastapi.common.logging.logger.exception", logger_exception_mock):
+    ), patch("app.common.logging.logger.exception", logger_exception_mock):
         asyncio.run(check_and_update_cache_main())
 
     logger_exception_mock.assert_any_call(
@@ -385,18 +378,22 @@ def test_check_and_update_several_to_update(
     gamemodes_json_data: dict,
     maps_json_data: dict,
 ):
-    gamemodes_cache_key = f"GamemodesParser-{BLIZZARD_HOST}/{locale}{HOME_PATH}"
+    gamemodes_cache_key = (
+        f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}"
+    )
     maps_cache_key = "MapsParser"
 
-    complete_gamemodes_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{gamemodes_cache_key}"
-    complete_map_cache_key = f"{PARSER_CACHE_KEY_PREFIX}:{maps_cache_key}"
+    complete_gamemodes_cache_key = (
+        f"{settings.parser_cache_key_prefix}:{gamemodes_cache_key}"
+    )
+    complete_map_cache_key = f"{settings.parser_cache_key_prefix}:{maps_cache_key}"
 
     # Add some data to update
     cache_manager.update_parser_cache(
-        gamemodes_cache_key, [], EXPIRED_CACHE_REFRESH_LIMIT - 5
+        gamemodes_cache_key, [], settings.expired_cache_refresh_limit - 5
     )
     cache_manager.update_parser_cache(
-        maps_cache_key, [], EXPIRED_CACHE_REFRESH_LIMIT - 5
+        maps_cache_key, [], settings.expired_cache_refresh_limit - 5
     )
 
     assert get_soon_expired_cache_keys() == {
@@ -410,7 +407,7 @@ def test_check_and_update_several_to_update(
         overfast_client,
         "get",
         return_value=Mock(status_code=200, text=home_html_data),
-    ), patch("overfastapi.common.logging.logger.info", logger_info_mock):
+    ), patch("app.common.logging.logger.info", logger_info_mock):
         asyncio.run(check_and_update_cache_main())
 
     # Check data in db (assert we created API Cache for subroutes)
