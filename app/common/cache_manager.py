@@ -25,7 +25,6 @@ parser-cache:https://overwatch.blizzard.com/en-us/heroes/ana
 """
 
 import json
-import zlib
 from collections.abc import Callable, Iterator
 
 import redis
@@ -33,6 +32,7 @@ from fastapi import Request
 
 from app.config import settings
 
+from .helpers import compress_json_value, decompress_json_value
 from .logging import logger
 from .metaclasses import Singleton
 
@@ -88,11 +88,7 @@ class CacheManager(metaclass=Singleton):
         parser_cache = self.redis_server.get(
             f"{settings.parser_cache_key_prefix}:{cache_key}"
         )
-        return (
-            json.loads(zlib.decompress(parser_cache).decode("utf-8"))
-            if parser_cache
-            else None
-        )
+        return decompress_json_value(parser_cache) if parser_cache else None
 
     @redis_connection_handler
     def update_api_cache(self, cache_key: str, value: dict | list, expire: int) -> None:
@@ -109,9 +105,8 @@ class CacheManager(metaclass=Singleton):
     @redis_connection_handler
     def update_parser_cache(self, cache_key: str, value: dict, expire: int) -> None:
         """Update or set a Parser Cache value with an expire value"""
-        compressed_value = zlib.compress(
-            json.dumps(value, separators=(",", ":")).encode("utf-8")
-        )
+        compressed_value = compress_json_value(value)
+
         self.redis_server.set(
             f"{settings.parser_cache_key_prefix}:{cache_key}",
             value=compressed_value,
@@ -146,3 +141,17 @@ class CacheManager(metaclass=Singleton):
                 continue
 
             yield key.decode("utf-8")
+
+    @redis_connection_handler
+    def update_namecards_cache(self, namecards: dict) -> None:
+        compressed_namecards = compress_json_value(namecards)
+        self.redis_server.set(
+            settings.namecards_key,
+            value=compressed_namecards,
+            ex=settings.namecards_timeout,
+        )
+
+    @redis_connection_handler
+    def get_namecards_cache(self) -> dict:
+        namecards_cache = self.redis_server.get(settings.namecards_key)
+        return decompress_json_value(namecards_cache) if namecards_cache else {}

@@ -85,6 +85,19 @@ class Settings(BaseSettings):
     search_account_path_cache_timeout: int = 3600
 
     ############
+    # NAMECARDS
+    ############
+
+    # URI of the page where namecards are saved
+    namecards_path: str = "/en-us/search/"
+
+    # Cache key for namecards list in Redis.
+    namecards_key: str = "namecards-cache"
+
+    # Cache TTL for namecards list
+    namecards_timeout: int = 7200
+
+    ############
     # BLIZZARD
     ############
 

@@ -1,2 +1,3 @@
 * * * * * cd /code && python -m app.commands.check_and_update_cache
 0 2 * * * cd /code && python -m app.commands.check_new_hero
+42 * * * * cd /code && python -m app.commands.update_namecards_cache

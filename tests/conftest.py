@@ -46,6 +46,11 @@ def player_html_data(request: SubRequest):
 
 
 @pytest.fixture(scope="session")
+def search_html_data():
+    return read_html_file("search.html")
+
+
+@pytest.fixture(scope="session")
 def heroes_json_data():
     return read_json_file("heroes.json")
 
@@ -88,3 +93,8 @@ def search_players_api_json_data():
 @pytest.fixture(scope="session")
 def maps_json_data():
     return read_json_file("maps.json")
+
+
+@pytest.fixture(scope="session")
+def namecards_json_data():
+    return read_json_file("namecards.json")
