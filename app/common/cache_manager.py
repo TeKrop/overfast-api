@@ -143,15 +143,17 @@ class CacheManager(metaclass=Singleton):
             yield key.decode("utf-8")
 
     @redis_connection_handler
-    def update_namecards_cache(self, namecards: dict) -> None:
-        compressed_namecards = compress_json_value(namecards)
-        self.redis_server.set(
-            settings.namecards_key,
-            value=compressed_namecards,
-            ex=settings.namecards_timeout,
-        )
+    def update_namecards_cache(self, namecards: dict[str, str]) -> None:
+        for namecard_key, namecard_url in namecards.items():
+            self.redis_server.set(
+                f"{settings.namecard_cache_key_prefix}:{namecard_key}",
+                value=namecard_url,
+                ex=settings.namecards_timeout,
+            )
 
     @redis_connection_handler
-    def get_namecards_cache(self) -> dict:
-        namecards_cache = self.redis_server.get(settings.namecards_key)
-        return decompress_json_value(namecards_cache) if namecards_cache else {}
+    def get_namecard_cache(self, cache_key: str) -> str | None:
+        namecard_cache = self.redis_server.get(
+            f"{settings.namecard_cache_key_prefix}:{cache_key}"
+        )
+        return namecard_cache.decode("utf-8") if namecard_cache else None

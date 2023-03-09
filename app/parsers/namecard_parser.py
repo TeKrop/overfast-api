@@ -1,4 +1,5 @@
 """Namecard Parser module"""
+from app.commands.update_namecards_cache import retrieve_namecards
 from app.common.exceptions import ParserParsingError
 from app.common.helpers import blizzard_response_error_from_request, overfast_request
 from app.common.logging import logger
@@ -59,13 +60,27 @@ class NamecardParser(APIParser):
         if "namecard" not in player_data:
             return {"namecard": None}
 
-        # Retrieve the possible matching value in the cache
-        namecard_url = self.cache_manager.get_namecards_cache().get(
-            player_data["namecard"]
-        )
+        # Retrieve the possible matching value in the cache. If not in
+        # cache (or Redis disabled), try to retrieve it directly.
+        namecard_url = self.cache_manager.get_namecard_cache(player_data["namecard"])
         if not namecard_url:
             logger.warning(
-                "Corresponding URL for namecard {} of player {} not found in the cache",
+                "URL for namecard {} of player {} not found in the cache",
+                player_data["namecard"],
+                self.player_id,
+            )
+
+            try:
+                namecards = retrieve_namecards()
+            except SystemExit:
+                namecards = {}
+
+            namecard_url = namecards.get(player_data["namecard"])
+
+        # If we still didn't retrieve the URL, log the error and return None
+        if not namecard_url:
+            logger.error(
+                "URL for namecard {} of player {} not found at all",
                 player_data["namecard"],
                 self.player_id,
             )

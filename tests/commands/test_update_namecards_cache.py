@@ -24,7 +24,9 @@ def test_update_namecards_cache(
     ):
         update_namecards_cache_main()
 
-    assert cache_manager.get_namecards_cache() == namecards_json_data
+    for namecard_key, namecard_url in namecards_json_data.items():
+        assert cache_manager.get_namecard_cache(namecard_key) == namecard_url
+    assert cache_manager.get_namecard_cache("0x1234") is None
 
 
 # RequestError from httpx not saving anything
@@ -40,7 +42,7 @@ def test_update_namecards_request_error(cache_manager: CacheManager):
     logger_exception_mock.assert_any_call(
         "An error occurred while requesting namecards !"
     )
-    assert cache_manager.get_namecards_cache() == {"fake": "value"}
+    assert cache_manager.get_namecard_cache("fake") == "value"
 
 
 def test_update_namecards_cache_namecards_not_found(cache_manager: CacheManager):
@@ -53,7 +55,7 @@ def test_update_namecards_cache_namecards_not_found(cache_manager: CacheManager)
         update_namecards_cache_main()
 
     logger_exception_mock.assert_any_call("Namecards not found on Blizzard page !")
-    assert cache_manager.get_namecards_cache() == {"fake": "value"}
+    assert cache_manager.get_namecard_cache("fake") == "value"
 
 
 def test_update_namecards_cache_invalid_json(cache_manager: CacheManager):
@@ -73,4 +75,4 @@ def test_update_namecards_cache_invalid_json(cache_manager: CacheManager):
     logger_exception_mock.assert_any_call(
         "Invalid format for namecards on Blizzard page !"
     )
-    assert cache_manager.get_namecards_cache() == {"fake": "value"}
+    assert cache_manager.get_namecard_cache("fake") == "value"

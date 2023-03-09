@@ -1,5 +1,4 @@
-"""Command used in order to retrieve the last version of the.
-"""
+"""Command used in order to retrieve the last version of the namecards"""
 import json
 import re
 
@@ -12,6 +11,16 @@ from app.config import settings
 
 # Generic cache manager used in the process
 cache_manager = CacheManager()
+
+
+def get_search_page() -> httpx.Response:
+    try:
+        response = httpx.get(f"{settings.blizzard_host}{settings.namecards_path}")
+    except httpx.RequestError as error:
+        logger.exception("An error occurred while requesting namecards !")
+        raise SystemExit from error
+    else:
+        return response
 
 
 def extract_namecards_data(html_content: str) -> dict:
@@ -34,30 +43,36 @@ def extract_namecards_data(html_content: str) -> dict:
         return json_result
 
 
-def transform_namecards_data(namecards_data: dict) -> dict:
+def transform_namecards_data(namecards_data: dict) -> dict[str, str]:
     return {
         namecard_key: namecard["icon"]
         for namecard_key, namecard in namecards_data.items()
     }
 
 
-def main():
-    """Main method of the script"""
+def retrieve_namecards() -> dict[str, str]:
     logger.info("Retrieving Blizzard search page...")
-    try:
-        response = httpx.get(f"{settings.blizzard_host}{settings.namecards_path}")
-    except httpx.RequestError as error:
-        logger.exception("An error occurred while requesting namecards !")
-        raise SystemExit from error
+    search_page = get_search_page()
 
-    logger.info("Retrieving namecards from HTML data...")
-    namecards_data = extract_namecards_data(response.text)
+    logger.info("Extracting namecards from HTML data...")
+    namecards_data = extract_namecards_data(search_page.text)
 
     logger.info("Transforming data...")
-    namecards = transform_namecards_data(namecards_data)
+    return transform_namecards_data(namecards_data)
+
+
+def update_namecards_cache():
+    """Main method of the script"""
+    logger.info("Retrieving namecards...")
+    namecards = retrieve_namecards()
 
     logger.info("Saving namecards...")
     cache_manager.update_namecards_cache(namecards)
+
+
+def main():
+    """Main method of the script"""
+    update_namecards_cache()
 
 
 if __name__ == "__main__":  # pragma: no cover

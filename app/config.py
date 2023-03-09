@@ -88,11 +88,11 @@ class Settings(BaseSettings):
     # NAMECARDS
     ############
 
+    # Cache key for namecard cache in Redis.
+    namecard_cache_key_prefix: str = "namecard-cache"
+
     # URI of the page where namecards are saved
     namecards_path: str = "/en-us/search/"
-
-    # Cache key for namecards list in Redis.
-    namecards_key: str = "namecards-cache"
 
     # Cache TTL for namecards list
     namecards_timeout: int = 7200
