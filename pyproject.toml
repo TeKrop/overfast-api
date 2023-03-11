@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.93.0"
+fastapi = "^0.94.0"
 beautifulsoup4 = "^4.11.2"
 lxml = "^4.9.2"
 redis = "^4.5.1"

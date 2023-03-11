@@ -31,7 +31,7 @@ class NamecardParser(APIParser):
         # Parse retrieved HTML data
         try:
             self.data = self.parse_data()
-        except (AttributeError, KeyError, IndexError, TypeError) as error:
+        except KeyError as error:
             raise ParserParsingError(repr(error)) from error
 
         # Update the Parser Cache
@@ -57,7 +57,11 @@ class NamecardParser(APIParser):
             return {"namecard": None}
 
         # If the player doesn't have any namecard, directly return nothing here
-        if "namecard" not in player_data:
+        if (
+            "namecard" not in player_data
+            or player_data["namecard"] == "0x0000000000000000"
+        ):
+            logger.info("Player {} doesn't have any namecard", self.player_id)
             return {"namecard": None}
 
         # Retrieve the possible matching value in the cache. If not in
@@ -77,9 +81,10 @@ class NamecardParser(APIParser):
 
             namecard_url = namecards.get(player_data["namecard"])
 
-        # If we still didn't retrieve the URL, log the error and return None
+        # If we still didn't retrieve the URL, it means the player doesn't
+        # have one, or we had an issue, log it and return None
         if not namecard_url:
-            logger.error(
+            logger.warning(
                 "URL for namecard {} of player {} not found at all",
                 player_data["namecard"],
                 self.player_id,

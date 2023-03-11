@@ -2,6 +2,7 @@ import asyncio
 from unittest.mock import Mock, patch
 
 import pytest
+from fastapi import status
 from httpx import TimeoutException
 
 from app.commands.check_and_update_cache import get_soon_expired_cache_keys
@@ -55,7 +56,7 @@ def test_check_and_update_gamemodes_cache_to_update(
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=200, text=home_html_data),
+        return_value=Mock(status_code=status.HTTP_200_OK, text=home_html_data),
     ), patch("app.common.logging.logger.info", logger_info_mock):
         asyncio.run(check_and_update_cache_main())
 
@@ -93,7 +94,7 @@ def test_check_and_update_specific_hero_to_update(
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=200, text=hero_html_data),
+        return_value=Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
     ), patch("app.common.logging.logger.info", logger_info_mock):
         asyncio.run(check_and_update_cache_main())
 
@@ -203,7 +204,7 @@ def test_check_and_update_specific_player_to_update(
         overfast_client,
         "get",
         return_value=Mock(
-            status_code=200,
+            status_code=status.HTTP_200_OK,
             text=player_html_data,
         ),
     ), patch("app.common.logging.logger.info", logger_info_mock):
@@ -255,7 +256,7 @@ def test_check_and_update_player_stats_summary_to_update(
         overfast_client,
         "get",
         return_value=Mock(
-            status_code=200,
+            status_code=status.HTTP_200_OK,
             text=player_html_data,
         ),
     ), patch("app.common.logging.logger.info", logger_info_mock):
@@ -282,12 +283,17 @@ def test_check_internal_error_from_blizzard(cache_manager: CacheManager, locale:
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=500, text="Internal Server Error"),
+        return_value=Mock(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            text="Internal Server Error",
+        ),
     ), patch("app.common.logging.logger.error", logger_error_mock):
         asyncio.run(check_and_update_cache_main())
 
     logger_error_mock.assert_any_call(
-        "Received an error from Blizzard. HTTP {} : {}", 500, "Internal Server Error"
+        "Received an error from Blizzard. HTTP {} : {}",
+        status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "Internal Server Error",
     )
 
 
@@ -336,7 +342,7 @@ def test_check_parser_parsing_error(
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=200, text=player_attr_error),
+        return_value=Mock(status_code=status.HTTP_200_OK, text=player_attr_error),
     ), patch("app.common.logging.logger.critical", logger_critical_mock):
         asyncio.run(check_and_update_cache_main())
 
@@ -362,7 +368,7 @@ def test_check_parser_init_error(
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=200, text=player_html_data),
+        return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
     ), patch("app.common.logging.logger.exception", logger_exception_mock):
         asyncio.run(check_and_update_cache_main())
 
@@ -406,7 +412,7 @@ def test_check_and_update_several_to_update(
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=200, text=home_html_data),
+        return_value=Mock(status_code=status.HTTP_200_OK, text=home_html_data),
     ), patch("app.common.logging.logger.info", logger_info_mock):
         asyncio.run(check_and_update_cache_main())
 

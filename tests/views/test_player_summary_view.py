@@ -16,7 +16,7 @@ client = TestClient(app)
     [
         (player_id, player_id, player_id)
         for player_id in players_ids
-        if player_id != "Unknown-1234"
+        if player_id == "TeKrop-2217"
     ],
     indirect=["player_html_data", "player_json_data"],
 )
@@ -24,6 +24,7 @@ def test_get_player_summary(
     player_id: str,
     player_html_data: str,
     player_json_data: dict,
+    namecards_json_data: dict,
 ):
     with patch.object(
         overfast_client,

@@ -18,10 +18,10 @@ from .routers import gamemodes, heroes, maps, players, roles
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Update namecards list from Blizzard before starting up
-    logger.info("Updating namecards data...")
-
-    with suppress(SystemExit):
-        update_namecards_cache()
+    if settings.redis_caching_enabled:
+        logger.info("Updating namecards data...")
+        with suppress(SystemExit):
+            update_namecards_cache()
 
     yield
 

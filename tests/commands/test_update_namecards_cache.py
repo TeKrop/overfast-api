@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 import httpx
 import pytest
+from fastapi import status
 
 from app.commands.update_namecards_cache import main as update_namecards_cache_main
 from app.common.cache_manager import CacheManager
@@ -20,7 +21,7 @@ def test_update_namecards_cache(
     # Nominal case, everything is working fine
     with patch(
         "httpx.get",
-        return_value=Mock(status_code=200, text=search_html_data),
+        return_value=Mock(status_code=status.HTTP_200_OK, text=search_html_data),
     ):
         update_namecards_cache_main()
 
@@ -49,9 +50,13 @@ def test_update_namecards_cache_namecards_not_found(cache_manager: CacheManager)
     cache_manager.update_namecards_cache({"fake": "value"})
 
     logger_exception_mock = Mock()
-    with patch("httpx.get", return_value=Mock(status_code=200, text="OK")), patch(
+    with patch(
+        "httpx.get", return_value=Mock(status_code=status.HTTP_200_OK, text="OK")
+    ), patch(
         "app.common.logging.logger.exception", logger_exception_mock
-    ), pytest.raises(SystemExit):
+    ), pytest.raises(
+        SystemExit
+    ):
         update_namecards_cache_main()
 
     logger_exception_mock.assert_any_call("Namecards not found on Blizzard page !")
@@ -64,7 +69,9 @@ def test_update_namecards_cache_invalid_json(cache_manager: CacheManager):
     logger_exception_mock = Mock()
     with patch(
         "httpx.get",
-        return_value=Mock(status_code=200, text="const namecards = {'test':abc}\n"),
+        return_value=Mock(
+            status_code=status.HTTP_200_OK, text="const namecards = {'test':abc}\n"
+        ),
     ), patch(
         "app.common.logging.logger.exception", logger_exception_mock
     ), pytest.raises(

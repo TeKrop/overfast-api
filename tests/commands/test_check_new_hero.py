@@ -1,6 +1,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+from fastapi import status
 
 from app.commands.check_new_hero import main as check_new_hero_main
 from app.common.enums import HeroKey
@@ -21,7 +22,7 @@ def test_check_no_new_hero(heroes_html_data: str):
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=200, text=heroes_html_data),
+        return_value=Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
     ), patch("app.common.logging.logger.info", logger_info_mock):
         check_new_hero_main()
 
@@ -64,12 +65,17 @@ def test_check_error_from_blizzard():
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=500, text="Internal Server Error"),
+        return_value=Mock(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            text="Internal Server Error",
+        ),
     ), patch("app.common.logging.logger.error", logger_error_mock), pytest.raises(
         SystemExit
     ):
         check_new_hero_main()
 
     logger_error_mock.assert_called_with(
-        "Received an error from Blizzard. HTTP {} : {}", 500, "Internal Server Error"
+        "Received an error from Blizzard. HTTP {} : {}",
+        status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "Internal Server Error",
     )
