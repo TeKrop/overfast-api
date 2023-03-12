@@ -109,7 +109,7 @@ def blizzard_response_error(status_code: int, error: str) -> HTTPException:
 
     return HTTPException(
         status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-        detail=(f"Couldn't get Blizzard page (HTTP {status_code} error) : {error}"),
+        detail=f"Couldn't get Blizzard page (HTTP {status_code} error) : {error}",
     )
 
 

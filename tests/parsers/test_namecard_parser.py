@@ -1,13 +1,12 @@
 import asyncio
 import json
-import re
 from unittest.mock import Mock, patch
 
 import httpx
 import pytest
-from fastapi import status
+from fastapi import HTTPException, status
 
-from app.common.exceptions import ParserBlizzardError, ParserParsingError
+from app.common.exceptions import ParserParsingError
 from app.common.helpers import overfast_client
 from app.parsers.namecard_parser import NamecardParser
 
@@ -34,6 +33,29 @@ def test_namecard_parser_no_cache(
         asyncio.run(parser.parse())
 
     assert parser.data == {"namecard": namecards_json_data.get("0x0250000000005510")}
+
+
+def test_namecard_parser_blizzard_error(
+    search_players_blizzard_json_data: dict,
+    search_html_data: str,
+    namecards_json_data: dict,
+):
+    parser = NamecardParser(player_id="Dekk-2677")
+
+    with pytest.raises(HTTPException) as error, patch.object(
+        overfast_client,
+        "get",
+        return_value=Mock(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, text="Service Unavailable"
+        ),
+    ):
+        asyncio.run(parser.parse())
+
+    assert error.value.status_code == status.HTTP_504_GATEWAY_TIMEOUT
+    assert (
+        error.value.detail
+        == "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable"
+    )
 
 
 def test_namecard_parser_error_key_error(search_tekrop_blizzard_json_data: dict):

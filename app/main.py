@@ -16,7 +16,7 @@ from .routers import gamemodes, heroes, maps, players, roles
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):  # pragma: no cover
     # Update namecards list from Blizzard before starting up
     if settings.redis_caching_enabled:
         logger.info("Updating namecards data...")

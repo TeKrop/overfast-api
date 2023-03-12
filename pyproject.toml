@@ -2,28 +2,33 @@
 name = "overfast-api"
 version = "2.10.0"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
-authors = ["TeKrop <tekrop@gmail.com>"]
 license = "MIT"
+authors = ["TeKrop <tekrop@gmail.com>"]
+readme = "README.md"
+homepage = "https://overfast-api.tekrop.fr/"
+repository = "https://github.com/TeKrop/overfast-api"
+documentation = "https://overfast-api.tekrop.fr/"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.94.0"
 beautifulsoup4 = "^4.11.2"
+fastapi = "^0.94.0"
+httpx = {extras = ["http2"], version = "^0.23.3"}
+loguru = "^0.6.0"
 lxml = "^4.9.2"
 redis = "^4.5.1"
 uvicorn = {extras = ["standard"], version = "^0.20.0"}
-loguru = "^0.6.0"
-httpx = {extras = ["http2"], version = "^0.23.3"}
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
+fakeredis = "^2.10.0"
+ipdb = "^0.13.13"
+isort = "^5.12.0"
 pytest = "^7.2.2"
+pytest-clarity = "^1.0.1"
 pytest-cov = "^4.0.0"
 pytest-randomly = "^3.12.0"
 pytest-xdist = "^3.2.0"
-isort = "^5.12.0"
-ipdb = "^0.13.13"
-fakeredis = "^2.10.0"
 ruff = "^0.0.254"
 
 [build-system]

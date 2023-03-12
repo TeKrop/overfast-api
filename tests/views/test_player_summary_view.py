@@ -46,7 +46,6 @@ def test_get_player_summary(
         # Search HTML page for namecard retrieval
         return_value=Mock(status_code=status.HTTP_200_OK, text=search_html_data),
     ):
-
         response = client.get(f"/players/{player_id}/summary")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == player_json_data["summary"]

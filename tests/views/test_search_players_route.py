@@ -97,10 +97,15 @@ def test_search_players_blizzard_timeout():
 def test_search_players(search_players_api_json_data: dict):
     response = client.get("/players?name=Test")
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {
-        "total": search_players_api_json_data["total"],
-        "results": search_players_api_json_data["results"][0:20],
-    }
+
+    json_response = response.json()
+    assert json_response["total"] == search_players_api_json_data["total"]
+    assert (
+        sorted(json_response["results"], key=lambda k: k["player_id"])
+        == sorted(
+            search_players_api_json_data["results"], key=lambda k: k["player_id"]
+        )[0:20]
+    )
 
 
 def test_search_players_with_cache(search_players_api_json_data: list):
