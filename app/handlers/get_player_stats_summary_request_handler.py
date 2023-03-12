@@ -1,13 +1,15 @@
 """Player Stats Summary Request Handler module"""
+from app.config import settings
 from app.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
 
-from .get_player_career_request_handler import GetPlayerCareerRequestHandler
+from .api_request_handler import APIRequestHandler
 
 
-class GetPlayerStatsSummaryRequestHandler(GetPlayerCareerRequestHandler):
+class GetPlayerStatsSummaryRequestHandler(APIRequestHandler):
     """Player Stats Summary Request Handler used in order to retrieve essential
     stats of a player, often used for tracking progress : winrate, kda, damage, etc.
     Using the PlayerStatsSummaryParser.
     """
 
     parser_classes = [PlayerStatsSummaryParser]
+    timeout = settings.career_path_cache_timeout

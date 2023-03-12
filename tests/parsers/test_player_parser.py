@@ -25,6 +25,10 @@ def test_player_page_parsing_with_filters(
     player_json_data: dict,
     kwargs_filter: dict,
 ):
+    # Remove "namecard" key from player_json_data, it's been added from another page
+    player_data = player_json_data.copy()
+    del player_data["summary"]["namecard"]
+
     parser = PlayerParser(player_id=player_id)
 
     with patch.object(
@@ -37,7 +41,7 @@ def test_player_page_parsing_with_filters(
     # Just check that the parsing is working properly
     parser.filter_request_using_query(**kwargs_filter)
 
-    assert parser.data == player_json_data
+    assert parser.data == player_data
 
 
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)

@@ -1,6 +1,7 @@
 """Parser Helpers module"""
 import csv
 import json
+import zlib
 from pathlib import Path
 
 import httpx
@@ -108,7 +109,7 @@ def blizzard_response_error(status_code: int, error: str) -> HTTPException:
 
     return HTTPException(
         status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-        detail=(f"Couldn't get Blizzard page (HTTP {status_code} error) : {error}"),
+        detail=f"Couldn't get Blizzard page (HTTP {status_code} error) : {error}",
     )
 
 
@@ -145,3 +146,11 @@ def read_json_file(filepath: str) -> dict | list:
 def read_csv_data_file(filepath: str) -> csv.DictReader:
     with Path(f"{Path.cwd()}/app/data/{filepath}").open(encoding="utf-8") as csv_file:
         yield from csv.DictReader(csv_file, delimiter=";")
+
+
+def compress_json_value(value: dict | list) -> str:
+    return zlib.compress(json.dumps(value, separators=(",", ":")).encode("utf-8"))
+
+
+def decompress_json_value(value: str) -> dict | list:
+    return json.loads(zlib.decompress(value).decode("utf-8"))

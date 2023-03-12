@@ -2,6 +2,7 @@ import asyncio
 from unittest.mock import Mock, patch
 
 import pytest
+from fastapi import status
 from httpx import AsyncClient
 
 from app.commands.update_test_fixtures import main as update_test_fixtures_main
@@ -59,7 +60,7 @@ def test_update_with_different_options(parameters, expected_calls: list[str]):
     ), patch.object(
         AsyncClient,
         "get",
-        return_value=Mock(status_code=200, text="HTML_DATA"),
+        return_value=Mock(status_code=status.HTTP_200_OK, text="HTML_DATA"),
     ), patch(
         "app.common.logging.logger.info", logger_info_mock
     ), patch(
@@ -81,7 +82,9 @@ def test_update_with_blizzard_error():
     ), patch.object(
         AsyncClient,
         "get",
-        return_value=Mock(status_code=500, text="BLIZZARD_ERROR"),
+        return_value=Mock(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, text="BLIZZARD_ERROR"
+        ),
     ), patch(
         "app.common.logging.logger.info", Mock()
     ), patch(

@@ -1,4 +1,5 @@
 """Project main file containing FastAPI app and routes definitions"""
+from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI, Request
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
@@ -7,12 +8,25 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from .commands.update_namecards_cache import update_namecards_cache
 from .common.enums import RouteTag
 from .common.logging import logger
 from .config import settings
 from .routers import gamemodes, heroes, maps, players, roles
 
-app = FastAPI(title="OverFast API", docs_url=None, redoc_url=None)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):  # pragma: no cover
+    # Update namecards list from Blizzard before starting up
+    if settings.redis_caching_enabled:
+        logger.info("Updating namecards data...")
+        with suppress(SystemExit):
+            update_namecards_cache()
+
+    yield
+
+
+app = FastAPI(title="OverFast API", docs_url=None, redoc_url=None, lifespan=lifespan)
 description = f"""OverFast API gives data about Overwatch 2 heroes, gamemodes, maps and players
 statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses
 **nginx** as reverse proxy and **Redis** for caching. By using a Refresh-Ahead cache system, it
