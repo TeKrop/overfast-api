@@ -36,18 +36,11 @@ def test_namecard_parser_no_cache(
     assert parser.data == {"namecard": namecards_json_data.get("0x0250000000005510")}
 
 
-def test_namecard_parser_error_key_error():
+def test_namecard_parser_error_key_error(search_tekrop_blizzard_json_data: dict):
     # Search data without battletag
-    search_data = [
-        {
-            "frame": "0x0250000000000FC1",
-            "isPublic": True,
-            "lastUpdated": 1678488893,
-            "namecard": "0x0250000000005510",
-            "portrait": "0x0250000000001598",
-            "title": "0x025000000000555E",
-        }
-    ]
+    search_data = [search_tekrop_blizzard_json_data[0].copy()]
+    del search_data[0]["battleTag"]
+
     parser = NamecardParser(player_id="TeKrop-2217")
 
     with patch.object(
@@ -115,9 +108,7 @@ def test_namecard_parser_player_without_namecard():
 
 
 def test_namecard_parser_no_cache_no_namecard(
-    search_players_blizzard_json_data: dict,
-    search_html_data: str,
-    namecards_json_data: dict,
+    search_players_blizzard_json_data: dict, search_html_data: str
 ):
     parser = NamecardParser(player_id="Dekk-2677")
 
@@ -156,9 +147,6 @@ def test_namecard_parser_with_cache(
     namecards_json_data: dict,
 ):
     parser = NamecardParser(player_id="Dekk-2677")
-    parser.cache_manager.get_namecard_cache = Mock(
-        return_value="https://d15f34w2p8l1cc.cloudfront.net/overwatch/757219956129146d84617a7e713dfca1bc33ea27cf6c73df60a33d02a147edc1.png"
-    )
 
     with patch.object(
         overfast_client,
@@ -168,6 +156,10 @@ def test_namecard_parser_with_cache(
             text=json.dumps(search_players_blizzard_json_data),
             json=lambda: search_players_blizzard_json_data,
         ),
+    ), patch.object(
+        parser.cache_manager,
+        "get_namecard_cache",
+        return_value="https://d15f34w2p8l1cc.cloudfront.net/overwatch/757219956129146d84617a7e713dfca1bc33ea27cf6c73df60a33d02a147edc1.png",
     ):
         asyncio.run(parser.parse())
 

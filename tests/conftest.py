@@ -86,6 +86,11 @@ def search_players_blizzard_json_data():
 
 
 @pytest.fixture(scope="session")
+def search_tekrop_blizzard_json_data():
+    return read_json_file("search_players/search_tekrop_blizzard_result.json")
+
+
+@pytest.fixture(scope="session")
 def search_players_api_json_data():
     return read_json_file("search_players/search_players_api_result.json")
 

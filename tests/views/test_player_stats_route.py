@@ -1,3 +1,4 @@
+import json
 from unittest.mock import Mock, patch
 
 import pytest
@@ -39,11 +40,19 @@ def test_get_player_stats(
     gamemode: PlayerGamemode | None,
     platform: PlayerPlatform | None,
     hero: HeroKeyCareerFilter | None,
+    search_tekrop_blizzard_json_data: dict,
 ):
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+        side_effect=[
+            Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+            Mock(
+                status_code=status.HTTP_200_OK,
+                text=json.dumps(search_tekrop_blizzard_json_data),
+                json=lambda: search_tekrop_blizzard_json_data,
+            ),
+        ],
     ):
         query_params = "&".join(
             [

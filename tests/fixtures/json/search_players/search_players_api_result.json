@@ -1,11 +1,17 @@
 {
-    "total": 13,
+    "total": 15,
     "results": [
         {
             "player_id": "DEKK-11775",
             "name": "DEKK#11775",
             "privacy": "private",
             "career_url": "https://overfast-api.tekrop.fr/players/DEKK-11775"
+        },
+        {
+            "player_id": "DEKK-21259",
+            "name": "DEKK#21259",
+            "privacy": "public",
+            "career_url": "https://overfast-api.tekrop.fr/players/DEKK-21259"
         },
         {
             "player_id": "Dekk-11904",
@@ -66,6 +72,12 @@
             "name": "Dekk#21771",
             "privacy": "private",
             "career_url": "https://overfast-api.tekrop.fr/players/Dekk-21771"
+        },
+        {
+            "player_id": "Dekk-21904",
+            "name": "Dekk#21904",
+            "privacy": "private",
+            "career_url": "https://overfast-api.tekrop.fr/players/Dekk-21904"
         },
         {
             "player_id": "Dekk-2677",

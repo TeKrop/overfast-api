@@ -1,3 +1,4 @@
+import json
 from unittest.mock import Mock, patch
 
 import pytest
@@ -16,7 +17,7 @@ client = TestClient(app)
     [
         (player_id, player_id, player_id)
         for player_id in players_ids
-        if player_id == "TeKrop-2217"
+        if player_id != "Unknown-1234"
     ],
     indirect=["player_html_data", "player_json_data"],
 )
@@ -24,13 +25,28 @@ def test_get_player_summary(
     player_id: str,
     player_html_data: str,
     player_json_data: dict,
-    namecards_json_data: dict,
+    search_tekrop_blizzard_json_data: dict,
+    search_html_data: str,
 ):
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+        side_effect=[
+            # Player HTML page
+            Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+            # Search results related to the player
+            Mock(
+                status_code=status.HTTP_200_OK,
+                text=json.dumps(search_tekrop_blizzard_json_data),
+                json=lambda: search_tekrop_blizzard_json_data,
+            ),
+        ],
+    ), patch(
+        "httpx.get",
+        # Search HTML page for namecard retrieval
+        return_value=Mock(status_code=status.HTTP_200_OK, text=search_html_data),
     ):
+
         response = client.get(f"/players/{player_id}/summary")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == player_json_data["summary"]

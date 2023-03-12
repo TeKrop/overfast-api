@@ -176,6 +176,10 @@ def test_check_and_update_specific_player_to_update(
     player_html_data: str,
     player_json_data: dict,
 ):
+    # Remove "namecard" key from player_json_data, it's been added from another page
+    player_data = player_json_data.copy()
+    del player_data["summary"]["namecard"]
+
     player_cache_key = f"PlayerParser-{settings.blizzard_host}/{locale}{settings.career_path}/TeKrop-2217/"
     complete_cache_key = f"{settings.parser_cache_key_prefix}:{player_cache_key}"
 
@@ -203,10 +207,7 @@ def test_check_and_update_specific_player_to_update(
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(
-            status_code=status.HTTP_200_OK,
-            text=player_html_data,
-        ),
+        return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
     ), patch("app.common.logging.logger.info", logger_info_mock):
         asyncio.run(check_and_update_cache_main())
 
@@ -214,7 +215,7 @@ def test_check_and_update_specific_player_to_update(
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
     logger_info_mock.assert_any_call("Updating data for {} key...", complete_cache_key)
 
-    assert cache_manager.get_parser_cache(player_cache_key) == player_json_data
+    assert cache_manager.get_parser_cache(player_cache_key) == player_data
 
 
 @pytest.mark.parametrize(

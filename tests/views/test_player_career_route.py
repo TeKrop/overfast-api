@@ -1,3 +1,4 @@
+import json
 from unittest.mock import Mock, patch
 
 import pytest
@@ -24,11 +25,29 @@ def test_get_player_career(
     player_id: str,
     player_html_data: str,
     player_json_data: dict,
+    search_tekrop_blizzard_json_data: dict,
+    search_html_data: str,
 ):
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+        side_effect=[
+            # Player HTML page
+            Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+            # Search results related to the player
+            Mock(
+                status_code=status.HTTP_200_OK,
+                text=json.dumps(search_tekrop_blizzard_json_data),
+                json=lambda: search_tekrop_blizzard_json_data,
+            ),
+        ],
+    ), patch(
+        "app.common.cache_manager.CacheManager.get_namecard_cache",
+        return_value=(
+            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/52ee742d4e2fc734e3cd7fdb74b0eac64bcdf26d58372a503c712839595802c5.png"
+            if player_id == "TeKrop-2217"
+            else None
+        ),
     ):
         response = client.get(f"/players/{player_id}")
     assert response.status_code == status.HTTP_200_OK
