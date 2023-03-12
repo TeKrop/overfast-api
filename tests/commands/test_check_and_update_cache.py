@@ -1,4 +1,5 @@
 import asyncio
+import json
 from unittest.mock import Mock, patch
 
 import pytest
@@ -428,3 +429,56 @@ def test_check_and_update_several_to_update(
 
     assert cache_manager.get_parser_cache(gamemodes_cache_key) == gamemodes_json_data
     assert cache_manager.get_parser_cache(maps_cache_key) == maps_json_data
+
+
+def test_check_and_update_namecard_to_update(
+    cache_manager: CacheManager,
+    locale: str,
+    search_tekrop_blizzard_json_data: dict,
+    namecards_json_data: dict,
+):
+    namecard_cache_key = f"NamecardParser-{settings.blizzard_host}/{locale}{settings.search_account_path}/TeKrop#2217"
+    complete_cache_key = f"{settings.parser_cache_key_prefix}:{namecard_cache_key}"
+
+    # Add namecards list data + parser_cache key which needs an update
+    cache_manager.update_namecards_cache(namecards_json_data)
+    cache_manager.update_parser_cache(
+        namecard_cache_key, {}, settings.expired_cache_refresh_limit - 5
+    )
+
+    # Add some data which doesn't need update
+    cache_manager.update_parser_cache(
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
+        {},
+        settings.expired_cache_refresh_limit + 5,
+    )
+    cache_manager.update_parser_cache(
+        f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}",
+        [],
+        settings.expired_cache_refresh_limit + 10,
+    )
+
+    # Check data in db (assert no Parser Cache data)
+    assert cache_manager.get_parser_cache(namecard_cache_key) == {}
+    assert get_soon_expired_cache_keys() == {complete_cache_key}
+
+    # check and update (only maps should be updated)
+    logger_info_mock = Mock()
+    with patch.object(
+        overfast_client,
+        "get",
+        return_value=Mock(
+            status_code=status.HTTP_200_OK,
+            text=json.dumps(search_tekrop_blizzard_json_data),
+            json=lambda: search_tekrop_blizzard_json_data,
+        ),
+    ), patch("app.common.logging.logger.info", logger_info_mock):
+        asyncio.run(check_and_update_cache_main())
+
+    # Check data in db (assert we created API Cache for subroutes)
+    logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
+    logger_info_mock.assert_any_call("Updating data for {} key...", complete_cache_key)
+
+    assert cache_manager.get_parser_cache(namecard_cache_key) == {
+        "namecard": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/52ee742d4e2fc734e3cd7fdb74b0eac64bcdf26d58372a503c712839595802c5.png"
+    }

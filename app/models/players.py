@@ -148,7 +148,9 @@ class PlayerSummary(BaseModel):
         description="URL of the player's namecard (or banner) if any",
         example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/55d8c21e9d8b14942c26c4028059b6cd3b4e2fea40a139821ecee73a0005126f.png",
     )
-    title: str | None = Field(None, description="Title of the player if any")
+    title: str | None = Field(
+        None, description="Title of the player if any", example="Bytefixer"
+    )
     endorsement: PlayerEndorsement = Field(...)
     competitive: PlayerCompetitiveRanksContainer | None = Field(
         None,
