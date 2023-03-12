@@ -132,10 +132,15 @@ def test_search_players_with_offset_and_limit(
 ):
     response = client.get(f"/players?name=Test&offset={offset}&limit={limit}")
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {
-        "total": search_players_api_json_data["total"],
-        "results": search_players_api_json_data["results"][offset:limit],
-    }
+
+    json_response = response.json()
+    assert json_response["total"] == search_players_api_json_data["total"]
+    assert (
+        sorted(json_response["results"], key=lambda k: k["player_id"])
+        == sorted(
+            search_players_api_json_data["results"], key=lambda k: k["player_id"]
+        )[offset:limit]
+    )
 
 
 @pytest.mark.parametrize(
@@ -154,10 +159,13 @@ def test_search_players_filter_by_privacy(
             if player["privacy"] == privacy
         ]
         assert response.status_code == status.HTTP_200_OK
-        assert response.json() == {
-            "total": len(filtered_players),
-            "results": filtered_players[0:20],
-        }
+
+        json_response = response.json()
+        assert json_response["total"] == len(filtered_players)
+        assert (
+            sorted(json_response["results"], key=lambda k: k["player_id"])
+            == sorted(filtered_players, key=lambda k: k["player_id"])[0:20]
+        )
     else:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
