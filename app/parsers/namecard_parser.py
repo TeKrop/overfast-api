@@ -12,7 +12,7 @@ class NamecardParser(APIParser):
     """Namecard Parser class"""
 
     root_path = settings.search_account_path
-    timeout = settings.search_account_path_cache_timeout
+    timeout = settings.career_path_cache_timeout
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -125,7 +125,7 @@ def test_update_and_get_parser_cache(
         (False, set()),
     ],
 )
-def test_get_soon_expired_parser_cache_keys(
+def test_get_soon_expired_cache_keys(
     cache_manager: CacheManager, is_redis_server_up: bool, expected: set[str]
 ):
     with patch(
@@ -148,7 +148,14 @@ def test_get_soon_expired_parser_cache_keys(
             settings.expired_cache_refresh_limit - 10,
         )
 
-        assert set(cache_manager.get_soon_expired_parser_cache_keys()) == expected
+        assert (
+            set(
+                cache_manager.get_soon_expired_cache_keys(
+                    settings.parser_cache_key_prefix
+                )
+            )
+            == expected
+        )
 
 
 def test_redis_connection_error(cache_manager: CacheManager):
@@ -173,10 +180,24 @@ def test_redis_connection_error(cache_manager: CacheManager):
         "app.common.cache_manager.redis.Redis.keys",
         side_effect=redis_connection_error,
     ):
-        assert set(cache_manager.get_soon_expired_parser_cache_keys()) == set()
+        assert (
+            set(
+                cache_manager.get_soon_expired_cache_keys(
+                    settings.parser_cache_key_prefix
+                )
+            )
+            == set()
+        )
 
     with patch(
         "app.common.cache_manager.redis.Redis.ttl",
         side_effect=redis_connection_error,
     ):
-        assert set(cache_manager.get_soon_expired_parser_cache_keys()) == set()
+        assert (
+            set(
+                cache_manager.get_soon_expired_cache_keys(
+                    settings.parser_cache_key_prefix
+                )
+            )
+            == set()
+        )
