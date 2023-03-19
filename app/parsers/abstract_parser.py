@@ -17,7 +17,7 @@ class AbstractParser(ABC):
     cache_manager = CacheManager()
 
     def __init__(self, **kwargs):
-        self.data = None
+        self.data: dict | list = None
 
     @property
     @abstractmethod
@@ -28,6 +28,11 @@ class AbstractParser(ABC):
     def cache_key(self) -> str:
         """Key used for caching using Parser Cache"""
         return type(self).__name__
+
+    @property
+    def cache_expiration_timeout(self) -> int | None:
+        """Timeout used for the optional Parser Cache expiration system"""
+        return
 
     @abstractmethod
     async def retrieve_and_parse_data(self) -> None:
@@ -51,6 +56,13 @@ class AbstractParser(ABC):
         # data or the Parser Cache has expired : retrieve and parse data (
         # Blizzard page for API Parser or local file for others parsers)
         await self.retrieve_and_parse_data()
+
+        # As we updated parser cache from a real API call, store the current
+        # date as last_update (used by the Parser Cache expiration system)
+        if self.cache_expiration_timeout is not None:
+            self.cache_manager.update_parser_cache_last_update(
+                self.cache_key, self.cache_expiration_timeout
+            )
 
     def filter_request_using_query(self, **kwargs) -> dict | list:
         """If the route contains subroutes accessible using GET queries, this method

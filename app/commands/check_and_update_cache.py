@@ -44,7 +44,9 @@ def get_soon_expired_cache_keys() -> set[str]:
     """Get a set of URIs for values in Parser Cache which are obsolete
     or will need to be updated.
     """
-    return set(cache_manager.get_soon_expired_parser_cache_keys())
+    return set(
+        cache_manager.get_soon_expired_cache_keys(settings.parser_cache_key_prefix)
+    )
 
 
 def get_request_parser_class(cache_key: str) -> tuple[type, dict]:
