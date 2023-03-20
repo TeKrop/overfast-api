@@ -53,17 +53,16 @@ def get_request_parser_class(cache_key: str) -> tuple[type, dict]:
     """Get the request parser class and cache kwargs to use for instanciation"""
     cache_kwargs = {}
 
-    specific_cache_key = cache_key.removeprefix(f"{settings.parser_cache_key_prefix}:")
-    parser_class_name = specific_cache_key.split("-")[0]
+    parser_class_name = cache_key.split("-")[0]
     cache_parser_class = PARSER_CLASSES_MAPPING[parser_class_name]
 
     # If the cache is related to local data
-    if settings.blizzard_host not in specific_cache_key:
+    if settings.blizzard_host not in cache_key:
         return cache_parser_class, cache_kwargs
 
-    uri = specific_cache_key.removeprefix(
-        f"{parser_class_name}-{settings.blizzard_host}"
-    ).split("/")
+    uri = cache_key.removeprefix(f"{parser_class_name}-{settings.blizzard_host}").split(
+        "/"
+    )
     cache_kwargs["locale"] = uri[1]
     if parser_class_name in ["PlayerParser", "PlayerStatsSummaryParser"]:
         cache_kwargs["player_id"] = uri[3]

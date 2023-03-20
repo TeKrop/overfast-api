@@ -11,13 +11,11 @@ cache_manager = CacheManager()
 
 def get_soon_expired_cache_keys() -> set[str]:
     """Get a set of keys for values in Parser Cache which should be deleted"""
-    last_update_keys_to_remove = cache_manager.get_soon_expired_cache_keys(
-        settings.parser_cache_last_update_key_prefix
+    return set(
+        cache_manager.get_soon_expired_cache_keys(
+            settings.parser_cache_last_update_key_prefix
+        )
     )
-    return {
-        f"{key.removeprefix(settings.parser_cache_last_update_key_prefix)}"
-        for key in last_update_keys_to_remove
-    }
 
 
 def delete_parser_cache_keys(parser_keys: set[str]) -> None:
@@ -25,24 +23,25 @@ def delete_parser_cache_keys(parser_keys: set[str]) -> None:
     Parser Cache data, and the ones used and retrieved in this process.
     """
     cache_manager.delete_keys(
-        [
-            f"{prefix}:{key}"
-            for key in parser_keys
-            for prefix in [
-                settings.parser_cache_key_prefix,
-                settings.parser_cache_last_update_key_prefix,
-            ]
+        f"{prefix}:{key}"
+        for key in parser_keys
+        for prefix in [
+            settings.parser_cache_key_prefix,
+            settings.parser_cache_last_update_key_prefix,
         ]
     )
 
 
 def main():
-    """Main coroutine of the script"""
+    """Main function of the script"""
     logger.info("Starting Parser Cache expiration system...")
     parser_keys = get_soon_expired_cache_keys()
-    logger.info("Done ! Parser keys to delete : {}", len(parser_keys))
+    logger.info("Parser keys retrieval done !")
+    if not parser_keys:
+        logger.info("No Parser key to delete, closing")
+        raise SystemExit
 
-    logger.info("Deleting values from Redis...")
+    logger.info("Deleting {} keys from Redis...", len(parser_keys))
     delete_parser_cache_keys(parser_keys)
     logger.info("Parser Cache cleaning done !")
 

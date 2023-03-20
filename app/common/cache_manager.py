@@ -12,7 +12,7 @@ api-cache:/heroes?role=damage => "[{...}]"
 
 ----
 
-Parser Cache data will never expire and just be invalidated using MD5 hash check.
+Parser Cache data will rarely expire and just be invalidated using MD5 hash check.
 It simply contains a JSON string representation of parsed data of a given Blizzard
 HTML page. MD5 hash is calculated using the HTML ready to be parsed
 (only the part used for parsing).
@@ -25,7 +25,7 @@ parser-cache:https://overwatch.blizzard.com/en-us/heroes/ana
 """
 
 import json
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 
 import redis
 from fastapi import Request
@@ -115,7 +115,7 @@ class CacheManager(metaclass=Singleton):
 
     def get_soon_expired_cache_keys(self, cache_key_prefix: str) -> Iterator[str]:
         """Get a set of cache keys for values in cache which will expire soon, meaning
-        the associated TTL is close to expiration."""
+        the associated TTL is close to expiration. Only returns the key suffix."""
         if not self.is_redis_server_up:
             yield from ()
             return
@@ -127,6 +127,7 @@ class CacheManager(metaclass=Singleton):
             yield from ()
             return
 
+        prefix_to_remove = f"{cache_key_prefix}:"
         for key in cache_keys:
             # Get key TTL in redis
             try:
@@ -139,7 +140,7 @@ class CacheManager(metaclass=Singleton):
             if key_ttl < 0 or key_ttl > settings.expired_cache_refresh_limit:
                 continue
 
-            yield key.decode("utf-8")
+            yield key.decode("utf-8").removeprefix(prefix_to_remove)
 
     @redis_connection_handler
     def update_namecards_cache(self, namecards: dict[str, str]) -> None:
@@ -159,6 +160,8 @@ class CacheManager(metaclass=Singleton):
 
     @redis_connection_handler
     def update_parser_cache_last_update(self, cache_key: str, expire: int) -> None:
+        # We just set a minimal value, we're just interested in
+        # the key and its expiration time
         self.redis_server.set(
             f"{settings.parser_cache_last_update_key_prefix}:{cache_key}",
             value=0,
@@ -166,5 +169,5 @@ class CacheManager(metaclass=Singleton):
         )
 
     @redis_connection_handler
-    def delete_keys(self, keys: list[str]) -> None:
-        self.redis_server.delete(keys)
+    def delete_keys(self, keys: Iterable[str]) -> None:
+        self.redis_server.delete(*keys)
