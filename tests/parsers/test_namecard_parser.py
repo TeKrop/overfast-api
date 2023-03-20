@@ -17,6 +17,7 @@ def test_namecard_parser_no_cache(
     namecards_json_data: dict,
 ):
     parser = NamecardParser(player_id="Dekk-2677")
+    update_parser_cache_last_update_mock = Mock()
 
     with patch.object(
         overfast_client,
@@ -29,10 +30,15 @@ def test_namecard_parser_no_cache(
     ), patch(
         "httpx.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=search_html_data),
+    ), patch.object(
+        parser.cache_manager,
+        "update_parser_cache_last_update",
+        update_parser_cache_last_update_mock,
     ):
         asyncio.run(parser.parse())
 
     assert parser.data == {"namecard": namecards_json_data.get("0x0250000000005510")}
+    update_parser_cache_last_update_mock.assert_called_once()
 
 
 def test_namecard_parser_blizzard_error(
