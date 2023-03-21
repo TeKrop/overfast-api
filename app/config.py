@@ -60,14 +60,19 @@ class Settings(BaseSettings):
     # Used by nginx as main API cache.
     api_cache_key_prefix: str = "api-cache"
 
-    # Prefix for keys in Parser cache (Redis). Used by parser in order to avoid
-    # parsing unchanged data.
+    # Prefix for keys in Parser cache (Redis). Used by parser classes
+    # in order to avoid parsing data which has already been parsed.
     parser_cache_key_prefix: str = "parser-cache"
+
+    # Prefix for keys in Parser cache last update (Redis).
+    # Used by the Parser Cache expiration system, to avoid keeping Parser
+    # Cache data which is not used anymore indefinitely.
+    parser_cache_last_update_key_prefix: str = "parser-cache-last-update"
 
     # When a cache value is about the expire (less than the configured value),
     # we will refresh it in the automatic cronjob "check_and_update_cache"
     # which is launched every minute. The value is specified in seconds.
-    expired_cache_refresh_limit: int = 1800
+    expired_cache_refresh_limit: int = 3600
 
     # Cache TTL for heroes list data (seconds)
     heroes_path_cache_timeout: int = 86400
@@ -79,10 +84,15 @@ class Settings(BaseSettings):
     home_path_cache_timeout: int = 86400
 
     # Cache TTL for career pages data (seconds)
-    career_path_cache_timeout: int = 3600
+    career_path_cache_timeout: int = 7200
 
     # Cache TTL for search account data (seconds)
     search_account_path_cache_timeout: int = 3600
+
+    # TTL for Parser Cache expiration system (seconds)
+    # Used in order to make the Parser Cache expire if the player career data
+    # hasn't been retrieved from an API call since a certain amount of time
+    career_parser_cache_expiration_timeout: int = 604800
 
     ############
     # NAMECARDS

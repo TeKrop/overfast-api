@@ -44,6 +44,7 @@ class PlayerParser(APIParser):
         200,  # Classic response
         404,  # Player Not Found response, we want to handle it here
     ]
+    cache_expiration_timeout = settings.career_parser_cache_expiration_timeout
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

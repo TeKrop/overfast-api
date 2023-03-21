@@ -118,14 +118,14 @@ def test_update_and_get_parser_cache(
         (
             True,
             {
-                f"{settings.parser_cache_key_prefix}:GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}",
-                f"{settings.parser_cache_key_prefix}:HeroesParser-{settings.blizzard_host}/{locale}{settings.heroes_path}",
+                f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}",
+                f"HeroesParser-{settings.blizzard_host}/{locale}{settings.heroes_path}",
             },
         ),
         (False, set()),
     ],
 )
-def test_get_soon_expired_parser_cache_keys(
+def test_get_soon_expired_cache_keys(
     cache_manager: CacheManager, is_redis_server_up: bool, expected: set[str]
 ):
     with patch(
@@ -148,7 +148,14 @@ def test_get_soon_expired_parser_cache_keys(
             settings.expired_cache_refresh_limit - 10,
         )
 
-        assert set(cache_manager.get_soon_expired_parser_cache_keys()) == expected
+        assert (
+            set(
+                cache_manager.get_soon_expired_cache_keys(
+                    settings.parser_cache_key_prefix
+                )
+            )
+            == expected
+        )
 
 
 def test_redis_connection_error(cache_manager: CacheManager):
@@ -173,10 +180,69 @@ def test_redis_connection_error(cache_manager: CacheManager):
         "app.common.cache_manager.redis.Redis.keys",
         side_effect=redis_connection_error,
     ):
-        assert set(cache_manager.get_soon_expired_parser_cache_keys()) == set()
+        assert (
+            set(
+                cache_manager.get_soon_expired_cache_keys(
+                    settings.parser_cache_key_prefix
+                )
+            )
+            == set()
+        )
 
     with patch(
         "app.common.cache_manager.redis.Redis.ttl",
         side_effect=redis_connection_error,
     ):
-        assert set(cache_manager.get_soon_expired_parser_cache_keys()) == set()
+        assert (
+            set(
+                cache_manager.get_soon_expired_cache_keys(
+                    settings.parser_cache_key_prefix
+                )
+            )
+            == set()
+        )
+
+
+def test_delete_keys(cache_manager: CacheManager):
+    # Set data in parser cache which which is actually expired
+    cache_manager.update_parser_cache(
+        "/heroes", [{"name": "Sojourn"}], settings.expired_cache_refresh_limit - 1
+    )
+    cache_manager.update_parser_cache_last_update(
+        "/heroes", settings.expired_cache_refresh_limit - 1
+    )
+
+    cache_manager.update_parser_cache(
+        "/maps", [{"name": "Hanamura"}], settings.expired_cache_refresh_limit - 1
+    )
+    cache_manager.update_parser_cache_last_update(
+        "/maps", settings.expired_cache_refresh_limit - 1
+    )
+
+    assert set(
+        cache_manager.get_soon_expired_cache_keys(settings.parser_cache_key_prefix)
+    ) == {"/heroes", "/maps"}
+    assert set(
+        cache_manager.get_soon_expired_cache_keys(
+            settings.parser_cache_last_update_key_prefix
+        )
+    ) == {"/heroes", "/maps"}
+
+    # Now delete the heroes key
+    cache_manager.delete_keys(
+        f"{prefix}:/heroes"
+        for prefix in [
+            settings.parser_cache_key_prefix,
+            settings.parser_cache_last_update_key_prefix,
+        ]
+    )
+
+    # Check if the keys are not here anymore
+    assert set(
+        cache_manager.get_soon_expired_cache_keys(settings.parser_cache_key_prefix)
+    ) == {"/maps"}
+    assert set(
+        cache_manager.get_soon_expired_cache_keys(
+            settings.parser_cache_last_update_key_prefix
+        )
+    ) == {"/maps"}

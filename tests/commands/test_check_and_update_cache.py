@@ -33,7 +33,6 @@ def test_check_and_update_gamemodes_cache_to_update(
     gamemodes_cache_key = (
         f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}"
     )
-    complete_cache_key = f"{settings.parser_cache_key_prefix}:{gamemodes_cache_key}"
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
@@ -50,7 +49,7 @@ def test_check_and_update_gamemodes_cache_to_update(
         gamemodes_cache_key, [], settings.expired_cache_refresh_limit - 5
     )
 
-    assert get_soon_expired_cache_keys() == {complete_cache_key}
+    assert get_soon_expired_cache_keys() == {gamemodes_cache_key}
 
     # check and update (only gamemodes should be updated)
     logger_info_mock = Mock()
@@ -63,7 +62,7 @@ def test_check_and_update_gamemodes_cache_to_update(
 
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
-    logger_info_mock.assert_any_call("Updating data for {} key...", complete_cache_key)
+    logger_info_mock.assert_any_call("Updating data for {} key...", gamemodes_cache_key)
 
     assert cache_manager.get_parser_cache(gamemodes_cache_key) == gamemodes_json_data
 
@@ -79,7 +78,6 @@ def test_check_and_update_specific_hero_to_update(
     ana_cache_key = (
         f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana"
     )
-    complete_cache_key = f"{settings.parser_cache_key_prefix}:{ana_cache_key}"
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
@@ -88,7 +86,7 @@ def test_check_and_update_specific_hero_to_update(
 
     # Check data in db (assert no Parser Cache data)
     assert cache_manager.get_parser_cache(ana_cache_key) == {}
-    assert get_soon_expired_cache_keys() == {complete_cache_key}
+    assert get_soon_expired_cache_keys() == {ana_cache_key}
 
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
@@ -101,7 +99,7 @@ def test_check_and_update_specific_hero_to_update(
 
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
-    logger_info_mock.assert_any_call("Updating data for {} key...", complete_cache_key)
+    logger_info_mock.assert_any_call("Updating data for {} key...", ana_cache_key)
 
     # Remove portrait as this is retrieved from heroes list
     hero_data = hero_json_data.copy()
@@ -114,7 +112,6 @@ def test_check_and_update_maps_to_update(
     cache_manager: CacheManager, maps_json_data: dict
 ):
     cache_key = "MapsParser"
-    complete_cache_key = f"{settings.parser_cache_key_prefix}:{cache_key}"
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
@@ -123,17 +120,16 @@ def test_check_and_update_maps_to_update(
 
     # Check data in db (assert no Parser Cache data)
     assert cache_manager.get_parser_cache(cache_key) == []
-    assert get_soon_expired_cache_keys() == {complete_cache_key}
+    assert get_soon_expired_cache_keys() == {cache_key}
 
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
-
     with patch("app.common.logging.logger.info", logger_info_mock):
         asyncio.run(check_and_update_cache_main())
 
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
-    logger_info_mock.assert_any_call("Updating data for {} key...", complete_cache_key)
+    logger_info_mock.assert_any_call("Updating data for {} key...", cache_key)
 
     assert cache_manager.get_parser_cache(cache_key) == maps_json_data
 
@@ -182,7 +178,6 @@ def test_check_and_update_specific_player_to_update(
     del player_data["summary"]["namecard"]
 
     player_cache_key = f"PlayerParser-{settings.blizzard_host}/{locale}{settings.career_path}/TeKrop-2217/"
-    complete_cache_key = f"{settings.parser_cache_key_prefix}:{player_cache_key}"
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
@@ -201,7 +196,7 @@ def test_check_and_update_specific_player_to_update(
 
     # Check data in db (assert no Parser Cache data)
     assert cache_manager.get_parser_cache(player_cache_key) == {}
-    assert get_soon_expired_cache_keys() == {complete_cache_key}
+    assert get_soon_expired_cache_keys() == {player_cache_key}
 
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
@@ -214,7 +209,7 @@ def test_check_and_update_specific_player_to_update(
 
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
-    logger_info_mock.assert_any_call("Updating data for {} key...", complete_cache_key)
+    logger_info_mock.assert_any_call("Updating data for {} key...", player_cache_key)
 
     assert cache_manager.get_parser_cache(player_cache_key) == player_data
 
@@ -231,7 +226,6 @@ def test_check_and_update_player_stats_summary_to_update(
     player_stats_json_data: dict,
 ):
     player_stats_cache_key = f"PlayerStatsSummaryParser-{settings.blizzard_host}/{locale}{settings.career_path}/TeKrop-2217/"
-    complete_cache_key = f"{settings.parser_cache_key_prefix}:{player_stats_cache_key}"
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
@@ -250,7 +244,7 @@ def test_check_and_update_player_stats_summary_to_update(
 
     # Check data in db (assert no Parser Cache data)
     assert cache_manager.get_parser_cache(player_stats_cache_key) == {}
-    assert get_soon_expired_cache_keys() == {complete_cache_key}
+    assert get_soon_expired_cache_keys() == {player_stats_cache_key}
 
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
@@ -266,7 +260,9 @@ def test_check_and_update_player_stats_summary_to_update(
 
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
-    logger_info_mock.assert_any_call("Updating data for {} key...", complete_cache_key)
+    logger_info_mock.assert_any_call(
+        "Updating data for {} key...", player_stats_cache_key
+    )
 
     assert (
         cache_manager.get_parser_cache(player_stats_cache_key) == player_stats_json_data
@@ -391,11 +387,6 @@ def test_check_and_update_several_to_update(
     )
     maps_cache_key = "MapsParser"
 
-    complete_gamemodes_cache_key = (
-        f"{settings.parser_cache_key_prefix}:{gamemodes_cache_key}"
-    )
-    complete_map_cache_key = f"{settings.parser_cache_key_prefix}:{maps_cache_key}"
-
     # Add some data to update
     cache_manager.update_parser_cache(
         gamemodes_cache_key, [], settings.expired_cache_refresh_limit - 5
@@ -404,10 +395,7 @@ def test_check_and_update_several_to_update(
         maps_cache_key, [], settings.expired_cache_refresh_limit - 5
     )
 
-    assert get_soon_expired_cache_keys() == {
-        complete_gamemodes_cache_key,
-        complete_map_cache_key,
-    }
+    assert get_soon_expired_cache_keys() == {gamemodes_cache_key, maps_cache_key}
 
     # check and update (only gamemodes should be updated)
     logger_info_mock = Mock()
@@ -420,12 +408,8 @@ def test_check_and_update_several_to_update(
 
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 2)
-    logger_info_mock.assert_any_call(
-        "Updating data for {} key...", complete_gamemodes_cache_key
-    )
-    logger_info_mock.assert_any_call(
-        "Updating data for {} key...", complete_map_cache_key
-    )
+    logger_info_mock.assert_any_call("Updating data for {} key...", gamemodes_cache_key)
+    logger_info_mock.assert_any_call("Updating data for {} key...", maps_cache_key)
 
     assert cache_manager.get_parser_cache(gamemodes_cache_key) == gamemodes_json_data
     assert cache_manager.get_parser_cache(maps_cache_key) == maps_json_data
@@ -438,7 +422,6 @@ def test_check_and_update_namecard_to_update(
     namecards_json_data: dict,
 ):
     namecard_cache_key = f"NamecardParser-{settings.blizzard_host}/{locale}{settings.search_account_path}/TeKrop#2217"
-    complete_cache_key = f"{settings.parser_cache_key_prefix}:{namecard_cache_key}"
 
     # Add namecards list data + parser_cache key which needs an update
     cache_manager.update_namecards_cache(namecards_json_data)
@@ -460,7 +443,7 @@ def test_check_and_update_namecard_to_update(
 
     # Check data in db (assert no Parser Cache data)
     assert cache_manager.get_parser_cache(namecard_cache_key) == {}
-    assert get_soon_expired_cache_keys() == {complete_cache_key}
+    assert get_soon_expired_cache_keys() == {namecard_cache_key}
 
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
@@ -477,7 +460,7 @@ def test_check_and_update_namecard_to_update(
 
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
-    logger_info_mock.assert_any_call("Updating data for {} key...", complete_cache_key)
+    logger_info_mock.assert_any_call("Updating data for {} key...", namecard_cache_key)
 
     assert cache_manager.get_parser_cache(namecard_cache_key) == {
         "namecard": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/52ee742d4e2fc734e3cd7fdb74b0eac64bcdf26d58372a503c712839595802c5.png"
