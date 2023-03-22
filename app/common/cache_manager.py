@@ -32,7 +32,7 @@ from fastapi import Request
 
 from app.config import settings
 
-from .helpers import compress_json_value, decompress_json_value
+from .helpers import compress_json_value, decompress_json_value, get_spread_value
 from .logging import logger
 from .metaclasses import Singleton
 
@@ -104,13 +104,21 @@ class CacheManager(metaclass=Singleton):
 
     @redis_connection_handler
     def update_parser_cache(self, cache_key: str, value: dict, expire: int) -> None:
-        """Update or set a Parser Cache value with an expire value"""
+        """Update or set a Parser Cache value with an expire value. In order to
+        fluidify the refresh and to avoid having a lot in the same time, we're
+        using a random percentage spread value for the expiration value.
+        """
         compressed_value = compress_json_value(value)
+
+        # Get the spread expire value depending on the settings
+        expiration = get_spread_value(
+            expire, settings.parser_cache_expiration_spreading_percentage
+        )
 
         self.redis_server.set(
             f"{settings.parser_cache_key_prefix}:{cache_key}",
             value=compressed_value,
-            ex=expire,
+            ex=expiration,
         )
 
     def get_soon_expired_cache_keys(self, cache_key_prefix: str) -> Iterator[str]:

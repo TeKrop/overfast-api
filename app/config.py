@@ -94,6 +94,13 @@ class Settings(BaseSettings):
     # hasn't been retrieved from an API call since a certain amount of time
     career_parser_cache_expiration_timeout: int = 604800
 
+    # In order to fluidify the parser cache refresh, and to avoid having a lot
+    # of refresh in the same time, we're using a random percentage spread value.
+    # It must be a value included between 0 and 100. For example, with 3600 as
+    # a timeout, and 25% of spreading, we have a spreading value of 900 = 25% * 3600.
+    # The expiration value will be between 2700 (3600 - 900) and 4500 (3600 + 900).
+    parser_cache_expiration_spreading_percentage: int = 25
+
     ############
     # NAMECARDS
     ############
