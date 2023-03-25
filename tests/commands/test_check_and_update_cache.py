@@ -24,6 +24,15 @@ def locale():
     return Locale.ENGLISH_US
 
 
+@pytest.fixture(autouse=True)
+def _set_no_spread_percentage():
+    with patch(
+        "app.common.cache_manager.settings.parser_cache_expiration_spreading_percentage",
+        0,
+    ):
+        yield
+
+
 def test_check_and_update_gamemodes_cache_to_update(
     cache_manager: CacheManager,
     locale: str,

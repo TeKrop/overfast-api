@@ -3,6 +3,7 @@ import csv
 import json
 import zlib
 from pathlib import Path
+from random import randint
 
 import httpx
 from fastapi import HTTPException, Request, status
@@ -144,13 +145,25 @@ def read_json_file(filepath: str) -> dict | list:
 
 
 def read_csv_data_file(filepath: str) -> csv.DictReader:
+    """Helper method for obtaining CSV DictReader from a path"""
     with Path(f"{Path.cwd()}/app/data/{filepath}").open(encoding="utf-8") as csv_file:
         yield from csv.DictReader(csv_file, delimiter=";")
 
 
 def compress_json_value(value: dict | list) -> str:
+    """Helper method to transform a value into compressed JSON data"""
     return zlib.compress(json.dumps(value, separators=(",", ":")).encode("utf-8"))
 
 
 def decompress_json_value(value: str) -> dict | list:
+    """Helper method to retrieve a value from a compressed JSON data"""
     return json.loads(zlib.decompress(value).decode("utf-8"))
+
+
+def get_spread_value(value: int, spread_percentage: float) -> int:
+    """Helper method to get a random value from a specific range
+    by using a percentage of the value, from (value - %*value) to (value + %*value)
+    """
+    min_percentage = (100 - spread_percentage) / 100
+    max_percentage = (100 + spread_percentage) / 100
+    return randint(int(min_percentage * value), int(max_percentage * value))

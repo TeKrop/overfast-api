@@ -20,6 +20,15 @@ def locale():
     return Locale.ENGLISH_US
 
 
+@pytest.fixture(autouse=True)
+def _set_no_spread_percentage():
+    with patch(
+        "app.common.cache_manager.settings.parser_cache_expiration_spreading_percentage",
+        0,
+    ):
+        yield
+
+
 @pytest.mark.parametrize(
     ("req", "expected"),
     [
@@ -96,20 +105,38 @@ def test_update_and_get_parser_cache(
     cache_key: str,
     parser_data: str,
 ):
+    timeout_value = 10
+
     with patch(
         "app.common.cache_manager.CacheManager.is_redis_server_up",
         is_redis_server_up,
-    ):
+    ), patch(
+        "app.common.cache_manager.settings.parser_cache_expiration_spreading_percentage",
+        25,
+    ), patch(
+        "app.common.helpers.randint",
+        Mock(side_effect=lambda min_value, max_value: min_value),
+    ) as randint_mock:
         # Assert the value is not here before update
         assert cache_manager.get_parser_cache(cache_key) is None
 
         # Update the Parser Cache and sleep if needed
-        cache_manager.update_parser_cache(cache_key, parser_data, 10)
+        cache_manager.update_parser_cache(cache_key, parser_data, timeout_value)
 
         # Assert the value matches
         assert cache_manager.get_parser_cache(cache_key) == (
             parser_data if is_redis_server_up else None
         )
+
+        # Assert the randint method has been called with the right parameters,
+        # or hasn't been called at all, depending if redis server is up
+        if is_redis_server_up:
+            randint_mock.assert_called_once_with(
+                int((75 / 100) * timeout_value),  # 100 - 25%
+                int((125 / 100) * timeout_value),  # 100 + 25%
+            )
+        else:
+            randint_mock.assert_not_called()
 
 
 @pytest.mark.parametrize(
