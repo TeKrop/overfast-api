@@ -1,5 +1,13 @@
 """Set of pydantic models used for Players API routes"""
-from pydantic import AnyHttpUrl, BaseModel, Field, HttpUrl, StrictFloat, StrictInt
+from pydantic import (
+    AnyHttpUrl,
+    BaseModel,
+    Field,
+    HttpUrl,
+    StrictFloat,
+    StrictInt,
+    create_model,
+)
 
 from app.common.api_examples import (
     CareerStatsExample,
@@ -12,6 +20,7 @@ from app.common.enums import (
     HeroKey,
     PlayerPrivacy,
 )
+from app.common.helpers import get_hero_name
 
 
 # Player search
@@ -218,133 +227,35 @@ class HeroCareerStats(BaseModel):
     )
 
 
-class CareerStats(BaseModel):
-    all_heroes: list[HeroCareerStats] | None = Field(
-        None,
-        description="Total of statistics for all heroes",
-        alias="all-heroes",
-        min_items=1,
-    )
-    ana: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Ana", min_items=1
-    )
-    ashe: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Ashe", min_items=1
-    )
-    baptiste: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Baptiste", min_items=1
-    )
-    bastion: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Bastion", min_items=1
-    )
-    brigitte: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Brigitte", min_items=1
-    )
-    cassidy: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Cassidy", min_items=1
-    )
-    dva: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for D.Va", min_items=1
-    )
-    doomfist: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Doomfist", min_items=1
-    )
-    echo: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Echo", min_items=1
-    )
-    genji: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Genji", min_items=1
-    )
-    hanzo: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Hanzo", min_items=1
-    )
-    junker_queen: list[HeroCareerStats] | None = Field(
-        None,
-        description="Career statistics for Junker Queen",
-        alias="junker-queen",
-        min_items=1,
-    )
-    junkrat: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Junkrat", min_items=1
-    )
-    kiriko: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Kiriko", min_items=1
-    )
-    lucio: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Lúcio", min_items=1
-    )
-    mei: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Mei", min_items=1
-    )
-    mercy: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Mercy", min_items=1
-    )
-    moira: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Moira", min_items=1
-    )
-    orisa: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Orisa", min_items=1
-    )
-    pharah: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Pharah", min_items=1
-    )
-    ramattra: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Ramattra", min_items=1
-    )
-    reaper: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Reaper", min_items=1
-    )
-    reinhardt: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Reinhardt", min_items=1
-    )
-    roadhog: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Roadhog", min_items=1
-    )
-    sigma: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Sigma", min_items=1
-    )
-    soldier_76: list[HeroCareerStats] | None = Field(
-        None,
-        description="Career statistics for Soldier: 76",
-        alias="soldier-76",
-        min_items=1,
-    )
-    sojourn: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Sojourn", min_items=1
-    )
-    sombra: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Sombra", min_items=1
-    )
-    symmetra: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Symmetra", min_items=1
-    )
-    torbjorn: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Torbjörn", min_items=1
-    )
-    tracer: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Tracer", min_items=1
-    )
-    widowmaker: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Widowmaker", min_items=1
-    )
-    winston: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Winston", min_items=1
-    )
-    wrecking_ball: list[HeroCareerStats] | None = Field(
-        None,
-        description="Career statistics for Wrecking Ball",
-        alias="wrecking-ball",
-        min_items=1,
-    )
-    zarya: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Zarya", min_items=1
-    )
-    zenyatta: list[HeroCareerStats] | None = Field(
-        None, description="Career statistics for Zenyatta", min_items=1
-    )
+class CareerStatsConfig:
+    schema_extra = {"example": CareerStatsExample}
 
-    class Config:
-        schema_extra = {"example": CareerStatsExample}
+
+CareerStats = create_model(
+    "CareerStats",
+    all_heroes=(
+        list[HeroCareerStats] | None,
+        Field(
+            None,
+            description="Total of statistics for all heroes",
+            alias="all-heroes",
+            min_items=1,
+        ),
+    ),
+    **{
+        hero_key.name.lower(): (
+            list[HeroCareerStats] | None,
+            Field(
+                None,
+                description=f"Career statistics for {get_hero_name(hero_key)}",
+                alias=hero_key.value,
+                min_items=1,
+            ),
+        )
+        for hero_key in HeroKey
+    },
+    __config__=CareerStatsConfig,
+)
 
 
 class PlayerGamemodeStats(BaseModel):
@@ -480,218 +391,23 @@ class PlayerRolesStats(BaseModel):
     )
 
 
-class PlayerHeroesStats(BaseModel):
-    ana: StatsSummary | None = Field(
-        None,
-        description="Stats summary for Ana. Not defined if he never played the hero.",
-    )
-    ashe: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Ashe. Not defined if he never played the hero."
-        ),
-    )
-    baptiste: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Baptiste. Not defined if he never played the hero."
-        ),
-    )
-    bastion: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Bastion. Not defined if he never played the hero."
-        ),
-    )
-    brigitte: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Brigitte. Not defined if he never played the hero."
-        ),
-    )
-    cassidy: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Cassidy. Not defined if he never played the hero."
-        ),
-    )
-    dva: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for D.Va. Not defined if he never played the hero."
-        ),
-    )
-    doomfist: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Doomfist. Not defined if he never played the hero."
-        ),
-    )
-    echo: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Echo. Not defined if he never played the hero."
-        ),
-    )
-    genji: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Genji. Not defined if he never played the hero."
-        ),
-    )
-    hanzo: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Hanzo. Not defined if he never played the hero."
-        ),
-    )
-    junker_queen: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Junker Queen. Not defined if he never played the hero."
-        ),
-        alias="junker-queen",
-    )
-    junkrat: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Junkrat. Not defined if he never played the hero."
-        ),
-    )
-    kiriko: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Kiriko. Not defined if he never played the hero."
-        ),
-    )
-    lucio: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Lúcio. Not defined if he never played the hero."
-        ),
-    )
-    mei: StatsSummary | None = Field(
-        None,
-        description="Stats summary for Mei. Not defined if he never played the hero.",
-    )
-    mercy: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Mercy. Not defined if he never played the hero."
-        ),
-    )
-    moira: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Lúcio. Not defined if he never played the hero."
-        ),
-    )
-    orisa: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Orisa. Not defined if he never played the hero."
-        ),
-    )
-    pharah: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Pharah. Not defined if he never played the hero."
-        ),
-    )
-    ramattra: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Ramattra. Not defined if he never played the hero."
-        ),
-    )
-    reaper: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Reaper. Not defined if he never played the hero."
-        ),
-    )
-    reinhardt: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Reinhardt. Not defined if he never played the hero."
-        ),
-    )
-    roadhog: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Roadhog. Not defined if he never played the hero."
-        ),
-    )
-    sigma: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Sigma. Not defined if he never played the hero."
-        ),
-    )
-    soldier_76: StatsSummary | None = Field(
-        None,
-        description="Stats summary for Soldier: 76. Not defined if he never played the hero.",
-        alias="soldier-76",
-    )
-    sojourn: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Sojourn. Not defined if he never played the hero."
-        ),
-    )
-    sombra: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Sombra. Not defined if he never played the hero."
-        ),
-    )
-    symmetra: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Symmetra. Not defined if he never played the hero."
-        ),
-    )
-    torbjorn: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Torbjörn. Not defined if he never played the hero."
-        ),
-    )
-    tracer: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Tracer. Not defined if he never played the hero."
-        ),
-    )
-    widowmaker: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Widowmaker. Not defined if he never played the hero."
-        ),
-    )
-    winston: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Winston. Not defined if he never played the hero."
-        ),
-    )
-    wrecking_ball: StatsSummary | None = Field(
-        None,
-        description="Stats summary for Wrecking Ball. Not defined if he never played the hero.",
-        alias="wrecking-ball",
-    )
-    zarya: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Zarya. Not defined if he never played the hero."
-        ),
-    )
-    zenyatta: StatsSummary | None = Field(
-        None,
-        description=(
-            "Stats summary for Zenyatta. Not defined if he never played the hero."
-        ),
-    )
+PlayerHeroesStats = create_model(
+    "PlayerHeroesStats",
+    **{
+        hero_key.name.lower(): (
+            StatsSummary | None,
+            Field(
+                None,
+                description=(
+                    f"Stats summary for {get_hero_name(hero_key)}. "
+                    "Not defined if he never played the hero."
+                ),
+                alias=hero_key.value,
+            ),
+        )
+        for hero_key in HeroKey
+    },
+)
 
 
 class PlayerStatsSummary(BaseModel):

@@ -1,6 +1,7 @@
 """Parser Helpers module"""
 import re
 import unicodedata
+from functools import cache
 
 from app.common.enums import CompetitiveDivision, HeroKey, Role
 from app.config import settings
@@ -104,34 +105,48 @@ def string_to_snakecase(input_str: str) -> str:
     )
 
 
+@cache
 def get_hero_role(hero_key: HeroKey) -> Role:
-    """Returns the role of a given hero"""
-    if hero_key in [
-        HeroKey.ANA,
-        HeroKey.BAPTISTE,
-        HeroKey.BRIGITTE,
-        HeroKey.KIRIKO,
-        HeroKey.LUCIO,
-        HeroKey.MERCY,
-        HeroKey.MOIRA,
-        HeroKey.ZENYATTA,
-    ]:
-        return Role.SUPPORT
-    elif hero_key in [
-        HeroKey.DVA,
-        HeroKey.DOOMFIST,
-        HeroKey.JUNKER_QUEEN,
-        HeroKey.ORISA,
-        HeroKey.RAMATTRA,
-        HeroKey.REINHARDT,
-        HeroKey.ROADHOG,
-        HeroKey.SIGMA,
-        HeroKey.WINSTON,
-        HeroKey.WRECKING_BALL,
-        HeroKey.ZARYA,
-    ]:
-        return Role.TANK
-    return Role.DAMAGE
+    """Get the role of a given hero"""
+    heroes_role: dict[HeroKey, Role] = {
+        HeroKey.ANA: Role.SUPPORT,
+        HeroKey.ASHE: Role.DAMAGE,
+        HeroKey.BAPTISTE: Role.SUPPORT,
+        HeroKey.BASTION: Role.DAMAGE,
+        HeroKey.BRIGITTE: Role.SUPPORT,
+        HeroKey.CASSIDY: Role.DAMAGE,
+        HeroKey.DVA: Role.TANK,
+        HeroKey.DOOMFIST: Role.TANK,
+        HeroKey.ECHO: Role.DAMAGE,
+        HeroKey.GENJI: Role.DAMAGE,
+        HeroKey.HANZO: Role.DAMAGE,
+        HeroKey.JUNKER_QUEEN: Role.TANK,
+        HeroKey.JUNKRAT: Role.DAMAGE,
+        HeroKey.KIRIKO: Role.SUPPORT,
+        HeroKey.LUCIO: Role.SUPPORT,
+        HeroKey.MEI: Role.DAMAGE,
+        HeroKey.MERCY: Role.SUPPORT,
+        HeroKey.MOIRA: Role.SUPPORT,
+        HeroKey.ORISA: Role.TANK,
+        HeroKey.PHARAH: Role.DAMAGE,
+        HeroKey.RAMATTRA: Role.TANK,
+        HeroKey.REAPER: Role.DAMAGE,
+        HeroKey.REINHARDT: Role.TANK,
+        HeroKey.ROADHOG: Role.TANK,
+        HeroKey.SIGMA: Role.TANK,
+        HeroKey.SOJOURN: Role.DAMAGE,
+        HeroKey.SOLDIER_76: Role.DAMAGE,
+        HeroKey.SOMBRA: Role.DAMAGE,
+        HeroKey.SYMMETRA: Role.DAMAGE,
+        HeroKey.TORBJORN: Role.DAMAGE,
+        HeroKey.TRACER: Role.DAMAGE,
+        HeroKey.WIDOWMAKER: Role.DAMAGE,
+        HeroKey.WINSTON: Role.TANK,
+        HeroKey.WRECKING_BALL: Role.TANK,
+        HeroKey.ZARYA: Role.TANK,
+        HeroKey.ZENYATTA: Role.SUPPORT,
+    }
+    return heroes_role[hero_key]
 
 
 def get_role_from_icon_url(url: str) -> str:

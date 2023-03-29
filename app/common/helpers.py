@@ -8,6 +8,7 @@ from random import randint
 import httpx
 from fastapi import HTTPException, Request, status
 
+from app.common.enums import HeroKey
 from app.config import settings
 from app.models.errors import BlizzardErrorMessage, InternalServerErrorMessage
 
@@ -167,3 +168,18 @@ def get_spread_value(value: int, spread_percentage: float) -> int:
     min_percentage = (100 - spread_percentage) / 100
     max_percentage = (100 + spread_percentage) / 100
     return randint(int(min_percentage * value), int(max_percentage * value))
+
+
+def get_hero_name(hero_key: HeroKey) -> str:
+    """Get a hero name base on its hero key. In general we just need to clean
+    the string, but there are some edgecases.
+    """
+    specific_heroes_names: dict[HeroKey, str] = {
+        HeroKey.DVA: "D.Va",
+        HeroKey.LUCIO: "Lúcio",
+        HeroKey.SOLDIER_76: "Soldier: 76",
+        HeroKey.TORBJORN: "Torbjörn",
+    }
+    return specific_heroes_names.get(
+        hero_key, " ".join(s.capitalize() for s in hero_key.value.split("-"))
+    )
