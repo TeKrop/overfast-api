@@ -81,46 +81,16 @@ class HeroKey(StrEnum):
     ZENYATTA = "zenyatta"
 
 
-class HeroKeyCareerFilter(StrEnum):
-    """Hero keys filter for career statistics endpoint"""
-
-    ALL_HEROES = "all-heroes"
-    ANA = "ana"
-    ASHE = "ashe"
-    BAPTISTE = "baptiste"
-    BASTION = "bastion"
-    BRIGITTE = "brigitte"
-    CASSIDY = "cassidy"
-    DVA = "dva"
-    DOOMFIST = "doomfist"
-    ECHO = "echo"
-    GENJI = "genji"
-    HANZO = "hanzo"
-    JUNKER_QUEEN = "junker-queen"
-    JUNKRAT = "junkrat"
-    KIRIKO = "kiriko"
-    LUCIO = "lucio"
-    MEI = "mei"
-    MERCY = "mercy"
-    MOIRA = "moira"
-    ORISA = "orisa"
-    PHARAH = "pharah"
-    RAMATTRA = "ramattra"
-    REAPER = "reaper"
-    REINHARDT = "reinhardt"
-    ROADHOG = "roadhog"
-    SIGMA = "sigma"
-    SOJOURN = "sojourn"
-    SOLDIER_76 = "soldier-76"
-    SOMBRA = "sombra"
-    SYMMETRA = "symmetra"
-    TORBJORN = "torbjorn"
-    TRACER = "tracer"
-    WIDOWMAKER = "widowmaker"
-    WINSTON = "winston"
-    WRECKING_BALL = "wrecking-ball"
-    ZARYA = "zarya"
-    ZENYATTA = "zenyatta"
+# Dynamically create the HeroKeyCareerFilter by using the existing
+# HeroKey enum and just adding the "all-heroes" option
+HeroKeyCareerFilter = StrEnum(
+    "HeroKeyCareerFilter",
+    {
+        "ALL_HEROES": "all-heroes",
+        **{hero_key.name: hero_key.value for hero_key in HeroKey},
+    },
+)
+HeroKeyCareerFilter.__doc__ = "Hero keys filter for career statistics endpoint"
 
 
 class MediaType(StrEnum):
