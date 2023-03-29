@@ -64,7 +64,7 @@ def get_request_parser_class(cache_key: str) -> tuple[type, dict]:
         "/"
     )
     cache_kwargs["locale"] = uri[1]
-    if parser_class_name in ["PlayerParser", "PlayerStatsSummaryParser"]:
+    if parser_class_name in ("PlayerParser", "PlayerStatsSummaryParser"):
         cache_kwargs["player_id"] = uri[3]
     elif parser_class_name == "NamecardParser":
         cache_kwargs["player_id"] = uri[4].replace("#", "-")

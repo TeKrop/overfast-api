@@ -18,7 +18,7 @@
 * [🛠️ Cache System](#%EF%B8%8F-cache-system)
 * [🐍 Architecture](#-architecture)
 * [🤝 Contributing](#-contributing)
-* [🫶 Community projects](#-community-projects)
+* [🚀 Community projects](#-community-projects)
 * [🙏 Credits](#-credits)
 * [📝 License](#-license)
 
@@ -237,11 +237,12 @@ Contributions, issues and feature requests are welcome!
 
 Feel free to check [issues page](https://github.com/TeKrop/overfast-api/issues).
 
-## 🫶 Community projects
+## 🚀 Community projects
 
 Here is a list of projects which are currently using OverFast API as a data source. You're using it in one of your projects ? Feel free to reach me by e-mail, send me a link of your project (either website URL or public git repository), and I will add it in the list :)
 
-- Project name (project link)
+- Overfast API client (https://github.com/Sipixer/overfast-api-client)
+- ...
 
 ## 🙏 Credits
 

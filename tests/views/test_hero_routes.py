@@ -15,7 +15,7 @@ client = TestClient(app)
     ("hero_name", "hero_html_data", "hero_json_data"),
     [
         (h.value, h.value, h.value)
-        for h in [HeroKey.ANA, HeroKey.GENJI, HeroKey.REINHARDT]
+        for h in (HeroKey.ANA, HeroKey.GENJI, HeroKey.REINHARDT)
     ],
     indirect=["hero_html_data", "hero_json_data"],
 )

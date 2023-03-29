@@ -32,7 +32,6 @@ class AbstractParser(ABC):
     @property
     def cache_expiration_timeout(self) -> int | None:
         """Timeout used for the optional Parser Cache expiration system"""
-        return
 
     @abstractmethod
     async def retrieve_and_parse_data(self) -> None:
