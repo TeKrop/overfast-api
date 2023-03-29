@@ -258,10 +258,10 @@ def test_delete_keys(cache_manager: CacheManager):
     # Now delete the heroes key
     cache_manager.delete_keys(
         f"{prefix}:/heroes"
-        for prefix in [
+        for prefix in (
             settings.parser_cache_key_prefix,
             settings.parser_cache_last_update_key_prefix,
-        ]
+        )
     )
 
     # Check if the keys are not here anymore
