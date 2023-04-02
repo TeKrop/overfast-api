@@ -30,6 +30,7 @@ jobs:
         poetry-version: ${{ matrix.poetry-version }}
 
     - name: Update python version badge
+      if: github.event_name == 'push'
       uses: schneegans/dynamic-badges-action@v1.6.0
       with:
         auth: ${{ secrets.GIST_SECRET }}

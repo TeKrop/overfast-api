@@ -30,6 +30,7 @@ jobs:
         echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
 
     - name: Update test coverage badge
+      if: github.event_name == 'push'
       uses: schneegans/dynamic-badges-action@v1.6.0
       with:
         auth: ${{ secrets.GIST_SECRET }}
