@@ -1,6 +1,6 @@
 import pytest
 
-from app.common.enums import CompetitiveDivision, Role
+from app.common.enums import CompetitiveDivision, HeroKey, Role
 from app.config import settings
 from app.parsers.helpers import (
     get_computed_stat_value,
@@ -8,6 +8,7 @@ from app.parsers.helpers import (
     get_endorsement_value_from_frame,
     get_full_url,
     get_hero_keyname,
+    get_hero_role,
     get_role_key_from_icon,
     get_stats_hero_class,
     get_tier_from_rank_icon,
@@ -246,3 +247,11 @@ def test_remove_accents(input_str: str, result: str):
 )
 def test_string_to_snakecase(input_str: str, result: str):
     assert string_to_snakecase(input_str) == result
+
+
+@pytest.mark.parametrize(("hero_key"), [(h.value) for h in HeroKey])
+def test_get_hero_role(hero_key: HeroKey):
+    try:
+        get_hero_role(hero_key)
+    except KeyError:
+        pytest.fail(f"Missing role for '{hero_key}' hero")
