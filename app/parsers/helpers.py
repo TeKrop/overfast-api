@@ -123,6 +123,7 @@ def get_hero_role(hero_key: HeroKey) -> Role:
         HeroKey.JUNKER_QUEEN: Role.TANK,
         HeroKey.JUNKRAT: Role.DAMAGE,
         HeroKey.KIRIKO: Role.SUPPORT,
+        HeroKey.LIFEWEAVER: Role.SUPPORT,
         HeroKey.LUCIO: Role.SUPPORT,
         HeroKey.MEI: Role.DAMAGE,
         HeroKey.MERCY: Role.SUPPORT,

@@ -1,4 +1,5 @@
 """Players endpoints router : players search, players career, statistics, etc."""
+
 from fastapi import APIRouter, Depends, Path, Query, Request, status
 
 from app.common.decorators import validation_error_handler
@@ -15,7 +16,7 @@ from app.handlers.get_player_stats_summary_request_handler import (
     GetPlayerStatsSummaryRequestHandler,
 )
 from app.handlers.search_players_request_handler import SearchPlayersRequestHandler
-from app.models.errors import ParserErrorMessage
+from app.models.errors import PlayerParserErrorMessage
 from app.models.players import (
     CareerStats,
     Player,
@@ -27,7 +28,7 @@ from app.models.players import (
 # Custom route responses for player careers
 career_routes_responses = {
     status.HTTP_404_NOT_FOUND: {
-        "model": ParserErrorMessage,
+        "model": PlayerParserErrorMessage,
         "description": "Player Not Found",
     },
     **common_routes_responses,
