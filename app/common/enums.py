@@ -57,6 +57,7 @@ class HeroKey(StrEnum):
     JUNKER_QUEEN = "junker-queen"
     JUNKRAT = "junkrat"
     KIRIKO = "kiriko"
+    LIFEWEAVER = "lifeweaver"
     LUCIO = "lucio"
     MEI = "mei"
     MERCY = "mercy"

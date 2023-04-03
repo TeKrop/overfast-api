@@ -1,12 +1,13 @@
 """Heroes endpoints router : heroes list, heroes details, etc."""
 
-from fastapi import APIRouter, Path, Query, Request
+from fastapi import APIRouter, Path, Query, Request, status
 
 from app.common.decorators import validation_error_handler
 from app.common.enums import HeroKey, Locale, Role, RouteTag
 from app.common.helpers import routes_responses
 from app.handlers.get_hero_request_handler import GetHeroRequestHandler
 from app.handlers.list_heroes_request_handler import ListHeroesRequestHandler
+from app.models.errors import HeroParserErrorMessage
 from app.models.heroes import Hero, HeroShort
 
 router = APIRouter()
@@ -35,7 +36,13 @@ async def list_heroes(
 
 @router.get(
     "/{hero_key}",
-    responses=routes_responses,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "model": HeroParserErrorMessage,
+            "description": "Hero Not Found",
+        },
+        **routes_responses,
+    },
     tags=[RouteTag.HEROES],
     summary="Get hero data",
     description=(

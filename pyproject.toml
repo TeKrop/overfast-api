@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "overfast-api"
-version = "2.12.0"
+version = "2.13.0"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = "MIT"
 authors = ["TeKrop <tekrop@gmail.com>"]
@@ -20,8 +20,8 @@ redis = "^4.5.2"
 uvicorn = {extras = ["standard"], version = "^0.21.1"}
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.1.0"
-fakeredis = "^2.10.1"
+black = "^23.3.0"
+fakeredis = "^2.10.2"
 ipdb = "^0.13.13"
 isort = "^5.12.0"
 pytest = "^7.2.2"
@@ -29,7 +29,7 @@ pytest-clarity = "^1.0.1"
 pytest-cov = "^4.0.0"
 pytest-randomly = "^3.12.0"
 pytest-xdist = "^3.2.1"
-ruff = "^0.0.257"
+ruff = "^0.0.260"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -77,6 +77,7 @@ ignore = [
     "E501",    # line too long, handled by black
     "B008",    # do not perform function calls in argument defaults
     "S101",    # using "assert" is not a security issue
+    "S311",    # there is no cryptographic usage of random here
     "RET505",  # allow using else after return statement
     "PLE1205", # error checking doesn't support {} format
     "PLR0913", # allow 6/7 arguments for some functions

@@ -1,7 +1,9 @@
 """Hero page Parser module"""
 from bs4 import Tag
+from fastapi import status
 
 from app.common.enums import MediaType
+from app.common.exceptions import ParserBlizzardError
 from app.config import settings
 
 from .api_parser import APIParser
@@ -13,11 +15,23 @@ class HeroParser(APIParser):
 
     root_path = settings.heroes_path
     timeout = settings.hero_path_cache_timeout
+    valid_http_codes = [
+        200,  # Classic response
+        404,  # Hero Not Found response, we want to handle it here
+    ]
 
     def get_blizzard_url(self, **kwargs) -> str:
         return f"{super().get_blizzard_url(**kwargs)}/{kwargs.get('hero_key')}"
 
     def parse_data(self) -> dict:
+        # We must check if we have the expected section for hero. If not,
+        # it means the hero hasn't been found and/or released yet.
+        if not self.root_tag.find("div", class_="abilities-container", recursive=False):
+            raise ParserBlizzardError(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Hero not found or not released yet",
+            )
+
         overview_section = self.root_tag.find("blz-page-header", recursive=False)
         abilities_section = self.root_tag.find(
             "div", class_="abilities-container", recursive=False
