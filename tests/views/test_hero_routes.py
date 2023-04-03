@@ -35,6 +35,24 @@ def test_get_hero(
     assert response.json() == hero_json_data
 
 
+@pytest.mark.parametrize(
+    ("hero_name", "hero_html_data"),
+    [("lifeweaver", "unknown-hero")],
+    indirect=["hero_html_data"],
+)
+def test_get_unreleased_hero(hero_name: str, hero_html_data: str):
+    with patch.object(
+        overfast_client,
+        "get",
+        side_effect=[
+            Mock(status_code=status.HTTP_404_NOT_FOUND, text=hero_html_data),
+        ],
+    ):
+        response = client.get(f"/heroes/{hero_name}")
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"error": "Hero not found or not released yet"}
+
+
 def test_get_hero_blizzard_error():
     with patch.object(
         overfast_client,
