@@ -25,10 +25,10 @@ def delete_parser_cache_keys(parser_keys: set[str]) -> None:
     cache_manager.delete_keys(
         f"{prefix}:{key}"
         for key in parser_keys
-        for prefix in [
+        for prefix in (
             settings.parser_cache_key_prefix,
             settings.parser_cache_last_update_key_prefix,
-        ]
+        )
     )
 
 
