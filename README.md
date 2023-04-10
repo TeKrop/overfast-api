@@ -12,7 +12,7 @@
 
 ## Table of contents
 * [✨ Live instance](#-live-instance)
-* [💽 Installation](#-installation)
+* [💽 Dev environment](#-dev-environment)
 * [🐋 Docker](#-docker)
 * [👨‍💻 Technical details](#-technical-details)
 * [🛠️ Cache System](#%EF%B8%8F-cache-system)
@@ -29,17 +29,16 @@ You can see and use a live version of the API here, the root URL being the Redoc
 
 You can also consult the Swagger UI documentation, useful for directly trying API calls : https://overfast-api.tekrop.fr/docs
 
-## 💽 Installation
+## 💽 Dev environment
 
 ### Requirements
-* Python 3.11
-* Poetry
-* Docker & Docker Compose (production)
+* 🐍 Python 3.11
+* 🪶 Poetry
 
-### Install process
+### Install
 
 - Clone the project
-- [OPTIONAL] Rename `.env.example` into `.env`, and edit the configuration in order to match your needs
+- Rename `.env.example` into `.env`, and edit the configuration in order to match your needs
 - Run `poetry install` to install all the dependencies (+ dev dependencies)
 
 ### Launch
@@ -59,26 +58,33 @@ docker run -d -p 80:80 --name overfast-api tekrop/overfast-api
 ### Definitive edition (with cache system)
 First, you need to create a dotenv file (`.env`) from the `.env.example` file. You'll need to modify it following your needs in order to configure the volumes used by OverFast API, here are the configuration steps.
 
-- `APP_VOLUME_PATH` will be a folder containing shared data for the app :
-    - the app logs folders
-    - the settings file (`config.py`)
-    - crontab configurations for background cache update, you just need to copy the `overfast-crontab` file from the repo (`scripts` folder) into your folder
+#### Generic settings
+- `APP_PORT` is the port used by the app container. Default is `80`.
+- `APP_BASE_URL` is used for the links exposed in some endpoints (players search and maps listing)
+You shouldn't need to modify any other generic setting, but in case you want to check their utility, be sure to check the docstrings in the `app/config.py` file.
 
-- `REDIS_VOLUME_PATH` will be a folder containing shared data for the Redis server. It will mainly contain a `dump.rdb` save file whenever the server has been stopped at least once.
+#### `APP_VOLUME_PATH`
+It's a folder containing shared data for the app : logs, settings file (`.env`) and crontab configurations for background cache update. You just need to :
 
-- `NGINX_VOLUME_PATH` will be a folder containing shared data for the nginx server. All files can be retrieve in the `scripts/nginx` folder of the project :
-    - the `ngx_http_redis_module.so` library file, allowing nginx to directly communicate with the redis server
-    - the main nginx configuration (`nginx.conf`), modified in order to use the `ngx_http_redis_module` and to define the two backends used (redis and uvicorn)
-    - the app configuration file (`overfast-api.conf`), implementing the caching system (call redis backend, then if error call uvicorn backend)
+- Create the folder on your side
+- Copy the `.env` file you previously created into your folder
+- Copy the `overfast-crontab` file from the repo (`scripts` folder) into your folder
 
-- `APP_PORT` is the port used by the app. Default is `80`.
+#### `REDIS_VOLUME_PATH`
+It's a folder containing shared data for the Redis server. It will mainly contain a `dump.rdb` save file whenever the server has been stopped at least once. Be sure to create
 
-- Once you set the right values in your dotenv, and you copied all the needed files in the respective folders, you can finally use the docker compose command to build everything and run the app
+#### `NGINX_VOLUME_PATH`
+It's a folder containing shared data for the nginx server. You'll need to copy some files from the `scripts/nginx` folder of the repo into your folder :
+- the `ngx_http_redis_module.so` library file, allowing nginx to directly communicate with the redis server
+- the main nginx configuration (`nginx.conf`), modified in order to use the `ngx_http_redis_module` and to define the two backends used (`redis` and `app`)
+- the app configuration file (`overfast-api.conf`), implementing the caching system (call `redis` backend, then if error call `app` backend)
+
+#### Final steps
+Once you set the right values in your dotenv, and you copied all the needed files in the respective folders, you can finally use the docker compose command to build everything and run the app
 ```
 docker-compose up
 ```
-
-- The server will be running on the port you set (`APP_PORT`).
+The server will be running on the port you set (`APP_PORT`).
 
 ## 👨‍💻 Technical details
 
