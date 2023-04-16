@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "overfast-api"
-version = "2.13.0"
+version = "2.13.1"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = "MIT"
 authors = ["TeKrop <tekrop@gmail.com>"]
@@ -25,6 +25,7 @@ fakeredis = "^2.10.2"
 ipdb = "^0.13.13"
 isort = "^5.12.0"
 pytest = "^7.2.2"
+pytest-asyncio = "^0.21.0"
 pytest-clarity = "^1.0.1"
 pytest-cov = "^4.0.0"
 pytest-randomly = "^3.12.0"

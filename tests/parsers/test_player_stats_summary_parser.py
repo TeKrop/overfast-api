@@ -1,4 +1,3 @@
-import asyncio
 from unittest.mock import Mock, patch
 
 import pytest
@@ -17,7 +16,8 @@ from app.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
     ],
     indirect=["player_html_data", "player_stats_json_data"],
 )
-def test_player_page_parsing(
+@pytest.mark.asyncio()
+async def test_player_page_parsing(
     player_id: str, player_html_data: str, player_stats_json_data: dict
 ):
     parser = PlayerStatsSummaryParser(player_id=player_id)
@@ -32,18 +32,19 @@ def test_player_page_parsing(
         "update_parser_cache_last_update",
         update_parser_cache_last_update_mock,
     ):
-        asyncio.run(parser.parse())
+        await parser.parse()
 
     assert parser.data == player_stats_json_data
     update_parser_cache_last_update_mock.assert_called_once()
 
 
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
-def test_unknown_player_parser_blizzard_error(player_html_data: str):
+@pytest.mark.asyncio()
+async def test_unknown_player_parser_blizzard_error(player_html_data: str):
     parser = PlayerStatsSummaryParser(player_id="Unknown-1234")
     with pytest.raises(ParserBlizzardError), patch.object(
         overfast_client,
         "get",
         return_value=Mock(status_code=200, text=player_html_data),
     ):
-        asyncio.run(parser.parse())
+        await parser.parse()

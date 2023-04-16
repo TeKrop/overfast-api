@@ -1,4 +1,3 @@
-import asyncio
 import json
 from unittest.mock import Mock, patch
 
@@ -11,7 +10,8 @@ from app.common.helpers import overfast_client
 from app.parsers.namecard_parser import NamecardParser
 
 
-def test_namecard_parser_no_cache(
+@pytest.mark.asyncio()
+async def test_namecard_parser_no_cache(
     search_players_blizzard_json_data: dict,
     search_html_data: str,
     namecards_json_data: dict,
@@ -35,17 +35,14 @@ def test_namecard_parser_no_cache(
         "update_parser_cache_last_update",
         update_parser_cache_last_update_mock,
     ):
-        asyncio.run(parser.parse())
+        await parser.parse()
 
     assert parser.data == {"namecard": namecards_json_data.get("0x0250000000005510")}
     update_parser_cache_last_update_mock.assert_called_once()
 
 
-def test_namecard_parser_blizzard_error(
-    search_players_blizzard_json_data: dict,
-    search_html_data: str,
-    namecards_json_data: dict,
-):
+@pytest.mark.asyncio()
+async def test_namecard_parser_blizzard_error():
     parser = NamecardParser(player_id="Dekk-2677")
 
     with pytest.raises(HTTPException) as error, patch.object(
@@ -55,7 +52,7 @@ def test_namecard_parser_blizzard_error(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, text="Service Unavailable"
         ),
     ):
-        asyncio.run(parser.parse())
+        await parser.parse()
 
     assert error.value.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert (
@@ -64,7 +61,8 @@ def test_namecard_parser_blizzard_error(
     )
 
 
-def test_namecard_parser_error_key_error(search_tekrop_blizzard_json_data: dict):
+@pytest.mark.asyncio()
+async def test_namecard_parser_error_key_error(search_tekrop_blizzard_json_data: dict):
     # Search data without battletag
     search_data = [search_tekrop_blizzard_json_data[0].copy()]
     del search_data[0]["battleTag"]
@@ -80,12 +78,13 @@ def test_namecard_parser_error_key_error(search_tekrop_blizzard_json_data: dict)
             json=lambda: search_data,
         ),
     ), pytest.raises(ParserParsingError) as error:
-        asyncio.run(parser.parse())
+        await parser.parse()
 
     assert error.value.message == "KeyError('battleTag')"
 
 
-def test_namecard_parser_player_not_found():
+@pytest.mark.asyncio()
+async def test_namecard_parser_player_not_found():
     parser = NamecardParser(player_id="Unknown-1234")
 
     logger_warning_mock = Mock()
@@ -94,7 +93,7 @@ def test_namecard_parser_player_not_found():
         "get",
         return_value=Mock(status_code=status.HTTP_200_OK, text="{}", json=lambda: {}),
     ), patch("app.common.logging.logger.warning", logger_warning_mock):
-        asyncio.run(parser.parse())
+        await parser.parse()
 
     logger_warning_mock.assert_any_call(
         "Player {} not found in search results, couldn't retrieve its namecard",
@@ -104,7 +103,8 @@ def test_namecard_parser_player_not_found():
     assert parser.data == {"namecard": None}
 
 
-def test_namecard_parser_player_without_namecard():
+@pytest.mark.asyncio()
+async def test_namecard_parser_player_without_namecard():
     search_data = [
         {
             "battleTag": "Dekk#2677",
@@ -128,15 +128,16 @@ def test_namecard_parser_player_without_namecard():
             json=lambda: search_data,
         ),
     ), patch("app.common.logging.logger.info", logger_info_mock):
-        asyncio.run(parser.parse())
+        await parser.parse()
 
     logger_info_mock.assert_any_call("Player {} doesn't have any namecard", "Dekk-2677")
 
     assert parser.data == {"namecard": None}
 
 
-def test_namecard_parser_no_cache_no_namecard(
-    search_players_blizzard_json_data: dict, search_html_data: str
+@pytest.mark.asyncio()
+async def test_namecard_parser_no_cache_no_namecard(
+    search_players_blizzard_json_data: dict,
 ):
     parser = NamecardParser(player_id="Dekk-2677")
 
@@ -152,7 +153,7 @@ def test_namecard_parser_no_cache_no_namecard(
     ), patch("httpx.get", side_effect=httpx.RequestError("error")), patch(
         "app.common.logging.logger.warning", logger_warning_mock
     ):
-        asyncio.run(parser.parse())
+        await parser.parse()
 
     logger_warning_mock.assert_any_call(
         "URL for namecard {} of player {} not found in the cache",
@@ -169,9 +170,9 @@ def test_namecard_parser_no_cache_no_namecard(
     assert parser.data == {"namecard": None}
 
 
-def test_namecard_parser_with_cache(
+@pytest.mark.asyncio()
+async def test_namecard_parser_with_cache(
     search_players_blizzard_json_data: dict,
-    search_html_data: str,
     namecards_json_data: dict,
 ):
     parser = NamecardParser(player_id="Dekk-2677")
@@ -189,6 +190,6 @@ def test_namecard_parser_with_cache(
         "get_namecard_cache",
         return_value="https://d15f34w2p8l1cc.cloudfront.net/overwatch/757219956129146d84617a7e713dfca1bc33ea27cf6c73df60a33d02a147edc1.png",
     ):
-        asyncio.run(parser.parse())
+        await parser.parse()
 
     assert parser.data == {"namecard": namecards_json_data.get("0x0250000000005510")}

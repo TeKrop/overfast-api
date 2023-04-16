@@ -65,9 +65,9 @@ def list_routes_to_update(args: argparse.Namespace) -> dict[str, str]:
         logger.info("Adding heroes routes...")
         route_file_mapping.update(
             {
-                settings.heroes_path: "/heroes.html",
+                f"{settings.heroes_path}/": "/heroes.html",
                 **{
-                    f"{settings.heroes_path}/{hero.value}": f"/heroes/{hero.value}.html"
+                    f"{settings.heroes_path}/{hero.value}/": f"/heroes/{hero.value}.html"
                     for hero in HeroKey
                 },
             }
