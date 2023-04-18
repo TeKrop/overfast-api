@@ -1,4 +1,4 @@
-version: "1.1"
+version: "1.2"
 services:
   app:
     build: .
@@ -6,11 +6,19 @@ services:
       - ${APP_VOLUME_PATH}/logs:/code/logs
       - ${APP_VOLUME_PATH}/.env:/code/.env
       - ${APP_VOLUME_PATH}/overfast-crontab:/etc/crontabs/root
+    healthcheck:
+      test: ["CMD-SHELL", "wget -O /dev/null http://localhost:8080 || exit 1"]
+      start_period: 20s
+      timeout: 10s
   redis:
     image: "redis:alpine"
     command: redis-server --save 60 1 --loglevel warning
     volumes:
       - ${REDIS_VOLUME_PATH}:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      start_period: 10s
+      timeout: 10s
   nginx:
     image: "nginx:1.20.2-alpine"
     ports:
@@ -19,3 +27,7 @@ services:
       - ${NGINX_VOLUME_PATH}/nginx.conf:/etc/nginx/nginx.conf
       - ${NGINX_VOLUME_PATH}/ngx_http_redis_module.so:/usr/lib/nginx/modules/ngx_http_redis_module.so
       - ${NGINX_VOLUME_PATH}/overfast-api.conf:/etc/nginx/conf.d/default.conf
+    healthcheck:
+      test: ["CMD-SHELL", "wget -O /dev/null http://localhost || exit 1"]
+      start_period: 10s
+      timeout: 10s
