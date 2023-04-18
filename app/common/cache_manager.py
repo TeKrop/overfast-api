@@ -54,6 +54,10 @@ class CacheManager(metaclass=Singleton):
     is_redis_server_up = settings.redis_caching_enabled
 
     @staticmethod
+    def log_warning(err: redis.exceptions.RedisError) -> None:
+        logger.warning("Redis server error : {}", str(err))
+
+    @staticmethod
     def get_cache_key_from_request(request: Request) -> str:
         """Get the cache key associated with a user request"""
         return request.url.path + (
@@ -72,7 +76,7 @@ class CacheManager(metaclass=Singleton):
             try:
                 return func(self, *args, **kwargs)
             except redis.exceptions.RedisError as err:
-                logger.warning("Redis server error : {}", str(err))
+                self.log_warning(err)
                 return None
 
         return wrapper
@@ -131,7 +135,7 @@ class CacheManager(metaclass=Singleton):
         try:
             cache_keys = self.redis_server.keys(pattern=f"{cache_key_prefix}:*")
         except redis.exceptions.RedisError as err:
-            logger.warning("Redis server error : {}", str(err))
+            self.log_warning(err)
             yield from ()
             return
 
@@ -141,7 +145,7 @@ class CacheManager(metaclass=Singleton):
             try:
                 key_ttl = self.redis_server.ttl(key)
             except redis.exceptions.RedisError as err:
-                logger.warning("Redis server error : {}", str(err))
+                self.log_warning(err)
                 continue
 
             # If the key doesn't have any TTL or the limit is far, we don't do anything

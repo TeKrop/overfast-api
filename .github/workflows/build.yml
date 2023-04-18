@@ -1,4 +1,4 @@
-name: "Pytest"
+name: "Build"
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Pytest
+    name: Ruff & Pytest
     runs-on: ubuntu-latest
 
     strategy:
@@ -23,7 +23,10 @@ jobs:
         python-version: ${{ matrix.python-version }}
         poetry-version: ${{ matrix.poetry-version }}
 
-    - name: Run tests
+    - name: Run Ruff code analysis
+      run: ruff .
+
+    - name: Run tests suite
       run: |
         PYTHONPATH=app/ python -m pytest -v --cov-fail-under=80 --cov-report=html --cov=app/ tests/
         PERCENT=$(cat htmlcov/index.html | grep "pc_cov" | awk -F '>' '{print $2}' | awk -F '%' '{print $1}')
@@ -41,3 +44,14 @@ jobs:
         minColorRange: 50
         maxColorRange: 90
         valColorRange: ${{ env.COVERAGE }}
+
+    - name: Update python version badge
+      if: github.event_name == 'push'
+      uses: schneegans/dynamic-badges-action@v1.6.0
+      with:
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: 15a234815aa74059953a766a10e92688
+        filename: python-version.json
+        label: python
+        message: v${{ matrix.python-version }}
+        color: blue

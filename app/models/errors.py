@@ -26,7 +26,7 @@ class InternalServerErrorMessage(BaseModel):
 class PlayerParserErrorMessage(BaseModel):
     error: str = Field(
         ...,
-        description="Message describing the error",
+        description="Message describing the player parser error",
         example="Player not found",
     )
 
@@ -34,6 +34,6 @@ class PlayerParserErrorMessage(BaseModel):
 class HeroParserErrorMessage(BaseModel):
     error: str = Field(
         ...,
-        description="Message describing the error",
+        description="Message describing the hero parser error",
         example="Hero not found or not released yet",
     )

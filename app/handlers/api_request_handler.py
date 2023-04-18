@@ -71,8 +71,6 @@ class APIRequestHandler(ApiRequestMixin, ABC):
                 ) from error
             except ParserParsingError as error:
                 raise overfast_internal_error(parser.blizzard_url, error) from error
-            except HTTPException:
-                raise
 
             # Filter the data to obtain final parser data
             logger.info("Filtering the data using query...")
@@ -88,9 +86,7 @@ class APIRequestHandler(ApiRequestMixin, ABC):
         logger.info("Done ! Returning filtered data...")
         return computed_data
 
-    def merge_parsers_data(
-        self, parsers_data: list[dict | list], **kwargs
-    ) -> dict | list:
+    def merge_parsers_data(self, parsers_data: list[dict | list], **_) -> dict | list:
         """Merge parsers data together. It depends on the given route and datas,
         and needs to be overriden in case a given Request Handler has several
         associated Parsers.

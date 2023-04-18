@@ -2,6 +2,12 @@
 from fastapi import status
 
 
+class NamecardsRetrievalError(Exception):
+    """Generic namecards retrieval Exception"""
+
+    message = "Error while retrieving namecards"
+
+
 class OverfastError(Exception):
     """Generic OverFast API Exception"""
 

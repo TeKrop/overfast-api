@@ -1,4 +1,7 @@
 """Player stats summary Parser module"""
+from collections import defaultdict
+from copy import deepcopy
+
 from fastapi import status
 
 from app.common.enums import HeroKey, PlayerGamemode, PlayerPlatform, Role
@@ -13,6 +16,21 @@ class PlayerStatsSummaryParser(PlayerParser):
 
     generic_stats_names = ["games_played", "games_lost", "time_played"]
     total_stats_names = ["eliminations", "assists", "deaths", "damage", "healing"]
+
+    stats_placeholder = {
+        "games_played": 0,
+        "games_lost": 0,  # We'll keep this one for calculation
+        "time_played": 0,
+        "winrate": 0,
+        "kda": 0,
+        "total": {
+            "eliminations": 0,
+            "assists": 0,
+            "deaths": 0,
+            "damage": 0,
+            "healing": 0,
+        },
+    }
 
     def filter_request_using_query(self, **kwargs) -> dict:
         gamemodes = (
@@ -52,40 +70,7 @@ class PlayerStatsSummaryParser(PlayerParser):
 
         # Compute raw heroes data (every gamemode and platform)
         # into the ones the user want
-        computed_heroes_stats = {}
-        for hero_key, hero_stats in self.data.items():
-            computed_heroes_stats[hero_key] = {
-                "games_played": 0,
-                "games_lost": 0,  # We'll keep this one for calculation
-                "time_played": 0,
-                "winrate": 0,
-                "kda": 0,
-                "total": {
-                    "eliminations": 0,
-                    "assists": 0,
-                    "deaths": 0,
-                    "damage": 0,
-                    "healing": 0,
-                },
-            }
-
-            # Retrieve raw data from heroes
-            for platform in platforms:
-                if platform not in hero_stats:
-                    continue
-
-                for gamemode in gamemodes:
-                    if gamemode not in hero_stats[platform]:
-                        continue
-
-                    for stat_name in self.generic_stats_names:
-                        computed_heroes_stats[hero_key][stat_name] += hero_stats[
-                            platform
-                        ][gamemode][stat_name]
-                    for stat_name in self.total_stats_names:
-                        computed_heroes_stats[hero_key]["total"][
-                            stat_name
-                        ] += hero_stats[platform][gamemode]["total"][stat_name]
+        computed_heroes_stats = self.__init_heroes_data(gamemodes, platforms)
 
         # Calculate special values (winrate, kda, averages)
         for hero_key, hero_stats in computed_heroes_stats.items():
@@ -105,6 +90,40 @@ class PlayerStatsSummaryParser(PlayerParser):
             for hero_key, hero_stats in computed_heroes_stats.items()
             if hero_stats["games_played"] > 0
         }
+
+    def __init_heroes_data(
+        self, gamemodes: list[PlayerGamemode], platforms: list[PlayerPlatform]
+    ) -> dict:
+        """Init heroes data by looping over the self.data object. We will
+        retrieve the data for all the platforms and gamemodes.
+        """
+        computed_heroes_stats = {}
+
+        for hero_key, hero_stats in self.data.items():
+            computed_heroes_stats[hero_key] = deepcopy(self.stats_placeholder)
+
+            # Retrieve raw data from heroes
+            hero_platforms = {
+                platform for platform in platforms if platform in hero_stats
+            }
+            for platform in hero_platforms:
+                hero_platform_gamemodes = {
+                    gamemode
+                    for gamemode in gamemodes
+                    if gamemode in hero_stats[platform]
+                }
+
+                for gamemode in hero_platform_gamemodes:
+                    for stat_name in self.generic_stats_names:
+                        computed_heroes_stats[hero_key][stat_name] += hero_stats[
+                            platform
+                        ][gamemode][stat_name]
+                    for stat_name in self.total_stats_names:
+                        computed_heroes_stats[hero_key]["total"][
+                            stat_name
+                        ] += hero_stats[platform][gamemode]["total"][stat_name]
+
+        return computed_heroes_stats
 
     def __compute_stats(
         self,
@@ -170,59 +189,15 @@ class PlayerStatsSummaryParser(PlayerParser):
         if not raw_stats:
             return None
 
-        # Retrieve general + total values
-        heroes_stats = {hero_key: {} for hero_key in HeroKey}
-        for platform, platform_stats in raw_stats.items():
-            if not platform_stats:
-                continue
+        # Filter only platforms with stats
+        raw_heroes_stats = {
+            platform: platform_stats
+            for platform, platform_stats in raw_stats.items()
+            if platform_stats
+        }
 
-            for gamemode, gamemode_stats in platform_stats.items():
-                if not gamemode_stats:
-                    continue
-
-                for hero_key, hero_stats in gamemode_stats["career_stats"].items():
-                    if hero_key == "all-heroes" or not hero_stats:
-                        continue
-
-                    game_stats = self._get_category_stats("game", hero_stats)
-                    games_played = self._get_stat_value("games_played", game_stats)
-                    if games_played <= 0:
-                        continue
-
-                    time_played = self._get_stat_value("time_played", game_stats)
-                    games_lost = self._get_stat_value("games_lost", game_stats)
-
-                    # Sometimes, games lost are negative on Blizzard page. To not
-                    # disturbate too much the winrate, I decided to put a value
-                    # in order for the player to have 50% winrate
-                    games_lost = (
-                        round(games_played / 2) if games_lost < 0 else games_lost
-                    )
-
-                    combat_stats = self._get_category_stats("combat", hero_stats)
-                    eliminations = self._get_stat_value("eliminations", combat_stats)
-                    deaths = self._get_stat_value("deaths", combat_stats)
-                    damage = self._get_stat_value("all_damage_done", combat_stats)
-
-                    assists_stats = self._get_category_stats("assists", hero_stats)
-                    assists = self._get_stat_value("offensive_assists", assists_stats)
-                    healing = self._get_stat_value("healing_done", assists_stats)
-
-                    if platform not in heroes_stats[hero_key]:
-                        heroes_stats[hero_key][platform] = {}
-
-                    heroes_stats[hero_key][platform][gamemode] = {
-                        "games_played": games_played,
-                        "games_lost": games_lost,
-                        "time_played": time_played,
-                        "total": {
-                            "eliminations": eliminations,
-                            "assists": assists,
-                            "deaths": deaths,
-                            "damage": damage,
-                            "healing": healing,
-                        },
-                    }
+        # Compute the data
+        heroes_stats = self.__compute_heroes_stats(raw_heroes_stats)
 
         # Only return heroes for which we have stats
         return {
@@ -231,28 +206,78 @@ class PlayerStatsSummaryParser(PlayerParser):
             if hero_stat
         }
 
+    def __compute_heroes_stats(self, raw_heroes_stats: dict) -> dict:
+        """Compute heroes stats for every gamemode and platform."""
+        heroes_stats = {hero_key: defaultdict(dict) for hero_key in HeroKey}
+
+        for platform, platform_stats in raw_heroes_stats.items():
+            platform_gamemodes_stats = {
+                gamemode: gamemode_stats
+                for gamemode, gamemode_stats in platform_stats.items()
+                if gamemode_stats
+            }
+
+            for gamemode, gamemode_stats in platform_gamemodes_stats.items():
+                career_stats = {
+                    hero_key: hero_stats
+                    for hero_key, hero_stats in gamemode_stats["career_stats"].items()
+                    if hero_stats and hero_key != "all-heroes"
+                }
+
+                for hero_key, hero_stats in career_stats.items():
+                    if not (
+                        computed_hero_stats := self.__compute_hero_stats(hero_stats)
+                    ):
+                        continue
+
+                    heroes_stats[hero_key][platform][gamemode] = computed_hero_stats
+
+        return heroes_stats
+
+    def __compute_hero_stats(self, hero_stats: dict) -> dict | None:
+        """Compute a single hero statistics."""
+
+        game_stats = self._get_category_stats("game", hero_stats)
+        games_played = self._get_stat_value("games_played", game_stats)
+        if games_played <= 0:
+            return None
+
+        time_played = self._get_stat_value("time_played", game_stats)
+        games_lost = self._get_stat_value("games_lost", game_stats)
+
+        # Sometimes, games lost are negative on Blizzard page. To not
+        # disturbate too much the winrate, I decided to put a value
+        # in order for the player to have 50% winrate
+        games_lost = round(games_played / 2) if games_lost < 0 else games_lost
+
+        combat_stats = self._get_category_stats("combat", hero_stats)
+        eliminations = self._get_stat_value("eliminations", combat_stats)
+        deaths = self._get_stat_value("deaths", combat_stats)
+        damage = self._get_stat_value("all_damage_done", combat_stats)
+
+        assists_stats = self._get_category_stats("assists", hero_stats)
+        assists = self._get_stat_value("offensive_assists", assists_stats)
+        healing = self._get_stat_value("healing_done", assists_stats)
+
+        return {
+            "games_played": games_played,
+            "games_lost": games_lost,
+            "time_played": time_played,
+            "total": {
+                "eliminations": eliminations,
+                "assists": assists,
+                "deaths": deaths,
+                "damage": damage,
+                "healing": healing,
+            },
+        }
+
     def __get_roles_stats(self, heroes_stats: dict | None) -> dict | None:
         if not heroes_stats:
             return None
 
         # Initialize stats
-        roles_stats = {
-            role_key: {
-                "games_played": 0,
-                "games_lost": 0,  # We'll keep this one for calculation
-                "time_played": 0,
-                "winrate": 0,
-                "kda": 0,
-                "total": {
-                    "eliminations": 0,
-                    "assists": 0,
-                    "deaths": 0,
-                    "damage": 0,
-                    "healing": 0,
-                },
-            }
-            for role_key in Role
-        }
+        roles_stats = {role_key: deepcopy(self.stats_placeholder) for role_key in Role}
 
         # Retrieve raw data from heroes
         for hero_key, hero_stats in heroes_stats.items():
@@ -281,20 +306,7 @@ class PlayerStatsSummaryParser(PlayerParser):
         if not roles_stats:
             return None
 
-        general_stats = {
-            "games_played": 0,
-            "games_lost": 0,  # We'll keep this one for calculation
-            "time_played": 0,
-            "winrate": 0,
-            "kda": 0,
-            "total": {
-                "eliminations": 0,
-                "assists": 0,
-                "deaths": 0,
-                "damage": 0,
-                "healing": 0,
-            },
-        }
+        general_stats = deepcopy(self.stats_placeholder)
 
         # Retrieve raw data from roles
         for role_stat in roles_stats.values():

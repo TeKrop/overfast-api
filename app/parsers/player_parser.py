@@ -58,41 +58,44 @@ class PlayerParser(APIParser):
             return self.data.get("summary")
 
         if kwargs.get("stats"):
-            filtered_data = self.data["stats"] or {}
-
-            platform = kwargs.get("platform")
-            if not platform:
-                # Retrieve a "default" platform is the user didn't provided one
-                possible_platforms = [
-                    platform_key
-                    for platform_key, platform_data in filtered_data.items()
-                    if platform_data is not None
-                ]
-                # If there is no data in any platform, just return nothing
-                if not possible_platforms:
-                    return {}
-                # Take the first one of the list, usually there will be only one.
-                # If there are two, the PC stats should come first
-                platform = possible_platforms[0]
-
-            filtered_data = filtered_data.get(platform) or {}
-            if not filtered_data:
-                return {}
-
-            filtered_data = filtered_data.get(kwargs.get("gamemode")) or {}
-            if not filtered_data:
-                return {}
-
-            filtered_data = filtered_data.get("career_stats") or {}
-
-            hero_filter = kwargs.get("hero")
-            return {
-                hero_key: statistics
-                for hero_key, statistics in filtered_data.items()
-                if not hero_filter or hero_filter == hero_key
-            }
+            return self.__filter_stats(**kwargs)
 
         return self.data
+
+    def __filter_stats(self, **kwargs) -> dict:
+        filtered_data = self.data["stats"] or {}
+
+        platform = kwargs.get("platform")
+        if not platform:
+            # Retrieve a "default" platform is the user didn't provided one
+            possible_platforms = [
+                platform_key
+                for platform_key, platform_data in filtered_data.items()
+                if platform_data is not None
+            ]
+            # If there is no data in any platform, just return nothing
+            if not possible_platforms:
+                return {}
+            # Take the first one of the list, usually there will be only one.
+            # If there are two, the PC stats should come first
+            platform = possible_platforms[0]
+
+        filtered_data = filtered_data.get(platform) or {}
+        if not filtered_data:
+            return {}
+
+        filtered_data = filtered_data.get(kwargs.get("gamemode")) or {}
+        if not filtered_data:
+            return {}
+
+        filtered_data = filtered_data.get("career_stats") or {}
+        hero_filter = kwargs.get("hero")
+
+        return {
+            hero_key: statistics
+            for hero_key, statistics in filtered_data.items()
+            if not hero_filter or hero_filter == hero_key
+        }
 
     def parse_data(self) -> dict:
         # We must check if we have the expected section for profile. If not,
