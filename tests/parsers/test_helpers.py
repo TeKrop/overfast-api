@@ -2,19 +2,7 @@ import pytest
 
 from app.common.enums import CompetitiveDivision, HeroKey, Role
 from app.config import settings
-from app.parsers.helpers import (
-    get_computed_stat_value,
-    get_division_from_rank_icon,
-    get_endorsement_value_from_frame,
-    get_full_url,
-    get_hero_keyname,
-    get_hero_role,
-    get_role_key_from_icon,
-    get_stats_hero_class,
-    get_tier_from_rank_icon,
-    remove_accents,
-    string_to_snakecase,
-)
+from app.parsers import helpers
 
 
 @pytest.mark.parametrize(
@@ -51,7 +39,7 @@ from app.parsers.helpers import (
     ],
 )
 def test_get_computed_stat_value(input_str: str, result: int | float | str):
-    assert get_computed_stat_value(input_str) == result
+    assert helpers.get_computed_stat_value(input_str) == result
 
 
 @pytest.mark.parametrize(
@@ -88,7 +76,7 @@ def test_get_computed_stat_value(input_str: str, result: int | float | str):
     ],
 )
 def test_get_division_from_rank_icon(rank_url: str, division: CompetitiveDivision):
-    assert get_division_from_rank_icon(rank_url) == division
+    assert helpers.get_division_from_rank_icon(rank_url) == division
 
 
 @pytest.mark.parametrize(
@@ -121,7 +109,7 @@ def test_get_division_from_rank_icon(rank_url: str, division: CompetitiveDivisio
     ],
 )
 def test_get_endorsement_value_from_frame(frame_url: str, endorsement_value: int):
-    assert get_endorsement_value_from_frame(frame_url) == endorsement_value
+    assert helpers.get_endorsement_value_from_frame(frame_url) == endorsement_value
 
 
 @pytest.mark.parametrize(
@@ -135,7 +123,7 @@ def test_get_endorsement_value_from_frame(frame_url: str, endorsement_value: int
     ],
 )
 def test_get_full_url(url: str, full_url: str):
-    assert get_full_url(url) == full_url
+    assert helpers.get_full_url(url) == full_url
 
 
 @pytest.mark.parametrize(
@@ -154,7 +142,7 @@ def test_get_full_url(url: str, full_url: str):
     ],
 )
 def test_get_hero_keyname(input_str: str, result: str):
-    assert get_hero_keyname(input_str) == result
+    assert helpers.get_hero_keyname(input_str) == result
 
 
 @pytest.mark.parametrize(
@@ -175,7 +163,7 @@ def test_get_hero_keyname(input_str: str, result: str):
     ],
 )
 def test_get_role_key_from_icon(icon_url: str, role: Role):
-    assert get_role_key_from_icon(icon_url) == role
+    assert helpers.get_role_key_from_icon(icon_url) == role
 
 
 @pytest.mark.parametrize(
@@ -186,7 +174,7 @@ def test_get_role_key_from_icon(icon_url: str, role: Role):
     ],
 )
 def test_get_stats_hero_class(hero_classes: list[str], result: str):
-    assert get_stats_hero_class(hero_classes) == result
+    assert helpers.get_stats_hero_class(hero_classes) == result
 
 
 @pytest.mark.parametrize(
@@ -211,7 +199,7 @@ def test_get_stats_hero_class(hero_classes: list[str], result: str):
     ],
 )
 def test_get_tier_from_rank_icon(rank_url: str, tier: int):
-    assert get_tier_from_rank_icon(rank_url) == tier
+    assert helpers.get_tier_from_rank_icon(rank_url) == tier
 
 
 @pytest.mark.parametrize(
@@ -227,7 +215,7 @@ def test_get_tier_from_rank_icon(rank_url: str, tier: int):
     ],
 )
 def test_remove_accents(input_str: str, result: str):
-    assert remove_accents(input_str) == result
+    assert helpers.remove_accents(input_str) == result
 
 
 @pytest.mark.parametrize(
@@ -246,12 +234,12 @@ def test_remove_accents(input_str: str, result: str):
     ],
 )
 def test_string_to_snakecase(input_str: str, result: str):
-    assert string_to_snakecase(input_str) == result
+    assert helpers.string_to_snakecase(input_str) == result
 
 
 @pytest.mark.parametrize(("hero_key"), [(h.value) for h in HeroKey])
 def test_get_hero_role(hero_key: HeroKey):
     try:
-        get_hero_role(hero_key)
+        helpers.get_hero_role(hero_key)
     except KeyError:
         pytest.fail(f"Missing role for '{hero_key}' hero")

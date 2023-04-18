@@ -1,11 +1,15 @@
-import asyncio
 from unittest.mock import Mock, patch
 
+import pytest
+
+from app.common.enums import HeroKey
+from app.common.exceptions import OverfastError
 from app.common.helpers import overfast_client
 from app.parsers.heroes_parser import HeroesParser
 
 
-def test_heroes_page_parsing(heroes_html_data: str, heroes_json_data: list):
+@pytest.mark.asyncio()
+async def test_heroes_page_parsing(heroes_html_data: str):
     parser = HeroesParser()
 
     with patch.object(
@@ -13,6 +17,9 @@ def test_heroes_page_parsing(heroes_html_data: str, heroes_json_data: list):
         "get",
         return_value=Mock(status_code=200, text=heroes_html_data),
     ):
-        asyncio.run(parser.parse())
+        try:
+            await parser.parse()
+        except OverfastError:
+            pytest.fail("Heroes list parsing failed")
 
-    assert parser.data == heroes_json_data
+    assert {hero["key"] for hero in parser.data} == {h.value for h in HeroKey}

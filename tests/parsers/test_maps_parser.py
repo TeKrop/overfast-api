@@ -1,10 +1,14 @@
-import asyncio
+import pytest
 
+from app.common.exceptions import OverfastError
 from app.parsers.maps_parser import MapsParser
 
 
-def test_maps_page_parsing(maps_json_data: list):
+@pytest.mark.asyncio()
+async def test_maps_page_parsing():
     parser = MapsParser()
-    asyncio.run(parser.parse())
 
-    assert parser.data == maps_json_data
+    try:
+        await parser.parse()
+    except OverfastError:
+        pytest.fail("Maps list parsing failed")

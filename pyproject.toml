@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "overfast-api"
-version = "2.13.0"
+version = "2.13.1"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = "MIT"
 authors = ["TeKrop <tekrop@gmail.com>"]
@@ -11,26 +11,27 @@ documentation = "https://overfast-api.tekrop.fr/"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-beautifulsoup4 = "^4.12.0"
-fastapi = "^0.95.0"
-httpx = {extras = ["http2"], version = "^0.23.3"}
-loguru = "^0.6.0"
+beautifulsoup4 = "^4.12.2"
+fastapi = "^0.95.1"
+httpx = {extras = ["http2"], version = "^0.24.0"}
+loguru = "^0.7.0"
 lxml = "^4.9.2"
 redis = "^4.5.2"
 uvicorn = {extras = ["standard"], version = "^0.21.1"}
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
-fakeredis = "^2.10.2"
+fakeredis = "^2.10.3"
 ipdb = "^0.13.13"
 isort = "^5.12.0"
-pytest = "^7.2.2"
+pytest = "^7.3.1"
+pytest-asyncio = "^0.21.0"
 pytest-clarity = "^1.0.1"
 pytest-cov = "^4.0.0"
 pytest-randomly = "^3.12.0"
 pytest-xdist = "^3.2.1"
 refurb = "^1.15.0"
-ruff = "^0.0.260"
+ruff = "^0.0.261"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
