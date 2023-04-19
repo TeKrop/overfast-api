@@ -1,6 +1,6 @@
 """Namecard Parser module"""
 from app.commands.update_namecards_cache import retrieve_namecards
-from app.common.exceptions import ParserParsingError
+from app.common.exceptions import NamecardsRetrievalError, ParserParsingError
 from app.common.helpers import blizzard_response_error_from_request, overfast_request
 from app.common.logging import logger
 from app.config import settings
@@ -77,7 +77,7 @@ class NamecardParser(APIParser):
 
             try:
                 namecards = retrieve_namecards()
-            except SystemExit:
+            except NamecardsRetrievalError:
                 namecards = {}
 
             namecard_url = namecards.get(player_data["namecard"])

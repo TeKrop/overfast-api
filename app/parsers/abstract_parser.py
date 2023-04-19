@@ -32,7 +32,7 @@ class AbstractParser(ABC):
     @property
     def cache_expiration_timeout(self) -> int | None:
         """Timeout used for the optional Parser Cache expiration system"""
-        return
+        return None
 
     @abstractmethod
     async def retrieve_and_parse_data(self) -> None:
@@ -64,7 +64,7 @@ class AbstractParser(ABC):
                 self.cache_key, self.cache_expiration_timeout
             )
 
-    def filter_request_using_query(self, **kwargs) -> dict | list:
+    def filter_request_using_query(self, **_) -> dict | list:
         """If the route contains subroutes accessible using GET queries, this method
         will filter data using the query data. This method should be
         redefined in child classes if needed. The default behaviour is to return

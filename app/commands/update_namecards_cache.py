@@ -5,6 +5,7 @@ import re
 import httpx
 
 from app.common.cache_manager import CacheManager
+from app.common.exceptions import NamecardsRetrievalError
 from app.common.helpers import send_discord_webhook_message
 from app.common.logging import logger
 from app.config import settings
@@ -18,7 +19,7 @@ def get_search_page() -> httpx.Response:
         response = httpx.get(f"{settings.blizzard_host}{settings.namecards_path}")
     except httpx.RequestError as error:
         logger.exception("An error occurred while requesting namecards !")
-        raise SystemExit from error
+        raise NamecardsRetrievalError from error
     else:
         return response
 
@@ -30,7 +31,7 @@ def extract_namecards_data(html_content: str) -> dict:
         error_message = "Namecards not found on Blizzard page !"
         logger.exception(error_message)
         send_discord_webhook_message(error_message)
-        raise SystemExit
+        raise NamecardsRetrievalError
 
     try:
         json_result = json.loads(result.group(1))
@@ -38,7 +39,7 @@ def extract_namecards_data(html_content: str) -> dict:
         error_message = "Invalid format for namecards on Blizzard page !"
         logger.exception(error_message)
         send_discord_webhook_message(error_message)
-        raise SystemExit from error
+        raise NamecardsRetrievalError from error
     else:
         return json_result
 
@@ -64,7 +65,11 @@ def retrieve_namecards() -> dict[str, str]:
 def update_namecards_cache():
     """Main method of the script"""
     logger.info("Retrieving namecards...")
-    namecards = retrieve_namecards()
+
+    try:
+        namecards = retrieve_namecards()
+    except NamecardsRetrievalError as error:
+        raise SystemExit from error
 
     logger.info("Saving namecards...")
     cache_manager.update_namecards_cache(namecards)
