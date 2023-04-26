@@ -181,25 +181,30 @@ You can run the project in several ways, though I would advise the first one for
 ### App (uvicorn) + Redis server (caching) + nginx
 ```mermaid
 sequenceDiagram
-    participant User
-    User->>Nginx: Make an API request
-    Nginx->>Redis: Make an API Cache request
+    autonumber
+    actor User
+    participant Nginx
+    participant Redis
+    participant App
+    User->>+Nginx: Make an API request
+    Nginx->>+Redis: Make an API Cache request
     alt API Cache is available
         Redis-->>Nginx: Return API Cache data
         Nginx-->>User: Return API Cache data
     else
-        Redis-->>Nginx: Return no result
-        Nginx->>App: Transmit the request to Python server
-        App->>Redis: Make Parser Cache request
+        Redis-->>-Nginx: Return no result
+        Nginx->>+App: Transmit the request to App server
+        App->>+Redis: Make Parser Cache request
         alt Parser Cache is available
             Redis-->>App: Return Parser Cache
         else
-            Redis-->>App: Return no result
+            Redis-->>-App: Return no result
             App->>App: Parse HTML page
         end
-        App-->>Nginx: Return API data
-        Nginx-->>User: Return API data
+        App-->>-Nginx: Return API data
+        Nginx-->>-User: Return API data
     end
+
 ```
 
 Using this way (via `docker-compose`), the response will be cached into Redis, and will be sent by nginx directly for the next times without requesting the Python server at all. It's the best performance compromise as nginx is the best for serving static content. A single request can lead to several Parser Cache requests, depending on configured Blizzard pages.
@@ -207,22 +212,25 @@ Using this way (via `docker-compose`), the response will be cached into Redis, a
 ### App (uvicorn) + Redis server (caching)
 ```mermaid
 sequenceDiagram
-    participant User
-    User->>App: Make an API request
-    App->>Redis: Make an API Cache request
+    autonumber
+    actor User
+    participant App
+    participant Redis
+    User->>+App: Make an API request
+    App->>+Redis: Make an API Cache request
     alt API Cache is available
         Redis-->>App: Return API Cache data
         App-->>User: Return API Cache data
     else
-        Redis-->>App: Return no result
-        App->>Redis: Make Parser Cache request
+        Redis-->>-App: Return no result
+        App->>+Redis: Make Parser Cache request
         alt Parser Cache is available
             Redis-->>App: Return Parser Cache
         else
-            Redis-->>App: Return no result
+            Redis-->>-App: Return no result
             App->>App: Parse HTML page
         end
-        App-->>User: Return API data
+        App-->>-User: Return API data
     end
 ```
 
@@ -231,9 +239,11 @@ Using this way (by manually doing it), the response will be cached into Redis, a
 ### App (uvicorn) only
 ```mermaid
 sequenceDiagram
-    participant User
-    User->>App: Make an API request
-    App-->>User: Return API data after parsing
+    autonumber
+    actor User
+    participant App
+    User->>+App: Make an API request
+    App-->>-User: Return API data after parsing
 ```
 Using this way (only using the image built with the `Dockerfile` alone), there will be no cache at all, and every call will make requests to Blizzard pages. I advise not to use this way unless for debugging.
 
