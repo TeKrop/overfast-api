@@ -1,7 +1,9 @@
 """Hero Request Handler module"""
+from app.common.helpers import dict_insert_value_before_key
 from app.config import settings
 from app.parsers.hero_parser import HeroParser
 from app.parsers.heroes_parser import HeroesParser
+from app.parsers.heroes_stats_parser import HeroesStatsParser
 
 from .api_request_handler import APIRequestHandler
 
@@ -12,23 +14,44 @@ class GetHeroRequestHandler(APIRequestHandler):
     should be used to display data about a specific hero.
     """
 
-    parser_classes = [HeroParser, HeroesParser]
+    parser_classes = [HeroParser, HeroesParser, HeroesStatsParser]
     timeout = settings.hero_path_cache_timeout
 
     def merge_parsers_data(self, parsers_data: list[dict], **kwargs) -> dict:
-        """Merge parsers data together : HeroParser for detailed data,
-        and HeroParser for portrait (not here in the specific page)
+        """Merge parsers data together :
+        - HeroParser for detailed data
+        - HeroesParser for portrait (not here in the specific page)
+        - HeroesStatsParser for stats (health, armor, shields)
         """
-        hero_data = parsers_data[0]
-        portrait_value = [
-            hero["portrait"]
-            for hero in parsers_data[1]
-            if hero["key"] == kwargs.get("hero_key")
-        ][0]
+        hero_data, heroes_data, heroes_stats_data = parsers_data
+
+        try:
+            portrait_value = [
+                hero["portrait"]
+                for hero in heroes_data
+                if hero["key"] == kwargs.get("hero_key")
+            ][0]
+        except KeyError:
+            # The hero key may not be here in some specific edge cases,
+            # for example if the hero has been released but is not in the
+            # heroes list yet, or the list cache is outdated
+            portrait_value = None
 
         # We want to insert the portrait before the "role" key
-        role_pos = list(hero_data.keys()).index("role")
-        hero_data_items = list(hero_data.items())
-        hero_data_items.insert(role_pos, ("portrait", portrait_value))
+        hero_data = dict_insert_value_before_key(
+            hero_data, "role", "portrait", portrait_value
+        )
 
-        return dict(hero_data_items)
+        try:
+            hitpoints = heroes_stats_data[kwargs.get("hero_key")]["hitpoints"]
+        except KeyError:
+            # Hero hitpoints may not be here if the CSV file
+            # containing the data hasn't been updated
+            hitpoints = None
+
+        # We want to insert hitpoints before "abilities" key
+        hero_data = dict_insert_value_before_key(
+            hero_data, "abilities", "hitpoints", hitpoints
+        )
+
+        return hero_data

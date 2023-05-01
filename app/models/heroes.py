@@ -1,9 +1,14 @@
 """Set of pydantic models used for Heroes API routes"""
-
-
 from pydantic import BaseModel, Field, HttpUrl
 
 from app.common.enums import HeroKey, MediaType, Role
+
+
+class HitPoints(BaseModel):
+    health: int = Field(..., description="Health of the hero", ge=1, example=200)
+    armor: int = Field(..., description="Armor of the hero", ge=0, example=0)
+    shields: int = Field(..., description="Shields of the hero", ge=0, example=0)
+    total: int = Field(..., description="Total HP of the hero", ge=1, example=200)
 
 
 class Ability(BaseModel):
@@ -92,8 +97,8 @@ class Hero(BaseModel):
             "deadeye precision and dives out of danger with eagle-like speed."
         ),
     )
-    portrait: HttpUrl = Field(
-        ...,
+    portrait: HttpUrl | None = Field(
+        None,
         description="Portrait picture URL of the hero",
         example="https://d15f34w2p8l1cc.cloudfront.net/overwatch/6cfb48b5597b657c2eafb1277dc5eef4a07eae90c265fcd37ed798189619f0a5.png",
     )
@@ -107,10 +112,11 @@ class Hero(BaseModel):
         description="Location of the hero",
         example="Santa Fe, New Mexico, USA",
     )
+    hitpoints: HitPoints | None = Field(None, description="Hitpoints of the hero")
     abilities: list[Ability] = Field(
         ..., description="List of hero abilities", min_items=1
     )
-    story: Story = Field(...)
+    story: Story = Field(..., description="Story of the hero")
 
 
 class HeroShort(BaseModel):

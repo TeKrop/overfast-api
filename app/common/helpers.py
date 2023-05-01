@@ -4,6 +4,7 @@ import json
 import zlib
 from pathlib import Path
 from random import randint
+from typing import Any
 
 import httpx
 from fastapi import HTTPException, Request, status
@@ -148,7 +149,7 @@ def read_json_file(filepath: str) -> dict | list:
 def read_csv_data_file(filepath: str) -> csv.DictReader:
     """Helper method for obtaining CSV DictReader from a path"""
     with Path(f"{Path.cwd()}/app/data/{filepath}").open(encoding="utf-8") as csv_file:
-        yield from csv.DictReader(csv_file, delimiter=";")
+        yield from csv.DictReader(csv_file, delimiter=",")
 
 
 def compress_json_value(value: dict | list) -> str:
@@ -183,3 +184,23 @@ def get_hero_name(hero_key: HeroKey) -> str:
     return specific_heroes_names.get(
         hero_key, " ".join(s.capitalize() for s in hero_key.value.split("-"))
     )
+
+
+def dict_insert_value_before_key(
+    data: dict, key: str, new_key: str, new_value: Any
+) -> dict:
+    """Insert a given key/value pair before another key in a given dict"""
+    if key not in data:
+        raise KeyError
+
+    # Retrieve the key position
+    key_pos = list(data.keys()).index(key)
+
+    # Retrieve dict items as a list of tuples
+    data_items = list(data.items())
+
+    # Insert the new tuple in the given position
+    data_items.insert(key_pos, (new_key, new_value))
+
+    # Convert back the list into a dict and return it
+    return dict(data_items)
