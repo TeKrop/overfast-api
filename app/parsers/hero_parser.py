@@ -76,11 +76,22 @@ class HeroParser(APIParser):
             for desc_div in abilities_list_div.find_all("blz-feature")
         ]
 
+        abilities_videos = [
+            {
+                "thumbnail": video_div["poster"],
+                "link": video_div["webm"],
+            }
+            for video_div in abilities_section.find(
+                "blz-carousel-section", recursive=False
+            ).find_all("blz-video", recursive=False)
+        ]
+
         return [
             {
                 "name": ability_div["label"],
                 "description": abilities_desc[ability_index].strip(),
                 "icon": ability_div.find("blz-image")["src"],
+                "video": abilities_videos[ability_index],
             }
             for ability_index, ability_div in enumerate(
                 abilities_list_div.find("blz-tab-controls").find_all("blz-tab-control")

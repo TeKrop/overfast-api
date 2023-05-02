@@ -31,7 +31,7 @@ class GetHeroRequestHandler(APIRequestHandler):
                 for hero in heroes_data
                 if hero["key"] == kwargs.get("hero_key")
             ][0]
-        except KeyError:
+        except IndexError:
             # The hero key may not be here in some specific edge cases,
             # for example if the hero has been released but is not in the
             # heroes list yet, or the list cache is outdated
