@@ -32,7 +32,7 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
         return int(input_str.replace("%", ""))
 
     # Float format
-    if re.match(r"^-?\d+\.\d+?$", input_str):
+    if re.match(r"^-?\d+\.\d+$", input_str):
         return float(input_str)
 
     # Zero time fought with a character

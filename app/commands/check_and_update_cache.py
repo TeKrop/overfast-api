@@ -14,6 +14,7 @@ from app.parsers.abstract_parser import AbstractParser
 from app.parsers.gamemodes_parser import GamemodesParser
 from app.parsers.hero_parser import HeroParser
 from app.parsers.heroes_parser import HeroesParser
+from app.parsers.heroes_stats_parser import HeroesStatsParser
 from app.parsers.maps_parser import MapsParser
 from app.parsers.namecard_parser import NamecardParser
 from app.parsers.player_parser import PlayerParser
@@ -25,6 +26,7 @@ PARSER_CLASSES_MAPPING = {
     "GamemodesParser": GamemodesParser,
     "HeroParser": HeroParser,
     "HeroesParser": HeroesParser,
+    "HeroesStatsParser": HeroesStatsParser,
     "MapsParser": MapsParser,
     "NamecardParser": NamecardParser,
     "PlayerParser": PlayerParser,
@@ -34,7 +36,6 @@ PARSER_CLASSES_MAPPING = {
 
 # Generic cache manager used in the process
 cache_manager = CacheManager()
-
 
 # Semaphore to limit concurrent requests for async processes
 sem = asyncio.Semaphore(settings.max_concurrent_requests)

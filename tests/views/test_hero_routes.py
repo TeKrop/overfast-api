@@ -5,7 +5,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.common.enums import HeroKey
-from app.common.helpers import overfast_client
+from app.common.helpers import overfast_client, read_csv_data_file
 from app.main import app
 
 client = TestClient(app)
@@ -84,3 +84,67 @@ def test_get_hero_internal_error():
                 "https://github.com/TeKrop/overfast-api/issues"
             )
         }
+
+
+@pytest.mark.parametrize(
+    ("hero_name", "hero_html_data"),
+    [(HeroKey.ANA, HeroKey.ANA)],
+    indirect=["hero_html_data"],
+)
+def test_get_hero_no_portrait(
+    hero_name: str,
+    hero_html_data: str,
+    heroes_html_data: str,
+    heroes_json_data: list[dict],
+):
+    heroes_data = [
+        hero_data for hero_data in heroes_json_data if hero_data["key"] != HeroKey.ANA
+    ]
+
+    with patch.object(
+        overfast_client,
+        "get",
+        side_effect=[
+            Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
+            Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
+        ],
+    ), patch(
+        "app.parsers.heroes_parser.HeroesParser.filter_request_using_query",
+        return_value=heroes_data,
+    ):
+        response = client.get(f"/heroes/{hero_name}")
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["portrait"] is None
+
+
+@pytest.mark.parametrize(
+    ("hero_name", "hero_html_data", "hero_json_data"),
+    [(HeroKey.ANA, HeroKey.ANA, HeroKey.ANA)],
+    indirect=["hero_html_data", "hero_json_data"],
+)
+def test_get_hero_no_hitpoints(
+    hero_name: str,
+    hero_html_data: str,
+    hero_json_data: dict,
+    heroes_html_data: str,
+):
+    heroes_stats = [
+        hero_stat
+        for hero_stat in read_csv_data_file("heroes_stats.csv")
+        if hero_stat["key"] != HeroKey.ANA
+    ]
+
+    with patch.object(
+        overfast_client,
+        "get",
+        side_effect=[
+            Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
+            Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
+        ],
+    ), patch(
+        "app.parsers.heroes_stats_parser.read_csv_data_file",
+        return_value=heroes_stats,
+    ):
+        response = client.get(f"/heroes/{hero_name}")
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["hitpoints"] is None

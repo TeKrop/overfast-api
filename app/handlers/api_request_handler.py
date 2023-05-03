@@ -54,7 +54,6 @@ class APIRequestHandler(ApiRequestMixin, ABC):
         # No API Cache or not using it in app, we request the data from Blizzard page
         logger.info("No API Cache, requesting the data to Blizzard...")
         parsers_data = []
-        parsers = []
         for parser_class in self.parser_classes:
             # Instanciate the parser, it will check if a Parser Cache is here.
             # If not, it will retrieve its associated Blizzard
@@ -74,7 +73,6 @@ class APIRequestHandler(ApiRequestMixin, ABC):
 
             # Filter the data to obtain final parser data
             logger.info("Filtering the data using query...")
-            parsers.append(parser)
             parsers_data.append(parser.filter_request_using_query(**kwargs))
 
         # Merge parsers data together

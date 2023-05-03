@@ -110,9 +110,10 @@ def test_check_and_update_specific_hero_to_update(
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
     logger_info_mock.assert_any_call("Updating data for {} key...", ana_cache_key)
 
-    # Remove portrait as this is retrieved from heroes list
+    # Remove portrait and hitpoints, as they're is retrieved from others parsers
     hero_data = hero_json_data.copy()
     del hero_data["portrait"]
+    del hero_data["hitpoints"]
 
     assert cache_manager.get_parser_cache(ana_cache_key) == hero_data
 
