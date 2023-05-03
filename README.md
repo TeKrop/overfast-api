@@ -249,15 +249,15 @@ Using this way (only using the image built with the `Dockerfile` alone), there w
 
 ## 🤝 Contributing
 
-Contributions, issues and feature requests are welcome!
+Contributions, issues and feature requests are welcome ! Do you want to update the heroes data (health, armor, shields, etc.) or the maps list ? Don't hesitate to consult the dedicated [CONTRIBUTING file](https://github.com/TeKrop/overfast-api/blob/main/CONTRIBUTING.md).
 
-Feel free to check [issues page](https://github.com/TeKrop/overfast-api/issues).
 
 ## 🚀 Community projects
 
 Here is a list of projects which are currently using OverFast API as a data source. You're using it in one of your projects ? Feel free to reach me by e-mail, send me a link of your project (either website URL or public git repository), and I will add it in the list :)
 
 - Overfast API client (https://github.com/Sipixer/overfast-api-client)
+- Watch Over, mobile app by @Backxtar (https://github.com/Backxtar)
 - ...
 
 ## 🙏 Credits

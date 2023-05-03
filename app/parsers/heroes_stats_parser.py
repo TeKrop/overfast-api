@@ -1,4 +1,4 @@
-"""Maps Parser module"""
+"""Heroes Stats Parser module"""
 from app.common.helpers import read_csv_data_file
 from app.config import settings
 
