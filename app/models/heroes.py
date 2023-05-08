@@ -11,17 +11,26 @@ class HitPoints(BaseModel):
     total: int = Field(..., description="Total HP of the hero", ge=1, example=200)
 
 
+class AbilityVideoLink(BaseModel):
+    mp4: HttpUrl = Field(
+        ...,
+        description="MP4 version",
+        example="https://assets.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt71688da0f7834fed/6333c9882dc7636608cc7078/OVERWATCH_WEBSITE_CHARACTER_CAPTURE_CassidyPeacekeeper_WEB_16x9_1920x1080p30_H264.mp4",
+    )
+    webm: HttpUrl = Field(
+        ...,
+        description="WebM version",
+        example="https://assets.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltcff86b9875852be9/6333c9873917977bfd986103/OVERWATCH_WEBSITE_CHARACTER_CAPTURE_CassidyPeacekeeper_WEB_16x9_1920x1080p30_H264.webm",
+    )
+
+
 class AbilityVideo(BaseModel):
     thumbnail: HttpUrl = Field(
         ...,
         description="Thumbnail of the ability video",
         example="https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt08db01a1d84b0c3b/6333c97e3922a2677fc88c3c/CASSIDY_COMBAT_ROLL.jpg",
     )
-    link: HttpUrl = Field(
-        ...,
-        description="Link to the ability video (webm version)",
-        example="https://assets.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltcff86b9875852be9/6333c9873917977bfd986103/OVERWATCH_WEBSITE_CHARACTER_CAPTURE_CassidyPeacekeeper_WEB_16x9_1920x1080p30_H264.webm",
-    )
+    link: AbilityVideoLink = Field(..., description="Link to the ability video")
 
 
 class Ability(BaseModel):
