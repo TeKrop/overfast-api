@@ -79,7 +79,10 @@ class HeroParser(APIParser):
         abilities_videos = [
             {
                 "thumbnail": video_div["poster"],
-                "link": video_div["webm"],
+                "link": {
+                    "mp4": video_div["mp4"],
+                    "webm": video_div["webm"],
+                },
             }
             for video_div in abilities_section.find(
                 "blz-carousel-section", recursive=False
