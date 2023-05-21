@@ -49,40 +49,25 @@ uvicorn app.main:app --reload
 
 ## 🐋 Docker
 
-### Standalone (no cache system)
-```
-docker build . -t tekrop/overfast-api:latest
-docker run -d -p 80:80 --name overfast-api tekrop/overfast-api
-```
+First, you need to create a dotenv file (`.env`) from the `.env.example` file. You'll need to modify it depending on your needs in order to configure the volumes used by OverFast API. You'll have to check
+some settings and create the app volume folder.
 
-### Definitive edition (with cache system)
-First, you need to create a dotenv file (`.env`) from the `.env.example` file. You'll need to modify it following your needs in order to configure the volumes used by OverFast API, here are the configuration steps.
-
-#### Generic settings
+### Generic settings
+- `APP_VOLUME_PATH` is the folder which will contain shared data of the app : logs, redis save file (`dump.rdb`), settings file (`.env`) and crontab configurations for background cache update.
 - `APP_PORT` is the port used by the app container. Default is `80`.
 - `APP_BASE_URL` is used for the links exposed in some endpoints (players search and maps listing)
 You shouldn't need to modify any other generic setting, but in case you want to check their utility, be sure to check the docstrings in the `app/config.py` file.
 
-#### `APP_VOLUME_PATH`
-It's a folder containing shared data for the app : logs, settings file (`.env`) and crontab configurations for background cache update. You just need to :
+### App volume folder
+In order to make the app work properly, you have to :
+- Create the folder located at `APP_VOLUME_PATH` on your side
+- Copy the `.env` file you previously created into the folder
+- Copy the `overfast-crontab` file from the repo (`scripts` folder) into the folder
 
-- Create the folder on your side
-- Copy the `.env` file you previously created into your folder
-- Copy the `overfast-crontab` file from the repo (`scripts` folder) into your folder
-
-#### `REDIS_VOLUME_PATH`
-It's a folder containing shared data for the Redis server. It will mainly contain a `dump.rdb` save file whenever the server has been stopped at least once. Be sure to create
-
-#### `NGINX_VOLUME_PATH`
-It's a folder containing shared data for the nginx server. You'll need to copy some files from the `scripts/nginx` folder of the repo into your folder :
-- the `ngx_http_redis_module.so` library file, allowing nginx to directly communicate with the redis server
-- the main nginx configuration (`nginx.conf`), modified in order to use the `ngx_http_redis_module` and to define the two backends used (`redis` and `app`)
-- the app configuration file (`overfast-api.conf`), implementing the caching system (call `redis` backend, then if error call `app` backend)
-
-#### Final steps
-Once you set the right values in your dotenv, and you copied all the needed files in the respective folders, you can finally use the docker compose command to build everything and run the app
+### Final step
+Once you set the right values in your dotenv and created the app volume folder, you can finally use the docker compose command to build everything and run the app
 ```
-docker-compose up
+docker compose up -d
 ```
 The server will be running on the port you set (`APP_PORT`).
 
