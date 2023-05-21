@@ -14,12 +14,13 @@ from .player_parser import PlayerParser
 class PlayerStatsSummaryParser(PlayerParser):
     """Overwatch player profile page Parser class"""
 
-    generic_stats_names = ["games_played", "games_lost", "time_played"]
+    generic_stats_names = ["games_played", "games_won", "games_lost", "time_played"]
     total_stats_names = ["eliminations", "assists", "deaths", "damage", "healing"]
 
     stats_placeholder = {
         "games_played": 0,
-        "games_lost": 0,  # We'll keep this one for calculation
+        "games_won": 0,
+        "games_lost": 0,
         "time_played": 0,
         "winrate": 0,
         "kda": 0,
@@ -45,10 +46,17 @@ class PlayerStatsSummaryParser(PlayerParser):
         )
 
         heroes_stats = self.__compute_heroes_data(gamemodes, platforms)
+        if not heroes_stats:
+            return {}
+
         roles_stats = self.__get_roles_stats(heroes_stats)
         general_stats = self.__get_general_stats(roles_stats)
 
-        return self.__compute_stats(general_stats, roles_stats, heroes_stats)
+        return {
+            "general": general_stats,
+            "roles": roles_stats,
+            "heroes": heroes_stats,
+        }
 
     def parse_data(self) -> dict | None:
         # We must check if we have the expected section for profile. If not,
@@ -124,50 +132,6 @@ class PlayerStatsSummaryParser(PlayerParser):
                         ] += hero_stats[platform][gamemode]["total"][stat_name]
 
         return computed_heroes_stats
-
-    def __compute_stats(
-        self,
-        general_stats: dict | None,
-        roles_stats: dict | None,
-        heroes_stats: dict | None,
-    ) -> dict:
-        """Last computing before sending the stats, here we will remove the
-        "games_lost" key.
-        """
-        if not heroes_stats:
-            return {}
-
-        filtered_general_stats = {
-            stat_key: stat_value
-            for stat_key, stat_value in general_stats.items()
-            if stat_key != "games_lost"
-        }
-
-        filtered_roles_stats = {
-            role.value: {
-                stat_key: stat_value
-                for stat_key, stat_value in roles_stats[role.value].items()
-                if stat_key != "games_lost"
-            }
-            for role in Role
-            if role.value in roles_stats
-        }
-
-        filtered_heroes_stats = {
-            hero.value: {
-                stat_key: stat_value
-                for stat_key, stat_value in heroes_stats[hero.value].items()
-                if stat_key != "games_lost"
-            }
-            for hero in HeroKey
-            if hero.value in heroes_stats
-        }
-
-        return {
-            "general": filtered_general_stats,
-            "roles": filtered_roles_stats,
-            "heroes": filtered_heroes_stats,
-        }
 
     @staticmethod
     def _get_category_stats(category: str, hero_stats: dict) -> dict:
@@ -250,6 +214,14 @@ class PlayerStatsSummaryParser(PlayerParser):
         # in order for the player to have 50% winrate
         games_lost = round(games_played / 2) if games_lost < 0 else games_lost
 
+        # We just calculate games won like this because sometimes Blizzard
+        # exposes "Games Won" stats several times for the same hero and
+        # not with the same value, but it doesn't happen for games lost
+        games_won = games_played - games_lost
+
+        # Make sure it's not negative
+        games_won = max(games_won, 0)
+
         combat_stats = self._get_category_stats("combat", hero_stats)
         eliminations = self._get_stat_value("eliminations", combat_stats)
         deaths = self._get_stat_value("deaths", combat_stats)
@@ -261,6 +233,7 @@ class PlayerStatsSummaryParser(PlayerParser):
 
         return {
             "games_played": games_played,
+            "games_won": games_won,
             "games_lost": games_lost,
             "time_played": time_played,
             "total": {
@@ -272,10 +245,7 @@ class PlayerStatsSummaryParser(PlayerParser):
             },
         }
 
-    def __get_roles_stats(self, heroes_stats: dict | None) -> dict | None:
-        if not heroes_stats:
-            return None
-
+    def __get_roles_stats(self, heroes_stats: dict) -> dict:
         # Initialize stats
         roles_stats = {role_key: deepcopy(self.stats_placeholder) for role_key in Role}
 
@@ -302,10 +272,7 @@ class PlayerStatsSummaryParser(PlayerParser):
             if role_stat["games_played"] > 0
         }
 
-    def __get_general_stats(self, roles_stats: dict | None) -> dict | None:
-        if not roles_stats:
-            return None
-
+    def __get_general_stats(self, roles_stats: dict) -> dict:
         general_stats = deepcopy(self.stats_placeholder)
 
         # Retrieve raw data from roles
@@ -324,14 +291,14 @@ class PlayerStatsSummaryParser(PlayerParser):
 
     def __get_winrate_from_stat(self, stat: dict) -> float:
         return self.__get_winrate(
-            stat.get("games_played") or 0, stat.get("games_lost") or 0
+            stat.get("games_won") or 0, stat.get("games_played") or 0
         )
 
     @staticmethod
-    def __get_winrate(games_played: int, games_lost: int) -> float:
+    def __get_winrate(games_won: int, games_played: int) -> float:
         if games_played <= 0:
             return 0
-        return round(((games_played - games_lost) / games_played) * 100, 2)
+        return round((games_won / games_played) * 100, 2)
 
     def __get_kda_from_stat(self, stat: dict) -> float:
         return self.__get_kda(
