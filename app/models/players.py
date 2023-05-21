@@ -348,6 +348,8 @@ class AverageStatsSummary(BaseModel):
 
 class StatsSummary(BaseModel):
     games_played: int = Field(..., description="Number of games played", ge=0)
+    games_won: int = Field(..., description="Number of games won", ge=0)
+    games_lost: int = Field(..., description="Number of games lost", ge=0)
     time_played: int = Field(..., description="Time played (in seconds)", ge=0)
     winrate: float = Field(..., description="Winrate (in percent)", ge=0.0, le=100.0)
     kda: float = Field(..., description="Kill / Death / Assist ratio", ge=0.0)
