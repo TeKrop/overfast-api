@@ -58,11 +58,11 @@ class PlayerParser(APIParser):
             return self.data.get("summary")
 
         if kwargs.get("stats"):
-            return self.__filter_stats(**kwargs)
+            return self._filter_stats(**kwargs)
 
         return self.data
 
-    def __filter_stats(self, **kwargs) -> dict:
+    def _filter_stats(self, **kwargs) -> dict:
         filtered_data = self.data["stats"] or {}
 
         platform = kwargs.get("platform")

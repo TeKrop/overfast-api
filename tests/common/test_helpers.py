@@ -57,3 +57,15 @@ def test_dict_insert_value_before_key_valid(
         helpers.dict_insert_value_before_key(input_dict, key, new_key, new_value)
         == result_dict
     )
+
+
+@pytest.mark.parametrize(
+    ("key", "result_label"),
+    [
+        ("assists", "Assists"),
+        ("hero_specific", "Hero Specific"),
+        ("match_awards", "Match Awards"),
+    ],
+)
+def test_key_to_label(key: str, result_label: str):
+    assert helpers.key_to_label(key) == result_label
