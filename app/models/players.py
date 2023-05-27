@@ -12,6 +12,7 @@ from pydantic import (
 from app.common.api_examples import (
     CareerStatsExample,
     HeroesComparisonsExample,
+    PlayerCareerStatsExample,
     PlayerStatsSummaryExample,
 )
 from app.common.enums import (
@@ -20,7 +21,7 @@ from app.common.enums import (
     HeroKey,
     PlayerPrivacy,
 )
-from app.common.helpers import get_hero_name
+from app.common.helpers import get_hero_name, key_to_label
 
 
 # Player search
@@ -429,3 +430,51 @@ class PlayerStatsSummary(BaseModel):
 
     class Config:
         schema_extra = {"example": PlayerStatsSummaryExample}
+
+
+class PlayerCareerStatsConfig:
+    schema_extra = {"example": PlayerCareerStatsExample}
+
+
+# Player career stats
+HeroPlayerCareerStats = create_model(
+    "HeroPlayerCareerStats",
+    **{
+        stat_category.name.lower(): (
+            dict[str, StrictInt | StrictFloat] | None,
+            Field(
+                None,
+                description=(
+                    f'Statistics for "{key_to_label(stat_category.value)}" category'
+                ),
+                alias=stat_category.value,
+            ),
+        )
+        for stat_category in CareerStatCategory
+    },
+)
+
+
+PlayerCareerStats = create_model(
+    "PlayerCareerStats",
+    all_heroes=(
+        HeroPlayerCareerStats | None,
+        Field(
+            None,
+            description="Total of statistics for all heroes",
+            alias="all-heroes",
+        ),
+    ),
+    **{
+        hero_key.name.lower(): (
+            HeroPlayerCareerStats | None,
+            Field(
+                None,
+                description=f"Career statistics for {get_hero_name(hero_key)}",
+                alias=hero_key.value,
+            ),
+        )
+        for hero_key in HeroKey
+    },
+    __config__=PlayerCareerStatsConfig,
+)

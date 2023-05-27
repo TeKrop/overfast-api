@@ -204,3 +204,8 @@ def dict_insert_value_before_key(
 
     # Convert back the list into a dict and return it
     return dict(data_items)
+
+
+def key_to_label(key: str) -> str:
+    """Transform a given key in lowercase format into a human format"""
+    return " ".join(s.capitalize() for s in key.split("_"))

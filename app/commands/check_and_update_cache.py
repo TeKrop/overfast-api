@@ -18,6 +18,7 @@ from app.parsers.heroes_stats_parser import HeroesStatsParser
 from app.parsers.maps_parser import MapsParser
 from app.parsers.namecard_parser import NamecardParser
 from app.parsers.player_parser import PlayerParser
+from app.parsers.player_career_parser import PlayerCareerParser
 from app.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
 from app.parsers.roles_parser import RolesParser
 
@@ -30,6 +31,7 @@ PARSER_CLASSES_MAPPING = {
     "MapsParser": MapsParser,
     "NamecardParser": NamecardParser,
     "PlayerParser": PlayerParser,
+    "PlayerCareerParser": PlayerCareerParser,
     "PlayerStatsSummaryParser": PlayerStatsSummaryParser,
     "RolesParser": RolesParser,
 }
@@ -65,7 +67,7 @@ def get_request_parser_class(cache_key: str) -> tuple[type, dict]:
         "/"
     )
     cache_kwargs["locale"] = uri[1]
-    if parser_class_name in ("PlayerParser", "PlayerStatsSummaryParser"):
+    if "Player" in parser_class_name:
         cache_kwargs["player_id"] = uri[3]
     elif parser_class_name == "NamecardParser":
         cache_kwargs["player_id"] = uri[4].replace("#", "-")

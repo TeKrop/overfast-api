@@ -12,6 +12,9 @@ from app.common.enums import (
 )
 from app.common.helpers import routes_responses as common_routes_responses
 from app.handlers.get_player_career_request_handler import GetPlayerCareerRequestHandler
+from app.handlers.get_player_career_stats_request_handler import (
+    GetPlayerCareerStatsRequestHandler,
+)
 from app.handlers.get_player_stats_summary_request_handler import (
     GetPlayerStatsSummaryRequestHandler,
 )
@@ -20,6 +23,7 @@ from app.models.errors import PlayerParserErrorMessage
 from app.models.players import (
     CareerStats,
     Player,
+    PlayerCareerStats,
     PlayerSearchResult,
     PlayerStatsSummary,
     PlayerSummary,
@@ -46,6 +50,43 @@ async def get_player_common_parameters(
     ),
 ):
     return {"player_id": player_id}
+
+
+async def get_player_career_common_parameters(
+    commons: dict = Depends(get_player_common_parameters),
+    gamemode: PlayerGamemode = Query(
+        ...,
+        title="Gamemode",
+        description="Filter on a specific gamemode.",
+        example="competitive",
+    ),
+    platform: PlayerPlatform
+    | None = Query(
+        None,
+        title="Platform",
+        description=(
+            "Filter on a specific platform. If not specified, the only platform the "
+            "player played on will be selected. If the player has already played on "
+            "both PC and console, the PC stats will be displayed by default."
+        ),
+        example="pc",
+    ),
+    hero: HeroKeyCareerFilter
+    | None = Query(
+        None,
+        title="Hero key",
+        description=(
+            "Filter on a specific hero in order to only get his statistics. "
+            "You also can specify 'all-heroes' for general stats."
+        ),
+    ),
+):
+    return {
+        "player_id": commons.get("player_id"),
+        "gamemode": gamemode,
+        "platform": platform,
+        "hero": hero,
+    }
 
 
 router = APIRouter()
@@ -162,12 +203,58 @@ async def get_player_stats_summary(
 
 
 @router.get(
+    "/{player_id}/stats/career",
+    response_model_exclude_unset=True,
+    responses=career_routes_responses,
+    tags=[RouteTag.PLAYERS],
+    summary="Get player career stats",
+    description=(
+        "Career contains numerous statistics grouped by heroes and categories "
+        "(combat, game, best, hero specific, average, etc.). Filter them on "
+        "specific platform and gamemode (mandatory). You can even retrieve "
+        "data about a specific hero of your choice."
+        "<br />**Cache TTL : 1 hour.**"
+    ),
+)
+@validation_error_handler(response_model=PlayerCareerStats)
+async def get_player_career_stats(
+    request: Request,
+    commons: dict = Depends(get_player_career_common_parameters),
+) -> PlayerCareerStats:
+    return await GetPlayerCareerStatsRequestHandler(request).process_request(
+        stats=True, **commons
+    )
+
+
+@router.get(
+    "/{player_id}/stats",
+    response_model_exclude_unset=True,
+    responses=career_routes_responses,
+    tags=[RouteTag.PLAYERS],
+    summary="Get player stats with labels",
+    description=(
+        "This endpoint exposes the same data as the previous one, except it also "
+        "exposes labels of the categories and statistics."
+        "<br />**Cache TTL : 1 hour.**"
+    ),
+)
+@validation_error_handler(response_model=CareerStats)
+async def get_player_stats(
+    request: Request,
+    commons: dict = Depends(get_player_career_common_parameters),
+) -> CareerStats:
+    return await GetPlayerCareerRequestHandler(request).process_request(
+        stats=True, **commons
+    )
+
+
+@router.get(
     "/{player_id}",
     responses=career_routes_responses,
     tags=[RouteTag.PLAYERS],
-    summary="Get player career data",
+    summary="Get all player data",
     description=(
-        "Get all player data : summary and statistics.<br />**Cache TTL : 1 hour.**"
+        "Get all player data : summary and statistics with labels.<br />**Cache TTL : 1 hour.**"
     ),
 )
 @validation_error_handler(response_model=Player)
@@ -177,58 +264,4 @@ async def get_player_career(
 ) -> Player:
     return await GetPlayerCareerRequestHandler(request).process_request(
         player_id=commons.get("player_id")
-    )
-
-
-@router.get(
-    "/{player_id}/stats",
-    response_model_exclude_unset=True,
-    responses=career_routes_responses,
-    tags=[RouteTag.PLAYERS],
-    summary="Get player statistics",
-    description=(
-        "Career contains numerous statistics grouped by heroes and categories "
-        "(combat, game, best, hero specific, average, etc.). Filter them on "
-        "specific platform and gamemode (mandatory). You can even retrieve "
-        "data about a specific hero of your choice."
-        "<br />**Cache TTL : 1 hour.**"
-    ),
-)
-@validation_error_handler(response_model=CareerStats)
-async def get_player_stats(
-    request: Request,
-    commons: dict = Depends(get_player_common_parameters),
-    gamemode: PlayerGamemode = Query(
-        ...,
-        title="Gamemode",
-        description="Filter on a specific gamemode.",
-        example="competitive",
-    ),
-    platform: PlayerPlatform
-    | None = Query(
-        None,
-        title="Platform",
-        description=(
-            "Filter on a specific platform. If not specified, the only platform the "
-            "player played on will be selected. If the player has already played on "
-            "both PC and console, the PC stats will be displayed by default."
-        ),
-        example="pc",
-    ),
-    hero: HeroKeyCareerFilter
-    | None = Query(
-        None,
-        title="Hero key",
-        description=(
-            "Filter on a specific hero in order to only get his statistics. "
-            "You also can specify 'all-heroes' for general stats."
-        ),
-    ),
-) -> CareerStats:
-    return await GetPlayerCareerRequestHandler(request).process_request(
-        stats=True,
-        player_id=commons.get("player_id"),
-        platform=platform,
-        gamemode=gamemode,
-        hero=hero,
     )

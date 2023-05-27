@@ -81,6 +81,11 @@ def player_stats_json_data(request: SubRequest):
 
 
 @pytest.fixture(scope="session")
+def player_career_json_data(request: SubRequest):
+    return read_json_file(f"players/career/{request.param}.json")
+
+
+@pytest.fixture(scope="session")
 def search_players_blizzard_json_data():
     return read_json_file("search_players/search_players_blizzard_result.json")
 
