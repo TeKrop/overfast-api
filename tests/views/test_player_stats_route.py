@@ -17,9 +17,17 @@ heroes = {h.value for h in HeroKeyCareerFilter}
 
 
 @pytest.mark.parametrize(
-    ("player_html_data", "player_json_data", "gamemode", "platform", "hero"),
+    (
+        "player_html_data",
+        "player_json_data",
+        "player_career_json_data",
+        "gamemode",
+        "platform",
+        "hero",
+        "uri",
+    ),
     [
-        ("TeKrop-2217", "TeKrop-2217", gamemode, platform, hero)
+        ("TeKrop-2217", "TeKrop-2217", "TeKrop-2217", gamemode, platform, hero, uri)
         for gamemode in (None, Mock(value="invalid_gamemode"), *PlayerGamemode)
         for platform in (None, Mock(value="invalid_platform"), *PlayerPlatform)
         for hero in (
@@ -31,16 +39,19 @@ heroes = {h.value for h in HeroKeyCareerFilter}
                 HeroKeyCareerFilter.REINHARDT,
             ],
         )
+        for uri in ("/stats", "/stats/career")
     ],
-    indirect=["player_html_data", "player_json_data"],
+    indirect=["player_html_data", "player_json_data", "player_career_json_data"],
 )
 def test_get_player_stats(
     player_html_data: str,
     player_json_data: dict,
+    player_career_json_data: dict,
     gamemode: PlayerGamemode | None,
     platform: PlayerPlatform | None,
     hero: HeroKeyCareerFilter | None,
     search_tekrop_blizzard_json_data: dict,
+    uri: str,
 ):
     with patch.object(
         overfast_client,
@@ -62,7 +73,7 @@ def test_get_player_stats(
             ]
         )
         params = f"?{query_params}" if query_params else ""
-        response = client.get(f"/players/TeKrop-2217/stats{params}")
+        response = client.get(f"/players/TeKrop-2217{uri}{params}")
 
     # Gamemode is a mandatory option
     if (
@@ -74,7 +85,10 @@ def test_get_player_stats(
     else:
         assert response.status_code == status.HTTP_200_OK
 
-        filtered_data = player_json_data["stats"] or {}
+        if uri == "/stats":
+            filtered_data = player_json_data["stats"] or {}
+        elif uri == "/stats/career":
+            filtered_data = player_career_json_data.get("stats") or {}
 
         if not platform:
             # Retrieve a "default" platform is the user didn't provided one
@@ -102,7 +116,8 @@ def test_get_player_stats(
         }
 
 
-def test_get_player_stats_blizzard_error():
+@pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
+def test_get_player_stats_blizzard_error(uri: str):
     with patch.object(
         overfast_client,
         "get",
@@ -111,7 +126,7 @@ def test_get_player_stats_blizzard_error():
         ),
     ):
         response = client.get(
-            f"/players/TeKrop-2217/stats?gamemode={PlayerGamemode.QUICKPLAY}"
+            f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}"
         )
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
@@ -120,7 +135,8 @@ def test_get_player_stats_blizzard_error():
     }
 
 
-def test_get_player_stats_blizzard_timeout():
+@pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
+def test_get_player_stats_blizzard_timeout(uri: str):
     with patch.object(
         overfast_client,
         "get",
@@ -130,7 +146,7 @@ def test_get_player_stats_blizzard_timeout():
         ),
     ):
         response = client.get(
-            f"/players/TeKrop-2217/stats?gamemode={PlayerGamemode.QUICKPLAY}"
+            f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}"
         )
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
