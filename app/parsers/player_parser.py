@@ -19,6 +19,8 @@ from .helpers import (
     get_division_from_rank_icon,
     get_endorsement_value_from_frame,
     get_hero_keyname,
+    get_plural_stat_key,
+    get_real_category_name,
     get_role_key_from_icon,
     get_stats_hero_class,
     get_tier_from_rank_icon,
@@ -273,19 +275,6 @@ class PlayerParser(APIParser):
             "career_stats": self.__get_career_stats(career_stats_section),
         }
 
-    @staticmethod
-    def __get_real_category_name(category_name: str) -> str:
-        """Specific method used because Blizzard sometimes name their categories
-        in singular or plural. Example : "Objective Kill" or "Objective Kills".
-        In order to be more consistent, I forced categories in one form (plural).
-        """
-        singular_to_plural_mapping = {
-            "Game Won": "Games Won",
-            "Elimination per Life": "Eliminations per Life",
-            "Objective Kill": "Objective Kills",
-        }
-        return singular_to_plural_mapping.get(category_name, category_name)
-
     def __get_heroes_comparisons(self, top_heroes_section: Tag) -> dict:
         categories = {
             option["value"]: option["option-id"]
@@ -301,9 +290,9 @@ class PlayerParser(APIParser):
 
         heroes_comparisons = {
             string_to_snakecase(
-                self.__get_real_category_name(categories[category["data-category-id"]])
+                get_real_category_name(categories[category["data-category-id"]])
             ): {
-                "label": self.__get_real_category_name(
+                "label": get_real_category_name(
                     categories[category["data-category-id"]]
                 ),
                 "values": [
@@ -385,7 +374,7 @@ class PlayerParser(APIParser):
                     stat_name = stat_row.find("p", class_="name").get_text()
                     career_stats[hero_key][-1]["stats"].append(
                         {
-                            "key": string_to_snakecase(stat_name),
+                            "key": get_plural_stat_key(string_to_snakecase(stat_name)),
                             "label": stat_name,
                             "value": get_computed_stat_value(
                                 stat_row.find("p", class_="value").get_text()
