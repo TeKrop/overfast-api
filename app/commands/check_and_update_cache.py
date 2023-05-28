@@ -17,8 +17,8 @@ from app.parsers.heroes_parser import HeroesParser
 from app.parsers.heroes_stats_parser import HeroesStatsParser
 from app.parsers.maps_parser import MapsParser
 from app.parsers.namecard_parser import NamecardParser
-from app.parsers.player_parser import PlayerParser
 from app.parsers.player_career_parser import PlayerCareerParser
+from app.parsers.player_parser import PlayerParser
 from app.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
 from app.parsers.roles_parser import RolesParser
 

@@ -1,12 +1,12 @@
 """Project constants module"""
 import tomllib
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 
 from pydantic import BaseSettings
 
 
-@lru_cache
+@cache
 def get_app_version() -> str:
     with Path(f"{Path.cwd()}/pyproject.toml").open(mode="rb") as project_file:
         project_data = tomllib.load(project_file)
@@ -158,7 +158,7 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 
-@lru_cache
+@cache
 def get_settings() -> Settings:
     return Settings()
 

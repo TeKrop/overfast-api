@@ -7,7 +7,7 @@ from fastapi import status
 from app.common.enums import HeroKey, PlayerGamemode, PlayerPlatform, Role
 from app.common.exceptions import ParserBlizzardError
 
-from .helpers import get_hero_role
+from .helpers import get_hero_role, get_plural_stat_key
 from .player_parser import PlayerParser
 
 
@@ -96,7 +96,7 @@ class PlayerStatsSummaryParser(PlayerParser):
         return {
             hero_key: hero_stats
             for hero_key, hero_stats in computed_heroes_stats.items()
-            if hero_stats["games_played"] > 0
+            if hero_stats["time_played"] > 0
         }
 
     def __init_heroes_data(
@@ -134,7 +134,7 @@ class PlayerStatsSummaryParser(PlayerParser):
         return computed_heroes_stats
 
     @staticmethod
-    def _get_category_stats(category: str, hero_stats: dict) -> dict:
+    def _get_category_stats(category: str, hero_stats: list[dict]) -> dict:
         category_stats = filter(lambda x: x["category"] == category, hero_stats)
         try:
             return next(category_stats)["stats"]
@@ -142,8 +142,10 @@ class PlayerStatsSummaryParser(PlayerParser):
             return {}
 
     @staticmethod
-    def _get_stat_value(stat_name: str, stats_list: dict) -> int | float:
-        stat_value = filter(lambda x: x["key"] == stat_name, stats_list)
+    def _get_stat_value(stat_name: str, stats_list: list[dict]) -> int | float:
+        stat_value = filter(
+            lambda x: get_plural_stat_key(x["key"]) == stat_name, stats_list
+        )
         try:
             return next(stat_value)["value"]
         except StopIteration:
@@ -189,23 +191,17 @@ class PlayerStatsSummaryParser(PlayerParser):
                 }
 
                 for hero_key, hero_stats in career_stats.items():
-                    if not (
-                        computed_hero_stats := self.__compute_hero_stats(hero_stats)
-                    ):
-                        continue
-
-                    heroes_stats[hero_key][platform][gamemode] = computed_hero_stats
+                    heroes_stats[hero_key][platform][
+                        gamemode
+                    ] = self.__compute_hero_stats(hero_stats)
 
         return heroes_stats
 
-    def __compute_hero_stats(self, hero_stats: dict) -> dict | None:
+    def __compute_hero_stats(self, hero_stats: dict) -> dict:
         """Compute a single hero statistics."""
 
         game_stats = self._get_category_stats("game", hero_stats)
         games_played = self._get_stat_value("games_played", game_stats)
-        if games_played <= 0:
-            return None
-
         time_played = self._get_stat_value("time_played", game_stats)
         games_lost = self._get_stat_value("games_lost", game_stats)
 
@@ -269,7 +265,7 @@ class PlayerStatsSummaryParser(PlayerParser):
         return {
             role_key: role_stat
             for role_key, role_stat in roles_stats.items()
-            if role_stat["games_played"] > 0
+            if role_stat["time_played"] > 0
         }
 
     def __get_general_stats(self, roles_stats: dict) -> dict:
