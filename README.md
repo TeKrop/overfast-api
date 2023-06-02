@@ -243,7 +243,8 @@ Here is a list of projects which are currently using OverFast API as a data sour
 
 - Overfast API client (https://github.com/Sipixer/overfast-api-client)
 - Watch Over, mobile app by @Backxtar (https://github.com/Backxtar)
-- ...
+- Overwatch Career Profile (https://github.com/EliaRenov/ow-career-profile)
+- Discord Bot OW2 for stats (https://github.com/polsojac/ow2discordbot)
 
 ## 🙏 Credits
 
