@@ -10,6 +10,7 @@
         },
         "competitive": {
             "pc": {
+                "season": 2,
                 "damage": {
                     "division": "silver",
                     "tier": 4,
@@ -24,7 +25,12 @@
                 },
                 "tank": null
             },
-            "console": null
+            "console": {
+                "season": 1,
+                "tank": null,
+                "damage": null,
+                "support": null
+            }
         },
         "privacy": "public"
     },

@@ -10,6 +10,7 @@
         },
         "competitive": {
             "pc": {
+                "season": 2,
                 "tank": {
                     "division": "silver",
                     "tier": 1,

@@ -8,7 +8,15 @@
             "level": 1,
             "frame": "https://static.playoverwatch.com/img/pages/career/icons/endorsement/1-9de6d43ec5.svg#icon"
         },
-        "competitive": null,
+        "competitive": {
+            "pc": {
+                "season": 1,
+                "tank": null,
+                "damage": null,
+                "support": null
+            },
+            "console": null
+        },
         "privacy": "public"
     },
     "stats": {

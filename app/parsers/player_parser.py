@@ -170,6 +170,8 @@ class PlayerParser(APIParser):
     def __get_platform_competitive_ranks(
         self, progression_div: Tag, platform_class: str
     ) -> dict | None:
+        last_season_played = self.__get_last_season_played(platform_class)
+
         competitive_rank_div = progression_div.select_one(
             f"div.Profile-playerSummary--rankWrapper.{platform_class}"
         )
@@ -178,7 +180,7 @@ class PlayerParser(APIParser):
             class_="Profile-playerSummary--roleWrapper",
             recursive=False,
         )
-        if not role_wrappers:
+        if not role_wrappers and not last_season_played:
             return None
 
         competitive_ranks = {}
@@ -201,7 +203,26 @@ class PlayerParser(APIParser):
             if role.value not in competitive_ranks:
                 competitive_ranks[role.value] = None
 
+        competitive_ranks["season"] = last_season_played
+
         return competitive_ranks
+
+    def __get_last_season_played(self, platform_class: str) -> int | None:
+        profile_section = self.root_tag.select_one(f"div.Profile-view.{platform_class}")
+        if not profile_section:
+            return None
+
+        statistics_section = profile_section.select_one(
+            "blz-section.stats.competitive-view"
+        )
+        return (
+            int(statistics_section["data-latestherostatrankseasonow2"])
+            if (
+                statistics_section
+                and "data-latestherostatrankseasonow2" in statistics_section.attrs
+            )
+            else None
+        )
 
     @staticmethod
     def __get_role_icon(role_wrapper: Tag) -> str:
