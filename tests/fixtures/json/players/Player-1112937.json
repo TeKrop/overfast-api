@@ -11,6 +11,7 @@
         "competitive": {
             "pc": null,
             "console": {
+                "season": 1,
                 "tank": {
                     "division": "platinum",
                     "tier": 4,

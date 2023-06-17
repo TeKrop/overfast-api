@@ -82,6 +82,12 @@ class PlayerCompetitiveRank(BaseModel):
 
 
 class PlatformCompetitiveRanksContainer(BaseModel):
+    season: int | None = Field(
+        None,
+        description="Last competitive season played by the player",
+        example=3,
+        ge=1,
+    )
     tank: PlayerCompetitiveRank | None = Field(None, description="Tank role details")
     damage: PlayerCompetitiveRank | None = Field(
         None, description="Damage role details"
@@ -95,14 +101,14 @@ class PlayerCompetitiveRanksContainer(BaseModel):
     pc: PlatformCompetitiveRanksContainer | None = Field(
         None,
         description=(
-            "Competitive ranks for PC. "
+            "Competitive ranks for PC and last season played on it. "
             "If the player doesn't play on this platform, it's null."
         ),
     )
     console: PlatformCompetitiveRanksContainer | None = Field(
         None,
         description=(
-            "Competitive ranks for console. "
+            "Competitive ranks for console and last season played on it. "
             "If the player doesn't play on this platform, it's null."
         ),
     )
@@ -165,9 +171,9 @@ class PlayerSummary(BaseModel):
     competitive: PlayerCompetitiveRanksContainer | None = Field(
         None,
         description=(
-            "Competitive ranking in different roles depending on the platform. "
-            "If the career is private or if the player doesn't play competitive "
-            "at all, it's null."
+            "Competitive ranking in the last season played by the player in different roles "
+            "depending on the platform. If the career is private or if the player "
+            "doesn't play competitive at all, it's null."
         ),
     )
     privacy: PlayerPrivacy = Field(
@@ -290,7 +296,7 @@ class PlayerPlatformStats(BaseModel):
     competitive: PlayerGamemodeStats | None = Field(
         None,
         description=(
-            "Competitive statistics about heroes. "
+            "Competitive statistics about heroes in the last season played by the player. "
             "If the player doesn't have stats for this gamemode, it's null."
         ),
     )
