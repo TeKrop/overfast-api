@@ -242,7 +242,7 @@ Contributions, issues and feature requests are welcome ! Do you want to update t
 Here is a list of projects which are currently using OverFast API as a data source. You're using it in one of your projects ? Feel free to reach me by e-mail, send me a link of your project (either website URL or public git repository), and I will add it in the list :)
 
 - Overfast API client (https://github.com/Sipixer/overfast-api-client)
-- Watch Over, mobile app by @Backxtar (https://github.com/Backxtar)
+- Watch Over, mobile app by @Backxtar (https://play.google.com/store/apps/details?id=de.backxtar.watchoveroverwatch)
 - Overwatch Career Profile (https://github.com/EliaRenov/ow-career-profile)
 - Discord Bot OW2 for stats (https://github.com/polsojac/ow2discordbot)
 
