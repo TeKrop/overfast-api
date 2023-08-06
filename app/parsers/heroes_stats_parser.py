@@ -1,4 +1,6 @@
 """Heroes Stats Parser module"""
+from typing import ClassVar
+
 from app.common.helpers import read_csv_data_file
 from app.config import settings
 
@@ -9,7 +11,7 @@ class HeroesStatsParser(AbstractParser):
     """Heroes stats (health, armor, shields) Parser class"""
 
     timeout = settings.hero_path_cache_timeout
-    hitpoints_keys = {"health", "armor", "shields"}
+    hitpoints_keys: ClassVar[set] = {"health", "armor", "shields"}
 
     async def retrieve_and_parse_data(self) -> None:
         heroes_stats_data = read_csv_data_file("heroes_stats.csv")

@@ -46,7 +46,7 @@ async def get_player_common_parameters(
             'Identifier of the player : BattleTag (with "#" replaced by "-"). '
             "Be careful, letter case (capital/non-capital letters) is important !"
         ),
-        example="TeKrop-2217",
+        examples=["TeKrop-2217"],
     ),
 ):
     return {"player_id": player_id}
@@ -58,10 +58,9 @@ async def get_player_career_common_parameters(
         ...,
         title="Gamemode",
         description="Filter on a specific gamemode.",
-        example="competitive",
+        examples=["competitive"],
     ),
-    platform: PlayerPlatform
-    | None = Query(
+    platform: PlayerPlatform = Query(
         None,
         title="Platform",
         description=(
@@ -69,10 +68,9 @@ async def get_player_career_common_parameters(
             "player played on will be selected. If the player has already played on "
             "both PC and console, the PC stats will be displayed by default."
         ),
-        example="pc",
+        examples=["pc"],
     ),
-    hero: HeroKeyCareerFilter
-    | None = Query(
+    hero: HeroKeyCareerFilter = Query(
         None,
         title="Hero key",
         description=(
@@ -108,20 +106,18 @@ async def search_players(
     request: Request,
     name: str = Query(
         title="Player nickname to search",
-        example="TeKrop",
+        examples=["TeKrop"],
     ),
-    privacy: PlayerPrivacy
-    | None = Query(
-        None, title="Privacy settings of the player career", example="public"
+    privacy: PlayerPrivacy = Query(
+        None, title="Privacy settings of the player career", examples=["public"]
     ),
-    order_by: str
-    | None = Query(
+    order_by: str = Query(
         "name:asc",
         title="Ordering field and the way it's arranged (asc[ending]/desc[ending])",
-        regex="^(player_id|name|privacy):(asc|desc)$",
+        pattern=r"^(player_id|name|privacy):(asc|desc)$",
     ),
-    offset: int | None = Query(0, title="Offset of the results", ge=0),
-    limit: int | None = Query(20, title="Limit of results per page", gt=0),
+    offset: int = Query(0, title="Offset of the results", ge=0),
+    limit: int = Query(20, title="Limit of results per page", gt=0),
 ) -> PlayerSearchResult:
     return await SearchPlayersRequestHandler(request).process_request(
         name=name,
@@ -174,25 +170,23 @@ async def get_player_summary(
 async def get_player_stats_summary(
     request: Request,
     commons: dict = Depends(get_player_common_parameters),
-    gamemode: PlayerGamemode
-    | None = Query(
+    gamemode: PlayerGamemode = Query(
         None,
         title="Gamemode",
         description=(
             "Filter on a specific gamemode. If not specified, the data of "
             "every gamemode will be combined."
         ),
-        example="competitive",
+        examples=["competitive"],
     ),
-    platform: PlayerPlatform
-    | None = Query(
+    platform: PlayerPlatform = Query(
         None,
         title="Platform",
         description=(
             "Filter on a specific platform. If not specified, the data of "
             "every platform will be combined."
         ),
-        example="pc",
+        examples=["pc"],
     ),
 ) -> PlayerStatsSummary:
     return await GetPlayerStatsSummaryRequestHandler(request).process_request(

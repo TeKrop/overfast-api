@@ -1,4 +1,6 @@
 """Hero Request Handler module"""
+from typing import ClassVar
+
 from app.common.helpers import dict_insert_value_before_key
 from app.config import settings
 from app.parsers.hero_parser import HeroParser
@@ -14,7 +16,7 @@ class GetHeroRequestHandler(APIRequestHandler):
     should be used to display data about a specific hero.
     """
 
-    parser_classes = [HeroParser, HeroesParser, HeroesStatsParser]
+    parser_classes: ClassVar[list] = [HeroParser, HeroesParser, HeroesStatsParser]
     timeout = settings.hero_path_cache_timeout
 
     def merge_parsers_data(self, parsers_data: list[dict], **kwargs) -> dict:
@@ -26,21 +28,21 @@ class GetHeroRequestHandler(APIRequestHandler):
         hero_data, heroes_data, heroes_stats_data = parsers_data
 
         try:
-            portrait_value = [
+            portrait_value = next(
                 hero["portrait"]
                 for hero in heroes_data
                 if hero["key"] == kwargs.get("hero_key")
-            ][0]
-        except IndexError:
+            )
+        except StopIteration:
             # The hero key may not be here in some specific edge cases,
             # for example if the hero has been released but is not in the
             # heroes list yet, or the list cache is outdated
             portrait_value = None
-
-        # We want to insert the portrait before the "role" key
-        hero_data = dict_insert_value_before_key(
-            hero_data, "role", "portrait", portrait_value
-        )
+        else:
+            # We want to insert the portrait before the "role" key
+            hero_data = dict_insert_value_before_key(
+                hero_data, "role", "portrait", portrait_value
+            )
 
         try:
             hitpoints = heroes_stats_data[kwargs.get("hero_key")]["hitpoints"]
@@ -48,10 +50,10 @@ class GetHeroRequestHandler(APIRequestHandler):
             # Hero hitpoints may not be here if the CSV file
             # containing the data hasn't been updated
             hitpoints = None
-
-        # We want to insert hitpoints before "abilities" key
-        hero_data = dict_insert_value_before_key(
-            hero_data, "abilities", "hitpoints", hitpoints
-        )
+        else:
+            # We want to insert hitpoints before "abilities" key
+            hero_data = dict_insert_value_before_key(
+                hero_data, "abilities", "hitpoints", hitpoints
+            )
 
         return hero_data

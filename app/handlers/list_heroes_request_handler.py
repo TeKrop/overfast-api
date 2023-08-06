@@ -1,4 +1,6 @@
 """List Heroes Request Handler module"""
+from typing import ClassVar
+
 from app.config import settings
 from app.parsers.heroes_parser import HeroesParser
 
@@ -10,5 +12,5 @@ class ListHeroesRequestHandler(APIRequestHandler):
     retrieve a list of available Overwatch heroes.
     """
 
-    parser_classes = [HeroesParser]
+    parser_classes: ClassVar[list] = [HeroesParser]
     timeout = settings.heroes_path_cache_timeout

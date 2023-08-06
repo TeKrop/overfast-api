@@ -78,9 +78,9 @@ def get_role_key_from_icon(icon_url: str) -> Role:
 
 def get_stats_hero_class(hero_classes: list[str]) -> str:
     """Extract the specific classname from the classes list for a given hero."""
-    return [classname for classname in hero_classes if classname.startswith("option-")][
-        0
-    ]
+    return next(
+        classname for classname in hero_classes if classname.startswith("option-")
+    )
 
 
 def get_tier_from_rank_icon(rank_url: str) -> int:

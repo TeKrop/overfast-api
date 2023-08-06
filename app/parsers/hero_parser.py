@@ -1,4 +1,6 @@
 """Hero page Parser module"""
+from typing import ClassVar
+
 from bs4 import Tag
 from fastapi import status
 
@@ -15,7 +17,7 @@ class HeroParser(APIParser):
 
     root_path = settings.heroes_path
     timeout = settings.hero_path_cache_timeout
-    valid_http_codes = [
+    valid_http_codes: ClassVar[list] = [
         200,  # Classic response
         404,  # Hero Not Found response, we want to handle it here
     ]

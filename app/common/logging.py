@@ -3,6 +3,7 @@
 import logging
 import sys
 from pathlib import Path
+from typing import ClassVar
 
 from loguru import logger as loguru_logger
 
@@ -14,7 +15,7 @@ class InterceptHandler(logging.Handler):
     to transform them into loguru logs.
     """
 
-    loglevel_mapping = {
+    loglevel_mapping: ClassVar[dict] = {
         50: "CRITICAL",
         40: "ERROR",
         30: "WARNING",

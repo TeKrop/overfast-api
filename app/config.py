@@ -3,7 +3,7 @@ import tomllib
 from functools import cache
 from pathlib import Path
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 @cache
@@ -14,9 +14,17 @@ def get_app_version() -> str:
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env")
+
     ############
     # APPLICATION SETTINGS
     ############
+
+    # Application volume path for container
+    app_volume_path: str = "/my/custom/path/for/app"
+
+    # Application port
+    app_port: int = 80
 
     # Application version, retrieved from pyproject.toml. It should never be
     # overriden in dotenv. Only used in OpenAPI spec and request headers.
@@ -153,9 +161,6 @@ class Settings(BaseSettings):
 
     # Root path for Loguru access logs. It should never be overriden in dotenv.
     logs_root_path: str = f"{Path.cwd()}/logs"
-
-    class Config:
-        env_file = ".env"
 
 
 @cache
