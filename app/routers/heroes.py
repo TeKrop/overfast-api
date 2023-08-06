@@ -26,7 +26,7 @@ router = APIRouter()
 @validation_error_handler(response_model=HeroShort)
 async def list_heroes(
     request: Request,
-    role: Role | None = Query(None, title="Role filter"),
+    role: Role = Query(None, title="Role filter"),
     locale: Locale = Query(Locale.ENGLISH_US, title="Locale to be displayed"),
 ) -> list[HeroShort]:
     return await ListHeroesRequestHandler(request).process_request(

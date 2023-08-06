@@ -1,4 +1,6 @@
 """Player Stats Summary Request Handler module"""
+from typing import ClassVar
+
 from app.config import settings
 from app.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
 
@@ -11,5 +13,5 @@ class GetPlayerStatsSummaryRequestHandler(APIRequestHandler):
     Using the PlayerStatsSummaryParser.
     """
 
-    parser_classes = [PlayerStatsSummaryParser]
+    parser_classes: ClassVar[list] = [PlayerStatsSummaryParser]
     timeout = settings.career_path_cache_timeout

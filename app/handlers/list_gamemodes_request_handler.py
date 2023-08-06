@@ -1,4 +1,6 @@
 """List Gamemodes Request Handler module"""
+from typing import ClassVar
+
 from app.config import settings
 from app.parsers.gamemodes_parser import GamemodesParser
 
@@ -10,5 +12,5 @@ class ListGamemodesRequestHandler(APIRequestHandler):
     available Overwatch gamemodes, using the GamemodesParser class.
     """
 
-    parser_classes = [GamemodesParser]
+    parser_classes: ClassVar[list] = [GamemodesParser]
     timeout = settings.home_path_cache_timeout

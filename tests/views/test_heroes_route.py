@@ -77,13 +77,11 @@ def test_get_heroes_invalid_role():
     assert response.json() == {
         "detail": [
             {
+                "type": "enum",
                 "loc": ["query", "role"],
-                "msg": (
-                    "value is not a valid enumeration member; "
-                    "permitted: 'damage', 'support', 'tank'"
-                ),
-                "type": "type_error.enum",
-                "ctx": {"enum_values": ["damage", "support", "tank"]},
+                "msg": "Input should be 'damage','support' or 'tank'",
+                "input": "invalid",
+                "ctx": {"expected": "'damage','support' or 'tank'"},
             }
         ]
     }

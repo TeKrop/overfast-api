@@ -1,4 +1,6 @@
 """Player profile page Parser module"""
+from typing import ClassVar
+
 from bs4 import Tag
 from fastapi import status
 
@@ -42,7 +44,7 @@ class PlayerParser(APIParser):
 
     root_path = settings.career_path
     timeout = settings.career_path_cache_timeout
-    valid_http_codes = [
+    valid_http_codes: ClassVar[list] = [
         200,  # Classic response
         404,  # Player Not Found response, we want to handle it here
     ]
@@ -128,16 +130,26 @@ class PlayerParser(APIParser):
                     "img", class_="Profile-player--portrait", recursive=False
                 ).get("src")
             ),
-            "title": (
-                profile_div.find(
-                    "h2", class_="Profile-player--title", recursive=False
-                ).get_text()
-                or None
-            ),
+            "title": self.__get_title(profile_div),
             "endorsement": self.__get_endorsement(progression_div),
             "competitive": self.__get_competitive_ranks(progression_div),
             "privacy": self.__get_privacy(profile_div),
         }
+
+    @staticmethod
+    def __get_title(profile_div: Tag) -> str | None:
+        title = (
+            profile_div.find(
+                "h2", class_="Profile-player--title", recursive=False
+            ).get_text()
+            or None
+        )
+
+        # Special case : the "no title" means there is no title
+        if title and title.lower() == "no title":
+            return None
+
+        return title
 
     @staticmethod
     def __get_endorsement(progression_div: Tag) -> dict:

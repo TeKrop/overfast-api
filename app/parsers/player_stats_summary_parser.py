@@ -1,6 +1,7 @@
 """Player stats summary Parser module"""
 from collections import defaultdict
 from copy import deepcopy
+from typing import ClassVar
 
 from fastapi import status
 
@@ -14,10 +15,21 @@ from .player_parser import PlayerParser
 class PlayerStatsSummaryParser(PlayerParser):
     """Overwatch player profile page Parser class"""
 
-    generic_stats_names = ["games_played", "games_won", "games_lost", "time_played"]
-    total_stats_names = ["eliminations", "assists", "deaths", "damage", "healing"]
+    generic_stats_names: ClassVar[list] = [
+        "games_played",
+        "games_won",
+        "games_lost",
+        "time_played",
+    ]
+    total_stats_names: ClassVar[list] = [
+        "eliminations",
+        "assists",
+        "deaths",
+        "damage",
+        "healing",
+    ]
 
-    stats_placeholder = {
+    stats_placeholder: ClassVar[dict] = {
         "games_played": 0,
         "games_won": 0,
         "games_lost": 0,

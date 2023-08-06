@@ -1,6 +1,7 @@
 """Abstract API Parser module"""
 from abc import abstractmethod
 from functools import cached_property
+from typing import ClassVar
 
 from bs4 import BeautifulSoup
 from fastapi import status
@@ -19,7 +20,7 @@ class APIParser(AbstractParser):
     """
 
     # List of valid HTTP codes when retrieving Blizzard pages
-    valid_http_codes = [status.HTTP_200_OK]
+    valid_http_codes: ClassVar[list] = [status.HTTP_200_OK]
 
     def __init__(self, **kwargs):
         self.blizzard_url = self.get_blizzard_url(**kwargs)

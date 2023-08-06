@@ -1,4 +1,6 @@
 """List Maps Request Handler module"""
+from typing import ClassVar
+
 from app.config import settings
 from app.parsers.maps_parser import MapsParser
 
@@ -10,5 +12,5 @@ class ListMapsRequestHandler(APIRequestHandler):
     available Overwatch maps, using the MapsParser class.
     """
 
-    parser_classes = [MapsParser]
+    parser_classes: ClassVar[list] = [MapsParser]
     timeout = settings.home_path_cache_timeout

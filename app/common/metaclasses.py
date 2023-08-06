@@ -1,10 +1,11 @@
 """Set of metaclasses for the project"""
+from typing import ClassVar
 
 
 class Singleton(type):
     """Singleton class, to be used as metaclass."""
 
-    _instances = {}
+    _instances: ClassVar[dict] = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:

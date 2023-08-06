@@ -1,4 +1,6 @@
 """Player Career Request Handler module"""
+from typing import ClassVar
+
 from app.config import settings
 from app.parsers.namecard_parser import NamecardParser
 from app.parsers.player_parser import PlayerParser
@@ -12,7 +14,7 @@ class GetPlayerCareerRequestHandler(APIRequestHandler):
     PlayerParser class.
     """
 
-    parser_classes = [PlayerParser, NamecardParser]
+    parser_classes: ClassVar[list] = [PlayerParser, NamecardParser]
     timeout = settings.career_path_cache_timeout
 
     def merge_parsers_data(self, parsers_data: list[dict], **kwargs) -> dict:

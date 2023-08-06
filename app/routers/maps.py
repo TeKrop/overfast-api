@@ -21,8 +21,7 @@ router = APIRouter()
 @validation_error_handler(response_model=Map)
 async def list_maps(
     request: Request,
-    gamemode: MapGamemode
-    | None = Query(
+    gamemode: MapGamemode = Query(
         None,
         title="Gamemode filter",
         description="Filter maps available for a specific gamemode",

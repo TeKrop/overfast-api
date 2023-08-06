@@ -32,32 +32,18 @@ def test_get_maps_filter_by_gamemode(gamemode: MapGamemode, maps_json_data: list
     ]
 
 
-def test_get_maps_invalid_role():
+def test_get_maps_invalid_gamemode():
     response = client.get("/maps?gamemode=invalid")
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert response.json() == {
         "detail": [
             {
+                "type": "enum",
                 "loc": ["query", "gamemode"],
-                "msg": (
-                    "value is not a valid enumeration member; "
-                    "permitted: 'assault', 'capture-the-flag', 'control', "
-                    "'deathmatch', 'elimination', 'escort', 'hybrid', 'push', "
-                    "'team-deathmatch'"
-                ),
-                "type": "type_error.enum",
+                "msg": "Input should be 'assault','capture-the-flag','control','deathmatch','elimination','escort','hybrid','push' or 'team-deathmatch'",
+                "input": "invalid",
                 "ctx": {
-                    "enum_values": [
-                        "assault",
-                        "capture-the-flag",
-                        "control",
-                        "deathmatch",
-                        "elimination",
-                        "escort",
-                        "hybrid",
-                        "push",
-                        "team-deathmatch",
-                    ]
+                    "expected": "'assault','capture-the-flag','control','deathmatch','elimination','escort','hybrid','push' or 'team-deathmatch'"
                 },
             }
         ]
