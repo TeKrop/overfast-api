@@ -130,7 +130,7 @@ def test_get_hero_no_hitpoints(
 ):
     heroes_stats = [
         hero_stat
-        for hero_stat in read_csv_data_file("heroes_stats.csv")
+        for hero_stat in read_csv_data_file("heroes.csv")
         if hero_stat["key"] != HeroKey.ANA
     ]
 

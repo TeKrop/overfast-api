@@ -6647,23 +6647,7 @@
                                 }
                             ]
                         }
-                    ],
-                    "doomfist": null,
-                    "echo": null,
-                    "genji": null,
-                    "junker-queen": null,
-                    "lifeweaver": null,
-                    "lucio": null,
-                    "mei": null,
-                    "moira": null,
-                    "pharah": null,
-                    "ramattra": null,
-                    "roadhog": null,
-                    "sombra": null,
-                    "symmetra": null,
-                    "torbjorn": null,
-                    "zarya": null,
-                    "zenyatta": null
+                    ]
                 }
             },
             "competitive": {
@@ -13795,25 +13779,7 @@
                                 }
                             ]
                         }
-                    ],
-                    "brigitte": null,
-                    "doomfist": null,
-                    "echo": null,
-                    "genji": null,
-                    "junker-queen": null,
-                    "lifeweaver": null,
-                    "mei": null,
-                    "moira": null,
-                    "pharah": null,
-                    "ramattra": null,
-                    "roadhog": null,
-                    "sombra": null,
-                    "symmetra": null,
-                    "torbjorn": null,
-                    "winston": null,
-                    "wrecking-ball": null,
-                    "zarya": null,
-                    "zenyatta": null
+                    ]
                 }
             }
         },
@@ -23458,16 +23424,7 @@
                                 }
                             ]
                         }
-                    ],
-                    "brigitte": null,
-                    "echo": null,
-                    "junker-queen": null,
-                    "kiriko": null,
-                    "lifeweaver": null,
-                    "mei": null,
-                    "ramattra": null,
-                    "sojourn": null,
-                    "zenyatta": null
+                    ]
                 }
             },
             "competitive": {
@@ -26052,37 +26009,7 @@
                                 }
                             ]
                         }
-                    ],
-                    "ana": null,
-                    "ashe": null,
-                    "baptiste": null,
-                    "brigitte": null,
-                    "cassidy": null,
-                    "doomfist": null,
-                    "echo": null,
-                    "genji": null,
-                    "hanzo": null,
-                    "junker-queen": null,
-                    "junkrat": null,
-                    "lifeweaver": null,
-                    "lucio": null,
-                    "mei": null,
-                    "mercy": null,
-                    "moira": null,
-                    "pharah": null,
-                    "ramattra": null,
-                    "reaper": null,
-                    "reinhardt": null,
-                    "sigma": null,
-                    "sojourn": null,
-                    "soldier-76": null,
-                    "sombra": null,
-                    "symmetra": null,
-                    "torbjorn": null,
-                    "tracer": null,
-                    "widowmaker": null,
-                    "winston": null,
-                    "zenyatta": null
+                    ]
                 }
             }
         }

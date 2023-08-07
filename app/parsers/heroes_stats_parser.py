@@ -14,7 +14,7 @@ class HeroesStatsParser(AbstractParser):
     hitpoints_keys: ClassVar[set] = {"health", "armor", "shields"}
 
     async def retrieve_and_parse_data(self) -> None:
-        heroes_stats_data = read_csv_data_file("heroes_stats.csv")
+        heroes_stats_data = read_csv_data_file("heroes.csv")
 
         self.data = {
             hero_stats["key"]: {"hitpoints": self.__get_hitpoints(hero_stats)}

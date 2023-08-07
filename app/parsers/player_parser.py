@@ -6,7 +6,6 @@ from fastapi import status
 
 from app.common.enums import (
     CareerHeroesComparisonsCategory,
-    HeroKey,
     PlayerGamemode,
     PlayerPlatform,
     PlayerPrivacy,
@@ -420,9 +419,5 @@ class PlayerParser(APIParser):
             # no stat at all
             if len(career_stats[hero_key]) == 0:
                 del career_stats[hero_key]
-
-        for hero_key in HeroKey:
-            if hero_key.value not in career_stats:
-                career_stats[hero_key.value] = None
 
         return career_stats

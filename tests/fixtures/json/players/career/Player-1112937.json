@@ -905,30 +905,7 @@
                             "hero_damage_done": 609,
                             "weapon_accuracy": 28
                         }
-                    },
-                    "ana": null,
-                    "ashe": null,
-                    "bastion": null,
-                    "brigitte": null,
-                    "echo": null,
-                    "junker-queen": null,
-                    "kiriko": null,
-                    "lifeweaver": null,
-                    "lucio": null,
-                    "mei": null,
-                    "mercy": null,
-                    "moira": null,
-                    "orisa": null,
-                    "pharah": null,
-                    "ramattra": null,
-                    "sojourn": null,
-                    "symmetra": null,
-                    "torbjorn": null,
-                    "tracer": null,
-                    "widowmaker": null,
-                    "winston": null,
-                    "zarya": null,
-                    "zenyatta": null
+                    }
                 }
             }
         },
@@ -3817,9 +3794,7 @@
                         "match_awards": {
                             "cards": 8
                         }
-                    },
-                    "lifeweaver": null,
-                    "ramattra": null
+                    }
                 }
             },
             "competitive": {
@@ -4928,24 +4903,7 @@
                             "healing_done_most_in_game": 1137,
                             "defensive_assists_avg_per_10_min": 34.48
                         }
-                    },
-                    "ashe": null,
-                    "hanzo": null,
-                    "junker-queen": null,
-                    "kiriko": null,
-                    "lifeweaver": null,
-                    "moira": null,
-                    "orisa": null,
-                    "ramattra": null,
-                    "reaper": null,
-                    "sojourn": null,
-                    "soldier-76": null,
-                    "symmetra": null,
-                    "torbjorn": null,
-                    "tracer": null,
-                    "widowmaker": null,
-                    "winston": null,
-                    "zarya": null
+                    }
                 }
             }
         }
