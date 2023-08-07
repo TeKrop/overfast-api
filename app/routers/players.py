@@ -100,6 +100,7 @@ router = APIRouter()
         "find the associated player_id to use in order to request career data."
         "<br />**Cache TTL : 1 hour.**"
     ),
+    operation_id="search_players",
 )
 @validation_error_handler(response_model=PlayerSearchResult)
 async def search_players(
@@ -137,6 +138,7 @@ async def search_players(
         "Get player summary : name, avatar, competitive ranks, etc. "
         "<br />**Cache TTL : 1 hour.**"
     ),
+    operation_id="get_player_summary",
 )
 @validation_error_handler(response_model=PlayerSummary)
 async def get_player_summary(
@@ -165,6 +167,7 @@ async def get_player_summary(
         "<br />Default behaviour : all gamemodes and platforms are taken in account."
         "<br />**Cache TTL : 1 hour.**"
     ),
+    operation_id="get_player_stats_summary",
 )
 @validation_error_handler(response_model=PlayerStatsSummary)
 async def get_player_stats_summary(
@@ -209,6 +212,7 @@ async def get_player_stats_summary(
         "data about a specific hero of your choice."
         "<br />**Cache TTL : 1 hour.**"
     ),
+    operation_id="get_player_career_stats",
 )
 @validation_error_handler(response_model=PlayerCareerStats)
 async def get_player_career_stats(
@@ -231,6 +235,7 @@ async def get_player_career_stats(
         "exposes labels of the categories and statistics."
         "<br />**Cache TTL : 1 hour.**"
     ),
+    operation_id="get_player_stats",
 )
 @validation_error_handler(response_model=CareerStats)
 async def get_player_stats(
@@ -250,6 +255,7 @@ async def get_player_stats(
     description=(
         "Get all player data : summary and statistics with labels.<br />**Cache TTL : 1 hour.**"
     ),
+    operation_id="get_player_career",
 )
 @validation_error_handler(response_model=Player)
 async def get_player_career(

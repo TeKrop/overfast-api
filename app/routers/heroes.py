@@ -22,6 +22,7 @@ router = APIRouter()
         "Get a list of Overwatch heroes, which can be filtered using roles. "
         "<br />**Cache TTL : 1 day.**"
     ),
+    operation_id="list_heroes",
 )
 @validation_error_handler(response_model=HeroShort)
 async def list_heroes(
@@ -49,6 +50,7 @@ async def list_heroes(
         "Get data about an Overwatch hero : description, abilities, story, etc. "
         "<br />**Cache TTL : 1 day.**"
     ),
+    operation_id="get_hero",
 )
 @validation_error_handler(response_model=Hero)
 async def get_hero(

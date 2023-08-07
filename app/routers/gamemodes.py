@@ -19,6 +19,7 @@ router = APIRouter()
         "Get a list of Overwatch gamemodes : Assault, Escort, Hybrid, etc."
         "<br />**Cache TTL : 1 day.**"
     ),
+    operation_id="list_map_gamemodes",
 )
 @validation_error_handler(response_model=GamemodeDetails)
 async def list_map_gamemodes(

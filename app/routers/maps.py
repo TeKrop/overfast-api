@@ -17,6 +17,7 @@ router = APIRouter()
         "Get a list of Overwatch maps : Hanamura, King's Row, Dorado, etc."
         "<br />**Cache TTL : 1 day.**"
     ),
+    operation_id="list_maps",
 )
 @validation_error_handler(response_model=Map)
 async def list_maps(
