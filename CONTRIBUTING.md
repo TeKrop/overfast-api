@@ -4,12 +4,14 @@
 This guide aims to help you in contributing in OverFast API. The first step for you will be to understand how to technically contribute. In order to do this, you'll have to fork the repo, you can follow the [official GitHub documentation](https://docs.github.com/en/get-started/quickstart/contributing-to-projects) for more details.
 
 As of now, only some specific stuff can easily be updated by anyone, even without any knowledge in Python or FastAPI framework. If I take too much time to update them, don't hesitate to make a PR if you need up-to-date data :
-- The CSV file containing some specific heroes statistics, like health, armor and shields
+- The CSV file containing basic heroes data : name, role, and some statistics like health, armor and shields
 - The CSV file containing the list of maps of the game
 
-## 🦸 Heroes statistics
-The CSV file containing heroes statistics data is located in `app/data/heroes_stats.csv`. Data is divided into 4 columns :
+## 🦸 Heroes data
+The CSV file containing heroes statistics data is located in `app/data/heroes.csv`. Data is divided into 6 columns :
 - `key` : Key of the hero name, used in URLs of the API (and by Blizzard for their pages)
+- `name` : Display name of the hero (with the right accentuation). Used in the documentation.
+- `role` : Role key of the hero, which is either `damage`, `support` or `tank`
 - `health` : Health of the hero
 - `armor` : Armor of the hero, mainly possessed by tanks
 - `shields` : Shields of the hero

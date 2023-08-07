@@ -14210,9 +14210,7 @@
                                 }
                             ]
                         }
-                    ],
-                    "lifeweaver": null,
-                    "ramattra": null
+                    ]
                 }
             },
             "competitive": {
@@ -15145,41 +15143,7 @@
                                 }
                             ]
                         }
-                    ],
-                    "ana": null,
-                    "ashe": null,
-                    "baptiste": null,
-                    "bastion": null,
-                    "brigitte": null,
-                    "cassidy": null,
-                    "dva": null,
-                    "doomfist": null,
-                    "echo": null,
-                    "genji": null,
-                    "hanzo": null,
-                    "junker-queen": null,
-                    "junkrat": null,
-                    "kiriko": null,
-                    "lifeweaver": null,
-                    "lucio": null,
-                    "mei": null,
-                    "mercy": null,
-                    "moira": null,
-                    "orisa": null,
-                    "pharah": null,
-                    "ramattra": null,
-                    "reaper": null,
-                    "sojourn": null,
-                    "soldier-76": null,
-                    "sombra": null,
-                    "symmetra": null,
-                    "torbjorn": null,
-                    "tracer": null,
-                    "widowmaker": null,
-                    "winston": null,
-                    "wrecking-ball": null,
-                    "zarya": null,
-                    "zenyatta": null
+                    ]
                 }
             }
         },

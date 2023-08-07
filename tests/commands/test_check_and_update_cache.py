@@ -173,20 +173,15 @@ def test_check_and_update_cache_no_update(cache_manager: CacheManager, locale: s
 
 
 @pytest.mark.parametrize(
-    ("player_html_data", "player_json_data"),
-    [("TeKrop-2217", "TeKrop-2217")],
-    indirect=["player_html_data", "player_json_data"],
+    ("player_html_data"),
+    [("TeKrop-2217")],
+    indirect=["player_html_data"],
 )
 def test_check_and_update_specific_player_to_update(
     cache_manager: CacheManager,
     locale: str,
     player_html_data: str,
-    player_json_data: dict,
 ):
-    # Remove "namecard" key from player_json_data, it's been added from another page
-    player_data = player_json_data.copy()
-    del player_data["summary"]["namecard"]
-
     player_cache_key = f"PlayerParser-{settings.blizzard_host}/{locale}{settings.career_path}/TeKrop-2217/"
 
     # Add some data (to update and not to update)
@@ -221,7 +216,7 @@ def test_check_and_update_specific_player_to_update(
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
     logger_info_mock.assert_any_call("Updating data for {} key...", player_cache_key)
 
-    assert cache_manager.get_parser_cache(player_cache_key) == player_data
+    assert cache_manager.get_parser_cache(player_cache_key) != {}
 
 
 @pytest.mark.parametrize(

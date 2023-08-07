@@ -47,8 +47,13 @@ def test_get_player_career(
         return_value=Mock(status_code=status.HTTP_200_OK, text=search_html_data),
     ):
         response = client.get(f"/players/{player_id}")
+
+    # Only assert the status and some elements from the response
+    # We already check the entire content in parsers UT
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == player_json_data
+
+    response_json = response.json()
+    assert response_json["summary"] == player_json_data["summary"]  # for namecard
 
 
 def test_get_player_career_blizzard_error():

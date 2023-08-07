@@ -4,6 +4,7 @@ import unicodedata
 from functools import cache
 
 from app.common.enums import CompetitiveDivision, HeroKey, Role
+from app.common.helpers import read_csv_data_file
 from app.config import settings
 
 
@@ -107,47 +108,12 @@ def string_to_snakecase(input_str: str) -> str:
 
 @cache
 def get_hero_role(hero_key: HeroKey) -> Role:
-    """Get the role of a given hero"""
-    heroes_role: dict[HeroKey, Role] = {
-        HeroKey.ANA: Role.SUPPORT,
-        HeroKey.ASHE: Role.DAMAGE,
-        HeroKey.BAPTISTE: Role.SUPPORT,
-        HeroKey.BASTION: Role.DAMAGE,
-        HeroKey.BRIGITTE: Role.SUPPORT,
-        HeroKey.CASSIDY: Role.DAMAGE,
-        HeroKey.DVA: Role.TANK,
-        HeroKey.DOOMFIST: Role.TANK,
-        HeroKey.ECHO: Role.DAMAGE,
-        HeroKey.GENJI: Role.DAMAGE,
-        HeroKey.HANZO: Role.DAMAGE,
-        HeroKey.JUNKER_QUEEN: Role.TANK,
-        HeroKey.JUNKRAT: Role.DAMAGE,
-        HeroKey.KIRIKO: Role.SUPPORT,
-        HeroKey.LIFEWEAVER: Role.SUPPORT,
-        HeroKey.LUCIO: Role.SUPPORT,
-        HeroKey.MEI: Role.DAMAGE,
-        HeroKey.MERCY: Role.SUPPORT,
-        HeroKey.MOIRA: Role.SUPPORT,
-        HeroKey.ORISA: Role.TANK,
-        HeroKey.PHARAH: Role.DAMAGE,
-        HeroKey.RAMATTRA: Role.TANK,
-        HeroKey.REAPER: Role.DAMAGE,
-        HeroKey.REINHARDT: Role.TANK,
-        HeroKey.ROADHOG: Role.TANK,
-        HeroKey.SIGMA: Role.TANK,
-        HeroKey.SOJOURN: Role.DAMAGE,
-        HeroKey.SOLDIER_76: Role.DAMAGE,
-        HeroKey.SOMBRA: Role.DAMAGE,
-        HeroKey.SYMMETRA: Role.DAMAGE,
-        HeroKey.TORBJORN: Role.DAMAGE,
-        HeroKey.TRACER: Role.DAMAGE,
-        HeroKey.WIDOWMAKER: Role.DAMAGE,
-        HeroKey.WINSTON: Role.TANK,
-        HeroKey.WRECKING_BALL: Role.TANK,
-        HeroKey.ZARYA: Role.TANK,
-        HeroKey.ZENYATTA: Role.SUPPORT,
-    }
-    return heroes_role[hero_key]
+    """Get the role of a given hero based on the CSV file"""
+    heroes_data = read_csv_data_file("heroes.csv")
+    role_key = next(
+        hero_data["role"] for hero_data in heroes_data if hero_data["key"] == hero_key
+    )
+    return Role(role_key)
 
 
 def get_role_from_icon_url(url: str) -> str:

@@ -241,5 +241,5 @@ def test_string_to_snakecase(input_str: str, result: str):
 def test_get_hero_role(hero_key: HeroKey):
     try:
         helpers.get_hero_role(hero_key)
-    except KeyError:
+    except StopIteration:
         pytest.fail(f"Missing role for '{hero_key}' hero")

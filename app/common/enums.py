@@ -4,6 +4,19 @@ heroes, gamemodes, etc.
 """
 from enum import StrEnum
 
+from app.common.helpers import read_csv_data_file
+
+# Dynamically create the HeroKey enum by using the CSV File
+heroes_data = read_csv_data_file("heroes.csv")
+HeroKey = StrEnum(
+    "HeroKey",
+    {
+        hero_data["key"].upper().replace("-", "_"): hero_data["key"]
+        for hero_data in heroes_data
+    },
+)
+HeroKey.__doc__ = "Hero keys used to identify Overwatch heroes in general"
+
 
 class CareerStatCategory(StrEnum):
     """Categories of general statistics displayed in the players API"""
@@ -38,48 +51,6 @@ class RouteTag(StrEnum):
     GAMEMODES = "🎲 Gamemodes"
     MAPS = "🗺️ Maps"
     PLAYERS = "🎮 Players"
-
-
-class HeroKey(StrEnum):
-    """Hero keys used to identify Overwatch heroes in general"""
-
-    ANA = "ana"
-    ASHE = "ashe"
-    BAPTISTE = "baptiste"
-    BASTION = "bastion"
-    BRIGITTE = "brigitte"
-    CASSIDY = "cassidy"
-    DVA = "dva"
-    DOOMFIST = "doomfist"
-    ECHO = "echo"
-    GENJI = "genji"
-    HANZO = "hanzo"
-    JUNKER_QUEEN = "junker-queen"
-    JUNKRAT = "junkrat"
-    KIRIKO = "kiriko"
-    LIFEWEAVER = "lifeweaver"
-    LUCIO = "lucio"
-    MEI = "mei"
-    MERCY = "mercy"
-    MOIRA = "moira"
-    ORISA = "orisa"
-    PHARAH = "pharah"
-    RAMATTRA = "ramattra"
-    REAPER = "reaper"
-    REINHARDT = "reinhardt"
-    ROADHOG = "roadhog"
-    SIGMA = "sigma"
-    SOJOURN = "sojourn"
-    SOLDIER_76 = "soldier-76"
-    SOMBRA = "sombra"
-    SYMMETRA = "symmetra"
-    TORBJORN = "torbjorn"
-    TRACER = "tracer"
-    WIDOWMAKER = "widowmaker"
-    WINSTON = "winston"
-    WRECKING_BALL = "wrecking-ball"
-    ZARYA = "zarya"
-    ZENYATTA = "zenyatta"
 
 
 # Dynamically create the HeroKeyCareerFilter by using the existing

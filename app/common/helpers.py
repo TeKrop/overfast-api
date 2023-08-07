@@ -2,18 +2,22 @@
 import csv
 import json
 import zlib
+from functools import cache
 from pathlib import Path
 from random import randint
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
 from fastapi import HTTPException, Request, status
 
-from app.common.enums import HeroKey
 from app.config import settings
 from app.models.errors import BlizzardErrorMessage, InternalServerErrorMessage
 
 from .logging import logger
+
+if TYPE_CHECKING:  # pragma: no cover
+    from app.common.enums import HeroKey
+
 
 # Typical routes responses to return
 routes_responses = {
@@ -130,15 +134,17 @@ def send_discord_webhook_message(message: str) -> httpx.Response | None:
     )
 
 
-def read_html_file(filepath: str) -> str:
+def read_html_file(filepath: str) -> str | None:
     """Helper method for retrieving fixture HTML file data"""
-    with Path(f"{settings.test_fixtures_root_path}/html/{filepath}").open(
-        encoding="utf-8"
-    ) as html_file:
+    html_file_object = Path(f"{settings.test_fixtures_root_path}/html/{filepath}")
+    if not html_file_object.is_file():
+        return None  # pragma: no cover
+
+    with html_file_object.open(encoding="utf-8") as html_file:
         return html_file.read()
 
 
-def read_json_file(filepath: str) -> dict | list:
+def read_json_file(filepath: str) -> dict | list | None:
     """Helper method for retrieving fixture JSON file data"""
     with Path(f"{settings.test_fixtures_root_path}/json/{filepath}").open(
         encoding="utf-8"
@@ -146,10 +152,11 @@ def read_json_file(filepath: str) -> dict | list:
         return json.load(json_file)
 
 
-def read_csv_data_file(filepath: str) -> csv.DictReader:
+@cache
+def read_csv_data_file(filepath: str) -> list[dict[str, str]]:
     """Helper method for obtaining CSV DictReader from a path"""
     with Path(f"{Path.cwd()}/app/data/{filepath}").open(encoding="utf-8") as csv_file:
-        yield from csv.DictReader(csv_file, delimiter=",")
+        return list(csv.DictReader(csv_file, delimiter=","))
 
 
 def compress_json_value(value: dict | list) -> str:
@@ -171,18 +178,17 @@ def get_spread_value(value: int, spread_percentage: float) -> int:
     return randint(int(min_percentage * value), int(max_percentage * value))
 
 
-def get_hero_name(hero_key: HeroKey) -> str:
-    """Get a hero name base on its hero key. In general we just need to clean
-    the string, but there are some edgecases.
-    """
-    specific_heroes_names: dict[HeroKey, str] = {
-        HeroKey.DVA: "D.Va",
-        HeroKey.LUCIO: "Lúcio",
-        HeroKey.SOLDIER_76: "Soldier: 76",
-        HeroKey.TORBJORN: "Torbjörn",
-    }
-    return specific_heroes_names.get(
-        hero_key, " ".join(s.capitalize() for s in hero_key.value.split("-"))
+@cache
+def get_hero_name(hero_key: "HeroKey") -> str:
+    """Get a hero name based on the CSV file"""
+    heroes_data = read_csv_data_file("heroes.csv")
+    return next(
+        (
+            hero_data["name"]
+            for hero_data in heroes_data
+            if hero_data["key"] == hero_key
+        ),
+        hero_key,
     )
 
 

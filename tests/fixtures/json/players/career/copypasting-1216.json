@@ -2427,10 +2427,7 @@
                             "defensive_assists_avg_per_10_min": 15.72,
                             "offensive_assists_avg_per_10_min": 3.51
                         }
-                    },
-                    "junker-queen": null,
-                    "lifeweaver": null,
-                    "ramattra": null
+                    }
                 }
             },
             "competitive": {
@@ -3237,32 +3234,7 @@
                         "assists": {
                             "assists": 1
                         }
-                    },
-                    "ana": null,
-                    "ashe": null,
-                    "baptiste": null,
-                    "brigitte": null,
-                    "cassidy": null,
-                    "echo": null,
-                    "genji": null,
-                    "hanzo": null,
-                    "junker-queen": null,
-                    "junkrat": null,
-                    "lifeweaver": null,
-                    "lucio": null,
-                    "mei": null,
-                    "moira": null,
-                    "ramattra": null,
-                    "reinhardt": null,
-                    "sigma": null,
-                    "soldier-76": null,
-                    "sombra": null,
-                    "symmetra": null,
-                    "tracer": null,
-                    "widowmaker": null,
-                    "wrecking-ball": null,
-                    "zarya": null,
-                    "zenyatta": null
+                    }
                 }
             }
         }
