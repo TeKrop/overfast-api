@@ -17,6 +17,7 @@ router = APIRouter()
     tags=[RouteTag.HEROES],
     summary="Get a list of roles",
     description="Get a list of available Overwatch roles.<br />**Cache TTL : 1 day.**",
+    operation_id="list_roles",
 )
 @validation_error_handler(response_model=RoleDetail)
 async def list_roles(
