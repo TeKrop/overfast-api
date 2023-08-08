@@ -10,6 +10,7 @@ doomfist,Doomfist,tank,450,0,0
 echo,Echo,damage,200,0,0
 genji,Genji,damage,200,0,0
 hanzo,Hanzo,damage,200,0,0
+illari,Illari,support,200,0,0
 junker-queen,Junker Queen,tank,450,0,0
 junkrat,Junkrat,damage,200,0,0
 kiriko,Kiriko,support,200,0,0
