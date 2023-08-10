@@ -141,6 +141,7 @@ class MapGamemode(StrEnum):
     DEATHMATCH = "deathmatch"
     ELIMINATION = "elimination"
     ESCORT = "escort"
+    FLASHPOINT = "flashpoint"
     HYBRID = "hybrid"
     PUSH = "push"
     TEAM_DEATHMATCH = "team-deathmatch"
