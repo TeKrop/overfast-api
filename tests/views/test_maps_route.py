@@ -40,10 +40,10 @@ def test_get_maps_invalid_gamemode():
             {
                 "type": "enum",
                 "loc": ["query", "gamemode"],
-                "msg": "Input should be 'assault','capture-the-flag','control','deathmatch','elimination','escort','hybrid','push' or 'team-deathmatch'",
+                "msg": "Input should be 'assault','capture-the-flag','control','deathmatch','elimination','escort','flashpoint','hybrid','push' or 'team-deathmatch'",
                 "input": "invalid",
                 "ctx": {
-                    "expected": "'assault','capture-the-flag','control','deathmatch','elimination','escort','hybrid','push' or 'team-deathmatch'"
+                    "expected": "'assault','capture-the-flag','control','deathmatch','elimination','escort','flashpoint','hybrid','push' or 'team-deathmatch'"
                 },
             }
         ]
