@@ -11,17 +11,20 @@ class HeroesParser(APIParser):
     timeout = settings.heroes_path_cache_timeout
 
     def parse_data(self) -> list[dict]:
-        return [
-            {
-                "key": hero["data-hero-id"],
-                "name": hero.find("div", class_="heroCardName").get_text(),
-                "portrait": hero.find("blz-image")["src"],
-                "role": hero["data-role"],
-            }
-            for hero in self.root_tag.find("blz-media-gallery").find_all(
-                "blz-hero-card"
-            )
-        ]
+        return sorted(
+            [
+                {
+                    "key": hero["data-hero-id"],
+                    "name": hero["hero-name"],
+                    "portrait": hero.find("blz-image")["src"],
+                    "role": hero["data-role"],
+                }
+                for hero in self.root_tag.find("blz-media-gallery").find_all(
+                    "blz-hero-card"
+                )
+            ],
+            key=lambda hero: hero["key"],
+        )
 
     def filter_request_using_query(self, **kwargs) -> list[dict]:
         role = kwargs.get("role")
