@@ -13,6 +13,7 @@ from fastapi import HTTPException, Request, status
 from app.config import settings
 from app.models.errors import BlizzardErrorMessage, InternalServerErrorMessage
 
+from .decorators import rate_limited
 from .logging import logger
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -125,8 +126,10 @@ def blizzard_response_error_from_request(req: Request) -> HTTPException:
     return blizzard_response_error(req.status_code, req.text)
 
 
+@rate_limited(max_calls=1, interval=1800)
 def send_discord_webhook_message(message: str) -> httpx.Response | None:
-    """Helper method for sending a Discord webhook message"""
+    """Helper method for sending a Discord webhook message. It's limited to
+    one call per 30 minutes with the same parameters."""
     return (
         httpx.post(settings.discord_webhook_url, data={"content": message}, timeout=10)
         if settings.discord_webhook_enabled
