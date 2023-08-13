@@ -90,7 +90,7 @@ class CacheManager(metaclass=Singleton):
     def get_parser_cache(self, cache_key: str) -> dict | list | None:
         """Get the Parser Cache value associated with a given cache key"""
         parser_cache = self.redis_server.get(
-            f"{settings.parser_cache_key_prefix}:{cache_key}"
+            f"{settings.parser_cache_key_prefix}:{cache_key}",
         )
         return decompress_json_value(parser_cache) if parser_cache else None
 
@@ -103,7 +103,9 @@ class CacheManager(metaclass=Singleton):
 
         # Store it in API Cache
         self.redis_server.set(
-            f"{settings.api_cache_key_prefix}:{cache_key}", str_value, ex=expire
+            f"{settings.api_cache_key_prefix}:{cache_key}",
+            str_value,
+            ex=expire,
         )
 
     @redis_connection_handler
@@ -116,7 +118,8 @@ class CacheManager(metaclass=Singleton):
 
         # Get the spread expire value depending on the settings
         expiration = get_spread_value(
-            expire, settings.parser_cache_expiration_spreading_percentage
+            expire,
+            settings.parser_cache_expiration_spreading_percentage,
         )
 
         self.redis_server.set(
@@ -166,7 +169,7 @@ class CacheManager(metaclass=Singleton):
     @redis_connection_handler
     def get_namecard_cache(self, cache_key: str) -> str | None:
         namecard_cache = self.redis_server.get(
-            f"{settings.namecard_cache_key_prefix}:{cache_key}"
+            f"{settings.namecard_cache_key_prefix}:{cache_key}",
         )
         return namecard_cache.decode("utf-8") if namecard_cache else None
 

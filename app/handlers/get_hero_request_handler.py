@@ -41,7 +41,10 @@ class GetHeroRequestHandler(APIRequestHandler):
         else:
             # We want to insert the portrait before the "role" key
             hero_data = dict_insert_value_before_key(
-                hero_data, "role", "portrait", portrait_value
+                hero_data,
+                "role",
+                "portrait",
+                portrait_value,
             )
 
         try:
@@ -53,7 +56,10 @@ class GetHeroRequestHandler(APIRequestHandler):
         else:
             # We want to insert hitpoints before "abilities" key
             hero_data = dict_insert_value_before_key(
-                hero_data, "abilities", "hitpoints", hitpoints
+                hero_data,
+                "abilities",
+                "hitpoints",
+                hitpoints,
             )
 
         return hero_data

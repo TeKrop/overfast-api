@@ -22,7 +22,8 @@ def locale():
 
 
 def test_check_and_delete_parser_cache_some_to_delete(
-    cache_manager: CacheManager, locale: str
+    cache_manager: CacheManager,
+    locale: str,
 ):
     # Add some data, with some which is expired and some which is not. Only the
     # parser cache last update needs to be expired for the process to work
@@ -34,40 +35,52 @@ def test_check_and_delete_parser_cache_some_to_delete(
     # call since a long time : we'll delete it
     first_cache_key = f"{cache_key_prefix}/Player-0001"
     cache_manager.update_parser_cache(
-        first_cache_key, {}, settings.expired_cache_refresh_limit + 10
+        first_cache_key,
+        {},
+        settings.expired_cache_refresh_limit + 10,
     )
     cache_manager.update_parser_cache_last_update(
-        first_cache_key, settings.expired_cache_refresh_limit - 10
+        first_cache_key,
+        settings.expired_cache_refresh_limit - 10,
     )
 
     # Parser Cache is up-to-date and has been recently retrieved from API call,
     # no need to delete it.
     second_cache_key = f"{cache_key_prefix}/Player-0002"
     cache_manager.update_parser_cache(
-        second_cache_key, {}, settings.expired_cache_refresh_limit + 10
+        second_cache_key,
+        {},
+        settings.expired_cache_refresh_limit + 10,
     )
     cache_manager.update_parser_cache_last_update(
-        second_cache_key, settings.expired_cache_refresh_limit + 10
+        second_cache_key,
+        settings.expired_cache_refresh_limit + 10,
     )
 
     # Parser Cache is outdated and has been recently retrieved from API call,
     # no need to delete it.
     third_cache_key = f"{cache_key_prefix}/Player-0003"
     cache_manager.update_parser_cache(
-        third_cache_key, {}, settings.expired_cache_refresh_limit - 10
+        third_cache_key,
+        {},
+        settings.expired_cache_refresh_limit - 10,
     )
     cache_manager.update_parser_cache_last_update(
-        third_cache_key, settings.expired_cache_refresh_limit + 10
+        third_cache_key,
+        settings.expired_cache_refresh_limit + 10,
     )
 
     # Parser Cache is outdated and it hasn't been retrieved from API
     # call since a long time : we'll delete it
     fourth_cache_key = f"{cache_key_prefix}/Player-0004"
     cache_manager.update_parser_cache(
-        fourth_cache_key, {}, settings.expired_cache_refresh_limit - 10
+        fourth_cache_key,
+        {},
+        settings.expired_cache_refresh_limit - 10,
     )
     cache_manager.update_parser_cache_last_update(
-        fourth_cache_key, settings.expired_cache_refresh_limit - 10
+        fourth_cache_key,
+        settings.expired_cache_refresh_limit - 10,
     )
 
     # Only the first and fourth keys should be deleted
@@ -93,15 +106,19 @@ def test_check_and_delete_parser_cache_some_to_delete(
 
 
 def test_check_and_delete_parser_cache_no_cache_to_delete(
-    cache_manager: CacheManager, locale: str
+    cache_manager: CacheManager,
+    locale: str,
 ):
     # Add some data which is not expiring
     cache_key = f"PlayerParser-{settings.blizzard_host}/{locale}{settings.career_path}/TeKrop-2217"
     cache_manager.update_parser_cache(
-        cache_key, {}, settings.expired_cache_refresh_limit + 30
+        cache_key,
+        {},
+        settings.expired_cache_refresh_limit + 30,
     )
     cache_manager.update_parser_cache_last_update(
-        cache_key, settings.expired_cache_refresh_limit + 30
+        cache_key,
+        settings.expired_cache_refresh_limit + 30,
     )
 
     assert get_soon_expired_cache_keys() == set()
@@ -109,7 +126,8 @@ def test_check_and_delete_parser_cache_no_cache_to_delete(
     # check and delete (no delete)
     logger_info_mock = Mock()
     with pytest.raises(SystemExit), patch(
-        "app.common.logging.logger.info", logger_info_mock
+        "app.common.logging.logger.info",
+        logger_info_mock,
     ):
         check_and_delete_parser_cache_main()
 

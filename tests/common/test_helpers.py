@@ -15,7 +15,10 @@ from app.common import helpers
     ],
 )
 def test_dict_insert_value_before_key_with_key_error(
-    input_dict: dict, key: str, new_key: str, new_value: Any
+    input_dict: dict,
+    key: str,
+    new_key: str,
+    new_value: Any,
 ):
     with pytest.raises(KeyError):
         helpers.dict_insert_value_before_key(input_dict, key, new_key, new_value)
@@ -51,7 +54,11 @@ def test_dict_insert_value_before_key_with_key_error(
     ],
 )
 def test_dict_insert_value_before_key_valid(
-    input_dict: dict, key: str, new_key: str, new_value: Any, result_dict: dict
+    input_dict: dict,
+    key: str,
+    new_key: str,
+    new_value: Any,
+    result_dict: dict,
 ):
     assert (
         helpers.dict_insert_value_before_key(input_dict, key, new_key, new_value)

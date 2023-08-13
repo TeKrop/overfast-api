@@ -63,7 +63,9 @@ class PlayerSearchResult(BaseModel):
 # Player career
 class PlayerCompetitiveRank(BaseModel):
     division: CompetitiveDivision = Field(
-        ..., description="Division of the rank", examples=["diamond"]
+        ...,
+        description="Division of the rank",
+        examples=["diamond"],
     )
     tier: int = Field(
         ...,
@@ -76,14 +78,14 @@ class PlayerCompetitiveRank(BaseModel):
         ...,
         description="URL the role icon",
         examples=[
-            "https://static.playoverwatch.com/img/pages/career/icons/role/tank-f64702b684.svg#icon"
+            "https://static.playoverwatch.com/img/pages/career/icons/role/tank-f64702b684.svg#icon",
         ],
     )
     rank_icon: HttpUrl = Field(
         ...,
         description="URL of the rank icon associated with the player rank (division + tier)",
         examples=[
-            "https://static.playoverwatch.com/img/pages/career/icons/rank/GrandmasterTier-3-e55e61f68f.png"
+            "https://static.playoverwatch.com/img/pages/career/icons/rank/GrandmasterTier-3-e55e61f68f.png",
         ],
     )
 
@@ -98,7 +100,8 @@ class PlatformCompetitiveRanksContainer(BaseModel):
     tank: PlayerCompetitiveRank | None = Field(..., description="Tank role details")
     damage: PlayerCompetitiveRank | None = Field(..., description="Damage role details")
     support: PlayerCompetitiveRank | None = Field(
-        ..., description="Support role details"
+        ...,
+        description="Support role details",
     )
 
 
@@ -131,7 +134,7 @@ class PlayerEndorsement(BaseModel):
         ...,
         description="URL of the endorsement frame corresponding to the level",
         examples=[
-            "https://static.playoverwatch.com/img/pages/career/icons/endorsement/3-8ccb5f0aef.svg#icon"
+            "https://static.playoverwatch.com/img/pages/career/icons/endorsement/3-8ccb5f0aef.svg#icon",
         ],
     )
 
@@ -161,27 +164,32 @@ class HeroesStats(BaseModel):
 
 class PlayerSummary(BaseModel):
     username: str = Field(
-        ..., description="Username of the player", examples=["TeKrop"]
+        ...,
+        description="Username of the player",
+        examples=["TeKrop"],
     )
     avatar: HttpUrl | None = Field(
         None,
         description="URL of the player's avatar. Can be null if couldn't retrieve any",
         examples=[
-            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/daeddd96e58a2150afa6ffc3c5503ae7f96afc2e22899210d444f45dee508c6c.png"
+            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/daeddd96e58a2150afa6ffc3c5503ae7f96afc2e22899210d444f45dee508c6c.png",
         ],
     )
     namecard: HttpUrl | None = Field(
         None,
         description="URL of the player's namecard (or banner) if any",
         examples=[
-            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/55d8c21e9d8b14942c26c4028059b6cd3b4e2fea40a139821ecee73a0005126f.png"
+            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/55d8c21e9d8b14942c26c4028059b6cd3b4e2fea40a139821ecee73a0005126f.png",
         ],
     )
     title: str | None = Field(
-        ..., description="Title of the player if any", examples=["Bytefixer"]
+        ...,
+        description="Title of the player if any",
+        examples=["Bytefixer"],
     )
     endorsement: PlayerEndorsement = Field(
-        ..., description="Player endorsement details"
+        ...,
+        description="Player endorsement details",
     )
     competitive: PlayerCompetitiveRanksContainer | None = Field(
         ...,
@@ -206,10 +214,12 @@ class HeroesComparisons(BaseModel):
     model_config = ConfigDict(json_schema_extra={"example": HeroesComparisonsExample})
 
     time_played: HeroesStats | None = Field(
-        ..., description="Total time played for each hero (integer in seconds)"
+        ...,
+        description="Total time played for each hero (integer in seconds)",
     )
     games_won: HeroesStats | None = Field(
-        ..., description="Number of games won for each hero (integer)"
+        ...,
+        description="Number of games won for each hero (integer)",
     )
     weapon_accuracy: HeroesStats | None = Field(
         ...,
@@ -220,17 +230,20 @@ class HeroesComparisons(BaseModel):
         description="Winrate percentage for each hero (integer between 0 and 100)",
     )
     eliminations_per_life: HeroesStats | None = Field(
-        ..., description="Eliminations per life for each hero (float)"
+        ...,
+        description="Eliminations per life for each hero (float)",
     )
     critical_hit_accuracy: HeroesStats | None = Field(
         ...,
         description="Critical hit accuracy percentage for each hero (integer between 0 and 100)",
     )
     multikill_best: HeroesStats | None = Field(
-        ..., description="Best multikills statistic for each hero (integer)"
+        ...,
+        description="Best multikills statistic for each hero (integer)",
     )
     objective_kills: HeroesStats | None = Field(
-        ..., description="Total number of objective kills for each hero (integer)"
+        ...,
+        description="Total number of objective kills for each hero (integer)",
     )
 
 
@@ -244,7 +257,9 @@ class HeroCareerStats(BaseModel):
     category: CareerStatCategory = Field(..., description="Stat category key")
     label: str = Field(..., description="Label of the stat category")
     stats: list[SingleCareerStat] = Field(
-        ..., description="List of statistics associated with the category", min_length=1
+        ...,
+        description="List of statistics associated with the category",
+        min_length=1,
     )
 
 
@@ -331,7 +346,8 @@ class PlayerStats(BaseModel):
 
 class Player(BaseModel):
     summary: PlayerSummary = Field(
-        ..., description="Player summary (avatar, endorsement, competitive ranks, etc.)"
+        ...,
+        description="Player summary (avatar, endorsement, competitive ranks, etc.)",
     )
     stats: PlayerStats | None = Field(
         ...,
@@ -353,13 +369,17 @@ class TotalStatsSummary(BaseModel):
 
 class AverageStatsSummary(BaseModel):
     eliminations: float = Field(
-        ..., description="Average eliminations per 10 minutes", ge=0.0
+        ...,
+        description="Average eliminations per 10 minutes",
+        ge=0.0,
     )
     assists: float = Field(..., description="Average assists per 10 minutes", ge=0.0)
     deaths: float = Field(..., description="Average deaths per 10 minutes", ge=0.0)
     damage: float = Field(..., description="Average damage done per 10 minutes", ge=0.0)
     healing: float = Field(
-        ..., description="Average healing done per 10 minutes", ge=0.0
+        ...,
+        description="Average healing done per 10 minutes",
+        ge=0.0,
     )
 
 
@@ -443,7 +463,8 @@ class PlayerStatsSummary(BaseModel):
         ),
     )
     heroes: PlayerHeroesStats | None = Field(
-        None, description="Stats of all the heroes played by the player"
+        None,
+        description="Stats of all the heroes played by the player",
     )
 
 

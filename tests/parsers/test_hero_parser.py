@@ -21,7 +21,9 @@ async def test_hero_page_parsing(hero_key: str, hero_html_data: str):
     parser = HeroParser()
 
     with patch.object(
-        overfast_client, "get", return_value=Mock(status_code=200, text=hero_html_data)
+        overfast_client,
+        "get",
+        return_value=Mock(status_code=200, text=hero_html_data),
     ):
         try:
             await parser.parse()

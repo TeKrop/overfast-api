@@ -66,7 +66,8 @@ class APIRequestHandler(ApiRequestMixin, ABC):
                 await parser.parse()
             except ParserBlizzardError as error:
                 raise HTTPException(
-                    status_code=error.status_code, detail=error.message
+                    status_code=error.status_code,
+                    detail=error.message,
                 ) from error
             except ParserParsingError as error:
                 raise overfast_internal_error(parser.blizzard_url, error) from error

@@ -18,7 +18,7 @@ def test_get_maps(maps_json_data: list):
     # Check if all the images link are valid
     for map_dict in json_response:
         image_response = client.get(
-            map_dict["screenshot"].removeprefix(settings.app_base_url)
+            map_dict["screenshot"].removeprefix(settings.app_base_url),
         )
         assert image_response.status_code == status.HTTP_200_OK
 
@@ -43,10 +43,10 @@ def test_get_maps_invalid_gamemode():
                 "msg": "Input should be 'assault','capture-the-flag','control','deathmatch','elimination','escort','flashpoint','hybrid','push' or 'team-deathmatch'",
                 "input": "invalid",
                 "ctx": {
-                    "expected": "'assault','capture-the-flag','control','deathmatch','elimination','escort','flashpoint','hybrid','push' or 'team-deathmatch'"
+                    "expected": "'assault','capture-the-flag','control','deathmatch','elimination','escort','flashpoint','hybrid','push' or 'team-deathmatch'",
                 },
-            }
-        ]
+            },
+        ],
     }
 
 

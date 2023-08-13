@@ -75,7 +75,8 @@ class PlayerStatsSummaryParser(PlayerParser):
         # it means the player doesn't exist or hasn't been found.
         if not self.root_tag.find("blz-section", class_="Profile-masthead"):
             raise ParserBlizzardError(
-                status_code=status.HTTP_404_NOT_FOUND, message="Player not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Player not found",
             )
 
         # Only return heroes stats, which will be used for calculation
@@ -83,7 +84,9 @@ class PlayerStatsSummaryParser(PlayerParser):
         return self.__get_heroes_stats(self.get_stats())
 
     def __compute_heroes_data(
-        self, gamemodes: list[PlayerGamemode], platforms: list[PlayerPlatform]
+        self,
+        gamemodes: list[PlayerGamemode],
+        platforms: list[PlayerPlatform],
     ) -> dict | None:
         if not self.data:
             return None
@@ -95,13 +98,13 @@ class PlayerStatsSummaryParser(PlayerParser):
         # Calculate special values (winrate, kda, averages)
         for hero_key, hero_stats in computed_heroes_stats.items():
             computed_heroes_stats[hero_key]["winrate"] = self.__get_winrate_from_stat(
-                hero_stats
+                hero_stats,
             )
             computed_heroes_stats[hero_key]["kda"] = self.__get_kda_from_stat(
-                hero_stats
+                hero_stats,
             )
             computed_heroes_stats[hero_key]["average"] = self.__get_average_from_stat(
-                hero_stats
+                hero_stats,
             )
 
         # Only return the heroes for which we have stats
@@ -112,7 +115,9 @@ class PlayerStatsSummaryParser(PlayerParser):
         }
 
     def __init_heroes_data(
-        self, gamemodes: list[PlayerGamemode], platforms: list[PlayerPlatform]
+        self,
+        gamemodes: list[PlayerGamemode],
+        platforms: list[PlayerPlatform],
     ) -> dict:
         """Init heroes data by looping over the self.data object. We will
         retrieve the data for all the platforms and gamemodes.
@@ -156,7 +161,8 @@ class PlayerStatsSummaryParser(PlayerParser):
     @staticmethod
     def _get_stat_value(stat_name: str, stats_list: list[dict]) -> int | float:
         stat_value = filter(
-            lambda x: get_plural_stat_key(x["key"]) == stat_name, stats_list
+            lambda x: get_plural_stat_key(x["key"]) == stat_name,
+            stats_list,
         )
         try:
             return next(stat_value)["value"]
@@ -299,7 +305,8 @@ class PlayerStatsSummaryParser(PlayerParser):
 
     def __get_winrate_from_stat(self, stat: dict) -> float:
         return self.__get_winrate(
-            stat.get("games_won") or 0, stat.get("games_played") or 0
+            stat.get("games_won") or 0,
+            stat.get("games_played") or 0,
         )
 
     @staticmethod

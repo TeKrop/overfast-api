@@ -20,7 +20,7 @@ class HeroesParser(APIParser):
                     "role": hero["data-role"],
                 }
                 for hero in self.root_tag.find("blz-media-gallery").find_all(
-                    "blz-hero-card"
+                    "blz-hero-card",
                 )
             ],
             key=lambda hero: hero["key"],

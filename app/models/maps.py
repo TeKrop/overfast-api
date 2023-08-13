@@ -12,10 +12,13 @@ class Map(BaseModel):
         examples=["https://overfast-api.tekrop.fr/static/maps/hanamura.jpg"],
     )
     gamemodes: list[MapGamemode] = Field(
-        ..., description="Main gamemodes on which the map is playable"
+        ...,
+        description="Main gamemodes on which the map is playable",
     )
     location: str = Field(
-        ..., description="Location of the map", examples=["Tokyo, Japan"]
+        ...,
+        description="Location of the map",
+        examples=["Tokyo, Japan"],
     )
     country_code: str | None = Field(
         ...,

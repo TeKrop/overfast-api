@@ -40,6 +40,8 @@ class GamemodesParser(APIParser):
                 "screenshot": gamemodes_extras[gamemode_index]["screenshot"],
             }
             for gamemode_index, gamemode_div in enumerate(
-                gamemodes_container.find("blz-tab-controls").find_all("blz-tab-control")
+                gamemodes_container.find("blz-tab-controls").find_all(
+                    "blz-tab-control",
+                ),
             )
         ]

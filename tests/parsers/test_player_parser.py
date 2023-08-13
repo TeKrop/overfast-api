@@ -66,7 +66,8 @@ async def test_unknown_player_parser_blizzard_error(player_html_data: str):
 @pytest.mark.asyncio()
 async def test_player_parser_parsing_error_attribute_error(player_html_data: str):
     player_attr_error = player_html_data.replace(
-        'class="Profile-player--summaryWrapper"', 'class="blabla"'
+        'class="Profile-player--summaryWrapper"',
+        'class="blabla"',
     )
     parser = PlayerParser(player_id="TeKrop-2217")
 
@@ -107,7 +108,8 @@ async def test_player_parser_parsing_error_key_error(player_html_data: str):
 @pytest.mark.asyncio()
 async def test_player_parser_parsing_error_type_error(player_html_data: str):
     player_type_error = player_html_data.replace(
-        'class="Profile-playerSummary--endorsement"', ""
+        'class="Profile-playerSummary--endorsement"',
+        "",
     )
     parser = PlayerParser(player_id="TeKrop-2217")
 

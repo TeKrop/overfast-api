@@ -20,7 +20,10 @@ client = TestClient(app)
     indirect=["hero_html_data", "hero_json_data"],
 )
 def test_get_hero(
-    hero_name: str, hero_html_data: str, hero_json_data: dict, heroes_html_data: str
+    hero_name: str,
+    hero_html_data: str,
+    hero_json_data: dict,
+    heroes_html_data: str,
 ):
     with patch.object(
         overfast_client,
@@ -58,14 +61,15 @@ def test_get_hero_blizzard_error():
         overfast_client,
         "get",
         return_value=Mock(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, text="Service Unavailable"
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            text="Service Unavailable",
         ),
     ):
         response = client.get(f"/heroes/{HeroKey.ANA}")
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
-        "error": "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable"
+        "error": "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable",
     }
 
 
@@ -82,7 +86,7 @@ def test_get_hero_internal_error():
                 "received a notification, but don't hesitate to create a GitHub "
                 "issue if you want any news concerning the bug resolution : "
                 "https://github.com/TeKrop/overfast-api/issues"
-            )
+            ),
         }
 
 
@@ -118,14 +122,13 @@ def test_get_hero_no_portrait(
 
 
 @pytest.mark.parametrize(
-    ("hero_name", "hero_html_data", "hero_json_data"),
-    [(HeroKey.ANA, HeroKey.ANA, HeroKey.ANA)],
-    indirect=["hero_html_data", "hero_json_data"],
+    ("hero_name", "hero_html_data"),
+    [(HeroKey.ANA, HeroKey.ANA)],
+    indirect=["hero_html_data"],
 )
 def test_get_hero_no_hitpoints(
     hero_name: str,
     hero_html_data: str,
-    hero_json_data: dict,
     heroes_html_data: str,
 ):
     heroes_stats = [

@@ -110,7 +110,9 @@ async def search_players(
         examples=["TeKrop"],
     ),
     privacy: PlayerPrivacy = Query(
-        None, title="Privacy settings of the player career", examples=["public"]
+        None,
+        title="Privacy settings of the player career",
+        examples=["public"],
     ),
     order_by: str = Query(
         "name:asc",
@@ -220,7 +222,8 @@ async def get_player_career_stats(
     commons: dict = Depends(get_player_career_common_parameters),
 ) -> PlayerCareerStats:
     return await GetPlayerCareerStatsRequestHandler(request).process_request(
-        stats=True, **commons
+        stats=True,
+        **commons,
     )
 
 
@@ -243,7 +246,8 @@ async def get_player_stats(
     commons: dict = Depends(get_player_career_common_parameters),
 ) -> CareerStats:
     return await GetPlayerCareerRequestHandler(request).process_request(
-        stats=True, **commons
+        stats=True,
+        **commons,
     )
 
 
@@ -263,5 +267,5 @@ async def get_player_career(
     commons: dict = Depends(get_player_common_parameters),
 ) -> Player:
     return await GetPlayerCareerRequestHandler(request).process_request(
-        player_id=commons.get("player_id")
+        player_id=commons.get("player_id"),
     )

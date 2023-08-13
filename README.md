@@ -135,6 +135,15 @@ Running tests (with coverage)
 python -m pytest --cov=app --cov-report html
 ```
 
+### Pre-commit
+The project is using [pre-commit](https://pre-commit.com/) framework to ensure code quality before making any commit on the repository. After installing the project dependencies, you can install the pre-commit by using the `pre-commit install` command.
+
+The configuration can be found in the `.pre-commit-config.yaml` file. It consists in launching 3 processes on modified files before making any commit :
+- `isort` for imports sorting in a clean way
+- `black` for formatting the code in a uniform and PEP8-compliant format
+- `ruff` for code quality checks and some fixes if possible
+- `sourcery` for more code quality checks and a lot of simplifications
+
 ## 🛠️ Cache System
 
 ### API Cache and Parser Cache

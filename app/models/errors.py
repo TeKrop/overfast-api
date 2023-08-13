@@ -20,7 +20,7 @@ class InternalServerErrorMessage(BaseModel):
                 "received a notification, but don't hesitate to create a GitHub "
                 "issue if you want any news concerning the bug resolution : "
                 "https://github.com/TeKrop/overfast-api/issues"
-            )
+            ),
         ],
     )
 

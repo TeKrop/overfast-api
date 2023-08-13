@@ -56,14 +56,15 @@ def test_get_player_summary_blizzard_error():
         overfast_client,
         "get",
         return_value=Mock(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, text="Service Unavailable"
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            text="Service Unavailable",
         ),
     ):
         response = client.get("/players/TeKrop-2217/summary")
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
-        "error": "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable"
+        "error": "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable",
     }
 
 
@@ -73,7 +74,7 @@ def test_get_player_summary_blizzard_timeout():
         "get",
         side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
-            "Read timed out. (read timeout=10)"
+            "Read timed out. (read timeout=10)",
         ),
     ):
         response = client.get("/players/TeKrop-2217/summary")
@@ -83,7 +84,7 @@ def test_get_player_summary_blizzard_timeout():
         "error": (
             "Couldn't get Blizzard page (HTTP 0 error) : "
             "Blizzard took more than 10 seconds to respond, resulting in a timeout"
-        )
+        ),
     }
 
 
@@ -100,5 +101,5 @@ def test_get_player_summary_internal_error():
                 "received a notification, but don't hesitate to create a GitHub "
                 "issue if you want any news concerning the bug resolution : "
                 "https://github.com/TeKrop/overfast-api/issues"
-            )
+            ),
         }

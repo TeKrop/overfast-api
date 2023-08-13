@@ -13,8 +13,8 @@ def get_soon_expired_cache_keys() -> set[str]:
     """Get a set of keys for values in Parser Cache which should be deleted"""
     return set(
         cache_manager.get_soon_expired_cache_keys(
-            settings.parser_cache_last_update_key_prefix
-        )
+            settings.parser_cache_last_update_key_prefix,
+        ),
     )
 
 
@@ -48,6 +48,6 @@ def main():
 
 if __name__ == "__main__":  # pragma: no cover
     logger = logger.patch(
-        lambda record: record.update(name="check_and_delete_parser_cache")
+        lambda record: record.update(name="check_and_delete_parser_cache"),
     )
     main()

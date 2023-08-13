@@ -16,14 +16,14 @@ class AbilityVideoLink(BaseModel):
         ...,
         description="MP4 version",
         examples=[
-            "https://assets.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt71688da0f7834fed/6333c9882dc7636608cc7078/OVERWATCH_WEBSITE_CHARACTER_CAPTURE_CassidyPeacekeeper_WEB_16x9_1920x1080p30_H264.mp4"
+            "https://assets.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt71688da0f7834fed/6333c9882dc7636608cc7078/OVERWATCH_WEBSITE_CHARACTER_CAPTURE_CassidyPeacekeeper_WEB_16x9_1920x1080p30_H264.mp4",
         ],
     )
     webm: HttpUrl = Field(
         ...,
         description="WebM version",
         examples=[
-            "https://assets.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltcff86b9875852be9/6333c9873917977bfd986103/OVERWATCH_WEBSITE_CHARACTER_CAPTURE_CassidyPeacekeeper_WEB_16x9_1920x1080p30_H264.webm"
+            "https://assets.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltcff86b9875852be9/6333c9873917977bfd986103/OVERWATCH_WEBSITE_CHARACTER_CAPTURE_CassidyPeacekeeper_WEB_16x9_1920x1080p30_H264.webm",
         ],
     )
 
@@ -33,7 +33,7 @@ class AbilityVideo(BaseModel):
         ...,
         description="Thumbnail of the ability video",
         examples=[
-            "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt08db01a1d84b0c3b/6333c97e3922a2677fc88c3c/CASSIDY_COMBAT_ROLL.jpg"
+            "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt08db01a1d84b0c3b/6333c97e3922a2677fc88c3c/CASSIDY_COMBAT_ROLL.jpg",
         ],
     )
     link: AbilityVideoLink = Field(..., description="Link to the ability video")
@@ -50,7 +50,7 @@ class Ability(BaseModel):
         ...,
         description="Icon URL of the ability",
         examples=[
-            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/24a3f2f619859812bba6b6374513fa971b6b19ccb34950c02118b41cc4f93142.png"
+            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/24a3f2f619859812bba6b6374513fa971b6b19ccb34950c02118b41cc4f93142.png",
         ],
     )
     video: AbilityVideo = Field(..., description="Video of the ability")
@@ -86,14 +86,14 @@ class StoryChapter(BaseModel):
                 "turn it to their own ends. After the destruction of Overwatch's Swiss "
                 "HQ, Cassidy wanted no part of the infighting. He set off alone and "
                 "went underground."
-            )
+            ),
         ],
     )
     picture: HttpUrl = Field(
         ...,
         description="URL of the picture illustrating the chapter",
         examples=[
-            "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt1683656b69bedff7/638808d0273de01068bb2806/cassidy-01.jpg"
+            "https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/blt1683656b69bedff7/638808d0273de01068bb2806/cassidy-01.jpg",
         ],
     )
 
@@ -110,7 +110,7 @@ class Story(BaseModel):
                 "righting the world's injustices. But when Overwatch fell, Cassidy "
                 "went underground, resurfacing later as a gunslinger for hire, "
                 "fighting only for causes he believes are just."
-            )
+            ),
         ],
     )
     media: Media | None = Field(
@@ -133,7 +133,7 @@ class Hero(BaseModel):
             (
                 "Armed with his Peacekeeper revolver, Cassidy takes out targets with "
                 "deadeye precision and dives out of danger with eagle-like speed."
-            )
+            ),
         ],
     )
     portrait: HttpUrl | None = Field(
@@ -143,7 +143,7 @@ class Hero(BaseModel):
             "can be null for a few days."
         ),
         examples=[
-            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/6cfb48b5597b657c2eafb1277dc5eef4a07eae90c265fcd37ed798189619f0a5.png"
+            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/6cfb48b5597b657c2eafb1277dc5eef4a07eae90c265fcd37ed798189619f0a5.png",
         ],
     )
     role: Role = Field(
@@ -163,7 +163,9 @@ class Hero(BaseModel):
         ),
     )
     abilities: list[Ability] = Field(
-        ..., description="List of hero abilities", min_length=1
+        ...,
+        description="List of hero abilities",
+        min_length=1,
     )
     story: Story = Field(..., description="Story of the hero")
 
@@ -179,7 +181,7 @@ class HeroShort(BaseModel):
         ...,
         description="Portrait picture URL of the hero",
         examples=[
-            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/3429c394716364bbef802180e9763d04812757c205e1b4568bc321772096ed86.png"
+            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/3429c394716364bbef802180e9763d04812757c205e1b4568bc321772096ed86.png",
         ],
     )
     role: Role = Field(
@@ -196,13 +198,13 @@ class RoleDetail(BaseModel):
         ...,
         description="Icon URL of the role",
         examples=[
-            "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltc1d840ba007f88a8/62ea89572fdd1011027e605d/Damage.svg"
+            "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltc1d840ba007f88a8/62ea89572fdd1011027e605d/Damage.svg",
         ],
     )
     description: str = Field(
         ...,
         description="Description of the role",
         examples=[
-            "Damage heroes seek out, engage, and obliterate the enemy with wide-ranging tools, abilities, and play styles. Fearsome but fragile, these heroes require backup to survive."
+            "Damage heroes seek out, engage, and obliterate the enemy with wide-ranging tools, abilities, and play styles. Fearsome but fragile, these heroes require backup to survive.",
         ],
     )

@@ -32,9 +32,10 @@ def test_check_no_new_hero(heroes_html_data: str):
 def test_check_discord_webhook_disabled():
     logger_info_mock = Mock()
     with patch(
-        "app.commands.check_new_hero.settings.discord_webhook_enabled", False
+        "app.commands.check_new_hero.settings.discord_webhook_enabled",
+        False,
     ), patch("app.common.logging.logger.info", logger_info_mock), pytest.raises(
-        SystemExit
+        SystemExit,
     ):
         check_new_hero_main()
 
@@ -70,7 +71,7 @@ def test_check_error_from_blizzard():
             text="Internal Server Error",
         ),
     ), patch("app.common.logging.logger.error", logger_error_mock), pytest.raises(
-        SystemExit
+        SystemExit,
     ):
         check_new_hero_main()
 

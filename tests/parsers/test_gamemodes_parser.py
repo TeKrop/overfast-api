@@ -12,7 +12,9 @@ async def test_gamemodes_page_parsing(home_html_data: str):
     parser = GamemodesParser()
 
     with patch.object(
-        overfast_client, "get", return_value=Mock(status_code=200, text=home_html_data)
+        overfast_client,
+        "get",
+        return_value=Mock(status_code=200, text=home_html_data),
     ):
         try:
             await parser.parse()

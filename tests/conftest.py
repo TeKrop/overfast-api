@@ -18,7 +18,8 @@ def _patch_before_every_test(redis_server: fakeredis.FakeStrictRedis):
     redis_server.flushdb()
 
     with patch("app.common.helpers.settings.discord_webhook_enabled", False), patch(
-        "app.common.cache_manager.CacheManager.redis_server", redis_server
+        "app.common.cache_manager.CacheManager.redis_server",
+        redis_server,
     ):
         yield
 
