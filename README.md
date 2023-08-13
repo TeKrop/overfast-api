@@ -33,7 +33,7 @@ You can also consult the Swagger UI documentation, useful for directly trying AP
 
 ### Requirements
 * 🐍 Python 3.11
-* 🪶 Poetry
+* 📜 Poetry
 
 ### Install
 

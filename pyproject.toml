@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "overfast-api"
-version = "2.19.2"
+version = "2.19.3"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = "MIT"
 authors = ["TeKrop <tekrop@gmail.com>"]
@@ -38,6 +38,9 @@ ruff = "^0.0.282"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
 
 [tool.ruff]
 # Same configuration as black default
