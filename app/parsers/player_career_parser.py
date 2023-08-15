@@ -18,7 +18,8 @@ class PlayerCareerParser(PlayerParser):
         # it means the player doesn't exist or hasn't been found.
         if not self.root_tag.find("blz-section", class_="Profile-masthead"):
             raise ParserBlizzardError(
-                status_code=status.HTTP_404_NOT_FOUND, message="Player not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Player not found",
             )
 
         # Only return heroes stats, which will be used for calculation
@@ -48,12 +49,12 @@ class PlayerCareerParser(PlayerParser):
                             for hero_key, statistics in gamemode_stats[
                                 "career_stats"
                             ].items()
-                        }
+                        },
                     }
                     for gamemode, gamemode_stats in platform_stats.items()
                     if gamemode_stats
                 }
                 for platform, platform_stats in raw_stats.items()
                 if platform_stats
-            }
+            },
         }

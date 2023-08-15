@@ -9,11 +9,13 @@ from app.parsers.roles_parser import RolesParser
 
 
 @pytest.mark.asyncio()
-async def test_roles_page_parsing(home_html_data: str, roles_json_data: list):
+async def test_roles_page_parsing(home_html_data: str):
     parser = RolesParser()
 
     with patch.object(
-        overfast_client, "get", return_value=Mock(status_code=200, text=home_html_data)
+        overfast_client,
+        "get",
+        return_value=Mock(status_code=200, text=home_html_data),
     ):
         try:
             await parser.parse()

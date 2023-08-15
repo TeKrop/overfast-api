@@ -43,8 +43,8 @@ def test_search_players_missing_name():
                 "loc": ["query", "name"],
                 "msg": "Field required",
                 "input": None,
-            }
-        ]
+            },
+        ],
     }
 
 
@@ -69,13 +69,15 @@ def test_search_players_no_result():
 )
 def test_search_players_blizzard_error(status_code: int, text: str):
     with patch.object(
-        overfast_client, "get", return_value=Mock(status_code=status_code, text=text)
+        overfast_client,
+        "get",
+        return_value=Mock(status_code=status_code, text=text),
     ):
         response = client.get("/players?name=Player")
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
-        "error": f"Couldn't get Blizzard page (HTTP {status_code} error) : {text}"
+        "error": f"Couldn't get Blizzard page (HTTP {status_code} error) : {text}",
     }
 
 
@@ -85,7 +87,7 @@ def test_search_players_blizzard_timeout():
         "get",
         side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
-            "Read timed out. (read timeout=10)"
+            "Read timed out. (read timeout=10)",
         ),
     ):
         response = client.get("/players?name=Player")
@@ -95,7 +97,7 @@ def test_search_players_blizzard_timeout():
         "error": (
             "Couldn't get Blizzard page (HTTP 0 error) : "
             "Blizzard took more than 10 seconds to respond, resulting in a timeout"
-        )
+        ),
     }
 
 
@@ -139,7 +141,9 @@ def test_search_players_with_cache(search_players_api_json_data: list):
     ],
 )
 def test_search_players_with_offset_and_limit(
-    search_players_api_json_data: dict, offset: int, limit: int
+    search_players_api_json_data: dict,
+    offset: int,
+    limit: int,
 ):
     response = client.get(f"/players?name=Test&offset={offset}&limit={limit}")
     assert response.status_code == status.HTTP_200_OK
@@ -149,7 +153,8 @@ def test_search_players_with_offset_and_limit(
     assert (
         sorted(json_response["results"], key=lambda k: k["player_id"])
         == sorted(
-            search_players_api_json_data["results"], key=lambda k: k["player_id"]
+            search_players_api_json_data["results"],
+            key=lambda k: k["player_id"],
         )[offset:limit]
     )
 
@@ -159,7 +164,8 @@ def test_search_players_with_offset_and_limit(
     [*[p.value for p in PlayerPrivacy], "invalid_privacy", 1234],
 )
 def test_search_players_filter_by_privacy(
-    privacy: PlayerPrivacy, search_players_api_json_data: dict
+    privacy: PlayerPrivacy,
+    search_players_api_json_data: dict,
 ):
     response = client.get(f"/players?name=Test&privacy={privacy}")
 
@@ -187,7 +193,8 @@ def test_search_players_ordering(search_players_api_json_data: dict, order_by: s
 
     order_field, order_arrangement = order_by.split(":")
     search_players_api_json_data["results"].sort(
-        key=lambda player: player[order_field], reverse=order_arrangement == "desc"
+        key=lambda player: player[order_field],
+        reverse=order_arrangement == "desc",
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -210,5 +217,5 @@ def test_search_players_internal_error():
                 "received a notification, but don't hesitate to create a GitHub "
                 "issue if you want any news concerning the bug resolution : "
                 "https://github.com/TeKrop/overfast-api/issues"
-            )
+            ),
         }

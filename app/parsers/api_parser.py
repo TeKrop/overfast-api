@@ -56,7 +56,7 @@ class APIParser(AbstractParser):
 
         # Initialize BeautifulSoup object
         self.root_tag = BeautifulSoup(req.text, "lxml").body.find(
-            **self.root_tag_params
+            **self.root_tag_params,
         )
 
         # Parse retrieved HTML data

@@ -49,7 +49,8 @@ async def test_namecard_parser_blizzard_error():
         overfast_client,
         "get",
         return_value=Mock(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, text="Service Unavailable"
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            text="Service Unavailable",
         ),
     ):
         await parser.parse()
@@ -114,7 +115,7 @@ async def test_namecard_parser_player_without_namecard():
             "namecard": "0x0000000000000000",
             "portrait": "0x0250000000001598",
             "title": "0x025000000000555E",
-        }
+        },
     ]
     parser = NamecardParser(player_id="Dekk-2677")
 
@@ -151,7 +152,8 @@ async def test_namecard_parser_no_cache_no_namecard(
             json=lambda: search_players_blizzard_json_data,
         ),
     ), patch("httpx.get", side_effect=httpx.RequestError("error")), patch(
-        "app.common.logging.logger.warning", logger_warning_mock
+        "app.common.logging.logger.warning",
+        logger_warning_mock,
     ):
         await parser.parse()
 

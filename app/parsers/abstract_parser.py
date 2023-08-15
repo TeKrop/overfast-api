@@ -16,7 +16,7 @@ class AbstractParser(ABC):
 
     cache_manager = CacheManager()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **_):
         self.data: dict | list = None
 
     @property
@@ -61,7 +61,8 @@ class AbstractParser(ABC):
         # date as last_update (used by the Parser Cache expiration system)
         if self.cache_expiration_timeout is not None:
             self.cache_manager.update_parser_cache_last_update(
-                self.cache_key, self.cache_expiration_timeout
+                self.cache_key,
+                self.cache_expiration_timeout,
             )
 
     def filter_request_using_query(self, **_) -> dict | list:

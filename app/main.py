@@ -16,7 +16,7 @@ from .routers import gamemodes, heroes, maps, players, roles
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # pragma: no cover
+async def lifespan(_: FastAPI):  # pragma: no cover
     # Update namecards list from Blizzard before starting up
     if settings.redis_caching_enabled:
         logger.info("Updating namecards data...")
@@ -109,7 +109,7 @@ logger.info("Version : {}", settings.app_version)
 
 
 @app.exception_handler(StarletteHTTPException)
-async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+async def http_exception_handler(_: Request, exc: StarletteHTTPException):
     return JSONResponse(content={"error": exc.detail}, status_code=exc.status_code)
 
 

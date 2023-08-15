@@ -100,20 +100,27 @@ class PlayerParser(APIParser):
         # it means the player doesn't exist or hasn't been found.
         if not self.root_tag.find("blz-section", class_="Profile-masthead"):
             raise ParserBlizzardError(
-                status_code=status.HTTP_404_NOT_FOUND, message="Player not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Player not found",
             )
 
         return {"summary": self.__get_summary(), "stats": self.get_stats()}
 
     def __get_summary(self) -> dict:
         profile_div = self.root_tag.find(
-            "blz-section", class_="Profile-masthead", recursive=False
+            "blz-section",
+            class_="Profile-masthead",
+            recursive=False,
         ).find("div", class_="Profile-player", recursive=False)
         summary_div = profile_div.find(
-            "div", class_="Profile-player--summaryWrapper", recursive=False
+            "div",
+            class_="Profile-player--summaryWrapper",
+            recursive=False,
         )
         progression_div = profile_div.find(
-            "div", class_="Profile-player--info", recursive=False
+            "div",
+            class_="Profile-player--info",
+            recursive=False,
         )
         return {
             "username": (
@@ -121,7 +128,9 @@ class PlayerParser(APIParser):
             ),
             "avatar": (
                 summary_div.find(
-                    "img", class_="Profile-player--portrait", recursive=False
+                    "img",
+                    class_="Profile-player--portrait",
+                    recursive=False,
                 ).get("src")
             ),
             "title": self.__get_title(profile_div),
@@ -134,7 +143,9 @@ class PlayerParser(APIParser):
     def __get_title(profile_div: Tag) -> str | None:
         title = (
             profile_div.find(
-                "h2", class_="Profile-player--title", recursive=False
+                "h2",
+                class_="Profile-player--title",
+                recursive=False,
             ).get_text()
             or None
         )
@@ -145,10 +156,13 @@ class PlayerParser(APIParser):
     @staticmethod
     def __get_endorsement(progression_div: Tag) -> dict:
         endorsement_span = progression_div.find(
-            "span", class_="Profile-player--endorsementWrapper", recursive=False
+            "span",
+            class_="Profile-player--endorsementWrapper",
+            recursive=False,
         )
         endorsement_frame_url = endorsement_span.find(
-            "img", class_="Profile-playerSummary--endorsement"
+            "img",
+            class_="Profile-playerSummary--endorsement",
         )["src"]
 
         return {
@@ -159,7 +173,8 @@ class PlayerParser(APIParser):
     def __get_competitive_ranks(self, progression_div: Tag) -> dict | None:
         competitive_ranks = {
             platform.value: self.__get_platform_competitive_ranks(
-                progression_div, platform_class
+                progression_div,
+                platform_class,
             )
             for platform, platform_class in platforms_div_mapping.items()
         }
@@ -168,12 +183,14 @@ class PlayerParser(APIParser):
         return None if not any(competitive_ranks.values()) else competitive_ranks
 
     def __get_platform_competitive_ranks(
-        self, progression_div: Tag, platform_class: str
+        self,
+        progression_div: Tag,
+        platform_class: str,
     ) -> dict | None:
         last_season_played = self.__get_last_season_played(platform_class)
 
         competitive_rank_div = progression_div.select_one(
-            f"div.Profile-playerSummary--rankWrapper.{platform_class}"
+            f"div.Profile-playerSummary--rankWrapper.{platform_class}",
         )
         role_wrappers = competitive_rank_div.find_all(
             "div",
@@ -213,7 +230,7 @@ class PlayerParser(APIParser):
             return None
 
         statistics_section = profile_section.select_one(
-            "blz-section.stats.competitive-view"
+            "blz-section.stats.competitive-view",
         )
         return (
             int(statistics_section["data-latestherostatrankseasonow2"])
@@ -254,7 +271,7 @@ class PlayerParser(APIParser):
 
     def __get_platform_stats(self, platform_class: str) -> dict | None:
         statistics_section = self.root_tag.select_one(
-            f"div.Profile-view.{platform_class}"
+            f"div.Profile-view.{platform_class}",
         )
         gamemodes_infos = {
             gamemode.value: self.__get_gamemode_infos(statistics_section, gamemode)
@@ -266,13 +283,17 @@ class PlayerParser(APIParser):
         return None if not any(gamemodes_infos.values()) else gamemodes_infos
 
     def __get_gamemode_infos(
-        self, statistics_section: Tag, gamemode: PlayerGamemode
+        self,
+        statistics_section: Tag,
+        gamemode: PlayerGamemode,
     ) -> dict | None:
         if not statistics_section:
             return None
 
         top_heroes_section = statistics_section.find(
-            "blz-section", class_="Profile-heroSummary", recursive=False
+            "blz-section",
+            class_="Profile-heroSummary",
+            recursive=False,
         ).select_one(f"div.Profile-heroSummary--view.{gamemodes_div_mapping[gamemode]}")
 
         # Check if we can find a select in the section. If not, it means there is
@@ -281,7 +302,7 @@ class PlayerParser(APIParser):
             return None
 
         career_stats_section = statistics_section.select_one(
-            f"blz-section.stats.{gamemodes_div_mapping[gamemode]}"
+            f"blz-section.stats.{gamemodes_div_mapping[gamemode]}",
         )
 
         return {
@@ -294,7 +315,9 @@ class PlayerParser(APIParser):
             option["value"]: option["option-id"]
             for option in (
                 top_heroes_section.find(
-                    "div", class_="Profile-heroSummary--header", recursive=False
+                    "div",
+                    class_="Profile-heroSummary--header",
+                    recursive=False,
                 )
                 .find("select")
                 .find_all("option")
@@ -304,10 +327,10 @@ class PlayerParser(APIParser):
 
         heroes_comparisons = {
             string_to_snakecase(
-                get_real_category_name(categories[category["data-category-id"]])
+                get_real_category_name(categories[category["data-category-id"]]),
             ): {
                 "label": get_real_category_name(
-                    categories[category["data-category-id"]]
+                    categories[category["data-category-id"]],
                 ),
                 "values": [
                     {
@@ -318,17 +341,22 @@ class PlayerParser(APIParser):
                         ),
                         "value": get_computed_stat_value(
                             progress_bar.find(
-                                "div", class_="Profile-progressBar-description"
-                            ).get_text()
+                                "div",
+                                class_="Profile-progressBar-description",
+                            ).get_text(),
                         ),
                     }
                     for progress_bar in category.find_all(
-                        "div", class_="Profile-progressBar", recursive=False
+                        "div",
+                        class_="Profile-progressBar",
+                        recursive=False,
                     )
                 ],
             }
             for category in top_heroes_section.find_all(
-                "div", class_="Profile-progressBars", recursive=False
+                "div",
+                class_="Profile-progressBars",
+                recursive=False,
             )
             if category["data-category-id"] in categories
         }
@@ -345,7 +373,9 @@ class PlayerParser(APIParser):
             f"option-{option['value']}": option["option-id"]
             for option in (
                 career_stats_section.find(
-                    "div", class_="Profile-heroSummary--header", recursive=False
+                    "div",
+                    class_="Profile-heroSummary--header",
+                    recursive=False,
                 )
                 .find("select")
                 .find_all("option")
@@ -356,7 +386,9 @@ class PlayerParser(APIParser):
         career_stats = {}
 
         for hero_container in career_stats_section.find_all(
-            "span", class_="stats-container", recursive=False
+            "span",
+            class_="stats-container",
+            recursive=False,
         ):
             stats_hero_class = get_stats_hero_class(hero_container["class"])
 
@@ -370,11 +402,15 @@ class PlayerParser(APIParser):
 
             career_stats[hero_key] = []
             for card_stat in hero_container.find_all(
-                "div", class_="category", recursive=False
+                "div",
+                class_="category",
+                recursive=False,
             ):
                 content_div = card_stat.find("div", class_="content", recursive=False)
                 category_label = content_div.find(
-                    "div", class_="header", recursive=False
+                    "div",
+                    class_="header",
+                    recursive=False,
                 ).get_text()
 
                 career_stats[hero_key].append(
@@ -382,7 +418,7 @@ class PlayerParser(APIParser):
                         "category": string_to_snakecase(category_label),
                         "label": category_label,
                         "stats": [],
-                    }
+                    },
                 )
                 for stat_row in content_div.find_all("div", class_="stat-item"):
                     stat_name = stat_row.find("p", class_="name").get_text()
@@ -391,9 +427,9 @@ class PlayerParser(APIParser):
                             "key": get_plural_stat_key(string_to_snakecase(stat_name)),
                             "label": stat_name,
                             "value": get_computed_stat_value(
-                                stat_row.find("p", class_="value").get_text()
+                                stat_row.find("p", class_="value").get_text(),
                             ),
-                        }
+                        },
                     )
 
             # For a reason, sometimes the hero is in the dropdown but there

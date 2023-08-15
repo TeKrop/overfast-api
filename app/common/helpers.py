@@ -93,7 +93,7 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
     send_discord_webhook_message(
         f"* **URL** : {url}\n"
         f"* **Error type** : {type(error).__name__}\n"
-        f"* **Message** : {error}"
+        f"* **Message** : {error}",
     )
 
     return HTTPException(
@@ -150,7 +150,7 @@ def read_html_file(filepath: str) -> str | None:
 def read_json_file(filepath: str) -> dict | list | None:
     """Helper method for retrieving fixture JSON file data"""
     with Path(f"{settings.test_fixtures_root_path}/json/{filepath}").open(
-        encoding="utf-8"
+        encoding="utf-8",
     ) as json_file:
         return json.load(json_file)
 
@@ -196,7 +196,10 @@ def get_hero_name(hero_key: "HeroKey") -> str:
 
 
 def dict_insert_value_before_key(
-    data: dict, key: str, new_key: str, new_value: Any
+    data: dict,
+    key: str,
+    new_key: str,
+    new_value: Any,
 ) -> dict:
     """Insert a given key/value pair before another key in a given dict"""
     if key not in data:

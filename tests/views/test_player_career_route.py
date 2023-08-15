@@ -61,14 +61,15 @@ def test_get_player_career_blizzard_error():
         overfast_client,
         "get",
         return_value=Mock(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, text="Service Unavailable"
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            text="Service Unavailable",
         ),
     ):
         response = client.get("/players/TeKrop-2217")
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
-        "error": "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable"
+        "error": "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable",
     }
 
 
@@ -78,7 +79,7 @@ def test_get_player_career_blizzard_timeout():
         "get",
         side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
-            "Read timed out. (read timeout=10)"
+            "Read timed out. (read timeout=10)",
         ),
     ):
         response = client.get("/players/TeKrop-2217")
@@ -88,7 +89,7 @@ def test_get_player_career_blizzard_timeout():
         "error": (
             "Couldn't get Blizzard page (HTTP 0 error) : Blizzard took more "
             "than 10 seconds to respond, resulting in a timeout"
-        )
+        ),
     }
 
 
@@ -105,7 +106,7 @@ def test_get_player_career_internal_error():
                 "received a notification, but don't hesitate to create a GitHub "
                 "issue if you want any news concerning the bug resolution : "
                 "https://github.com/TeKrop/overfast-api/issues"
-            )
+            ),
         }
 
 
@@ -124,7 +125,8 @@ def test_get_player_parser_init_error(player_html_data: str):
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 def test_get_player_parser_parsing_error(player_html_data: str):
     player_attr_error = player_html_data.replace(
-        'class="Profile-player--summaryWrapper"', 'class="blabla"'
+        'class="Profile-player--summaryWrapper"',
+        'class="blabla"',
     )
     with patch.object(
         overfast_client,
@@ -139,5 +141,5 @@ def test_get_player_parser_parsing_error(player_html_data: str):
                 "received a notification, but don't hesitate to create a GitHub "
                 "issue if you want any news concerning the bug resolution : "
                 "https://github.com/TeKrop/overfast-api/issues"
-            )
+            ),
         }

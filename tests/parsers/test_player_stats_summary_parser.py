@@ -18,7 +18,9 @@ from app.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
 )
 @pytest.mark.asyncio()
 async def test_player_page_parsing(
-    player_id: str, player_html_data: str, player_stats_json_data: dict
+    player_id: str,
+    player_html_data: str,
+    player_stats_json_data: dict,
 ):
     parser = PlayerStatsSummaryParser(player_id=player_id)
     update_parser_cache_last_update_mock = Mock()

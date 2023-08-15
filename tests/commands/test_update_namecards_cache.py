@@ -36,12 +36,13 @@ def test_update_namecards_request_error(cache_manager: CacheManager):
 
     logger_exception_mock = Mock()
     with patch("httpx.get", side_effect=httpx.RequestError("error")), patch(
-        "app.common.logging.logger.exception", logger_exception_mock
+        "app.common.logging.logger.exception",
+        logger_exception_mock,
     ), pytest.raises(SystemExit):
         update_namecards_cache_main()
 
     logger_exception_mock.assert_any_call(
-        "An error occurred while requesting namecards !"
+        "An error occurred while requesting namecards !",
     )
     assert cache_manager.get_namecard_cache("fake") == "value"
 
@@ -51,11 +52,13 @@ def test_update_namecards_cache_namecards_not_found(cache_manager: CacheManager)
 
     logger_exception_mock = Mock()
     with patch(
-        "httpx.get", return_value=Mock(status_code=status.HTTP_200_OK, text="OK")
+        "httpx.get",
+        return_value=Mock(status_code=status.HTTP_200_OK, text="OK"),
     ), patch(
-        "app.common.logging.logger.exception", logger_exception_mock
+        "app.common.logging.logger.exception",
+        logger_exception_mock,
     ), pytest.raises(
-        SystemExit
+        SystemExit,
     ):
         update_namecards_cache_main()
 
@@ -70,16 +73,18 @@ def test_update_namecards_cache_invalid_json(cache_manager: CacheManager):
     with patch(
         "httpx.get",
         return_value=Mock(
-            status_code=status.HTTP_200_OK, text="const namecards = {'test':abc}\n"
+            status_code=status.HTTP_200_OK,
+            text="const namecards = {'test':abc}\n",
         ),
     ), patch(
-        "app.common.logging.logger.exception", logger_exception_mock
+        "app.common.logging.logger.exception",
+        logger_exception_mock,
     ), pytest.raises(
-        SystemExit
+        SystemExit,
     ):
         update_namecards_cache_main()
 
     logger_exception_mock.assert_any_call(
-        "Invalid format for namecards on Blizzard page !"
+        "Invalid format for namecards on Blizzard page !",
     )
     assert cache_manager.get_namecard_cache("fake") == "value"

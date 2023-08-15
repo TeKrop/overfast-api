@@ -48,7 +48,7 @@ def get_soon_expired_cache_keys() -> set[str]:
     or will need to be updated.
     """
     return set(
-        cache_manager.get_soon_expired_cache_keys(settings.parser_cache_key_prefix)
+        cache_manager.get_soon_expired_cache_keys(settings.parser_cache_key_prefix),
     )
 
 
@@ -64,7 +64,7 @@ def get_request_parser_class(cache_key: str) -> tuple[type, dict]:
         return cache_parser_class, cache_kwargs
 
     uri = cache_key.removeprefix(f"{parser_class_name}-{settings.blizzard_host}").split(
-        "/"
+        "/",
     )
     cache_kwargs["locale"] = uri[1]
     if "Player" in parser_class_name:

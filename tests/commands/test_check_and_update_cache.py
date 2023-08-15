@@ -55,7 +55,9 @@ def test_check_and_update_gamemodes_cache_to_update(
         settings.expired_cache_refresh_limit + 5,
     )
     cache_manager.update_parser_cache(
-        gamemodes_cache_key, [], settings.expired_cache_refresh_limit - 5
+        gamemodes_cache_key,
+        [],
+        settings.expired_cache_refresh_limit - 5,
     )
 
     assert get_soon_expired_cache_keys() == {gamemodes_cache_key}
@@ -82,7 +84,10 @@ def test_check_and_update_gamemodes_cache_to_update(
     indirect=["hero_html_data", "hero_json_data"],
 )
 def test_check_and_update_specific_hero_to_update(
-    cache_manager: CacheManager, locale: str, hero_html_data: str, hero_json_data: dict
+    cache_manager: CacheManager,
+    locale: str,
+    hero_html_data: str,
+    hero_json_data: dict,
 ):
     ana_cache_key = (
         f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana"
@@ -90,7 +95,9 @@ def test_check_and_update_specific_hero_to_update(
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        ana_cache_key, {}, settings.expired_cache_refresh_limit - 5
+        ana_cache_key,
+        {},
+        settings.expired_cache_refresh_limit - 5,
     )
 
     # Check data in db (assert no Parser Cache data)
@@ -119,13 +126,16 @@ def test_check_and_update_specific_hero_to_update(
 
 
 def test_check_and_update_maps_to_update(
-    cache_manager: CacheManager, maps_json_data: dict
+    cache_manager: CacheManager,
+    maps_json_data: dict,
 ):
     cache_key = "MapsParser"
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        cache_key, [], settings.expired_cache_refresh_limit - 5
+        cache_key,
+        [],
+        settings.expired_cache_refresh_limit - 5,
     )
 
     # Check data in db (assert no Parser Cache data)
@@ -186,7 +196,9 @@ def test_check_and_update_specific_player_to_update(
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        player_cache_key, {}, settings.expired_cache_refresh_limit - 5
+        player_cache_key,
+        {},
+        settings.expired_cache_refresh_limit - 5,
     )
     cache_manager.update_parser_cache(
         f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
@@ -234,7 +246,9 @@ def test_check_and_update_player_stats_summary_to_update(
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        player_stats_cache_key, {}, settings.expired_cache_refresh_limit - 5
+        player_stats_cache_key,
+        {},
+        settings.expired_cache_refresh_limit - 5,
     )
     cache_manager.update_parser_cache(
         f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
@@ -266,7 +280,8 @@ def test_check_and_update_player_stats_summary_to_update(
     # Check data in db (assert we created API Cache for subroutes)
     logger_info_mock.assert_any_call("Done ! Retrieved keys : {}", 1)
     logger_info_mock.assert_any_call(
-        "Updating data for {} key...", player_stats_cache_key
+        "Updating data for {} key...",
+        player_stats_cache_key,
     )
 
     assert (
@@ -314,7 +329,7 @@ def test_check_timeout_from_blizzard(cache_manager: CacheManager, locale: str):
         "get",
         side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
-            "Read timed out. (read timeout=10)"
+            "Read timed out. (read timeout=10)",
         ),
     ), patch("app.common.logging.logger.error", logger_error_mock):
         asyncio.run(check_and_update_cache_main())
@@ -328,7 +343,9 @@ def test_check_timeout_from_blizzard(cache_manager: CacheManager, locale: str):
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 def test_check_parser_parsing_error(
-    cache_manager: CacheManager, locale: str, player_html_data: str
+    cache_manager: CacheManager,
+    locale: str,
+    player_html_data: str,
 ):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
@@ -340,7 +357,8 @@ def test_check_parser_parsing_error(
     logger_critical_mock = Mock()
 
     player_attr_error = player_html_data.replace(
-        'class="Profile-player--summaryWrapper"', 'class="blabla"'
+        'class="Profile-player--summaryWrapper"',
+        'class="blabla"',
     )
     with patch.object(
         overfast_client,
@@ -358,7 +376,9 @@ def test_check_parser_parsing_error(
 
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
 def test_check_parser_init_error(
-    cache_manager: CacheManager, locale: str, player_html_data: str
+    cache_manager: CacheManager,
+    locale: str,
+    player_html_data: str,
 ):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
@@ -376,7 +396,8 @@ def test_check_parser_init_error(
         asyncio.run(check_and_update_cache_main())
 
     logger_exception_mock.assert_any_call(
-        "Failed to instanciate Parser when refreshing : {}", "Player not found"
+        "Failed to instanciate Parser when refreshing : {}",
+        "Player not found",
     )
 
 
@@ -394,10 +415,14 @@ def test_check_and_update_several_to_update(
 
     # Add some data to update
     cache_manager.update_parser_cache(
-        gamemodes_cache_key, [], settings.expired_cache_refresh_limit - 5
+        gamemodes_cache_key,
+        [],
+        settings.expired_cache_refresh_limit - 5,
     )
     cache_manager.update_parser_cache(
-        maps_cache_key, [], settings.expired_cache_refresh_limit - 5
+        maps_cache_key,
+        [],
+        settings.expired_cache_refresh_limit - 5,
     )
 
     assert get_soon_expired_cache_keys() == {gamemodes_cache_key, maps_cache_key}
@@ -431,7 +456,9 @@ def test_check_and_update_namecard_to_update(
     # Add namecards list data + parser_cache key which needs an update
     cache_manager.update_namecards_cache(namecards_json_data)
     cache_manager.update_parser_cache(
-        namecard_cache_key, {}, settings.expired_cache_refresh_limit - 5
+        namecard_cache_key,
+        {},
+        settings.expired_cache_refresh_limit - 5,
     )
 
     # Add some data which doesn't need update
@@ -468,5 +495,5 @@ def test_check_and_update_namecard_to_update(
     logger_info_mock.assert_any_call("Updating data for {} key...", namecard_cache_key)
 
     assert cache_manager.get_parser_cache(namecard_cache_key) == {
-        "namecard": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/52ee742d4e2fc734e3cd7fdb74b0eac64bcdf26d58372a503c712839595802c5.png"
+        "namecard": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/52ee742d4e2fc734e3cd7fdb74b0eac64bcdf26d58372a503c712839595802c5.png",
     }

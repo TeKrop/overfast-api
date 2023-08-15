@@ -34,6 +34,8 @@ pytest-randomly = "^3.13.0"
 pytest-xdist = "^3.3.1"
 refurb = "^1.19.0"
 ruff = "^0.0.282"
+pre-commit = "^3.3.3"
+sourcery = "^1.7.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -47,38 +49,51 @@ profile = "black"
 line-length = 88
 
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "C",   # flake8-comprehensions
-    "S",   # flake8-bandit
-    "BLE", # flake8-blind-except
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "DTZ", # flake8-datetimez
-    "T10", # flake8-debugger
-    "EM",  # flake8-errmsg
-    "ISC", # flake8-implicit-str-concat
-    "ICN", # flake8-import-conventions
-    "G",   # flake8-logging-format
-    "INP", # flake8-no-pep420
-    "PIE", # flake8-pie
-    "T20", # flake8-print
-    "PT",  # flake8-pytest-style
-    "Q",   # flake8-quotes
-    "RSE", # flake8-raise
-    "RET", # flake8-return
-    "SLF", # flake8-self
-    "SIM", # flake8-simplify
-    "TID", # flake8-tidy-imports
-    "PTH", # flake8-use-pathlib
-    "UP",  # pyupgrade
-    "N",   # pep8-naming
-    "C90", # mccabe complexity checker
-    "ERA", # eradicate commented-out code
-    "PL",  # pylint
-    "TRY", # tryceratops
-    "RUF", # ruff-specific rules
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "C90",   # mccabe complexity checker
+    "N",     # pep8-naming
+    "UP",    # pyupgrade
+    "ASYNC", # flake8-async
+    "S",     # flake8-bandit
+    "BLE",   # flake8-blind-except
+    "B",     # flake8-bugbear
+    "COM",   # flake8-commas
+    "CPY",   # flake8-copyright
+    "C4",    # flake8-comprehensions
+    "DTZ",   # flake8-datetimez
+    "T10",   # flake8-debugger
+    "EM",    # flake8-errmsg
+    "EXE",   # flake8-executable
+    "FIX",   # flake8-fixme
+    "FA",    # flake8-future-annotations
+    "INT",   # flake8-gettext
+    "ISC",   # flake8-implicit-str-concat
+    "ICN",   # flake8-import-conventions
+    "G",     # flake8-logging-format
+    "INP",   # flake8-no-pep420
+    "PIE",   # flake8-pie
+    "T20",   # flake8-print
+    "PT",    # flake8-pytest-style
+    "Q",     # flake8-quotes
+    "RSE",   # flake8-raise
+    "RET",   # flake8-return
+    "SLF",   # flake8-self
+    "SLOT",  # flake8-slots
+    "SIM",   # flake8-simplify
+    "TID",   # flake8-tidy-imports
+    "TD",    # flake8-todos
+    "TCH",   # flake8-type-checking
+    "ARG",   # flake8-unused-arguments
+    "PTH",   # flake8-use-pathlib
+    "ERA",   # eradicate commented-out code
+    "PGH",   # pygrep-hooks
+    "PL",    # pylint
+    "TRY",   # tryceratops
+    "FLY",   # flynt
+    "PERF",  # perflint
+    "RUF",   # ruff-specific rules
 ]
 ignore = [
     "E501",    # line too long, handled by black

@@ -9,7 +9,12 @@ def test_rate_limited():
     # Define the rate limited method
     @rate_limited(max_calls=3, interval=2)
     def method_to_limit(param1: int, param2: str, param3: bool):
-        logger.info("Here is the method to limit")
+        logger.info(
+            "Here is the method to limit with %d, %s, %s",
+            param1,
+            param2,
+            param3,
+        )
 
     # Call the method with same parameters twice
     method_to_limit(param1=42, param2="test", param3=True)

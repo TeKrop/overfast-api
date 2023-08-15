@@ -21,7 +21,7 @@ def parse_parameters() -> argparse.Namespace:  # pragma: no cover
         description=(
             "Update test data fixtures by retrieving Blizzard pages directly. "
             "By default, all the tests data will be updated."
-        )
+        ),
     )
     parser.add_argument(
         "-He",
@@ -63,6 +63,7 @@ def list_routes_to_update(args: argparse.Namespace) -> dict[str, str]:
 
     if args.heroes:
         logger.info("Adding heroes routes...")
+
         route_file_mapping |= {
             f"{settings.heroes_path}/": "/heroes.html",
             **{
@@ -77,7 +78,7 @@ def list_routes_to_update(args: argparse.Namespace) -> dict[str, str]:
             **{
                 f"{settings.career_path}/{player_id}/": f"/players/{player_id}.html"
                 for player_id in players_ids
-            }
+            },
         )
 
     if args.home:

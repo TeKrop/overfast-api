@@ -62,9 +62,11 @@ def test_update_with_different_options(parameters, expected_calls: list[str]):
         "get",
         return_value=Mock(status_code=status.HTTP_200_OK, text="HTML_DATA"),
     ), patch(
-        "app.common.logging.logger.info", logger_info_mock
+        "app.common.logging.logger.info",
+        logger_info_mock,
     ), patch(
-        "app.common.logging.logger.error", logger_error_mock
+        "app.common.logging.logger.error",
+        logger_error_mock,
     ):
         asyncio.run(update_test_fixtures_main())
 
@@ -83,15 +85,19 @@ def test_update_with_blizzard_error():
         AsyncClient,
         "get",
         return_value=Mock(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, text="BLIZZARD_ERROR"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            text="BLIZZARD_ERROR",
         ),
     ), patch(
-        "app.common.logging.logger.info", Mock()
+        "app.common.logging.logger.info",
+        Mock(),
     ), patch(
-        "app.common.logging.logger.error", logger_error_mock
+        "app.common.logging.logger.error",
+        logger_error_mock,
     ):
         asyncio.run(update_test_fixtures_main())
 
     logger_error_mock.assert_called_with(
-        "Error while getting the page : {}", "BLIZZARD_ERROR"
+        "Error while getting the page : {}",
+        "BLIZZARD_ERROR",
     )

@@ -105,7 +105,7 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
                     "name": player["battleTag"],
                     "privacy": "public" if player["isPublic"] else "private",
                     "career_url": f"{settings.app_base_url}/players/{player_id}",
-                }
+                },
             )
         return transformed_players
 
@@ -114,7 +114,8 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
         """Apply the given ordering to the list of found players."""
         order_field, order_arrangement = order_by.split(":")
         players.sort(
-            key=lambda player: player[order_field], reverse=order_arrangement == "desc"
+            key=lambda player: player[order_field],
+            reverse=order_arrangement == "desc",
         )
         return players
 

@@ -36,7 +36,9 @@ class HeroParser(APIParser):
 
         overview_section = self.root_tag.find("blz-page-header", recursive=False)
         abilities_section = self.root_tag.find(
-            "div", class_="abilities-container", recursive=False
+            "div",
+            class_="abilities-container",
+            recursive=False,
         )
         lore_section = self.root_tag.find("blz-section", class_="lore", recursive=False)
 
@@ -63,7 +65,8 @@ class HeroParser(APIParser):
     @staticmethod
     def __get_abilities(abilities_section: Tag) -> list[dict]:
         abilities_list_div = abilities_section.find(
-            "blz-carousel-section", recursive=False
+            "blz-carousel-section",
+            recursive=False,
         ).find("blz-carousel", recursive=False)
 
         abilities_desc = [
@@ -87,7 +90,8 @@ class HeroParser(APIParser):
                 },
             }
             for video_div in abilities_section.find(
-                "blz-carousel-section", recursive=False
+                "blz-carousel-section",
+                recursive=False,
             ).find_all("blz-video", recursive=False)
         ]
 
@@ -99,7 +103,7 @@ class HeroParser(APIParser):
                 "video": abilities_videos[ability_index],
             }
             for ability_index, ability_div in enumerate(
-                abilities_list_div.find("blz-tab-controls").find_all("blz-tab-control")
+                abilities_list_div.find("blz-tab-controls").find_all("blz-tab-control"),
             )
         ]
 
@@ -117,8 +121,9 @@ class HeroParser(APIParser):
             "media": self.__get_media(showcase_section),
             "chapters": self.__get_story_chapters(
                 lore_section.find("blz-accordion-section", recursive=False).find(
-                    "blz-accordion", recursive=False
-                )
+                    "blz-accordion",
+                    recursive=False,
+                ),
             ),
         }
 
@@ -150,11 +155,13 @@ class HeroParser(APIParser):
                     [
                         paragraph.get_text()
                         for paragraph in content_container.find_all("p")
-                    ]
+                    ],
                 ).strip()
             )
             for content_container in accordion.find_all(
-                "div", slot="content", recursive=False
+                "div",
+                slot="content",
+                recursive=False,
             )
         ]
         chapters_picture = [
@@ -168,6 +175,6 @@ class HeroParser(APIParser):
                 "picture": chapters_picture[title_index],
             }
             for title_index, title_span in enumerate(
-                accordion.find_all("span", recursive=False)
+                accordion.find_all("span", recursive=False),
             )
         ]

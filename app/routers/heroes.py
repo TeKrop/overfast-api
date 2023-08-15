@@ -31,7 +31,8 @@ async def list_heroes(
     locale: Locale = Query(Locale.ENGLISH_US, title="Locale to be displayed"),
 ) -> list[HeroShort]:
     return await ListHeroesRequestHandler(request).process_request(
-        role=role, locale=locale
+        role=role,
+        locale=locale,
     )
 
 
@@ -59,5 +60,6 @@ async def get_hero(
     locale: Locale = Query(Locale.ENGLISH_US, title="Locale to be displayed"),
 ) -> Hero:
     return await GetHeroRequestHandler(request).process_request(
-        hero_key=hero_key, locale=locale
+        hero_key=hero_key,
+        locale=locale,
     )

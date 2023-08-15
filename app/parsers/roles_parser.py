@@ -13,13 +13,15 @@ class RolesParser(APIParser):
 
     def parse_data(self) -> list[dict]:
         roles_container = self.root_tag.find(
-            "div", class_="homepage-features-heroes", recursive=False
+            "div",
+            class_="homepage-features-heroes",
+            recursive=False,
         ).find("blz-feature-carousel-section", recursive=False)
 
         roles_icons = [
             role_icon_div.find("blz-image")["src:min-plus"]
             for role_icon_div in roles_container.find("blz-tab-controls").find_all(
-                "blz-tab-control"
+                "blz-tab-control",
             )
         ]
 
@@ -33,6 +35,6 @@ class RolesParser(APIParser):
                 ),
             }
             for role_index, role_div in list(
-                enumerate(roles_container.find_all("blz-feature"))
+                enumerate(roles_container.find_all("blz-feature")),
             )[:3]
         ]
