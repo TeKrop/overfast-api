@@ -207,26 +207,16 @@ def test_redis_connection_error(cache_manager: CacheManager):
         "app.common.cache_manager.redis.Redis.keys",
         side_effect=redis_connection_error,
     ):
-        assert (
-            set(
-                cache_manager.get_soon_expired_cache_keys(
-                    settings.parser_cache_key_prefix
-                )
-            )
-            == set()
+        assert not set(
+            cache_manager.get_soon_expired_cache_keys(settings.parser_cache_key_prefix)
         )
 
     with patch(
         "app.common.cache_manager.redis.Redis.ttl",
         side_effect=redis_connection_error,
     ):
-        assert (
-            set(
-                cache_manager.get_soon_expired_cache_keys(
-                    settings.parser_cache_key_prefix
-                )
-            )
-            == set()
+        assert not set(
+            cache_manager.get_soon_expired_cache_keys(settings.parser_cache_key_prefix)
         )
 
 

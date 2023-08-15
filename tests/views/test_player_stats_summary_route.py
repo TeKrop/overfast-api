@@ -39,7 +39,7 @@ def test_get_player_stats(
                 (f"platform={platform.value}" if platform else ""),
             ]
         )
-        params = f"?{query_params}" if any(param for param in query_params) else ""
+        params = f"?{query_params}" if any(query_params) else ""
         response = client.get(f"/players/TeKrop-2217/stats/summary{params}")
 
     if (gamemode and gamemode not in gamemodes) or (

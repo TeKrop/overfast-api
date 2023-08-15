@@ -60,10 +60,7 @@ class PlayerParser(APIParser):
         if kwargs.get("summary"):
             return self.data.get("summary")
 
-        if kwargs.get("stats"):
-            return self._filter_stats(**kwargs)
-
-        return self.data
+        return self._filter_stats(**kwargs) if kwargs.get("stats") else self.data
 
     def _filter_stats(self, **kwargs) -> dict:
         filtered_data = self.data["stats"] or {}
@@ -71,18 +68,16 @@ class PlayerParser(APIParser):
         platform = kwargs.get("platform")
         if not platform:
             # Retrieve a "default" platform is the user didn't provided one
-            possible_platforms = [
+            if possible_platforms := [
                 platform_key
                 for platform_key, platform_data in filtered_data.items()
                 if platform_data is not None
-            ]
-            # If there is no data in any platform, just return nothing
-            if not possible_platforms:
+            ]:
+                # Take the first one of the list, usually there will be only one.
+                # If there are two, the PC stats should come first
+                platform = possible_platforms[0]
+            else:
                 return {}
-            # Take the first one of the list, usually there will be only one.
-            # If there are two, the PC stats should come first
-            platform = possible_platforms[0]
-
         filtered_data = filtered_data.get(platform) or {}
         if not filtered_data:
             return {}
@@ -145,10 +140,7 @@ class PlayerParser(APIParser):
         )
 
         # Special case : the "no title" means there is no title
-        if title and title.lower() == "no title":
-            return None
-
-        return title
+        return None if title and title.lower() == "no title" else title
 
     @staticmethod
     def __get_endorsement(progression_div: Tag) -> dict:
@@ -173,10 +165,7 @@ class PlayerParser(APIParser):
         }
 
         # If we don't have data for any platform, return None directly
-        if not any(rank for rank in competitive_ranks.values()):
-            return None
-
-        return competitive_ranks
+        return None if not any(competitive_ranks.values()) else competitive_ranks
 
     def __get_platform_competitive_ranks(
         self, progression_div: Tag, platform_class: str
@@ -240,8 +229,7 @@ class PlayerParser(APIParser):
         """The role icon format may differ depending on the platform : img for
         PC players, svg for console players
         """
-        role_div = role_wrapper.find("div", class_="Profile-playerSummary--role")
-        if role_div:
+        if role_div := role_wrapper.find("div", class_="Profile-playerSummary--role"):
             return role_div.find("img")["src"]
 
         role_svg = role_wrapper.find("svg", class_="Profile-playerSummary--role")
@@ -262,10 +250,7 @@ class PlayerParser(APIParser):
         }
 
         # If we don't have data for any platform, return None directly
-        if not any(stat for stat in stats.values()):
-            return None
-
-        return stats
+        return None if not any(stats.values()) else stats
 
     def __get_platform_stats(self, platform_class: str) -> dict | None:
         statistics_section = self.root_tag.select_one(
@@ -278,10 +263,7 @@ class PlayerParser(APIParser):
 
         # If we don't have data for any gamemode for the given platform,
         # return None directly
-        if not any(info for info in gamemodes_infos.values()):
-            return None
-
-        return gamemodes_infos
+        return None if not any(gamemodes_infos.values()) else gamemodes_infos
 
     def __get_gamemode_infos(
         self, statistics_section: Tag, gamemode: PlayerGamemode

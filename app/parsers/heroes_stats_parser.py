@@ -26,5 +26,5 @@ class HeroesStatsParser(AbstractParser):
 
     def __get_hitpoints(self, hero_stats: dict) -> dict:
         hitpoints = {hp_key: int(hero_stats[hp_key]) for hp_key in self.hitpoints_keys}
-        hitpoints["total"] = sum(hp for hp in hitpoints.values())
+        hitpoints["total"] = sum(hitpoints.values())
         return hitpoints
