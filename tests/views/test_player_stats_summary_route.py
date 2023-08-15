@@ -29,17 +29,17 @@ def test_get_player_stats(
     platform: PlayerPlatform | None,
 ):
     with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
-    ):
+            overfast_client,
+            "get",
+            return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+        ):
         query_params = "&".join(
             [
                 (f"gamemode={gamemode.value}" if gamemode else ""),
                 (f"platform={platform.value}" if platform else ""),
             ]
         )
-        params = f"?{query_params}" if any(param for param in query_params) else ""
+        params = f"?{query_params}" if any(query_params) else ""
         response = client.get(f"/players/TeKrop-2217/stats/summary{params}")
 
     if (gamemode and gamemode not in gamemodes) or (

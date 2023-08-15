@@ -34,7 +34,7 @@ def extract_namecards_data(html_content: str) -> dict:
         raise NamecardsRetrievalError
 
     try:
-        json_result = json.loads(result.group(1))
+        json_result = json.loads(result[1])
     except ValueError as error:
         error_message = "Invalid format for namecards on Blizzard page !"
         logger.exception(error_message)

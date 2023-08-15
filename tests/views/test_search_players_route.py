@@ -108,8 +108,9 @@ def test_search_players(search_players_api_json_data: dict):
     assert (
         sorted(json_response["results"], key=lambda k: k["player_id"])
         == sorted(
-            search_players_api_json_data["results"], key=lambda k: k["player_id"]
-        )[0:20]
+            search_players_api_json_data["results"],
+            key=lambda k: k["player_id"],
+        )[:20]
     )
 
 
@@ -117,7 +118,7 @@ def test_search_players_with_cache(search_players_api_json_data: list):
     with patch("app.common.mixins.settings.use_api_cache_in_app", True):
         players_response_data = {
             "total": search_players_api_json_data["total"],
-            "results": search_players_api_json_data["results"][0:20],
+            "results": search_players_api_json_data["results"][:20],
         }
 
         cache_manager = CacheManager()
@@ -174,7 +175,7 @@ def test_search_players_filter_by_privacy(
         assert json_response["total"] == len(filtered_players)
         assert (
             sorted(json_response["results"], key=lambda k: k["player_id"])
-            == sorted(filtered_players, key=lambda k: k["player_id"])[0:20]
+            == sorted(filtered_players, key=lambda k: k["player_id"])[:20]
         )
     else:
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -192,7 +193,7 @@ def test_search_players_ordering(search_players_api_json_data: dict, order_by: s
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
         "total": search_players_api_json_data["total"],
-        "results": search_players_api_json_data["results"][0:20],
+        "results": search_players_api_json_data["results"][:20],
     }
 
 

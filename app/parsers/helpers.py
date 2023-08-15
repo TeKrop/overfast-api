@@ -14,19 +14,15 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
     int and float respectively.
     """
 
-    # Duration format in hour:min:sec => seconds
-    result = re.match(r"^(-?\d+,?\d*?):(\d+):(\d+)$", input_str)
-    if result:
+    if result := re.match(r"^(-?\d+,?\d*?):(\d+):(\d+)$", input_str):
         return (
-            int(result.group(1).replace(",", "")) * 3600
-            + int(result.group(2)) * 60
-            + int(result.group(3))
+            int(result[1].replace(",", "")) * 3600
+            + int(result[2]) * 60
+            + int(result[3])
         )
 
-    # Duration format in min:sec => seconds
-    result = re.match(r"^(-?\d+):(\d+)$", input_str)
-    if result:
-        return int(result.group(1)) * 60 + int(result.group(2))
+    if result := re.match(r"^(-?\d+):(\d+)$", input_str):
+        return int(result[1]) * 60 + int(result[2])
 
     # Int format
     if re.match(r"^-?\d+%?$", input_str):
@@ -37,11 +33,7 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
         return float(input_str)
 
     # Zero time fought with a character
-    if input_str == "--":
-        return 0
-
-    # Default value for anything else
-    return input_str
+    return 0 if input_str == "--" else input_str
 
 
 def get_division_from_rank_icon(rank_url: str) -> CompetitiveDivision:

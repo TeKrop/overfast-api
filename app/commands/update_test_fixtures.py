@@ -63,15 +63,13 @@ def list_routes_to_update(args: argparse.Namespace) -> dict[str, str]:
 
     if args.heroes:
         logger.info("Adding heroes routes...")
-        route_file_mapping.update(
-            {
-                f"{settings.heroes_path}/": "/heroes.html",
-                **{
-                    f"{settings.heroes_path}/{hero.value}/": f"/heroes/{hero.value}.html"
-                    for hero in HeroKey
-                },
-            }
-        )
+        route_file_mapping |= {
+            f"{settings.heroes_path}/": "/heroes.html",
+            **{
+                f"{settings.heroes_path}/{hero.value}/": f"/heroes/{hero.value}.html"
+                for hero in HeroKey
+            },
+        }
 
     if args.players:
         logger.info("Adding player careers routes...")

@@ -304,9 +304,7 @@ class PlayerStatsSummaryParser(PlayerParser):
 
     @staticmethod
     def __get_winrate(games_won: int, games_played: int) -> float:
-        if games_played <= 0:
-            return 0
-        return round((games_won / games_played) * 100, 2)
+        return 0 if games_played <= 0 else round((games_won / games_played) * 100, 2)
 
     def __get_kda_from_stat(self, stat: dict) -> float:
         return self.__get_kda(
