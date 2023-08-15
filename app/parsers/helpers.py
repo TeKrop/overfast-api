@@ -14,6 +14,7 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
     int and float respectively.
     """
 
+    # Duration format in hour:min:sec => seconds
     if result := re.match(r"^(-?\d+,?\d*?):(\d+):(\d+)$", input_str):
         return (
             int(result[1].replace(",", "")) * 3600
@@ -21,6 +22,7 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
             + int(result[3])
         )
 
+    # Duration format in min:sec => seconds
     if result := re.match(r"^(-?\d+):(\d+)$", input_str):
         return int(result[1]) * 60 + int(result[2])
 
@@ -32,7 +34,7 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
     if re.match(r"^-?\d+\.\d+$", input_str):
         return float(input_str)
 
-    # Zero time fought with a character
+    # Zero time fought with a character if "--", else default value
     return 0 if input_str == "--" else input_str
 
 

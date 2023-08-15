@@ -67,6 +67,7 @@ class PlayerParser(APIParser):
 
         platform = kwargs.get("platform")
         if not platform:
+            # Retrieve a "default" platform is the user didn't provided one
             if possible_platforms := [
                 platform_key
                 for platform_key, platform_data in filtered_data.items()
@@ -75,7 +76,6 @@ class PlayerParser(APIParser):
                 # Take the first one of the list, usually there will be only one.
                 # If there are two, the PC stats should come first
                 platform = possible_platforms[0]
-
             else:
                 return {}
         filtered_data = filtered_data.get(platform) or {}
@@ -229,9 +229,7 @@ class PlayerParser(APIParser):
         """The role icon format may differ depending on the platform : img for
         PC players, svg for console players
         """
-        if role_div := role_wrapper.find(
-            "div", class_="Profile-playerSummary--role"
-        ):
+        if role_div := role_wrapper.find("div", class_="Profile-playerSummary--role"):
             return role_div.find("img")["src"]
 
         role_svg = role_wrapper.find("svg", class_="Profile-playerSummary--role")
