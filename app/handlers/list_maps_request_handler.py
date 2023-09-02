@@ -13,4 +13,4 @@ class ListMapsRequestHandler(APIRequestHandler):
     """
 
     parser_classes: ClassVar[list] = [MapsParser]
-    timeout = settings.home_path_cache_timeout
+    timeout = settings.csv_cache_timeout

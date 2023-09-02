@@ -10,8 +10,8 @@ from app.common.exceptions import ParserBlizzardError, ParserParsingError
 from app.common.helpers import overfast_internal_error
 from app.common.logging import logger
 from app.config import settings
-from app.parsers.abstract_parser import AbstractParser
 from app.parsers.gamemodes_parser import GamemodesParser
+from app.parsers.generics.abstract_parser import AbstractParser
 from app.parsers.hero_parser import HeroParser
 from app.parsers.heroes_parser import HeroesParser
 from app.parsers.heroes_stats_parser import HeroesStatsParser

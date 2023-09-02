@@ -5,7 +5,7 @@ from app.common.helpers import blizzard_response_error_from_request, overfast_re
 from app.common.logging import logger
 from app.config import settings
 
-from .api_parser import APIParser
+from .generics.api_parser import APIParser
 
 
 class NamecardParser(APIParser):

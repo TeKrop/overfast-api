@@ -39,9 +39,7 @@ def test_check_and_update_gamemodes_cache_to_update(
     home_html_data: list,
     gamemodes_json_data: dict,
 ):
-    gamemodes_cache_key = (
-        f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}"
-    )
+    gamemodes_cache_key = "GamemodesParser"
 
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
@@ -167,7 +165,7 @@ def test_check_and_update_cache_no_update(cache_manager: CacheManager, locale: s
         settings.expired_cache_refresh_limit + 5,
     )
     cache_manager.update_parser_cache(
-        f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}",
+        "GamemodesParser",
         [],
         settings.expired_cache_refresh_limit + 10,
     )
@@ -206,7 +204,7 @@ def test_check_and_update_specific_player_to_update(
         settings.expired_cache_refresh_limit + 5,
     )
     cache_manager.update_parser_cache(
-        f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}",
+        "GamemodesParser",
         [],
         settings.expired_cache_refresh_limit + 10,
     )
@@ -256,7 +254,7 @@ def test_check_and_update_player_stats_summary_to_update(
         settings.expired_cache_refresh_limit + 5,
     )
     cache_manager.update_parser_cache(
-        f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}",
+        "GamemodesParser",
         [],
         settings.expired_cache_refresh_limit + 10,
     )
@@ -403,14 +401,11 @@ def test_check_parser_init_error(
 
 def test_check_and_update_several_to_update(
     cache_manager: CacheManager,
-    locale: str,
     home_html_data: list,
     gamemodes_json_data: dict,
     maps_json_data: dict,
 ):
-    gamemodes_cache_key = (
-        f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}"
-    )
+    gamemodes_cache_key = "GamemodesParser"
     maps_cache_key = "MapsParser"
 
     # Add some data to update
@@ -468,7 +463,7 @@ def test_check_and_update_namecard_to_update(
         settings.expired_cache_refresh_limit + 5,
     )
     cache_manager.update_parser_cache(
-        f"GamemodesParser-{settings.blizzard_host}/{locale}{settings.home_path}",
+        "GamemodesParser",
         [],
         settings.expired_cache_refresh_limit + 10,
     )

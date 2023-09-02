@@ -5,6 +5,7 @@ This guide aims to help you in contributing in OverFast API. The first step for 
 
 As of now, only some specific stuff can easily be updated by anyone, even without any knowledge in Python or FastAPI framework. If I take too much time to update them, don't hesitate to make a PR if you need up-to-date data :
 - The CSV file containing basic heroes data : name, role, and some statistics like health, armor and shields
+- The CSV file containing the list of gamemodes of the game
 - The CSV file containing the list of maps of the game
 
 ## 🦸 Heroes data
@@ -15,6 +16,12 @@ The CSV file containing heroes statistics data is located in `app/data/heroes.cs
 - `health` : Health of the hero
 - `armor` : Armor of the hero, mainly possessed by tanks
 - `shields` : Shields of the hero
+
+## 🎲 Gamemodes list
+The CSV file containing gamemodes list is located in `app/data/gamemodes.csv`. Data is divided into 3 columns :
+- `key` : Key of the gamemode, used in URLs of the API, and for the name of the corresponding screenshot and icon files
+- `name` : Name of the gamemode (in english)
+- `description` : Description of the gamemode (in english)
 
 ## 🗺️ Maps list
 The CSV file containing maps list is located in `app/data/maps.csv`. Data is divided into 5 columns :
