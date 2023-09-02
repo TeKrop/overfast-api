@@ -1,7 +1,7 @@
 """Heroes page Parser module"""
 from app.config import settings
 
-from .api_parser import APIParser
+from .generics.api_parser import APIParser
 
 
 class HeroesParser(APIParser):

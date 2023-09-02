@@ -13,4 +13,4 @@ class ListGamemodesRequestHandler(APIRequestHandler):
     """
 
     parser_classes: ClassVar[list] = [GamemodesParser]
-    timeout = settings.home_path_cache_timeout
+    timeout = settings.csv_cache_timeout

@@ -26,32 +26,6 @@ def test_get_gamemodes(gamemodes_json_data: list):
     assert response.json() == gamemodes_json_data
 
 
-def test_get_gamemodes_after_get_roles(gamemodes_json_data: list):
-    # Used to check we don't have any conflict between parsers
-    # using the same Blizzard URL and associated Parser caches
-    client.get("/heroes/roles")
-    response = client.get("/gamemodes")
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == gamemodes_json_data
-
-
-def test_get_gamemodes_blizzard_error():
-    with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            text="Service Unavailable",
-        ),
-    ):
-        response = client.get("/gamemodes")
-
-    assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
-    assert response.json() == {
-        "error": "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable",
-    }
-
-
 def test_get_gamemodes_internal_error():
     with patch(
         "app.handlers.list_gamemodes_request_handler."

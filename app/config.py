@@ -88,8 +88,8 @@ class Settings(BaseSettings):
     # Cache TTL for specific hero data (seconds)
     hero_path_cache_timeout: int = 86400
 
-    # Cache TTL for Blizzard homepage data : gamemodes and roles (seconds)
-    home_path_cache_timeout: int = 86400
+    # Cache TTL for local CSV-based data : heroes stats, gamemodes and maps
+    csv_cache_timeout: int = 86400
 
     # Cache TTL for career pages data (seconds)
     career_path_cache_timeout: int = 7200

@@ -132,16 +132,13 @@ class Locale(StrEnum):
     CHINESE_TAIWAN = "zh-tw"
 
 
-class MapGamemode(StrEnum):
-    """Maps gamemodes keys"""
-
-    ASSAULT = "assault"
-    CAPTURE_THE_FLAG = "capture-the-flag"
-    CONTROL = "control"
-    DEATHMATCH = "deathmatch"
-    ELIMINATION = "elimination"
-    ESCORT = "escort"
-    FLASHPOINT = "flashpoint"
-    HYBRID = "hybrid"
-    PUSH = "push"
-    TEAM_DEATHMATCH = "team-deathmatch"
+# Dynamically create the MapGamemode enum by using the CSV File
+gamemodes_data = read_csv_data_file("gamemodes.csv")
+MapGamemode = StrEnum(
+    "MapGamemode",
+    {
+        gamemode["key"].upper().replace("-", "_"): gamemode["key"]
+        for gamemode in gamemodes_data
+    },
+)
+MapGamemode.__doc__ = "Maps gamemodes keys"

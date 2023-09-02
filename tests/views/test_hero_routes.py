@@ -145,7 +145,7 @@ def test_get_hero_no_hitpoints(
             Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
         ],
     ), patch(
-        "app.parsers.heroes_stats_parser.read_csv_data_file",
+        "app.parsers.generics.csv_parser.read_csv_data_file",
         return_value=heroes_stats,
     ):
         response = client.get(f"/heroes/{hero_name}")

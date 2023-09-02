@@ -8,7 +8,7 @@ from app.common.enums import MediaType
 from app.common.exceptions import ParserBlizzardError
 from app.config import settings
 
-from .api_parser import APIParser
+from .generics.api_parser import APIParser
 from .helpers import get_full_url, get_role_from_icon_url
 
 

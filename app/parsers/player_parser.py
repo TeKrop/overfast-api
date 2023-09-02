@@ -14,7 +14,7 @@ from app.common.enums import (
 from app.common.exceptions import ParserBlizzardError
 from app.config import settings
 
-from .api_parser import APIParser
+from .generics.api_parser import APIParser
 from .helpers import (
     get_computed_stat_value,
     get_division_from_rank_icon,

@@ -1,7 +1,7 @@
 """Roles Parser module"""
 from app.config import settings
 
-from .api_parser import APIParser
+from .generics.api_parser import APIParser
 from .helpers import get_role_from_icon_url
 
 
