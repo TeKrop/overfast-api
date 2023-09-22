@@ -25,9 +25,9 @@
 
 ## ✨ [Live instance](https://overfast-api.tekrop.fr)
 
-You can see and use a live version of the API here, the root URL being the Redoc documentation : https://overfast-api.tekrop.fr/
-
-You can also consult the Swagger UI documentation, useful for directly trying API calls : https://overfast-api.tekrop.fr/docs
+- Live instance (Redoc documentation) : https://overfast-api.tekrop.fr/
+- Swagger UI : https://overfast-api.tekrop.fr/docs
+- Status page : https://stats.uptimerobot.com/E0k0yU1pJQ
 
 ## 💽 Dev environment
 
