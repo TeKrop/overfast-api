@@ -38,7 +38,10 @@ In players statistics endpoints, several conversions are made for convenience :
 - **percent values** are exposed as **integers** instead of a string with a percent symbol
 - integer and float string representations are converted into the concerned type
 
-Swagger UI (useful for trying API calls) : {settings.app_base_url}/docs"""
+Swagger UI (useful for trying API calls) : {settings.app_base_url}/docs
+
+Status page : https://stats.uptimerobot.com/E0k0yU1pJQ
+"""
 
 
 def custom_openapi():  # pragma: no cover
