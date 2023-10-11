@@ -79,9 +79,9 @@ def test_get_heroes_invalid_role():
             {
                 "type": "enum",
                 "loc": ["query", "role"],
-                "msg": "Input should be 'damage','support' or 'tank'",
+                "msg": "Input should be 'damage', 'support' or 'tank'",
                 "input": "invalid",
-                "ctx": {"expected": "'damage','support' or 'tank'"},
+                "ctx": {"expected": "'damage', 'support' or 'tank'"},
             },
         ],
     }
