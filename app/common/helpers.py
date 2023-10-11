@@ -50,7 +50,7 @@ overfast_client_settings = {
             f"OverFastAPI v{settings.app_version} - "
             "https://github.com/TeKrop/overfast-api"
         ),
-        "From": "vporchet@gmail.com",
+        "From": "valentin.porchet@proton.me",
     },
     "http2": True,
     "timeout": 10,

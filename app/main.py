@@ -55,7 +55,7 @@ def custom_openapi():  # pragma: no cover
         contact={
             "name": 'Valentin "TeKrop" PORCHET',
             "url": "https://github.com/TeKrop/overfast-api",
-            "email": "vporchet@gmail.com",
+            "email": "valentin.porchet@proton.me",
         },
         license_info={
             "name": "MIT",
