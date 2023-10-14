@@ -255,6 +255,7 @@ Here is a list of projects which are currently using OverFast API as a data sour
 - Overwatch Career Profile (https://github.com/EliaRenov/ow-career-profile)
 - Discord Bot OW2 for stats (https://github.com/polsojac/ow2discordbot)
 - OverBot, the best Overwatch bot for Discord (https://github.com/davidetacchini/overbot)
+- OverwatchPy, a Python wrapper for the API (https://github.com/alexraskin/overwatchpy)
 
 ## 🙏 Credits
 
