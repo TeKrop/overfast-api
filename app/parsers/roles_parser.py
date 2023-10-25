@@ -19,7 +19,7 @@ class RolesParser(APIParser):
         ).find("blz-feature-carousel-section", recursive=False)
 
         roles_icons = [
-            role_icon_div.find("blz-image")["src:min-plus"]
+            role_icon_div.find("blz-image")["src"]
             for role_icon_div in roles_container.find("blz-tab-controls").find_all(
                 "blz-tab-control",
             )
