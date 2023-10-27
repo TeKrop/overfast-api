@@ -38,7 +38,7 @@ from app.parsers import helpers
         ("string", "string"),
     ],
 )
-def test_get_computed_stat_value(input_str: str, result: int | float | str):
+def test_get_computed_stat_value(input_str: str, result: float | str):
     assert helpers.get_computed_stat_value(input_str) == result
 
 

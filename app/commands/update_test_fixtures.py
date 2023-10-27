@@ -119,7 +119,7 @@ async def main():
                 response.status_code,
                 response.elapsed.total_seconds(),
             )
-            if response.status_code in (status.HTTP_200_OK, status.HTTP_404_NOT_FOUND):
+            if response.status_code in {status.HTTP_200_OK, status.HTTP_404_NOT_FOUND}:
                 save_fixture_file(f"{test_data_path}{filepath}", response.text)
             else:
                 logger.error("Error while getting the page : {}", response.text)
