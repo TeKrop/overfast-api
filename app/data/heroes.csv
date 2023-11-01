@@ -29,11 +29,11 @@ sigma,Sigma,tank,350,0,200
 sojourn,Sojourn,damage,200,0,0
 soldier-76,Soldier: 76,damage,200,0,0
 sombra,Sombra,damage,200,0,0
-symmetra,Symmetra,damage,100,0,125
+symmetra,Symmetra,damage,100,0,100
 torbjorn,Torbjörn,damage,200,50,0
 tracer,Tracer,damage,150,0,0
 widowmaker,Widowmaker,damage,175,0,0
 winston,Winston,tank,350,200,0
 wrecking-ball,Wrecking Ball,tank,450,100,150
 zarya,Zarya,tank,250,0,225
-zenyatta,Zenyatta,support,50,0,150
+zenyatta,Zenyatta,support,75,0,150
