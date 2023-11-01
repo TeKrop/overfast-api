@@ -13,8 +13,8 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.11"]
-        poetry-version: [1.2.2]
+        python-version: ["3.12"]
+        poetry-version: [1.6.1]
 
     steps:
     - name: Build project

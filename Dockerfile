@@ -1,4 +1,4 @@
-FROM python:3.11-alpine
+FROM python:3.12-alpine
 
 # Environment variables
 ENV PYTHONFAULTHANDLER=1 \
@@ -7,12 +7,12 @@ ENV PYTHONFAULTHANDLER=1 \
   PIP_NO_CACHE_DIR=off \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_VERSION=1.2.2
+  POETRY_VERSION=1.6.1
 
 # Install required system packages and install poetry
 RUN apk add build-base && \
   apk add libffi-dev && \
-  pip install poetry==1.2.2
+  pip install poetry==1.6.1
 
 # Copy only requirements (caching in Docker layer)
 WORKDIR /code
