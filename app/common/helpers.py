@@ -41,6 +41,7 @@ players_ids = [
     "Player-137712",  # Private profile
     "TeKrop-2217",  # Classic profile
     "Unknown-1234",  # No player
+    "JohnV1-1190",  # Player without any title ingame
 ]
 
 # httpx client settings

@@ -122,6 +122,7 @@ class PlayerParser(APIParser):
             class_="Profile-player--info",
             recursive=False,
         )
+
         return {
             "username": (
                 summary_div.find("h1", class_="Profile-player--name").get_text()
@@ -141,14 +142,18 @@ class PlayerParser(APIParser):
 
     @staticmethod
     def __get_title(profile_div: Tag) -> str | None:
-        title = (
-            profile_div.find(
+        # We return None is there isn't any player title div
+        if not (
+            title_tag := profile_div.find(
                 "h2",
                 class_="Profile-player--title",
                 recursive=False,
-            ).get_text()
-            or None
-        )
+            )
+        ):
+            return None
+
+        # Retrieve the title text
+        title = title_tag.get_text() or None
 
         # Special case : the "no title" means there is no title
         return None if title and title.lower() == "no title" else title
