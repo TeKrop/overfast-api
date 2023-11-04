@@ -38,7 +38,7 @@
 ### Install
 
 - Clone the project
-- Rename `.env.example` into `.env`, and edit the configuration in order to match your needs
+- Rename `.env.dist` into `.env`, and edit the configuration in order to match your needs
 - Run `poetry install` to install all the dependencies (+ dev dependencies)
 
 ### Launch
@@ -49,7 +49,7 @@ uvicorn app.main:app --reload
 
 ## 🐋 Docker
 
-First, you need to create a dotenv file (`.env`) from the `.env.example` file. You'll need to modify it depending on your needs in order to configure the volumes used by OverFast API. You'll have to check
+First, you need to create a dotenv file (`.env`) from the `.env.dist` file. You'll need to modify it depending on your needs in order to configure the volumes used by OverFast API. You'll have to check
 some settings and create the app volume folder.
 
 ### Generic settings
