@@ -16,7 +16,7 @@ junkrat,Junkrat,damage,200,0,0
 kiriko,Kiriko,support,200,0,0
 lifeweaver,Lifeweaver,support,175,0,50
 lucio,Lúcio,support,200,0,0
-mauga,Mauga,tank,500,0,0
+mauga,Mauga,tank,650,0,0
 mei,Mei,damage,250,0,0
 mercy,Mercy,support,200,0,0
 moira,Moira,support,200,0,0
@@ -33,6 +33,7 @@ sombra,Sombra,damage,200,0,0
 symmetra,Symmetra,damage,100,0,100
 torbjorn,Torbjörn,damage,200,50,0
 tracer,Tracer,damage,150,0,0
+venture,Venture,damage,200,0,0
 widowmaker,Widowmaker,damage,175,0,0
 winston,Winston,tank,350,200,0
 wrecking-ball,Wrecking Ball,tank,450,100,150
