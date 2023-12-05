@@ -16,13 +16,13 @@ junkrat,Junkrat,damage,200,0,0
 kiriko,Kiriko,support,200,0,0
 lifeweaver,Lifeweaver,support,175,0,50
 lucio,Lúcio,support,200,0,0
-mauga,Mauga,tank,650,0,0
+mauga,Mauga,tank,350,150,0
 mei,Mei,damage,250,0,0
 mercy,Mercy,support,200,0,0
 moira,Moira,support,200,0,0
 orisa,Orisa,tank,275,275,0
 pharah,Pharah,damage,200,0,0
-ramattra,Ramattra,tank,450,0,0
+ramattra,Ramattra,tank,200,100,0
 reaper,Reaper,damage,250,0,0
 reinhardt,Reinhardt,tank,350,250,0
 roadhog,Roadhog,tank,700,0,0

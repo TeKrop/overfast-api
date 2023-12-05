@@ -27,8 +27,8 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
         return int(result[1]) * 60 + int(result[2])
 
     # Int format
-    if re.match(r"^-?\d+%?$", input_str):
-        return int(input_str.replace("%", ""))
+    if re.match(r"^-?\d+(,\d+)*%?$", input_str):
+        return int(input_str.replace("%", "").replace(",", ""))
 
     # Float format
     if re.match(r"^-?\d+\.\d+$", input_str):
