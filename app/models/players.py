@@ -93,9 +93,12 @@ class PlayerCompetitiveRank(BaseModel):
 class PlatformCompetitiveRanksContainer(BaseModel):
     season: int | None = Field(
         ...,
-        description="Last competitive season played by the player",
+        description=(
+            "Last competitive season played by the player. Can be 0 on Blizzard "
+            "data for some reason, but can't explain what it means."
+        ),
         examples=[3],
-        ge=1,
+        ge=0,
     )
     tank: PlayerCompetitiveRank | None = Field(..., description="Tank role details")
     damage: PlayerCompetitiveRank | None = Field(..., description="Damage role details")
