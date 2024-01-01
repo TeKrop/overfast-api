@@ -110,17 +110,17 @@ class Settings(BaseSettings):
     parser_cache_expiration_spreading_percentage: int = 25
 
     ############
-    # NAMECARDS
+    # SEARCH DATA (AVATARS, NAMECARDS, TITLES)
     ############
 
-    # Cache key for namecard cache in Redis.
-    namecard_cache_key_prefix: str = "namecard-cache"
+    # Cache key for search data cache in Redis.
+    search_data_cache_key_prefix: str = "search-data-cache"
 
-    # URI of the page where namecards are saved
-    namecards_path: str = "/en-us/search/"
+    # URI of the page where search data are saved
+    search_data_path: str = "/search/"
 
-    # Cache TTL for namecards list
-    namecards_timeout: int = 7200
+    # Cache TTL for search data list
+    search_data_timeout: int = 7200
 
     ############
     # BLIZZARD

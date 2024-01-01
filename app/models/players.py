@@ -38,6 +38,25 @@ class PlayerShort(BaseModel):
         description="Player nickname displayed in the game",
         examples=["TeKrop#2217"],
     )
+    avatar: HttpUrl | None = Field(
+        None,
+        description="URL of the player's avatar. Can be null if couldn't retrieve any",
+        examples=[
+            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/daeddd96e58a2150afa6ffc3c5503ae7f96afc2e22899210d444f45dee508c6c.png",
+        ],
+    )
+    namecard: HttpUrl | None = Field(
+        None,
+        description="URL of the player's namecard (or banner) if any",
+        examples=[
+            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/55d8c21e9d8b14942c26c4028059b6cd3b4e2fea40a139821ecee73a0005126f.png",
+        ],
+    )
+    title: str | None = Field(
+        ...,
+        description="Title of the player if any",
+        examples=["Bytefixer"],
+    )
     privacy: PlayerPrivacy = Field(
         ...,
         title="Privacy",

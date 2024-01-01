@@ -101,7 +101,13 @@ def test_search_players_blizzard_timeout():
     }
 
 
-def test_search_players(search_players_api_json_data: dict):
+def test_search_players(
+    search_players_api_json_data: dict, search_data_json_data: dict
+):
+    # Add search data in cache as if we launched the server
+    cache_manager = CacheManager()
+    cache_manager.update_search_data_cache(search_data_json_data)
+
     response = client.get("/players?name=Test")
     assert response.status_code == status.HTTP_200_OK
 
@@ -116,19 +122,25 @@ def test_search_players(search_players_api_json_data: dict):
     )
 
 
-def test_search_players_with_cache(search_players_api_json_data: list):
+def test_search_players_with_cache(
+    search_players_api_json_data: dict, search_data_json_data: dict
+):
+    # Add search data in cache as if we launched the server
+    cache_manager = CacheManager()
+    cache_manager.update_search_data_cache(search_data_json_data)
+
+    # Add data in API cache to be
+    players_response_data = {
+        "total": search_players_api_json_data["total"],
+        "results": search_players_api_json_data["results"][:20],
+    }
+    cache_manager.update_api_cache("/players?name=Test", players_response_data, 100)
+
     with patch("app.common.mixins.settings.use_api_cache_in_app", True):
-        players_response_data = {
-            "total": search_players_api_json_data["total"],
-            "results": search_players_api_json_data["results"][:20],
-        }
-
-        cache_manager = CacheManager()
-        cache_manager.update_api_cache("/players?name=Test", players_response_data, 100)
-
         response = client.get("/players?name=Test")
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json() == players_response_data
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == players_response_data
 
 
 @pytest.mark.parametrize(
@@ -142,9 +154,14 @@ def test_search_players_with_cache(search_players_api_json_data: list):
 )
 def test_search_players_with_offset_and_limit(
     search_players_api_json_data: dict,
+    search_data_json_data: dict,
     offset: int,
     limit: int,
 ):
+    # Add search data in cache as if we launched the server
+    cache_manager = CacheManager()
+    cache_manager.update_search_data_cache(search_data_json_data)
+
     response = client.get(f"/players?name=Test&offset={offset}&limit={limit}")
     assert response.status_code == status.HTTP_200_OK
 
@@ -166,7 +183,12 @@ def test_search_players_with_offset_and_limit(
 def test_search_players_filter_by_privacy(
     privacy: PlayerPrivacy,
     search_players_api_json_data: dict,
+    search_data_json_data: dict,
 ):
+    # Add search data in cache as if we launched the server
+    cache_manager = CacheManager()
+    cache_manager.update_search_data_cache(search_data_json_data)
+
     response = client.get(f"/players?name=Test&privacy={privacy}")
 
     if privacy in privacies:
@@ -188,7 +210,13 @@ def test_search_players_filter_by_privacy(
 
 
 @pytest.mark.parametrize("order_by", ["name:asc", "name:desc"])
-def test_search_players_ordering(search_players_api_json_data: dict, order_by: str):
+def test_search_players_ordering(
+    search_players_api_json_data: dict, search_data_json_data: dict, order_by: str
+):
+    # Add search data in cache as if we launched the server
+    cache_manager = CacheManager()
+    cache_manager.update_search_data_cache(search_data_json_data)
+
     response = client.get(f"/players?name=Test&order_by={order_by}")
 
     order_field, order_arrangement = order_by.split(":")

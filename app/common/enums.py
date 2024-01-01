@@ -142,3 +142,9 @@ MapGamemode = StrEnum(
     },
 )
 MapGamemode.__doc__ = "Maps gamemodes keys"
+
+
+class SearchDataType(StrEnum):
+    NAMECARD = "namecard"
+    PORTRAIT = "portrait"
+    TITLE = "title"

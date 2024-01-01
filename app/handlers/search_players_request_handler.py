@@ -5,10 +5,15 @@ from fastapi import Request, status
 
 from app.common.cache_manager import CacheManager
 from app.common.enums import Locale
-from app.common.helpers import blizzard_response_error_from_request, overfast_request
+from app.common.helpers import (
+    blizzard_response_error_from_request,
+    get_player_title,
+    overfast_request,
+)
 from app.common.logging import logger
 from app.common.mixins import ApiRequestMixin
 from app.config import settings
+from app.parsers.search_data_parser import NamecardParser, PortraitParser, TitleParser
 
 
 class SearchPlayersRequestHandler(ApiRequestMixin):
@@ -16,7 +21,9 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
     using some filters : career privacy, etc.
 
     The APIRequestHandler class is not used here, as this is a very specific request,
-    depending on a Blizzard endpoint returning JSON Data, and without needing any parser.
+    depending on a Blizzard endpoint returning JSON Data. Some parsers are used,
+    but only to compute already downloaded data, we don't want them to retrieve
+    Blizzard data as when we call their general parse() method.
     """
 
     timeout = settings.search_account_path_cache_timeout
@@ -91,10 +98,9 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
         filters = [filter_privacy]
         return filter(lambda x: all(f(x) for f in filters), players)
 
-    @staticmethod
-    def apply_transformations(players: Iterable[dict]) -> list[dict]:
+    def apply_transformations(self, players: Iterable[dict]) -> list[dict]:
         """Apply transformations to found players in order to return the data
-        in the OverFast API format.
+        in the OverFast API format. We'll also retrieve some data from parsers.
         """
         transformed_players = []
         for player in players:
@@ -103,6 +109,9 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
                 {
                     "player_id": player_id,
                     "name": player["battleTag"],
+                    "avatar": self.get_avatar_url(player, player_id),
+                    "namecard": self.get_namecard_url(player, player_id),
+                    "title": self.get_title(player, player_id),
                     "privacy": "public" if player["isPublic"] else "private",
                     "career_url": f"{settings.app_base_url}/players/{player_id}",
                 },
@@ -123,4 +132,14 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
     def get_blizzard_url(**kwargs) -> str:
         """URL used when requesting data to Blizzard."""
         locale = Locale.ENGLISH_US
-        return f"{settings.blizzard_host}/{locale}{settings.search_account_path}/{kwargs.get('name')}"
+        return f"{settings.blizzard_host}/{locale}{settings.search_account_path}/{kwargs.get('name')}/"
+
+    def get_avatar_url(self, player: dict, player_id: str) -> str | None:
+        return PortraitParser(player_id=player_id).retrieve_data_value(player)
+
+    def get_namecard_url(self, player: dict, player_id: str) -> str | None:
+        return NamecardParser(player_id=player_id).retrieve_data_value(player)
+
+    def get_title(self, player: dict, player_id: str) -> str | None:
+        title = TitleParser(player_id=player_id).retrieve_data_value(player)
+        return get_player_title(title)
