@@ -5,16 +5,17 @@ import httpx
 import pytest
 from fastapi import HTTPException, status
 
+from app.common.enums import SearchDataType
 from app.common.exceptions import ParserParsingError
 from app.common.helpers import overfast_client
-from app.parsers.namecard_parser import NamecardParser
+from app.parsers.search_data_parser import NamecardParser
 
 
 @pytest.mark.asyncio()
 async def test_namecard_parser_no_cache(
     search_players_blizzard_json_data: dict,
     search_html_data: str,
-    namecards_json_data: dict,
+    search_data_json_data: dict,
 ):
     parser = NamecardParser(player_id="Dekk-2677")
     update_parser_cache_last_update_mock = Mock()
@@ -37,7 +38,9 @@ async def test_namecard_parser_no_cache(
     ):
         await parser.parse()
 
-    assert parser.data == {"namecard": namecards_json_data.get("0x0250000000005510")}
+    assert parser.data == {
+        "namecard": search_data_json_data[SearchDataType.NAMECARD]["0x0250000000005510"]
+    }
     update_parser_cache_last_update_mock.assert_called_once()
 
 
@@ -97,8 +100,9 @@ async def test_namecard_parser_player_not_found():
         await parser.parse()
 
     logger_warning_mock.assert_any_call(
-        "Player {} not found in search results, couldn't retrieve its namecard",
+        "Player {} not found in search results, couldn't retrieve its {}",
         "Unknown-1234",
+        SearchDataType.NAMECARD,
     )
 
     assert parser.data == {"namecard": None}
@@ -131,7 +135,9 @@ async def test_namecard_parser_player_without_namecard():
     ), patch("app.common.logging.logger.info", logger_info_mock):
         await parser.parse()
 
-    logger_info_mock.assert_any_call("Player {} doesn't have any namecard", "Dekk-2677")
+    logger_info_mock.assert_any_call(
+        "Player {} doesn't have any {}", "Dekk-2677", SearchDataType.NAMECARD
+    )
 
     assert parser.data == {"namecard": None}
 
@@ -158,13 +164,15 @@ async def test_namecard_parser_no_cache_no_namecard(
         await parser.parse()
 
     logger_warning_mock.assert_any_call(
-        "URL for namecard {} of player {} not found in the cache",
+        "URL for {} {} of player {} not found in the cache",
+        SearchDataType.NAMECARD,
         "0x0250000000005510",
         "Dekk-2677",
     )
 
     logger_warning_mock.assert_any_call(
-        "URL for namecard {} of player {} not found at all",
+        "URL for {} {} of player {} not found at all",
+        SearchDataType.NAMECARD,
         "0x0250000000005510",
         "Dekk-2677",
     )
@@ -175,7 +183,7 @@ async def test_namecard_parser_no_cache_no_namecard(
 @pytest.mark.asyncio()
 async def test_namecard_parser_with_cache(
     search_players_blizzard_json_data: dict,
-    namecards_json_data: dict,
+    search_data_json_data: dict,
 ):
     parser = NamecardParser(player_id="Dekk-2677")
 
@@ -189,9 +197,11 @@ async def test_namecard_parser_with_cache(
         ),
     ), patch.object(
         parser.cache_manager,
-        "get_namecard_cache",
+        "get_search_data_cache",
         return_value="https://d15f34w2p8l1cc.cloudfront.net/overwatch/757219956129146d84617a7e713dfca1bc33ea27cf6c73df60a33d02a147edc1.png",
     ):
         await parser.parse()
 
-    assert parser.data == {"namecard": namecards_json_data.get("0x0250000000005510")}
+    assert parser.data == {
+        "namecard": search_data_json_data[SearchDataType.NAMECARD]["0x0250000000005510"]
+    }

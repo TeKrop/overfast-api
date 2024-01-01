@@ -5,7 +5,11 @@ from fastapi import Request, status
 
 from app.common.cache_manager import CacheManager
 from app.common.enums import Locale
-from app.common.helpers import blizzard_response_error_from_request, overfast_request
+from app.common.helpers import (
+    blizzard_response_error_from_request,
+    get_player_title,
+    overfast_request,
+)
 from app.common.logging import logger
 from app.common.mixins import ApiRequestMixin
 from app.config import settings
@@ -138,4 +142,4 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
 
     def get_title(self, player: dict, player_id: str) -> str | None:
         title = TitleParser(player_id=player_id).retrieve_data_value(player)
-        return None if title and title.lower() == "no title" else title
+        return get_player_title(title)

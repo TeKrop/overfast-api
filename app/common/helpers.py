@@ -222,3 +222,11 @@ def dict_insert_value_before_key(
 def key_to_label(key: str) -> str:
     """Transform a given key in lowercase format into a human format"""
     return " ".join(s.capitalize() for s in key.split("_"))
+
+
+@cache
+def get_player_title(title: str | None) -> str | None:
+    """Get player title from string extracted from Blizzard page. This is
+    where we're handling the special "no title" case for which we return None
+    """
+    return None if title and title.lower() == "no title" else title

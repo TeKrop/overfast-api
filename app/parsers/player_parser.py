@@ -12,6 +12,7 @@ from app.common.enums import (
     Role,
 )
 from app.common.exceptions import ParserBlizzardError
+from app.common.helpers import get_player_title
 from app.config import settings
 
 from .generics.api_parser import APIParser
@@ -156,7 +157,7 @@ class PlayerParser(APIParser):
         title = title_tag.get_text() or None
 
         # Special case : the "no title" means there is no title
-        return None if title and title.lower() == "no title" else title
+        return get_player_title(title)
 
     @staticmethod
     def __get_endorsement(progression_div: Tag) -> dict:

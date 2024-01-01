@@ -76,3 +76,15 @@ def test_dict_insert_value_before_key_valid(
 )
 def test_key_to_label(key: str, result_label: str):
     assert helpers.key_to_label(key) == result_label
+
+
+@pytest.mark.parametrize(
+    ("title", "resulting_title"),
+    [
+        (None, None),
+        ("No Title", None),
+        ("Philosopher", "Philosopher"),
+    ],
+)
+def test_get_player_title(title: str | None, resulting_title: str | None):
+    assert helpers.get_player_title(title) == resulting_title

@@ -444,12 +444,12 @@ def test_check_and_update_namecard_to_update(
     cache_manager: CacheManager,
     locale: str,
     search_tekrop_blizzard_json_data: dict,
-    namecards_json_data: dict,
+    search_data_json_data: dict,
 ):
     namecard_cache_key = f"NamecardParser-{settings.blizzard_host}/{locale}{settings.search_account_path}/TeKrop#2217"
 
-    # Add namecards list data + parser_cache key which needs an update
-    cache_manager.update_namecards_cache(namecards_json_data)
+    # Add search data + parser_cache key which needs an update
+    cache_manager.update_search_data_cache(search_data_json_data)
     cache_manager.update_parser_cache(
         namecard_cache_key,
         {},
@@ -472,7 +472,7 @@ def test_check_and_update_namecard_to_update(
     assert cache_manager.get_parser_cache(namecard_cache_key) == {}
     assert get_soon_expired_cache_keys() == {namecard_cache_key}
 
-    # check and update (only maps should be updated)
+    # check and update
     logger_info_mock = Mock()
     with patch.object(
         overfast_client,

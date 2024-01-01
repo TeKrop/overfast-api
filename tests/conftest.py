@@ -107,5 +107,5 @@ def maps_json_data():
 
 
 @pytest.fixture(scope="session")
-def namecards_json_data():
-    return read_json_file("namecards.json")
+def search_data_json_data():
+    return read_json_file("search_data.json")

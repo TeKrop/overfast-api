@@ -6,7 +6,7 @@ from fastapi import Request
 from redis.exceptions import RedisError
 
 from app.common.cache_manager import CacheManager
-from app.common.enums import Locale
+from app.common.enums import Locale, SearchDataType
 from app.config import settings
 
 
@@ -273,3 +273,21 @@ def test_delete_keys(cache_manager: CacheManager):
             settings.parser_cache_last_update_key_prefix,
         ),
     ) == {"/maps"}
+
+
+@pytest.mark.parametrize(("data_type"), list(SearchDataType))
+def test_search_data_update_and_get(
+    cache_manager: CacheManager, data_type: SearchDataType
+):
+    # Insert search data only for one data type
+    cache_manager.update_search_data_cache({data_type: {"key": "value"}})
+
+    # Check we can retrieve the data by querying for this type
+    assert cache_manager.get_search_data_cache(data_type, "key") == "value"
+
+    # Check we don't retrieve it for other types
+    assert not any(
+        cache_manager.get_search_data_cache(search_type, "key")
+        for search_type in SearchDataType
+        if search_type != data_type
+    )

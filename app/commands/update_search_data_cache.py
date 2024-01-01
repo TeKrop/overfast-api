@@ -79,7 +79,7 @@ def retrieve_search_data(
         logger.info("Retrieving Blizzard search page...")
         search_page = get_search_page()
 
-    logger.info("Extracting %s data from HTML data...", data_type)
+    logger.info("Extracting {} data from HTML data...", data_type)
     search_data = extract_search_data(search_page.text, data_type)
 
     logger.info("Transforming data...")
