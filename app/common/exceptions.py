@@ -2,10 +2,10 @@
 from fastapi import status
 
 
-class NamecardsRetrievalError(Exception):
-    """Generic namecards retrieval Exception"""
+class SearchDataRetrievalError(Exception):
+    """Generic search data retrieval Exception (namecards, titles, etc.)"""
 
-    message = "Error while retrieving namecards"
+    message = "Error while retrieving search data"
 
 
 class OverfastError(Exception):

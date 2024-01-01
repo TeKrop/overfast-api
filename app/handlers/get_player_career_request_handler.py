@@ -2,8 +2,8 @@
 from typing import ClassVar
 
 from app.config import settings
-from app.parsers.namecard_parser import NamecardParser
 from app.parsers.player_parser import PlayerParser
+from app.parsers.search_data_parser import NamecardParser
 
 from .api_request_handler import APIRequestHandler
 

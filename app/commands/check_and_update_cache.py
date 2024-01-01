@@ -16,11 +16,11 @@ from app.parsers.hero_parser import HeroParser
 from app.parsers.heroes_parser import HeroesParser
 from app.parsers.heroes_stats_parser import HeroesStatsParser
 from app.parsers.maps_parser import MapsParser
-from app.parsers.namecard_parser import NamecardParser
 from app.parsers.player_career_parser import PlayerCareerParser
 from app.parsers.player_parser import PlayerParser
 from app.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
 from app.parsers.roles_parser import RolesParser
+from app.parsers.search_data_parser import NamecardParser
 
 # Mapping of parser class names to linked classes
 PARSER_CLASSES_MAPPING = {

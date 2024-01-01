@@ -30,6 +30,7 @@ from collections.abc import Callable, Iterable, Iterator
 import redis
 from fastapi import Request
 
+from app.common.enums import SearchDataType
 from app.config import settings
 
 from .helpers import compress_json_value, decompress_json_value, get_spread_value
@@ -158,20 +159,25 @@ class CacheManager(metaclass=Singleton):
             yield key.decode("utf-8").removeprefix(prefix_to_remove)
 
     @redis_connection_handler
-    def update_namecards_cache(self, namecards: dict[str, str]) -> None:
-        for namecard_key, namecard_url in namecards.items():
-            self.redis_server.set(
-                f"{settings.namecard_cache_key_prefix}:{namecard_key}",
-                value=namecard_url,
-                ex=settings.namecards_timeout,
-            )
+    def update_search_data_cache(
+        self, search_data: dict[SearchDataType, dict[str, str]]
+    ) -> None:
+        for data_type, data in search_data.items():
+            for data_key, data_value in data.items():
+                self.redis_server.set(
+                    f"{settings.search_data_cache_key_prefix}:{data_type}:{data_key}",
+                    value=data_value,
+                    ex=settings.search_data_timeout,
+                )
 
     @redis_connection_handler
-    def get_namecard_cache(self, cache_key: str) -> str | None:
-        namecard_cache = self.redis_server.get(
-            f"{settings.namecard_cache_key_prefix}:{cache_key}",
+    def get_search_data_cache(
+        self, data_type: SearchDataType, cache_key: str
+    ) -> str | None:
+        data_cache = self.redis_server.get(
+            f"{settings.search_data_cache_key_prefix}:{data_type}:{cache_key}",
         )
-        return namecard_cache.decode("utf-8") if namecard_cache else None
+        return data_cache.decode("utf-8") if data_cache else None
 
     @redis_connection_handler
     def update_parser_cache_last_update(self, cache_key: str, expire: int) -> None:

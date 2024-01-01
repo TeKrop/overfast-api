@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from .commands.update_namecards_cache import update_namecards_cache
+from .commands.update_search_data_cache import update_search_data_cache
 from .common.enums import RouteTag
 from .common.logging import logger
 from .config import settings
@@ -17,11 +17,11 @@ from .routers import gamemodes, heroes, maps, players, roles
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):  # pragma: no cover
-    # Update namecards list from Blizzard before starting up
+    # Update search data list from Blizzard before starting up
     if settings.redis_caching_enabled:
-        logger.info("Updating namecards data...")
+        logger.info("Updating search data cache (avatars, namecards, titles)")
         with suppress(SystemExit):
-            update_namecards_cache()
+            update_search_data_cache()
 
     yield
 
