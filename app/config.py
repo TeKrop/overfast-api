@@ -117,7 +117,7 @@ class Settings(BaseSettings):
     search_data_cache_key_prefix: str = "search-data-cache"
 
     # URI of the page where search data are saved
-    search_data_path: str = "/en-us/search/"
+    search_data_path: str = "/search/"
 
     # Cache TTL for search data list
     search_data_timeout: int = 7200

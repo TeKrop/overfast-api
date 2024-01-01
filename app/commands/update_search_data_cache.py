@@ -5,7 +5,7 @@ import re
 import httpx
 
 from app.common.cache_manager import CacheManager
-from app.common.enums import SearchDataType
+from app.common.enums import Locale, SearchDataType
 from app.common.exceptions import SearchDataRetrievalError
 from app.common.helpers import send_discord_webhook_message
 from app.common.logging import logger
@@ -24,7 +24,9 @@ variable_name_mapping: dict[SearchDataType, str] = {
 
 def get_search_page() -> httpx.Response:
     try:
-        response = httpx.get(f"{settings.blizzard_host}{settings.search_data_path}")
+        response = httpx.get(
+            f"{settings.blizzard_host}/{Locale.ENGLISH_US}{settings.search_data_path}"
+        )
     except httpx.RequestError as error:
         logger.exception("An error occurred while requesting search data !")
         raise SearchDataRetrievalError from error
