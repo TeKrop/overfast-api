@@ -12,7 +12,7 @@ documentation = "https://overfast-api.tekrop.fr/"
 [tool.poetry.dependencies]
 python = "^3.12"
 beautifulsoup4 = "^4.12.2"
-fastapi = "^0.104.0"
+fastapi = "^0.109.0"
 httpx = {extras = ["http2"], version = "^0.26.0"}
 loguru = "^0.7.2"
 lxml = "^5.1.0"
