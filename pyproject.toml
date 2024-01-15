@@ -17,7 +17,7 @@ httpx = {extras = ["http2"], version = "^0.26.0"}
 loguru = "^0.7.2"
 lxml = "^4.9.3"
 redis = "^5.0.1"
-uvicorn = {extras = ["standard"], version = "^0.23.2"}
+uvicorn = {extras = ["standard"], version = "^0.25.0"}
 pydantic = "^2.4.2"
 pydantic-settings = "^2.0.3"
 
