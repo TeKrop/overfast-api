@@ -40,6 +40,14 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
+
+# Check app code and tests
+src = ["app", "tests"]
+
+# Assume Python 3.12
+target-version = "py312"
+
+[tool.ruff.lint]
 select = [
     "E",     # pycodestyle errors
     "W",     # pycodestyle warnings
@@ -109,12 +117,6 @@ ignore = [
     "W191"     # tab indentation detected instead of spaces
 ]
 
-# Check app code and tests
-src = ["app", "tests"]
-
-# Assume Python 3.12
-target-version = "py312"
-
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 # Consider app as first-party for imports in tests
 known-first-party = ["app"]

@@ -95,7 +95,7 @@ async def test_namecard_parser_player_not_found():
     with patch.object(
         overfast_client,
         "get",
-        return_value=Mock(status_code=status.HTTP_200_OK, text="{}", json=lambda: {}),
+        return_value=Mock(status_code=status.HTTP_200_OK, text="{}", json=dict),
     ), patch("app.common.logging.logger.warning", logger_warning_mock):
         await parser.parse()
 
