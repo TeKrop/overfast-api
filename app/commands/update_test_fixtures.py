@@ -114,7 +114,9 @@ async def main():
         for route, filepath in route_file_mapping.items():
             logger.info("Updating {}{}...", test_data_path, filepath)
             logger.info("GET {}/{}{}...", settings.blizzard_host, locale, route)
-            response = await client.get(f"{settings.blizzard_host}/{locale}{route}")
+            response = await client.get(
+                f"{settings.blizzard_host}/{locale}{route}", follow_redirects=True
+            )
             logger.debug(
                 "HTTP {} / Time : {}",
                 response.status_code,

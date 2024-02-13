@@ -38,7 +38,7 @@ players_ids = [
     "Dekk-2677",  # Classic profile without rank
     "KIRIKO-21253",  # Profile with rank on only two roles
     "Player-1112937",  # Console player
-    "Player-137712",  # Private profile
+    "quibble-11594",  # Profile without endorsement
     "TeKrop-2217",  # Classic profile
     "Unknown-1234",  # No player
     "JohnV1-1190",  # Player without any title ingame

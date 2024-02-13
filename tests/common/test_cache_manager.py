@@ -38,8 +38,8 @@ def _set_no_spread_percentage():
             "/heroes?role=damage",
         ),
         (
-            Mock(url=Mock(path="/players"), query_params="name=TeKrop&privacy=public"),
-            "/players?name=TeKrop&privacy=public",
+            Mock(url=Mock(path="/players"), query_params="name=TeKrop"),
+            "/players?name=TeKrop",
         ),
     ],
 )

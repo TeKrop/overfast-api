@@ -18,7 +18,6 @@ from app.parsers.search_data_parser import NamecardParser, PortraitParser, Title
 
 class SearchPlayersRequestHandler(ApiRequestMixin):
     """Search Players Request Handler used in order to find an Overwatch player
-    using some filters : career privacy, etc.
 
     The APIRequestHandler class is not used here, as this is a very specific request,
     depending on a Blizzard endpoint returning JSON Data. Some parsers are used,
@@ -56,10 +55,6 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
 
         players = req.json()
 
-        # Filter results using kwargs
-        logger.info("Applying filters..")
-        players = self.apply_filters(players, **kwargs)
-
         # Transform into PlayerSearchResult format
         logger.info("Applying transformation..")
         players = self.apply_transformations(players)
@@ -84,20 +79,6 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
         logger.info("Done ! Returning players list...")
         return players_list
 
-    @staticmethod
-    def apply_filters(players: list[dict], **kwargs) -> Iterable[dict]:
-        """Apply query params filters on a list of players (only career
-        privacy for now), and return the results accordingly as an iterable.
-        """
-
-        def filter_privacy(player: dict) -> bool:
-            return not kwargs.get("privacy") or player["isPublic"] == (
-                kwargs.get("privacy") == "public"
-            )
-
-        filters = [filter_privacy]
-        return filter(lambda x: all(f(x) for f in filters), players)
-
     def apply_transformations(self, players: Iterable[dict]) -> list[dict]:
         """Apply transformations to found players in order to return the data
         in the OverFast API format. We'll also retrieve some data from parsers.
@@ -112,7 +93,6 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
                     "avatar": self.get_avatar_url(player, player_id),
                     "namecard": self.get_namecard_url(player, player_id),
                     "title": self.get_title(player, player_id),
-                    "privacy": "public" if player["isPublic"] else "private",
                     "career_url": f"{settings.app_base_url}/players/{player_id}",
                 },
             )

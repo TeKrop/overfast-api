@@ -1,6 +1,6 @@
 import pytest
 
-from app.common.enums import CompetitiveDivision, HeroKey, Role
+from app.common.enums import CompetitiveDivision, CompetitiveRole, HeroKey
 from app.config import settings
 from app.parsers import helpers
 
@@ -58,7 +58,7 @@ def test_get_computed_stat_value(input_str: str, result: float | str):
             CompetitiveDivision.GOLD,
         ),
         (
-            "https://static.playoverwatch.com/img/pages/career/icons/rank/PlatinumTier-4-a34efd83ff.png",
+            "https://static.playoverwatch.com/img/pages/career/icons/rank/Rank_PlatinumTier-ccf57375a7.png",
             CompetitiveDivision.PLATINUM,
         ),
         (
@@ -73,10 +73,14 @@ def test_get_computed_stat_value(input_str: str, result: float | str):
             "https://static.playoverwatch.com/img/pages/career/icons/rank/GrandmasterTier-3-e55e61f68f.png",
             CompetitiveDivision.GRANDMASTER,
         ),
+        (
+            "https://static.playoverwatch.com/img/pages/career/icons/rank/ChampionTier-3-e55e61f68f.png",
+            CompetitiveDivision.CHAMPION,
+        ),
     ],
 )
-def test_get_division_from_rank_icon(rank_url: str, division: CompetitiveDivision):
-    assert helpers.get_division_from_rank_icon(rank_url) == division
+def test_get_division_from_icon(rank_url: str, division: CompetitiveDivision):
+    assert helpers.get_division_from_icon(rank_url) == division
 
 
 @pytest.mark.parametrize(
@@ -150,19 +154,23 @@ def test_get_hero_keyname(input_str: str, result: str):
     [
         (
             "https://static.playoverwatch.com/img/pages/career/icons/role/offense-ab1756f419.svg#icon",
-            Role.DAMAGE,
+            CompetitiveRole.DAMAGE,
         ),
         (
             "https://static.playoverwatch.com/img/pages/career/icons/role/tank-f64702b684.svg#icon",
-            Role.TANK,
+            CompetitiveRole.TANK,
         ),
         (
             "https://static.playoverwatch.com/img/pages/career/icons/role/support-0258e13d85.svg#icon",
-            Role.SUPPORT,
+            CompetitiveRole.SUPPORT,
+        ),
+        (
+            "https://static.playoverwatch.com/img/pages/career/icons/role/open-163b3b8ddc.svg#icon",
+            CompetitiveRole.OPEN,
         ),
     ],
 )
-def test_get_role_key_from_icon(icon_url: str, role: Role):
+def test_get_role_key_from_icon(icon_url: str, role: CompetitiveRole):
     assert helpers.get_role_key_from_icon(icon_url) == role
 
 
@@ -178,18 +186,18 @@ def test_get_stats_hero_class(hero_classes: list[str], result: str):
 
 
 @pytest.mark.parametrize(
-    ("rank_url", "tier"),
+    ("tier_url", "tier"),
     [
         (
-            "https://static.playoverwatch.com/img/pages/career/icons/rank/PlatinumTier-2-2251fd0f3e.png",
+            "https://static.playoverwatch.com/img/pages/career/icons/rank/TierDivision_2-2251fd0f3e.png",
             2,
         ),
         (
-            "https://static.playoverwatch.com/img/pages/career/icons/rank/GrandmasterTier-3-e55e61f68f.png",
+            "https://static.playoverwatch.com/img/pages/career/icons/rank/TierDivision_3-1de89374e2.png",
             3,
         ),
         (
-            "https://static.playoverwatch.com/img/pages/career/icons/rank/BronzeTier-4-6b6e7959d4.png",
+            "https://static.playoverwatch.com/img/pages/career/icons/rank/TierDivision_4-0cd0907e1b.png",
             4,
         ),
         (
@@ -198,8 +206,8 @@ def test_get_stats_hero_class(hero_classes: list[str], result: str):
         ),
     ],
 )
-def test_get_tier_from_rank_icon(rank_url: str, tier: int):
-    assert helpers.get_tier_from_rank_icon(rank_url) == tier
+def test_get_tier_from_icon(tier_url: str, tier: int):
+    assert helpers.get_tier_from_icon(tier_url) == tier
 
 
 @pytest.mark.parametrize(

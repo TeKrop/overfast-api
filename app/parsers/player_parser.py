@@ -6,10 +6,9 @@ from fastapi import status
 
 from app.common.enums import (
     CareerHeroesComparisonsCategory,
+    CompetitiveRole,
     PlayerGamemode,
     PlayerPlatform,
-    PlayerPrivacy,
-    Role,
 )
 from app.common.exceptions import ParserBlizzardError
 from app.common.helpers import get_player_title
@@ -18,14 +17,14 @@ from app.config import settings
 from .generics.api_parser import APIParser
 from .helpers import (
     get_computed_stat_value,
-    get_division_from_rank_icon,
+    get_division_from_icon,
     get_endorsement_value_from_frame,
     get_hero_keyname,
     get_plural_stat_key,
     get_real_category_name,
     get_role_key_from_icon,
     get_stats_hero_class,
-    get_tier_from_rank_icon,
+    get_tier_from_icon,
     string_to_snakecase,
 )
 
@@ -138,7 +137,6 @@ class PlayerParser(APIParser):
             "title": self.__get_title(profile_div),
             "endorsement": self.__get_endorsement(progression_div),
             "competitive": self.__get_competitive_ranks(progression_div),
-            "privacy": self.__get_privacy(profile_div),
         }
 
     @staticmethod
@@ -160,12 +158,15 @@ class PlayerParser(APIParser):
         return get_player_title(title)
 
     @staticmethod
-    def __get_endorsement(progression_div: Tag) -> dict:
+    def __get_endorsement(progression_div: Tag) -> dict | None:
         endorsement_span = progression_div.find(
             "span",
             class_="Profile-player--endorsementWrapper",
             recursive=False,
         )
+        if not endorsement_span:
+            return None
+
         endorsement_frame_url = endorsement_span.find(
             "img",
             class_="Profile-playerSummary--endorsement",
@@ -210,19 +211,22 @@ class PlayerParser(APIParser):
 
         for role_wrapper in role_wrappers:
             role_icon = self.__get_role_icon(role_wrapper)
-            rank_icon = role_wrapper.find("img", class_="Profile-playerSummary--rank")[
-                "src"
-            ]
             role_key = get_role_key_from_icon(role_icon).value
 
+            rank_tier_icons = role_wrapper.find_all(
+                "img", class_="Profile-playerSummary--rank"
+            )
+            rank_icon, tier_icon = rank_tier_icons[0]["src"], rank_tier_icons[1]["src"]
+
             competitive_ranks[role_key] = {
-                "division": get_division_from_rank_icon(rank_icon).value,
-                "tier": get_tier_from_rank_icon(rank_icon),
+                "division": get_division_from_icon(rank_icon).value,
+                "tier": get_tier_from_icon(tier_icon),
                 "role_icon": role_icon,
                 "rank_icon": rank_icon,
+                "tier_icon": tier_icon,
             }
 
-        for role in Role:
+        for role in CompetitiveRole:
             if role.value not in competitive_ranks:
                 competitive_ranks[role.value] = None
 
@@ -257,14 +261,6 @@ class PlayerParser(APIParser):
 
         role_svg = role_wrapper.find("svg", class_="Profile-playerSummary--role")
         return role_svg.find("use")["xlink:href"]
-
-    @staticmethod
-    def __get_privacy(profile_div: Tag) -> str:
-        return (
-            PlayerPrivacy.PRIVATE
-            if profile_div.find("div", class_="Profile-player--private")
-            else PlayerPrivacy.PUBLIC
-        ).value
 
     def get_stats(self) -> dict | None:
         stats = {

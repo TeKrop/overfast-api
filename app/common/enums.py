@@ -81,6 +81,18 @@ class Role(StrEnum):
     TANK = "tank"
 
 
+# Dynamically create the CompetitiveRole enum by using the existing
+# Role enum and just adding the "open" option for Open Queue
+CompetitiveRole = StrEnum(
+    "CompetitiveRole",
+    {
+        **{role.name: role.value for role in Role},
+        "OPEN": "open",
+    },
+)
+CompetitiveRole.__doc__ = "Competitive roles for ranks in stats summary"
+
+
 class PlayerGamemode(StrEnum):
     """Gamemodes associated with players statistics"""
 
@@ -95,13 +107,6 @@ class PlayerPlatform(StrEnum):
     PC = "pc"
 
 
-class PlayerPrivacy(StrEnum):
-    """Players career privacy"""
-
-    PUBLIC = "public"
-    PRIVATE = "private"
-
-
 class CompetitiveDivision(StrEnum):
     """Competitive division of a rank"""
 
@@ -112,6 +117,7 @@ class CompetitiveDivision(StrEnum):
     DIAMOND = "diamond"
     MASTER = "master"
     GRANDMASTER = "grandmaster"
+    CHAMPION = "champion"
 
 
 class Locale(StrEnum):

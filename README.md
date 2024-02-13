@@ -117,7 +117,7 @@ options:
 ```
 
 ### Code Quality
-The code quality is checked using the `ruff` command. I'm also using the `isort` utility for imports ordering, and `black` to enforce PEP-8 convention on my code. To check the quality of the code, you just have to run the following command :
+The code quality is checked using the `ruff` command. I'm also using `ruff format` for imports ordering and code formatting, enforcing PEP-8 convention on my code. To check the quality of the code, you just have to run the following command :
 
 ```
 ruff .
@@ -139,9 +139,7 @@ python -m pytest --cov=app --cov-report html
 The project is using [pre-commit](https://pre-commit.com/) framework to ensure code quality before making any commit on the repository. After installing the project dependencies, you can install the pre-commit by using the `pre-commit install` command.
 
 The configuration can be found in the `.pre-commit-config.yaml` file. It consists in launching 3 processes on modified files before making any commit :
-- `isort` for imports sorting in a clean way
-- `black` for formatting the code in a uniform and PEP8-compliant format
-- `ruff` for code quality checks and some fixes if possible
+- `ruff` for linting and code formatting (with `ruff format`)
 - `sourcery` for more code quality checks and a lot of simplifications
 
 ## 🛠️ Cache System

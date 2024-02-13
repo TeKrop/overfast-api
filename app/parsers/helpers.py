@@ -3,7 +3,7 @@ import re
 import unicodedata
 from functools import cache
 
-from app.common.enums import CompetitiveDivision, HeroKey, Role
+from app.common.enums import CompetitiveDivision, CompetitiveRole, HeroKey, Role
 from app.common.helpers import read_csv_data_file
 from app.config import settings
 
@@ -38,8 +38,8 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
     return 0 if input_str == "--" else input_str
 
 
-def get_division_from_rank_icon(rank_url: str) -> CompetitiveDivision:
-    division_name = rank_url.split("/")[-1].split("-")[0]
+def get_division_from_icon(rank_url: str) -> CompetitiveDivision:
+    division_name = rank_url.split("/")[-1].split("-")[0].split("_")[-1]
     return CompetitiveDivision(division_name[:-4].lower())
 
 
@@ -65,10 +65,14 @@ def get_hero_keyname(input_str: str) -> str:
     return string_to_snakecase(input_str).replace("_", "-")
 
 
-def get_role_key_from_icon(icon_url: str) -> Role:
+def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:
     """Extract role key from the role icon."""
     icon_role_key = icon_url.split("/")[-1].split("-")[0]
-    return Role.DAMAGE if icon_role_key == "offense" else Role(icon_role_key)
+    return (
+        CompetitiveRole.DAMAGE
+        if icon_role_key == "offense"
+        else CompetitiveRole(icon_role_key)
+    )
 
 
 def get_stats_hero_class(hero_classes: list[str]) -> str:
@@ -78,10 +82,10 @@ def get_stats_hero_class(hero_classes: list[str]) -> str:
     )
 
 
-def get_tier_from_rank_icon(rank_url: str) -> int:
+def get_tier_from_icon(tier_url: str) -> int:
     """Extracts the rank tier from the rank URL. 0 if not found."""
     try:
-        return int(rank_url.split("/")[-1].split("-")[1])
+        return int(tier_url.split("/")[-1].split("-")[0].split("_")[-1])
     except (IndexError, ValueError):
         return 0
 

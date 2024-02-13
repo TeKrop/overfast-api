@@ -20,7 +20,6 @@ from app.common.enums import (
     CareerStatCategory,
     CompetitiveDivision,
     HeroKey,
-    PlayerPrivacy,
 )
 from app.common.helpers import get_hero_name, key_to_label
 
@@ -56,15 +55,6 @@ class PlayerShort(BaseModel):
         ...,
         description="Title of the player if any",
         examples=["Bytefixer"],
-    )
-    privacy: PlayerPrivacy = Field(
-        ...,
-        title="Privacy",
-        description=(
-            "Privacy of the player career. If private, only some basic informations "
-            "are available on player details endpoint (avatar, endorsement)"
-        ),
-        examples=["public"],
     )
     career_url: AnyHttpUrl = Field(
         ...,
@@ -102,9 +92,16 @@ class PlayerCompetitiveRank(BaseModel):
     )
     rank_icon: HttpUrl = Field(
         ...,
-        description="URL of the rank icon associated with the player rank (division + tier)",
+        description="URL of the division icon associated with the player rank",
         examples=[
-            "https://static.playoverwatch.com/img/pages/career/icons/rank/GrandmasterTier-3-e55e61f68f.png",
+            "https://static.playoverwatch.com/img/pages/career/icons/rank/Rank_MasterTier-7d3b85ba0d.png",
+        ],
+    )
+    tier_icon: HttpUrl = Field(
+        ...,
+        description="URL of the tier icon associated with the player rank",
+        examples=[
+            "https://static.playoverwatch.com/img/pages/career/icons/rank/TierDivision_3-1de89374e2.png",
         ],
     )
 
@@ -122,8 +119,10 @@ class PlatformCompetitiveRanksContainer(BaseModel):
     tank: PlayerCompetitiveRank | None = Field(..., description="Tank role details")
     damage: PlayerCompetitiveRank | None = Field(..., description="Damage role details")
     support: PlayerCompetitiveRank | None = Field(
-        ...,
-        description="Support role details",
+        ..., description="Support role details"
+    )
+    open: PlayerCompetitiveRank | None = Field(
+        ..., description="Open Queue role details"
     )
 
 
@@ -131,14 +130,14 @@ class PlayerCompetitiveRanksContainer(BaseModel):
     pc: PlatformCompetitiveRanksContainer | None = Field(
         ...,
         description=(
-            "Role Queue competitive ranks for PC and last season played on it. "
+            "Competitive ranks for PC and last season played on it. "
             "If the player doesn't play on this platform, it's null."
         ),
     )
     console: PlatformCompetitiveRanksContainer | None = Field(
         ...,
         description=(
-            "Role Queue competitive ranks for console and last season played on it. "
+            "Competitive ranks for console and last season played on it. "
             "If the player doesn't play on this platform, it's null."
         ),
     )
@@ -209,26 +208,17 @@ class PlayerSummary(BaseModel):
         description="Title of the player if any",
         examples=["Bytefixer"],
     )
-    endorsement: PlayerEndorsement = Field(
+    endorsement: PlayerEndorsement | None = Field(
         ...,
         description="Player endorsement details",
     )
     competitive: PlayerCompetitiveRanksContainer | None = Field(
         ...,
         description=(
-            "Role Queue competitive ranking in the last season played by the player "
+            "Competitive ranking in the last season played by the player "
             "in different roles depending on the platform. If the career is private "
             "or if the player doesn't play competitive at all, it's null."
         ),
-    )
-    privacy: PlayerPrivacy = Field(
-        ...,
-        title="Privacy",
-        description=(
-            "Privacy of the player career. If private, only some basic informations "
-            "are available (avatar, endorsement)"
-        ),
-        examples=["public"],
     )
 
 

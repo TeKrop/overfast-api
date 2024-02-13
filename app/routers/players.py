@@ -7,7 +7,6 @@ from app.common.enums import (
     HeroKeyCareerFilter,
     PlayerGamemode,
     PlayerPlatform,
-    PlayerPrivacy,
     RouteTag,
 )
 from app.common.helpers import routes_responses as common_routes_responses
@@ -109,22 +108,16 @@ async def search_players(
         title="Player nickname to search",
         examples=["TeKrop"],
     ),
-    privacy: PlayerPrivacy = Query(
-        None,
-        title="Privacy settings of the player career",
-        examples=["public"],
-    ),
     order_by: str = Query(
         "name:asc",
         title="Ordering field and the way it's arranged (asc[ending]/desc[ending])",
-        pattern=r"^(player_id|name|privacy):(asc|desc)$",
+        pattern=r"^(player_id|name):(asc|desc)$",
     ),
     offset: int = Query(0, title="Offset of the results", ge=0),
     limit: int = Query(20, title="Limit of results per page", gt=0),
 ) -> PlayerSearchResult:
     return await SearchPlayersRequestHandler(request).process_request(
         name=name,
-        privacy=privacy,
         order_by=order_by,
         offset=offset,
         limit=limit,
