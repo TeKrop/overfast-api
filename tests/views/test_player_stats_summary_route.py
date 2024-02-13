@@ -55,27 +55,6 @@ def test_get_player_stats(
         assert response.json() == filtered_data
 
 
-@pytest.mark.parametrize(
-    "player_html_data",
-    [("Player-137712")],
-    indirect=["player_html_data"],
-)
-def test_get_private_player_stats(
-    player_html_data: str,
-):
-    with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
-    ):
-        response = client.get("/players/Player-137712/stats/summary")
-
-    filtered_data = read_json_file("players/stats/filtered/Player-137712.json")
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == filtered_data
-
-
 def test_get_player_stats_blizzard_error():
     with patch.object(
         overfast_client,

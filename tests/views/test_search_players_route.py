@@ -7,12 +7,10 @@ from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
 from app.common.cache_manager import CacheManager
-from app.common.enums import PlayerPrivacy
 from app.common.helpers import overfast_client
 from app.main import app
 
 client = TestClient(app)
-privacies = {p.value for p in PlayerPrivacy}
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -30,7 +28,7 @@ def _setup_search_players_test(search_players_blizzard_json_data: list[dict]):
 
 
 def test_search_players_missing_name():
-    response = client.get("/players?privacy=public")
+    response = client.get("/players")
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     json_response = response.json()
@@ -174,39 +172,6 @@ def test_search_players_with_offset_and_limit(
             key=lambda k: k["player_id"],
         )[offset:limit]
     )
-
-
-@pytest.mark.parametrize(
-    "privacy",
-    [*[p.value for p in PlayerPrivacy], "invalid_privacy", 1234],
-)
-def test_search_players_filter_by_privacy(
-    privacy: PlayerPrivacy,
-    search_players_api_json_data: dict,
-    search_data_json_data: dict,
-):
-    # Add search data in cache as if we launched the server
-    cache_manager = CacheManager()
-    cache_manager.update_search_data_cache(search_data_json_data)
-
-    response = client.get(f"/players?name=Test&privacy={privacy}")
-
-    if privacy in privacies:
-        filtered_players = [
-            player
-            for player in search_players_api_json_data["results"]
-            if player["privacy"] == privacy
-        ]
-        assert response.status_code == status.HTTP_200_OK
-
-        json_response = response.json()
-        assert json_response["total"] == len(filtered_players)
-        assert (
-            sorted(json_response["results"], key=lambda k: k["player_id"])
-            == sorted(filtered_players, key=lambda k: k["player_id"])[:20]
-        )
-    else:
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 @pytest.mark.parametrize("order_by", ["name:asc", "name:desc"])
