@@ -117,7 +117,7 @@ class CompetitiveDivision(StrEnum):
     DIAMOND = "diamond"
     MASTER = "master"
     GRANDMASTER = "grandmaster"
-    CHAMPION = "champion"
+    ULTIMATE = "ultimate"
 
 
 class Locale(StrEnum):
