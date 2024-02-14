@@ -74,8 +74,8 @@ def test_get_computed_stat_value(input_str: str, result: float | str):
             CompetitiveDivision.GRANDMASTER,
         ),
         (
-            "https://static.playoverwatch.com/img/pages/career/icons/rank/ChampionTier-3-e55e61f68f.png",
-            CompetitiveDivision.CHAMPION,
+            "https://static.playoverwatch.com/img/pages/career/icons/rank/Rank_UltimateTier-99f8248b65.png",
+            CompetitiveDivision.ULTIMATE,
         ),
     ],
 )
