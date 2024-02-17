@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)
 ![Mockup OverFast API](https://files.tekrop.fr/overfast_api_logo_full_1000.png)
 
-> OverFast API gives data about Overwatch 2 heroes, gamemodes, maps and players statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses **nginx** as reverse proxy and **Redis** for caching. By using a specific cache system, it minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate data to users.
+> OverFast API provides comprehensive data on Overwatch 2 heroes, game modes, maps, and player statistics by scraping Blizzard pages. Developed with the efficiency of **FastAPI** and **Beautiful Soup**, it leverages **nginx** as a reverse proxy and **Redis** for caching. Its tailored caching mechanism significantly reduces calls to Blizzard pages, ensuring swift and precise data delivery to users.
 
 ## Table of contents
 * [✨ Live instance](#-live-instance)
@@ -49,14 +49,13 @@ uvicorn app.main:app --reload
 
 ## 🐋 Docker
 
-First, you need to create a dotenv file (`.env`) from the `.env.dist` file. You'll need to modify it depending on your needs in order to configure the volumes used by OverFast API. You'll have to check
-some settings and create the app volume folder.
+Before getting started, create a `.env` file from the provided `.env.dist` template. Customize this file according to your requirements to configure the volumes used by the OverFast API. Ensure to review and adjust the settings as necessary, and also set up the app volume folder before proceeding.
 
 ### Generic settings
-- `APP_VOLUME_PATH` is the folder which will contain shared data of the app : logs, redis save file (`dump.rdb`), settings file (`.env`) and crontab configurations for background cache update.
-- `APP_PORT` is the port used by the app container. Default is `80`.
-- `APP_BASE_URL` is used for the links exposed in some endpoints (players search and maps listing)
-You shouldn't need to modify any other generic setting, but in case you want to check their utility, be sure to check the docstrings in the `app/config.py` file.
+- `APP_VOLUME_PATH`: Folder for shared app data like logs, Redis save file, settings, and crontab configurations for background cache updates.
+- `APP_PORT`: Port for the app container (default is `80`).
+- `APP_BASE_URL` : Base URL for exposed links in endpoints like player search and maps listing. 
+You likely won't need to modify other generic settings, but if you're curious about their functionality, consult the docstrings within the `app/config.py` file for further details.
 
 ### App volume folder
 In order to make the app work properly, you have to :
@@ -65,7 +64,7 @@ In order to make the app work properly, you have to :
 - Copy the `overfast-crontab` file from the repo (`scripts` folder) into the folder
 
 ### Final step
-Once you set the right values in your dotenv and created the app volume folder, you can finally use the docker compose command to build everything and run the app
+After configuring your dotenv and creating the app volume folder, simply use the Docker Compose command to build and run the app seamlessly.
 ```
 docker compose up -d
 ```
@@ -75,23 +74,23 @@ The server will be running on the port you set (`APP_PORT`).
 
 ### Computed statistics values
 
-In players career statistics, several conversions are made for convenience :
-- all **duration values** are converted into **seconds** (integer)
-- **percent values** are exposed as **integers** instead of a string with a percent symbol
-- integer and float string representations are converted into the concerned type
+In player career statistics, various conversions are applied for ease of use:
+- **Duration values** are converted to **seconds** (integer)
+- **Percent values** are represented as **integers**, omitting the percent symbol
+- Integer and float string representations are converted to their respective types
 
 ### Commands
 
-The following commands are either used :
-- In an automated way, for checking if cache values need to be updated, or if a new hero has been published on Blizzard pages (the code needs to be updated if this is the case)
-- In a manual way, in order to update the test fixtures used in the test suite
+The commands serve two purposes:
+- Automated checks determine if cache updates are necessary or if a new hero has been added to Blizzard pages, triggering code updates
+- Manual updates are performed to refresh the test fixtures used in the test suite
 
 #### Check and update Redis cache which needs to be updated
 ```
 python -m app.commands.check_and_update_cache
 ```
 
-#### Check if there is a new hero available, and notify the developer if there is one
+#### Check if there is a new hero available, and notify the developer if there is any
 ```
 python -m app.commands.check_new_hero
 ```
@@ -146,9 +145,9 @@ The configuration can be found in the `.pre-commit-config.yaml` file. It consist
 
 ### API Cache and Parser Cache
 
-OverFast API includes a cache stored on a **Redis** server, and divided in two parts :
-* **API Cache** : a very high level cache, linking URIs (cache key) to raw JSON data. When first doing a request, if a cache is available, the JSON data is returned as-is by the **nginx** server. The cached values are stored with an arbitrary TTL (time to leave) parameter depending on the called route.
-* **Parser Cache** : a specific cache for the parser system of the OverFast API. When an HTML Blizzard page is parsed, the parsing result (JSON object) is stored, in order to minimize calls to Blizzard when doing a request with filters. The value is refreshed in the background before its expiration.
+OverFast API integrates a **Redis**-based cache system, divided into two main components:
+- **API Cache**: This high-level cache associates URIs (cache keys) with raw JSON data. Upon the initial request, if a cache entry exists, the **nginx** server returns the JSON data directly. Cached values are stored with varying TTL (Time-To-Live) parameters depending on the requested route.
+- **Parser Cache**: Specifically designed for the API's parsing system, this cache stores parsing results (JSON objects) from HTML Blizzard pages. Its purpose is to minimize calls to Blizzard servers when requests involve filters. The cached values are refreshed in the background prior to expiration.
 
 Here is the list of all TTL values configured for API Cache :
 * Heroes list : 1 day
@@ -161,14 +160,14 @@ Here is the list of all TTL values configured for API Cache :
 
 ### Refresh-Ahead cache system
 
-In order to reduce the number of requests to Blizzard that API users can make, a Refresh-Ahead cache system has been implemented.
+To minimize requests to Blizzard servers, an innovative Refresh-Ahead cache system has been deployed.
 
-When a user requests its player career page, it will be slow for the first call (2-3s in total), as it's retrieving data from Blizzard. Then, the computed data will be stored in the Parser Cache (which will be refreshed in background), and the final data will be stored in API Cache (only created when a user makes a request).
+Upon the initial request for a player's career page, there may be a slight delay (approximately 2-3 seconds) as data is fetched from Blizzard. Following this, the computed data is cached in the Parser Cache, which is subsequently refreshed in the background before expiration. Additionally, the final data is stored in the API Cache, which is generated only upon user requests.
 
-Thanks to this system, user requests on the same career page will be very fast for all the next times.
+This approach ensures that subsequent requests for the same career page are exceptionally swift, significantly enhancing user experience.
 
 ## 🐍 Architecture
-You can run the project in several ways, though I would advise the first one for better user experience.
+You have multiple options for running the project, but for an optimal user experience, I recommend the first method.
 
 ### App (uvicorn) + Redis server (caching) + nginx
 ```mermaid
@@ -199,7 +198,7 @@ sequenceDiagram
 
 ```
 
-Using this way (via `docker-compose`), the response will be cached into Redis, and will be sent by nginx directly for the next times without requesting the Python server at all. It's the best performance compromise as nginx is the best for serving static content. A single request can lead to several Parser Cache requests, depending on configured Blizzard pages.
+Utilizing `docker compose`, this method caches the response into Redis. Subsequent requests are then directly served by nginx without involving the Python server at all. This approach strikes the optimal performance balance, leveraging nginx's efficiency in serving static content. Depending on the configured Blizzard pages, a single request may trigger multiple Parser Cache requests.
 
 ### App (uvicorn) + Redis server (caching)
 ```mermaid
@@ -226,7 +225,7 @@ sequenceDiagram
     end
 ```
 
-Using this way (by manually doing it), the response will be cached into Redis, and the cache will be checked by the Python server (`USE_API_CACHE_IN_APP` setting in `config.py` must be set to `True`). It's an acceptable compromise, but keep in mind that cache retrieval is ~100 times slower than the previous solution (tested with [wrk](https://github.com/wg/wrk)).
+When manually executing the process, the response gets cached into Redis, and the Python server checks the cache (`USE_API_CACHE_IN_APP` must be set to `True`). While this compromise is acceptable, it's worth noting that cache retrieval is approximately 100 times slower compared to the previous solution (verified with [wrk](https://github.com/wg/wrk)).
 
 ### App (uvicorn) only
 ```mermaid
@@ -237,7 +236,7 @@ sequenceDiagram
     User->>+App: Make an API request
     App-->>-User: Return API data after parsing
 ```
-Using this way (only using the image built with the `Dockerfile` alone), there will be no cache at all, and every call will make requests to Blizzard pages. I advise not to use this way unless for debugging.
+Using only the image built with the `Dockerfile` alone means there won't be any cache, resulting in every call making requests to Blizzard pages. I recommend avoiding this approach except for debugging purposes.
 
 ## 🤝 Contributing
 
@@ -245,15 +244,15 @@ Contributions, issues and feature requests are welcome ! Do you want to update t
 
 
 ## 🚀 Community projects
+Projects using OverFast API as a data source are listed below. Using it in your project? Reach out via email with your project link, and I'll add it!
 
-Here is a list of projects which are currently using OverFast API as a data source. You're using it in one of your projects ? Feel free to reach me by e-mail, send me a link of your project (either website URL or public git repository), and I will add it in the list :)
-
-- Overfast API client (https://github.com/Sipixer/overfast-api-client)
-- Watch Over, mobile app by @Backxtar (https://play.google.com/store/apps/details?id=de.backxtar.watchoveroverwatch)
-- Overwatch Career Profile (https://github.com/EliaRenov/ow-career-profile)
+- Datastrike, analysis and results tracking tool (https://datastrike.cloud)
 - Discord Bot OW2 for stats (https://github.com/polsojac/ow2discordbot)
 - OverBot, the best Overwatch bot for Discord (https://github.com/davidetacchini/overbot)
+- Overfast API client (https://github.com/Sipixer/overfast-api-client)
+- Overwatch Career Profile (https://github.com/EliaRenov/ow-career-profile)
 - OverwatchPy, a Python wrapper for the API (https://github.com/alexraskin/overwatchpy)
+- Watch Over, mobile app by @Backxtar (https://play.google.com/store/apps/details?id=de.backxtar.watchoveroverwatch)
 
 ## 🙏 Credits
 
