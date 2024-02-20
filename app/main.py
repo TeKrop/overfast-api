@@ -27,20 +27,23 @@ async def lifespan(_: FastAPI):  # pragma: no cover
 
 
 app = FastAPI(title="OverFast API", docs_url=None, redoc_url=None, lifespan=lifespan)
-description = f"""OverFast API gives data about Overwatch 2 heroes, gamemodes, maps and players
-statistics by scraping Blizzard pages. Built with **FastAPI** and **Beautiful Soup**, and uses
-**nginx** as reverse proxy and **Redis** for caching. By using a Refresh-Ahead cache system, it
-minimizes calls to Blizzard pages (which can be very slow), and quickly returns accurate
-data to users.
+description = f"""OverFast API provides comprehensive data on Overwatch 2 heroes,
+game modes, maps, and player statistics by scraping Blizzard pages. Developed with
+the efficiency of **FastAPI** and **Beautiful Soup**, it leverages **nginx** as a
+reverse proxy and **Redis** for caching. Its tailored caching mechanism significantly
+reduces calls to Blizzard pages, ensuring swift and precise data delivery to users.
 
-In players statistics endpoints, several conversions are made for convenience :
-- all **duration values** are converted into **seconds** (integer)
-- **percent values** are exposed as **integers** instead of a string with a percent symbol
-- integer and float string representations are converted into the concerned type
+This live instance is restricted to **30 req/s** (a shared limit across all endpoints).
+If you require more, consider hosting your own instance on a server 👍
+
+In player career statistics, various conversions are applied for ease of use:
+- **Duration values** are converted to **seconds** (integer)
+- **Percent values** are represented as **integers**, omitting the percent symbol
+- Integer and float string representations are converted to their respective types
 
 Swagger UI (useful for trying API calls) : {settings.app_base_url}/docs
 
-Status page : https://stats.uptimerobot.com/E0k0yU1pJQ
+{f"Status page : {settings.status_page_url}" if settings.status_page_url else ""}
 """
 
 
