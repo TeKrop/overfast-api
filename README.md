@@ -24,6 +24,7 @@
 
 
 ## ✨ [Live instance](https://overfast-api.tekrop.fr)
+The live instance is restricted to **30 req/s** (a shared limit across all endpoints). If you require more, consider hosting your own instance on a server 👍
 
 - Live instance (Redoc documentation) : https://overfast-api.tekrop.fr/
 - Swagger UI : https://overfast-api.tekrop.fr/docs

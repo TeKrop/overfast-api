@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     # Max HTTPX concurrent requests for async calls to Blizzard (cache updates)
     max_concurrent_requests: int = 5
 
+    # Optional, status page URL if you have any to provide
+    status_page_url: str | None = None
+
     ############
     # REDIS CONFIGURATION
     ############
