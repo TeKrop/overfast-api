@@ -94,6 +94,7 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
                     "namecard": self.get_namecard_url(player, player_id),
                     "title": self.get_title(player, player_id),
                     "career_url": f"{settings.app_base_url}/players/{player_id}",
+                    "blizzard_id": player["url"],
                 },
             )
         return transformed_players
