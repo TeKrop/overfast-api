@@ -62,6 +62,12 @@ class PlayerShort(BaseModel):
         description="Player's career OverFast API URL (Get player career data)",
         examples=["https://overfast-api.tekrop.fr/players/TeKrop-2217"],
     )
+    blizzard_id: str = Field(
+        ...,
+        title="Blizzard ID",
+        description="Blizzard unique identifier of the player (hexadecimal)",
+        examples=["c65b8798bc61d6ffbba120%7Ccfe9dd77a4382165e2b920bdcc035949"],
+    )
 
 
 class PlayerSearchResult(BaseModel):

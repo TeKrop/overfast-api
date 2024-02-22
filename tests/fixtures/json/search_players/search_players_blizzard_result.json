@@ -6,7 +6,8 @@
         "lastUpdated": 1678488893,
         "namecard": "0x0250000000005510",
         "portrait": "0x0250000000001598",
-        "title": "0x025000000000555E"
+        "title": "0x025000000000555E",
+        "url": "d65ba781fe23cdfabe%7C9b3063608098cdbf1b9825d8664f4d96"
     },
     {
         "battleTag": "Dekk#21386",
@@ -15,7 +16,8 @@
         "lastUpdated": 1677947164,
         "namecard": "0x0000000000000000",
         "portrait": "0x0250000000000315",
-        "title": "0x0000000000000000"
+        "title": "0x0000000000000000",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "dekk#2548",
@@ -24,7 +26,8 @@
         "lastUpdated": 1676811985,
         "namecard": "0x0000000000000000",
         "portrait": "0x0250000000001374",
-        "title": "0x0000000000000000"
+        "title": "0x0000000000000000",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "Dekk#21904",
@@ -33,7 +36,8 @@
         "lastUpdated": 1676730323,
         "namecard": "0x0000000000000000",
         "portrait": "0x0250000000004D59",
-        "title": "0x0000000000000000"
+        "title": "0x0000000000000000",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "DEKK#21259",
@@ -42,76 +46,87 @@
         "lastUpdated": 1676555200,
         "namecard": "0x0000000000000000",
         "portrait": "0x02500000000002F9",
-        "title": "0x0000000000000000"
+        "title": "0x0000000000000000",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "Dekk#2162",
         "frame": "0x02500000000009CD",
         "isPublic": false,
         "lastUpdated": 1671155709,
-        "portrait": "0x0250000000000BBA"
+        "portrait": "0x0250000000000BBA",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "Dekk#1637",
         "frame": "0x0250000000000918",
         "isPublic": false,
         "lastUpdated": 1670258731,
-        "portrait": "0x02500000000002F7"
+        "portrait": "0x02500000000002F7",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "Dekk#21260",
         "frame": "0x0250000000000918",
         "isPublic": false,
         "lastUpdated": 1668452370,
-        "portrait": "0x02500000000002F7"
+        "portrait": "0x02500000000002F7",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "Dekk#21129",
         "frame": "0x0250000000000918",
         "isPublic": false,
         "lastUpdated": 1668372404,
-        "portrait": "0x0250000000005643"
+        "portrait": "0x0250000000005643",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "Dekk#11906",
         "frame": "0x0250000000000919",
         "isPublic": false,
         "lastUpdated": 1667959199,
-        "portrait": "0x0250000000000D60"
+        "portrait": "0x0250000000000D60",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "Dekk#11904",
         "frame": "0x0250000000000918",
         "isPublic": false,
         "lastUpdated": 1666924000,
-        "portrait": "0x0250000000000B14"
+        "portrait": "0x0250000000000B14",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "Dekk#21771",
         "frame": "0x0250000000000921",
         "isPublic": false,
         "lastUpdated": 1666737903,
-        "portrait": "0x02500000000012DB"
+        "portrait": "0x02500000000012DB",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "Dekk#1380",
         "frame": "0x0250000000000918",
         "isPublic": false,
         "lastUpdated": 1666538443,
-        "portrait": "0x02500000000002F7"
+        "portrait": "0x02500000000002F7",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "DEKK#11775",
         "frame": "0x0250000000000920",
         "isPublic": false,
         "lastUpdated": 1665953911,
-        "portrait": "0x025000000000115C"
+        "portrait": "0x025000000000115C",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
         "battleTag": "Dekk#1766",
         "frame": "0x0250000000000918",
         "isPublic": false,
         "lastUpdated": 1665287787,
-        "portrait": "0x02500000000002F7"
+        "portrait": "0x02500000000002F7",
+        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     }
 ]
