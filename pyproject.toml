@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "overfast-api"
-version = "2.25.2"
+version = "2.26.0"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = "MIT"
 authors = ["Valentin PORCHET <valentin.porchet@proton.me>"]
