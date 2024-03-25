@@ -28,23 +28,26 @@ def test_get_player_career(
     search_tekrop_blizzard_json_data: dict,
     search_html_data: str,
 ):
-    with patch.object(
-        overfast_client,
-        "get",
-        side_effect=[
-            # Player HTML page
-            Mock(status_code=status.HTTP_200_OK, text=player_html_data),
-            # Search results related to the player
-            Mock(
-                status_code=status.HTTP_200_OK,
-                text=json.dumps(search_tekrop_blizzard_json_data),
-                json=lambda: search_tekrop_blizzard_json_data,
-            ),
-        ],
-    ), patch(
-        "httpx.get",
-        # Search HTML page for namecard retrieval
-        return_value=Mock(status_code=status.HTTP_200_OK, text=search_html_data),
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            side_effect=[
+                # Player HTML page
+                Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+                # Search results related to the player
+                Mock(
+                    status_code=status.HTTP_200_OK,
+                    text=json.dumps(search_tekrop_blizzard_json_data),
+                    json=lambda: search_tekrop_blizzard_json_data,
+                ),
+            ],
+        ),
+        patch(
+            "httpx.get",
+            # Search HTML page for namecard retrieval
+            return_value=Mock(status_code=status.HTTP_200_OK, text=search_html_data),
+        ),
     ):
         response = client.get(f"/players/{player_id}")
 

@@ -1,4 +1,5 @@
 """Gamemodes endpoints router : gamemodes list, etc."""
+
 from fastapi import APIRouter, Request
 
 from app.common.decorators import validation_error_handler

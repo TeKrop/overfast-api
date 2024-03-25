@@ -1,6 +1,7 @@
 """Command used in order to check and update Redis API Cache depending on
 the expired cache refresh limit configuration. It can be run in the background.
 """
+
 import asyncio
 
 from fastapi import HTTPException

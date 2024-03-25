@@ -20,21 +20,25 @@ async def test_namecard_parser_no_cache(
     parser = NamecardParser(player_id="Dekk-2677")
     update_parser_cache_last_update_mock = Mock()
 
-    with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(
-            status_code=status.HTTP_200_OK,
-            text=json.dumps(search_players_blizzard_json_data),
-            json=lambda: search_players_blizzard_json_data,
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(
+                status_code=status.HTTP_200_OK,
+                text=json.dumps(search_players_blizzard_json_data),
+                json=lambda: search_players_blizzard_json_data,
+            ),
         ),
-    ), patch(
-        "httpx.get",
-        return_value=Mock(status_code=status.HTTP_200_OK, text=search_html_data),
-    ), patch.object(
-        parser.cache_manager,
-        "update_parser_cache_last_update",
-        update_parser_cache_last_update_mock,
+        patch(
+            "httpx.get",
+            return_value=Mock(status_code=status.HTTP_200_OK, text=search_html_data),
+        ),
+        patch.object(
+            parser.cache_manager,
+            "update_parser_cache_last_update",
+            update_parser_cache_last_update_mock,
+        ),
     ):
         await parser.parse()
 
@@ -48,12 +52,15 @@ async def test_namecard_parser_no_cache(
 async def test_namecard_parser_blizzard_error():
     parser = NamecardParser(player_id="Dekk-2677")
 
-    with pytest.raises(HTTPException) as error, patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            text="Service Unavailable",
+    with (
+        pytest.raises(HTTPException) as error,
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                text="Service Unavailable",
+            ),
         ),
     ):
         await parser.parse()
@@ -73,15 +80,18 @@ async def test_namecard_parser_error_key_error(search_tekrop_blizzard_json_data:
 
     parser = NamecardParser(player_id="TeKrop-2217")
 
-    with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(
-            status_code=status.HTTP_200_OK,
-            text=json.dumps(search_data),
-            json=lambda: search_data,
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(
+                status_code=status.HTTP_200_OK,
+                text=json.dumps(search_data),
+                json=lambda: search_data,
+            ),
         ),
-    ), pytest.raises(ParserParsingError) as error:
+        pytest.raises(ParserParsingError) as error,
+    ):
         await parser.parse()
 
     assert error.value.message == "KeyError('battleTag')"
@@ -92,11 +102,14 @@ async def test_namecard_parser_player_not_found():
     parser = NamecardParser(player_id="Unknown-1234")
 
     logger_warning_mock = Mock()
-    with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(status_code=status.HTTP_200_OK, text="{}", json=dict),
-    ), patch("app.common.logging.logger.warning", logger_warning_mock):
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(status_code=status.HTTP_200_OK, text="{}", json=dict),
+        ),
+        patch("app.common.logging.logger.warning", logger_warning_mock),
+    ):
         await parser.parse()
 
     logger_warning_mock.assert_any_call(
@@ -124,15 +137,18 @@ async def test_namecard_parser_player_without_namecard():
     parser = NamecardParser(player_id="Dekk-2677")
 
     logger_info_mock = Mock()
-    with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(
-            status_code=status.HTTP_200_OK,
-            text=json.dumps(search_data),
-            json=lambda: search_data,
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(
+                status_code=status.HTTP_200_OK,
+                text=json.dumps(search_data),
+                json=lambda: search_data,
+            ),
         ),
-    ), patch("app.common.logging.logger.info", logger_info_mock):
+        patch("app.common.logging.logger.info", logger_info_mock),
+    ):
         await parser.parse()
 
     logger_info_mock.assert_any_call(
@@ -149,17 +165,21 @@ async def test_namecard_parser_no_cache_no_namecard(
     parser = NamecardParser(player_id="Dekk-2677")
 
     logger_warning_mock = Mock()
-    with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(
-            status_code=status.HTTP_200_OK,
-            text=json.dumps(search_players_blizzard_json_data),
-            json=lambda: search_players_blizzard_json_data,
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(
+                status_code=status.HTTP_200_OK,
+                text=json.dumps(search_players_blizzard_json_data),
+                json=lambda: search_players_blizzard_json_data,
+            ),
         ),
-    ), patch("httpx.get", side_effect=httpx.RequestError("error")), patch(
-        "app.common.logging.logger.warning",
-        logger_warning_mock,
+        patch("httpx.get", side_effect=httpx.RequestError("error")),
+        patch(
+            "app.common.logging.logger.warning",
+            logger_warning_mock,
+        ),
     ):
         await parser.parse()
 
@@ -187,18 +207,21 @@ async def test_namecard_parser_with_cache(
 ):
     parser = NamecardParser(player_id="Dekk-2677")
 
-    with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(
-            status_code=status.HTTP_200_OK,
-            text=json.dumps(search_players_blizzard_json_data),
-            json=lambda: search_players_blizzard_json_data,
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(
+                status_code=status.HTTP_200_OK,
+                text=json.dumps(search_players_blizzard_json_data),
+                json=lambda: search_players_blizzard_json_data,
+            ),
         ),
-    ), patch.object(
-        parser.cache_manager,
-        "get_search_data_cache",
-        return_value="https://d15f34w2p8l1cc.cloudfront.net/overwatch/757219956129146d84617a7e713dfca1bc33ea27cf6c73df60a33d02a147edc1.png",
+        patch.object(
+            parser.cache_manager,
+            "get_search_data_cache",
+            return_value="https://d15f34w2p8l1cc.cloudfront.net/overwatch/757219956129146d84617a7e713dfca1bc33ea27cf6c73df60a33d02a147edc1.png",
+        ),
     ):
         await parser.parse()
 

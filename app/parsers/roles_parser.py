@@ -1,4 +1,5 @@
 """Roles Parser module"""
+
 from app.config import settings
 
 from .generics.api_parser import APIParser

@@ -1,4 +1,5 @@
 """Abstract API Request Handler module"""
+
 from abc import ABC, abstractmethod
 
 from fastapi import HTTPException, Request
@@ -7,10 +8,9 @@ from app.common.cache_manager import CacheManager
 from app.common.exceptions import ParserBlizzardError, ParserParsingError
 from app.common.helpers import overfast_internal_error
 from app.common.logging import logger
-from app.common.mixins import ApiRequestMixin
 
 
-class APIRequestHandler(ApiRequestMixin, ABC):
+class APIRequestHandler(ABC):
     """Generic abstract API Request Handler, containing attributes structure and methods
     in order to quickly be able to create concrete request handlers. A handler can
     be associated with several parsers (one parser = one Blizzard page parsing).
@@ -37,22 +37,15 @@ class APIRequestHandler(ApiRequestMixin, ABC):
         """Main method used to process the request from user and return final data. Raises
         an HTTPException in case of error when retrieving or parsing data.
 
-        The process uses API Cache if available and needed, the main steps are :
-        - Check if API Cache data is here, and return it
-        - Else, instanciate the dedicated parser classes, each one will :
+        The main steps are :
+        - Instanciate the dedicated parser classes, each one will :
             - Check if Parser Cache is available. If so, use it
             - Else, get Blizzard HTML page, parse it and create the Parser Cache
         - Filter the data using kwargs parameters, then merge the data from parsers
         - Update related API Cache and return the final data
         """
 
-        # If we are using API Cache from inside the app
-        # (no reverse proxy configured), check the API Cache
-        if (api_cache_data := self.get_api_cache_data()) is not None:
-            return api_cache_data
-
-        # No API Cache or not using it in app, we request the data from Blizzard page
-        logger.info("No API Cache, requesting the data to Blizzard...")
+        # Request the data from Blizzard page
         parsers_data = []
         for parser_class in self.parser_classes:
             # Instanciate the parser, it will check if a Parser Cache is here.

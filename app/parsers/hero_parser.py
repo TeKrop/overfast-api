@@ -1,4 +1,5 @@
 """Hero page Parser module"""
+
 from typing import ClassVar
 
 from bs4 import Tag

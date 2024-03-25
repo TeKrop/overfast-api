@@ -1,4 +1,5 @@
 """List Gamemodes Request Handler module"""
+
 from typing import ClassVar
 
 from app.config import settings

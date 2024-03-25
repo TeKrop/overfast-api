@@ -1,4 +1,5 @@
 """Player stats summary Parser module"""
+
 from collections import defaultdict
 from copy import deepcopy
 from typing import ClassVar
@@ -144,9 +145,9 @@ class PlayerStatsSummaryParser(PlayerParser):
                             platform
                         ][gamemode][stat_name]
                     for stat_name in self.total_stats_names:
-                        computed_heroes_stats[hero_key]["total"][
-                            stat_name
-                        ] += hero_stats[platform][gamemode]["total"][stat_name]
+                        computed_heroes_stats[hero_key]["total"][stat_name] += (
+                            hero_stats[platform][gamemode]["total"][stat_name]
+                        )
 
         return computed_heroes_stats
 
@@ -209,9 +210,9 @@ class PlayerStatsSummaryParser(PlayerParser):
                 }
 
                 for hero_key, hero_stats in career_stats.items():
-                    heroes_stats[hero_key][platform][
-                        gamemode
-                    ] = self.__compute_hero_stats(hero_stats)
+                    heroes_stats[hero_key][platform][gamemode] = (
+                        self.__compute_hero_stats(hero_stats)
+                    )
 
         return heroes_stats
 

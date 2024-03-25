@@ -1,4 +1,5 @@
 """Set of pydantic models used for Gamemodes API routes"""
+
 from pydantic import BaseModel, Field, HttpUrl
 
 from app.common.enums import MapGamemode

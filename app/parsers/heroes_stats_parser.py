@@ -1,4 +1,5 @@
 """Heroes Stats Parser module"""
+
 from typing import ClassVar
 
 from .generics.csv_parser import CSVParser

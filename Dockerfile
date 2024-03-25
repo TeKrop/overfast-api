@@ -1,4 +1,6 @@
-FROM python:3.12-alpine
+FROM python:3.12-alpine AS main
+
+WORKDIR /code
 
 # Environment variables
 ENV PYTHONFAULTHANDLER=1 \
@@ -7,16 +9,15 @@ ENV PYTHONFAULTHANDLER=1 \
   PIP_NO_CACHE_DIR=off \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_VERSION=1.6.1
+  POETRY_VERSION=1.8.2
 
 # Install required system packages and install poetry
 RUN apk add build-base && \
   apk add libffi-dev && \
-  pip install poetry==1.6.1
+  pip install poetry==1.8.2
 
 # Copy only requirements (caching in Docker layer)
-WORKDIR /code
-COPY pyproject.toml scripts/app-start.sh /code/
+COPY pyproject.toml /code/
 
 # Install dependencies
 RUN poetry config virtualenvs.create false && \
@@ -26,5 +27,11 @@ RUN poetry config virtualenvs.create false && \
 COPY ./app /code/app
 COPY ./static /code/static
 
-# Configure the command
-CMD ["sh", "/code/app-start.sh"]
+# Copy crontabs file and make it executable
+COPY ./build/overfast-crontab /etc/crontabs/root
+RUN chmod +x /etc/crontabs/root
+
+# For dev image, copy the tests and install necessary dependencies
+FROM main as dev
+RUN poetry install --only dev --no-interaction --no-ansi
+COPY ./tests /code/tests

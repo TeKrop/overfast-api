@@ -1,4 +1,5 @@
 """Set of metaclasses for the project"""
+
 from typing import ClassVar
 
 

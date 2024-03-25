@@ -1,4 +1,5 @@
 """Player Stats Summary Request Handler module"""
+
 from typing import ClassVar
 
 from app.config import settings

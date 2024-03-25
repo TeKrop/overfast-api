@@ -125,9 +125,12 @@ def test_check_and_delete_parser_cache_no_cache_to_delete(
 
     # check and delete (no delete)
     logger_info_mock = Mock()
-    with pytest.raises(SystemExit), patch(
-        "app.common.logging.logger.info",
-        logger_info_mock,
+    with (
+        pytest.raises(SystemExit),
+        patch(
+            "app.common.logging.logger.info",
+            logger_info_mock,
+        ),
     ):
         check_and_delete_parser_cache_main()
 

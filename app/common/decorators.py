@@ -1,4 +1,5 @@
 """Decorators module"""
+
 import time
 from collections.abc import Callable
 from functools import wraps

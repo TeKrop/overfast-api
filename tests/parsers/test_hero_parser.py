@@ -36,9 +36,12 @@ async def test_hero_page_parsing(hero_key: str, hero_html_data: str):
 async def test_not_released_hero_parser_blizzard_error(hero_html_data: str):
     parser = HeroParser()
 
-    with pytest.raises(ParserBlizzardError), patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(status_code=404, text=hero_html_data),
+    with (
+        pytest.raises(ParserBlizzardError),
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(status_code=404, text=hero_html_data),
+        ),
     ):
         await parser.parse()

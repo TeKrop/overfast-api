@@ -120,27 +120,6 @@ def test_search_players(
     )
 
 
-def test_search_players_with_cache(
-    search_players_api_json_data: dict, search_data_json_data: dict
-):
-    # Add search data in cache as if we launched the server
-    cache_manager = CacheManager()
-    cache_manager.update_search_data_cache(search_data_json_data)
-
-    # Add data in API cache to be
-    players_response_data = {
-        "total": search_players_api_json_data["total"],
-        "results": search_players_api_json_data["results"][:20],
-    }
-    cache_manager.update_api_cache("/players?name=Test", players_response_data, 100)
-
-    with patch("app.common.mixins.settings.use_api_cache_in_app", True):
-        response = client.get("/players?name=Test")
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == players_response_data
-
-
 @pytest.mark.parametrize(
     ("offset", "limit"),
     [

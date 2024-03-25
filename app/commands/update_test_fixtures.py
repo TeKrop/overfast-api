@@ -2,6 +2,7 @@
 Using Blizzard real data about heroes, some players and maps,
 download and update parsers test HTML fixtures
 """
+
 import argparse
 import asyncio
 from pathlib import Path

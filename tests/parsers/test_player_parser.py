@@ -32,14 +32,17 @@ async def test_player_page_parsing_with_filters(
     parser = PlayerParser(player_id=player_id)
     update_parser_cache_last_update_mock = Mock()
 
-    with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(status_code=200, text=player_html_data),
-    ), patch.object(
-        parser.cache_manager,
-        "update_parser_cache_last_update",
-        update_parser_cache_last_update_mock,
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(status_code=200, text=player_html_data),
+        ),
+        patch.object(
+            parser.cache_manager,
+            "update_parser_cache_last_update",
+            update_parser_cache_last_update_mock,
+        ),
     ):
         await parser.parse()
 
@@ -54,10 +57,13 @@ async def test_player_page_parsing_with_filters(
 @pytest.mark.asyncio()
 async def test_unknown_player_parser_blizzard_error(player_html_data: str):
     parser = PlayerParser(player_id="Unknown-1234")
-    with pytest.raises(ParserBlizzardError), patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(status_code=200, text=player_html_data),
+    with (
+        pytest.raises(ParserBlizzardError),
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(status_code=200, text=player_html_data),
+        ),
     ):
         await parser.parse()
 
@@ -71,11 +77,14 @@ async def test_player_parser_parsing_error_attribute_error(player_html_data: str
     )
     parser = PlayerParser(player_id="TeKrop-2217")
 
-    with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(status_code=200, text=player_attr_error),
-    ), pytest.raises(ParserParsingError) as error:
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(status_code=200, text=player_attr_error),
+        ),
+        pytest.raises(ParserParsingError) as error,
+    ):
         await parser.parse()
 
     assert (
@@ -94,11 +103,14 @@ async def test_player_parser_parsing_error_key_error(player_html_data: str):
     )
     parser = PlayerParser(player_id="TeKrop-2217")
 
-    with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(status_code=200, text=player_key_error),
-    ), pytest.raises(ParserParsingError) as error:
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(status_code=200, text=player_key_error),
+        ),
+        pytest.raises(ParserParsingError) as error,
+    ):
         await parser.parse()
 
     assert error.value.message == "KeyError('src')"
@@ -113,11 +125,14 @@ async def test_player_parser_parsing_error_type_error(player_html_data: str):
     )
     parser = PlayerParser(player_id="TeKrop-2217")
 
-    with patch.object(
-        overfast_client,
-        "get",
-        return_value=Mock(status_code=200, text=player_type_error),
-    ), pytest.raises(ParserParsingError) as error:
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            return_value=Mock(status_code=200, text=player_type_error),
+        ),
+        pytest.raises(ParserParsingError) as error,
+    ):
         await parser.parse()
 
     assert (

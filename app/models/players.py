@@ -1,4 +1,5 @@
 """Set of pydantic models used for Players API routes"""
+
 from pydantic import (
     AnyHttpUrl,
     BaseModel,

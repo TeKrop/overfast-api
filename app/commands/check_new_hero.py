@@ -2,6 +2,7 @@
 to the internal heroes list. If this is a case, a Discord notification is sent to the
 developer.
 """
+
 import asyncio
 
 from fastapi import HTTPException

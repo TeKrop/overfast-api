@@ -1,4 +1,5 @@
 """Command used in order to retrieve the last version of the namecards"""
+
 import json
 import re
 

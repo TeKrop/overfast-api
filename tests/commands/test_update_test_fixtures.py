@@ -13,10 +13,13 @@ from app.config import settings
 
 @pytest.fixture(scope="module", autouse=True)
 def _setup_update_test_fixtures_test():
-    with patch(
-        "app.commands.update_test_fixtures.save_fixture_file",
-        return_value=Mock(),
-    ), patch("app.common.logging.logger.debug"):
+    with (
+        patch(
+            "app.commands.update_test_fixtures.save_fixture_file",
+            return_value=Mock(),
+        ),
+        patch("app.common.logging.logger.debug"),
+    ):
         yield
 
 
@@ -54,19 +57,24 @@ def test_update_with_different_options(parameters, expected_calls: list[str]):
     logger_info_mock = Mock()
     logger_error_mock = Mock()
 
-    with patch(
-        "app.commands.update_test_fixtures.parse_parameters",
-        return_value=parameters,
-    ), patch.object(
-        AsyncClient,
-        "get",
-        return_value=Mock(status_code=status.HTTP_200_OK, text="HTML_DATA"),
-    ), patch(
-        "app.common.logging.logger.info",
-        logger_info_mock,
-    ), patch(
-        "app.common.logging.logger.error",
-        logger_error_mock,
+    with (
+        patch(
+            "app.commands.update_test_fixtures.parse_parameters",
+            return_value=parameters,
+        ),
+        patch.object(
+            AsyncClient,
+            "get",
+            return_value=Mock(status_code=status.HTTP_200_OK, text="HTML_DATA"),
+        ),
+        patch(
+            "app.common.logging.logger.info",
+            logger_info_mock,
+        ),
+        patch(
+            "app.common.logging.logger.error",
+            logger_error_mock,
+        ),
     ):
         asyncio.run(update_test_fixtures_main())
 
@@ -78,22 +86,27 @@ def test_update_with_different_options(parameters, expected_calls: list[str]):
 def test_update_with_blizzard_error():
     logger_error_mock = Mock()
 
-    with patch(
-        "app.commands.update_test_fixtures.parse_parameters",
-        return_value=Mock(heroes=False, players=False, maps=True),
-    ), patch.object(
-        AsyncClient,
-        "get",
-        return_value=Mock(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            text="BLIZZARD_ERROR",
+    with (
+        patch(
+            "app.commands.update_test_fixtures.parse_parameters",
+            return_value=Mock(heroes=False, players=False, maps=True),
         ),
-    ), patch(
-        "app.common.logging.logger.info",
-        Mock(),
-    ), patch(
-        "app.common.logging.logger.error",
-        logger_error_mock,
+        patch.object(
+            AsyncClient,
+            "get",
+            return_value=Mock(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                text="BLIZZARD_ERROR",
+            ),
+        ),
+        patch(
+            "app.common.logging.logger.info",
+            Mock(),
+        ),
+        patch(
+            "app.common.logging.logger.error",
+            logger_error_mock,
+        ),
     ):
         asyncio.run(update_test_fixtures_main())
 
