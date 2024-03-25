@@ -29,23 +29,6 @@ def test_get_heroes(heroes_json_data: list):
     assert response.json() == heroes_json_data
 
 
-def test_get_heroes_when_no_cache(heroes_json_data: list):
-    with patch("app.common.mixins.settings.use_api_cache_in_app", True):
-        response = client.get("/heroes")
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json() == heroes_json_data
-
-
-def test_get_heroes_from_api_cache(heroes_json_data: list):
-    with patch("app.common.mixins.settings.use_api_cache_in_app", True):
-        cache_manager = CacheManager()
-        cache_manager.update_api_cache("/heroes", heroes_json_data, 100)
-
-        response = client.get("/heroes")
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json() == heroes_json_data
-
-
 def test_get_heroes_from_parser_cache(heroes_json_data: list):
     cache_manager = CacheManager()
     cache_manager.update_parser_cache(

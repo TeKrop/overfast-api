@@ -1,4 +1,5 @@
 """Maps endpoints router : maps list, etc."""
+
 from fastapi import APIRouter, Query, Request
 
 from app.common.decorators import validation_error_handler

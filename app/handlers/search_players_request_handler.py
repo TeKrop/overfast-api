@@ -1,4 +1,5 @@
 """Search Players Request Handler module"""
+
 from collections.abc import Iterable
 
 from fastapi import Request, status
@@ -11,12 +12,11 @@ from app.common.helpers import (
     overfast_request,
 )
 from app.common.logging import logger
-from app.common.mixins import ApiRequestMixin
 from app.config import settings
 from app.parsers.search_data_parser import NamecardParser, PortraitParser, TitleParser
 
 
-class SearchPlayersRequestHandler(ApiRequestMixin):
+class SearchPlayersRequestHandler:
     """Search Players Request Handler used in order to find an Overwatch player
 
     The APIRequestHandler class is not used here, as this is a very specific request,
@@ -34,21 +34,14 @@ class SearchPlayersRequestHandler(ApiRequestMixin):
     async def process_request(self, **kwargs) -> dict:
         """Main method used to process the request from user and return final data.
 
-        The process uses API Cache if available and needed, the main steps are :
-        - Make a request to Blizzard URL (if not using Cache API)
+        The main steps are :
+        - Make a request to Blizzard URL
         - Instanciate the dedicated parser class with Blizzard response
         - Parse the page completely, apply filters, transformation and ordering
         - Update API Cache accordingly, and return the final result
         """
 
-        # If we are using API Cache from inside the app
-        # (no reverse proxy configured), check the API Cache
-        if (api_cache_data := self.get_api_cache_data()) is not None:
-            return api_cache_data
-
-        # No API Cache or not using it in app, we request the data from Blizzard URL
-        logger.info("No API Cache, requesting the data to Blizzard...")
-
+        # Request the data from Blizzard URL
         req = await overfast_request(self.get_blizzard_url(**kwargs))
         if req.status_code != status.HTTP_200_OK:
             raise blizzard_response_error_from_request(req)

@@ -1,4 +1,5 @@
 """Set of pydantic models used for Heroes API routes"""
+
 from pydantic import BaseModel, Field, HttpUrl
 
 from app.common.enums import HeroKey, MediaType, Role

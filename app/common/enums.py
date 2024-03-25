@@ -2,6 +2,7 @@
 heroes, gamemodes, etc.
 
 """
+
 from enum import StrEnum
 
 from app.common.helpers import read_csv_data_file

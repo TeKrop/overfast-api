@@ -1,4 +1,5 @@
 """Abstract API Parser module"""
+
 from abc import abstractmethod
 
 from app.common.helpers import read_csv_data_file

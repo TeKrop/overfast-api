@@ -105,16 +105,19 @@ def test_get_hero_no_portrait(
         hero_data for hero_data in heroes_json_data if hero_data["key"] != HeroKey.ANA
     ]
 
-    with patch.object(
-        overfast_client,
-        "get",
-        side_effect=[
-            Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
-            Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
-        ],
-    ), patch(
-        "app.parsers.heroes_parser.HeroesParser.filter_request_using_query",
-        return_value=heroes_data,
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            side_effect=[
+                Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
+                Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
+            ],
+        ),
+        patch(
+            "app.parsers.heroes_parser.HeroesParser.filter_request_using_query",
+            return_value=heroes_data,
+        ),
     ):
         response = client.get(f"/heroes/{hero_name}")
     assert response.status_code == status.HTTP_200_OK
@@ -137,16 +140,19 @@ def test_get_hero_no_hitpoints(
         if hero_stat["key"] != HeroKey.ANA
     ]
 
-    with patch.object(
-        overfast_client,
-        "get",
-        side_effect=[
-            Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
-            Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
-        ],
-    ), patch(
-        "app.parsers.generics.csv_parser.read_csv_data_file",
-        return_value=heroes_stats,
+    with (
+        patch.object(
+            overfast_client,
+            "get",
+            side_effect=[
+                Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
+                Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
+            ],
+        ),
+        patch(
+            "app.parsers.generics.csv_parser.read_csv_data_file",
+            return_value=heroes_stats,
+        ),
     ):
         response = client.get(f"/heroes/{hero_name}")
     assert response.status_code == status.HTTP_200_OK

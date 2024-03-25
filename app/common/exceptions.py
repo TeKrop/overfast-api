@@ -1,4 +1,5 @@
 """Set of custom exceptions used in the API"""
+
 from fastapi import status
 
 

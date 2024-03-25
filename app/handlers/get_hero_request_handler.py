@@ -1,4 +1,5 @@
 """Hero Request Handler module"""
+
 from typing import ClassVar
 
 from app.common.helpers import dict_insert_value_before_key
