@@ -109,16 +109,20 @@ def test_update_and_get_parser_cache(
 ):
     timeout_value = 10
 
-    with patch(
-        "app.common.cache_manager.CacheManager.is_redis_server_up",
-        is_redis_server_up,
-    ), patch(
-        "app.common.cache_manager.settings.parser_cache_expiration_spreading_percentage",
-        25,
-    ), patch(
-        "app.common.helpers.randint",
-        Mock(side_effect=lambda min_value, _: min_value),
-    ) as randint_mock:
+    with (
+        patch(
+            "app.common.cache_manager.CacheManager.is_redis_server_up",
+            is_redis_server_up,
+        ),
+        patch(
+            "app.common.cache_manager.settings.parser_cache_expiration_spreading_percentage",
+            25,
+        ),
+        patch(
+            "app.common.helpers.randint",
+            Mock(side_effect=lambda min_value, _: min_value),
+        ) as randint_mock,
+    ):
         # Assert the value is not here before update
         assert cache_manager.get_parser_cache(cache_key) is None
 

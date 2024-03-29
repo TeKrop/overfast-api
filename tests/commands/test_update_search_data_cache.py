@@ -46,10 +46,14 @@ def test_update_search_data_request_error(
     cache_manager.update_search_data_cache({data_type: {"fake": "value"}})
 
     logger_exception_mock = Mock()
-    with patch("httpx.get", side_effect=httpx.RequestError("error")), patch(
-        "app.common.logging.logger.exception",
-        logger_exception_mock,
-    ), pytest.raises(SystemExit):
+    with (
+        patch("httpx.get", side_effect=httpx.RequestError("error")),
+        patch(
+            "app.common.logging.logger.exception",
+            logger_exception_mock,
+        ),
+        pytest.raises(SystemExit),
+    ):
         update_search_data_cache_main()
 
     logger_exception_mock.assert_any_call(
@@ -62,14 +66,18 @@ def test_update_search_data_cache_not_found(cache_manager: CacheManager):
     cache_manager.update_search_data_cache({SearchDataType.NAMECARD: {"fake": "value"}})
 
     logger_exception_mock = Mock()
-    with patch(
-        "httpx.get",
-        return_value=Mock(status_code=status.HTTP_200_OK, text="OK"),
-    ), patch(
-        "app.common.logging.logger.exception",
-        logger_exception_mock,
-    ), pytest.raises(
-        SystemExit,
+    with (
+        patch(
+            "httpx.get",
+            return_value=Mock(status_code=status.HTTP_200_OK, text="OK"),
+        ),
+        patch(
+            "app.common.logging.logger.exception",
+            logger_exception_mock,
+        ),
+        pytest.raises(
+            SystemExit,
+        ),
     ):
         update_search_data_cache_main()
 
@@ -114,17 +122,21 @@ def test_update_search_data_cache_invalid_json(
     cache_manager.update_search_data_cache({data_type: {"fake": "value"}})
 
     logger_exception_mock = Mock()
-    with patch(
-        "httpx.get",
-        return_value=Mock(
-            status_code=status.HTTP_200_OK,
-            text=blizzard_response_text,
+    with (
+        patch(
+            "httpx.get",
+            return_value=Mock(
+                status_code=status.HTTP_200_OK,
+                text=blizzard_response_text,
+            ),
         ),
-    ), patch(
-        "app.common.logging.logger.exception",
-        logger_exception_mock,
-    ), pytest.raises(
-        SystemExit,
+        patch(
+            "app.common.logging.logger.exception",
+            logger_exception_mock,
+        ),
+        pytest.raises(
+            SystemExit,
+        ),
     ):
         update_search_data_cache_main()
 

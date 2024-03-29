@@ -1,4 +1,5 @@
 """Project constants module"""
+
 import tomllib
 from functools import cache
 from pathlib import Path
@@ -20,8 +21,9 @@ class Settings(BaseSettings):
     # APPLICATION SETTINGS
     ############
 
-    # Application volume path for container
-    app_volume_path: str = "/my/custom/path/for/app"
+    # Application volume path for container (logs, dotenv settings, etc.)
+    # If not specified, temporary folder will be used
+    app_volume_path: str = ""
 
     # Application port
     app_port: int = 80
@@ -61,11 +63,6 @@ class Settings(BaseSettings):
     ############
     # CACHE CONFIGURATION
     ############
-
-    # Whether or not you want to use the API Cache directly in the app (GET).
-    # Disabled by default, because we are using the reverse proxy (nginx) to
-    # request the API Cache first, before calling Fast API server.
-    use_api_cache_in_app: bool = False
 
     # Prefix for keys in API Cache with entire payload (Redis).
     # Used by nginx as main API cache.

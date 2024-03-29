@@ -1,4 +1,5 @@
 """Search Data Parser module"""
+
 from abc import ABC, abstractmethod
 
 from app.commands.update_search_data_cache import retrieve_search_data

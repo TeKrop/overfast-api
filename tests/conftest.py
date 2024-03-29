@@ -17,9 +17,12 @@ def _patch_before_every_test(redis_server: fakeredis.FakeStrictRedis):
     # Flush Redis before and after every tests
     redis_server.flushdb()
 
-    with patch("app.common.helpers.settings.discord_webhook_enabled", False), patch(
-        "app.common.cache_manager.CacheManager.redis_server",
-        redis_server,
+    with (
+        patch("app.common.helpers.settings.discord_webhook_enabled", False),
+        patch(
+            "app.common.cache_manager.CacheManager.redis_server",
+            redis_server,
+        ),
     ):
         yield
 

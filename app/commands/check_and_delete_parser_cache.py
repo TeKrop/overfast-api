@@ -1,6 +1,7 @@
 """Command used in order to delete Parser Cache which hasn't been retrieved
 from API since a certain amount of time. It can be run in the background.
 """
+
 from app.common.cache_manager import CacheManager
 from app.common.logging import logger
 from app.config import settings

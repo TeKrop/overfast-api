@@ -1,4 +1,5 @@
 """Parser Helpers module"""
+
 import csv
 import json
 import zlib

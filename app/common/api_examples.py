@@ -1,4 +1,5 @@
 """Some API result examples, mainly used in the exposed documentation"""
+
 CareerStatsExample = {
     "all-heroes": [
         {

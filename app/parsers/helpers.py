@@ -1,4 +1,5 @@
 """Parser Helpers module"""
+
 import re
 import unicodedata
 from functools import cache

@@ -1,36 +1,65 @@
+version: "3.8"
 services:
   app:
-    build: .
+    build:
+      context: .
+      target: ${BUILD_TARGET:-main}
+    command: uvicorn app.main:app --host "0.0.0.0" --port 8080 --proxy-headers
+    env_file: ${APP_VOLUME_PATH:-.}/.env
     volumes:
-      - ${APP_VOLUME_PATH}/logs:/code/logs
-      - ${APP_VOLUME_PATH}/.env:/code/.env
-      - ${APP_VOLUME_PATH}/overfast-crontab:/etc/crontabs/root
+      - ${APP_VOLUME_PATH:-/tmp}/app-logs:/code/logs
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -O /dev/null http://localhost:8080 || exit 1"]
-      start_period: 20s
-      timeout: 10s
+      interval: 5s
+      timeout: 5s
+
+  worker:
+    build:
+      context: .
+      target: ${BUILD_TARGET:-main}
+    command: crond -f
+    env_file: ${APP_VOLUME_PATH:-.}/.env
+    volumes:
+      - ${APP_VOLUME_PATH:-/tmp}/worker-logs:/code/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.80'
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -i crond | grep -wv grep || exit 1"]
+      interval: 5s
+      timeout: 2s
 
   redis:
-    image: "redis:alpine"
-    command: redis-server --save 60 1 --loglevel warning
+    build:
+      context: ./build/redis
+    command: sh -c "./init.sh"
+    # Run as privileged to allow the container to change the vm.overcommit_memory setting
+    privileged: true
     volumes:
       - ${APP_VOLUME_PATH}/redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      start_period: 10s
-      timeout: 10s
+      interval: 3s
+      timeout: 2s
 
   nginx:
     build:
-      context: ./scripts/nginx
+      context: ./build/nginx
     ports:
       - "${APP_PORT}:80"
     depends_on:
-      - app
-      - redis
+      app:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -O /dev/null http://localhost || exit 1"]
-      start_period: 10s
-      timeout: 10s
+      interval: 5s
+      timeout: 2s

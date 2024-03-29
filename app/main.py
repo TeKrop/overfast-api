@@ -1,4 +1,5 @@
 """Project main file containing FastAPI app and routes definitions"""
+
 from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI, Request
