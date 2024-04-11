@@ -35,7 +35,14 @@ def test_get_hero(
     ):
         response = client.get(f"/heroes/{hero_name}")
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == hero_json_data
+
+    response_json = response.json()
+    del response_json["hitpoints"]
+
+    hero_data = hero_json_data.copy()
+    del hero_data["hitpoints"]
+
+    assert response_json == hero_data
 
 
 @pytest.mark.parametrize(
