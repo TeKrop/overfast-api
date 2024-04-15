@@ -53,6 +53,8 @@ class HeroParser(APIParser):
     def __get_summary(overview_section: Tag) -> dict:
         header_section = overview_section.find("blz-header")
         extra_list_items = overview_section.find("blz-list").find_all("blz-list-item")
+        birthday, age = extra_list_items[2].get_text().split(" (Age: ")
+        age = age[:-1]
 
         return {
             "name": header_section.find("h2").get_text(),
@@ -61,6 +63,8 @@ class HeroParser(APIParser):
             ),
             "role": get_role_from_icon_url(extra_list_items[0].find("image")["href"]),
             "location": extra_list_items[1].get_text(),
+            "birthday": birthday,
+            "age": int(age),
         }
 
     @staticmethod
