@@ -6,10 +6,10 @@ from app.common.enums import HeroKey, MediaType, Role
 
 
 class HitPoints(BaseModel):
-    health: int = Field(..., description="Health of the hero", ge=1, examples=[200])
+    health: int = Field(..., description="Health of the hero", ge=1, examples=[250])
     armor: int = Field(..., description="Armor of the hero", ge=0, examples=[0])
     shields: int = Field(..., description="Shields of the hero", ge=0, examples=[0])
-    total: int = Field(..., description="Total HP of the hero", ge=1, examples=[200])
+    total: int = Field(..., description="Total HP of the hero", ge=1, examples=[250])
 
 
 class AbilityVideoLink(BaseModel):
@@ -156,6 +156,17 @@ class Hero(BaseModel):
         ...,
         description="Location of the hero",
         examples=["Santa Fe, New Mexico, USA"],
+    )
+    age: int | None = Field(
+        ...,
+        description="Age of the hero. Can be null if unknown.",
+        ge=1,
+        examples=[39],
+    )
+    birthday: str | None = Field(
+        ...,
+        description="Birthday of the hero. Can be null if unknown.",
+        examples=["31 Jul"],
     )
     hitpoints: HitPoints | None = Field(
         None,

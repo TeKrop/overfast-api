@@ -251,3 +251,20 @@ def test_get_hero_role(hero_key: HeroKey):
         helpers.get_hero_role(hero_key)
     except StopIteration:
         pytest.fail(f"Missing role for '{hero_key}' hero")
+
+
+@pytest.mark.parametrize(
+    ("input_str", "result"),
+    [
+        # Classic cases
+        ("Aug 19 (Age: 37)", ("Aug 19", 37)),
+        ("May 9 (Age: 1)", ("May 9", 1)),
+        # Specific unknown case (bastion)
+        ("Unknown (Age: 32)", (None, 32)),
+        # Invalid case
+        ("Unknown", (None, None)),
+    ],
+)
+def test_get_birthday_and_age(input_str: str, result: tuple[str | None, int | None]):
+    """Get birthday and age from text for a given hero"""
+    assert helpers.get_birthday_and_age(input_str) == result
