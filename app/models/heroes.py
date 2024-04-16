@@ -157,10 +157,15 @@ class Hero(BaseModel):
         description="Location of the hero",
         examples=["Santa Fe, New Mexico, USA"],
     )
-    age: int = Field(..., description="Age of the hero", ge=1, examples=[39])
-    birthday: str = Field(
+    age: int | None = Field(
         ...,
-        description="Birthday of the hero",
+        description="Age of the hero. Can be null if unknown.",
+        ge=1,
+        examples=[39],
+    )
+    birthday: str | None = Field(
+        ...,
+        description="Birthday of the hero. Can be null if unknown.",
         examples=["31 Jul"],
     )
     hitpoints: HitPoints | None = Field(

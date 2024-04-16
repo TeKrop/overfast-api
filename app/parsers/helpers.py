@@ -306,3 +306,15 @@ def get_plural_stat_key(stat_key: str) -> str:
     }
 
     return stat_keys_mapping.get(stat_key, stat_key)
+
+
+def get_birthday_and_age(birthday_age_text: str) -> tuple[str | None, int | None]:
+    """Get birthday and age from text for a given hero"""
+    result = re.match(r"^(.*) \(Age: (\d+)\)$", birthday_age_text)
+    if not result:
+        return None, None
+
+    birthday = result[1] if result[1] != "Unknown" else None
+    age = int(result[2]) if result[2] else None
+
+    return birthday, age

@@ -10,7 +10,7 @@ from app.common.exceptions import ParserBlizzardError
 from app.config import settings
 
 from .generics.api_parser import APIParser
-from .helpers import get_full_url, get_role_from_icon_url
+from .helpers import get_birthday_and_age, get_full_url, get_role_from_icon_url
 
 
 class HeroParser(APIParser):
@@ -53,8 +53,7 @@ class HeroParser(APIParser):
     def __get_summary(overview_section: Tag) -> dict:
         header_section = overview_section.find("blz-header")
         extra_list_items = overview_section.find("blz-list").find_all("blz-list-item")
-        birthday, age = extra_list_items[2].get_text().split(" (Age: ")
-        age = age[:-1]
+        birthday, age = get_birthday_and_age(extra_list_items[2].get_text())
 
         return {
             "name": header_section.find("h2").get_text(),
@@ -64,7 +63,7 @@ class HeroParser(APIParser):
             "role": get_role_from_icon_url(extra_list_items[0].find("image")["href"]),
             "location": extra_list_items[1].get_text(),
             "birthday": birthday,
-            "age": int(age),
+            "age": age,
         }
 
     @staticmethod
