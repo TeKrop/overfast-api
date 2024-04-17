@@ -74,9 +74,11 @@ else
 endif
 
 # Run OverFastAPI application (production mode)
-up: down
+up:
 	@echo "Building OverFastAPI (production mode)..."
 	docker compose build
+	@echo "Stopping OverFastAPI and cleaning containers..."
+	docker compose down -v --remove-orphans
 	@echo "Launching OverFastAPI (production mode)..."
 	docker compose up -d
 

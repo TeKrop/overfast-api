@@ -1,6 +1,6 @@
 import pytest
 
-from app.common.enums import CompetitiveDivision, CompetitiveRole, HeroKey
+from app.common.enums import CompetitiveDivision, CompetitiveRole, HeroKey, Locale
 from app.config import settings
 from app.parsers import helpers
 
@@ -254,17 +254,34 @@ def test_get_hero_role(hero_key: HeroKey):
 
 
 @pytest.mark.parametrize(
-    ("input_str", "result"),
+    ("input_str", "locale", "result"),
     [
         # Classic cases
-        ("Aug 19 (Age: 37)", ("Aug 19", 37)),
-        ("May 9 (Age: 1)", ("May 9", 1)),
+        ("Aug 19 (Age: 37)", Locale.ENGLISH_US, ("Aug 19", 37)),
+        ("May 9 (Age: 1)", Locale.ENGLISH_US, ("May 9", 1)),
         # Specific unknown case (bastion)
-        ("Unknown (Age: 32)", (None, 32)),
+        ("Unknown (Age: 32)", Locale.ENGLISH_US, (None, 32)),
+        # Specific venture case (not the same spacing)
+        ("Aug 6 (Age : 26)", Locale.ENGLISH_US, ("Aug 6", 26)),
+        ("Aug 6 (Age : 26)", Locale.ENGLISH_EU, ("Aug 6", 26)),
+        # Other languages than english
+        ("6. Aug. (Alter: 26)", Locale.GERMAN, ("6. Aug.", 26)),
+        ("6 ago (Edad: 26)", Locale.SPANISH_EU, ("6 ago", 26)),
+        ("6 ago (Edad: 26)", Locale.SPANISH_LATIN, ("6 ago", 26)),
+        ("6 août (Âge : 26 ans)", Locale.FRENCH, ("6 août", 26)),
+        ("6 ago (Età: 26)", Locale.ITALIANO, ("6 ago", 26)),
+        ("8月6日 （年齢: 26）", Locale.JAPANESE, ("8月6日", 26)),
+        ("8월 6일 (나이: 26세)", Locale.KOREAN, ("8월 6일", 26)),
+        ("6 sie (Wiek: 26 lat)", Locale.POLISH, ("6 sie", 26)),
+        ("6 de ago. (Idade: 26)", Locale.PORTUGUESE_BRAZIL, ("6 de ago.", 26)),
+        ("6 авг. (Возраст: 26)", Locale.RUSSIAN, ("6 авг.", 26)),
+        ("8月6日 （年齡：26）", Locale.CHINESE_TAIWAN, ("8月6日", 26)),
         # Invalid case
-        ("Unknown", (None, None)),
+        ("Unknown", Locale.ENGLISH_US, (None, None)),
     ],
 )
-def test_get_birthday_and_age(input_str: str, result: tuple[str | None, int | None]):
+def test_get_birthday_and_age(
+    input_str: str, locale: Locale, result: tuple[str | None, int | None]
+):
     """Get birthday and age from text for a given hero"""
-    assert helpers.get_birthday_and_age(input_str) == result
+    assert helpers.get_birthday_and_age(input_str, locale) == result

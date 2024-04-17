@@ -4,7 +4,7 @@ import re
 import unicodedata
 from functools import cache
 
-from app.common.enums import CompetitiveDivision, CompetitiveRole, HeroKey, Role
+from app.common.enums import CompetitiveDivision, CompetitiveRole, HeroKey, Locale, Role
 from app.common.helpers import read_csv_data_file
 from app.config import settings
 
@@ -308,13 +308,35 @@ def get_plural_stat_key(stat_key: str) -> str:
     return stat_keys_mapping.get(stat_key, stat_key)
 
 
-def get_birthday_and_age(birthday_age_text: str) -> tuple[str | None, int | None]:
+def get_birthday_and_age(text: str, locale: Locale) -> tuple[str | None, int | None]:
     """Get birthday and age from text for a given hero"""
-    result = re.match(r"^(.*) \(Age: (\d+)\)$", birthday_age_text)
+
+    # Regex matching the birthday for every known locale
+    birthday_regex = r"^(.*) [\(（].*[:：] ?(\d+).*[\)）]$"
+
+    result = re.match(birthday_regex, text)
     if not result:
         return None, None
 
-    birthday = result[1] if result[1] != "Unknown" else None
+    # Text corresponding to "Unknown" in the locale of the page
+    unknown_texts = {
+        Locale.GERMAN: "Unbekannt",
+        Locale.ENGLISH_EU: "Unknown",
+        Locale.ENGLISH_US: "Unknown",
+        Locale.SPANISH_EU: "Desconocido",
+        Locale.SPANISH_LATIN: "Desconocido",
+        Locale.FRENCH: "Inconnu",
+        Locale.ITALIANO: "Sconosciuto",
+        Locale.JAPANESE: "不明",
+        Locale.KOREAN: "알 수 없음",
+        Locale.POLISH: "Nieznane",
+        Locale.PORTUGUESE_BRAZIL: "Desconhecido",
+        Locale.RUSSIAN: "Неизвестно",
+        Locale.CHINESE_TAIWAN: "未知",
+    }
+    unknown_text = unknown_texts.get(locale, "Unknown")
+
+    birthday = result[1] if result[1] != unknown_text else None
     age = int(result[2]) if result[2] else None
 
     return birthday, age
