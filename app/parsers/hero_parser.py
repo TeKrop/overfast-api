@@ -5,7 +5,7 @@ from typing import ClassVar
 from bs4 import Tag
 from fastapi import status
 
-from app.common.enums import MediaType
+from app.common.enums import Locale, MediaType
 from app.common.exceptions import ParserBlizzardError
 from app.config import settings
 
@@ -22,6 +22,10 @@ class HeroParser(APIParser):
         200,  # Classic response
         404,  # Hero Not Found response, we want to handle it here
     ]
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.locale = kwargs.get("locale") or Locale.ENGLISH_US
 
     def get_blizzard_url(self, **kwargs) -> str:
         return f"{super().get_blizzard_url(**kwargs)}/{kwargs.get('hero_key')}"
@@ -49,11 +53,12 @@ class HeroParser(APIParser):
             "story": self.__get_story(lore_section),
         }
 
-    @staticmethod
-    def __get_summary(overview_section: Tag) -> dict:
+    def __get_summary(self, overview_section: Tag) -> dict:
         header_section = overview_section.find("blz-header")
         extra_list_items = overview_section.find("blz-list").find_all("blz-list-item")
-        birthday, age = get_birthday_and_age(extra_list_items[2].get_text())
+        birthday, age = get_birthday_and_age(
+            text=extra_list_items[2].get_text(), locale=self.locale
+        )
 
         return {
             "name": header_section.find("h2").get_text(),
