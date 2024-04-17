@@ -314,35 +314,27 @@ def get_birthday_and_age(text: str, locale: Locale) -> tuple[str | None, int | N
     # Regex matching the birthday for every known locale
     birthday_regex = r"^(.*) [\(（].*[:：] ?(\d+).*[\)）]$"
 
-    # Text corresponding to "Unknown" in the locale of the page
-    unknown_text = None
-    match locale:
-        case Locale.GERMAN:
-            unknown_text = "Unbekannt"
-        case Locale.ENGLISH_EU | Locale.ENGLISH_US:
-            unknown_text = "Unknown"
-        case Locale.SPANISH_EU | Locale.SPANISH_LATIN:
-            unknown_text = "Desconocido"
-        case Locale.FRENCH:
-            unknown_text = "Inconnu"
-        case Locale.ITALIANO:
-            unknown_text = "Sconosciuto"
-        case Locale.JAPANESE:
-            unknown_text = "不明"
-        case Locale.KOREAN:
-            unknown_text = "알 수 없음"
-        case Locale.POLISH:
-            unknown_text = "Nieznane"
-        case Locale.PORTUGUESE_BRAZIL:
-            unknown_text = "Desconhecido"
-        case Locale.RUSSIAN:
-            unknown_text = "Неизвестно"
-        case Locale.CHINESE_TAIWAN:
-            unknown_text = "未知"
-
     result = re.match(birthday_regex, text)
     if not result:
         return None, None
+
+    # Text corresponding to "Unknown" in the locale of the page
+    unknown_texts = {
+        Locale.GERMAN: "Unbekannt",
+        Locale.ENGLISH_EU: "Unknown",
+        Locale.ENGLISH_US: "Unknown",
+        Locale.SPANISH_EU: "Desconocido",
+        Locale.SPANISH_LATIN: "Desconocido",
+        Locale.FRENCH: "Inconnu",
+        Locale.ITALIANO: "Sconosciuto",
+        Locale.JAPANESE: "不明",
+        Locale.KOREAN: "알 수 없음",
+        Locale.POLISH: "Nieznane",
+        Locale.PORTUGUESE_BRAZIL: "Desconhecido",
+        Locale.RUSSIAN: "Неизвестно",
+        Locale.CHINESE_TAIWAN: "未知",
+    }
+    unknown_text = unknown_texts.get(locale, "Unknown")
 
     birthday = result[1] if result[1] != unknown_text else None
     age = int(result[2]) if result[2] else None
