@@ -30,11 +30,7 @@ def _setup_search_players_test(search_players_blizzard_json_data: list[dict]):
 def test_search_players_missing_name():
     response = client.get("/players")
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    json_response = response.json()
-    del json_response["detail"][0]["url"]  # url depends on the version of pydantic
-
-    assert json_response == {
+    assert response.json() == {
         "detail": [
             {
                 "type": "missing",

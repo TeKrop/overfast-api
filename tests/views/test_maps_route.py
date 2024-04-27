@@ -45,7 +45,6 @@ def test_get_maps_invalid_gamemode():
                 "ctx": {
                     "expected": "'assault', 'capture-the-flag', 'control', 'deathmatch', 'elimination', 'escort', 'flashpoint', 'hybrid', 'push' or 'team-deathmatch'",
                 },
-                "url": "https://errors.pydantic.dev/2.7/v/enum",
             },
         ],
     }

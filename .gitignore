@@ -127,8 +127,5 @@ dmypy.json
 # Redis dump
 dump.rdb
 
-# Poetry
-poetry.lock
-
 # Loguru gzipped logs
 *.log.gz
