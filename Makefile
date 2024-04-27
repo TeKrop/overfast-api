@@ -17,54 +17,37 @@ DOCKER_RUN := docker compose run \
 	--rm \
 	app
 
-help:
+help: ## Show this help message
 	@echo "Usage: make <command>"
 	@echo ""
 	@echo "${CYAN}Commands:${RESET}"
-	@printf "  ${GREEN}%-10s${RESET} : ${YELLOW}%s${RESET}\n" "build" "Build project images (dev mode)."
-	@printf "  ${GREEN}%-10s${RESET} : ${YELLOW}%s${RESET}\n" "start" "Run OverFastAPI application (dev mode)."
-	@printf "  ${GREEN}%-10s${RESET} : ${YELLOW}%s${RESET}\n" "lint" "Run linter."
-	@printf "  ${GREEN}%-10s${RESET} : ${YELLOW}%s${RESET}\n" "format" "Run formatter."
-	@printf "  ${GREEN}%-10s${RESET} : ${YELLOW}%s${RESET}\n" "shell" "Access an interactive shell inside the app container"
-	@printf "  ${GREEN}%-10s${RESET} : ${YELLOW}%s${RESET}\n" "exec" "Execute a given COMMAND inside the app container"
-	@printf "  ${GREEN}%-10s${RESET} : ${YELLOW}%s${RESET}\n" "test" "Run tests. PYTEST_ARGS can be specified."
-	@printf "  ${GREEN}%-10s${RESET} : ${YELLOW}%s${RESET}\n" "up" "Build & run OverFastAPI application (production mode)."
-	@printf "  ${GREEN}%-10s${RESET} : ${YELLOW}%s${RESET}\n" "down" "Stop the app and remove containers."
-	@printf "  ${GREEN}%-10s${RESET} : ${YELLOW}%s${RESET}\n" "clean" "Clean up Docker environment"
-	@printf "  ${GREEN}%-10s${RESET} : ${YELLOW}%s${RESET}\n" "help" "Show this help message"
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?##/ {printf "  ${GREEN}%-10s${RESET} : ${YELLOW}%s${RESET}\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-# Build project images
-build:
+build: ## Build project images
 	@echo "Building OverFastAPI (dev mode)..."
 	BUILD_TARGET="dev" docker compose build
 
-# Run OverFastAPI application (dev mode)
-start:
+start: ## Run OverFastAPI application (dev mode)
 	@echo "Launching OverFastAPI (dev mode)..."
 	$(DOCKER_RUN) uvicorn app.main:app --reload --host 0.0.0.0
 
-# Run linter
-lint:
+lint: ## Run linter
 	@echo "Running linter..."
 	$(DOCKER_RUN) ruff check --fix --exit-non-zero-on-fix
 
-# Run formatter
-format:
+format: ## Run formatter
 	@echo "Running formatter..."
 	$(DOCKER_RUN) ruff format
 
-# Open a shell on the app container
-shell:
+shell: ## Access an interactive shell inside the app container
 	@echo "Running shell on app container..."
 	$(DOCKER_RUN) /bin/sh
 
-# Execute a command on the app container
-exec:
-	@echo "Running shell on app container..."
+exec: ## Execute a given COMMAND inside the app container
+	@echo "Running command on app container..."
 	$(DOCKER_RUN) $(COMMAND)
 
-# Run tests (no coverage calculation if a target is specified)
-test: build
+test:  ## Run tests, PYTEST_ARGS can be specified
 ifdef PYTEST_ARGS
 	@echo "Running tests on $(PYTEST_ARGS)..."
 	$(DOCKER_RUN) python -m pytest $(PYTEST_ARGS)
@@ -73,8 +56,7 @@ else
 	$(DOCKER_RUN) python -m pytest --cov app --cov-report html -n auto
 endif
 
-# Run OverFastAPI application (production mode)
-up:
+up: ## Build & run OverFastAPI application (production mode)
 	@echo "Building OverFastAPI (production mode)..."
 	docker compose build
 	@echo "Stopping OverFastAPI and cleaning containers..."
@@ -82,15 +64,16 @@ up:
 	@echo "Launching OverFastAPI (production mode)..."
 	docker compose up -d
 
-# Remove containers
-down:
+down: ## Stop the app and remove containers
 	@echo "Stopping OverFastAPI and cleaning containers..."
 	docker compose down -v --remove-orphans
 
-# Clean Docker environment
-clean: down
+clean: down ## Clean up Docker environment
 	@echo "Cleaning Docker environment..."
 	docker image prune -af
 	docker network prune -f
 
-.PHONY: help build start lint format shell exec test up down clean
+lock: ## Update poetry lock file
+	@poetry lock --no-update
+
+.PHONY: help build start lint format shell exec test up down clean lock

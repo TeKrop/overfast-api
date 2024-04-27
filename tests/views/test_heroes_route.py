@@ -65,7 +65,6 @@ def test_get_heroes_invalid_role():
                 "msg": "Input should be 'damage', 'support' or 'tank'",
                 "input": "invalid",
                 "ctx": {"expected": "'damage', 'support' or 'tank'"},
-                "url": "https://errors.pydantic.dev/2.7/v/enum",
             },
         ],
     }

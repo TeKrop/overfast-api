@@ -18,6 +18,7 @@ RUN apk add build-base && \
 
 # Copy only requirements (caching in Docker layer)
 COPY pyproject.toml /code/
+COPY poetry.lock /code/
 
 # Install dependencies
 RUN poetry config virtualenvs.create false && \
