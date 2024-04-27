@@ -44,7 +44,7 @@ shell: ## Access an interactive shell inside the app container
 	$(DOCKER_RUN) /bin/sh
 
 exec: ## Execute a given COMMAND inside the app container
-	@echo "Running shell on app container..."
+	@echo "Running command on app container..."
 	$(DOCKER_RUN) $(COMMAND)
 
 test:  ## Run tests, PYTEST_ARGS can be specified
