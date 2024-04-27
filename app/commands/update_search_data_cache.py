@@ -37,7 +37,7 @@ def get_search_page() -> httpx.Response:
 
 def extract_search_data(html_content: str, data_type: SearchDataType) -> dict:
     variable_name = variable_name_mapping[data_type]
-    data_regexp = r"const %s = (\{.*\})\n" % variable_name
+    data_regexp = rf"const {variable_name} = (\{{.*\}})\n"
 
     result = re.search(data_regexp, html_content)
 
