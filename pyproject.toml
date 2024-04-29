@@ -30,7 +30,7 @@ pytest-asyncio = "^0.23.6"
 pytest-clarity = "^1.0.1"
 pytest-cov = "^5.0.0"
 pytest-randomly = "^3.15.0"
-pytest-xdist = "^3.5.0"
+pytest-xdist = "^3.6.1"
 ruff = "^0.4.2"
 pre-commit = "^3.7.0"
 
