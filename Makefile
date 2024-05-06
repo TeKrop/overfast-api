@@ -29,7 +29,7 @@ build: ## Build project images
 
 start: ## Run OverFastAPI application (dev mode)
 	@echo "Launching OverFastAPI (dev mode)..."
-	$(DOCKER_RUN) uvicorn app.main:app --reload --host 0.0.0.0
+	$(DOCKER_RUN) fastapi dev app/main.py --host 0.0.0.0
 
 lint: ## Run linter
 	@echo "Running linter..."
