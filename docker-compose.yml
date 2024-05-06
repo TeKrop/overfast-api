@@ -4,7 +4,7 @@ services:
     build:
       context: .
       target: ${BUILD_TARGET:-main}
-    command: uvicorn app.main:app --host "0.0.0.0" --port 8080 --proxy-headers
+    command: fastapi run app/main.py --port 8080 --proxy-headers
     env_file: ${APP_VOLUME_PATH:-.}/.env
     volumes:
       - ${APP_VOLUME_PATH:-/tmp}/app-logs:/code/logs
