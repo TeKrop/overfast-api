@@ -59,6 +59,6 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -O /dev/null http://localhost || exit 1"]
+      test: ["CMD-SHELL", "wget --spider --quiet http://localhost || exit 1"]
       interval: 5s
       timeout: 2s

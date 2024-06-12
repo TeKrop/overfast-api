@@ -1,20 +1,25 @@
-FROM python:3.12-alpine AS main
+# Build arguments
+ARG PYTHON_VERSION=3.12
+ARG POETRY_VERSION=1.8.2
+
+FROM python:${PYTHON_VERSION}-alpine AS main
 
 WORKDIR /code
 
 # Environment variables
+ARG POETRY_VERSION
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
   PYTHONHASHSEED=random \
   PIP_NO_CACHE_DIR=off \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_VERSION=1.8.2
+  POETRY_VERSION=${POETRY_VERSION}
 
 # Install required system packages and install poetry
 RUN apk add build-base && \
   apk add libffi-dev && \
-  pip install poetry==1.8.2
+  pip install poetry==$POETRY_VERSION
 
 # Copy only requirements (caching in Docker layer)
 COPY pyproject.toml /code/
