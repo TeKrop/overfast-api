@@ -45,7 +45,7 @@ class APIParser(AbstractParser):
         on the page which will be used for searching and hashing (for cache). We
         don't want to calculate an hash and do the data parsing on all the HTML.
         """
-        return {"name": "div", "class_": "main-content", "recursive": False}
+        return {"name": "main", "class_": "main-content", "recursive": False}
 
     async def retrieve_and_parse_data(self) -> None:
         """Method used to retrieve data from Blizzard (HTML data), parsing it
