@@ -13,15 +13,11 @@ class RolesParser(APIParser):
     timeout = settings.heroes_path_cache_timeout
 
     def parse_data(self) -> list[dict]:
-        roles_container = (
-            self.root_tag.find("main", recursive=False)
-            .find(
-                "div",
-                class_="homepage-features-heroes",
-                recursive=False,
-            )
-            .find("blz-feature-carousel-section", recursive=False)
-        )
+        roles_container = self.root_tag.find(
+            "div",
+            class_="homepage-features-heroes",
+            recursive=False,
+        ).find("blz-feature-carousel-section", recursive=False)
 
         roles_icons = [
             role_icon_div.find("blz-image")["src"]
