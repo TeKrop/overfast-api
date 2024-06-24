@@ -1,6 +1,6 @@
 # Build arguments
-ARG NGINX_VERSION=1.20.2
-ARG NGX_HTTP_REDIS_VERSION=0.3.8
+ARG NGINX_VERSION=1.27.0
+ARG NGX_HTTP_REDIS_VERSION=0.3.9
 
 FROM nginx:${NGINX_VERSION}-alpine
 
@@ -17,8 +17,8 @@ COPY overfast-api.conf /etc/nginx/conf.d/default.conf
 # Download nginx and ngx_http_redis sources
 RUN wget https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz && \
   tar -xzvf nginx-$NGINX_VERSION.tar.gz && \
-  wget http://people.freebsd.org/~osa/ngx_http_redis-$NGX_HTTP_REDIS_VERSION.tar.gz && \
-  tar -xzvf ngx_http_redis-$NGX_HTTP_REDIS_VERSION.tar.gz
+  wget https://github.com/TeKrop/ngx_http_redis/archive/refs/tags/v$NGX_HTTP_REDIS_VERSION.tar.gz && \
+  tar -xzvf v$NGX_HTTP_REDIS_VERSION.tar.gz
 
 # Download build dependencies
 RUN apk add build-base linux-headers pcre-dev openssl-dev zlib-dev
