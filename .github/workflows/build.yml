@@ -24,7 +24,7 @@ jobs:
         poetry-version: ${{ matrix.poetry-version }}
 
     - name: Run Ruff code analysis
-      run: ruff .
+      run: ruff check .
 
     - name: Run tests suite
       run: |
