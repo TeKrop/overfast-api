@@ -32,6 +32,10 @@ routes_responses = {
         "description": "Blizzard Server Error",
     },
 }
+if settings.too_many_requests_response:
+    routes_responses[status.HTTP_429_TOO_MANY_REQUESTS] = {
+        "description": "Rate Limit Error",
+    }
 
 # List of players used for testing
 players_ids = [

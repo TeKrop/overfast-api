@@ -45,6 +45,10 @@ class Settings(BaseSettings):
     # Optional, status page URL if you have any to provide
     status_page_url: str | None = None
 
+    # Enable this option if you're using a reverse proxy to handle rate limits
+    # in order to indicate HTTP 429 as possible response from the API in doc
+    too_many_requests_response: bool = True
+
     ############
     # REDIS CONFIGURATION
     ############
