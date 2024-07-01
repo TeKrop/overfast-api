@@ -240,29 +240,57 @@ class HeroesComparisons(BaseModel):
         ...,
         description="Number of games won for each hero (integer)",
     )
-    weapon_accuracy: HeroesStats | None = Field(
-        ...,
-        description="Percentage of weapon accuracy for each hero (integer between 0 and 100)",
-    )
     win_percentage: HeroesStats | None = Field(
         ...,
         description="Winrate percentage for each hero (integer between 0 and 100)",
+    )
+    weapon_accuracy_best_in_game: HeroesStats | None = Field(
+        ...,
+        description="Best weapon accuracy in game for each hero (integer percent between 0 and 100)",
     )
     eliminations_per_life: HeroesStats | None = Field(
         ...,
         description="Eliminations per life for each hero (float)",
     )
-    critical_hit_accuracy: HeroesStats | None = Field(
+    kill_streak_best: HeroesStats | None = Field(
         ...,
-        description="Critical hit accuracy percentage for each hero (integer between 0 and 100)",
+        description="Best kill streak in game for each hero (integer)",
     )
     multikill_best: HeroesStats | None = Field(
         ...,
         description="Best multikills statistic for each hero (integer)",
     )
-    objective_kills: HeroesStats | None = Field(
+    eliminations_avg_per_10_min: HeroesStats | None = Field(
         ...,
-        description="Total number of objective kills for each hero (integer)",
+        description="Average eliminations per 10 minutes for each hero (float)",
+    )
+    deaths_avg_per_10_min: HeroesStats | None = Field(
+        ...,
+        description="Average deaths per 10 minutes for each hero (float)",
+    )
+    final_blows_avg_per_10_min: HeroesStats | None = Field(
+        ...,
+        description="Average final blows per 10 minutes for each hero (float)",
+    )
+    solo_kills_avg_per_10_min: HeroesStats | None = Field(
+        ...,
+        description="Average solo kills per 10 minutes for each hero (float)",
+    )
+    objective_kills_avg_per_10_min: HeroesStats | None = Field(
+        ...,
+        description="Average objective kills per 10 minutes for each hero (float)",
+    )
+    objective_time_avg_per_10_min: HeroesStats | None = Field(
+        ...,
+        description="Average objective time per 10 minutes for each hero in seconds (integer)",
+    )
+    hero_damage_done_avg_per_10_min: HeroesStats | None = Field(
+        ...,
+        description="Average damage done per 10 minutes for each hero (integer)",
+    )
+    healing_done_avg_per_10_min: HeroesStats | None = Field(
+        ...,
+        description="Average healing done per 10 minutes for each hero (integer)",
     )
 
 
