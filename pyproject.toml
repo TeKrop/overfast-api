@@ -29,7 +29,7 @@ pytest-asyncio = "^0.23.7"
 pytest-cov = "^5.0.0"
 pytest-randomly = "^3.15.0"
 pytest-xdist = "^3.6.1"
-ruff = "^0.5.0"
+ruff = "^0.5.1"
 pre-commit = "^3.7.1"
 
 [build-system]
@@ -98,6 +98,7 @@ ignore = [
     # General rules to ignore
     "B008",    # do not perform function calls in argument defaults
     "S101",    # using "assert" is not a security issue
+    "S113",    # using default timeout of httpx without specifying it
     "S311",    # there is no cryptographic usage of random here
     "RET505",  # allow using else after return statement
     "PLE1205", # error checking doesn't support {} format
