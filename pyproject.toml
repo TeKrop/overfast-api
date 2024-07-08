@@ -98,6 +98,7 @@ ignore = [
     # General rules to ignore
     "B008",    # do not perform function calls in argument defaults
     "S101",    # using "assert" is not a security issue
+    "S113",    # using default timeout of httpx without specifying it
     "S311",    # there is no cryptographic usage of random here
     "RET505",  # allow using else after return statement
     "PLE1205", # error checking doesn't support {} format
