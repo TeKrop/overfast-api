@@ -13,6 +13,7 @@ hanzo,Hanzo,damage,250,0,0
 illari,Illari,support,250,0,0
 junker-queen,Junker Queen,tank,525,0,0
 junkrat,Junkrat,damage,250,0,0
+juno,Juno,support,250,0,0
 kiriko,Kiriko,support,250,0,0
 lifeweaver,Lifeweaver,support,225,0,50
 lucio,Lúcio,support,250,0,0
@@ -21,11 +22,11 @@ mei,Mei,damage,300,0,0
 mercy,Mercy,support,250,0,0
 moira,Moira,support,250,0,0
 orisa,Orisa,tank,275,350,0
-pharah,Pharah,damage,250,0,0
-ramattra,Ramattra,tank,425,100,0
+pharah,Pharah,damage,225,0,0
+ramattra,Ramattra,tank,400,75,0
 reaper,Reaper,damage,300,0,0
 reinhardt,Reinhardt,tank,400,300,0
-roadhog,Roadhog,tank,800,0,0
+roadhog,Roadhog,tank,750,0,0
 sigma,Sigma,tank,350,0,275
 sojourn,Sojourn,damage,250,0,0
 soldier-76,Soldier: 76,damage,250,0,0
