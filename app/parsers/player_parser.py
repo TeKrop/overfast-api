@@ -365,7 +365,12 @@ class PlayerParser(APIParser):
         }
 
         for category in CareerHeroesComparisonsCategory:
-            if category.value not in heroes_comparisons:
+            # Sometimes, Blizzard exposes the categories without any value
+            # In that case, we must assume we have no data at all
+            if (
+                category.value not in heroes_comparisons
+                or not heroes_comparisons[category.value]["values"]
+            ):
                 heroes_comparisons[category.value] = None
 
         return heroes_comparisons

@@ -34,6 +34,8 @@ from app.parsers import helpers
         ("-86.96", -86.96),
         # Zero time fought with a character
         ("--", 0),
+        # Invalid value (not a number)
+        ("NaN", 0),
         # Default value for anything else
         ("string", "string"),
     ],
