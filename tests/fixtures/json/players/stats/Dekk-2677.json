@@ -19,15 +19,15 @@
     "ashe": {
         "pc": {
             "quickplay": {
-                "games_played": 54,
+                "games_played": 55,
                 "games_won": 23,
-                "games_lost": 31,
-                "time_played": 25843,
+                "games_lost": 32,
+                "time_played": 26163,
                 "total": {
-                    "eliminations": 692,
+                    "eliminations": 695,
                     "assists": 0,
-                    "deaths": 286,
-                    "damage": 424957,
+                    "deaths": 289,
+                    "damage": 428560,
                     "healing": 0
                 }
             }
@@ -53,15 +53,15 @@
     "bastion": {
         "pc": {
             "quickplay": {
-                "games_played": 149,
-                "games_won": 69,
-                "games_lost": 80,
-                "time_played": 78855,
+                "games_played": 179,
+                "games_won": 81,
+                "games_lost": 98,
+                "time_played": 95881,
                 "total": {
-                    "eliminations": 2534,
+                    "eliminations": 3037,
                     "assists": 0,
-                    "deaths": 1097,
-                    "damage": 1920031,
+                    "deaths": 1343,
+                    "damage": 2351790,
                     "healing": 0
                 }
             },
@@ -100,15 +100,15 @@
     "cassidy": {
         "pc": {
             "quickplay": {
-                "games_played": 294,
-                "games_won": 115,
-                "games_lost": 179,
-                "time_played": 145013,
+                "games_played": 313,
+                "games_won": 122,
+                "games_lost": 191,
+                "time_played": 154906,
                 "total": {
-                    "eliminations": 4243,
+                    "eliminations": 4480,
                     "assists": 0,
-                    "deaths": 2126,
-                    "damage": 2299645,
+                    "deaths": 2277,
+                    "damage": 2446699,
                     "healing": 0
                 }
             }
@@ -154,12 +154,12 @@
                 "games_played": 23,
                 "games_won": 9,
                 "games_lost": 14,
-                "time_played": 11519,
+                "time_played": 11595,
                 "total": {
                     "eliminations": 324,
                     "assists": 0,
-                    "deaths": 170,
-                    "damage": 190525,
+                    "deaths": 172,
+                    "damage": 190732,
                     "healing": 0
                 }
             }
@@ -168,15 +168,15 @@
     "genji": {
         "pc": {
             "quickplay": {
-                "games_played": 1031,
-                "games_won": 561,
-                "games_lost": 470,
-                "time_played": 484534,
+                "games_played": 1037,
+                "games_won": 564,
+                "games_lost": 473,
+                "time_played": 488796,
                 "total": {
-                    "eliminations": 15699,
+                    "eliminations": 15798,
                     "assists": 0,
-                    "deaths": 7315,
-                    "damage": 5872580,
+                    "deaths": 7382,
+                    "damage": 5923817,
                     "healing": 0
                 }
             }
@@ -185,15 +185,15 @@
     "hanzo": {
         "pc": {
             "quickplay": {
-                "games_played": 9046,
-                "games_won": 4592,
-                "games_lost": 4454,
-                "time_played": 4268668,
+                "games_played": 10072,
+                "games_won": 5153,
+                "games_lost": 4919,
+                "time_played": 4808460,
                 "total": {
-                    "eliminations": 143482,
+                    "eliminations": 159397,
                     "assists": 0,
-                    "deaths": 50108,
-                    "damage": 83377304,
+                    "deaths": 56266,
+                    "damage": 93470899,
                     "healing": 0
                 }
             },
@@ -215,15 +215,15 @@
     "junker-queen": {
         "pc": {
             "quickplay": {
-                "games_played": 89,
-                "games_won": 45,
-                "games_lost": 44,
-                "time_played": 41817,
+                "games_played": 91,
+                "games_won": 46,
+                "games_lost": 45,
+                "time_played": 42969,
                 "total": {
-                    "eliminations": 1554,
+                    "eliminations": 1584,
                     "assists": 0,
-                    "deaths": 497,
-                    "damage": 683157,
+                    "deaths": 510,
+                    "damage": 706084,
                     "healing": 0
                 }
             }
@@ -232,15 +232,15 @@
     "junkrat": {
         "pc": {
             "quickplay": {
-                "games_played": 361,
-                "games_won": 187,
+                "games_played": 362,
+                "games_won": 188,
                 "games_lost": 174,
-                "time_played": 184418,
+                "time_played": 184539,
                 "total": {
                     "eliminations": 6234,
                     "assists": 448,
-                    "deaths": 2326,
-                    "damage": 4443753,
+                    "deaths": 2329,
+                    "damage": 4445023,
                     "healing": 0
                 }
             },
@@ -347,16 +347,16 @@
     "moira": {
         "pc": {
             "quickplay": {
-                "games_played": 562,
-                "games_won": 323,
+                "games_played": 563,
+                "games_won": 324,
                 "games_lost": 239,
-                "time_played": 264985,
+                "time_played": 265457,
                 "total": {
-                    "eliminations": 10183,
+                    "eliminations": 10203,
                     "assists": 0,
-                    "deaths": 2699,
-                    "damage": 2961358,
-                    "healing": 3300373
+                    "deaths": 2700,
+                    "damage": 2966779,
+                    "healing": 3306531
                 }
             }
         }
@@ -364,15 +364,15 @@
     "orisa": {
         "pc": {
             "quickplay": {
-                "games_played": 308,
+                "games_played": 309,
                 "games_won": 154,
-                "games_lost": 154,
-                "time_played": 139223,
+                "games_lost": 155,
+                "time_played": 139901,
                 "total": {
-                    "eliminations": 4345,
-                    "assists": 2025,
-                    "deaths": 1512,
-                    "damage": 2305533,
+                    "eliminations": 4359,
+                    "assists": 2030,
+                    "deaths": 1521,
+                    "damage": 2317998,
                     "healing": 0
                 }
             }
@@ -415,15 +415,15 @@
     "reaper": {
         "pc": {
             "quickplay": {
-                "games_played": 275,
-                "games_won": 141,
+                "games_played": 276,
+                "games_won": 142,
                 "games_lost": 134,
-                "time_played": 140622,
+                "time_played": 141515,
                 "total": {
-                    "eliminations": 5533,
+                    "eliminations": 5553,
                     "assists": 0,
-                    "deaths": 2024,
-                    "damage": 2481782,
+                    "deaths": 2037,
+                    "damage": 2505844,
                     "healing": 0
                 }
             }
@@ -452,13 +452,13 @@
                 "games_played": 3402,
                 "games_won": 1934,
                 "games_lost": 1468,
-                "time_played": 1642310,
+                "time_played": 1642459,
                 "total": {
-                    "eliminations": 63078,
-                    "assists": 13805,
-                    "deaths": 18139,
-                    "damage": 29218440,
-                    "healing": 0
+                    "eliminations": 63084,
+                    "assists": 13808,
+                    "deaths": 18142,
+                    "damage": 29220529,
+                    "healing": 857
                 }
             }
         }
@@ -483,15 +483,15 @@
     "sojourn": {
         "pc": {
             "quickplay": {
-                "games_played": 18,
-                "games_won": 3,
-                "games_lost": 15,
-                "time_played": 9843,
+                "games_played": 21,
+                "games_won": 4,
+                "games_lost": 17,
+                "time_played": 11273,
                 "total": {
-                    "eliminations": 254,
+                    "eliminations": 287,
                     "assists": 0,
-                    "deaths": 153,
-                    "damage": 158836,
+                    "deaths": 174,
+                    "damage": 179306,
                     "healing": 0
                 }
             }
@@ -500,16 +500,16 @@
     "soldier-76": {
         "pc": {
             "quickplay": {
-                "games_played": 254,
-                "games_won": 116,
-                "games_lost": 138,
-                "time_played": 124989,
+                "games_played": 263,
+                "games_won": 120,
+                "games_lost": 143,
+                "time_played": 130506,
                 "total": {
-                    "eliminations": 4559,
+                    "eliminations": 4715,
                     "assists": 0,
-                    "deaths": 1758,
-                    "damage": 2681623,
-                    "healing": 252967
+                    "deaths": 1834,
+                    "damage": 2778150,
+                    "healing": 265038
                 }
             }
         }
@@ -517,15 +517,15 @@
     "sombra": {
         "pc": {
             "quickplay": {
-                "games_played": 87,
-                "games_won": 28,
-                "games_lost": 59,
-                "time_played": 45586,
+                "games_played": 99,
+                "games_won": 30,
+                "games_lost": 69,
+                "time_played": 52354,
                 "total": {
-                    "eliminations": 1224,
-                    "assists": 720,
-                    "deaths": 415,
-                    "damage": 420931,
+                    "eliminations": 1367,
+                    "assists": 781,
+                    "deaths": 523,
+                    "damage": 480719,
                     "healing": 0
                 }
             }
@@ -534,15 +534,15 @@
     "symmetra": {
         "pc": {
             "quickplay": {
-                "games_played": 134,
-                "games_won": 86,
-                "games_lost": 48,
-                "time_played": 59307,
+                "games_played": 139,
+                "games_won": 87,
+                "games_lost": 52,
+                "time_played": 62198,
                 "total": {
-                    "eliminations": 2019,
+                    "eliminations": 2085,
                     "assists": 0,
-                    "deaths": 697,
-                    "damage": 706750,
+                    "deaths": 748,
+                    "damage": 751544,
                     "healing": 0
                 }
             }
@@ -554,12 +554,12 @@
                 "games_played": 29,
                 "games_won": 15,
                 "games_lost": 14,
-                "time_played": 13654,
+                "time_played": 13710,
                 "total": {
-                    "eliminations": 495,
+                    "eliminations": 496,
                     "assists": 0,
-                    "deaths": 163,
-                    "damage": 237394,
+                    "deaths": 164,
+                    "damage": 238267,
                     "healing": 0
                 }
             },
@@ -584,7 +584,7 @@
                 "games_played": 283,
                 "games_won": 147,
                 "games_lost": 136,
-                "time_played": 139287,
+                "time_played": 139289,
                 "total": {
                     "eliminations": 4907,
                     "assists": 0,
@@ -598,15 +598,15 @@
     "widowmaker": {
         "pc": {
             "quickplay": {
-                "games_played": 1174,
-                "games_won": 582,
-                "games_lost": 592,
-                "time_played": 543439,
+                "games_played": 1178,
+                "games_won": 584,
+                "games_lost": 594,
+                "time_played": 545446,
                 "total": {
-                    "eliminations": 17364,
+                    "eliminations": 17389,
                     "assists": 0,
-                    "deaths": 5460,
-                    "damage": 6477935,
+                    "deaths": 5479,
+                    "damage": 6493617,
                     "healing": 0
                 }
             }
@@ -666,16 +666,16 @@
     "zenyatta": {
         "pc": {
             "quickplay": {
-                "games_played": 2546,
-                "games_won": 1385,
+                "games_played": 2548,
+                "games_won": 1387,
                 "games_lost": 1161,
-                "time_played": 1158617,
+                "time_played": 1159566,
                 "total": {
-                    "eliminations": 34164,
-                    "assists": 31036,
-                    "deaths": 13465,
-                    "damage": 14572118,
-                    "healing": 9030567
+                    "eliminations": 34200,
+                    "assists": 31058,
+                    "deaths": 13473,
+                    "damage": 14582778,
+                    "healing": 9037766
                 }
             }
         }

@@ -37,12 +37,19 @@ class CareerHeroesComparisonsCategory(StrEnum):
 
     TIME_PLAYED = "time_played"
     GAMES_WON = "games_won"
-    WEAPON_ACCURACY = "weapon_accuracy"
     WIN_PERCENTAGE = "win_percentage"
+    WEAPON_ACCURACY_BEST_IN_GAME = "weapon_accuracy_best_in_game"
     ELIMINATIONS_PER_LIFE = "eliminations_per_life"
-    CRITICAL_HIT_ACCURACY = "critical_hit_accuracy"
+    KILL_STREAK_BEST = "kill_streak_best"
     MULTIKILL_BEST = "multikill_best"
-    OBJECTIVE_KILLS = "objective_kills"
+    ELIMINATIONS_AVG_PER_10_MIN = "eliminations_avg_per_10_min"
+    DEATHS_AVG_PER_10_MIN = "deaths_avg_per_10_min"
+    FINAL_BLOWS_AVG_PER_10_MIN = "final_blows_avg_per_10_min"
+    SOLO_KILLS_AVG_PER_10_MIN = "solo_kills_avg_per_10_min"
+    OBJECTIVE_KILLS_AVG_PER_10_MIN = "objective_kills_avg_per_10_min"
+    OBJECTIVE_TIME_AVG_PER_10_MIN = "objective_time_avg_per_10_min"
+    HERO_DAMAGE_DONE_AVG_PER_10_MIN = "hero_damage_done_avg_per_10_min"
+    HEALING_DONE_AVG_PER_10_MIN = "healing_done_avg_per_10_min"
 
 
 class RouteTag(StrEnum):

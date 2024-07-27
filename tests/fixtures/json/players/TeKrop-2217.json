@@ -321,136 +321,285 @@
                             }
                         ]
                     },
-                    "weapon_accuracy": {
-                        "label": "Weapon Accuracy",
+                    "win_percentage": {
+                        "label": "Win Percentage",
                         "values": [
                             {
-                                "hero": "ashe",
-                                "value": 48
-                            },
-                            {
-                                "hero": "sigma",
-                                "value": 48
-                            },
-                            {
-                                "hero": "pharah",
-                                "value": 44
-                            },
-                            {
-                                "hero": "cassidy",
-                                "value": 42
-                            },
-                            {
-                                "hero": "zarya",
-                                "value": 40
-                            },
-                            {
-                                "hero": "sombra",
-                                "value": 37
-                            },
-                            {
-                                "hero": "soldier-76",
-                                "value": 36
-                            },
-                            {
-                                "hero": "winston",
-                                "value": 35
-                            },
-                            {
-                                "hero": "widowmaker",
-                                "value": 35
-                            },
-                            {
-                                "hero": "baptiste",
-                                "value": 33
-                            },
-                            {
-                                "hero": "kiriko",
-                                "value": 33
-                            },
-                            {
-                                "hero": "tracer",
-                                "value": 33
-                            },
-                            {
-                                "hero": "hanzo",
-                                "value": 32
+                                "hero": "bastion",
+                                "value": 87
                             },
                             {
                                 "hero": "torbjorn",
-                                "value": 32
-                            },
-                            {
-                                "hero": "wrecking-ball",
-                                "value": 32
-                            },
-                            {
-                                "hero": "orisa",
-                                "value": 30
-                            },
-                            {
-                                "hero": "sojourn",
-                                "value": 28
-                            },
-                            {
-                                "hero": "lucio",
-                                "value": 28
-                            },
-                            {
-                                "hero": "mei",
-                                "value": 27
-                            },
-                            {
-                                "hero": "symmetra",
-                                "value": 27
-                            },
-                            {
-                                "hero": "junker-queen",
-                                "value": 27
-                            },
-                            {
-                                "hero": "genji",
-                                "value": 27
-                            },
-                            {
-                                "hero": "doomfist",
-                                "value": 26
+                                "value": 71
                             },
                             {
                                 "hero": "zenyatta",
-                                "value": 25
+                                "value": 59
                             },
                             {
-                                "hero": "reaper",
-                                "value": 25
+                                "hero": "sigma",
+                                "value": 58
                             },
                             {
-                                "hero": "ramattra",
-                                "value": 24
+                                "hero": "cassidy",
+                                "value": 54
                             },
                             {
-                                "hero": "roadhog",
-                                "value": 24
+                                "hero": "hanzo",
+                                "value": 54
                             },
                             {
-                                "hero": "junkrat",
-                                "value": 24
+                                "hero": "brigitte",
+                                "value": 54
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 54
+                            },
+                            {
+                                "hero": "zarya",
+                                "value": 54
+                            },
+                            {
+                                "hero": "soldier-76",
+                                "value": 53
                             },
                             {
                                 "hero": "dva",
-                                "value": 23
+                                "value": 52
                             },
                             {
-                                "hero": "mercy",
-                                "value": 20
+                                "hero": "orisa",
+                                "value": 51
                             },
                             {
-                                "hero": "bastion",
-                                "value": 16
+                                "hero": "doomfist",
+                                "value": 51
+                            },
+                            {
+                                "hero": "moira",
+                                "value": 50
+                            },
+                            {
+                                "hero": "lucio",
+                                "value": 50
+                            },
+                            {
+                                "hero": "kiriko",
+                                "value": 49
+                            },
+                            {
+                                "hero": "junkrat",
+                                "value": 48
+                            },
+                            {
+                                "hero": "roadhog",
+                                "value": 47
+                            },
+                            {
+                                "hero": "pharah",
+                                "value": 47
                             },
                             {
                                 "hero": "ana",
-                                "value": 16
+                                "value": 47
+                            },
+                            {
+                                "hero": "symmetra",
+                                "value": 46
+                            },
+                            {
+                                "hero": "baptiste",
+                                "value": 46
+                            },
+                            {
+                                "hero": "mei",
+                                "value": 46
+                            },
+                            {
+                                "hero": "winston",
+                                "value": 45
+                            },
+                            {
+                                "hero": "genji",
+                                "value": 43
+                            },
+                            {
+                                "hero": "junker-queen",
+                                "value": 42
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 41
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 41
+                            },
+                            {
+                                "hero": "widowmaker",
+                                "value": 38
+                            },
+                            {
+                                "hero": "ashe",
+                                "value": 36
+                            },
+                            {
+                                "hero": "mercy",
+                                "value": 34
+                            },
+                            {
+                                "hero": "sombra",
+                                "value": 31
+                            },
+                            {
+                                "hero": "wrecking-ball",
+                                "value": 27
+                            },
+                            {
+                                "hero": "ramattra",
+                                "value": 4
+                            },
+                            {
+                                "hero": "sojourn",
+                                "value": 1
+                            },
+                            {
+                                "hero": "echo",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "weapon_accuracy_best_in_game": {
+                        "label": "Weapon Accuracy - Best in Game",
+                        "values": [
+                            {
+                                "hero": "tracer",
+                                "value": 100
+                            },
+                            {
+                                "hero": "mercy",
+                                "value": 100
+                            },
+                            {
+                                "hero": "zenyatta",
+                                "value": 100
+                            },
+                            {
+                                "hero": "genji",
+                                "value": 100
+                            },
+                            {
+                                "hero": "zarya",
+                                "value": 100
+                            },
+                            {
+                                "hero": "lucio",
+                                "value": 100
+                            },
+                            {
+                                "hero": "wrecking-ball",
+                                "value": 100
+                            },
+                            {
+                                "hero": "kiriko",
+                                "value": 100
+                            },
+                            {
+                                "hero": "dva",
+                                "value": 93
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 88
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 84
+                            },
+                            {
+                                "hero": "hanzo",
+                                "value": 73
+                            },
+                            {
+                                "hero": "pharah",
+                                "value": 71
+                            },
+                            {
+                                "hero": "winston",
+                                "value": 71
+                            },
+                            {
+                                "hero": "soldier-76",
+                                "value": 71
+                            },
+                            {
+                                "hero": "mei",
+                                "value": 71
+                            },
+                            {
+                                "hero": "baptiste",
+                                "value": 71
+                            },
+                            {
+                                "hero": "roadhog",
+                                "value": 69
+                            },
+                            {
+                                "hero": "widowmaker",
+                                "value": 67
+                            },
+                            {
+                                "hero": "symmetra",
+                                "value": 67
+                            },
+                            {
+                                "hero": "doomfist",
+                                "value": 57
+                            },
+                            {
+                                "hero": "ashe",
+                                "value": 57
+                            },
+                            {
+                                "hero": "junker-queen",
+                                "value": 55
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 54
+                            },
+                            {
+                                "hero": "bastion",
+                                "value": 52
+                            },
+                            {
+                                "hero": "junkrat",
+                                "value": 50
+                            },
+                            {
+                                "hero": "sigma",
+                                "value": 49
+                            },
+                            {
+                                "hero": "sombra",
+                                "value": 49
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 47
+                            },
+                            {
+                                "hero": "torbjorn",
+                                "value": 42
+                            },
+                            {
+                                "hero": "sojourn",
+                                "value": 33
+                            },
+                            {
+                                "hero": "ramattra",
+                                "value": 30
                             },
                             {
                                 "hero": "echo",
@@ -470,7 +619,6 @@
                             }
                         ]
                     },
-                    "win_percentage": null,
                     "eliminations_per_life": {
                         "label": "Eliminations per Life",
                         "values": [
@@ -620,152 +768,152 @@
                             }
                         ]
                     },
-                    "critical_hit_accuracy": {
-                        "label": "Critical Hit Accuracy",
+                    "kill_streak_best": {
+                        "label": "Kill Streak - Best",
                         "values": [
                             {
-                                "hero": "kiriko",
-                                "value": 16
-                            },
-                            {
-                                "hero": "widowmaker",
-                                "value": 15
-                            },
-                            {
                                 "hero": "roadhog",
-                                "value": 14
+                                "value": 35
                             },
                             {
-                                "hero": "mei",
-                                "value": 12
+                                "hero": "zarya",
+                                "value": 33
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 31
+                            },
+                            {
+                                "hero": "baptiste",
+                                "value": 30
+                            },
+                            {
+                                "hero": "dva",
+                                "value": 29
+                            },
+                            {
+                                "hero": "winston",
+                                "value": 25
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 25
                             },
                             {
                                 "hero": "zenyatta",
-                                "value": 12
+                                "value": 24
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 24
+                            },
+                            {
+                                "hero": "moira",
+                                "value": 23
+                            },
+                            {
+                                "hero": "soldier-76",
+                                "value": 22
+                            },
+                            {
+                                "hero": "sigma",
+                                "value": 20
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 19
+                            },
+                            {
+                                "hero": "mei",
+                                "value": 18
+                            },
+                            {
+                                "hero": "kiriko",
+                                "value": 18
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 17
+                            },
+                            {
+                                "hero": "pharah",
+                                "value": 17
+                            },
+                            {
+                                "hero": "junkrat",
+                                "value": 17
                             },
                             {
                                 "hero": "hanzo",
+                                "value": 16
+                            },
+                            {
+                                "hero": "genji",
+                                "value": 16
+                            },
+                            {
+                                "hero": "doomfist",
+                                "value": 16
+                            },
+                            {
+                                "hero": "torbjorn",
+                                "value": 15
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 14
+                            },
+                            {
+                                "hero": "lucio",
+                                "value": 13
+                            },
+                            {
+                                "hero": "widowmaker",
+                                "value": 12
+                            },
+                            {
+                                "hero": "brigitte",
+                                "value": 12
+                            },
+                            {
+                                "hero": "wrecking-ball",
                                 "value": 11
                             },
                             {
-                                "hero": "mercy",
+                                "hero": "junker-queen",
                                 "value": 11
                             },
                             {
                                 "hero": "ramattra",
-                                "value": 10
-                            },
-                            {
-                                "hero": "cassidy",
-                                "value": 10
-                            },
-                            {
-                                "hero": "tracer",
-                                "value": 10
-                            },
-                            {
-                                "hero": "sombra",
-                                "value": 10
-                            },
-                            {
-                                "hero": "genji",
-                                "value": 10
-                            },
-                            {
-                                "hero": "reaper",
-                                "value": 10
-                            },
-                            {
-                                "hero": "dva",
-                                "value": 10
-                            },
-                            {
-                                "hero": "ashe",
-                                "value": 9
-                            },
-                            {
-                                "hero": "baptiste",
-                                "value": 9
-                            },
-                            {
-                                "hero": "lucio",
-                                "value": 8
-                            },
-                            {
-                                "hero": "soldier-76",
-                                "value": 7
+                                "value": 11
                             },
                             {
                                 "hero": "bastion",
-                                "value": 6
+                                "value": 9
                             },
                             {
-                                "hero": "torbjorn",
-                                "value": 3
-                            },
-                            {
-                                "hero": "doomfist",
-                                "value": 1
-                            },
-                            {
-                                "hero": "wrecking-ball",
-                                "value": 0
-                            },
-                            {
-                                "hero": "reinhardt",
-                                "value": 0
-                            },
-                            {
-                                "hero": "pharah",
-                                "value": 0
-                            },
-                            {
-                                "hero": "winston",
-                                "value": 0
+                                "hero": "sombra",
+                                "value": 9
                             },
                             {
                                 "hero": "symmetra",
-                                "value": 0
+                                "value": 8
                             },
                             {
-                                "hero": "junkrat",
-                                "value": 0
-                            },
-                            {
-                                "hero": "zarya",
-                                "value": 0
-                            },
-                            {
-                                "hero": "ana",
-                                "value": 0
-                            },
-                            {
-                                "hero": "orisa",
-                                "value": 0
-                            },
-                            {
-                                "hero": "brigitte",
-                                "value": 0
-                            },
-                            {
-                                "hero": "moira",
-                                "value": 0
+                                "hero": "ashe",
+                                "value": 5
                             },
                             {
                                 "hero": "sojourn",
-                                "value": 0
+                                "value": 4
+                            },
+                            {
+                                "hero": "mercy",
+                                "value": 3
                             },
                             {
                                 "hero": "echo",
-                                "value": 0
-                            },
-                            {
-                                "hero": "junker-queen",
-                                "value": 0
-                            },
-                            {
-                                "hero": "sigma",
-                                "value": 0
+                                "value": 1
                             }
                         ]
                     },
@@ -918,151 +1066,1194 @@
                             }
                         ]
                     },
-                    "objective_kills": {
-                        "label": "Objective Kills",
+                    "eliminations_avg_per_10_min": {
+                        "label": "Eliminations - Avg per 10 Min",
                         "values": [
                             {
-                                "hero": "reinhardt",
-                                "value": 14991
-                            },
-                            {
-                                "hero": "zarya",
-                                "value": 13619
-                            },
-                            {
-                                "hero": "zenyatta",
-                                "value": 8015
+                                "hero": "soldier-76",
+                                "value": 24.09
                             },
                             {
                                 "hero": "cassidy",
-                                "value": 6842
-                            },
-                            {
-                                "hero": "roadhog",
-                                "value": 4975
-                            },
-                            {
-                                "hero": "ana",
-                                "value": 4463
-                            },
-                            {
-                                "hero": "moira",
-                                "value": 4444
-                            },
-                            {
-                                "hero": "orisa",
-                                "value": 4060
-                            },
-                            {
-                                "hero": "baptiste",
-                                "value": 3271
-                            },
-                            {
-                                "hero": "winston",
-                                "value": 2694
-                            },
-                            {
-                                "hero": "soldier-76",
-                                "value": 2201
-                            },
-                            {
-                                "hero": "dva",
-                                "value": 1647
-                            },
-                            {
-                                "hero": "tracer",
-                                "value": 1244
-                            },
-                            {
-                                "hero": "lucio",
-                                "value": 1130
-                            },
-                            {
-                                "hero": "kiriko",
-                                "value": 534
-                            },
-                            {
-                                "hero": "hanzo",
-                                "value": 503
-                            },
-                            {
-                                "hero": "sigma",
-                                "value": 413
+                                "value": 22.37
                             },
                             {
                                 "hero": "reaper",
-                                "value": 406
+                                "value": 21.96
                             },
                             {
-                                "hero": "wrecking-ball",
-                                "value": 330
+                                "hero": "sigma",
+                                "value": 21.91
                             },
                             {
-                                "hero": "brigitte",
-                                "value": 270
+                                "hero": "moira",
+                                "value": 21.77
                             },
                             {
-                                "hero": "junkrat",
-                                "value": 242
+                                "hero": "dva",
+                                "value": 21.46
                             },
                             {
-                                "hero": "pharah",
-                                "value": 184
+                                "hero": "tracer",
+                                "value": 21.3
                             },
                             {
-                                "hero": "mei",
-                                "value": 122
-                            },
-                            {
-                                "hero": "genji",
-                                "value": 93
-                            },
-                            {
-                                "hero": "doomfist",
-                                "value": 74
-                            },
-                            {
-                                "hero": "widowmaker",
-                                "value": 58
-                            },
-                            {
-                                "hero": "symmetra",
-                                "value": 49
-                            },
-                            {
-                                "hero": "junker-queen",
-                                "value": 41
-                            },
-                            {
-                                "hero": "mercy",
-                                "value": 35
-                            },
-                            {
-                                "hero": "sombra",
-                                "value": 29
-                            },
-                            {
-                                "hero": "ramattra",
-                                "value": 27
-                            },
-                            {
-                                "hero": "torbjorn",
-                                "value": 26
-                            },
-                            {
-                                "hero": "bastion",
-                                "value": 26
+                                "hero": "zarya",
+                                "value": 20.81
                             },
                             {
                                 "hero": "ashe",
-                                "value": 14
+                                "value": 20.21
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 20.04
+                            },
+                            {
+                                "hero": "roadhog",
+                                "value": 19.72
+                            },
+                            {
+                                "hero": "winston",
+                                "value": 19.15
+                            },
+                            {
+                                "hero": "zenyatta",
+                                "value": 18.3
+                            },
+                            {
+                                "hero": "hanzo",
+                                "value": 17.41
+                            },
+                            {
+                                "hero": "torbjorn",
+                                "value": 17.36
+                            },
+                            {
+                                "hero": "ramattra",
+                                "value": 17.09
+                            },
+                            {
+                                "hero": "symmetra",
+                                "value": 17.03
+                            },
+                            {
+                                "hero": "junkrat",
+                                "value": 16.58
+                            },
+                            {
+                                "hero": "widowmaker",
+                                "value": 16.09
+                            },
+                            {
+                                "hero": "brigitte",
+                                "value": 15.73
+                            },
+                            {
+                                "hero": "junker-queen",
+                                "value": 15.69
+                            },
+                            {
+                                "hero": "doomfist",
+                                "value": 15.68
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 15.32
+                            },
+                            {
+                                "hero": "genji",
+                                "value": 14.97
+                            },
+                            {
+                                "hero": "mei",
+                                "value": 14.95
+                            },
+                            {
+                                "hero": "pharah",
+                                "value": 14.93
+                            },
+                            {
+                                "hero": "bastion",
+                                "value": 14.47
+                            },
+                            {
+                                "hero": "wrecking-ball",
+                                "value": 14.07
+                            },
+                            {
+                                "hero": "baptiste",
+                                "value": 13.78
+                            },
+                            {
+                                "hero": "sombra",
+                                "value": 13.5
+                            },
+                            {
+                                "hero": "lucio",
+                                "value": 13.27
                             },
                             {
                                 "hero": "sojourn",
-                                "value": 6
+                                "value": 10.46
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 10.1
+                            },
+                            {
+                                "hero": "kiriko",
+                                "value": 8.54
                             },
                             {
                                 "hero": "echo",
+                                "value": 7.58
+                            },
+                            {
+                                "hero": "mercy",
+                                "value": 0.69
+                            }
+                        ]
+                    },
+                    "deaths_avg_per_10_min": {
+                        "label": "Deaths - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "sojourn",
+                                "value": 12.42
+                            },
+                            {
+                                "hero": "wrecking-ball",
+                                "value": 11.37
+                            },
+                            {
+                                "hero": "genji",
+                                "value": 10.13
+                            },
+                            {
+                                "hero": "doomfist",
+                                "value": 10.01
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 9.29
+                            },
+                            {
+                                "hero": "symmetra",
+                                "value": 9.23
+                            },
+                            {
+                                "hero": "ashe",
+                                "value": 8.84
+                            },
+                            {
+                                "hero": "lucio",
+                                "value": 8.8
+                            },
+                            {
+                                "hero": "pharah",
+                                "value": 8.64
+                            },
+                            {
+                                "hero": "junkrat",
+                                "value": 8.61
+                            },
+                            {
+                                "hero": "winston",
+                                "value": 8.44
+                            },
+                            {
+                                "hero": "bastion",
+                                "value": 8.35
+                            },
+                            {
+                                "hero": "ramattra",
+                                "value": 8.31
+                            },
+                            {
+                                "hero": "widowmaker",
+                                "value": 8.19
+                            },
+                            {
+                                "hero": "mercy",
+                                "value": 8.14
+                            },
+                            {
+                                "hero": "soldier-76",
+                                "value": 7.88
+                            },
+                            {
+                                "hero": "sombra",
+                                "value": 7.79
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 7.78
+                            },
+                            {
+                                "hero": "mei",
+                                "value": 7.73
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 7.71
+                            },
+                            {
+                                "hero": "echo",
+                                "value": 7.58
+                            },
+                            {
+                                "hero": "hanzo",
+                                "value": 7.52
+                            },
+                            {
+                                "hero": "zenyatta",
+                                "value": 7.47
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 7.39
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 7.33
+                            },
+                            {
+                                "hero": "baptiste",
+                                "value": 6.87
+                            },
+                            {
+                                "hero": "brigitte",
+                                "value": 6.68
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 6.62
+                            },
+                            {
+                                "hero": "roadhog",
+                                "value": 6.61
+                            },
+                            {
+                                "hero": "junker-queen",
+                                "value": 6.54
+                            },
+                            {
+                                "hero": "zarya",
+                                "value": 6.26
+                            },
+                            {
+                                "hero": "dva",
+                                "value": 6.16
+                            },
+                            {
+                                "hero": "moira",
+                                "value": 6.01
+                            },
+                            {
+                                "hero": "kiriko",
+                                "value": 5.99
+                            },
+                            {
+                                "hero": "torbjorn",
+                                "value": 5.79
+                            },
+                            {
+                                "hero": "sigma",
+                                "value": 5.17
+                            }
+                        ]
+                    },
+                    "final_blows_avg_per_10_min": {
+                        "label": "Final Blows - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "cassidy",
+                                "value": 13.37
+                            },
+                            {
+                                "hero": "soldier-76",
+                                "value": 12.63
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 12.21
+                            },
+                            {
+                                "hero": "widowmaker",
+                                "value": 10.92
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 10.37
+                            },
+                            {
+                                "hero": "hanzo",
+                                "value": 10.33
+                            },
+                            {
+                                "hero": "junkrat",
+                                "value": 9.97
+                            },
+                            {
+                                "hero": "roadhog",
+                                "value": 9.48
+                            },
+                            {
+                                "hero": "ashe",
+                                "value": 9.48
+                            },
+                            {
+                                "hero": "pharah",
+                                "value": 8.86
+                            },
+                            {
+                                "hero": "doomfist",
+                                "value": 8.68
+                            },
+                            {
+                                "hero": "dva",
+                                "value": 8.36
+                            },
+                            {
+                                "hero": "winston",
+                                "value": 8.32
+                            },
+                            {
+                                "hero": "sigma",
+                                "value": 8.19
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 8.12
+                            },
+                            {
+                                "hero": "zenyatta",
+                                "value": 7.8
+                            },
+                            {
+                                "hero": "genji",
+                                "value": 7.32
+                            },
+                            {
+                                "hero": "zarya",
+                                "value": 7.32
+                            },
+                            {
+                                "hero": "torbjorn",
+                                "value": 7.3
+                            },
+                            {
+                                "hero": "symmetra",
+                                "value": 7.16
+                            },
+                            {
+                                "hero": "ramattra",
+                                "value": 6.88
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 6.81
+                            },
+                            {
+                                "hero": "bastion",
+                                "value": 6.68
+                            },
+                            {
+                                "hero": "junker-queen",
+                                "value": 6.54
+                            },
+                            {
+                                "hero": "moira",
+                                "value": 6.41
+                            },
+                            {
+                                "hero": "sombra",
+                                "value": 6.23
+                            },
+                            {
+                                "hero": "brigitte",
+                                "value": 5.59
+                            },
+                            {
+                                "hero": "wrecking-ball",
+                                "value": 4.8
+                            },
+                            {
+                                "hero": "baptiste",
+                                "value": 4.71
+                            },
+                            {
+                                "hero": "mei",
+                                "value": 4.7
+                            },
+                            {
+                                "hero": "sojourn",
+                                "value": 3.92
+                            },
+                            {
+                                "hero": "lucio",
+                                "value": 3.21
+                            },
+                            {
+                                "hero": "kiriko",
+                                "value": 2.83
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 2.37
+                            },
+                            {
+                                "hero": "mercy",
+                                "value": 0.22
+                            },
+                            {
+                                "hero": "echo",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "solo_kills_avg_per_10_min": {
+                        "label": "Solo Kills - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "widowmaker",
+                                "value": 5.17
+                            },
+                            {
+                                "hero": "ashe",
+                                "value": 3.16
+                            },
+                            {
+                                "hero": "junkrat",
+                                "value": 2.69
+                            },
+                            {
+                                "hero": "bastion",
+                                "value": 2.5
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 2.4
+                            },
+                            {
+                                "hero": "pharah",
+                                "value": 2.39
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 2.2
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 2.16
+                            },
+                            {
+                                "hero": "soldier-76",
+                                "value": 2.1
+                            },
+                            {
+                                "hero": "symmetra",
+                                "value": 1.91
+                            },
+                            {
+                                "hero": "hanzo",
+                                "value": 1.85
+                            },
+                            {
+                                "hero": "genji",
+                                "value": 1.82
+                            },
+                            {
+                                "hero": "doomfist",
+                                "value": 1.62
+                            },
+                            {
+                                "hero": "dva",
+                                "value": 1.46
+                            },
+                            {
+                                "hero": "zenyatta",
+                                "value": 1.45
+                            },
+                            {
+                                "hero": "mei",
+                                "value": 1.43
+                            },
+                            {
+                                "hero": "winston",
+                                "value": 1.43
+                            },
+                            {
+                                "hero": "roadhog",
+                                "value": 1.36
+                            },
+                            {
+                                "hero": "sombra",
+                                "value": 1.21
+                            },
+                            {
+                                "hero": "torbjorn",
+                                "value": 1.01
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 0.94
+                            },
+                            {
+                                "hero": "moira",
+                                "value": 0.8
+                            },
+                            {
+                                "hero": "zarya",
+                                "value": 0.75
+                            },
+                            {
+                                "hero": "brigitte",
+                                "value": 0.74
+                            },
+                            {
+                                "hero": "junker-queen",
+                                "value": 0.56
+                            },
+                            {
+                                "hero": "wrecking-ball",
+                                "value": 0.53
+                            },
+                            {
+                                "hero": "sigma",
+                                "value": 0.46
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 0.45
+                            },
+                            {
+                                "hero": "baptiste",
+                                "value": 0.43
+                            },
+                            {
+                                "hero": "lucio",
+                                "value": 0.38
+                            },
+                            {
+                                "hero": "kiriko",
+                                "value": 0.32
+                            },
+                            {
+                                "hero": "ramattra",
+                                "value": 0.24
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 0.21
+                            },
+                            {
+                                "hero": "mercy",
+                                "value": 0.03
+                            },
+                            {
+                                "hero": "sojourn",
+                                "value": 0
+                            },
+                            {
+                                "hero": "echo",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "objective_kills_avg_per_10_min": {
+                        "label": "Objective Kills - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "sigma",
+                                "value": 11.13
+                            },
+                            {
+                                "hero": "moira",
+                                "value": 10.61
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 10.55
+                            },
+                            {
+                                "hero": "wrecking-ball",
+                                "value": 10.36
+                            },
+                            {
+                                "hero": "soldier-76",
+                                "value": 10.3
+                            },
+                            {
+                                "hero": "zarya",
+                                "value": 10.02
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 9.8
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 9.57
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 9.16
+                            },
+                            {
+                                "hero": "roadhog",
+                                "value": 9.05
+                            },
+                            {
+                                "hero": "ashe",
+                                "value": 8.84
+                            },
+                            {
+                                "hero": "dva",
+                                "value": 8.43
+                            },
+                            {
+                                "hero": "zenyatta",
+                                "value": 7.84
+                            },
+                            {
+                                "hero": "symmetra",
+                                "value": 7.8
+                            },
+                            {
+                                "hero": "junker-queen",
+                                "value": 7.66
+                            },
+                            {
+                                "hero": "winston",
+                                "value": 7.45
+                            },
+                            {
+                                "hero": "bastion",
+                                "value": 7.24
+                            },
+                            {
+                                "hero": "lucio",
+                                "value": 7.02
+                            },
+                            {
+                                "hero": "mei",
+                                "value": 6.99
+                            },
+                            {
+                                "hero": "baptiste",
+                                "value": 6.89
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 6.73
+                            },
+                            {
+                                "hero": "junkrat",
+                                "value": 6.72
+                            },
+                            {
+                                "hero": "torbjorn",
+                                "value": 6.54
+                            },
+                            {
+                                "hero": "ramattra",
+                                "value": 6.41
+                            },
+                            {
+                                "hero": "brigitte",
+                                "value": 6.24
+                            },
+                            {
+                                "hero": "hanzo",
+                                "value": 6.17
+                            },
+                            {
+                                "hero": "pharah",
+                                "value": 5.7
+                            },
+                            {
+                                "hero": "doomfist",
+                                "value": 5.45
+                            },
+                            {
+                                "hero": "genji",
+                                "value": 5.12
+                            },
+                            {
+                                "hero": "sombra",
+                                "value": 5.02
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 4.67
+                            },
+                            {
+                                "hero": "kiriko",
+                                "value": 4.2
+                            },
+                            {
+                                "hero": "sojourn",
+                                "value": 3.92
+                            },
+                            {
+                                "hero": "widowmaker",
+                                "value": 3.37
+                            },
+                            {
+                                "hero": "mercy",
+                                "value": 0.26
+                            },
+                            {
+                                "hero": "echo",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "objective_time_avg_per_10_min": {
+                        "label": "Objective Time - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "wrecking-ball",
+                                "value": 182
+                            },
+                            {
+                                "hero": "junker-queen",
+                                "value": 124
+                            },
+                            {
+                                "hero": "sigma",
+                                "value": 122
+                            },
+                            {
+                                "hero": "brigitte",
+                                "value": 118
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 116
+                            },
+                            {
+                                "hero": "ramattra",
+                                "value": 111
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 108
+                            },
+                            {
+                                "hero": "lucio",
+                                "value": 98
+                            },
+                            {
+                                "hero": "roadhog",
+                                "value": 94
+                            },
+                            {
+                                "hero": "zarya",
+                                "value": 92
+                            },
+                            {
+                                "hero": "dva",
+                                "value": 87
+                            },
+                            {
+                                "hero": "moira",
+                                "value": 86
+                            },
+                            {
+                                "hero": "winston",
+                                "value": 86
+                            },
+                            {
+                                "hero": "echo",
+                                "value": 83
+                            },
+                            {
+                                "hero": "kiriko",
+                                "value": 76
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 76
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 75
+                            },
+                            {
+                                "hero": "baptiste",
+                                "value": 73
+                            },
+                            {
+                                "hero": "zenyatta",
+                                "value": 67
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 62
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 61
+                            },
+                            {
+                                "hero": "soldier-76",
+                                "value": 60
+                            },
+                            {
+                                "hero": "mei",
+                                "value": 57
+                            },
+                            {
+                                "hero": "genji",
+                                "value": 57
+                            },
+                            {
+                                "hero": "sombra",
+                                "value": 56
+                            },
+                            {
+                                "hero": "symmetra",
+                                "value": 56
+                            },
+                            {
+                                "hero": "sojourn",
+                                "value": 54
+                            },
+                            {
+                                "hero": "hanzo",
+                                "value": 52
+                            },
+                            {
+                                "hero": "mercy",
+                                "value": 51
+                            },
+                            {
+                                "hero": "torbjorn",
+                                "value": 49
+                            },
+                            {
+                                "hero": "doomfist",
+                                "value": 47
+                            },
+                            {
+                                "hero": "junkrat",
+                                "value": 46
+                            },
+                            {
+                                "hero": "pharah",
+                                "value": 38
+                            },
+                            {
+                                "hero": "bastion",
+                                "value": 29
+                            },
+                            {
+                                "hero": "ashe",
+                                "value": 24
+                            },
+                            {
+                                "hero": "widowmaker",
+                                "value": 8
+                            }
+                        ]
+                    },
+                    "hero_damage_done_avg_per_10_min": {
+                        "label": "Hero Damage Done - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "torbjorn",
+                                "value": 11703
+                            },
+                            {
+                                "hero": "soldier-76",
+                                "value": 9464
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 8531
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 8076
+                            },
+                            {
+                                "hero": "sigma",
+                                "value": 7979
+                            },
+                            {
+                                "hero": "junkrat",
+                                "value": 7928
+                            },
+                            {
+                                "hero": "hanzo",
+                                "value": 7549
+                            },
+                            {
+                                "hero": "ashe",
+                                "value": 6994
+                            },
+                            {
+                                "hero": "pharah",
+                                "value": 6926
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 6918
+                            },
+                            {
+                                "hero": "ramattra",
+                                "value": 6870
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 6778
+                            },
+                            {
+                                "hero": "roadhog",
+                                "value": 6773
+                            },
+                            {
+                                "hero": "zarya",
+                                "value": 6645
+                            },
+                            {
+                                "hero": "junker-queen",
+                                "value": 6618
+                            },
+                            {
+                                "hero": "symmetra",
+                                "value": 6569
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 6457
+                            },
+                            {
+                                "hero": "doomfist",
+                                "value": 6371
+                            },
+                            {
+                                "hero": "genji",
+                                "value": 6370
+                            },
+                            {
+                                "hero": "dva",
+                                "value": 6143
+                            },
+                            {
+                                "hero": "widowmaker",
+                                "value": 5870
+                            },
+                            {
+                                "hero": "bastion",
+                                "value": 5828
+                            },
+                            {
+                                "hero": "sojourn",
+                                "value": 5674
+                            },
+                            {
+                                "hero": "zenyatta",
+                                "value": 5544
+                            },
+                            {
+                                "hero": "winston",
+                                "value": 5409
+                            },
+                            {
+                                "hero": "wrecking-ball",
+                                "value": 5386
+                            },
+                            {
+                                "hero": "moira",
+                                "value": 5001
+                            },
+                            {
+                                "hero": "baptiste",
+                                "value": 4274
+                            },
+                            {
+                                "hero": "sombra",
+                                "value": 4142
+                            },
+                            {
+                                "hero": "mei",
+                                "value": 4031
+                            },
+                            {
+                                "hero": "brigitte",
+                                "value": 3986
+                            },
+                            {
+                                "hero": "echo",
+                                "value": 3516
+                            },
+                            {
+                                "hero": "lucio",
+                                "value": 3046
+                            },
+                            {
+                                "hero": "kiriko",
+                                "value": 2497
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 2423
+                            },
+                            {
+                                "hero": "mercy",
+                                "value": 83.67
+                            }
+                        ]
+                    },
+                    "healing_done_avg_per_10_min": {
+                        "label": "Healing Done - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "moira",
+                                "value": 9407
+                            },
+                            {
+                                "hero": "baptiste",
+                                "value": 8565
+                            },
+                            {
+                                "hero": "kiriko",
+                                "value": 8363
+                            },
+                            {
+                                "hero": "mercy",
+                                "value": 8050
+                            },
+                            {
+                                "hero": "lucio",
+                                "value": 7118
+                            },
+                            {
+                                "hero": "brigitte",
+                                "value": 6867
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 6803
+                            },
+                            {
+                                "hero": "zenyatta",
+                                "value": 5076
+                            },
+                            {
+                                "hero": "roadhog",
+                                "value": 3839
+                            },
+                            {
+                                "hero": "soldier-76",
+                                "value": 1503
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 1230
+                            },
+                            {
+                                "hero": "bastion",
+                                "value": 976
+                            },
+                            {
+                                "hero": "mei",
+                                "value": 815
+                            },
+                            {
+                                "hero": "sombra",
+                                "value": 605
+                            },
+                            {
+                                "hero": "junker-queen",
+                                "value": 518
+                            },
+                            {
+                                "hero": "winston",
+                                "value": 1.21
+                            },
+                            {
+                                "hero": "dva",
+                                "value": 0.99
+                            },
+                            {
+                                "hero": "sigma",
+                                "value": 0.22
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 0.13
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 0.12
+                            },
+                            {
+                                "hero": "zarya",
+                                "value": 0.08
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 0
+                            },
+                            {
+                                "hero": "hanzo",
+                                "value": 0
+                            },
+                            {
+                                "hero": "torbjorn",
+                                "value": 0
+                            },
+                            {
+                                "hero": "pharah",
+                                "value": 0
+                            },
+                            {
+                                "hero": "widowmaker",
+                                "value": 0
+                            },
+                            {
+                                "hero": "symmetra",
+                                "value": 0
+                            },
+                            {
+                                "hero": "genji",
+                                "value": 0
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 0
+                            },
+                            {
+                                "hero": "junkrat",
+                                "value": 0
+                            },
+                            {
+                                "hero": "doomfist",
+                                "value": 0
+                            },
+                            {
+                                "hero": "wrecking-ball",
+                                "value": 0
+                            },
+                            {
+                                "hero": "sojourn",
+                                "value": 0
+                            },
+                            {
+                                "hero": "ashe",
+                                "value": 0
+                            },
+                            {
+                                "hero": "echo",
+                                "value": 0
+                            },
+                            {
+                                "hero": "ramattra",
                                 "value": 0
                             }
                         ]
@@ -3400,13 +4591,13 @@
                                     "value": 16
                                 },
                                 {
-                                    "key": "magnetic_grenade_kills",
-                                    "label": "Magnetic Grenade Kills",
+                                    "key": "flashbang_kills",
+                                    "label": "Flashbang Kills",
                                     "value": 742
                                 },
                                 {
-                                    "key": "magnetic_grenade_kills_most_in_game",
-                                    "label": "Magnetic Grenade Kills - Most in Game",
+                                    "key": "flashbang_kills_most_in_game",
+                                    "label": "Flashbang Kills - Most in Game",
                                     "value": 19
                                 },
                                 {
@@ -3425,8 +4616,8 @@
                                     "value": 0.79
                                 },
                                 {
-                                    "key": "magnetic_grenade_kills_avg_per_10_min",
-                                    "label": "Magnetic Grenade Kills - Avg per 10 Min",
+                                    "key": "flashbang_kills_avg_per_10_min",
+                                    "label": "Flashbang Kills - Avg per 10 Min",
                                     "value": 0.99
                                 },
                                 {
@@ -14793,35 +15984,6 @@
                             }
                         ]
                     },
-                    "weapon_accuracy": {
-                        "label": "Weapon Accuracy",
-                        "values": [
-                            {
-                                "hero": "orisa",
-                                "value": 40
-                            },
-                            {
-                                "hero": "cassidy",
-                                "value": 38
-                            },
-                            {
-                                "hero": "reaper",
-                                "value": 26
-                            },
-                            {
-                                "hero": "ana",
-                                "value": 18
-                            },
-                            {
-                                "hero": "tracer",
-                                "value": 0
-                            },
-                            {
-                                "hero": "reinhardt",
-                                "value": 0
-                            }
-                        ]
-                    },
                     "win_percentage": {
                         "label": "Win Percentage",
                         "values": [
@@ -14847,6 +16009,35 @@
                             },
                             {
                                 "hero": "orisa",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "weapon_accuracy_best_in_game": {
+                        "label": "Weapon Accuracy - Best in Game",
+                        "values": [
+                            {
+                                "hero": "cassidy",
+                                "value": 53
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 40
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 26
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 19
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 0
+                            },
+                            {
+                                "hero": "reinhardt",
                                 "value": 0
                             }
                         ]
@@ -14880,31 +16071,31 @@
                             }
                         ]
                     },
-                    "critical_hit_accuracy": {
-                        "label": "Critical Hit Accuracy",
+                    "kill_streak_best": {
+                        "label": "Kill Streak - Best",
                         "values": [
-                            {
-                                "hero": "cassidy",
-                                "value": 10
-                            },
                             {
                                 "hero": "reaper",
                                 "value": 7
                             },
                             {
-                                "hero": "tracer",
-                                "value": 0
+                                "hero": "reinhardt",
+                                "value": 6
                             },
                             {
-                                "hero": "reinhardt",
-                                "value": 0
+                                "hero": "cassidy",
+                                "value": 5
                             },
                             {
                                 "hero": "ana",
-                                "value": 0
+                                "value": 4
                             },
                             {
                                 "hero": "orisa",
+                                "value": 4
+                            },
+                            {
+                                "hero": "tracer",
                                 "value": 0
                             }
                         ]
@@ -14938,31 +16129,206 @@
                             }
                         ]
                     },
-                    "objective_kills": {
-                        "label": "Objective Kills",
+                    "eliminations_avg_per_10_min": {
+                        "label": "Eliminations - Avg per 10 Min",
                         "values": [
                             {
-                                "hero": "ana",
-                                "value": 7
-                            },
-                            {
-                                "hero": "cassidy",
-                                "value": 5
-                            },
-                            {
-                                "hero": "orisa",
-                                "value": 4
-                            },
-                            {
                                 "hero": "reaper",
-                                "value": 3
+                                "value": 17.63
                             },
                             {
                                 "hero": "reinhardt",
-                                "value": 3
+                                "value": 12.26
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 12.07
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 9.11
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 6.73
                             },
                             {
                                 "hero": "tracer",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "deaths_avg_per_10_min": {
+                        "label": "Deaths - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "cassidy",
+                                "value": 8.3
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 7.84
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 5.61
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 5.39
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 4.6
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "final_blows_avg_per_10_min": {
+                        "label": "Final Blows - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "cassidy",
+                                "value": 6.79
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 4.6
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 3.92
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 2.1
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 1.35
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "solo_kills_avg_per_10_min": null,
+                    "objective_kills_avg_per_10_min": {
+                        "label": "Objective Kills - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "reaper",
+                                "value": 5.88
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 5.39
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 4.91
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 4.6
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 3.77
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "objective_time_avg_per_10_min": {
+                        "label": "Objective Time - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "reinhardt",
+                                "value": 256
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 154
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 64
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 43
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 18
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "hero_damage_done_avg_per_10_min": {
+                        "label": "Hero Damage Done - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "reinhardt",
+                                "value": 13263
+                            },
+                            {
+                                "hero": "orisa",
+                                "value": 12226
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 6937
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 6655
+                            },
+                            {
+                                "hero": "ana",
+                                "value": 2645
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "healing_done_avg_per_10_min": {
+                        "label": "Healing Done - Avg per 10 Min",
+                        "values": [
+                            {
+                                "hero": "ana",
+                                "value": 8560
+                            },
+                            {
+                                "hero": "reaper",
+                                "value": 954
+                            },
+                            {
+                                "hero": "tracer",
+                                "value": 0
+                            },
+                            {
+                                "hero": "reinhardt",
+                                "value": 0
+                            },
+                            {
+                                "hero": "cassidy",
+                                "value": 0
+                            },
+                            {
+                                "hero": "orisa",
                                 "value": 0
                             }
                         ]
@@ -15645,13 +17011,13 @@
                                     "value": 1
                                 },
                                 {
-                                    "key": "magnetic_grenade_kills",
-                                    "label": "Magnetic Grenade Kills",
+                                    "key": "flashbang_kills",
+                                    "label": "Flashbang Kills",
                                     "value": 4
                                 },
                                 {
-                                    "key": "magnetic_grenade_kills_most_in_game",
-                                    "label": "Magnetic Grenade Kills - Most in Game",
+                                    "key": "flashbang_kills_most_in_game",
+                                    "label": "Flashbang Kills - Most in Game",
                                     "value": 3
                                 },
                                 {
@@ -15670,8 +17036,8 @@
                                     "value": 1.51
                                 },
                                 {
-                                    "key": "magnetic_grenade_kills_avg_per_10_min",
-                                    "label": "Magnetic Grenade Kills - Avg per 10 Min",
+                                    "key": "flashbang_kills_avg_per_10_min",
+                                    "label": "Flashbang Kills - Avg per 10 Min",
                                     "value": 3.02
                                 },
                                 {
