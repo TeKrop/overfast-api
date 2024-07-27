@@ -35,8 +35,11 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
     if re.match(r"^-?\d+\.\d+$", input_str):
         return float(input_str)
 
-    # Zero time fought with a character if "--", else default value
-    return 0 if input_str == "--" else input_str
+    # Return 0 value if :
+    # - Zero time fought with a character ("--")
+    # - Invalid value in DOM ("NaN")
+    # Else default value
+    return 0 if input_str in {"--", "NaN"} else input_str
 
 
 def get_division_from_icon(rank_url: str) -> CompetitiveDivision:
