@@ -111,7 +111,7 @@ async def search_players(
     order_by: str = Query(
         "name:asc",
         title="Ordering field and the way it's arranged (asc[ending]/desc[ending])",
-        pattern=r"^(player_id|name):(asc|desc)$",
+        pattern=r"^(player_id|name|last_updated_at):(asc|desc)$",
     ),
     offset: int = Query(0, title="Offset of the results", ge=0),
     limit: int = Query(20, title="Limit of results per page", gt=0),

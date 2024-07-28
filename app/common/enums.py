@@ -162,3 +162,4 @@ class SearchDataType(StrEnum):
     NAMECARD = "namecard"
     PORTRAIT = "portrait"
     TITLE = "title"
+    LAST_UPDATED_AT = "lastUpdatedAt"
