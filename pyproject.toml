@@ -24,7 +24,7 @@ pydantic-settings = "^2.3.4"
 [tool.poetry.group.dev.dependencies]
 fakeredis = "^2.23.3"
 ipdb = "^0.13.13"
-pytest = "^8.3.1"
+pytest = "^8.3.2"
 pytest-asyncio = "^0.23.8"
 pytest-cov = "^5.0.0"
 pytest-randomly = "^3.15.0"
