@@ -8,6 +8,11 @@ from app.common.enums import CompetitiveDivision, CompetitiveRole, HeroKey, Loca
 from app.common.helpers import read_csv_data_file
 from app.config import settings
 
+DURATION_HOURS_PATTERN = re.compile(r"^(-?\d+,?\d*?):(\d+):(\d+)$")
+DURATION_MINUTES_PATTERN = re.compile(r"^(-?\d+):(\d+)$")
+INT_PATTERN = re.compile(r"^-?\d+(,\d+)*%?$")
+FLOAT_PATTERN = re.compile(r"^-?\d+(,\d+)*\.\d+$")
+
 
 def get_computed_stat_value(input_str: str) -> str | float | int:
     """Get computed value from player statistics : convert duration representations
@@ -16,7 +21,7 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
     """
 
     # Duration format in hour:min:sec => seconds
-    if result := re.match(r"^(-?\d+,?\d*?):(\d+):(\d+)$", input_str):
+    if result := DURATION_HOURS_PATTERN.match(input_str):
         return (
             int(result[1].replace(",", "")) * 3600
             + int(result[2]) * 60
@@ -24,15 +29,15 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
         )
 
     # Duration format in min:sec => seconds
-    if result := re.match(r"^(-?\d+):(\d+)$", input_str):
+    if result := DURATION_MINUTES_PATTERN.match(input_str):
         return int(result[1]) * 60 + int(result[2])
 
     # Int format
-    if re.match(r"^-?\d+(,\d+)*%?$", input_str):
+    if INT_PATTERN.match(input_str):
         return int(input_str.replace("%", "").replace(",", ""))
 
     # Float format
-    if re.match(r"^-?\d+(,\d+)*\.\d+$", input_str):
+    if FLOAT_PATTERN.match(input_str):
         return float(input_str.replace(",", ""))
 
     # Return 0 value if :
@@ -61,6 +66,7 @@ def get_full_url(url: str) -> str:
     return f"{settings.blizzard_host}{url}" if url.startswith("/") else url
 
 
+@cache
 def get_hero_keyname(input_str: str) -> str:
     """Returns Overwatch hero keyname using its fullname.
     Example : ("Soldier: 76" -> "soldier-76")
@@ -94,12 +100,14 @@ def get_tier_from_icon(tier_url: str) -> int:
         return 0
 
 
+@cache
 def remove_accents(input_str: str) -> str:
     """Removes accents from a string and return the resulting string"""
     nfkd_form = unicodedata.normalize("NFKD", input_str)
     return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
 
 
+@cache
 def string_to_snakecase(input_str: str) -> str:
     """Returns a string transformed in snakecase format"""
     cleaned_str = remove_accents(input_str).replace("- ", "")

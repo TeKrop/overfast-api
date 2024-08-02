@@ -33,6 +33,7 @@ from app.parsers import helpers
         ("37.89", 37.89),
         ("-86.96", -86.96),
         ("1,102.5", 1_102.5),
+        ("1,234,567.89", 1_234_567.89),
         # Zero time fought with a character
         ("--", 0),
         # Invalid value (not a number)
