@@ -32,8 +32,8 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
         return int(input_str.replace("%", "").replace(",", ""))
 
     # Float format
-    if re.match(r"^-?\d+\.\d+$", input_str):
-        return float(input_str)
+    if re.match(r"^-?\d+(,\d+)*\.\d+$", input_str):
+        return float(input_str.replace(",", ""))
 
     # Return 0 value if :
     # - Zero time fought with a character ("--")
