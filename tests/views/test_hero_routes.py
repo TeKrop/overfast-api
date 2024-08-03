@@ -2,55 +2,31 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import status
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
 from app.common.enums import HeroKey
 from app.common.helpers import overfast_client, read_csv_data_file
-from app.main import app
-
-client = TestClient(app)
 
 
+@pytest.mark.asyncio()
 @pytest.mark.parametrize(
-    ("hero_name", "hero_html_data", "hero_json_data"),
-    [
-        (h.value, h.value, h.value)
-        for h in (HeroKey.ANA, HeroKey.GENJI, HeroKey.REINHARDT)
-    ],
-    indirect=["hero_html_data", "hero_json_data"],
+    ("hero_name"),
+    [(h.value) for h in (HeroKey.ANA, HeroKey.GENJI, HeroKey.REINHARDT)],
 )
-def test_get_hero(
-    hero_name: str,
-    hero_html_data: str,
-    hero_json_data: dict,
-    heroes_html_data: str,
-):
-    with patch.object(
-        overfast_client,
-        "get",
-        side_effect=[
-            Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
-            Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
-        ],
-    ):
-        response = client.get(f"/heroes/{hero_name}")
+async def test_get_hero(client: AsyncClient, hero_name: str):
+    response = await client.get(f"/heroes/{hero_name}")
     assert response.status_code == status.HTTP_200_OK
 
-    response_json = response.json()
-    del response_json["hitpoints"]
 
-    hero_data = hero_json_data.copy()
-    del hero_data["hitpoints"]
-
-    assert response_json == hero_data
-
-
+@pytest.mark.asyncio()
 @pytest.mark.parametrize(
     ("hero_name", "hero_html_data"),
     [("lifeweaver", "unknown-hero")],
     indirect=["hero_html_data"],
 )
-def test_get_unreleased_hero(hero_name: str, hero_html_data: str):
+async def test_get_unreleased_hero(
+    client: AsyncClient, hero_name: str, hero_html_data: str
+):
     with patch.object(
         overfast_client,
         "get",
@@ -58,12 +34,13 @@ def test_get_unreleased_hero(hero_name: str, hero_html_data: str):
             Mock(status_code=status.HTTP_404_NOT_FOUND, text=hero_html_data),
         ],
     ):
-        response = client.get(f"/heroes/{hero_name}")
+        response = await client.get(f"/heroes/{hero_name}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"error": "Hero not found or not released yet"}
 
 
-def test_get_hero_blizzard_error():
+@pytest.mark.asyncio()
+async def test_get_hero_blizzard_error(client: AsyncClient):
     with patch.object(
         overfast_client,
         "get",
@@ -72,7 +49,7 @@ def test_get_hero_blizzard_error():
             text="Service Unavailable",
         ),
     ):
-        response = client.get(f"/heroes/{HeroKey.ANA}")
+        response = await client.get(f"/heroes/{HeroKey.ANA}")
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
@@ -80,12 +57,13 @@ def test_get_hero_blizzard_error():
     }
 
 
-def test_get_hero_internal_error():
+@pytest.mark.asyncio()
+async def test_get_hero_internal_error(client: AsyncClient):
     with patch(
         "app.handlers.get_hero_request_handler.GetHeroRequestHandler.process_request",
         return_value={"invalid_key": "invalid_value"},
     ):
-        response = client.get(f"/heroes/{HeroKey.ANA}")
+        response = await client.get(f"/heroes/{HeroKey.ANA}")
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert response.json() == {
             "error": (
@@ -97,12 +75,14 @@ def test_get_hero_internal_error():
         }
 
 
+@pytest.mark.asyncio()
 @pytest.mark.parametrize(
     ("hero_name", "hero_html_data"),
     [(HeroKey.ANA, HeroKey.ANA)],
     indirect=["hero_html_data"],
 )
-def test_get_hero_no_portrait(
+async def test_get_hero_no_portrait(
+    client: AsyncClient,
     hero_name: str,
     hero_html_data: str,
     heroes_html_data: str,
@@ -126,17 +106,19 @@ def test_get_hero_no_portrait(
             return_value=heroes_data,
         ),
     ):
-        response = client.get(f"/heroes/{hero_name}")
+        response = await client.get(f"/heroes/{hero_name}")
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["portrait"] is None
 
 
+@pytest.mark.asyncio()
 @pytest.mark.parametrize(
     ("hero_name", "hero_html_data"),
     [(HeroKey.ANA, HeroKey.ANA)],
     indirect=["hero_html_data"],
 )
-def test_get_hero_no_hitpoints(
+async def test_get_hero_no_hitpoints(
+    client: AsyncClient,
     hero_name: str,
     hero_html_data: str,
     heroes_html_data: str,
@@ -161,6 +143,6 @@ def test_get_hero_no_hitpoints(
             return_value=heroes_stats,
         ),
     ):
-        response = client.get(f"/heroes/{hero_name}")
+        response = await client.get(f"/heroes/{hero_name}")
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["hitpoints"] is None

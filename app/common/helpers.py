@@ -104,12 +104,7 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
 
     return HTTPException(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail=(
-            "An internal server error occurred during the process. The developer "
-            "received a notification, but don't hesitate to create a GitHub "
-            "issue if you want any news concerning the bug resolution : "
-            "https://github.com/TeKrop/overfast-api/issues"
-        ),
+        detail=settings.internal_server_error_message,
     )
 
 
