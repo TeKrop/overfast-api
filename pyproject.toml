@@ -13,7 +13,7 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.12"
 beautifulsoup4 = "^4.12.3"
-fastapi = "^0.111.1"
+fastapi = "^0.112.0"
 httpx = {extras = ["http2"], version = "^0.27.0"}
 loguru = "^0.7.2"
 lxml = "^5.2.2"
