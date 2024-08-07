@@ -16,7 +16,7 @@ from app.config import settings
 cache_manager = CacheManager()
 
 # Mapping between the search data type and the variable name in JS
-variable_name_mapping: dict[SearchDataType, str] = {
+variable_name_mapping: dict[SearchDataType, str | None] = {
     SearchDataType.PORTRAIT: "avatars",
     SearchDataType.NAMECARD: "namecards",
     SearchDataType.TITLE: "titles",
@@ -37,6 +37,9 @@ def get_search_page() -> httpx.Response:
 
 def extract_search_data(html_content: str, data_type: SearchDataType) -> dict:
     variable_name = variable_name_mapping[data_type]
+    if not variable_name:
+        return None
+
     data_regexp = rf"const {variable_name} = (\{{.*\}})\n"
 
     result = re.search(data_regexp, html_content)
@@ -99,6 +102,7 @@ def update_search_data_cache():
         search_data = {
             data_type: retrieve_search_data(data_type, search_page)
             for data_type in SearchDataType
+            if data_type != SearchDataType.LAST_UPDATED_AT
         }
     except SearchDataRetrievalError as error:
         raise SystemExit from error
