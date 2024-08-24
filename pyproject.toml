@@ -25,6 +25,9 @@ Documentation = "https://overfast-api.tekrop.fr"
 Repository = "https://github.com/TeKrop/overfast-api"
 Issues = "https://github.com/TeKrop/overfast-api/issues"
 
+[tool.setuptools]
+packages = ["app"]
+
 [tool.uv]
 compile-bytecode = true
 dev-dependencies = [

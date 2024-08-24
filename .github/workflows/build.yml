@@ -26,7 +26,7 @@ jobs:
       run: uv python install ${{ matrix.python-version }}
 
     - name: Install the project
-      run: uv sync --frozen
+      run: uv sync --frozen --no-cache
 
     - name: Run Ruff code analysis
       run: uv run ruff check .
