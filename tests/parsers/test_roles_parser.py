@@ -8,7 +8,7 @@ from app.common.helpers import overfast_client
 from app.parsers.roles_parser import RolesParser
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_roles_page_parsing(home_html_data: str):
     parser = RolesParser()
 

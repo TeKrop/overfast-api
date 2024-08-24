@@ -16,7 +16,7 @@ from app.parsers.player_career_parser import PlayerCareerParser
     ],
     indirect=["player_html_data", "player_career_json_data"],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_player_page_parsing_with_filters(
     player_id: str,
     player_html_data: str,
@@ -47,7 +47,7 @@ async def test_player_page_parsing_with_filters(
 
 
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_unknown_player_parser_blizzard_error(player_html_data: str):
     parser = PlayerCareerParser(player_id="Unknown-1234")
     with (

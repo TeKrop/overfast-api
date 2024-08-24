@@ -7,7 +7,7 @@ from app.common.helpers import overfast_client
 from app.parsers.gamemodes_parser import GamemodesParser
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_gamemodes_page_parsing(home_html_data: str):
     parser = GamemodesParser()
 

@@ -13,7 +13,7 @@ from app.parsers.hero_parser import HeroParser
     [(h.value, h.value) for h in HeroKey],
     indirect=["hero_html_data"],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_hero_page_parsing(hero_key: str, hero_html_data: str):
     if not hero_html_data:
         pytest.skip("Hero HTML file not saved yet, skipping")
@@ -32,7 +32,7 @@ async def test_hero_page_parsing(hero_key: str, hero_html_data: str):
 
 
 @pytest.mark.parametrize("hero_html_data", ["unknown-hero"], indirect=True)
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_not_released_hero_parser_blizzard_error(hero_html_data: str):
     parser = HeroParser()
 

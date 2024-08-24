@@ -8,7 +8,7 @@ from app.common.helpers import overfast_client
 from app.parsers.heroes_parser import HeroesParser
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_heroes_page_parsing(heroes_html_data: str):
     parser = HeroesParser()
 

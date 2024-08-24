@@ -9,7 +9,7 @@ from app.common.cache_manager import CacheManager
 from app.common.enums import SearchDataType
 
 
-@pytest.fixture()
+@pytest.fixture
 def cache_manager():
     return CacheManager()
 
