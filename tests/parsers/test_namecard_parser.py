@@ -11,7 +11,7 @@ from app.common.helpers import overfast_client
 from app.parsers.search_data_parser import NamecardParser
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_namecard_parser_no_cache(
     search_players_blizzard_json_data: dict,
     search_html_data: str,
@@ -48,7 +48,7 @@ async def test_namecard_parser_no_cache(
     update_parser_cache_last_update_mock.assert_called_once()
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_namecard_parser_blizzard_error():
     parser = NamecardParser(player_id="Dekk-2677")
 
@@ -72,7 +72,7 @@ async def test_namecard_parser_blizzard_error():
     )
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_namecard_parser_error_key_error(search_tekrop_blizzard_json_data: dict):
     # Search data without battletag
     search_data = [search_tekrop_blizzard_json_data[0].copy()]
@@ -97,7 +97,7 @@ async def test_namecard_parser_error_key_error(search_tekrop_blizzard_json_data:
     assert error.value.message == "KeyError('battleTag')"
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_namecard_parser_player_not_found():
     parser = NamecardParser(player_id="Unknown-1234")
 
@@ -121,7 +121,7 @@ async def test_namecard_parser_player_not_found():
     assert parser.data == {"namecard": None}
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_namecard_parser_player_without_namecard():
     search_data = [
         {
@@ -158,7 +158,7 @@ async def test_namecard_parser_player_without_namecard():
     assert parser.data == {"namecard": None}
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_namecard_parser_no_cache_no_namecard(
     search_players_blizzard_json_data: dict,
 ):
@@ -200,7 +200,7 @@ async def test_namecard_parser_no_cache_no_namecard(
     assert parser.data == {"namecard": None}
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_namecard_parser_with_cache(
     search_players_blizzard_json_data: dict,
     search_data_json_data: dict,

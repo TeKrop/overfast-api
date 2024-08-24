@@ -14,12 +14,12 @@ from app.common.helpers import overfast_client
 from app.config import settings
 
 
-@pytest.fixture()
+@pytest.fixture
 def cache_manager():
     return CacheManager()
 
 
-@pytest.fixture()
+@pytest.fixture
 def locale():
     return Locale.ENGLISH_US
 

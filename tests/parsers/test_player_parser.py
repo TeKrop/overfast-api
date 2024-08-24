@@ -18,7 +18,7 @@ from app.parsers.player_parser import PlayerParser
     ],
     indirect=["player_html_data", "player_json_data"],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_player_page_parsing_with_filters(
     player_id: str,
     player_html_data: str,
@@ -54,7 +54,7 @@ async def test_player_page_parsing_with_filters(
 
 
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_unknown_player_parser_blizzard_error(player_html_data: str):
     parser = PlayerParser(player_id="Unknown-1234")
     with (
@@ -69,7 +69,7 @@ async def test_unknown_player_parser_blizzard_error(player_html_data: str):
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_player_parser_parsing_error_attribute_error(player_html_data: str):
     player_attr_error = player_html_data.replace(
         'class="Profile-player--summaryWrapper"',
@@ -94,7 +94,7 @@ async def test_player_parser_parsing_error_attribute_error(player_html_data: str
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_player_parser_parsing_error_key_error(player_html_data: str):
     player_key_error = re.sub(
         'class="Profile-playerSummary--endorsement" src="[^"]*"',
@@ -117,7 +117,7 @@ async def test_player_parser_parsing_error_key_error(player_html_data: str):
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_player_parser_parsing_error_type_error(player_html_data: str):
     player_type_error = player_html_data.replace(
         'class="Profile-playerSummary--endorsement"',
