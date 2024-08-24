@@ -3,7 +3,7 @@ services:
     build:
       context: .
       target: ${BUILD_TARGET:-main}
-    command: fastapi run app/main.py --port 8080 --proxy-headers
+    command: /code/.venv/bin/fastapi run app/main.py --port 8080 --proxy-headers
     env_file: ${APP_VOLUME_PATH:-.}/.env
     volumes:
       - ${APP_VOLUME_PATH:-/tmp}/app-logs:/code/logs
