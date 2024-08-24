@@ -29,15 +29,15 @@ build: ## Build project images
 
 start: ## Run OverFastAPI application (dev mode)
 	@echo "Launching OverFastAPI (dev mode)..."
-	$(DOCKER_RUN) fastapi dev app/main.py --host 0.0.0.0
+	$(DOCKER_RUN) uv run fastapi dev app/main.py --host 0.0.0.0
 
 lint: ## Run linter
 	@echo "Running linter..."
-	$(DOCKER_RUN) ruff check --fix --exit-non-zero-on-fix
+	$(DOCKER_RUN) uv run ruff check --fix --exit-non-zero-on-fix
 
 format: ## Run formatter
 	@echo "Running formatter..."
-	$(DOCKER_RUN) ruff format
+	$(DOCKER_RUN) uv run ruff format
 
 shell: ## Access an interactive shell inside the app container
 	@echo "Running shell on app container..."
@@ -50,10 +50,10 @@ exec: ## Execute a given COMMAND inside the app container
 test:  ## Run tests, PYTEST_ARGS can be specified
 ifdef PYTEST_ARGS
 	@echo "Running tests on $(PYTEST_ARGS)..."
-	$(DOCKER_RUN) python -m pytest $(PYTEST_ARGS)
+	$(DOCKER_RUN) uv run python -m pytest $(PYTEST_ARGS)
 else
 	@echo "Running all tests with coverage..."
-	$(DOCKER_RUN) python -m pytest --cov app --cov-report html -n auto
+	$(DOCKER_RUN) uv run python -m pytest --cov app --cov-report html -n auto
 endif
 
 up: ## Build & run OverFastAPI application (production mode)
@@ -73,7 +73,7 @@ clean: down ## Clean up Docker environment
 	docker image prune -af
 	docker network prune -f
 
-lock: ## Update poetry lock file
-	@poetry lock --no-update
+lock: ## Update lock file
+	$(DOCKER_RUN) uv lock
 
 .PHONY: help build start lint format shell exec test up down clean lock

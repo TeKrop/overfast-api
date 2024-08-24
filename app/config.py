@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 def get_app_version() -> str:
     with Path(f"{Path.cwd()}/pyproject.toml").open(mode="rb") as project_file:
         project_data = tomllib.load(project_file)
-    return project_data["tool"]["poetry"]["version"]
+    return project_data["project"]["version"]
 
 
 class Settings(BaseSettings):

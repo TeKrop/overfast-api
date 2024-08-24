@@ -14,21 +14,26 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.12"]
-        poetry-version: [1.8.2]
+        uv-version: ["0.3.3"]
 
     steps:
-    - name: Build project
-      uses: TeKrop/install-python-poetry-project@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-        poetry-version: ${{ matrix.poetry-version }}
+    - uses: actions/checkout@v4
+
+    - name: Set up uv
+      run: curl -LsSf https://astral.sh/uv/${{ matrix.uv-version }}/install.sh | sh
+
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
+
+    - name: Install the project
+      run: uv sync --frozen --no-cache
 
     - name: Run Ruff code analysis
-      run: ruff check .
+      run: uv run ruff check .
 
     - name: Run tests suite
       run: |
-        PYTHONPATH=app/ python -m pytest -v --cov-fail-under=80 --cov-report=html --cov=app/ tests/
+        PYTHONPATH=app/ uv run python -m pytest -v --cov-fail-under=80 --cov-report=html --cov=app/ tests/
         PERCENT=$(cat htmlcov/index.html | grep "pc_cov" | awk -F '>' '{print $2}' | awk -F '%' '{print $1}')
         echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
 
