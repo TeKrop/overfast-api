@@ -69,6 +69,15 @@ class PlayerShort(BaseModel):
         description="Blizzard unique identifier of the player (hexadecimal)",
         examples=["c65b8798bc61d6ffbba120%7Ccfe9dd77a4382165e2b920bdcc035949"],
     )
+    last_updated_at: int | None = Field(
+        None,
+        title="Timestamp",
+        description=(
+            "Last time the player profile was updated on Blizzard (timestamp). "
+            "Can be null if couldn't retrieve any"
+        ),
+        examples=[1704209332],
+    )
 
 
 class PlayerSearchResult(BaseModel):
@@ -226,6 +235,15 @@ class PlayerSummary(BaseModel):
             "in different roles depending on the platform. If the career is private "
             "or if the player doesn't play competitive at all, it's null."
         ),
+    )
+    last_updated_at: int | None = Field(
+        None,
+        title="Timestamp",
+        description=(
+            "Last time the player profile was updated on Blizzard (timestamp). "
+            "Can be null if couldn't retrieve any"
+        ),
+        examples=[1704209332],
     )
 
 

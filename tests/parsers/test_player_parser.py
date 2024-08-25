@@ -25,9 +25,11 @@ async def test_player_page_parsing_with_filters(
     player_json_data: dict,
     kwargs_filter: dict,
 ):
-    # Remove "namecard" key from player_json_data, it's been added from another page
+    # Remove "namecard" and "last_updated_at" keys from player_json_data,
+    # it's been added from others parsers
     player_data = player_json_data.copy()
     del player_data["summary"]["namecard"]
+    del player_data["summary"]["last_updated_at"]
 
     parser = PlayerParser(player_id=player_id)
     update_parser_cache_last_update_mock = Mock()

@@ -88,6 +88,7 @@ class SearchPlayersRequestHandler:
                     "title": self.get_title(player, player_id),
                     "career_url": f"{settings.app_base_url}/players/{player_id}",
                     "blizzard_id": player["url"],
+                    "last_updated_at": player["lastUpdated"],
                 },
             )
         return transformed_players

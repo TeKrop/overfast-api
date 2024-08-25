@@ -134,3 +134,12 @@ class TitleParser(SearchDataParser):
     """Title Parser class"""
 
     data_type = SearchDataType.TITLE
+
+
+class LastUpdatedAtParser(SearchDataParser):
+    """LastUpdatedAt Parser class"""
+
+    data_type = SearchDataType.LAST_UPDATED_AT
+
+    def retrieve_data_value(self, player_data: dict) -> int:
+        return player_data["lastUpdated"]
