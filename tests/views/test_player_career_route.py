@@ -35,7 +35,13 @@ def test_get_player_career(
             side_effect=[
                 # Player HTML page
                 Mock(status_code=status.HTTP_200_OK, text=player_html_data),
-                # Search results related to the player
+                # Search results related to the player (for namecard)
+                Mock(
+                    status_code=status.HTTP_200_OK,
+                    text=json.dumps(search_tekrop_blizzard_json_data),
+                    json=lambda: search_tekrop_blizzard_json_data,
+                ),
+                # Search results related to the player (for last_updated_at)
                 Mock(
                     status_code=status.HTTP_200_OK,
                     text=json.dumps(search_tekrop_blizzard_json_data),
