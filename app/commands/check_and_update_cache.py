@@ -21,7 +21,7 @@ from app.parsers.player_career_parser import PlayerCareerParser
 from app.parsers.player_parser import PlayerParser
 from app.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
 from app.parsers.roles_parser import RolesParser
-from app.parsers.search_data_parser import NamecardParser
+from app.parsers.search_data_parser import LastUpdatedAtParser, NamecardParser
 
 # Mapping of parser class names to linked classes
 PARSER_CLASSES_MAPPING = {
@@ -29,6 +29,7 @@ PARSER_CLASSES_MAPPING = {
     "HeroParser": HeroParser,
     "HeroesParser": HeroesParser,
     "HeroesStatsParser": HeroesStatsParser,
+    "LastUpdatedAtParser": LastUpdatedAtParser,
     "MapsParser": MapsParser,
     "NamecardParser": NamecardParser,
     "PlayerParser": PlayerParser,
@@ -70,7 +71,7 @@ def get_request_parser_class(cache_key: str) -> tuple[type, dict]:
     cache_kwargs["locale"] = uri[1]
     if "Player" in parser_class_name:
         cache_kwargs["player_id"] = uri[3]
-    elif parser_class_name == "NamecardParser":
+    elif parser_class_name in ("LastUpdatedAtParser", "NamecardParser"):
         cache_kwargs["player_id"] = uri[4].replace("#", "-")
     elif parser_class_name == "HeroParser":
         cache_kwargs["hero_key"] = uri[3]
