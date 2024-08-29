@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.12"]
-        uv-version: ["0.3.3"]
+        uv-version: ["0.4.0"]
 
     steps:
     - uses: actions/checkout@v4
