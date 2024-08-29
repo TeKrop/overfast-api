@@ -74,6 +74,6 @@ clean: down ## Clean up Docker environment
 	docker network prune -f
 
 lock: ## Update lock file
-	$(DOCKER_RUN) uv lock
+	uv lock
 
 .PHONY: help build start lint format shell exec test up down clean lock
