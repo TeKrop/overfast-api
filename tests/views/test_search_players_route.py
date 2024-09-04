@@ -7,17 +7,12 @@ from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
 from app.common.cache_manager import CacheManager
-from app.common.helpers import overfast_client
-from app.main import app
-
-client = TestClient(app)
 
 
 @pytest.fixture(scope="module", autouse=True)
 def _setup_search_players_test(search_players_blizzard_json_data: list[dict]):
-    with patch.object(
-        overfast_client,
-        "get",
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_200_OK,
             text=json.dumps(search_players_blizzard_json_data),
@@ -27,7 +22,7 @@ def _setup_search_players_test(search_players_blizzard_json_data: list[dict]):
         yield
 
 
-def test_search_players_missing_name():
+def test_search_players_missing_name(client: TestClient):
     response = client.get("/players")
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert response.json() == {
@@ -42,10 +37,9 @@ def test_search_players_missing_name():
     }
 
 
-def test_search_players_no_result():
-    with patch.object(
-        overfast_client,
-        "get",
+def test_search_players_no_result(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text="[]", json=list),
     ):
         response = client.get("/players?name=Player")
@@ -61,10 +55,9 @@ def test_search_players_no_result():
         (status.HTTP_500_INTERNAL_SERVER_ERROR, '{"error":"searchByName error"}'),
     ],
 )
-def test_search_players_blizzard_error(status_code: int, text: str):
-    with patch.object(
-        overfast_client,
-        "get",
+def test_search_players_blizzard_error(client: TestClient, status_code: int, text: str):
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(status_code=status_code, text=text),
     ):
         response = client.get("/players?name=Player")
@@ -75,10 +68,9 @@ def test_search_players_blizzard_error(status_code: int, text: str):
     }
 
 
-def test_search_players_blizzard_timeout():
-    with patch.object(
-        overfast_client,
-        "get",
+def test_search_players_blizzard_timeout(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
         side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)",
@@ -96,7 +88,7 @@ def test_search_players_blizzard_timeout():
 
 
 def test_search_players(
-    search_players_api_json_data: dict, search_data_json_data: dict
+    client: TestClient, search_players_api_json_data: dict, search_data_json_data: dict
 ):
     # Add search data in cache as if we launched the server
     cache_manager = CacheManager()
@@ -126,6 +118,7 @@ def test_search_players(
     ],
 )
 def test_search_players_with_offset_and_limit(
+    client: TestClient,
     search_players_api_json_data: dict,
     search_data_json_data: dict,
     offset: int,
@@ -151,7 +144,10 @@ def test_search_players_with_offset_and_limit(
 
 @pytest.mark.parametrize("order_by", ["name:asc", "name:desc"])
 def test_search_players_ordering(
-    search_players_api_json_data: dict, search_data_json_data: dict, order_by: str
+    client: TestClient,
+    search_players_api_json_data: dict,
+    search_data_json_data: dict,
+    order_by: str,
 ):
     # Add search data in cache as if we launched the server
     cache_manager = CacheManager()
@@ -172,7 +168,7 @@ def test_search_players_ordering(
     }
 
 
-def test_search_players_internal_error():
+def test_search_players_internal_error(client: TestClient):
     with patch(
         "app.handlers.search_players_request_handler.SearchPlayersRequestHandler.process_request",
         return_value={"invalid_key": "invalid_value"},

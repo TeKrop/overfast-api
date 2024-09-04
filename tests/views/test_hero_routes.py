@@ -5,10 +5,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.common.enums import HeroKey
-from app.common.helpers import overfast_client, read_csv_data_file
-from app.main import app
-
-client = TestClient(app)
+from app.common.helpers import read_csv_data_file
 
 
 @pytest.mark.parametrize(
@@ -20,14 +17,14 @@ client = TestClient(app)
     indirect=["hero_html_data", "hero_json_data"],
 )
 def test_get_hero(
+    client: TestClient,
     hero_name: str,
     hero_html_data: str,
     hero_json_data: dict,
     heroes_html_data: str,
 ):
-    with patch.object(
-        overfast_client,
-        "get",
+    with patch(
+        "httpx.AsyncClient.get",
         side_effect=[
             Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
             Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
@@ -50,10 +47,9 @@ def test_get_hero(
     [("lifeweaver", "unknown-hero")],
     indirect=["hero_html_data"],
 )
-def test_get_unreleased_hero(hero_name: str, hero_html_data: str):
-    with patch.object(
-        overfast_client,
-        "get",
+def test_get_unreleased_hero(client: TestClient, hero_name: str, hero_html_data: str):
+    with patch(
+        "httpx.AsyncClient.get",
         side_effect=[
             Mock(status_code=status.HTTP_404_NOT_FOUND, text=hero_html_data),
         ],
@@ -63,10 +59,9 @@ def test_get_unreleased_hero(hero_name: str, hero_html_data: str):
     assert response.json() == {"error": "Hero not found or not released yet"}
 
 
-def test_get_hero_blizzard_error():
-    with patch.object(
-        overfast_client,
-        "get",
+def test_get_hero_blizzard_error(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
@@ -80,7 +75,7 @@ def test_get_hero_blizzard_error():
     }
 
 
-def test_get_hero_internal_error():
+def test_get_hero_internal_error(client: TestClient):
     with patch(
         "app.handlers.get_hero_request_handler.GetHeroRequestHandler.process_request",
         return_value={"invalid_key": "invalid_value"},
@@ -103,6 +98,7 @@ def test_get_hero_internal_error():
     indirect=["hero_html_data"],
 )
 def test_get_hero_no_portrait(
+    client: TestClient,
     hero_name: str,
     hero_html_data: str,
     heroes_html_data: str,
@@ -113,9 +109,8 @@ def test_get_hero_no_portrait(
     ]
 
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             side_effect=[
                 Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
                 Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
@@ -137,6 +132,7 @@ def test_get_hero_no_portrait(
     indirect=["hero_html_data"],
 )
 def test_get_hero_no_hitpoints(
+    client: TestClient,
     hero_name: str,
     hero_html_data: str,
     heroes_html_data: str,
@@ -148,9 +144,8 @@ def test_get_hero_no_hitpoints(
     ]
 
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             side_effect=[
                 Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
                 Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),

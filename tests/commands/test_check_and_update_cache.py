@@ -10,7 +10,6 @@ from app.commands.check_and_update_cache import get_soon_expired_cache_keys
 from app.commands.check_and_update_cache import main as check_and_update_cache_main
 from app.common.cache_manager import CacheManager
 from app.common.enums import Locale
-from app.common.helpers import overfast_client
 from app.config import settings
 
 
@@ -63,9 +62,8 @@ def test_check_and_update_gamemodes_cache_to_update(
     # check and update (only gamemodes should be updated)
     logger_info_mock = Mock()
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(status_code=status.HTTP_200_OK, text=home_html_data),
         ),
         patch("app.common.logging.logger.info", logger_info_mock),
@@ -108,9 +106,8 @@ def test_check_and_update_specific_hero_to_update(
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
         ),
         patch("app.common.logging.logger.info", logger_info_mock),
@@ -222,9 +219,8 @@ def test_check_and_update_specific_player_to_update(
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
         ),
         patch("app.common.logging.logger.info", logger_info_mock),
@@ -275,9 +271,8 @@ def test_check_and_update_player_stats_summary_to_update(
     # check and update (only maps should be updated)
     logger_info_mock = Mock()
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(
                 status_code=status.HTTP_200_OK,
                 text=player_html_data,
@@ -309,9 +304,8 @@ def test_check_internal_error_from_blizzard(cache_manager: CacheManager, locale:
 
     logger_error_mock = Mock()
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 text="Internal Server Error",
@@ -338,9 +332,8 @@ def test_check_timeout_from_blizzard(cache_manager: CacheManager, locale: str):
 
     logger_error_mock = Mock()
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             side_effect=TimeoutException(
                 "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
                 "Read timed out. (read timeout=10)",
@@ -377,9 +370,8 @@ def test_check_parser_parsing_error(
         'class="blabla"',
     )
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(status_code=status.HTTP_200_OK, text=player_attr_error),
         ),
         patch("app.common.logging.logger.critical", logger_critical_mock),
@@ -408,9 +400,8 @@ def test_check_parser_init_error(
 
     logger_exception_mock = Mock()
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
         ),
         patch("app.common.logging.logger.exception", logger_exception_mock),
@@ -449,9 +440,8 @@ def test_check_and_update_several_to_update(
     # check and update (only gamemodes should be updated)
     logger_info_mock = Mock()
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(status_code=status.HTTP_200_OK, text=home_html_data),
         ),
         patch("app.common.logging.logger.info", logger_info_mock),
@@ -502,9 +492,8 @@ def test_check_and_update_namecard_to_update(
     # check and update
     logger_info_mock = Mock()
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(
                 status_code=status.HTTP_200_OK,
                 text=json.dumps(search_tekrop_blizzard_json_data),

@@ -4,12 +4,9 @@ from fastapi.testclient import TestClient
 
 from app.common.enums import MapGamemode
 from app.config import settings
-from app.main import app
-
-client = TestClient(app)
 
 
-def test_get_maps(maps_json_data: list):
+def test_get_maps(client: TestClient, maps_json_data: list):
     response = client.get("/maps")
     json_response = response.json()
     assert response.status_code == status.HTTP_200_OK
@@ -24,7 +21,9 @@ def test_get_maps(maps_json_data: list):
 
 
 @pytest.mark.parametrize("gamemode", [g.value for g in MapGamemode])
-def test_get_maps_filter_by_gamemode(gamemode: MapGamemode, maps_json_data: list):
+def test_get_maps_filter_by_gamemode(
+    client: TestClient, gamemode: MapGamemode, maps_json_data: list
+):
     response = client.get(f"/maps?gamemode={gamemode}")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [
@@ -32,7 +31,7 @@ def test_get_maps_filter_by_gamemode(gamemode: MapGamemode, maps_json_data: list
     ]
 
 
-def test_get_maps_invalid_gamemode():
+def test_get_maps_invalid_gamemode(client: TestClient):
     response = client.get("/maps?gamemode=invalid")
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert response.json() == {
@@ -50,7 +49,7 @@ def test_get_maps_invalid_gamemode():
     }
 
 
-def test_get_maps_images(maps_json_data: list):
+def test_get_maps_images(client: TestClient, maps_json_data: list):
     response = client.get("/maps")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == maps_json_data

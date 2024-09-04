@@ -63,15 +63,12 @@ overfast_client_settings = {
     "follow_redirects": True,
 }
 
-# Instanciate global httpx client
-overfast_client = httpx.AsyncClient(**overfast_client_settings)
 
-
-async def overfast_request(url: str) -> httpx.Response:
+async def overfast_request(client: httpx.AsyncClient, url: str) -> httpx.Response:
     """Make an HTTP GET request with custom headers and retrieve the result"""
     try:
         logger.debug("Requesting {}...", url)
-        response = await overfast_client.get(url)
+        response = await client.get(url)
     except httpx.TimeoutException as error:
         raise blizzard_response_error(
             status_code=0,

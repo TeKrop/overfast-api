@@ -17,7 +17,7 @@ class AbstractParser(ABC):
     cache_manager = CacheManager()
 
     def __init__(self, **_):
-        self.data: dict | list = None
+        self.data: Optional[dict | list] = None
 
     @property
     @abstractmethod

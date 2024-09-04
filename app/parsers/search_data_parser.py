@@ -32,7 +32,7 @@ class SearchDataParser(APIParser, ABC):
         """Method used to retrieve data from Blizzard (JSON data), parsing it
         and storing it into self.data attribute.
         """
-        req = await overfast_request(self.blizzard_url)
+        req = await overfast_request(client=self.overfast_client, url=self.blizzard_url)
         if req.status_code not in self.valid_http_codes:
             raise blizzard_response_error_from_request(req)
 

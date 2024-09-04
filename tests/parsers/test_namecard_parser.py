@@ -7,7 +7,6 @@ from fastapi import HTTPException, status
 
 from app.common.enums import SearchDataType
 from app.common.exceptions import ParserParsingError
-from app.common.helpers import overfast_client
 from app.parsers.search_data_parser import NamecardParser
 
 
@@ -17,13 +16,13 @@ async def test_namecard_parser_no_cache(
     search_html_data: str,
     search_data_json_data: dict,
 ):
-    parser = NamecardParser(player_id="Dekk-2677")
+    client = httpx.AsyncClient()
+    parser = NamecardParser(client=client, player_id="Dekk-2677")
     update_parser_cache_last_update_mock = Mock()
 
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(
                 status_code=status.HTTP_200_OK,
                 text=json.dumps(search_players_blizzard_json_data),
@@ -42,6 +41,8 @@ async def test_namecard_parser_no_cache(
     ):
         await parser.parse()
 
+    await client.aclose()
+
     assert parser.data == {
         "namecard": search_data_json_data[SearchDataType.NAMECARD]["0x0250000000005510"]
     }
@@ -50,13 +51,13 @@ async def test_namecard_parser_no_cache(
 
 @pytest.mark.asyncio
 async def test_namecard_parser_blizzard_error():
-    parser = NamecardParser(player_id="Dekk-2677")
+    client = httpx.AsyncClient()
+    parser = NamecardParser(client=client, player_id="Dekk-2677")
 
     with (
         pytest.raises(HTTPException) as error,
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 text="Service Unavailable",
@@ -64,6 +65,8 @@ async def test_namecard_parser_blizzard_error():
         ),
     ):
         await parser.parse()
+
+    await client.aclose()
 
     assert error.value.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert (
@@ -78,12 +81,12 @@ async def test_namecard_parser_error_key_error(search_tekrop_blizzard_json_data:
     search_data = [search_tekrop_blizzard_json_data[0].copy()]
     del search_data[0]["battleTag"]
 
-    parser = NamecardParser(player_id="TeKrop-2217")
+    client = httpx.AsyncClient()
+    parser = NamecardParser(client=client, player_id="TeKrop-2217")
 
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(
                 status_code=status.HTTP_200_OK,
                 text=json.dumps(search_data),
@@ -94,23 +97,27 @@ async def test_namecard_parser_error_key_error(search_tekrop_blizzard_json_data:
     ):
         await parser.parse()
 
+    await client.aclose()
+
     assert error.value.message == "KeyError('battleTag')"
 
 
 @pytest.mark.asyncio
 async def test_namecard_parser_player_not_found():
-    parser = NamecardParser(player_id="Unknown-1234")
+    client = httpx.AsyncClient()
+    parser = NamecardParser(client=client, player_id="Unknown-1234")
 
     logger_warning_mock = Mock()
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(status_code=status.HTTP_200_OK, text="{}", json=dict),
         ),
         patch("app.common.logging.logger.warning", logger_warning_mock),
     ):
         await parser.parse()
+
+    await client.aclose()
 
     logger_warning_mock.assert_any_call(
         "Player {} not found in search results, couldn't retrieve its {}",
@@ -134,13 +141,13 @@ async def test_namecard_parser_player_without_namecard():
             "title": "0x025000000000555E",
         },
     ]
-    parser = NamecardParser(player_id="Dekk-2677")
+    client = httpx.AsyncClient()
+    parser = NamecardParser(client=client, player_id="Dekk-2677")
 
     logger_info_mock = Mock()
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(
                 status_code=status.HTTP_200_OK,
                 text=json.dumps(search_data),
@@ -150,6 +157,8 @@ async def test_namecard_parser_player_without_namecard():
         patch("app.common.logging.logger.info", logger_info_mock),
     ):
         await parser.parse()
+
+    await client.aclose()
 
     logger_info_mock.assert_any_call(
         "Player {} doesn't have any {}", "Dekk-2677", SearchDataType.NAMECARD
@@ -162,13 +171,13 @@ async def test_namecard_parser_player_without_namecard():
 async def test_namecard_parser_no_cache_no_namecard(
     search_players_blizzard_json_data: dict,
 ):
-    parser = NamecardParser(player_id="Dekk-2677")
+    client = httpx.AsyncClient()
+    parser = NamecardParser(client=client, player_id="Dekk-2677")
 
     logger_warning_mock = Mock()
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(
                 status_code=status.HTTP_200_OK,
                 text=json.dumps(search_players_blizzard_json_data),
@@ -182,6 +191,8 @@ async def test_namecard_parser_no_cache_no_namecard(
         ),
     ):
         await parser.parse()
+
+    await client.aclose()
 
     logger_warning_mock.assert_any_call(
         "URL for {} {} of player {} not found in the cache",
@@ -205,12 +216,12 @@ async def test_namecard_parser_with_cache(
     search_players_blizzard_json_data: dict,
     search_data_json_data: dict,
 ):
-    parser = NamecardParser(player_id="Dekk-2677")
+    client = httpx.AsyncClient()
+    parser = NamecardParser(client=client, player_id="Dekk-2677")
 
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(
                 status_code=status.HTTP_200_OK,
                 text=json.dumps(search_players_blizzard_json_data),
@@ -224,6 +235,8 @@ async def test_namecard_parser_with_cache(
         ),
     ):
         await parser.parse()
+
+    await client.aclose()
 
     assert parser.data == {
         "namecard": search_data_json_data[SearchDataType.NAMECARD]["0x0250000000005510"]
