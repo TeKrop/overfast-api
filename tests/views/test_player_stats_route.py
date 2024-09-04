@@ -7,10 +7,7 @@ from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
 from app.common.enums import HeroKeyCareerFilter, PlayerGamemode, PlayerPlatform
-from app.common.helpers import overfast_client
-from app.main import app
 
-client = TestClient(app)
 platforms = {p.value for p in PlayerPlatform}
 gamemodes = {g.value for g in PlayerGamemode}
 heroes = {h.value for h in HeroKeyCareerFilter}
@@ -44,6 +41,7 @@ heroes = {h.value for h in HeroKeyCareerFilter}
     indirect=["player_html_data", "player_json_data", "player_career_json_data"],
 )
 def test_get_player_stats(
+    client: TestClient,
     player_html_data: str,
     player_json_data: dict,
     player_career_json_data: dict,
@@ -53,9 +51,8 @@ def test_get_player_stats(
     search_tekrop_blizzard_json_data: dict,
     uri: str,
 ):
-    with patch.object(
-        overfast_client,
-        "get",
+    with patch(
+        "httpx.AsyncClient.get",
         side_effect=[
             # Player HTML page
             Mock(status_code=status.HTTP_200_OK, text=player_html_data),
@@ -125,10 +122,9 @@ def test_get_player_stats(
 
 
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
-def test_get_player_stats_blizzard_error(uri: str):
-    with patch.object(
-        overfast_client,
-        "get",
+def test_get_player_stats_blizzard_error(client: TestClient, uri: str):
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
@@ -145,10 +141,9 @@ def test_get_player_stats_blizzard_error(uri: str):
 
 
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
-def test_get_player_stats_blizzard_timeout(uri: str):
-    with patch.object(
-        overfast_client,
-        "get",
+def test_get_player_stats_blizzard_timeout(client: TestClient, uri: str):
+    with patch(
+        "httpx.AsyncClient.get",
         side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)",
@@ -167,7 +162,7 @@ def test_get_player_stats_blizzard_timeout(uri: str):
     }
 
 
-def test_get_player_stats_internal_error():
+def test_get_player_stats_internal_error(client: TestClient):
     with patch(
         "app.handlers.get_player_career_request_handler.GetPlayerCareerRequestHandler.process_request",
         return_value={

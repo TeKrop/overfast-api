@@ -4,11 +4,12 @@ the expired cache refresh limit configuration. It can be run in the background.
 
 import asyncio
 
+import httpx
 from fastapi import HTTPException
 
 from app.common.cache_manager import CacheManager
 from app.common.exceptions import ParserBlizzardError, ParserParsingError
-from app.common.helpers import overfast_internal_error
+from app.common.helpers import overfast_client_settings, overfast_internal_error
 from app.common.logging import logger
 from app.config import settings
 from app.parsers.gamemodes_parser import GamemodesParser
@@ -106,13 +107,19 @@ async def main():
     keys_to_update = get_soon_expired_cache_keys()
     logger.info("Done ! Retrieved keys : {}", len(keys_to_update))
 
+    # Instanciate one HTTPX Client to use for all the updates
+    client = httpx.AsyncClient(**overfast_client_settings)
+
     tasks = []
     for key in keys_to_update:
         parser_class, kwargs = get_request_parser_class(key)
-        parser = parser_class(**kwargs)
+        parser = parser_class(client=client, **kwargs)
         tasks.append(retrieve_data(key, parser))
 
     await asyncio.gather(*tasks)
+
+    # Properly close HTTPX Async Client
+    await client.aclose()
 
     logger.info("Redis cache update finished !")
 

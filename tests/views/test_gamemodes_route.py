@@ -4,29 +4,23 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from app.common.helpers import overfast_client
-from app.main import app
-
-client = TestClient(app)
-
 
 @pytest.fixture(scope="module", autouse=True)
 def _setup_gamemodes_test(home_html_data: str):
-    with patch.object(
-        overfast_client,
-        "get",
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=home_html_data),
     ):
         yield
 
 
-def test_get_gamemodes(gamemodes_json_data: list):
+def test_get_gamemodes(client: TestClient, gamemodes_json_data: list):
     response = client.get("/gamemodes")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == gamemodes_json_data
 
 
-def test_get_gamemodes_internal_error():
+def test_get_gamemodes_internal_error(client: TestClient):
     with patch(
         "app.handlers.list_gamemodes_request_handler."
         "ListGamemodesRequestHandler.process_request",

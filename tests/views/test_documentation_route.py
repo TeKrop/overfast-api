@@ -3,12 +3,8 @@ import re
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from app.main import app
 
-client = TestClient(app)
-
-
-def test_get_redoc_documentation():
+def test_get_redoc_documentation(client: TestClient):
     response = client.get("/")
     assert response.status_code == status.HTTP_200_OK
     assert (
@@ -17,7 +13,7 @@ def test_get_redoc_documentation():
     )
 
 
-def test_get_swagger_documentation():
+def test_get_swagger_documentation(client: TestClient):
     response = client.get("/docs")
     assert response.status_code == status.HTTP_200_OK
     assert (

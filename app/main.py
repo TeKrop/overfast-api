@@ -2,6 +2,7 @@
 
 from contextlib import asynccontextmanager, suppress
 
+import httpx
 from fastapi import FastAPI, Request
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
@@ -11,20 +12,28 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .commands.update_search_data_cache import update_search_data_cache
 from .common.enums import RouteTag
+from .common.helpers import overfast_client_settings
 from .common.logging import logger
 from .config import settings
 from .routers import gamemodes, heroes, maps, players, roles
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):  # pragma: no cover
+async def lifespan(app: FastAPI):  # pragma: no cover
     # Update search data list from Blizzard before starting up
     if settings.redis_caching_enabled:
         logger.info("Updating search data cache (avatars, namecards, titles)")
         with suppress(SystemExit):
             update_search_data_cache()
 
+    # Instanciate HTTPX Async Client
+    logger.info("Instanciating HTTPX AsyncClient...")
+    app.overfast_client = httpx.AsyncClient(**overfast_client_settings)
+
     yield
+
+    # Properly close HTTPX Async Client
+    await app.overfast_client.aclose()
 
 
 app = FastAPI(title="OverFast API", docs_url=None, redoc_url=None, lifespan=lifespan)

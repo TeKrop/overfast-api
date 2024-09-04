@@ -1,5 +1,7 @@
 """Players endpoints router : players search, players career, statistics, etc."""
 
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Path, Query, Request, status
 
 from app.common.decorators import validation_error_handler
@@ -51,8 +53,11 @@ async def get_player_common_parameters(
     return {"player_id": player_id}
 
 
+CommonsPlayerDep = Annotated[dict, Depends(get_player_common_parameters)]
+
+
 async def get_player_career_common_parameters(
-    commons: dict = Depends(get_player_common_parameters),
+    commons: CommonsPlayerDep,
     gamemode: PlayerGamemode = Query(
         ...,
         title="Gamemode",
@@ -85,6 +90,8 @@ async def get_player_career_common_parameters(
         "hero": hero,
     }
 
+
+CommonsPlayerCareerDep = Annotated[dict, Depends(get_player_career_common_parameters)]
 
 router = APIRouter()
 
@@ -138,7 +145,7 @@ async def search_players(
 @validation_error_handler(response_model=PlayerSummary)
 async def get_player_summary(
     request: Request,
-    commons: dict = Depends(get_player_common_parameters),
+    commons: CommonsPlayerDep,
 ) -> PlayerSummary:
     return await GetPlayerCareerRequestHandler(request).process_request(
         summary=True,
@@ -167,7 +174,7 @@ async def get_player_summary(
 @validation_error_handler(response_model=PlayerStatsSummary)
 async def get_player_stats_summary(
     request: Request,
-    commons: dict = Depends(get_player_common_parameters),
+    commons: CommonsPlayerDep,
     gamemode: PlayerGamemode = Query(
         None,
         title="Gamemode",
@@ -212,7 +219,7 @@ async def get_player_stats_summary(
 @validation_error_handler(response_model=PlayerCareerStats)
 async def get_player_career_stats(
     request: Request,
-    commons: dict = Depends(get_player_career_common_parameters),
+    commons: CommonsPlayerCareerDep,
 ) -> PlayerCareerStats:
     return await GetPlayerCareerStatsRequestHandler(request).process_request(
         stats=True,
@@ -236,7 +243,7 @@ async def get_player_career_stats(
 @validation_error_handler(response_model=CareerStats)
 async def get_player_stats(
     request: Request,
-    commons: dict = Depends(get_player_career_common_parameters),
+    commons: CommonsPlayerCareerDep,
 ) -> CareerStats:
     return await GetPlayerCareerRequestHandler(request).process_request(
         stats=True,
@@ -257,7 +264,7 @@ async def get_player_stats(
 @validation_error_handler(response_model=Player)
 async def get_player_career(
     request: Request,
-    commons: dict = Depends(get_player_common_parameters),
+    commons: CommonsPlayerDep,
 ) -> Player:
     return await GetPlayerCareerRequestHandler(request).process_request(
         player_id=commons.get("player_id"),

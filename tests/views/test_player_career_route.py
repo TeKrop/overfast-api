@@ -6,10 +6,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
-from app.common.helpers import overfast_client, players_ids
-from app.main import app
-
-client = TestClient(app)
+from app.common.helpers import players_ids
 
 
 @pytest.mark.parametrize(
@@ -22,6 +19,7 @@ client = TestClient(app)
     indirect=["player_html_data", "player_json_data"],
 )
 def test_get_player_career(
+    client: TestClient,
     player_id: str,
     player_html_data: str,
     player_json_data: dict,
@@ -29,9 +27,8 @@ def test_get_player_career(
     search_html_data: str,
 ):
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             side_effect=[
                 # Player HTML page
                 Mock(status_code=status.HTTP_200_OK, text=player_html_data),
@@ -65,10 +62,9 @@ def test_get_player_career(
     assert response_json["summary"] == player_json_data["summary"]  # for namecard
 
 
-def test_get_player_career_blizzard_error():
-    with patch.object(
-        overfast_client,
-        "get",
+def test_get_player_career_blizzard_error(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
@@ -82,10 +78,9 @@ def test_get_player_career_blizzard_error():
     }
 
 
-def test_get_player_career_blizzard_timeout():
-    with patch.object(
-        overfast_client,
-        "get",
+def test_get_player_career_blizzard_timeout(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
         side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)",
@@ -102,7 +97,7 @@ def test_get_player_career_blizzard_timeout():
     }
 
 
-def test_get_player_career_internal_error():
+def test_get_player_career_internal_error(client: TestClient):
     with patch(
         "app.handlers.get_player_career_request_handler.GetPlayerCareerRequestHandler.process_request",
         return_value={"invalid_key": "invalid_value"},
@@ -120,10 +115,9 @@ def test_get_player_career_internal_error():
 
 
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
-def test_get_player_parser_init_error(player_html_data: str):
-    with patch.object(
-        overfast_client,
-        "get",
+def test_get_player_parser_init_error(client: TestClient, player_html_data: str):
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
     ):
         response = client.get("/players/TeKrop-2217")
@@ -132,14 +126,13 @@ def test_get_player_parser_init_error(player_html_data: str):
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
-def test_get_player_parser_parsing_error(player_html_data: str):
+def test_get_player_parser_parsing_error(client: TestClient, player_html_data: str):
     player_attr_error = player_html_data.replace(
         'class="Profile-player--summaryWrapper"',
         'class="blabla"',
     )
-    with patch.object(
-        overfast_client,
-        "get",
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=player_attr_error),
     ):
         response = client.get("/players/TeKrop-2217")

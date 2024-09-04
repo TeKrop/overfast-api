@@ -4,29 +4,23 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from app.common.helpers import overfast_client
-from app.main import app
-
-client = TestClient(app)
-
 
 @pytest.fixture(scope="module", autouse=True)
 def _setup_roles_test(home_html_data: str):
-    with patch.object(
-        overfast_client,
-        "get",
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=home_html_data),
     ):
         yield
 
 
-def test_get_roles(roles_json_data: list):
+def test_get_roles(client: TestClient, roles_json_data: list):
     response = client.get("/roles")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == roles_json_data
 
 
-def test_get_roles_after_get_gamemodes(roles_json_data: list):
+def test_get_roles_after_get_gamemodes(client: TestClient, roles_json_data: list):
     # Used to check we don't have any conflict between parsers
     # using the same Blizzard URL and associated Parser caches
     client.get("/gamemodes")
@@ -35,10 +29,9 @@ def test_get_roles_after_get_gamemodes(roles_json_data: list):
     assert response.json() == roles_json_data
 
 
-def test_get_roles_blizzard_error():
-    with patch.object(
-        overfast_client,
-        "get",
+def test_get_roles_blizzard_error(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
@@ -52,7 +45,7 @@ def test_get_roles_blizzard_error():
     }
 
 
-def test_get_roles_internal_error():
+def test_get_roles_internal_error(client: TestClient):
     with patch(
         "app.handlers.list_roles_request_handler.ListRolesRequestHandler.process_request",
         return_value=[{"invalid_key": "invalid_value"}],

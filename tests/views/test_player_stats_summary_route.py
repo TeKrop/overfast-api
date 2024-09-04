@@ -6,10 +6,8 @@ from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
 from app.common.enums import PlayerGamemode, PlayerPlatform
-from app.common.helpers import overfast_client, read_json_file
-from app.main import app
+from app.common.helpers import read_json_file
 
-client = TestClient(app)
 platforms = {p.value for p in PlayerPlatform}
 gamemodes = {g.value for g in PlayerGamemode}
 
@@ -24,13 +22,13 @@ gamemodes = {g.value for g in PlayerGamemode}
     indirect=["player_html_data"],
 )
 def test_get_player_stats(
+    client: TestClient,
     player_html_data: str,
     gamemode: PlayerGamemode | None,
     platform: PlayerPlatform | None,
 ):
-    with patch.object(
-        overfast_client,
-        "get",
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=player_html_data),
     ):
         query_params = "&".join(
@@ -55,10 +53,9 @@ def test_get_player_stats(
         assert response.json() == filtered_data
 
 
-def test_get_player_stats_blizzard_error():
-    with patch.object(
-        overfast_client,
-        "get",
+def test_get_player_stats_blizzard_error(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
@@ -74,10 +71,9 @@ def test_get_player_stats_blizzard_error():
     }
 
 
-def test_get_player_stats_blizzard_timeout():
-    with patch.object(
-        overfast_client,
-        "get",
+def test_get_player_stats_blizzard_timeout(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
         side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)",
@@ -96,7 +92,7 @@ def test_get_player_stats_blizzard_timeout():
     }
 
 
-def test_get_player_stats_internal_error():
+def test_get_player_stats_internal_error(client: TestClient):
     with patch(
         "app.handlers.get_player_stats_summary_request_handler.GetPlayerStatsSummaryRequestHandler.process_request",
         return_value={

@@ -30,6 +30,7 @@ class SearchPlayersRequestHandler:
 
     def __init__(self, request: Request):
         self.cache_key = CacheManager.get_cache_key_from_request(request)
+        self.overfast_client = request.app.overfast_client
 
     async def process_request(self, **kwargs) -> dict:
         """Main method used to process the request from user and return final data.
@@ -42,7 +43,9 @@ class SearchPlayersRequestHandler:
         """
 
         # Request the data from Blizzard URL
-        req = await overfast_request(self.get_blizzard_url(**kwargs))
+        req = await overfast_request(
+            client=self.overfast_client, url=self.get_blizzard_url(**kwargs)
+        )
         if req.status_code != status.HTTP_200_OK:
             raise blizzard_response_error_from_request(req)
 
@@ -110,11 +113,17 @@ class SearchPlayersRequestHandler:
         return f"{settings.blizzard_host}/{locale}{settings.search_account_path}/{kwargs.get('name')}/"
 
     def get_avatar_url(self, player: dict, player_id: str) -> str | None:
-        return PortraitParser(player_id=player_id).retrieve_data_value(player)
+        return PortraitParser(
+            client=self.overfast_client, player_id=player_id
+        ).retrieve_data_value(player)
 
     def get_namecard_url(self, player: dict, player_id: str) -> str | None:
-        return NamecardParser(player_id=player_id).retrieve_data_value(player)
+        return NamecardParser(
+            client=self.overfast_client, player_id=player_id
+        ).retrieve_data_value(player)
 
     def get_title(self, player: dict, player_id: str) -> str | None:
-        title = TitleParser(player_id=player_id).retrieve_data_value(player)
+        title = TitleParser(
+            client=self.overfast_client, player_id=player_id
+        ).retrieve_data_value(player)
         return get_player_title(title)

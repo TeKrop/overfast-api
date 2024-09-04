@@ -4,6 +4,7 @@ from abc import abstractmethod
 from functools import cached_property
 from typing import ClassVar
 
+import httpx
 from bs4 import BeautifulSoup
 from fastapi import status
 
@@ -23,8 +24,9 @@ class APIParser(AbstractParser):
     # List of valid HTTP codes when retrieving Blizzard pages
     valid_http_codes: ClassVar[list] = [status.HTTP_200_OK]
 
-    def __init__(self, **kwargs):
+    def __init__(self, client: httpx.AsyncClient, **kwargs):
         self.blizzard_url = self.get_blizzard_url(**kwargs)
+        self.overfast_client = client
         super().__init__(**kwargs)
 
     @property
@@ -51,7 +53,7 @@ class APIParser(AbstractParser):
         """Method used to retrieve data from Blizzard (HTML data), parsing it
         and storing it into self.data attribute.
         """
-        req = await overfast_request(self.blizzard_url)
+        req = await overfast_request(client=self.overfast_client, url=self.blizzard_url)
         if req.status_code not in self.valid_http_codes:
             raise blizzard_response_error_from_request(req)
 

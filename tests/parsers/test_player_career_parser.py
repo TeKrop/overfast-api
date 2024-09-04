@@ -1,9 +1,10 @@
 from unittest.mock import Mock, patch
 
+import httpx
 import pytest
 
 from app.common.exceptions import ParserBlizzardError
-from app.common.helpers import overfast_client, players_ids
+from app.common.helpers import players_ids
 from app.parsers.player_career_parser import PlayerCareerParser
 
 
@@ -22,13 +23,13 @@ async def test_player_page_parsing_with_filters(
     player_html_data: str,
     player_career_json_data: dict,
 ):
-    parser = PlayerCareerParser(player_id=player_id)
+    client = httpx.AsyncClient()
+    parser = PlayerCareerParser(client=client, player_id=player_id)
     update_parser_cache_last_update_mock = Mock()
 
     with (
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(status_code=200, text=player_html_data),
         ),
         patch.object(
@@ -38,6 +39,8 @@ async def test_player_page_parsing_with_filters(
         ),
     ):
         await parser.parse()
+
+    await client.aclose()
 
     # Just check that the parsing is working properly
     parser.filter_request_using_query()
@@ -49,13 +52,16 @@ async def test_player_page_parsing_with_filters(
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
 @pytest.mark.asyncio
 async def test_unknown_player_parser_blizzard_error(player_html_data: str):
-    parser = PlayerCareerParser(player_id="Unknown-1234")
+    client = httpx.AsyncClient()
+    parser = PlayerCareerParser(client=client, player_id="Unknown-1234")
+
     with (
         pytest.raises(ParserBlizzardError),
-        patch.object(
-            overfast_client,
-            "get",
+        patch(
+            "httpx.AsyncClient.get",
             return_value=Mock(status_code=200, text=player_html_data),
         ),
     ):
         await parser.parse()
+
+    await client.aclose()
