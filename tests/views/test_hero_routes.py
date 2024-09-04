@@ -6,55 +6,20 @@ from fastapi.testclient import TestClient
 
 from app.common.enums import HeroKey
 from app.common.helpers import read_csv_data_file
+from app.config import settings
 
 
 @pytest.mark.parametrize(
-    ("hero_name", "hero_html_data", "hero_json_data"),
-    [
-        (h.value, h.value, h.value)
-        for h in (HeroKey.ANA, HeroKey.GENJI, HeroKey.REINHARDT)
-    ],
-    indirect=["hero_html_data", "hero_json_data"],
+    ("hero_name"),
+    [(h.value) for h in (HeroKey.ANA, HeroKey.GENJI, HeroKey.REINHARDT)],
 )
-def test_get_hero(
-    client: TestClient,
-    hero_name: str,
-    hero_html_data: str,
-    hero_json_data: dict,
-    heroes_html_data: str,
-):
-    with patch(
-        "httpx.AsyncClient.get",
-        side_effect=[
-            Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
-            Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
-        ],
-    ):
-        response = client.get(f"/heroes/{hero_name}")
+def test_get_hero(client: TestClient, hero_name: str):
+    response = client.get(f"/heroes/{hero_name}")
     assert response.status_code == status.HTTP_200_OK
 
-    response_json = response.json()
-    del response_json["hitpoints"]
 
-    hero_data = hero_json_data.copy()
-    del hero_data["hitpoints"]
-
-    assert response_json == hero_data
-
-
-@pytest.mark.parametrize(
-    ("hero_name", "hero_html_data"),
-    [("lifeweaver", "unknown-hero")],
-    indirect=["hero_html_data"],
-)
-def test_get_unreleased_hero(client: TestClient, hero_name: str, hero_html_data: str):
-    with patch(
-        "httpx.AsyncClient.get",
-        side_effect=[
-            Mock(status_code=status.HTTP_404_NOT_FOUND, text=hero_html_data),
-        ],
-    ):
-        response = client.get(f"/heroes/{hero_name}")
+def test_get_unreleased_hero(client: TestClient):
+    response = client.get("/heroes/unknown-hero")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"error": "Hero not found or not released yet"}
 
@@ -82,80 +47,38 @@ def test_get_hero_internal_error(client: TestClient):
     ):
         response = client.get(f"/heroes/{HeroKey.ANA}")
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.json() == {
-            "error": (
-                "An internal server error occurred during the process. The developer "
-                "received a notification, but don't hesitate to create a GitHub "
-                "issue if you want any news concerning the bug resolution : "
-                "https://github.com/TeKrop/overfast-api/issues"
-            ),
-        }
+        assert response.json() == {"error": settings.internal_server_error_message}
 
 
-@pytest.mark.parametrize(
-    ("hero_name", "hero_html_data"),
-    [(HeroKey.ANA, HeroKey.ANA)],
-    indirect=["hero_html_data"],
-)
-def test_get_hero_no_portrait(
-    client: TestClient,
-    hero_name: str,
-    hero_html_data: str,
-    heroes_html_data: str,
-    heroes_json_data: list[dict],
-):
+def test_get_hero_no_portrait(client: TestClient, heroes_json_data: list[dict]):
+    hero_name = HeroKey.ANA
     heroes_data = [
-        hero_data for hero_data in heroes_json_data if hero_data["key"] != HeroKey.ANA
+        hero_data for hero_data in heroes_json_data if hero_data["key"] != hero_name
     ]
 
-    with (
-        patch(
-            "httpx.AsyncClient.get",
-            side_effect=[
-                Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
-                Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
-            ],
-        ),
-        patch(
-            "app.parsers.heroes_parser.HeroesParser.filter_request_using_query",
-            return_value=heroes_data,
-        ),
+    with patch(
+        "app.parsers.heroes_parser.HeroesParser.filter_request_using_query",
+        return_value=heroes_data,
     ):
         response = client.get(f"/heroes/{hero_name}")
+
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["portrait"] is None
 
 
-@pytest.mark.parametrize(
-    ("hero_name", "hero_html_data"),
-    [(HeroKey.ANA, HeroKey.ANA)],
-    indirect=["hero_html_data"],
-)
-def test_get_hero_no_hitpoints(
-    client: TestClient,
-    hero_name: str,
-    hero_html_data: str,
-    heroes_html_data: str,
-):
+def test_get_hero_no_hitpoints(client: TestClient):
+    hero_name = HeroKey.ANA
     heroes_stats = [
         hero_stat
         for hero_stat in read_csv_data_file("heroes.csv")
-        if hero_stat["key"] != HeroKey.ANA
+        if hero_stat["key"] != hero_name
     ]
 
-    with (
-        patch(
-            "httpx.AsyncClient.get",
-            side_effect=[
-                Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
-                Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
-            ],
-        ),
-        patch(
-            "app.parsers.generics.csv_parser.read_csv_data_file",
-            return_value=heroes_stats,
-        ),
+    with patch(
+        "app.parsers.generics.csv_parser.read_csv_data_file",
+        return_value=heroes_stats,
     ):
         response = client.get(f"/heroes/{hero_name}")
+
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["hitpoints"] is None

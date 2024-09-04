@@ -2,6 +2,8 @@
 
 from pydantic import BaseModel, Field
 
+from app.config import settings
+
 
 class BlizzardErrorMessage(BaseModel):
     error: str = Field(
@@ -15,14 +17,7 @@ class InternalServerErrorMessage(BaseModel):
     error: str = Field(
         ...,
         description="Message describing the internal server error",
-        examples=[
-            (
-                "An internal server error occurred during the process. The developer "
-                "received a notification, but don't hesitate to create a GitHub "
-                "issue if you want any news concerning the bug resolution : "
-                "https://github.com/TeKrop/overfast-api/issues"
-            ),
-        ],
+        examples=[settings.internal_server_error_message],
     )
 
 
