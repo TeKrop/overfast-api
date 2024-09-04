@@ -5,7 +5,7 @@ from app.parsers.gamemodes_parser import GamemodesParser
 
 
 @pytest.mark.asyncio
-async def test_gamemodes_page_parsing(home_html_data: str):
+async def test_gamemodes_page_parsing():
     parser = GamemodesParser()
 
     try:
