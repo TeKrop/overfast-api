@@ -14,13 +14,15 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.12"]
-        uv-version: ["0.4.0"]
+        uv-version: ["0.4.5"]
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Set up uv
-      run: curl -LsSf https://astral.sh/uv/${{ matrix.uv-version }}/install.sh | sh
+      uses: astral-sh/setup-uv@v1
+      with:
+        version: "${{ matrix.uv-version }}"
 
     - name: Set up Python ${{ matrix.python-version }}
       run: uv python install ${{ matrix.python-version }}
