@@ -2,8 +2,14 @@
 ARG PYTHON_VERSION=3.12
 ARG UV_VERSION=0.4.5
 
+# Create a temporary stage to pull the uv binary
+FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv-stage
+
 # Main stage
-FROM ghcr.io/astral-sh/uv:${UV_VERSION}-python${PYTHON_VERSION}-alpine AS main
+FROM python:${PYTHON_VERSION}-alpine AS main
+
+# Copy the uv binary from the temporary stage to the main stage
+COPY --from=uv-stage /uv /bin/uv
 
 # Copy only requirements (caching in Docker layer)
 COPY pyproject.toml uv.lock /code/
