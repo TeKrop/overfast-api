@@ -15,7 +15,7 @@ dependencies = [
     "loguru==0.7.*",
     "lxml==5.3.*",
     "redis==5.0.*",
-    "pydantic==2.8.*",
+    "pydantic==2.9.*",
     "pydantic-settings==2.4.*",
 ]
 
