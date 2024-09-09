@@ -1,12 +1,47 @@
+import asyncio
+
 import httpx
 import pytest
+from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.common.helpers import overfast_client_settings
+from app.common.logging import logger
 from app.main import app
 
 
-@pytest.fixture(scope="session")
+class RetryTransport(httpx.AsyncBaseTransport):
+    def __init__(self, retries: int = 3, delay: int = 2):
+        self.retries = retries
+        self.delay = delay
+        self._transport = httpx.AsyncHTTPTransport()
+
+    async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+        for attempt in range(self.retries):
+            try:
+                response = await self._transport.handle_async_request(request)
+                if response.status_code not in (
+                    status.HTTP_502_BAD_GATEWAY,
+                    status.HTTP_503_SERVICE_UNAVAILABLE,
+                ):
+                    return response
+                logger.info(
+                    f"{attempt + 1} attempt failed with HTTP 502, retrying in {self.delay} secondes..."
+                )
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code not in (
+                    status.HTTP_502_BAD_GATEWAY,
+                    status.HTTP_503_SERVICE_UNAVAILABLE,
+                ):
+                    raise
+            await asyncio.sleep(self.delay)
+        raise httpx.HTTPStatusError
+
+
+@pytest.fixture
 def client() -> TestClient:
-    app.overfast_client = httpx.AsyncClient(**overfast_client_settings)
+    transport = RetryTransport(retries=3, delay=2)
+    app.overfast_client = httpx.AsyncClient(
+        transport=transport, **overfast_client_settings
+    )
     return TestClient(app)

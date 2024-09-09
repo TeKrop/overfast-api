@@ -18,10 +18,23 @@ def test_get_hero(client: TestClient, hero_name: str):
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_get_unreleased_hero(client: TestClient):
-    response = client.get("/heroes/unknown-hero")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+@pytest.mark.parametrize(
+    ("hero_html_data"),
+    [("unknown-hero")],
+    indirect=["hero_html_data"],
+)
+def test_get_unreleased_hero(client: TestClient, hero_html_data: str):
+    with patch(
+        "httpx.AsyncClient.get",
+        return_value=Mock(
+            status_code=status.HTTP_404_NOT_FOUND,
+            text=hero_html_data,
+        ),
+    ):
+        response = client.get("/heroes/ana")
+
     assert response.json() == {"error": "Hero not found or not released yet"}
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_get_hero_blizzard_error(client: TestClient):
@@ -50,15 +63,12 @@ def test_get_hero_internal_error(client: TestClient):
         assert response.json() == {"error": settings.internal_server_error_message}
 
 
-def test_get_hero_no_portrait(client: TestClient, heroes_json_data: list[dict]):
+def test_get_hero_no_portrait(client: TestClient):
     hero_name = HeroKey.ANA
-    heroes_data = [
-        hero_data for hero_data in heroes_json_data if hero_data["key"] != hero_name
-    ]
 
     with patch(
         "app.parsers.heroes_parser.HeroesParser.filter_request_using_query",
-        return_value=heroes_data,
+        return_value=[],
     ):
         response = client.get(f"/heroes/{hero_name}")
 

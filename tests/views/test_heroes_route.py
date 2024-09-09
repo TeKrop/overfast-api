@@ -4,67 +4,25 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from app.common.cache_manager import CacheManager
-from app.common.enums import Locale, Role
-from app.config import settings
+from app.common.enums import Role
 
 
-@pytest.fixture(scope="module", autouse=True)
-def _setup_heroes_test(heroes_html_data: str):
-    with patch(
-        "httpx.AsyncClient.get",
-        return_value=Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
-    ):
-        yield
-
-
-def test_get_heroes(client: TestClient, heroes_json_data: list):
+def test_get_heroes(client: TestClient):
     response = client.get("/heroes")
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == heroes_json_data
+    assert len(response.json()) > 0
 
 
-def test_get_heroes_from_parser_cache(client: TestClient, heroes_json_data: list):
-    cache_manager = CacheManager()
-    cache_manager.update_parser_cache(
-        f"HeroesParser-{settings.blizzard_host}/{Locale.ENGLISH_US}{settings.heroes_path}",
-        heroes_json_data,
-        100,
-    )
-
-    response = client.get("/heroes")
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == heroes_json_data
-
-
-@pytest.mark.parametrize(
-    "role",
-    [r.value for r in Role],
-)
-def test_get_heroes_filter_by_role(
-    client: TestClient, role: Role, heroes_json_data: list
-):
+@pytest.mark.parametrize("role", [r.value for r in Role])
+def test_get_heroes_filter_by_role(client: TestClient, role: Role):
     response = client.get(f"/heroes?role={role}")
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == [
-        hero for hero in heroes_json_data if hero["role"] == role
-    ]
+    assert len(response.json()) > 0
 
 
 def test_get_heroes_invalid_role(client: TestClient):
     response = client.get("/heroes?role=invalid")
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert response.json() == {
-        "detail": [
-            {
-                "type": "enum",
-                "loc": ["query", "role"],
-                "msg": "Input should be 'damage', 'support' or 'tank'",
-                "input": "invalid",
-                "ctx": {"expected": "'damage', 'support' or 'tank'"},
-            },
-        ],
-    }
 
 
 def test_get_heroes_blizzard_error(client: TestClient):

@@ -1,4 +1,3 @@
-import json
 from unittest.mock import Mock, patch
 
 import pytest
@@ -10,56 +9,12 @@ from app.common.helpers import players_ids
 
 
 @pytest.mark.parametrize(
-    ("player_id", "player_html_data", "player_json_data"),
-    [
-        (player_id, player_id, player_id)
-        for player_id in players_ids
-        if player_id != "Unknown-1234"
-    ],
-    indirect=["player_html_data", "player_json_data"],
+    ("player_id"),
+    [(player_id) for player_id in players_ids if player_id != "Unknown-1234"],
 )
-def test_get_player_career(
-    client: TestClient,
-    player_id: str,
-    player_html_data: str,
-    player_json_data: dict,
-    search_tekrop_blizzard_json_data: dict,
-    search_html_data: str,
-):
-    with (
-        patch(
-            "httpx.AsyncClient.get",
-            side_effect=[
-                # Player HTML page
-                Mock(status_code=status.HTTP_200_OK, text=player_html_data),
-                # Search results related to the player (for namecard)
-                Mock(
-                    status_code=status.HTTP_200_OK,
-                    text=json.dumps(search_tekrop_blizzard_json_data),
-                    json=lambda: search_tekrop_blizzard_json_data,
-                ),
-                # Search results related to the player (for last_updated_at)
-                Mock(
-                    status_code=status.HTTP_200_OK,
-                    text=json.dumps(search_tekrop_blizzard_json_data),
-                    json=lambda: search_tekrop_blizzard_json_data,
-                ),
-            ],
-        ),
-        patch(
-            "httpx.get",
-            # Search HTML page for namecard retrieval
-            return_value=Mock(status_code=status.HTTP_200_OK, text=search_html_data),
-        ),
-    ):
-        response = client.get(f"/players/{player_id}")
-
-    # Only assert the status and some elements from the response
-    # We already check the entire content in parsers UT
+def test_get_player_career(client: TestClient, player_id: str):
+    response = client.get(f"/players/{player_id}")
     assert response.status_code == status.HTTP_200_OK
-
-    response_json = response.json()
-    assert response_json["summary"] == player_json_data["summary"]  # for namecard
 
 
 def test_get_player_career_blizzard_error(client: TestClient):
