@@ -11,7 +11,7 @@ def test_get_maps(client: TestClient):
     assert response.status_code == status.HTTP_200_OK
 
     response_json = response.json()
-    assert len(response_json.keys()) > 0
+    assert len(response_json) > 0
 
     # Check if all the images link are valid
     for map_dict in response_json:

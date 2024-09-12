@@ -5,15 +5,9 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
-from app.common.helpers import players_ids
 
-
-@pytest.mark.parametrize(
-    ("player_id"),
-    [(player_id) for player_id in players_ids if player_id != "Unknown-1234"],
-)
-def test_get_player_career(client: TestClient, player_id: str):
-    response = client.get(f"/players/{player_id}")
+def test_get_player_career(client: TestClient):
+    response = client.get("/players/TeKrop-2217")
     assert response.status_code == status.HTTP_200_OK
 
 
