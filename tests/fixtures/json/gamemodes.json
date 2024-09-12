@@ -14,6 +14,13 @@
         "screenshot": "https://overfast-api.tekrop.fr/static/gamemodes/capture-the-flag.avif"
     },
     {
+        "key": "clash",
+        "name": "Clash",
+        "icon": "https://overfast-api.tekrop.fr/static/gamemodes/clash-icon.svg",
+        "description": "Vie for dominance across a series of capture points with dynamic spawns and linear map routes, so you spend less time running back to the battle and more time in the heart of it.",
+        "screenshot": "https://overfast-api.tekrop.fr/static/gamemodes/clash.avif"
+    },
+    {
         "key": "control",
         "name": "Control",
         "icon": "https://overfast-api.tekrop.fr/static/gamemodes/control-icon.svg",
