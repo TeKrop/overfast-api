@@ -28,7 +28,7 @@ class HeroParser(APIParser):
         self.locale = kwargs.get("locale") or Locale.ENGLISH_US
 
     def get_blizzard_url(self, **kwargs) -> str:
-        return f"{super().get_blizzard_url(**kwargs)}/{kwargs.get('hero_key')}"
+        return f"{super().get_blizzard_url(**kwargs)}{kwargs.get('hero_key')}/"
 
     def parse_data(self) -> dict:
         # We must check if we have the expected section for hero. If not,
@@ -66,7 +66,7 @@ class HeroParser(APIParser):
                 header_section.find("p", slot="description").get_text().strip()
             ),
             "role": get_role_from_icon_url(extra_list_items[0].find("image")["href"]),
-            "location": extra_list_items[1].get_text(),
+            "location": extra_list_items[1].get_text().strip(),
             "birthday": birthday,
             "age": age,
         }
@@ -163,7 +163,7 @@ class HeroParser(APIParser):
                 " ".join(
                     [
                         paragraph.get_text()
-                        for paragraph in content_container.find_all("p")
+                        for paragraph in content_container.find_all(["p", "pr"])
                     ],
                 ).strip()
             )
