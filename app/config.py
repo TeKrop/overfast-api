@@ -137,7 +137,7 @@ class Settings(BaseSettings):
     home_path: str = "/"
 
     # Route for Overwatch heroes pages
-    heroes_path: str = "/heroes"
+    heroes_path: str = "/heroes/"
 
     # Route for players career pages
     career_path: str = "/career"

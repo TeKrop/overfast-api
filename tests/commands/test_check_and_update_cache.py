@@ -47,7 +47,7 @@ def test_check_and_update_gamemodes_cache_to_update(
         settings.expired_cache_refresh_limit + 30,
     )
     cache_manager.update_parser_cache(
-        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}ana/",
         {},
         settings.expired_cache_refresh_limit + 5,
     )
@@ -89,7 +89,7 @@ def test_check_and_update_specific_hero_to_update(
     hero_json_data: dict,
 ):
     ana_cache_key = (
-        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana"
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}ana/"
     )
 
     # Add some data (to update and not to update)
@@ -163,7 +163,7 @@ def test_check_and_update_cache_no_update(cache_manager: CacheManager, locale: s
         settings.expired_cache_refresh_limit + 30,
     )
     cache_manager.update_parser_cache(
-        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}ana/",
         {},
         settings.expired_cache_refresh_limit + 5,
     )
@@ -202,7 +202,7 @@ def test_check_and_update_specific_player_to_update(
         settings.expired_cache_refresh_limit - 5,
     )
     cache_manager.update_parser_cache(
-        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}ana/",
         {},
         settings.expired_cache_refresh_limit + 5,
     )
@@ -254,7 +254,7 @@ def test_check_and_update_player_stats_summary_to_update(
         settings.expired_cache_refresh_limit - 5,
     )
     cache_manager.update_parser_cache(
-        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}ana/",
         {},
         settings.expired_cache_refresh_limit + 5,
     )
@@ -297,7 +297,7 @@ def test_check_and_update_player_stats_summary_to_update(
 def test_check_internal_error_from_blizzard(cache_manager: CacheManager, locale: str):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}ana/",
         {},
         settings.expired_cache_refresh_limit - 5,
     )
@@ -325,7 +325,7 @@ def test_check_internal_error_from_blizzard(cache_manager: CacheManager, locale:
 def test_check_timeout_from_blizzard(cache_manager: CacheManager, locale: str):
     # Add some data (to update and not to update)
     cache_manager.update_parser_cache(
-        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}ana/",
         {},
         settings.expired_cache_refresh_limit - 5,
     )
@@ -475,7 +475,7 @@ def test_check_and_update_namecard_to_update(
 
     # Add some data which doesn't need update
     cache_manager.update_parser_cache(
-        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
+        f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}ana/",
         {},
         settings.expired_cache_refresh_limit + 5,
     )
