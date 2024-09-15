@@ -168,7 +168,7 @@ def test_get_soon_expired_cache_keys(
         is_redis_server_up,
     ):
         cache_manager.update_parser_cache(
-            f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}/ana",
+            f"HeroParser-{settings.blizzard_host}/{locale}{settings.heroes_path}ana/",
             {},
             settings.expired_cache_refresh_limit + 5,
         )
