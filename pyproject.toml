@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "beautifulsoup4==4.12.*",
-    "fastapi[standard]==0.114.*",
+    "fastapi[standard]==0.115.*",
     "httpx[http2]==0.27.*",
     "loguru==0.7.*",
     "lxml==5.3.*",
