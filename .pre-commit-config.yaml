@@ -2,7 +2,7 @@ default_language_version:
     python: python3.12
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.2
+    rev: v0.6.9
     hooks:
       - id: ruff
         name: (ruff) Linting and fixing code
@@ -10,7 +10,7 @@ repos:
       - id: ruff-format
         name: (ruff) Formatting code
   - repo: https://github.com/sourcery-ai/sourcery
-    rev: v1.16.0
+    rev: v1.23.0
     hooks:
       - id: sourcery
         name: (sourcery) Checking code quality

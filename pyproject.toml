@@ -1,6 +1,6 @@
 [project]
 name = "overfast-api"
-version = "2.37.1"
+version = "2.37.2"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = {file = "LICENSE"}
 authors = [
@@ -10,11 +10,11 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "beautifulsoup4==4.12.*",
-    "fastapi[standard]==0.114.*",
+    "fastapi[standard]==0.115.*",
     "httpx[http2]==0.27.*",
     "loguru==0.7.*",
     "lxml==5.3.*",
-    "redis==5.0.*",
+    "redis==5.1.*",
     "pydantic==2.9.*",
     "pydantic-settings==2.5.*",
 ]
@@ -28,7 +28,7 @@ Issues = "https://github.com/TeKrop/overfast-api/issues"
 [tool.uv]
 compile-bytecode = true
 dev-dependencies = [
-    "fakeredis==2.24.*",
+    "fakeredis==2.25.*",
     "ipdb==0.13.*",
     "pytest==8.3.*",
     "pytest-asyncio==0.24.*",
@@ -36,7 +36,7 @@ dev-dependencies = [
     "pytest-randomly==3.15.*",
     "pytest-xdist==3.6.*",
     "ruff==0.6.*",
-    "pre-commit==3.8.*",
+    "pre-commit==4.0.*",
 ]
 
 [tool.ruff]
