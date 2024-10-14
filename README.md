@@ -172,6 +172,7 @@ Contributions, issues and feature requests are welcome ! Do you want to update t
 ## 🚀 Community projects
 Projects using OverFast API as a data source are listed below. Using it in your project? Reach out via email with your project link, and I'll add it!
 
+- Counterwatch, enhances your Overwatch 2 experience (https://www.counterwatch.app)
 - Datastrike, analysis and results tracking tool (https://datastrike.cloud)
 - Discord Bot OW2 for stats (https://github.com/polsojac/ow2discordbot)
 - OverBot, the best Overwatch bot for Discord (https://github.com/davidetacchini/overbot)
