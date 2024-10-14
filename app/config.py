@@ -68,6 +68,9 @@ class Settings(BaseSettings):
     # CACHE CONFIGURATION
     ############
 
+    # Enable background cache refresh system (check_and_update_cache)
+    background_cache_refresh_enabled: bool = True
+
     # Prefix for keys in API Cache with entire payload (Redis).
     # Used by nginx as main API cache.
     api_cache_key_prefix: str = "api-cache"
