@@ -10,10 +10,6 @@ ENV NGINX_VERSION=${NGINX_VERSION}
 ARG NGX_HTTP_REDIS_VERSION
 ENV NGX_HTTP_REDIS_VERSION=${NGX_HTTP_REDIS_VERSION}
 
-# Copy specific configuration files
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY overfast-api.conf /etc/nginx/conf.d/default.conf
-
 # Download nginx and ngx_http_redis sources
 RUN wget https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz && \
   tar -xzvf nginx-$NGINX_VERSION.tar.gz && \
@@ -33,6 +29,10 @@ RUN cd nginx-$NGINX_VERSION && \
   ./configure.sh && \
   make modules && \
   cp objs/ngx_http_redis_module.so /usr/lib/nginx/modules/ngx_http_redis_module.so
+
+# Copy specific configuration files
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY overfast-api.conf /etc/nginx/conf.d/default.conf
 
 # Clean everything
 RUN rm -rf nginx-$NGINX_VERSION* && \

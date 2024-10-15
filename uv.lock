@@ -540,7 +540,7 @@ wheels = [
 
 [[package]]
 name = "overfast-api"
-version = "2.37.2"
+version = "2.39.0"
 source = { virtual = "." }
 dependencies = [
     { name = "beautifulsoup4" },

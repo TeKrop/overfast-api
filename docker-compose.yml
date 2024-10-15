@@ -6,6 +6,7 @@ services:
     command: /code/.venv/bin/fastapi run app/main.py --port 8080 --proxy-headers
     env_file: ${APP_VOLUME_PATH:-.}/.env
     volumes:
+      - static_volume:/code/static
       - ${APP_VOLUME_PATH:-/tmp}/app-logs:/code/logs
     depends_on:
       redis:
@@ -53,6 +54,8 @@ services:
       context: ./build/nginx
     ports:
       - "${APP_PORT}:80"
+    volumes:
+      - static_volume:/static
     depends_on:
       app:
         condition: service_healthy
@@ -62,3 +65,6 @@ services:
       test: ["CMD-SHELL", "wget --spider --quiet http://localhost || exit 1"]
       interval: 5s
       timeout: 2s
+
+volumes:
+  static_volume:
