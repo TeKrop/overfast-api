@@ -32,6 +32,15 @@ def _set_no_spread_percentage():
         yield
 
 
+@pytest.fixture(autouse=True)
+def _set_background_cache_refresh_enabled():
+    with patch(
+        "app.common.cache_manager.settings.background_cache_refresh_enabled",
+        True,
+    ):
+        yield
+
+
 def test_check_and_update_gamemodes_cache_to_update(
     cache_manager: CacheManager,
     locale: str,

@@ -102,6 +102,10 @@ async def retrieve_data(key: str, parser: AbstractParser):
 
 async def main():
     """Main coroutine of the script"""
+    if not settings.background_cache_refresh_enabled:
+        logger.warning("Background Cache Refresh system is disabled")
+        raise SystemExit
+
     logger.info("Starting Redis cache update...")
 
     keys_to_update = get_soon_expired_cache_keys()
