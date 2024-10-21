@@ -16,7 +16,7 @@ dependencies = [
     "lxml==5.3.*",
     "redis==5.1.*",
     "pydantic==2.9.*",
-    "pydantic-settings==2.5.*",
+    "pydantic-settings==2.6.*",
 ]
 
 [project.urls]
