@@ -4,6 +4,8 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from app.config import settings
+
 
 @pytest.fixture(scope="module", autouse=True)
 def _setup_roles_test(home_html_data: str):
@@ -60,3 +62,22 @@ def test_get_roles_internal_error(client: TestClient):
                 "https://github.com/TeKrop/overfast-api/issues"
             ),
         }
+
+
+def test_get_roles_blizzard_forbidden_error(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
+        return_value=Mock(
+            status_code=status.HTTP_403_FORBIDDEN,
+            text="403 Forbidden",
+        ),
+    ):
+        response = client.get("/roles")
+
+    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    assert response.json() == {
+        "error": (
+            "API has been rate limited by Blizzard, please wait for "
+            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
+        )
+    }

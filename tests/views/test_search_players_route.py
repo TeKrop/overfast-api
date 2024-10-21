@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
 from app.common.cache_manager import CacheManager
+from app.config import settings
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -84,6 +85,25 @@ def test_search_players_blizzard_timeout(client: TestClient):
             "Couldn't get Blizzard page (HTTP 0 error) : "
             "Blizzard took more than 10 seconds to respond, resulting in a timeout"
         ),
+    }
+
+
+def test_get_roles_blizzard_forbidden_error(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
+        return_value=Mock(
+            status_code=status.HTTP_403_FORBIDDEN,
+            text="403 Forbidden",
+        ),
+    ):
+        response = client.get("/players?name=Player")
+
+    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    assert response.json() == {
+        "error": (
+            "API has been rate limited by Blizzard, please wait for "
+            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
+        )
     }
 
 

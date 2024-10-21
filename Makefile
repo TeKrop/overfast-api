@@ -66,7 +66,11 @@ up: ## Build & run OverFastAPI application (production mode)
 
 down: ## Stop the app and remove containers
 	@echo "Stopping OverFastAPI and cleaning containers..."
-	docker compose down -v --remove-orphans
+	docker compose --profile "*" down  -v --remove-orphans
+
+testing: ## Run OverFastAPI application (testing mode)
+	@echo "Launching OverFastAPI (testing mode)..."
+	docker compose --profile testing up -d
 
 clean: down ## Clean up Docker environment
 	@echo "Cleaning Docker environment..."

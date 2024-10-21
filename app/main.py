@@ -43,14 +43,8 @@ the efficiency of **FastAPI** and **Beautiful Soup**, it leverages **nginx** as 
 reverse proxy and **Redis** for caching. Its tailored caching mechanism significantly
 reduces calls to Blizzard pages, ensuring swift and precise data delivery to users.
 
-{
-"""
-This live instance is restricted to **30 req/s** per IP (a shared limit across all endpoints).
+This live instance is restricted to **{settings.rate_limit_per_second_per_ip} req/s** per IP (a shared limit across all endpoints).
 If you require more, consider hosting your own instance on a server 👍
-"""
-if settings.too_many_requests_response
-else ""
-}
 
 In player career statistics, various conversions are applied for ease of use:
 - **Duration values** are converted to **seconds** (integer)
@@ -132,7 +126,11 @@ logger.info("Version : {}", settings.app_version)
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(_: Request, exc: StarletteHTTPException):
-    return JSONResponse(content={"error": exc.detail}, status_code=exc.status_code)
+    return JSONResponse(
+        content={"error": exc.detail},
+        status_code=exc.status_code,
+        headers=exc.headers,
+    )
 
 
 # We need to override default Redoc page in order to be

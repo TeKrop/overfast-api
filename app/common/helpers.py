@@ -12,7 +12,11 @@ import httpx
 from fastapi import HTTPException, Request, status
 
 from app.config import settings
-from app.models.errors import BlizzardErrorMessage, InternalServerErrorMessage
+from app.models.errors import (
+    BlizzardErrorMessage,
+    InternalServerErrorMessage,
+    RateLimitErrorMessage,
+)
 
 from .decorators import rate_limited
 from .logging import logger
@@ -23,6 +27,19 @@ if TYPE_CHECKING:  # pragma: no cover
 
 # Typical routes responses to return
 routes_responses = {
+    status.HTTP_429_TOO_MANY_REQUESTS: {
+        "model": RateLimitErrorMessage,
+        "description": "Rate Limit Error",
+        "headers": {
+            "Retry-After": {
+                "description": "Indicates how long to wait before making a new request",
+                "schema": {
+                    "type": "string",
+                    "example": "5",
+                },
+            }
+        },
+    },
     status.HTTP_500_INTERNAL_SERVER_ERROR: {
         "model": InternalServerErrorMessage,
         "description": "Internal Server Error",
@@ -32,10 +49,6 @@ routes_responses = {
         "description": "Blizzard Server Error",
     },
 }
-if settings.too_many_requests_response:
-    routes_responses[status.HTTP_429_TOO_MANY_REQUESTS] = {
-        "description": "Rate Limit Error",
-    }
 
 # List of players used for testing
 players_ids = [
@@ -66,6 +79,17 @@ overfast_client_settings = {
 
 async def overfast_request(client: httpx.AsyncClient, url: str) -> httpx.Response:
     """Make an HTTP GET request with custom headers and retrieve the result"""
+
+    # First, make sure we're not being rate limited by Blizzard before making
+    # any API call. Else, return an HTTP 429 with Retry-After header.
+    from .cache_manager import CacheManager
+
+    cache_manager = CacheManager()
+    if cache_manager.is_being_rate_limited():
+        raise too_many_requests_response(
+            retry_after=cache_manager.get_global_rate_limit_remaining_time()
+        )
+
     try:
         logger.debug("Requesting {}...", url)
         response = await client.get(url)
@@ -74,9 +98,15 @@ async def overfast_request(client: httpx.AsyncClient, url: str) -> httpx.Respons
             status_code=0,
             error="Blizzard took more than 10 seconds to respond, resulting in a timeout",
         ) from error
-    else:
-        logger.debug("OverFast request done !")
-        return response
+
+    logger.debug("OverFast request done !")
+
+    # Make sure we catch HTTP 403 from Blizzard when it happens,
+    # so we don't make any more call before some amount of time
+    if response.status_code == status.HTTP_403_FORBIDDEN:
+        raise blizzard_forbidden_error()
+
+    return response
 
 
 def overfast_internal_error(url: str, error: Exception) -> HTTPException:
@@ -127,6 +157,40 @@ def blizzard_response_error(status_code: int, error: str) -> HTTPException:
 def blizzard_response_error_from_request(req: Request) -> HTTPException:
     """Alias for sending Blizzard error from a request directly"""
     return blizzard_response_error(req.status_code, req.text)
+
+
+def blizzard_forbidden_error() -> HTTPException:
+    """Retrieve a generic error response when Blizzard returns forbidden error.
+    Also prevent further calls to Blizzard for a given amount of time.
+    """
+
+    # We have to block future requests to Blizzard, cache the information on Redis
+    from .cache_manager import CacheManager
+
+    CacheManager().set_global_rate_limit()
+
+    # If Discord Webhook configuration is enabled, send a message to the
+    # given channel using Discord Webhook URL
+    send_discord_webhook_message(
+        "Blizzard Rate Limit reached ! Blocking further calls for "
+        f"{settings.blizzard_rate_limit_retry_after} seconds..."
+    )
+
+    return too_many_requests_response(
+        retry_after=settings.blizzard_rate_limit_retry_after
+    )
+
+
+def too_many_requests_response(retry_after: int) -> HTTPException:
+    """Generic method to return an HTTP 429 response with Retry-After header"""
+    return HTTPException(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        detail=(
+            "API has been rate limited by Blizzard, please wait for "
+            f"{retry_after} seconds before retrying"
+        ),
+        headers={"Retry-After": str(retry_after)},
+    )
 
 
 @rate_limited(max_calls=1, interval=1800)
