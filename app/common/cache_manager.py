@@ -192,3 +192,19 @@ class CacheManager(metaclass=Singleton):
     @redis_connection_handler
     def delete_keys(self, keys: Iterable[str]) -> None:
         self.redis_server.delete(*keys)
+
+    @redis_connection_handler
+    def is_being_rate_limited(self) -> bool:
+        return self.redis_server.exists(settings.blizzard_rate_limit_key)
+
+    @redis_connection_handler
+    def get_global_rate_limit_remaining_time(self) -> int:
+        return self.redis_server.ttl(settings.blizzard_rate_limit_key)
+
+    @redis_connection_handler
+    def set_global_rate_limit(self) -> None:
+        self.redis_server.set(
+            settings.blizzard_rate_limit_key,
+            value=0,
+            ex=settings.blizzard_rate_limit_retry_after,
+        )

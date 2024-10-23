@@ -23,7 +23,7 @@
 
 
 ## ✨ [Live instance](https://overfast-api.tekrop.fr)
-The live instance is restricted to **30 req/s** per IP (a shared limit across all endpoints). If you require more, consider hosting your own instance on a server 👍
+The live instance is restricted with a rate limit around 10 req/s per IP (a shared limit across all endpoints). This limit may be adjusted as needed. If you require higher throughput, consider hosting your own instance on a server 👍
 
 - Live instance (Redoc documentation) : https://overfast-api.tekrop.fr/
 - Swagger UI : https://overfast-api.tekrop.fr/docs
@@ -44,6 +44,7 @@ Then, execute the following commands to launch the dev server :
 ```shell
 make build     # Build the images, needed for all further commands
 make start     # Launch OverFast API (dev mode)
+make testing   # Launch OverFast API (testing mode with reverse proxy)
 ```
 The dev server will be running on the port `8000`. You can use the `make down` command to stop and remove the containers. Feel free to type `make` or `make help` to access a comprehensive list of all available commands for your reference.
 

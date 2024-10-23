@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
 from app.common.helpers import players_ids
+from app.config import settings
 
 
 @pytest.mark.parametrize(
@@ -112,6 +113,25 @@ def test_get_player_career_internal_error(client: TestClient):
                 "https://github.com/TeKrop/overfast-api/issues"
             ),
         }
+
+
+def test_get_player_career_blizzard_forbidden_error(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
+        return_value=Mock(
+            status_code=status.HTTP_403_FORBIDDEN,
+            text="403 Forbidden",
+        ),
+    ):
+        response = client.get("/players/TeKrop-2217")
+
+    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    assert response.json() == {
+        "error": (
+            "API has been rate limited by Blizzard, please wait for "
+            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
+        )
+    }
 
 
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)

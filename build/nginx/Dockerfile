@@ -32,7 +32,10 @@ RUN cd nginx-$NGINX_VERSION && \
 
 # Copy specific configuration files
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY overfast-api.conf /etc/nginx/conf.d/default.conf
+COPY overfast-api.conf.template /etc/nginx/conf.d/default.conf.template
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Clean everything
 RUN rm -rf nginx-$NGINX_VERSION* && \

@@ -45,9 +45,24 @@ class Settings(BaseSettings):
     # Optional, status page URL if you have any to provide
     status_page_url: str | None = None
 
-    # Enable this option if you're using a reverse proxy to handle rate limits
-    # in order to indicate HTTP 429 as possible response from the API in doc
-    too_many_requests_response: bool = True
+    ############
+    # RATE LIMITING
+    ############
+
+    # Redis key for Blizzard rate limit storage
+    blizzard_rate_limit_key: str = "blizzard-rate-limit"
+
+    # Number of seconds before the user is authorized to make calls to Blizzard again
+    blizzard_rate_limit_retry_after: int = 5
+
+    # Global rate limit of requests per second per ip to apply on the API
+    rate_limit_per_second_per_ip: int = 10
+
+    # Global burst value to apply on rate limit before rejecting requests
+    rate_limit_per_ip_burst: int = 2
+
+    # Global maximum number of connection per ip
+    max_connections_per_ip: int = 5
 
     ############
     # REDIS CONFIGURATION

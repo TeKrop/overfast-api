@@ -40,3 +40,13 @@ class HeroParserErrorMessage(BaseModel):
         description="Message describing the hero parser error",
         examples=["Hero not found or not released yet"],
     )
+
+
+class RateLimitErrorMessage(BaseModel):
+    error: str = Field(
+        ...,
+        description="Message describing the rate limit error and number of seconds before retrying",
+        examples=[
+            "API has been rate limited by Blizzard, please wait for 5 seconds before retrying"
+        ],
+    )

@@ -7,6 +7,7 @@ from httpx import TimeoutException
 
 from app.common.enums import PlayerGamemode, PlayerPlatform
 from app.common.helpers import read_json_file
+from app.config import settings
 
 platforms = {p.value for p in PlayerPlatform}
 gamemodes = {g.value for g in PlayerGamemode}
@@ -111,3 +112,24 @@ def test_get_player_stats_internal_error(client: TestClient):
                 "https://github.com/TeKrop/overfast-api/issues"
             ),
         }
+
+
+def test_get_player_stats_blizzard_forbidden_error(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
+        return_value=Mock(
+            status_code=status.HTTP_403_FORBIDDEN,
+            text="403 Forbidden",
+        ),
+    ):
+        response = client.get(
+            f"/players/TeKrop-2217/stats/summary?gamemode={PlayerGamemode.QUICKPLAY}",
+        )
+
+    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    assert response.json() == {
+        "error": (
+            "API has been rate limited by Blizzard, please wait for "
+            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
+        )
+    }

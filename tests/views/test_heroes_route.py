@@ -98,3 +98,22 @@ def test_get_heroes_internal_error(client: TestClient):
                 "https://github.com/TeKrop/overfast-api/issues"
             ),
         }
+
+
+def test_get_heroes_blizzard_forbidden_error(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
+        return_value=Mock(
+            status_code=status.HTTP_403_FORBIDDEN,
+            text="403 Forbidden",
+        ),
+    ):
+        response = client.get("/heroes")
+
+    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    assert response.json() == {
+        "error": (
+            "API has been rate limited by Blizzard, please wait for "
+            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
+        )
+    }

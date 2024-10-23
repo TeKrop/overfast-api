@@ -9,10 +9,14 @@ from random import randint
 from typing import TYPE_CHECKING, Any
 
 import httpx
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, status
 
 from app.config import settings
-from app.models.errors import BlizzardErrorMessage, InternalServerErrorMessage
+from app.models.errors import (
+    BlizzardErrorMessage,
+    InternalServerErrorMessage,
+    RateLimitErrorMessage,
+)
 
 from .decorators import rate_limited
 from .logging import logger
@@ -23,6 +27,19 @@ if TYPE_CHECKING:  # pragma: no cover
 
 # Typical routes responses to return
 routes_responses = {
+    status.HTTP_429_TOO_MANY_REQUESTS: {
+        "model": RateLimitErrorMessage,
+        "description": "Rate Limit Error",
+        "headers": {
+            "Retry-After": {
+                "description": "Indicates how long to wait before making a new request",
+                "schema": {
+                    "type": "string",
+                    "example": "5",
+                },
+            }
+        },
+    },
     status.HTTP_500_INTERNAL_SERVER_ERROR: {
         "model": InternalServerErrorMessage,
         "description": "Internal Server Error",
@@ -32,10 +49,6 @@ routes_responses = {
         "description": "Blizzard Server Error",
     },
 }
-if settings.too_many_requests_response:
-    routes_responses[status.HTTP_429_TOO_MANY_REQUESTS] = {
-        "description": "Rate Limit Error",
-    }
 
 # List of players used for testing
 players_ids = [
@@ -48,35 +61,6 @@ players_ids = [
     "Unknown-1234",  # No player
     "JohnV1-1190",  # Player without any title ingame
 ]
-
-# httpx client settings
-overfast_client_settings = {
-    "headers": {
-        "User-Agent": (
-            f"OverFastAPI v{settings.app_version} - "
-            "https://github.com/TeKrop/overfast-api"
-        ),
-        "From": "valentin.porchet@proton.me",
-    },
-    "http2": True,
-    "timeout": 10,
-    "follow_redirects": True,
-}
-
-
-async def overfast_request(client: httpx.AsyncClient, url: str) -> httpx.Response:
-    """Make an HTTP GET request with custom headers and retrieve the result"""
-    try:
-        logger.debug("Requesting {}...", url)
-        response = await client.get(url)
-    except httpx.TimeoutException as error:
-        raise blizzard_response_error(
-            status_code=0,
-            error="Blizzard took more than 10 seconds to respond, resulting in a timeout",
-        ) from error
-    else:
-        logger.debug("OverFast request done !")
-        return response
 
 
 def overfast_internal_error(url: str, error: Exception) -> HTTPException:
@@ -108,25 +92,6 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
             "https://github.com/TeKrop/overfast-api/issues"
         ),
     )
-
-
-def blizzard_response_error(status_code: int, error: str) -> HTTPException:
-    """Retrieve a generic error response when a Blizzard page doesn't load"""
-    logger.error(
-        "Received an error from Blizzard. HTTP {} : {}",
-        status_code,
-        error,
-    )
-
-    return HTTPException(
-        status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-        detail=f"Couldn't get Blizzard page (HTTP {status_code} error) : {error}",
-    )
-
-
-def blizzard_response_error_from_request(req: Request) -> HTTPException:
-    """Alias for sending Blizzard error from a request directly"""
-    return blizzard_response_error(req.status_code, req.text)
 
 
 @rate_limited(max_calls=1, interval=1800)
