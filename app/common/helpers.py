@@ -9,7 +9,7 @@ from random import randint
 from typing import TYPE_CHECKING, Any
 
 import httpx
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, status
 
 from app.config import settings
 from app.models.errors import (
@@ -62,52 +62,6 @@ players_ids = [
     "JohnV1-1190",  # Player without any title ingame
 ]
 
-# httpx client settings
-overfast_client_settings = {
-    "headers": {
-        "User-Agent": (
-            f"OverFastAPI v{settings.app_version} - "
-            "https://github.com/TeKrop/overfast-api"
-        ),
-        "From": "valentin.porchet@proton.me",
-    },
-    "http2": True,
-    "timeout": 10,
-    "follow_redirects": True,
-}
-
-
-async def overfast_request(client: httpx.AsyncClient, url: str) -> httpx.Response:
-    """Make an HTTP GET request with custom headers and retrieve the result"""
-
-    # First, make sure we're not being rate limited by Blizzard before making
-    # any API call. Else, return an HTTP 429 with Retry-After header.
-    from .cache_manager import CacheManager
-
-    cache_manager = CacheManager()
-    if cache_manager.is_being_rate_limited():
-        raise too_many_requests_response(
-            retry_after=cache_manager.get_global_rate_limit_remaining_time()
-        )
-
-    try:
-        logger.debug("Requesting {}...", url)
-        response = await client.get(url)
-    except httpx.TimeoutException as error:
-        raise blizzard_response_error(
-            status_code=0,
-            error="Blizzard took more than 10 seconds to respond, resulting in a timeout",
-        ) from error
-
-    logger.debug("OverFast request done !")
-
-    # Make sure we catch HTTP 403 from Blizzard when it happens,
-    # so we don't make any more call before some amount of time
-    if response.status_code == status.HTTP_403_FORBIDDEN:
-        raise blizzard_forbidden_error()
-
-    return response
-
 
 def overfast_internal_error(url: str, error: Exception) -> HTTPException:
     """Returns an Internal Server Error. Also log it and eventually send
@@ -137,59 +91,6 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
             "issue if you want any news concerning the bug resolution : "
             "https://github.com/TeKrop/overfast-api/issues"
         ),
-    )
-
-
-def blizzard_response_error(status_code: int, error: str) -> HTTPException:
-    """Retrieve a generic error response when a Blizzard page doesn't load"""
-    logger.error(
-        "Received an error from Blizzard. HTTP {} : {}",
-        status_code,
-        error,
-    )
-
-    return HTTPException(
-        status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-        detail=f"Couldn't get Blizzard page (HTTP {status_code} error) : {error}",
-    )
-
-
-def blizzard_response_error_from_request(req: Request) -> HTTPException:
-    """Alias for sending Blizzard error from a request directly"""
-    return blizzard_response_error(req.status_code, req.text)
-
-
-def blizzard_forbidden_error() -> HTTPException:
-    """Retrieve a generic error response when Blizzard returns forbidden error.
-    Also prevent further calls to Blizzard for a given amount of time.
-    """
-
-    # We have to block future requests to Blizzard, cache the information on Redis
-    from .cache_manager import CacheManager
-
-    CacheManager().set_global_rate_limit()
-
-    # If Discord Webhook configuration is enabled, send a message to the
-    # given channel using Discord Webhook URL
-    send_discord_webhook_message(
-        "Blizzard Rate Limit reached ! Blocking further calls for "
-        f"{settings.blizzard_rate_limit_retry_after} seconds..."
-    )
-
-    return too_many_requests_response(
-        retry_after=settings.blizzard_rate_limit_retry_after
-    )
-
-
-def too_many_requests_response(retry_after: int) -> HTTPException:
-    """Generic method to return an HTTP 429 response with Retry-After header"""
-    return HTTPException(
-        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-        detail=(
-            "API has been rate limited by Blizzard, please wait for "
-            f"{retry_after} seconds before retrying"
-        ),
-        headers={"Retry-After": str(retry_after)},
     )
 
 
