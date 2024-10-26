@@ -23,7 +23,7 @@
 
 
 ## ✨ [Live instance](https://overfast-api.tekrop.fr)
-The live instance is restricted with a rate limiter per IP (a shared limit across all endpoints). If you require more, consider hosting your own instance on a server 👍
+The live instance is restricted with a rate limit around 10 req/s per IP (a shared limit across all endpoints). This limit may be adjusted as needed. If you require higher throughput, consider hosting your own instance on a server 👍
 
 - Live instance (Redoc documentation) : https://overfast-api.tekrop.fr/
 - Swagger UI : https://overfast-api.tekrop.fr/docs

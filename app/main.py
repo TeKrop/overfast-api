@@ -2,7 +2,6 @@
 
 from contextlib import asynccontextmanager, suppress
 
-import httpx
 from fastapi import FastAPI, Request
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
@@ -12,14 +11,14 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .commands.update_search_data_cache import update_search_data_cache
 from .common.enums import RouteTag
-from .common.helpers import overfast_client_settings
 from .common.logging import logger
+from .common.overfast_client import OverFastClient
 from .config import settings
 from .routers import gamemodes, heroes, maps, players, roles
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # pragma: no cover
+async def lifespan(_: FastAPI):  # pragma: no cover
     # Update search data list from Blizzard before starting up
     if settings.redis_caching_enabled:
         logger.info("Updating search data cache (avatars, namecards, titles)")
@@ -28,12 +27,12 @@ async def lifespan(app: FastAPI):  # pragma: no cover
 
     # Instanciate HTTPX Async Client
     logger.info("Instanciating HTTPX AsyncClient...")
-    app.overfast_client = httpx.AsyncClient(**overfast_client_settings)
+    overfast_client = OverFastClient()
 
     yield
 
     # Properly close HTTPX Async Client
-    await app.overfast_client.aclose()
+    await overfast_client.aclose()
 
 
 app = FastAPI(title="OverFast API", docs_url=None, redoc_url=None, lifespan=lifespan)
@@ -43,17 +42,26 @@ the efficiency of **FastAPI** and **Beautiful Soup**, it leverages **nginx** as 
 reverse proxy and **Redis** for caching. Its tailored caching mechanism significantly
 reduces calls to Blizzard pages, ensuring swift and precise data delivery to users.
 
-This live instance is restricted to **{settings.rate_limit_per_second_per_ip} req/s** per IP (a shared limit across all endpoints).
-If you require more, consider hosting your own instance on a server 👍
+This live instance is configured with the following restrictions:
+- Rate Limit per IP: **{settings.rate_limit_per_second_per_ip} requests/second** (burst capacity :
+**{settings.rate_limit_per_ip_burst}**)
+- Maximum connections per IP: **{settings.max_connections_per_ip}**
+- Retry delay after Blizzard rate limiting: **{settings.blizzard_rate_limit_retry_after} seconds**
+
+This limit may be adjusted as needed. If you require higher throughput, consider
+hosting your own instance on a server 👍
+
+Swagger UI (useful for trying API calls) : {settings.app_base_url}/docs
+
+{f"Status page : {settings.status_page_url}" if settings.status_page_url else ""}
+"""
+
+players_section_description = """Overwatch players data : summary, statistics, etc.
 
 In player career statistics, various conversions are applied for ease of use:
 - **Duration values** are converted to **seconds** (integer)
 - **Percent values** are represented as **integers**, omitting the percent symbol
 - Integer and float string representations are converted to their respective types
-
-Swagger UI (useful for trying API calls) : {settings.app_base_url}/docs
-
-{f"Status page : {settings.status_page_url}" if settings.status_page_url else ""}
 """
 
 
@@ -98,7 +106,7 @@ def custom_openapi():  # pragma: no cover
             },
             {
                 "name": RouteTag.PLAYERS,
-                "description": "Overwatch players data : summary, statistics, etc.",
+                "description": players_section_description,
                 "externalDocs": {
                     "description": "Blizzard profile pages, source of the information",
                     "url": "https://overwatch.blizzard.com/en-us/search/",

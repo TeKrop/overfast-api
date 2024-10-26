@@ -77,6 +77,9 @@ services:
     volumes:
       - ./build/reverse-proxy/default.conf:/etc/nginx/conf.d/default.conf
       - ./build/reverse-proxy/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      nginx:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget --spider --quiet http://localhost || exit 1"]
       interval: 5s

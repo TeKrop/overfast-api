@@ -5,7 +5,6 @@ from abc import ABC, abstractmethod
 from app.commands.update_search_data_cache import retrieve_search_data
 from app.common.enums import SearchDataType
 from app.common.exceptions import ParserParsingError, SearchDataRetrievalError
-from app.common.helpers import blizzard_response_error_from_request, overfast_request
 from app.common.logging import logger
 from app.config import settings
 
@@ -32,9 +31,9 @@ class SearchDataParser(APIParser, ABC):
         """Method used to retrieve data from Blizzard (JSON data), parsing it
         and storing it into self.data attribute.
         """
-        req = await overfast_request(client=self.overfast_client, url=self.blizzard_url)
+        req = await self.overfast_client.get(url=self.blizzard_url)
         if req.status_code not in self.valid_http_codes:
-            raise blizzard_response_error_from_request(req)
+            raise self.overfast_client.blizzard_response_error_from_request(req)
 
         self.players = req.json()
 
