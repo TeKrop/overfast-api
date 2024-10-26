@@ -19,6 +19,7 @@ server {
 
     expires 1d;
     add_header Cache-Control public;
+    add_header Access-Control-Allow-Origin "*" always;
   }
 
   # Favicon
