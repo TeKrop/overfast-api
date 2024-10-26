@@ -5,17 +5,17 @@ developer.
 
 import asyncio
 
-import httpx
 from fastapi import HTTPException
 
 from app.common.enums import HeroKey
-from app.common.helpers import overfast_client_settings, send_discord_webhook_message
+from app.common.helpers import send_discord_webhook_message
 from app.common.logging import logger
+from app.common.overfast_client import OverFastClient
 from app.config import settings
 from app.parsers.heroes_parser import HeroesParser
 
 
-async def get_distant_hero_keys(client: httpx.AsyncClient) -> set[str]:
+async def get_distant_hero_keys(client: OverFastClient) -> set[str]:
     """Get a set of Overwatch hero keys from the Blizzard heroes page"""
     heroes_parser = HeroesParser(client=client)
 
@@ -42,7 +42,7 @@ async def main():
     logger.info("OK ! Starting to check if a new hero is here...")
 
     # Instanciate one HTTPX Client to use for all the updates
-    client = httpx.AsyncClient(**overfast_client_settings)
+    client = OverFastClient()
 
     distant_hero_keys = await get_distant_hero_keys(client)
     local_hero_keys = get_local_hero_keys()

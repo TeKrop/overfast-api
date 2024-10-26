@@ -22,7 +22,6 @@ class APIRequestHandler(ABC):
 
     def __init__(self, request: Request):
         self.cache_key = CacheManager.get_cache_key_from_request(request)
-        self.overfast_client = request.app.overfast_client
 
     @property
     @abstractmethod
@@ -52,7 +51,7 @@ class APIRequestHandler(ABC):
             # Instanciate the parser, it will check if a Parser Cache is here.
             # If not, it will retrieve its associated Blizzard
             # page and use the kwargs to generate the appropriate URL
-            parser = parser_class(client=self.overfast_client, **kwargs)
+            parser = parser_class(**kwargs)
 
             # Do the parsing. Internally, it will check for Parser Cache
             # before doing a real parsing using BeautifulSoup

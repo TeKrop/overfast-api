@@ -4,7 +4,6 @@ from fastapi import APIRouter, Request
 
 from app.common.decorators import validation_error_handler
 from app.common.enums import RouteTag
-from app.common.helpers import routes_responses
 from app.handlers.list_gamemodes_request_handler import ListGamemodesRequestHandler
 from app.models.gamemodes import GamemodeDetails
 
@@ -13,7 +12,6 @@ router = APIRouter()
 
 @router.get(
     "",
-    responses=routes_responses,
     tags=[RouteTag.GAMEMODES],
     summary="Get a list of gamemodes",
     description=(

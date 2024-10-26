@@ -1,3 +1,11 @@
+# Create connection zone to limit number of connections per IP/domain
+limit_conn_zone $http_x_forwarded_for zone=ofconn:10m;
+limit_conn_status 429;
+
+# Create request zone to introduce a rate limit per IP
+limit_req_zone $http_x_forwarded_for zone=ofreq:10m rate=${RATE_LIMIT_PER_SECOND_PER_IP}r/s;
+limit_req_status 429;
+
 server {
   listen 80;
 
@@ -11,6 +19,7 @@ server {
 
     expires 1d;
     add_header Cache-Control public;
+    add_header Access-Control-Allow-Origin "*" always;
   }
 
   # Favicon
@@ -28,6 +37,13 @@ server {
 
   # Main route
   location / {
+    # Rate limiting instructions
+    limit_conn ofconn ${MAX_CONNECTIONS_PER_IP};
+    limit_req zone=ofreq burst=${RATE_LIMIT_PER_IP_BURST} nodelay;
+
+    # Handle HTTP 429 when triggered by nginx rate limit
+    error_page 429 = @limit_reached;
+
     # Always authorize any origin as it's a public API
     add_header Access-Control-Allow-Origin "*" always;
 
@@ -65,5 +81,14 @@ server {
 
     # Ensure HEAD requests are passed as GET
     proxy_method GET;
+  }
+
+  # nginx rate limit reached
+  location @limit_reached {
+    add_header Access-Control-Allow-Origin "*" always;
+    add_header Retry-After 1 always;
+
+    default_type application/json;
+    return 429 '{"error": "API rate limit reached, please wait for 1 second before retrying"}';
   }
 }

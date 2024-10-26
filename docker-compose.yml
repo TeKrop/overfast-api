@@ -54,6 +54,8 @@ services:
       context: ./build/nginx
     ports:
       - "${APP_PORT}:80"
+    entrypoint: ["/entrypoint.sh"]
+    env_file: ${APP_VOLUME_PATH:-.}/.env
     volumes:
       - static_volume:/static
     depends_on:
@@ -61,6 +63,23 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider --quiet http://localhost || exit 1"]
+      interval: 5s
+      timeout: 2s
+
+  reverse-proxy:
+    profiles:
+      - testing
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./build/reverse-proxy/default.conf:/etc/nginx/conf.d/default.conf
+      - ./build/reverse-proxy/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      nginx:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget --spider --quiet http://localhost || exit 1"]
       interval: 5s
