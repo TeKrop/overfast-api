@@ -8,7 +8,9 @@ CYAN := \033[1;36m
 RESET := \033[0m
 
 # Aliases
-DOCKER_RUN := docker compose run \
+DOCKER_COMPOSE := docker compose
+
+DOCKER_RUN := $(DOCKER_COMPOSE) run \
 	--volume ${PWD}/app:/code/app \
 	--volume ${PWD}/tests:/code/tests \
 	--volume ${PWD}/htmlcov:/code/htmlcov \
@@ -25,11 +27,16 @@ help: ## Show this help message
 
 build: ## Build project images
 	@echo "Building OverFastAPI (dev mode)..."
-	BUILD_TARGET="dev" docker compose build
+	BUILD_TARGET="dev" $(DOCKER_COMPOSE) build
 
-start: ## Run OverFastAPI application (dev mode)
-	@echo "Launching OverFastAPI (dev mode)..."
+start: ## Run OverFastAPI application (dev or testing mode)
+ifdef TESTING_MODE
+	@echo "Launching OverFastAPI (testing mode with reverse proxy)..."
+	$(DOCKER_COMPOSE) --profile testing up -d
+else
+	@echo "Launching OverFastAPI (dev mode with autoreload)..."
 	$(DOCKER_RUN) uv run fastapi dev app/main.py --host 0.0.0.0
+endif
 
 lint: ## Run linter
 	@echo "Running linter..."
@@ -58,19 +65,15 @@ endif
 
 up: ## Build & run OverFastAPI application (production mode)
 	@echo "Building OverFastAPI (production mode)..."
-	docker compose build
+	$(DOCKER_COMPOSE) build
 	@echo "Stopping OverFastAPI and cleaning containers..."
-	docker compose down -v --remove-orphans
+	$(DOCKER_COMPOSE) down -v --remove-orphans
 	@echo "Launching OverFastAPI (production mode)..."
-	docker compose up -d
+	$(DOCKER_COMPOSE) up -d
 
 down: ## Stop the app and remove containers
 	@echo "Stopping OverFastAPI and cleaning containers..."
-	docker compose --profile "*" down  -v --remove-orphans
-
-up-testing: ## Run OverFastAPI application (testing mode)
-	@echo "Launching OverFastAPI (testing mode)..."
-	docker compose --profile testing up -d
+	$(DOCKER_COMPOSE) --profile "*" down  -v --remove-orphans
 
 clean: down ## Clean up Docker environment
 	@echo "Cleaning Docker environment..."

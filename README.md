@@ -42,9 +42,9 @@ Same as earlier, ensure you have `docker` and `docker compose` installed, and ge
 Then, execute the following commands to launch the dev server :
 
 ```shell
-make build     # Build the images, needed for all further commands
-make start     # Launch OverFast API (dev mode)
-make testing   # Launch OverFast API (testing mode with reverse proxy)
+make build                     # Build the images, needed for all further commands
+make start                     # Launch OverFast API (dev mode with autoreload)
+make start TESTING_MODE=true   # Launch OverFast API (testing mode with reverse proxy)
 ```
 The dev server will be running on the port `8000`. You can use the `make down` command to stop and remove the containers. Feel free to type `make` or `make help` to access a comprehensive list of all available commands for your reference.
 

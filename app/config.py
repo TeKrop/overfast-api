@@ -39,9 +39,6 @@ class Settings(BaseSettings):
     # Log level for Loguru
     log_level: str = "info"
 
-    # Max HTTPX concurrent requests for async calls to Blizzard (cache updates)
-    max_concurrent_requests: int = 5
-
     # Optional, status page URL if you have any to provide
     status_page_url: str | None = None
 
@@ -68,11 +65,6 @@ class Settings(BaseSettings):
     # REDIS CONFIGURATION
     ############
 
-    # Whether or not you want to use Redis as a cache system for the API. Mainly
-    # used to avoid useless calls to Blizzard HTML pages (profiles can take from
-    # 2 to 5 seconds to load...). Enabled by default.
-    redis_caching_enabled: bool = True
-
     # Redis server host
     redis_host: str = "127.0.0.1"
 
@@ -83,26 +75,13 @@ class Settings(BaseSettings):
     # CACHE CONFIGURATION
     ############
 
-    # Enable background cache refresh system (check_and_update_cache)
-    background_cache_refresh_enabled: bool = True
-
     # Prefix for keys in API Cache with entire payload (Redis).
     # Used by nginx as main API cache.
     api_cache_key_prefix: str = "api-cache"
 
-    # Prefix for keys in Parser cache (Redis). Used by parser classes
+    # Prefix for keys in Player Cache (Redis). Used by player classes
     # in order to avoid parsing data which has already been parsed.
-    parser_cache_key_prefix: str = "parser-cache"
-
-    # Prefix for keys in Parser cache last update (Redis).
-    # Used by the Parser Cache expiration system, to avoid keeping Parser
-    # Cache data which is not used anymore indefinitely.
-    parser_cache_last_update_key_prefix: str = "parser-cache-last-update"
-
-    # When a cache value is about the expire (less than the configured value),
-    # we will refresh it in the automatic cronjob "check_and_update_cache"
-    # which is launched every minute. The value is specified in seconds.
-    expired_cache_refresh_limit: int = 3600
+    player_cache_key_prefix: str = "player-cache"
 
     # Cache TTL for heroes list data (seconds)
     heroes_path_cache_timeout: int = 86400
@@ -114,22 +93,10 @@ class Settings(BaseSettings):
     csv_cache_timeout: int = 86400
 
     # Cache TTL for career pages data (seconds)
-    career_path_cache_timeout: int = 7200
+    career_path_cache_timeout: int = 3600
 
     # Cache TTL for search account data (seconds)
     search_account_path_cache_timeout: int = 3600
-
-    # TTL for Parser Cache expiration system (seconds)
-    # Used in order to make the Parser Cache expire if the player career data
-    # hasn't been retrieved from an API call since a certain amount of time
-    career_parser_cache_expiration_timeout: int = 604800
-
-    # In order to fluidify the parser cache refresh, and to avoid having a lot
-    # of refresh in the same time, we're using a random percentage spread value.
-    # It must be a value included between 0 and 100. For example, with 3600 as
-    # a timeout, and 25% of spreading, we have a spreading value of 900 = 25% * 3600.
-    # The expiration value will be between 2700 (3600 - 900) and 4500 (3600 + 900).
-    parser_cache_expiration_spreading_percentage: int = 25
 
     ############
     # SEARCH DATA (AVATARS, NAMECARDS, TITLES)

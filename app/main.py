@@ -9,21 +9,24 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from .commands.update_search_data_cache import update_search_data_cache
-from .common.enums import RouteTag
-from .common.logging import logger
-from .common.overfast_client import OverFastClient
 from .config import settings
-from .routers import gamemodes, heroes, maps, players, roles
+from .enums import RouteTag
+from .gamemodes import router as gamemodes
+from .heroes import router as heroes
+from .logging import logger
+from .maps import router as maps
+from .overfast_client import OverFastClient
+from .players import router as players
+from .players.commands.update_search_data_cache import update_search_data_cache
+from .roles import router as roles
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):  # pragma: no cover
     # Update search data list from Blizzard before starting up
-    if settings.redis_caching_enabled:
-        logger.info("Updating search data cache (avatars, namecards, titles)")
-        with suppress(SystemExit):
-            update_search_data_cache()
+    logger.info("Updating search data cache (avatars, namecards, titles)")
+    with suppress(SystemExit):
+        update_search_data_cache()
 
     # Instanciate HTTPX Async Client
     logger.info("Instanciating HTTPX AsyncClient...")
