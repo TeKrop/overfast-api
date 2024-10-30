@@ -2,7 +2,6 @@
 
 from fastapi import APIRouter, Path, Query, Request, status
 
-from app.decorators import validation_error_handler
 from app.enums import Locale, RouteTag
 from app.helpers import routes_responses
 from app.roles.enums import Role
@@ -26,7 +25,6 @@ router = APIRouter()
     ),
     operation_id="list_heroes",
 )
-@validation_error_handler(response_model=HeroShort)
 async def list_heroes(
     request: Request,
     role: Role = Query(None, title="Role filter"),
@@ -55,7 +53,6 @@ async def list_heroes(
     ),
     operation_id="get_hero",
 )
-@validation_error_handler(response_model=Hero)
 async def get_hero(
     request: Request,
     hero_key: HeroKey = Path(title="Key name of the hero"),

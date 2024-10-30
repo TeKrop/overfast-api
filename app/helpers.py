@@ -77,10 +77,12 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
 def send_discord_webhook_message(message: str) -> httpx.Response | None:
     """Helper method for sending a Discord webhook message. It's limited to
     one call per 30 minutes with the same parameters."""
-    return (
-        httpx.post(settings.discord_webhook_url, data={"content": message}, timeout=10)
-        if settings.discord_webhook_enabled
-        else None
+    if not settings.discord_webhook_enabled:
+        logger.error(message)
+        return None
+
+    return httpx.post(
+        settings.discord_webhook_url, data={"content": message}, timeout=10
     )
 
 

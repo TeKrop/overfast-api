@@ -4,7 +4,6 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query, Request, status
 
-from app.decorators import validation_error_handler
 from app.enums import RouteTag
 from app.helpers import routes_responses as common_routes_responses
 
@@ -109,7 +108,6 @@ router = APIRouter()
     ),
     operation_id="search_players",
 )
-@validation_error_handler(response_model=PlayerSearchResult)
 async def search_players(
     request: Request,
     name: str = Query(
@@ -143,7 +141,6 @@ async def search_players(
     ),
     operation_id="get_player_summary",
 )
-@validation_error_handler(response_model=PlayerSummary)
 async def get_player_summary(
     request: Request,
     commons: CommonsPlayerDep,
@@ -172,7 +169,6 @@ async def get_player_summary(
     ),
     operation_id="get_player_stats_summary",
 )
-@validation_error_handler(response_model=PlayerStatsSummary)
 async def get_player_stats_summary(
     request: Request,
     commons: CommonsPlayerDep,
@@ -217,7 +213,6 @@ async def get_player_stats_summary(
     ),
     operation_id="get_player_career_stats",
 )
-@validation_error_handler(response_model=PlayerCareerStats)
 async def get_player_career_stats(
     request: Request,
     commons: CommonsPlayerCareerDep,
@@ -241,7 +236,6 @@ async def get_player_career_stats(
     ),
     operation_id="get_player_stats",
 )
-@validation_error_handler(response_model=CareerStats)
 async def get_player_stats(
     request: Request,
     commons: CommonsPlayerCareerDep,
@@ -263,7 +257,6 @@ async def get_player_stats(
     ),
     operation_id="get_player_career",
 )
-@validation_error_handler(response_model=Player)
 async def get_player_career(
     request: Request,
     commons: CommonsPlayerDep,

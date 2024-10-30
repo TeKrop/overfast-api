@@ -3,6 +3,7 @@
 from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import ResponseValidationError
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
@@ -12,6 +13,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from .config import settings
 from .enums import RouteTag
 from .gamemodes import router as gamemodes
+from .helpers import overfast_internal_error
 from .heroes import router as heroes
 from .logging import logger
 from .maps import router as maps
@@ -142,6 +144,13 @@ async def http_exception_handler(_: Request, exc: StarletteHTTPException):
         status_code=exc.status_code,
         headers=exc.headers,
     )
+
+
+@app.exception_handler(ResponseValidationError)
+async def pydantic_validation_error_handler(
+    request: Request, error: ResponseValidationError
+):
+    raise overfast_internal_error(request.url.path, error) from error
 
 
 # We need to override default Redoc page in order to be

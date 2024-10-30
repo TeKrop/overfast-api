@@ -2,7 +2,6 @@
 
 from fastapi import APIRouter, Query, Request
 
-from app.decorators import validation_error_handler
 from app.enums import Locale, RouteTag
 from app.helpers import routes_responses
 
@@ -23,7 +22,6 @@ router = APIRouter()
     ),
     operation_id="list_roles",
 )
-@validation_error_handler(response_model=RoleDetail)
 async def list_roles(
     request: Request,
     locale: Locale = Query(Locale.ENGLISH_US, title="Locale to be displayed"),

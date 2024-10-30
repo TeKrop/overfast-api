@@ -2,7 +2,6 @@
 
 from fastapi import APIRouter, Query, Request
 
-from app.decorators import validation_error_handler
 from app.enums import RouteTag
 from app.gamemodes.enums import MapGamemode
 
@@ -22,7 +21,6 @@ router = APIRouter()
     ),
     operation_id="list_maps",
 )
-@validation_error_handler(response_model=Map)
 async def list_maps(
     request: Request,
     gamemode: MapGamemode = Query(
