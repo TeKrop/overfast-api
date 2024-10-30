@@ -121,6 +121,9 @@ ignore = [
 # Allow some confusable UTF8 chars (used in regexp)
 allowed-confusables = ["（", "）", "："]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["SLF001"]  # Ignore private member access on tests
+
 [tool.ruff.lint.isort]
 # Consider app as first-party for imports in tests
 known-first-party = ["app"]
