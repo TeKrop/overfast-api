@@ -17,7 +17,7 @@ router = APIRouter()
     summary="Get a list of gamemodes",
     description=(
         "Get a list of Overwatch gamemodes : Assault, Escort, Flashpoint, Hybrid, etc."
-        "<br />**Cache TTL : 1 day.**"
+        f"<br />**Cache TTL : {ListGamemodesController.get_human_readable_timeout()}.**"
     ),
     operation_id="list_map_gamemodes",
 )

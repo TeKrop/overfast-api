@@ -91,3 +91,22 @@ def read_csv_data_file(filename: str) -> list[dict[str, str]]:
         encoding="utf-8"
     ) as csv_file:
         return list(csv.DictReader(csv_file, delimiter=","))
+
+
+@cache
+def get_human_readable_duration(duration: int) -> str:
+    # Define the time units
+    days, remainder = divmod(duration, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, _ = divmod(remainder, 60)
+
+    # Build the human-readable string
+    duration_parts = []
+    if days > 0:
+        duration_parts.append(f"{days} day{'s' if days > 1 else ''}")
+    if hours > 0:
+        duration_parts.append(f"{hours} hour{'s' if hours > 1 else ''}")
+    if minutes > 0:
+        duration_parts.append(f"{minutes} minute{'s' if minutes > 1 else ''}")
+
+    return ", ".join(duration_parts)

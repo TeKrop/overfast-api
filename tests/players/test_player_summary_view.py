@@ -24,7 +24,6 @@ def test_get_player_summary(
     player_id: str,
     player_html_data: str,
     player_json_data: dict,
-    search_html_data: str,
     player_search_response_mock: Mock,
     search_data_func: Callable[[str, str], str | None],
 ):

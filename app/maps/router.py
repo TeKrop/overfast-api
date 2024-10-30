@@ -18,7 +18,7 @@ router = APIRouter()
     summary="Get a list of maps",
     description=(
         "Get a list of Overwatch maps : Hanamura, King's Row, Dorado, etc."
-        "<br />**Cache TTL : 1 day.**"
+        f"<br />**Cache TTL : {ListMapsController.get_human_readable_timeout()}.**"
     ),
     operation_id="list_maps",
 )

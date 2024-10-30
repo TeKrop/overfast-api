@@ -100,17 +100,22 @@ class CacheManager(metaclass=Singleton):
     @redis_connection_handler
     def get_player_cache(self, player_id: str) -> dict | list | None:
         """Get the Player Cache value associated with a given cache key"""
-        player_cache = self.redis_server.get(
-            f"{settings.player_cache_key_prefix}:{player_id}",
-        )
-        return self.__decompress_json_value(player_cache) if player_cache else None
+        player_key = f"{settings.player_cache_key_prefix}:{player_id}"
+        if not (player_cache := self.redis_server.get(player_key)):
+            return None
+
+        # Reset the TTL before returning the value
+        self.redis_server.expire(player_key, settings.player_cache_timeout)
+        return self.__decompress_json_value(player_cache)
 
     @redis_connection_handler
     def update_player_cache(self, player_id: str, value: dict) -> None:
         """Update or set a Player Cache value"""
         compressed_value = self.__compress_json_value(value)
         self.redis_server.set(
-            f"{settings.player_cache_key_prefix}:{player_id}", value=compressed_value
+            f"{settings.player_cache_key_prefix}:{player_id}",
+            value=compressed_value,
+            ex=settings.player_cache_timeout,
         )
 
     @redis_connection_handler

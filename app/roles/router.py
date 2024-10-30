@@ -17,7 +17,10 @@ router = APIRouter()
     responses=routes_responses,
     tags=[RouteTag.HEROES],
     summary="Get a list of roles",
-    description="Get a list of available Overwatch roles.<br />**Cache TTL : 1 day.**",
+    description=(
+        "Get a list of available Overwatch roles."
+        f"<br />**Cache TTL : {ListRolesController.get_human_readable_timeout()}.**"
+    ),
     operation_id="list_roles",
 )
 @validation_error_handler(response_model=RoleDetail)

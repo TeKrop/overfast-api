@@ -6,7 +6,7 @@ from fastapi import HTTPException, Request
 
 from .cache_manager import CacheManager
 from .exceptions import ParserBlizzardError, ParserParsingError
-from .helpers import overfast_internal_error
+from .helpers import get_human_readable_duration, overfast_internal_error
 from .logging import logger
 
 
@@ -24,14 +24,20 @@ class AbstractController(ABC):
         self.cache_key = CacheManager.get_cache_key_from_request(request)
 
     @property
+    @classmethod
     @abstractmethod
-    def parser_classes(self) -> list[type]:
+    def parser_classes(cls) -> list[type]:
         """Parser classes used for parsing the Blizzard page retrieved with this controller"""
 
     @property
+    @classmethod
     @abstractmethod
-    def timeout(self) -> int:
+    def timeout(cls) -> int:
         """Timeout used for API Cache storage for this specific controller"""
+
+    @classmethod
+    def get_human_readable_timeout(cls) -> str:
+        return get_human_readable_duration(cls.timeout)
 
     async def process_request(self, **kwargs) -> dict:
         """Main method used to process the request from user and return final data. Raises

@@ -22,7 +22,7 @@ router = APIRouter()
     summary="Get a list of heroes",
     description=(
         "Get a list of Overwatch heroes, which can be filtered using roles. "
-        "<br />**Cache TTL : 1 day.**"
+        f"<br />**Cache TTL : {ListHeroesController.get_human_readable_timeout()}.**"
     ),
     operation_id="list_heroes",
 )
@@ -51,7 +51,7 @@ async def list_heroes(
     summary="Get hero data",
     description=(
         "Get data about an Overwatch hero : description, abilities, story, etc. "
-        "<br />**Cache TTL : 1 day.**"
+        f"<br />**Cache TTL : {GetHeroController.get_human_readable_timeout()}.**"
     ),
     operation_id="get_hero",
 )

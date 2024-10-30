@@ -83,6 +83,10 @@ class Settings(BaseSettings):
     # in order to avoid parsing data which has already been parsed.
     player_cache_key_prefix: str = "player-cache"
 
+    # Cache TTL for Player Cache. Whenever a key is accessed, its TTL is reset.
+    # It will only expires if not accessed during TTL time.
+    player_cache_timeout: int = 172800
+
     # Cache TTL for heroes list data (seconds)
     heroes_path_cache_timeout: int = 86400
 
