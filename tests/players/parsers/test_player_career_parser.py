@@ -5,21 +5,25 @@ from fastapi import status
 
 from app.exceptions import ParserBlizzardError
 from app.players.helpers import players_ids
-from app.players.parsers.player_career_parser import PlayerCareerParser
+from app.players.parsers.player_career_stats_parser import PlayerCareerStatsParser
 
 
 @pytest.mark.parametrize(
-    ("player_career_parser", "player_html_data", "player_career_json_data"),
+    ("player_career_stats_parser", "player_html_data", "player_career_json_data"),
     [
         (player_id, player_id, player_id)
         for player_id in players_ids
         if player_id != "Unknown-1234"
     ],
-    indirect=["player_career_parser", "player_html_data", "player_career_json_data"],
+    indirect=[
+        "player_career_stats_parser",
+        "player_html_data",
+        "player_career_json_data",
+    ],
 )
 @pytest.mark.asyncio
 async def test_player_page_parsing_with_filters(
-    player_career_parser: PlayerCareerParser,
+    player_career_stats_parser: PlayerCareerStatsParser,
     player_html_data: str,
     player_career_json_data: dict,
     player_search_response_mock: Mock,
@@ -33,22 +37,22 @@ async def test_player_page_parsing_with_filters(
             Mock(status_code=status.HTTP_200_OK, text=player_html_data),
         ],
     ):
-        await player_career_parser.parse()
+        await player_career_stats_parser.parse()
 
     # Just check that the parsing is working properly
-    player_career_parser.filter_request_using_query()
+    player_career_stats_parser.filter_request_using_query()
 
-    assert player_career_parser.data == player_career_json_data
+    assert player_career_stats_parser.data == player_career_json_data
 
 
 @pytest.mark.parametrize(
-    ("player_career_parser"),
+    ("player_career_stats_parser"),
     [("Unknown-1234")],
     indirect=True,
 )
 @pytest.mark.asyncio
 async def test_unknown_player_parser_blizzard_error(
-    player_career_parser: PlayerCareerParser,
+    player_career_stats_parser: PlayerCareerStatsParser,
     player_search_response_mock: Mock,
 ):
     with (
@@ -58,4 +62,4 @@ async def test_unknown_player_parser_blizzard_error(
             return_value=player_search_response_mock,
         ),
     ):
-        await player_career_parser.parse()
+        await player_career_stats_parser.parse()

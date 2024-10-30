@@ -7,22 +7,22 @@ from fastapi import status
 
 from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.players.helpers import players_ids
-from app.players.parsers.player_parser import PlayerParser
+from app.players.parsers.player_career_parser import PlayerCareerParser
 
 
 @pytest.mark.parametrize(
-    ("player_parser", "player_html_data", "player_json_data", "kwargs_filter"),
+    ("player_career_parser", "player_html_data", "player_json_data", "kwargs_filter"),
     [
         (player_id, player_id, player_id, kwargs_filter)
         for player_id in players_ids
         for kwargs_filter in ({}, {"summary": True}, {"stats": True})
         if player_id != "Unknown-1234"
     ],
-    indirect=["player_parser", "player_html_data", "player_json_data"],
+    indirect=["player_career_parser", "player_html_data", "player_json_data"],
 )
 @pytest.mark.asyncio
 async def test_player_page_parsing_with_filters(
-    player_parser: PlayerParser,
+    player_career_parser: PlayerCareerParser,
     player_html_data: str,
     player_json_data: dict,
     kwargs_filter: dict,
@@ -44,22 +44,22 @@ async def test_player_page_parsing_with_filters(
             side_effect=search_data_func,
         ),
     ):
-        await player_parser.parse()
+        await player_career_parser.parse()
 
     # Just check that the parsing is working properly
-    player_parser.filter_request_using_query(**kwargs_filter)
+    player_career_parser.filter_request_using_query(**kwargs_filter)
 
-    assert player_parser.data == player_json_data
+    assert player_career_parser.data == player_json_data
 
 
 @pytest.mark.parametrize(
-    ("player_parser"),
+    ("player_career_parser"),
     [("Unknown-1234")],
     indirect=True,
 )
 @pytest.mark.asyncio
-async def test_unknown_player_parser_blizzard_error(
-    player_parser: PlayerParser,
+async def test_unknown_player_career_parser_blizzard_error(
+    player_career_parser: PlayerCareerParser,
     player_search_response_mock: Mock,
 ):
     with (
@@ -69,17 +69,17 @@ async def test_unknown_player_parser_blizzard_error(
             return_value=player_search_response_mock,
         ),
     ):
-        await player_parser.parse()
+        await player_career_parser.parse()
 
 
 @pytest.mark.parametrize(
-    ("player_parser", "player_html_data"),
+    ("player_career_parser", "player_html_data"),
     [("TeKrop-2217", "TeKrop-2217")],
-    indirect=["player_parser", "player_html_data"],
+    indirect=["player_career_parser", "player_html_data"],
 )
 @pytest.mark.asyncio
-async def test_player_parser_parsing_error_attribute_error(
-    player_parser: PlayerParser,
+async def test_player_career_parser_parsing_error_attribute_error(
+    player_career_parser: PlayerCareerParser,
     player_html_data: str,
     player_search_response_mock: Mock,
 ):
@@ -100,7 +100,7 @@ async def test_player_parser_parsing_error_attribute_error(
         ),
         pytest.raises(ParserParsingError) as error,
     ):
-        await player_parser.parse()
+        await player_career_parser.parse()
 
     assert (
         error.value.message
@@ -109,13 +109,13 @@ async def test_player_parser_parsing_error_attribute_error(
 
 
 @pytest.mark.parametrize(
-    ("player_parser", "player_html_data"),
+    ("player_career_parser", "player_html_data"),
     [("TeKrop-2217", "TeKrop-2217")],
-    indirect=["player_parser", "player_html_data"],
+    indirect=["player_career_parser", "player_html_data"],
 )
 @pytest.mark.asyncio
-async def test_player_parser_parsing_error_key_error(
-    player_parser: PlayerParser,
+async def test_player_career_parser_parsing_error_key_error(
+    player_career_parser: PlayerCareerParser,
     player_html_data: str,
     player_search_response_mock: Mock,
 ):
@@ -137,19 +137,19 @@ async def test_player_parser_parsing_error_key_error(
         ),
         pytest.raises(ParserParsingError) as error,
     ):
-        await player_parser.parse()
+        await player_career_parser.parse()
 
     assert error.value.message == "KeyError('src')"
 
 
 @pytest.mark.parametrize(
-    ("player_parser", "player_html_data"),
+    ("player_career_parser", "player_html_data"),
     [("TeKrop-2217", "TeKrop-2217")],
-    indirect=["player_parser", "player_html_data"],
+    indirect=["player_career_parser", "player_html_data"],
 )
 @pytest.mark.asyncio
-async def test_player_parser_parsing_error_type_error(
-    player_parser: PlayerParser,
+async def test_player_career_parser_parsing_error_type_error(
+    player_career_parser: PlayerCareerParser,
     player_html_data: str,
     player_search_response_mock: Mock,
 ):
@@ -170,7 +170,7 @@ async def test_player_parser_parsing_error_type_error(
         ),
         pytest.raises(ParserParsingError) as error,
     ):
-        await player_parser.parse()
+        await player_career_parser.parse()
 
     assert (
         error.value.message == "TypeError(\"'NoneType' object is not subscriptable\")"

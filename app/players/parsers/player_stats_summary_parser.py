@@ -11,10 +11,10 @@ from app.roles.enums import Role
 
 from ..enums import HeroKey, PlayerGamemode, PlayerPlatform
 from ..helpers import get_hero_role, get_plural_stat_key
-from .player_parser import PlayerParser
+from .player_career_parser import PlayerCareerParser
 
 
-class PlayerStatsSummaryParser(PlayerParser):
+class PlayerStatsSummaryParser(PlayerCareerParser):
     """Overwatch player profile page Parser class"""
 
     generic_stats_names: ClassVar[list] = [
