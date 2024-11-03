@@ -9,7 +9,7 @@ from app.cache_manager import CacheManager
 from app.config import settings
 from app.enums import Locale
 from app.helpers import send_discord_webhook_message
-from app.logging import logger
+from app.overfast_logger import logger
 
 from ..enums import SearchDataType
 from ..exceptions import SearchDataRetrievalError

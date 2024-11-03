@@ -2,7 +2,7 @@ from time import sleep
 from unittest.mock import Mock, patch
 
 from app.decorators import rate_limited
-from app.logging import logger
+from app.overfast_logger import logger
 
 
 def test_rate_limited():
@@ -21,14 +21,14 @@ def test_rate_limited():
     method_to_limit(param1=42, param2="test", param3=True)
 
     logger_info_mock = Mock()
-    with patch("app.logging.logger.info", logger_info_mock):
+    with patch("app.overfast_logger.logger.info", logger_info_mock):
         # Call the method with same parameters a third time,
         # it should work fine for the next one shouldn't
         method_to_limit(param1=42, param2="test", param3=True)
         logger_info_mock.assert_called()
 
     logger_info_mock = Mock()
-    with patch("app.logging.logger.info", logger_info_mock):
+    with patch("app.overfast_logger.logger.info", logger_info_mock):
         # Now call the method again, it should reach the limit and not being called
         method_to_limit(param1=42, param2="test", param3=True)
         logger_info_mock.assert_not_called()
@@ -41,6 +41,6 @@ def test_rate_limited():
     sleep(2)
 
     logger_info_mock = Mock()
-    with patch("app.logging.logger.info", logger_info_mock):
+    with patch("app.overfast_logger.logger.info", logger_info_mock):
         method_to_limit(param1=42, param2="test", param3=True)
         logger_info_mock.assert_called()

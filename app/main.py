@@ -15,9 +15,9 @@ from .enums import RouteTag
 from .gamemodes import router as gamemodes
 from .helpers import overfast_internal_error
 from .heroes import router as heroes
-from .logging import logger
 from .maps import router as maps
 from .overfast_client import OverFastClient
+from .overfast_logger import logger
 from .players import router as players
 from .players.commands.update_search_data_cache import update_search_data_cache
 from .roles import router as roles

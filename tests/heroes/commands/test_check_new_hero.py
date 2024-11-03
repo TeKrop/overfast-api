@@ -24,7 +24,7 @@ def test_check_no_new_hero(heroes_html_data: str):
             "httpx.AsyncClient.get",
             return_value=Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
         ),
-        patch("app.logging.logger.info", logger_info_mock),
+        patch("app.overfast_logger.logger.info", logger_info_mock),
     ):
         asyncio.run(check_new_hero_main())
 
@@ -38,7 +38,7 @@ def test_check_discord_webhook_disabled():
             "app.heroes.commands.check_new_hero.settings.discord_webhook_enabled",
             False,
         ),
-        patch("app.logging.logger.info", logger_info_mock),
+        patch("app.overfast_logger.logger.info", logger_info_mock),
         pytest.raises(
             SystemExit,
         ),
@@ -63,7 +63,7 @@ def test_check_new_heroes(distant_heroes: set[str], expected: set[str]):
             "app.heroes.commands.check_new_hero.get_distant_hero_keys",
             return_value={*HeroKey, *distant_heroes},
         ),
-        patch("app.logging.logger.info", logger_info_mock),
+        patch("app.overfast_logger.logger.info", logger_info_mock),
     ):
         asyncio.run(check_new_hero_main())
 
@@ -80,7 +80,7 @@ def test_check_error_from_blizzard():
                 text="Internal Server Error",
             ),
         ),
-        patch("app.logging.logger.error", logger_error_mock),
+        patch("app.overfast_logger.logger.error", logger_error_mock),
         pytest.raises(
             SystemExit,
         ),

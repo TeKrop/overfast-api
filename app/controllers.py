@@ -7,7 +7,7 @@ from fastapi import HTTPException, Request
 from .cache_manager import CacheManager
 from .exceptions import ParserBlizzardError, ParserParsingError
 from .helpers import get_human_readable_duration, overfast_internal_error
-from .logging import logger
+from .overfast_logger import logger
 
 
 class AbstractController(ABC):

@@ -60,7 +60,7 @@ ifdef PYTEST_ARGS
 	$(DOCKER_RUN) uv run python -m pytest $(PYTEST_ARGS)
 else
 	@echo "Running all tests with coverage..."
-	$(DOCKER_RUN) uv run python -m pytest --cov app --cov-report html -n auto
+	$(DOCKER_RUN) uv run python -m pytest --cov app/ --cov-report html -n auto tests/
 endif
 
 up: ## Build & run OverFastAPI application (production mode)

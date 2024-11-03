@@ -9,12 +9,12 @@ from fastapi import HTTPException, status
 
 from .config import settings
 from .decorators import rate_limited
-from .logging import logger
 from .models import (
     BlizzardErrorMessage,
     InternalServerErrorMessage,
     RateLimitErrorMessage,
 )
+from .overfast_logger import logger
 
 # Typical routes responses to return
 routes_responses = {

@@ -2,7 +2,7 @@ import httpx
 from fastapi import status
 
 from app.exceptions import ParserBlizzardError
-from app.logging import logger
+from app.overfast_logger import logger
 from app.parsers import HTMLParser
 
 from ..enums import SearchDataType

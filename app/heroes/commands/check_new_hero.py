@@ -9,8 +9,8 @@ from fastapi import HTTPException
 
 from app.config import settings
 from app.helpers import send_discord_webhook_message
-from app.logging import logger
 from app.overfast_client import OverFastClient
+from app.overfast_logger import logger
 
 from ..enums import HeroKey
 from ..parsers.heroes_parser import HeroesParser

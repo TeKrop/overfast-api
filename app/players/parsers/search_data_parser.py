@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 
 from app.config import settings
-from app.logging import logger
+from app.overfast_logger import logger
 from app.parsers import JSONParser
 
 from ..enums import SearchDataType

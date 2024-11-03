@@ -3,7 +3,7 @@
 from collections.abc import Iterable
 
 from app.config import settings
-from app.logging import logger
+from app.overfast_logger import logger
 from app.parsers import JSONParser
 
 from ..helpers import get_player_title

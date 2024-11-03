@@ -5,8 +5,8 @@ from app.config import settings
 
 from .cache_manager import CacheManager
 from .helpers import send_discord_webhook_message
-from .logging import logger
 from .metaclasses import Singleton
+from .overfast_logger import logger
 
 
 class OverFastClient(metaclass=Singleton):

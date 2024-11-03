@@ -46,7 +46,7 @@ def test_get_cache_key_from_request(
 @pytest.mark.parametrize(
     ("cache_key", "value", "expire", "sleep_time", "expected"),
     [
-        ("/heroes", [{"name": "Sojourn"}], 10, None, b'[{"name":"Sojourn"}]'),
+        ("/heroes", [{"name": "Sojourn"}], 10, 0, b'[{"name":"Sojourn"}]'),
         ("/heroes", [{"name": "Sojourn"}], 1, 1, None),
     ],
 )
@@ -63,8 +63,7 @@ def test_update_and_get_api_cache(
 
     # Update the API Cache and sleep if needed
     cache_manager.update_api_cache(cache_key, value, expire)
-    if sleep_time:
-        sleep(sleep_time)
+    sleep(sleep_time)
 
     # Assert the value matches
     assert cache_manager.get_api_cache(cache_key) == expected

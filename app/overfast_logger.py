@@ -41,7 +41,7 @@ class InterceptHandler(logging.Handler):
         )
 
 
-class OverFastAPILogger:
+class OverFastLogger:
     @classmethod
     def make_logger(cls):
         return cls.customize_logging(
@@ -95,4 +95,4 @@ class OverFastAPILogger:
 
 
 # Instanciate generic logger for all the app
-logger = OverFastAPILogger.make_logger()
+logger = OverFastLogger.make_logger()

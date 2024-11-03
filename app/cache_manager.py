@@ -30,8 +30,8 @@ from fastapi import Request
 from app.players.enums import SearchDataType
 
 from .config import settings
-from .logging import logger
 from .metaclasses import Singleton
+from .overfast_logger import logger
 
 
 class CacheManager(metaclass=Singleton):

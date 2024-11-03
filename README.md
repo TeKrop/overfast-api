@@ -66,7 +66,7 @@ make format    # Run ruff formatter
 ```
 
 ### Testing
-The code has been tested using unit testing, except some rare parts which are not relevant to test. There are tests on the parsers classes, the common classes, but also on the commands (ran in CLI) and the API views (using FastAPI TestClient class).
+The code has been tested using unit testing, except some rare parts which are not relevant to test. There are tests on the parsers classes, the common classes, but also on the commands (run in CLI) and the API views (using FastAPI TestClient class).
 
 Running tests with coverage (default)
 ```shell

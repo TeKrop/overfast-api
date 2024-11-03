@@ -96,7 +96,7 @@ async def test_namecard_parser_player_not_found(namecard_parser: NamecardParser)
             "httpx.AsyncClient.get",
             return_value=Mock(status_code=status.HTTP_200_OK, text="{}", json=dict),
         ),
-        patch("app.logging.logger.warning", logger_warning_mock),
+        patch("app.overfast_logger.logger.warning", logger_warning_mock),
     ):
         await namecard_parser.parse()
 
@@ -138,7 +138,7 @@ async def test_namecard_parser_player_without_namecard(namecard_parser: Namecard
                 json=lambda: search_data,
             ),
         ),
-        patch("app.logging.logger.info", logger_info_mock),
+        patch("app.overfast_logger.logger.info", logger_info_mock),
     ):
         await namecard_parser.parse()
 
@@ -166,7 +166,7 @@ async def test_namecard_parser_no_cache_no_namecard(
             return_value=player_search_response_mock,
         ),
         patch(
-            "app.logging.logger.warning",
+            "app.overfast_logger.logger.warning",
             logger_warning_mock,
         ),
     ):

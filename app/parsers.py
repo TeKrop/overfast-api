@@ -10,8 +10,8 @@ from .config import settings
 from .enums import Locale
 from .exceptions import ParserParsingError
 from .helpers import read_csv_data_file
-from .logging import logger
 from .overfast_client import OverFastClient
+from .overfast_logger import logger
 
 
 class AbstractParser(ABC):

@@ -12,7 +12,7 @@ from fastapi import status
 
 from app.config import settings
 from app.enums import Locale
-from app.logging import logger
+from app.overfast_logger import logger
 
 from ..enums import HeroKey
 from ..helpers import players_ids

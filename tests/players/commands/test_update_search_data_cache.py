@@ -51,7 +51,7 @@ def test_update_search_data_request_error(
     with (
         patch("httpx.get", side_effect=httpx.RequestError("error")),
         patch(
-            "app.logging.logger.exception",
+            "app.overfast_logger.logger.exception",
             logger_exception_mock,
         ),
         pytest.raises(SystemExit),
@@ -74,7 +74,7 @@ def test_update_search_data_cache_not_found(cache_manager: CacheManager):
             return_value=Mock(status_code=status.HTTP_200_OK, text="OK"),
         ),
         patch(
-            "app.logging.logger.exception",
+            "app.overfast_logger.logger.exception",
             logger_exception_mock,
         ),
         pytest.raises(
@@ -133,7 +133,7 @@ def test_update_search_data_cache_invalid_json(
             ),
         ),
         patch(
-            "app.logging.logger.exception",
+            "app.overfast_logger.logger.exception",
             logger_exception_mock,
         ),
         pytest.raises(

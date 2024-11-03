@@ -4,7 +4,7 @@ import time
 from collections.abc import Callable
 from functools import wraps
 
-from .logging import logger
+from .overfast_logger import logger
 
 
 def rate_limited(max_calls: int, interval: int):
