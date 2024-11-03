@@ -116,7 +116,7 @@ Below is the current list of TTL values configured for the API cache. The latest
 
 The default case is pretty straightforward. When a `User` makes an API request, `Nginx` first checks `Redis` for cached data :
 * If available, `Redis` returns the data directly to `Nginx`, which forwards it to the `User` (cache hit).
-* If the cache is empty (cache miss), `Nginx` sends the request to the `App` server, which retrieves and parses data from Blizzard.
+* If the cache is empty (cache miss), `Nginx` sends the request to the `App` server, which retrieves and parses data from `Blizzard`.
 
 The `App` then stores this data in `Redis` and returns it to `Nginx`, which sends the response to the `User`. This approach minimizes external requests and speeds up response times by prioritizing cached data.
 
@@ -127,6 +127,7 @@ sequenceDiagram
     participant Nginx
     participant Redis
     participant App
+    participant Blizzard
     User->>+Nginx: Make an API request
     Nginx->>+Redis: Make an API Cache request
     alt API Cache is available
@@ -135,7 +136,8 @@ sequenceDiagram
     else
         Redis-->>-Nginx: Return no result
         Nginx->>+App: Transmit the request to App server
-        App->>App: Retrieve data from Blizzard
+        App->>+Blizzard: Retrieve data
+        Blizzard-->>-App: Return data
         App->>App: Parse HTML page
         App->>Redis: Store data into API Cache
         App-->>-Nginx: Return API data
@@ -147,9 +149,11 @@ sequenceDiagram
 
 The player profile request flow is similar to the previous setup, but with an extra layer of caching for player-specific data, including HTML data (profile page) and player search data (JSON data).
 
-When a `User` makes an API request, `Nginx` checks `Redis` for cached API data. If found, it’s returned directly. If not, `Nginx` forwards the request to the `App` server. It then checks a Player Cache in `Redis` :
-* If the player data is cached, `App` parses it
-* if not, `App` retrieves and parses the data from Blizzard, then stores it in both the Player Cache and API Cache.
+When a `User` makes an API request, `Nginx` checks `Redis` for cached API data. If found, it’s returned directly. If not, `Nginx` forwards the request to the `App` server.
+
+It then retrieves Search data from `Blizzard` and checks a Player Cache in `Redis` :
+* If the player data is cached and up-to-date (`lastUpdated` from Search data has not changed), `App` parses it
+* If not, `App` retrieves and parses the data from `Blizzard`, then stores it in both the Player Cache and API Cache.
 
 This additional Player Cache layer reduces external calls for player-specific data, especially when player career hasn't changed, improving performance and response times.
 
@@ -160,6 +164,7 @@ sequenceDiagram
     participant Nginx
     participant Redis
     participant App
+    participant Blizzard
     User->>+Nginx: Make an API request
     Nginx->>+Redis: Make an API Cache request
     alt API Cache is available
@@ -168,13 +173,16 @@ sequenceDiagram
     else
         Redis-->>-Nginx: Return no result
         Nginx->>+App: Transmit the request to App server
+        App->>+Blizzard: Make a Player Search request
+        Blizzard-->>-App: Return Player Search data
         App->>+Redis: Make Player Cache request
-        alt Player Cache is available
+        alt Player Cache is available and up-to-date
             Redis-->>App: Return Player Cache
             App->>App: Parse HTML page
         else
             Redis-->>-App: Return no result
-            App->>App: Retrieve data from Blizzard
+            App->>+Blizzard: Retrieve Player data (HTML)
+            Blizzard-->>-App: Return Player data
             App->>App: Parse HTML page
             App->>Redis: Store data into Player Cache
         end
