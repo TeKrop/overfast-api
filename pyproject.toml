@@ -1,6 +1,6 @@
 [project]
 name = "overfast-api"
-version = "2.40.1"
+version = "3.0.0"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = {file = "LICENSE"}
 authors = [
@@ -105,6 +105,7 @@ ignore = [
     "RET505",  # allow using else after return statement
     "PLE1205", # error checking doesn't support {} format
     "PLR0913", # allow 6/7 arguments for some functions
+    "TID252",  # allow relative imports from parents
 
     # Rules already handled by ruff formatter
     "E501",    # line too long
@@ -120,6 +121,13 @@ ignore = [
 # Allow some confusable UTF8 chars (used in regexp)
 allowed-confusables = ["（", "）", "："]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["SLF001"]  # Ignore private member access on tests
+
 [tool.ruff.lint.isort]
 # Consider app as first-party for imports in tests
 known-first-party = ["app"]
+
+[tool.pytest.ini_options]
+# Put this default value to prevent warnings
+asyncio_default_fixture_loop_scope = "function"

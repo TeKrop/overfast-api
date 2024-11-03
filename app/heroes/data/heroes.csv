@@ -1,0 +1,42 @@
+key,name,role,health,armor,shields
+ana,Ana,support,250,0,0
+ashe,Ashe,damage,250,0,0
+baptiste,Baptiste,support,250,0,0
+bastion,Bastion,damage,250,100,0
+brigitte,Brigitte,support,200,50,0
+cassidy,Cassidy,damage,275,0,0
+dva,D.Va,tank,350,375,0
+doomfist,Doomfist,tank,525,0,0
+echo,Echo,damage,250,0,0
+genji,Genji,damage,250,0,0
+hanzo,Hanzo,damage,250,0,0
+illari,Illari,support,250,0,0
+junker-queen,Junker Queen,tank,525,0,0
+junkrat,Junkrat,damage,250,0,0
+juno,Juno,support,250,0,0
+kiriko,Kiriko,support,250,0,0
+lifeweaver,Lifeweaver,support,225,0,50
+lucio,Lúcio,support,250,0,0
+mauga,Mauga,tank,525,200,0
+mei,Mei,damage,300,0,0
+mercy,Mercy,support,250,0,0
+moira,Moira,support,250,0,0
+orisa,Orisa,tank,325,300,0
+pharah,Pharah,damage,225,0,0
+ramattra,Ramattra,tank,400,75,0
+reaper,Reaper,damage,300,0,0
+reinhardt,Reinhardt,tank,400,300,0
+roadhog,Roadhog,tank,750,0,0
+sigma,Sigma,tank,350,0,275
+sojourn,Sojourn,damage,250,0,0
+soldier-76,Soldier: 76,damage,250,0,0
+sombra,Sombra,damage,250,0,0
+symmetra,Symmetra,damage,100,0,150
+torbjorn,Torbjörn,damage,250,50,0
+tracer,Tracer,damage,175,0,0
+venture,Venture,damage,250,0,0
+widowmaker,Widowmaker,damage,200,0,0
+winston,Winston,tank,375,250,0
+wrecking-ball,Wrecking Ball,tank,450,175,150
+zarya,Zarya,tank,325,0,225
+zenyatta,Zenyatta,support,75,0,175

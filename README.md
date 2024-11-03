@@ -23,11 +23,11 @@
 
 
 ## ✨ [Live instance](https://overfast-api.tekrop.fr)
-The live instance is restricted with a rate limit around 10 req/s per IP (a shared limit across all endpoints). This limit may be adjusted as needed. If you require higher throughput, consider hosting your own instance on a server 👍
+The live instance operates with a rate limit applied per second, shared across all endpoints. You can view the current rate limit on the home page, and this limit may be adjusted as needed. For higher request throughput, consider hosting your own instance on a dedicated server 👍
 
 - Live instance (Redoc documentation) : https://overfast-api.tekrop.fr/
 - Swagger UI : https://overfast-api.tekrop.fr/docs
-- Status page : https://stats.uptimerobot.com/E0k0yU1pJQ
+- Status page : https://uptime-overfast-api.tekrop.fr/
 
 ## 🐋 Run for production
 Running the project is straightforward. Ensure you have `docker` and `docker compose` installed. Next, generate a `.env` file using the provided `.env.dist` template. Finally, execute the following command:
@@ -42,11 +42,11 @@ Same as earlier, ensure you have `docker` and `docker compose` installed, and ge
 Then, execute the following commands to launch the dev server :
 
 ```shell
-make build     # Build the images, needed for all further commands
-make start     # Launch OverFast API (dev mode)
-make testing   # Launch OverFast API (testing mode with reverse proxy)
+make build                     # Build the images, needed for all further commands
+make start                     # Launch OverFast API (dev mode with autoreload)
+make start TESTING_MODE=true   # Launch OverFast API (testing mode, with reverse proxy)
 ```
-The dev server will be running on the port `8000`. You can use the `make down` command to stop and remove the containers. Feel free to type `make` or `make help` to access a comprehensive list of all available commands for your reference.
+The dev server will be running on the port `8000`. Reverse proxy will be running on the port `8080` in testing mode. You can use the `make down` command to stop and remove the containers. Feel free to type `make` or `make help` to access a comprehensive list of all available commands for your reference.
 
 ### Generic settings
 Should you wish to customize according to your specific requirements, here is a detailed list of available settings:
@@ -73,7 +73,7 @@ Running tests with coverage (default)
 make test
 ```
 
-Running tests with given args
+Running tests with given args (without coverage)
 ```shell
 make test PYTEST_ARGS="tests/common"
 ```
@@ -94,46 +94,31 @@ In player career statistics, various conversions are applied for ease of use:
 - **Percent values** are represented as **integers**, omitting the percent symbol
 - Integer and float string representations are converted to their respective types
 
-### API Cache and Parser Cache
+### Redis caching
 
-OverFast API integrates a **Redis**-based cache system, divided into two main components:
+OverFast API integrates a **Redis**-based cache system, divided into three main components:
 - **API Cache**: This high-level cache associates URIs (cache keys) with raw JSON data. Upon the initial request, if a cache entry exists, the **nginx** server returns the JSON data directly. Cached values are stored with varying TTL (Time-To-Live) parameters depending on the requested route.
-- **Parser Cache**: Specifically designed for the API's parsing system, this cache stores parsing results (JSON objects) from HTML Blizzard pages. Its purpose is to minimize calls to Blizzard servers when requests involve filters. The cached values are refreshed in the background prior to expiration.
+- **Player Cache**: Specifically designed for the API's players data endpoints, this cache stores both HTML Blizzard pages (`profile`) and search results (`summary`) for a given player. Its purpose is to minimize calls to Blizzard servers whenever an associated API Cache is expired, and player's career hasn't changed since last call, by using `lastUpdated` value from `summary`. This cache will only expire if not accessed for a given TTL (default is 3 days).
+- **Search Data Cache**: Cache the player search endpoint to store mappings between `avatar`, `namecard`, and `title` URLs and their corresponding IDs. On profile pages, only the ID values are accessible, so we initialize this "Search Data" cache when the app launches.
 
-Here is the list of all TTL values configured for API Cache :
+Below is the current list of TTL values configured for the API cache. The latest values are available on the API homepage.
 * Heroes list : 1 day
 * Hero specific data : 1 day
 * Roles list : 1 day
 * Gamemodes list : 1 day
 * Maps list : 1 day
 * Players career : 1 hour
-* Players search : 1 hour
-
-### Refresh-Ahead cache system
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Redis
-    participant Worker
-    participant Blizzard
-    Worker->>+Redis: Request expiring Parser Cache
-    Redis-->>-Worker: Return expiring Parser Cache
-    alt Some Parser Cache will expire
-        Worker->>+Blizzard: Request up-to-date data
-        Blizzard-->>-Worker: Return up-to-date data
-        Worker->>+Redis: Update cache values
-    end
-```
-
-To minimize requests to Blizzard servers, a Refresh-Ahead cache system has been deployed.
-
-Upon the initial request for a player's career page, there may be a slight delay (approximately 2-3 seconds) as data is fetched from Blizzard. Following this, the computed data is cached in the Parser Cache, which is subsequently refreshed in the background by a dedicated worker, before expiration. Additionally, the final data is stored in the API Cache, which is generated only upon user requests.
-
-This approach ensures that subsequent requests for the same career page are exceptionally swift, significantly enhancing user experience.
-
+* Players search : 10 min
 
 ## 🐍 Architecture
+
+### Default case
+
+The default case is pretty straightforward. When a `User` makes an API request, `Nginx` first checks `Redis` for cached data :
+* If available, `Redis` returns the data directly to `Nginx`, which forwards it to the `User` (cache hit).
+* If the cache is empty (cache miss), `Nginx` sends the request to the `App` server, which retrieves and parses data from `Blizzard`.
+
+The `App` then stores this data in `Redis` and returns it to `Nginx`, which sends the response to the `User`. This approach minimizes external requests and speeds up response times by prioritizing cached data.
 
 ```mermaid
 sequenceDiagram
@@ -142,6 +127,7 @@ sequenceDiagram
     participant Nginx
     participant Redis
     participant App
+    participant Blizzard
     User->>+Nginx: Make an API request
     Nginx->>+Redis: Make an API Cache request
     alt API Cache is available
@@ -150,20 +136,62 @@ sequenceDiagram
     else
         Redis-->>-Nginx: Return no result
         Nginx->>+App: Transmit the request to App server
-        App->>+Redis: Make Parser Cache request
-        alt Parser Cache is available
-            Redis-->>App: Return Parser Cache
+        App->>+Blizzard: Retrieve data
+        Blizzard-->>-App: Return data
+        App->>App: Parse HTML page
+        App->>Redis: Store data into API Cache
+        App-->>-Nginx: Return API data
+        Nginx-->>-User: Return API data
+    end
+```
+
+### Player profile case
+
+The player profile request flow is similar to the previous setup, but with an extra layer of caching for player-specific data, including HTML data (profile page) and player search data (JSON data).
+
+When a `User` makes an API request, `Nginx` checks `Redis` for cached API data. If found, it’s returned directly. If not, `Nginx` forwards the request to the `App` server.
+
+It then retrieves Search data from `Blizzard` and checks a Player Cache in `Redis` :
+* If the player data is cached and up-to-date (`lastUpdated` from Search data has not changed), `App` parses it
+* If not, `App` retrieves and parses the data from `Blizzard`, then stores it in both the Player Cache and API Cache.
+
+This additional Player Cache layer reduces external calls for player-specific data, especially when player career hasn't changed, improving performance and response times.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant Nginx
+    participant Redis
+    participant App
+    participant Blizzard
+    User->>+Nginx: Make an API request
+    Nginx->>+Redis: Make an API Cache request
+    alt API Cache is available
+        Redis-->>Nginx: Return API Cache data
+        Nginx-->>User: Return API Cache data
+    else
+        Redis-->>-Nginx: Return no result
+        Nginx->>+App: Transmit the request to App server
+        App->>+Blizzard: Make a Player Search request
+        Blizzard-->>-App: Return Player Search data
+        App->>+Redis: Make Player Cache request
+        alt Player Cache is available and up-to-date
+            Redis-->>App: Return Player Cache
+            App->>App: Parse HTML page
         else
             Redis-->>-App: Return no result
+            App->>+Blizzard: Retrieve Player data (HTML)
+            Blizzard-->>-App: Return Player data
             App->>App: Parse HTML page
+            App->>Redis: Store data into Player Cache
         end
+        App->>Redis: Store data into API Cache
         App-->>-Nginx: Return API data
         Nginx-->>-User: Return API data
     end
 
 ```
-
-Utilizing `docker compose`, this architecture provides response cache saving into Redis. Subsequent requests are then directly served by nginx without involving the Python server at all. This approach strikes the optimal performance balance, leveraging nginx's efficiency in serving static content. Depending on the configured Blizzard pages, a single request may trigger multiple Parser Cache requests.
 
 ## 🤝 Contributing
 

@@ -3,27 +3,32 @@
 from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import ResponseValidationError
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from .commands.update_search_data_cache import update_search_data_cache
-from .common.enums import RouteTag
-from .common.logging import logger
-from .common.overfast_client import OverFastClient
 from .config import settings
-from .routers import gamemodes, heroes, maps, players, roles
+from .enums import RouteTag
+from .gamemodes import router as gamemodes
+from .helpers import overfast_internal_error
+from .heroes import router as heroes
+from .maps import router as maps
+from .overfast_client import OverFastClient
+from .overfast_logger import logger
+from .players import router as players
+from .players.commands.update_search_data_cache import update_search_data_cache
+from .roles import router as roles
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):  # pragma: no cover
     # Update search data list from Blizzard before starting up
-    if settings.redis_caching_enabled:
-        logger.info("Updating search data cache (avatars, namecards, titles)")
-        with suppress(SystemExit):
-            update_search_data_cache()
+    logger.info("Updating search data cache (avatars, namecards, titles)")
+    with suppress(SystemExit):
+        update_search_data_cache()
 
     # Instanciate HTTPX Async Client
     logger.info("Instanciating HTTPX AsyncClient...")
@@ -45,7 +50,7 @@ reduces calls to Blizzard pages, ensuring swift and precise data delivery to use
 This live instance is configured with the following restrictions:
 - Rate Limit per IP: **{settings.rate_limit_per_second_per_ip} requests/second** (burst capacity :
 **{settings.rate_limit_per_ip_burst}**)
-- Maximum connections per IP: **{settings.max_connections_per_ip}**
+- Maximum connections/simultaneous requests per IP: **{settings.max_connections_per_ip}**
 - Retry delay after Blizzard rate limiting: **{settings.blizzard_rate_limit_retry_after} seconds**
 
 This limit may be adjusted as needed. If you require higher throughput, consider
@@ -139,6 +144,13 @@ async def http_exception_handler(_: Request, exc: StarletteHTTPException):
         status_code=exc.status_code,
         headers=exc.headers,
     )
+
+
+@app.exception_handler(ResponseValidationError)
+async def pydantic_validation_error_handler(
+    request: Request, error: ResponseValidationError
+):
+    raise overfast_internal_error(request.url.path, error) from error
 
 
 # We need to override default Redoc page in order to be

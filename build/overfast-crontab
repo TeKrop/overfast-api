@@ -1,4 +1,2 @@
-* * * * * cd /code && .venv/bin/python -m app.commands.check_and_update_cache
-0 2 * * * cd /code && .venv/bin/python -m app.commands.check_new_hero
-42 * * * * cd /code && .venv/bin/python -m app.commands.update_search_data_cache
-24 * * * * cd /code && .venv/bin/python -m app.commands.check_and_delete_parser_cache
+0 2 * * * cd /code && .venv/bin/python -m app.heroes.commands.check_new_hero
+42 * * * * cd /code && .venv/bin/python -m app.players.commands.update_search_data_cache

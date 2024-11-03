@@ -2,7 +2,7 @@
     "summary": {
         "username": "Dekk",
         "avatar": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/f52343cf63f193bc24598dabb07697f1b7a2277fb59f33c8868e2d5a4fc8e122.png",
-        "namecard": null,
+        "namecard": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/757219956129146d84617a7e713dfca1bc33ea27cf6c73df60a33d02a147edc1.png",
         "title": "Bytefixer",
         "endorsement": {
             "level": 4,
@@ -18,7 +18,7 @@
             },
             "console": null
         },
-        "last_updated_at": null
+        "last_updated_at": 1678488893
     },
     "stats": {
         "pc": {
