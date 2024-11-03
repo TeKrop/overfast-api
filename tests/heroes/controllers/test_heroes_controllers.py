@@ -22,7 +22,9 @@ def test_dict_insert_value_before_key_with_key_error(
     new_value: Any,
 ):
     with pytest.raises(KeyError):
-        get_hero_controller._GetHeroController__dict_insert_value_before_key(input_dict, key, new_key, new_value)
+        get_hero_controller._GetHeroController__dict_insert_value_before_key(
+            input_dict, key, new_key, new_value
+        )
 
 
 @pytest.mark.parametrize(
@@ -63,6 +65,8 @@ def test_dict_insert_value_before_key_valid(
     result_dict: dict,
 ):
     assert (
-        get_hero_controller._GetHeroController__dict_insert_value_before_key(input_dict, key, new_key, new_value)
+        get_hero_controller._GetHeroController__dict_insert_value_before_key(
+            input_dict, key, new_key, new_value
+        )
         == result_dict
     )

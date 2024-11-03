@@ -53,13 +53,13 @@ class Settings(BaseSettings):
     blizzard_rate_limit_retry_after: int = 5
 
     # Global rate limit of requests per second per ip to apply on the API
-    rate_limit_per_second_per_ip: int = 10
+    rate_limit_per_second_per_ip: int = 30
 
     # Global burst value to apply on rate limit before rejecting requests
-    rate_limit_per_ip_burst: int = 2
+    rate_limit_per_ip_burst: int = 5
 
-    # Global maximum number of connection per ip
-    max_connections_per_ip: int = 5
+    # Global maximum number of connection/simultaneous requests per ip
+    max_connections_per_ip: int = 10
 
     ############
     # REDIS CONFIGURATION
@@ -85,7 +85,7 @@ class Settings(BaseSettings):
 
     # Cache TTL for Player Cache. Whenever a key is accessed, its TTL is reset.
     # It will only expires if not accessed during TTL time.
-    player_cache_timeout: int = 172800
+    player_cache_timeout: int = 259200
 
     # Cache TTL for heroes list data (seconds)
     heroes_path_cache_timeout: int = 86400
@@ -100,7 +100,7 @@ class Settings(BaseSettings):
     career_path_cache_timeout: int = 3600
 
     # Cache TTL for search account data (seconds)
-    search_account_path_cache_timeout: int = 3600
+    search_account_path_cache_timeout: int = 600
 
     ############
     # SEARCH DATA (AVATARS, NAMECARDS, TITLES)

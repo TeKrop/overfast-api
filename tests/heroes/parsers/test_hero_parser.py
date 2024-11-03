@@ -16,7 +16,9 @@ from app.heroes.parsers.hero_parser import HeroParser
     indirect=["hero_html_data"],
 )
 @pytest.mark.asyncio
-async def test_hero_page_parsing(hero_parser: HeroParser, hero_key: str, hero_html_data: str):
+async def test_hero_page_parsing(
+    hero_parser: HeroParser, hero_key: str, hero_html_data: str
+):
     if not hero_html_data:
         pytest.skip("Hero HTML file not saved yet, skipping")
 
@@ -32,15 +34,20 @@ async def test_hero_page_parsing(hero_parser: HeroParser, hero_key: str, hero_ht
 
 @pytest.mark.parametrize("hero_html_data", ["unknown-hero"], indirect=True)
 @pytest.mark.asyncio
-async def test_not_released_hero_parser_blizzard_error(hero_parser: HeroParser, hero_html_data: str):
+async def test_not_released_hero_parser_blizzard_error(
+    hero_parser: HeroParser, hero_html_data: str
+):
     with (
         pytest.raises(ParserBlizzardError),
         patch(
             "httpx.AsyncClient.get",
-            return_value=Mock(status_code=status.HTTP_404_NOT_FOUND, text=hero_html_data),
+            return_value=Mock(
+                status_code=status.HTTP_404_NOT_FOUND, text=hero_html_data
+            ),
         ),
     ):
         await hero_parser.parse()
+
 
 @pytest.mark.parametrize(
     ("url", "full_url"),
@@ -84,7 +91,10 @@ def test_get_full_url(hero_parser: HeroParser, url: str, full_url: str):
     ],
 )
 def test_get_birthday_and_age(
-    hero_parser: HeroParser, input_str: str, locale: Locale, result: tuple[str | None, int | None]
+    hero_parser: HeroParser,
+    input_str: str,
+    locale: Locale,
+    result: tuple[str | None, int | None],
 ):
     """Get birthday and age from text for a given hero"""
     assert hero_parser._HeroParser__get_birthday_and_age(input_str, locale) == result

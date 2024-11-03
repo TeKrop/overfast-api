@@ -58,7 +58,9 @@ class BasePlayerParser(HTMLParser):
         logger.info("Player Cache not found or not up-to-date, calling Blizzard")
 
         # Update URL with player summary URL
-        self.blizzard_url = self.get_blizzard_url(player_id=self.player_data["summary"]["url"])
+        self.blizzard_url = self.get_blizzard_url(
+            player_id=self.player_data["summary"]["url"]
+        )
         await super().parse()
 
         # Update the Player Cache

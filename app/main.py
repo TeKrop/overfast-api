@@ -50,7 +50,7 @@ reduces calls to Blizzard pages, ensuring swift and precise data delivery to use
 This live instance is configured with the following restrictions:
 - Rate Limit per IP: **{settings.rate_limit_per_second_per_ip} requests/second** (burst capacity :
 **{settings.rate_limit_per_ip_burst}**)
-- Maximum connections per IP: **{settings.max_connections_per_ip}**
+- Maximum connections/simultaneous requests per IP: **{settings.max_connections_per_ip}**
 - Retry delay after Blizzard rate limiting: **{settings.blizzard_rate_limit_retry_after} seconds**
 
 This limit may be adjusted as needed. If you require higher throughput, consider

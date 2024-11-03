@@ -13,7 +13,7 @@ The CSV file containing heroes statistics data is located in `app/heroes/data/he
 - `key` : Key of the hero name, used in URLs of the API (and by Blizzard for their pages)
 - `name` : Display name of the hero (with the right accentuation). Used in the documentation.
 - `role` : Role key of the hero, which is either `damage`, `support` or `tank`
-- `health` : Health of the hero
+- `health` : Health of the hero (in Role Queue)
 - `armor` : Armor of the hero, mainly possessed by tanks
 - `shields` : Shields of the hero
 
