@@ -23,7 +23,8 @@ class PlayerSearchParser(JSONParser):
 
     def get_blizzard_url(self, **kwargs) -> str:
         """URL used when requesting data to Blizzard."""
-        return f"{super().get_blizzard_url(**kwargs)}/{kwargs.get('name')}/"
+        search_name = kwargs.get("name").split("#")[0]
+        return f"{super().get_blizzard_url(**kwargs)}/{search_name}/"
 
     def parse_data(self) -> dict:
         # Transform into PlayerSearchResult format
