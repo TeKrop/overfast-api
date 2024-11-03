@@ -37,7 +37,7 @@ def get_search_page() -> httpx.Response:
         return response
 
 
-def extract_search_data(html_content: str, data_type: SearchDataType) -> dict:
+def extract_search_data(html_content: str, data_type: SearchDataType) -> dict | None:
     variable_name = variable_name_mapping[data_type]
     if not variable_name:
         return None
