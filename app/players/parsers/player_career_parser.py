@@ -54,7 +54,13 @@ class PlayerCareerParser(BasePlayerParser):
         if kwargs.get("summary"):
             return self.data.get("summary")
 
-        return self._filter_stats(**kwargs) if kwargs.get("stats") else self.data
+        if kwargs.get("stats"):
+            return self._filter_stats(**kwargs)
+
+        return {
+            "summary": self.data["summary"],
+            "stats": self._filter_all_stats_data(**kwargs),
+        }
 
     def _filter_stats(self, **kwargs) -> dict:
         filtered_data = self.data["stats"] or {}
@@ -72,6 +78,7 @@ class PlayerCareerParser(BasePlayerParser):
                 platform = possible_platforms[0]
             else:
                 return {}
+
         filtered_data = filtered_data.get(platform) or {}
         if not filtered_data:
             return {}
@@ -88,6 +95,39 @@ class PlayerCareerParser(BasePlayerParser):
             for hero_key, statistics in filtered_data.items()
             if not hero_filter or hero_filter == hero_key
         }
+
+    def _filter_all_stats_data(self, **kwargs) -> dict:
+        stats_data = self.data["stats"] or {}
+        platform_filter = kwargs.get("platform")
+        gamemode_filter = kwargs.get("gamemode")
+
+        # Return early if no platform or gamemode is specified
+        if not platform_filter and not gamemode_filter:
+            return stats_data
+
+        filtered_data = {}
+
+        for platform_key, platform_data in stats_data.items():
+            if platform_filter and platform_key != platform_filter:
+                filtered_data[platform_key] = None
+                continue
+
+            if platform_data is None:
+                filtered_data[platform_key] = None
+                continue
+
+            if gamemode_filter is None:
+                filtered_data[platform_key] = platform_data
+                continue
+
+            filtered_data[platform_key] = {
+                gamemode_key: (
+                    gamemode_data if gamemode_key == gamemode_filter else None
+                )
+                for gamemode_key, gamemode_data in platform_data.items()
+            }
+
+        return filtered_data
 
     def parse_data(self) -> dict:
         # We must check if we have the expected section for profile. If not,

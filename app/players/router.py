@@ -260,7 +260,21 @@ async def get_player_stats(
 async def get_player_career(
     request: Request,
     commons: CommonsPlayerDep,
+    gamemode: PlayerGamemode = Query(
+        None,
+        title="Gamemode",
+        description="Filter on a specific gamemode. All gamemodes are displayed by default.",
+        examples=["competitive"],
+    ),
+    platform: PlayerPlatform = Query(
+        None,
+        title="Platform",
+        description="Filter on a specific platform. All platforms are displayed by default.",
+        examples=["pc"],
+    ),
 ) -> Player:
     return await GetPlayerCareerController(request).process_request(
         player_id=commons.get("player_id"),
+        gamemode=gamemode,
+        platform=platform,
     )
