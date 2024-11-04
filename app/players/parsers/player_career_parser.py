@@ -105,34 +105,29 @@ class PlayerCareerParser(BasePlayerParser):
         if not platform_filter and not gamemode_filter:
             return stats_data
 
-        # Extract platform-specific data and update stats data
-        # to contain only platform-specific information
-        if platform_filter:
-            stats_data = {
-                platform_key: (
-                    platform_data if platform_key == platform_filter else None
+        filtered_data = {}
+
+        for platform_key, platform_data in stats_data.items():
+            if platform_filter and platform_key != platform_filter:
+                filtered_data[platform_key] = None
+                continue
+
+            if platform_data is None:
+                filtered_data[platform_key] = None
+                continue
+
+            if gamemode_filter is None:
+                filtered_data[platform_key] = platform_data
+                continue
+
+            filtered_data[platform_key] = {
+                gamemode_key: (
+                    gamemode_data if gamemode_key == gamemode_filter else None
                 )
-                for platform_key, platform_data in stats_data.items()
+                for gamemode_key, gamemode_data in platform_data.items()
             }
 
-        # Extract gamemode-specific data within the remaining platforms
-        # and update stats data to contain only gamemode-specific information
-        if gamemode_filter:
-            stats_data = {
-                platform_key: (
-                    {
-                        gamemode_key: (
-                            gamemode_data if gamemode_key == gamemode_filter else None
-                        )
-                        for gamemode_key, gamemode_data in platform_data.items()
-                    }
-                    if platform_data is not None
-                    else None
-                )
-                for platform_key, platform_data in stats_data.items()
-            }
-
-        return stats_data
+        return filtered_data
 
     def parse_data(self) -> dict:
         # We must check if we have the expected section for profile. If not,
