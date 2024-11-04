@@ -50,22 +50,36 @@ class PlayerCareerParser(BasePlayerParser):
         404,  # Player Not Found response, we want to handle it here
     ]
 
-    def filter_request_using_query(self, **kwargs) -> dict:
-        if kwargs.get("summary"):
+    # Filters coming from user query
+    filters: ClassVar[dict[str, bool | str]]
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._init_filters(**kwargs)
+
+    def _init_filters(self, **kwargs) -> None:
+        self.filters = {
+            filter_key: kwargs.get(filter_key)
+            for filter_key in ("summary", "stats", "platform", "gamemode", "hero")
+        }
+
+    def filter_request_using_query(self, **_) -> dict:
+        if self.filters["summary"]:
             return self.data.get("summary")
 
-        if kwargs.get("stats"):
-            return self._filter_stats(**kwargs)
+        if self.filters["stats"]:
+            return self._filter_stats()
 
         return {
             "summary": self.data["summary"],
-            "stats": self._filter_all_stats_data(**kwargs),
+            "stats": self._filter_all_stats_data(),
         }
 
-    def _filter_stats(self, **kwargs) -> dict:
+    def _filter_stats(self) -> dict:
         filtered_data = self.data["stats"] or {}
 
-        platform = kwargs.get("platform")
+        # We must have a valid platform filter here
+        platform = self.filters["platform"]
         if not platform:
             # Retrieve a "default" platform is the user didn't provided one
             if possible_platforms := [
@@ -83,12 +97,12 @@ class PlayerCareerParser(BasePlayerParser):
         if not filtered_data:
             return {}
 
-        filtered_data = filtered_data.get(kwargs.get("gamemode")) or {}
+        filtered_data = filtered_data.get(self.filters["gamemode"]) or {}
         if not filtered_data:
             return {}
 
         filtered_data = filtered_data.get("career_stats") or {}
-        hero_filter = kwargs.get("hero")
+        hero_filter = self.filters["hero"]
 
         return {
             hero_key: statistics
@@ -96,19 +110,17 @@ class PlayerCareerParser(BasePlayerParser):
             if not hero_filter or hero_filter == hero_key
         }
 
-    def _filter_all_stats_data(self, **kwargs) -> dict:
+    def _filter_all_stats_data(self) -> dict:
         stats_data = self.data["stats"] or {}
-        platform_filter = kwargs.get("platform")
-        gamemode_filter = kwargs.get("gamemode")
 
         # Return early if no platform or gamemode is specified
-        if not platform_filter and not gamemode_filter:
+        if not self.filters["platform"] and not self.filters["gamemode"]:
             return stats_data
 
         filtered_data = {}
 
         for platform_key, platform_data in stats_data.items():
-            if platform_filter and platform_key != platform_filter:
+            if self.filters["platform"] and platform_key != self.filters["platform"]:
                 filtered_data[platform_key] = None
                 continue
 
@@ -116,13 +128,13 @@ class PlayerCareerParser(BasePlayerParser):
                 filtered_data[platform_key] = None
                 continue
 
-            if gamemode_filter is None:
+            if self.filters["gamemode"] is None:
                 filtered_data[platform_key] = platform_data
                 continue
 
             filtered_data[platform_key] = {
                 gamemode_key: (
-                    gamemode_data if gamemode_key == gamemode_filter else None
+                    gamemode_data if gamemode_key == self.filters["gamemode"] else None
                 )
                 for gamemode_key, gamemode_data in platform_data.items()
             }
@@ -141,6 +153,10 @@ class PlayerCareerParser(BasePlayerParser):
         return {"summary": self.__get_summary(), "stats": self.get_stats()}
 
     def __get_summary(self) -> dict:
+        # If the user filtered the page on stats, no need to parse the summary
+        if self.filters["stats"]:
+            return {}
+
         profile_div = self.root_tag.find(
             "blz-section",
             class_="Profile-masthead",
@@ -158,9 +174,7 @@ class PlayerCareerParser(BasePlayerParser):
         )
 
         return {
-            "username": (
-                summary_div.find("h1", class_="Profile-player--name").get_text()
-            ),
+            "username": summary_div.find("h1", class_="Profile-player--name").string,
             "avatar": (
                 summary_div.find(
                     "img",
@@ -198,7 +212,7 @@ class PlayerCareerParser(BasePlayerParser):
             return None
 
         # Retrieve the title text
-        title = title_tag.get_text() or None
+        title = title_tag.string or None
 
         # Special case : the "no title" means there is no title
         return get_player_title(title)
@@ -281,21 +295,22 @@ class PlayerCareerParser(BasePlayerParser):
         return competitive_ranks
 
     def __get_last_season_played(self, platform_class: str) -> int | None:
-        profile_section = self.root_tag.select_one(f"div.Profile-view.{platform_class}")
+        profile_section = self.root_tag.find(
+            "div",
+            class_=platform_class,
+            recursive=False,
+        )
         if not profile_section:
             return None
 
-        statistics_section = profile_section.select_one(
-            "blz-section.stats.competitive-view",
+        statistics_section = profile_section.find(
+            "blz-section",
+            class_="competitive-view",
+            recursive=False,
         )
-        return (
-            int(statistics_section["data-latestherostatrankseasonow2"])
-            if (
-                statistics_section
-                and "data-latestherostatrankseasonow2" in statistics_section.attrs
-            )
-            else None
-        )
+
+        last_season_played = statistics_section.get("data-latestherostatrankseasonow2")
+        return int(last_season_played) if last_season_played else None
 
     @staticmethod
     def __get_role_icon(role_wrapper: Tag) -> str:
@@ -309,17 +324,27 @@ class PlayerCareerParser(BasePlayerParser):
         return role_svg.find("use")["xlink:href"]
 
     def get_stats(self) -> dict | None:
+        # If the user filtered the page on summary, no need to parse the stats
+        if self.filters["summary"]:
+            return None
+
         stats = {
-            platform.value: self.__get_platform_stats(platform_class)
+            platform.value: self.__get_platform_stats(platform, platform_class)
             for platform, platform_class in platforms_div_mapping.items()
         }
 
-        # If we don't have data for any platform, return None directly
-        return None if not any(stats.values()) else stats
+        # If we don't have data for any platform and we're consulting stats, return None directly
+        return None if not any(stats.values()) and self.filters["stats"] else stats
 
-    def __get_platform_stats(self, platform_class: str) -> dict | None:
-        statistics_section = self.root_tag.select_one(
-            f"div.Profile-view.{platform_class}",
+    def __get_platform_stats(
+        self, platform: PlayerPlatform, platform_class: str
+    ) -> dict | None:
+        # If the user decided to filter on another platform, stop here
+        if self.filters["platform"] and self.filters["platform"] != platform:
+            return None
+
+        statistics_section = self.root_tag.find(
+            "div", class_=platform_class, recursive=False
         )
         gamemodes_infos = {
             gamemode.value: self.__get_gamemode_infos(statistics_section, gamemode)
@@ -335,6 +360,10 @@ class PlayerCareerParser(BasePlayerParser):
         statistics_section: Tag,
         gamemode: PlayerGamemode,
     ) -> dict | None:
+        # If the user decided to filter on another gamemode, stop here
+        if self.filters["gamemode"] and self.filters["gamemode"] != gamemode:
+            return None
+
         if not statistics_section:
             return None
 
@@ -342,15 +371,21 @@ class PlayerCareerParser(BasePlayerParser):
             "blz-section",
             class_="Profile-heroSummary",
             recursive=False,
-        ).select_one(f"div.Profile-heroSummary--view.{gamemodes_div_mapping[gamemode]}")
+        ).find(
+            "div",
+            class_=gamemodes_div_mapping[gamemode],
+            recursive=False,
+        )
 
         # Check if we can find a select in the section. If not, it means there is
         # no data to show for this gamemode and platform, return nothing.
         if not top_heroes_section.find("select"):
             return None
 
-        career_stats_section = statistics_section.select_one(
-            f"blz-section.stats.{gamemodes_div_mapping[gamemode]}",
+        career_stats_section = statistics_section.find(
+            "blz-section",
+            class_=gamemodes_div_mapping[gamemode],
+            recursive=False,
         )
 
         return {
@@ -367,8 +402,8 @@ class PlayerCareerParser(BasePlayerParser):
                     class_="Profile-heroSummary--header",
                     recursive=False,
                 )
-                .find("select")
-                .find_all("option")
+                .find("select", recursive=False)
+                .children
             )
             if option.get("option-id")
         }
@@ -382,31 +417,24 @@ class PlayerCareerParser(BasePlayerParser):
                 ),
                 "values": [
                     {
-                        "hero": (
-                            progress_bar.find("div", class_="Profile-progressBar--bar")[
-                                "data-hero-id"
-                            ]
-                        ),
+                        # First div is "Profile-progressBar--bar"
+                        "hero": progress_bar_container.contents[0]["data-hero-id"],
+                        # Second div is "Profile-progressBar--textWrapper"
                         "value": get_computed_stat_value(
-                            progress_bar.find(
-                                "div",
-                                class_="Profile-progressBar-description",
-                            ).get_text(),
+                            # Second div is "Profile-progressBar-description"
+                            progress_bar_container.contents[1].contents[1].string,
                         ),
                     }
-                    for progress_bar in category.find_all(
-                        "div",
-                        class_="Profile-progressBar",
-                        recursive=False,
-                    )
+                    for progress_bar in category.children
+                    for progress_bar_container in progress_bar.children
+                    if progress_bar_container.name == "div"
                 ],
             }
-            for category in top_heroes_section.find_all(
-                "div",
-                class_="Profile-progressBars",
-                recursive=False,
+            for category in top_heroes_section.children
+            if (
+                "Profile-progressBars" in category["class"]
+                and category["data-category-id"] in categories
             )
-            if category["data-category-id"] in categories
         }
 
         for category in CareerHeroesComparisonsCategory:
@@ -430,19 +458,19 @@ class PlayerCareerParser(BasePlayerParser):
                     class_="Profile-heroSummary--header",
                     recursive=False,
                 )
-                .find("select")
-                .find_all("option")
+                .find("select", recursive=False)
+                .children
             )
             if option.get("option-id")
         }
 
         career_stats = {}
 
-        for hero_container in career_stats_section.find_all(
-            "span",
-            class_="stats-container",
-            recursive=False,
-        ):
+        for hero_container in career_stats_section.children:
+            # Hero container should be span with "stats-container" class
+            if hero_container.name != "span":
+                continue
+
             stats_hero_class = get_stats_hero_class(hero_container["class"])
 
             # Sometimes, Blizzard makes some weird things and options don't
@@ -454,17 +482,13 @@ class PlayerCareerParser(BasePlayerParser):
             hero_key = get_hero_keyname(heroes_options[stats_hero_class])
 
             career_stats[hero_key] = []
-            for card_stat in hero_container.find_all(
-                "div",
-                class_="category",
-                recursive=False,
-            ):
-                content_div = card_stat.find("div", class_="content", recursive=False)
-                category_label = content_div.find(
-                    "div",
-                    class_="header",
-                    recursive=False,
-                ).get_text()
+            # Hero container children are div with "category" class
+            for card_stat in hero_container.children:
+                # Content div should be the only child ("content" class)
+                content_div = card_stat.contents[0]
+
+                # Label should be the first div within content ("header" class)
+                category_label = content_div.contents[0].contents[0].string
 
                 career_stats[hero_key].append(
                     {
@@ -473,14 +497,17 @@ class PlayerCareerParser(BasePlayerParser):
                         "stats": [],
                     },
                 )
-                for stat_row in content_div.find_all("div", class_="stat-item"):
-                    stat_name = stat_row.find("p", class_="name").get_text()
+                for stat_row in content_div.children:
+                    if "stat-item" not in stat_row["class"]:
+                        continue
+
+                    stat_name = stat_row.contents[0].string
                     career_stats[hero_key][-1]["stats"].append(
                         {
                             "key": get_plural_stat_key(string_to_snakecase(stat_name)),
                             "label": stat_name,
                             "value": get_computed_stat_value(
-                                stat_row.find("p", class_="value").get_text(),
+                                stat_row.contents[1].string,
                             ),
                         },
                     )

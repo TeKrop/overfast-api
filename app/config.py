@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     # Optional, status page URL if you have any to provide
     status_page_url: str | None = None
 
+    # Profiling with pyinstrument, for debug purposes
+    profiling: bool = False
+
     ############
     # RATE LIMITING
     ############

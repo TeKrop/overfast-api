@@ -1,12 +1,13 @@
 """Project main file containing FastAPI app and routes definitions"""
 
+from collections.abc import Callable
 from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import ResponseValidationError
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -21,6 +22,10 @@ from .overfast_logger import logger
 from .players import router as players
 from .players.commands.update_search_data_cache import update_search_data_cache
 from .roles import router as roles
+
+# pyinstrument won't be installed on production, that's why we're checking it here
+with suppress(ModuleNotFoundError):
+    from pyinstrument import Profiler
 
 
 @asynccontextmanager
@@ -174,6 +179,27 @@ async def overridden_swagger():
     swagger_settings = common_doc_settings.copy()
     swagger_settings["swagger_favicon_url"] = swagger_settings.pop("favicon_url")
     return get_swagger_ui_html(**swagger_settings)
+
+
+# In case enabled in settings, add the pyinstrument profiler middleware
+if settings.profiling is True:
+    logger.info("Profiling is enabled")
+
+    @app.middleware("http")
+    async def profile_request(request: Request, call_next: Callable):
+        """Profile the current request"""
+        # if the `profile=true` HTTP query argument is passed, we profile the request
+        if request.query_params.get("profile", False):
+            # we profile the request along with all additional middlewares, by interrupting
+            # the program every 1ms1 and records the entire stack at that point
+            with Profiler(interval=0.001, async_mode="enabled") as profiler:
+                await call_next(request)
+
+            # we dump the profiling into a file
+            return HTMLResponse(profiler.output_html())
+
+        # Proceed without profiling
+        return await call_next(request)
 
 
 # Add application routers

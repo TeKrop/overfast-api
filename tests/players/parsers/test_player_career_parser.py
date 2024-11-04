@@ -71,6 +71,8 @@ async def test_filter_all_stats_data(
     player_search_response_mock: Mock,
     search_data_func: Callable[[str, str], str | None],
 ):
+    player_career_parser._init_filters(platform=platform, gamemode=gamemode)
+
     with (
         patch(
             "httpx.AsyncClient.get",
@@ -89,9 +91,7 @@ async def test_filter_all_stats_data(
         await player_career_parser.parse()
 
     # Just check that the parsing is working properly
-    filtered_data = player_career_parser._filter_all_stats_data(
-        platform=platform, gamemode=gamemode
-    )
+    filtered_data = player_career_parser._filter_all_stats_data()
 
     if platform:
         assert all(
