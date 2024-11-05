@@ -10,8 +10,8 @@ from .player_career_parser import PlayerCareerParser
 class PlayerCareerStatsParser(PlayerCareerParser):
     """Overwatch player career Parser class"""
 
-    def filter_request_using_query(self, **kwargs) -> dict:
-        return self._filter_stats(**kwargs) if self.data else {}
+    def filter_request_using_query(self, **_) -> dict:
+        return self._filter_stats() if self.data else {}
 
     def parse_data(self) -> dict | None:
         # We must check if we have the expected section for profile. If not,

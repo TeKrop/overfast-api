@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import ClassVar
 
 import httpx
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
 from fastapi import status
 
 from .cache_manager import CacheManager
@@ -137,8 +137,7 @@ class HTMLParser(APIParser):
     @property
     def root_tag_params(self) -> dict:
         """Returns the BeautifulSoup params kwargs, used to find the root Tag
-        on the page which will be used for searching and hashing (for cache). We
-        don't want to calculate an hash and do the data parsing on all the HTML.
+        on the page which will be used for searching data.
         """
         return {"name": "main", "class_": "main-content", "recursive": False}
 
@@ -147,9 +146,10 @@ class HTMLParser(APIParser):
         self.create_bs_tag(response.text)
 
     def create_bs_tag(self, html_content: str) -> None:
-        self.root_tag = BeautifulSoup(html_content, "lxml").body.find(
-            **self.root_tag_params,
-        )
+        soup_strainer = SoupStrainer(**self.root_tag_params)
+        self.root_tag = BeautifulSoup(
+            html_content, "lxml", parse_only=soup_strainer
+        ).main
 
 
 class JSONParser(APIParser):
