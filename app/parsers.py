@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import ClassVar
 
 import httpx
-from bs4 import BeautifulSoup, SoupStrainer
+from bs4 import BeautifulSoup
 from fastapi import status
 
 from .cache_manager import CacheManager
@@ -146,10 +146,9 @@ class HTMLParser(APIParser):
         self.create_bs_tag(response.text)
 
     def create_bs_tag(self, html_content: str) -> None:
-        soup_strainer = SoupStrainer(**self.root_tag_params)
-        self.root_tag = BeautifulSoup(
-            html_content, "lxml", parse_only=soup_strainer
-        ).main
+        self.root_tag = BeautifulSoup(html_content, "lxml").body.find(
+            **self.root_tag_params,
+        )
 
 
 class JSONParser(APIParser):
