@@ -31,3 +31,12 @@ class Locale(StrEnum):
     PORTUGUESE_BRAZIL = "pt-br"
     RUSSIAN = "ru-ru"
     CHINESE_TAIWAN = "zh-tw"
+
+
+class Profiler(StrEnum):
+    """Supported profilers list"""
+
+    MEMRAY = "memray"
+    PYINSTRUMENT = "pyinstrument"
+    TRACEMALLOC = "tracemalloc"
+    OBJGRAPH = "objgraph"

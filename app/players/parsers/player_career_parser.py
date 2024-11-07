@@ -174,7 +174,9 @@ class PlayerCareerParser(BasePlayerParser):
         )
 
         return {
-            "username": summary_div.find("h1", class_="Profile-player--name").string,
+            "username": str(
+                summary_div.find("h1", class_="Profile-player--name").contents[0]
+            ),
             "avatar": (
                 summary_div.find(
                     "img",
@@ -212,7 +214,7 @@ class PlayerCareerParser(BasePlayerParser):
             return None
 
         # Retrieve the title text
-        title = title_tag.string or None
+        title = str(title_tag.contents[0]) or None
 
         # Special case : the "no title" means there is no title
         return get_player_title(title)
@@ -422,7 +424,11 @@ class PlayerCareerParser(BasePlayerParser):
                         # Second div is "Profile-progressBar--textWrapper"
                         "value": get_computed_stat_value(
                             # Second div is "Profile-progressBar-description"
-                            progress_bar_container.contents[1].contents[1].string,
+                            str(
+                                progress_bar_container.contents[1]
+                                .contents[1]
+                                .contents[0]
+                            ),
                         ),
                     }
                     for progress_bar in category.children
@@ -488,7 +494,7 @@ class PlayerCareerParser(BasePlayerParser):
                 content_div = card_stat.contents[0]
 
                 # Label should be the first div within content ("header" class)
-                category_label = content_div.contents[0].contents[0].string
+                category_label = str(content_div.contents[0].contents[0].contents[0])
 
                 career_stats[hero_key].append(
                     {
@@ -501,13 +507,13 @@ class PlayerCareerParser(BasePlayerParser):
                     if "stat-item" not in stat_row["class"]:
                         continue
 
-                    stat_name = stat_row.contents[0].string
+                    stat_name = str(stat_row.contents[0].contents[0])
                     career_stats[hero_key][-1]["stats"].append(
                         {
                             "key": get_plural_stat_key(string_to_snakecase(stat_name)),
                             "label": stat_name,
                             "value": get_computed_stat_value(
-                                stat_row.contents[1].string,
+                                str(stat_row.contents[1].contents[0]),
                             ),
                         },
                     )
