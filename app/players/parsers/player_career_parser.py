@@ -2,8 +2,8 @@
 
 from typing import ClassVar
 
-from bs4 import Tag
 from fastapi import status
+from selectolax.lexbor import LexborNode
 
 from app.config import settings
 from app.exceptions import ParserBlizzardError
@@ -144,7 +144,7 @@ class PlayerCareerParser(BasePlayerParser):
     def parse_data(self) -> dict:
         # We must check if we have the expected section for profile. If not,
         # it means the player doesn't exist or hasn't been found.
-        if not self.root_tag.find("blz-section", class_="Profile-masthead"):
+        if not self.root_tag.css_first("blz-section.Profile-masthead"):
             raise ParserBlizzardError(
                 status_code=status.HTTP_404_NOT_FOUND,
                 message="Player not found",
@@ -157,32 +157,18 @@ class PlayerCareerParser(BasePlayerParser):
         if self.filters["stats"]:
             return {}
 
-        profile_div = self.root_tag.find(
-            "blz-section",
-            class_="Profile-masthead",
-            recursive=False,
-        ).find("div", class_="Profile-player", recursive=False)
-        summary_div = profile_div.find(
-            "div",
-            class_="Profile-player--summaryWrapper",
-            recursive=False,
+        profile_div = self.root_tag.css_first(
+            "blz-section.Profile-masthead > div.Profile-player"
         )
-        progression_div = profile_div.find(
-            "div",
-            class_="Profile-player--info",
-            recursive=False,
-        )
+        summary_div = profile_div.css_first("div.Profile-player--summaryWrapper")
+        progression_div = profile_div.css_first("div.Profile-player--info")
 
         return {
-            "username": str(
-                summary_div.find("h1", class_="Profile-player--name").contents[0]
-            ),
+            "username": summary_div.css_first("h1.Profile-player--name").text(),
             "avatar": (
-                summary_div.find(
-                    "img",
-                    class_="Profile-player--portrait",
-                    recursive=False,
-                ).get("src")
+                summary_div.css_first("img.Profile-player--portrait").attributes.get(
+                    "src"
+                )
             ),
             "namecard": self.__get_namecard_url(),
             "title": self.__get_title(profile_div),
@@ -202,44 +188,35 @@ class PlayerCareerParser(BasePlayerParser):
         )
 
     @staticmethod
-    def __get_title(profile_div: Tag) -> str | None:
+    def __get_title(profile_div: LexborNode) -> str | None:
         # We return None is there isn't any player title div
-        if not (
-            title_tag := profile_div.find(
-                "h2",
-                class_="Profile-player--title",
-                recursive=False,
-            )
-        ):
+        if not (title_tag := profile_div.css_first("h2.Profile-player--title")):
             return None
 
         # Retrieve the title text
-        title = str(title_tag.contents[0]) or None
+        title = title_tag.text() or None
 
         # Special case : the "no title" means there is no title
         return get_player_title(title)
 
     @staticmethod
-    def __get_endorsement(progression_div: Tag) -> dict | None:
-        endorsement_span = progression_div.find(
-            "span",
-            class_="Profile-player--endorsementWrapper",
-            recursive=False,
+    def __get_endorsement(progression_div: LexborNode) -> dict | None:
+        endorsement_span = progression_div.css_first(
+            "span.Profile-player--endorsementWrapper"
         )
         if not endorsement_span:
             return None
 
-        endorsement_frame_url = endorsement_span.find(
-            "img",
-            class_="Profile-playerSummary--endorsement",
-        )["src"]
+        endorsement_frame_url = endorsement_span.css_first(
+            "img.Profile-playerSummary--endorsement"
+        ).attributes["src"]
 
         return {
             "level": get_endorsement_value_from_frame(endorsement_frame_url),
             "frame": endorsement_frame_url,
         }
 
-    def __get_competitive_ranks(self, progression_div: Tag) -> dict | None:
+    def __get_competitive_ranks(self, progression_div: LexborNode) -> dict | None:
         competitive_ranks = {
             platform.value: self.__get_platform_competitive_ranks(
                 progression_div,
@@ -253,18 +230,13 @@ class PlayerCareerParser(BasePlayerParser):
 
     def __get_platform_competitive_ranks(
         self,
-        progression_div: Tag,
+        progression_div: LexborNode,
         platform_class: str,
     ) -> dict | None:
         last_season_played = self.__get_last_season_played(platform_class)
 
-        competitive_rank_div = progression_div.select_one(
-            f"div.Profile-playerSummary--rankWrapper.{platform_class}",
-        )
-        role_wrappers = competitive_rank_div.find_all(
-            "div",
-            class_="Profile-playerSummary--roleWrapper",
-            recursive=False,
+        role_wrappers = progression_div.css(
+            f"div.Profile-playerSummary--rankWrapper.{platform_class} > div.Profile-playerSummary--roleWrapper",
         )
         if not role_wrappers and not last_season_played:
             return None
@@ -275,10 +247,11 @@ class PlayerCareerParser(BasePlayerParser):
             role_icon = self.__get_role_icon(role_wrapper)
             role_key = get_role_key_from_icon(role_icon).value
 
-            rank_tier_icons = role_wrapper.find_all(
-                "img", class_="Profile-playerSummary--rank"
+            rank_tier_icons = role_wrapper.css("img.Profile-playerSummary--rank")
+            rank_icon, tier_icon = (
+                rank_tier_icons[0].attributes["src"],
+                rank_tier_icons[1].attributes["src"],
             )
-            rank_icon, tier_icon = rank_tier_icons[0]["src"], rank_tier_icons[1]["src"]
 
             competitive_ranks[role_key] = {
                 "division": get_division_from_icon(rank_icon).value,
@@ -297,33 +270,30 @@ class PlayerCareerParser(BasePlayerParser):
         return competitive_ranks
 
     def __get_last_season_played(self, platform_class: str) -> int | None:
-        profile_section = self.root_tag.find(
-            "div",
-            class_=platform_class,
-            recursive=False,
-        )
-        if not profile_section:
+        if not (profile_section := self.__get_profile_view_section(platform_class)):
             return None
 
-        statistics_section = profile_section.find(
-            "blz-section",
-            class_="competitive-view",
-            recursive=False,
+        statistics_section = profile_section.css_first(
+            "blz-section.stats.competitive-view"
         )
-
-        last_season_played = statistics_section.get("data-latestherostatrankseasonow2")
+        last_season_played = statistics_section.attributes.get(
+            "data-latestherostatrankseasonow2"
+        )
         return int(last_season_played) if last_season_played else None
 
+    def __get_profile_view_section(self, platform_class: str) -> LexborNode:
+        return self.root_tag.css_first(f"div.Profile-view.{platform_class}")
+
     @staticmethod
-    def __get_role_icon(role_wrapper: Tag) -> str:
+    def __get_role_icon(role_wrapper: LexborNode) -> str:
         """The role icon format may differ depending on the platform : img for
         PC players, svg for console players
         """
-        if role_div := role_wrapper.find("div", class_="Profile-playerSummary--role"):
-            return role_div.find("img")["src"]
+        if role_div := role_wrapper.css_first("div.Profile-playerSummary--role"):
+            return role_div.css_first("img").attributes["src"]
 
-        role_svg = role_wrapper.find("svg", class_="Profile-playerSummary--role")
-        return role_svg.find("use")["xlink:href"]
+        role_svg = role_wrapper.css_first("svg.Profile-playerSummary--role")
+        return role_svg.css_first("use").attributes["xlink:href"]
 
     def get_stats(self) -> dict | None:
         # If the user filtered the page on summary, no need to parse the stats
@@ -345,9 +315,7 @@ class PlayerCareerParser(BasePlayerParser):
         if self.filters["platform"] and self.filters["platform"] != platform:
             return None
 
-        statistics_section = self.root_tag.find(
-            "div", class_=platform_class, recursive=False
-        )
+        statistics_section = self.__get_profile_view_section(platform_class)
         gamemodes_infos = {
             gamemode.value: self.__get_gamemode_infos(statistics_section, gamemode)
             for gamemode in PlayerGamemode
@@ -359,7 +327,7 @@ class PlayerCareerParser(BasePlayerParser):
 
     def __get_gamemode_infos(
         self,
-        statistics_section: Tag,
+        statistics_section: LexborNode,
         gamemode: PlayerGamemode,
     ) -> dict | None:
         # If the user decided to filter on another gamemode, stop here
@@ -369,77 +337,53 @@ class PlayerCareerParser(BasePlayerParser):
         if not statistics_section:
             return None
 
-        top_heroes_section = statistics_section.find(
-            "blz-section",
-            class_="Profile-heroSummary",
-            recursive=False,
-        ).find(
-            "div",
-            class_=gamemodes_div_mapping[gamemode],
-            recursive=False,
+        top_heroes_section = statistics_section.first_child.css_first(
+            f"div.{gamemodes_div_mapping[gamemode]}"
         )
 
         # Check if we can find a select in the section. If not, it means there is
         # no data to show for this gamemode and platform, return nothing.
-        if not top_heroes_section.find("select"):
+        if not top_heroes_section.css_first("select"):
             return None
 
-        career_stats_section = statistics_section.find(
-            "blz-section",
-            class_=gamemodes_div_mapping[gamemode],
-            recursive=False,
+        career_stats_section = statistics_section.css_first(
+            f"blz-section.{gamemodes_div_mapping[gamemode]}"
         )
-
         return {
             "heroes_comparisons": self.__get_heroes_comparisons(top_heroes_section),
             "career_stats": self.__get_career_stats(career_stats_section),
         }
 
-    def __get_heroes_comparisons(self, top_heroes_section: Tag) -> dict:
-        categories = {
-            option["value"]: option["option-id"]
-            for option in (
-                top_heroes_section.find(
-                    "div",
-                    class_="Profile-heroSummary--header",
-                    recursive=False,
-                )
-                .find("select", recursive=False)
-                .children
-            )
-            if option.get("option-id")
-        }
+    def __get_heroes_comparisons(self, top_heroes_section: LexborNode) -> dict:
+        categories = self.__get_heroes_options(top_heroes_section)
 
         heroes_comparisons = {
             string_to_snakecase(
-                get_real_category_name(categories[category["data-category-id"]]),
+                get_real_category_name(
+                    categories[category.attributes["data-category-id"]]
+                ),
             ): {
                 "label": get_real_category_name(
-                    categories[category["data-category-id"]],
+                    categories[category.attributes["data-category-id"]],
                 ),
                 "values": [
                     {
-                        # First div is "Profile-progressBar--bar"
-                        "hero": progress_bar_container.contents[0]["data-hero-id"],
-                        # Second div is "Profile-progressBar--textWrapper"
+                        "hero": progress_bar_container.first_child.attributes[
+                            "data-hero-id"
+                        ],
                         "value": get_computed_stat_value(
-                            # Second div is "Profile-progressBar-description"
-                            str(
-                                progress_bar_container.contents[1]
-                                .contents[1]
-                                .contents[0]
-                            ),
+                            progress_bar_container.last_child.last_child.text()
                         ),
                     }
-                    for progress_bar in category.children
-                    for progress_bar_container in progress_bar.children
-                    if progress_bar_container.name == "div"
+                    for progress_bar in category.iter()
+                    for progress_bar_container in progress_bar.iter()
+                    if progress_bar_container.tag == "div"
                 ],
             }
-            for category in top_heroes_section.children
+            for category in top_heroes_section.iter()
             if (
-                "Profile-progressBars" in category["class"]
-                and category["data-category-id"] in categories
+                "Profile-progressBars" in category.attributes["class"]
+                and category.attributes["data-category-id"] in categories
             )
         }
 
@@ -454,30 +398,19 @@ class PlayerCareerParser(BasePlayerParser):
 
         return heroes_comparisons
 
-    @staticmethod
-    def __get_career_stats(career_stats_section: Tag) -> dict:
-        heroes_options = {
-            f"option-{option['value']}": option["option-id"]
-            for option in (
-                career_stats_section.find(
-                    "div",
-                    class_="Profile-heroSummary--header",
-                    recursive=False,
-                )
-                .find("select", recursive=False)
-                .children
-            )
-            if option.get("option-id")
-        }
+    def __get_career_stats(self, career_stats_section: LexborNode) -> dict:
+        heroes_options = self.__get_heroes_options(
+            career_stats_section, key_prefix="option-"
+        )
 
         career_stats = {}
 
-        for hero_container in career_stats_section.children:
+        for hero_container in career_stats_section.iter():
             # Hero container should be span with "stats-container" class
-            if hero_container.name != "span":
+            if hero_container.tag != "span":
                 continue
 
-            stats_hero_class = get_stats_hero_class(hero_container["class"])
+            stats_hero_class = get_stats_hero_class(hero_container.attributes["class"])
 
             # Sometimes, Blizzard makes some weird things and options don't
             # have any label, so we can't know for sure which hero it is about.
@@ -489,12 +422,12 @@ class PlayerCareerParser(BasePlayerParser):
 
             career_stats[hero_key] = []
             # Hero container children are div with "category" class
-            for card_stat in hero_container.children:
+            for card_stat in hero_container.iter():
                 # Content div should be the only child ("content" class)
-                content_div = card_stat.contents[0]
+                content_div = card_stat.first_child
 
                 # Label should be the first div within content ("header" class)
-                category_label = str(content_div.contents[0].contents[0].contents[0])
+                category_label = content_div.first_child.first_child.text()
 
                 career_stats[hero_key].append(
                     {
@@ -503,17 +436,17 @@ class PlayerCareerParser(BasePlayerParser):
                         "stats": [],
                     },
                 )
-                for stat_row in content_div.children:
-                    if "stat-item" not in stat_row["class"]:
+                for stat_row in content_div.iter():
+                    if "stat-item" not in stat_row.attributes["class"]:
                         continue
 
-                    stat_name = str(stat_row.contents[0].contents[0])
+                    stat_name = stat_row.first_child.text()
                     career_stats[hero_key][-1]["stats"].append(
                         {
                             "key": get_plural_stat_key(string_to_snakecase(stat_name)),
                             "label": stat_name,
                             "value": get_computed_stat_value(
-                                str(stat_row.contents[1].contents[0]),
+                                stat_row.last_child.text()
                             ),
                         },
                     )
@@ -525,3 +458,17 @@ class PlayerCareerParser(BasePlayerParser):
                 del career_stats[hero_key]
 
         return career_stats
+
+    @staticmethod
+    def __get_heroes_options(
+        parent_section: LexborNode, key_prefix: str = ""
+    ) -> dict[str, str]:
+        return {
+            f"{key_prefix}{option.attributes['value']}": option.attributes["option-id"]
+            for option in (
+                parent_section.css_first(
+                    "div.Profile-heroSummary--header > select"
+                ).iter()
+            )
+            if option.attributes.get("option-id")
+        }

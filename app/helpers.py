@@ -54,8 +54,12 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
         str(error),
     )
 
-    # If Discord Webhook configuration is enabled, send a message to the
-    # given channel using Discord Webhook URL
+    # If we're using a profiler, it means we're debugging, raise the error
+    # directly in order to have proper backtrace in logs
+    if settings.profiler:
+        raise error
+
+    # Else, send a message to the given channel using Discord Webhook URL
     send_discord_webhook_message(
         f"* **URL** : {url}\n"
         f"* **Error type** : {type(error).__name__}\n"

@@ -16,7 +16,7 @@ class PlayerCareerStatsParser(PlayerCareerParser):
     def parse_data(self) -> dict | None:
         # We must check if we have the expected section for profile. If not,
         # it means the player doesn't exist or hasn't been found.
-        if not self.root_tag.find("blz-section", class_="Profile-masthead"):
+        if not self.root_tag.css_first("blz-section.Profile-masthead"):
             raise ParserBlizzardError(
                 status_code=status.HTTP_404_NOT_FOUND,
                 message="Player not found",

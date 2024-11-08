@@ -49,7 +49,7 @@ class BasePlayerParser(HTMLParser):
             == self.player_data["summary"]["lastUpdated"]
         ):
             logger.info("Player Cache found and up-to-date, using it")
-            self.create_bs_tag(player_cache["profile"])
+            self.create_parser_tag(player_cache["profile"])
             self.parse_response_data()
             return
 
