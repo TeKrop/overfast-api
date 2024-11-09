@@ -167,8 +167,8 @@ def test_get_role_key_from_icon(icon_url: str, role: CompetitiveRole):
 @pytest.mark.parametrize(
     ("hero_classes", "result"),
     [
-        (["stats-container", "option-0", "is-active"], "option-0"),
-        (["stats-container", "option-1"], "option-1"),
+        ("stats-container option-0 is-active", "option-0"),
+        ("stats-container option-1", "option-1"),
     ],
 )
 def test_get_stats_hero_class(hero_classes: list[str], result: str):

@@ -118,11 +118,13 @@ def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:
     )
 
 
-def get_stats_hero_class(hero_classes: list[str]) -> str:
+def get_stats_hero_class(hero_class: str) -> str:
     """Extract the specific classname from the classes list for a given hero."""
-    return next(
-        classname for classname in hero_classes if classname.startswith("option-")
-    )
+    start_index = hero_class.find("option-")
+    end_index = start_index + len("option-")
+    while end_index < len(hero_class) and hero_class[end_index].isdigit():
+        end_index += 1
+    return hero_class[start_index:end_index]
 
 
 def get_tier_from_icon(tier_url: str) -> int:

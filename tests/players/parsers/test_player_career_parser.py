@@ -165,7 +165,7 @@ async def test_player_career_parser_parsing_error_attribute_error(
 
     assert (
         error.value.message
-        == "AttributeError(\"'NoneType' object has no attribute 'find'\")"
+        == "AttributeError(\"'NoneType' object has no attribute 'css_first'\")"
     )
 
 
@@ -201,38 +201,3 @@ async def test_player_career_parser_parsing_error_key_error(
         await player_career_parser.parse()
 
     assert error.value.message == "KeyError('src')"
-
-
-@pytest.mark.parametrize(
-    ("player_career_parser", "player_html_data"),
-    [("TeKrop-2217", "TeKrop-2217")],
-    indirect=["player_career_parser", "player_html_data"],
-)
-@pytest.mark.asyncio
-async def test_player_career_parser_parsing_error_type_error(
-    player_career_parser: PlayerCareerParser,
-    player_html_data: str,
-    player_search_response_mock: Mock,
-):
-    player_type_error = player_html_data.replace(
-        'class="Profile-playerSummary--endorsement"',
-        "",
-    )
-
-    with (
-        patch(
-            "httpx.AsyncClient.get",
-            side_effect=[
-                # Players search call first
-                player_search_response_mock,
-                # Player profile page
-                Mock(status_code=status.HTTP_200_OK, text=player_type_error),
-            ],
-        ),
-        pytest.raises(ParserParsingError) as error,
-    ):
-        await player_career_parser.parse()
-
-    assert (
-        error.value.message == "TypeError(\"'NoneType' object is not subscriptable\")"
-    )

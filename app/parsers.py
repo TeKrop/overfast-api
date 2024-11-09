@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import ClassVar
 
 import httpx
-from bs4 import BeautifulSoup
 from fastapi import status
+from selectolax.lexbor import LexborHTMLParser
 
 from .cache_manager import CacheManager
 from .config import settings
@@ -134,24 +134,15 @@ class APIParser(AbstractParser):
 
 
 class HTMLParser(APIParser):
-    @property
-    def root_tag_params(self) -> dict:
-        """Returns the BeautifulSoup params kwargs, used to find the root Tag
-        on the page which will be used for searching data.
-        """
-        return {"name": "main", "class_": "main-content", "recursive": False}
-
     def store_response_data(self, response: httpx.Response) -> None:
-        """Initialize BeautifulSoup object with Blizzard response"""
-        self.create_bs_tag(response.text)
+        """Initialize parser tag with Blizzard response"""
+        self.create_parser_tag(response.text)
 
-    def create_bs_tag(self, html_content: str) -> None:
-        self.root_tag = BeautifulSoup(html_content, "lxml").body.find(
-            **self.root_tag_params,
-        )
+    def create_parser_tag(self, html_content: str) -> None:
+        self.root_tag = LexborHTMLParser(html_content).css_first("main")
 
 
 class JSONParser(APIParser):
     def store_response_data(self, response: httpx.Response) -> None:
-        """Initialize BeautifulSoup object with Blizzard response"""
+        """Initialize object with Blizzard response"""
         self.json_data = response.json()

@@ -3,8 +3,8 @@
 import re
 from typing import ClassVar
 
-from bs4 import Tag
 from fastapi import status
+from selectolax.lexbor import LexborNode
 
 from app.config import settings
 from app.enums import Locale
@@ -34,19 +34,16 @@ class HeroParser(HTMLParser):
     def parse_data(self) -> dict:
         # We must check if we have the expected section for hero. If not,
         # it means the hero hasn't been found and/or released yet.
-        if not self.root_tag.find("div", class_="abilities-container", recursive=False):
+        if not (
+            abilities_section := self.root_tag.css_first("div.abilities-container")
+        ):
             raise ParserBlizzardError(
                 status_code=status.HTTP_404_NOT_FOUND,
                 message="Hero not found or not released yet",
             )
 
-        overview_section = self.root_tag.find("blz-page-header", recursive=False)
-        abilities_section = self.root_tag.find(
-            "div",
-            class_="abilities-container",
-            recursive=False,
-        )
-        lore_section = self.root_tag.find("blz-section", class_="lore", recursive=False)
+        overview_section = self.root_tag.css_first("blz-page-header")
+        lore_section = self.root_tag.css_first("blz-section.lore")
 
         return {
             **self.__get_summary(overview_section),
@@ -54,20 +51,20 @@ class HeroParser(HTMLParser):
             "story": self.__get_story(lore_section),
         }
 
-    def __get_summary(self, overview_section: Tag) -> dict:
-        header_section = overview_section.find("blz-header")
-        extra_list_items = overview_section.find("blz-list").find_all("blz-list-item")
+    def __get_summary(self, overview_section: LexborNode) -> dict:
+        header_section = overview_section.css_first("blz-header")
+        extra_list_items = overview_section.css_first("blz-list").css("blz-list-item")
         birthday, age = self.__get_birthday_and_age(
-            text=extra_list_items[2].get_text(), locale=self.locale
+            text=extra_list_items[2].css_first("p").text(), locale=self.locale
         )
 
         return {
-            "name": header_section.find("h2").get_text(),
-            "description": (
-                header_section.find("p", slot="description").get_text().strip()
+            "name": header_section.css_first("h2").text(),
+            "description": header_section.css_first("p").text().strip(),
+            "role": get_role_from_icon_url(
+                extra_list_items[0].css_first("image").attributes.get("href")
             ),
-            "role": get_role_from_icon_url(extra_list_items[0].find("image")["href"]),
-            "location": extra_list_items[1].get_text().strip(),
+            "location": extra_list_items[1].text().strip(),
             "birthday": birthday,
             "age": age,
         }
@@ -109,85 +106,75 @@ class HeroParser(HTMLParser):
         return birthday, age
 
     @staticmethod
-    def __get_abilities(abilities_section: Tag) -> list[dict]:
-        abilities_list_div = abilities_section.find(
-            "blz-carousel-section",
-            recursive=False,
-        ).find("blz-carousel", recursive=False)
+    def __get_abilities(abilities_section: LexborNode) -> list[dict]:
+        carousel_section_div = abilities_section.css_first("blz-carousel-section")
+        abilities_list_div = carousel_section_div.css_first("blz-carousel")
 
         abilities_desc = [
             (
-                desc_div.find("blz-header")
-                .find("span")
-                .get_text()
+                desc_div.css_first("blz-header span")
+                .text()
                 .strip()
                 .replace("\r", "")
                 .replace("\n", " ")
             )
-            for desc_div in abilities_list_div.find_all("blz-feature")
+            for desc_div in abilities_list_div.css("blz-feature")
         ]
 
         abilities_videos = [
             {
-                "thumbnail": video_div["poster"],
+                "thumbnail": video_div.attributes["poster"],
                 "link": {
-                    "mp4": video_div["mp4"],
-                    "webm": video_div["webm"],
+                    "mp4": video_div.attributes["mp4"],
+                    "webm": video_div.attributes["webm"],
                 },
             }
-            for video_div in abilities_section.find(
-                "blz-carousel-section",
-                recursive=False,
-            ).find_all("blz-video", recursive=False)
+            for video_div in carousel_section_div.css("blz-video")
         ]
 
         return [
             {
-                "name": ability_div["label"],
+                "name": ability_div.attributes["label"],
                 "description": abilities_desc[ability_index].strip(),
-                "icon": ability_div.find("blz-image")["src"],
+                "icon": ability_div.css_first("blz-image").attributes["src"],
                 "video": abilities_videos[ability_index],
             }
             for ability_index, ability_div in enumerate(
-                abilities_list_div.find("blz-tab-controls").find_all("blz-tab-control"),
+                abilities_list_div.css_first("blz-tab-controls").css("blz-tab-control"),
             )
         ]
 
-    def __get_story(self, lore_section: Tag) -> dict:
-        showcase_section = lore_section.find("blz-showcase", recursive=False)
+    def __get_story(self, lore_section: LexborNode) -> dict:
+        showcase_section = lore_section.css_first("blz-showcase")
 
         return {
             "summary": (
-                showcase_section.find("blz-header")
-                .find("p")
-                .get_text()
+                showcase_section.css_first("blz-header p")
+                .text()
                 .strip()
                 .replace("\n", "")
             ),
             "media": self.__get_media(showcase_section),
             "chapters": self.__get_story_chapters(
-                lore_section.find("blz-accordion-section", recursive=False).find(
-                    "blz-accordion",
-                    recursive=False,
-                ),
+                lore_section.css_first("blz-accordion-section blz-accordion")
             ),
         }
 
-    def __get_media(self, showcase_section: Tag) -> dict | None:
-        if video := showcase_section.find("blz-video"):
+    def __get_media(self, showcase_section: LexborNode) -> dict | None:
+        if video := showcase_section.css_first("blz-video"):
             return {
                 "type": MediaType.VIDEO,
-                "link": f"https://youtu.be/{video['youtube-id']}",
+                "link": f"https://youtu.be/{video.attributes['youtube-id']}",
             }
 
-        if button := showcase_section.find("blz-button"):
+        if button := showcase_section.css_first("blz-button"):
             return {
                 "type": (
                     MediaType.SHORT_STORY
-                    if button["analytics-label"] == "short-story"
+                    if button.attributes["analytics-label"] == "short-story"
                     else MediaType.COMIC
                 ),
-                "link": self.__get_full_url(button["href"]),
+                "link": self.__get_full_url(button.attributes["href"]),
             }
 
         return None
@@ -199,33 +186,24 @@ class HeroParser(HTMLParser):
         return f"{settings.blizzard_host}{url}" if url.startswith("/") else url
 
     @staticmethod
-    def __get_story_chapters(accordion: Tag) -> list[dict]:
+    def __get_story_chapters(accordion: LexborNode) -> list[dict]:
         chapters_content = [
             (
                 " ".join(
-                    [
-                        paragraph.get_text()
-                        for paragraph in content_container.find_all(["p", "pr"])
-                    ],
+                    [paragraph.text() for paragraph in content_container.css("p,pr")],
                 ).strip()
             )
-            for content_container in accordion.find_all(
-                "div",
-                slot="content",
-                recursive=False,
-            )
+            for content_container in accordion.css("div[slot=content]")
         ]
         chapters_picture = [
-            picture["src"] for picture in accordion.find_all("blz-image")
+            picture.attributes["src"] for picture in accordion.css("blz-image")
         ]
 
         return [
             {
-                "title": title_span.get_text().capitalize().strip(),
+                "title": title_span.text().capitalize().strip(),
                 "content": chapters_content[title_index],
                 "picture": chapters_picture[title_index],
             }
-            for title_index, title_span in enumerate(
-                accordion.find_all("span", recursive=False),
-            )
+            for title_index, title_span in enumerate(accordion.css("span"))
         ]

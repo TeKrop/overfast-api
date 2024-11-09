@@ -48,7 +48,7 @@ async def lifespan(_: FastAPI):  # pragma: no cover
 app = FastAPI(title="OverFast API", docs_url=None, redoc_url=None, lifespan=lifespan)
 description = f"""OverFast API provides comprehensive data on Overwatch 2 heroes,
 game modes, maps, and player statistics by scraping Blizzard pages. Developed with
-the efficiency of **FastAPI** and **Beautiful Soup**, it leverages **nginx** as a
+the efficiency of **FastAPI** and **Selectolax**, it leverages **nginx** as a
 reverse proxy and **Redis** for caching. Its tailored caching mechanism significantly
 reduces calls to Blizzard pages, ensuring swift and precise data delivery to users.
 
