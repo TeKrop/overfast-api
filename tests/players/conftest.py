@@ -11,43 +11,23 @@ from tests.helpers import read_html_file, read_json_file
 
 
 @pytest.fixture(scope="package")
-def player_html_data(request: SubRequest):
+def player_html_data(request: SubRequest) -> str:
     return read_html_file(f"players/{request.param}.html")
 
 
 @pytest.fixture(scope="package")
-def search_html_data():
+def search_html_data() -> str:
     return read_html_file("search.html")
 
 
 @pytest.fixture(scope="package")
-def player_json_data(request: SubRequest):
-    return read_json_file(f"players/{request.param}.json")
+def search_players_blizzard_json_data() -> list:
+    return read_json_file("search_players_blizzard_result.json")
 
 
 @pytest.fixture(scope="package")
-def player_stats_json_data(request: SubRequest):
-    return read_json_file(f"players/stats/{request.param}.json")
-
-
-@pytest.fixture(scope="package")
-def player_career_json_data(request: SubRequest):
-    return read_json_file(f"players/career/{request.param}.json")
-
-
-@pytest.fixture(scope="package")
-def search_players_blizzard_json_data():
-    return read_json_file("search_players/search_players_blizzard_result.json")
-
-
-@pytest.fixture(scope="package")
-def search_players_api_json_data():
-    return read_json_file("search_players/search_players_api_result.json")
-
-
-@pytest.fixture(scope="package")
-def search_data_json_data():
-    return read_json_file("search_data.json")
+def search_data_json_data() -> list:
+    return read_json_file("formatted_search_data.json")
 
 
 @pytest.fixture(scope="package")

@@ -1,6 +1,6 @@
 [project]
 name = "overfast-api"
-version = "3.4.0"
+version = "3.5.0"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = {file = "LICENSE"}
 authors = [
@@ -12,7 +12,6 @@ dependencies = [
     "fastapi[standard]==0.115.*",
     "httpx[http2]==0.27.*",
     "loguru==0.7.*",
-    "lxml==5.3.*",
     "redis==5.2.*",
     "pydantic==2.9.*",
     "pydantic-settings==2.6.*",

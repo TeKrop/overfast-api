@@ -7,11 +7,12 @@ from fastapi import HTTPException, status
 from app.exceptions import ParserParsingError
 from app.players.enums import SearchDataType
 from app.players.parsers.search_data_parser import NamecardParser
+from tests.helpers import unknown_player_id
 
 
 @pytest.mark.parametrize(
     ("namecard_parser"),
-    [("Dekk-2677")],
+    [("TeKrop-2217")],
     indirect=True,
 )
 @pytest.mark.asyncio
@@ -30,7 +31,7 @@ async def test_namecard_parser_no_cache(
 
 @pytest.mark.parametrize(
     ("namecard_parser"),
-    [("Dekk-2677")],
+    [("TeKrop-2217")],
     indirect=True,
 )
 @pytest.mark.asyncio
@@ -85,7 +86,7 @@ async def test_namecard_parser_error_key_error(
 
 @pytest.mark.parametrize(
     ("namecard_parser"),
-    [("Unknown-1234")],
+    [(unknown_player_id)],
     indirect=True,
 )
 @pytest.mark.asyncio
@@ -102,7 +103,7 @@ async def test_namecard_parser_player_not_found(namecard_parser: NamecardParser)
 
     logger_warning_mock.assert_any_call(
         "Player {} not found in search results, couldn't retrieve its {}",
-        "Unknown-1234",
+        unknown_player_id,
         SearchDataType.NAMECARD,
     )
 
@@ -111,14 +112,14 @@ async def test_namecard_parser_player_not_found(namecard_parser: NamecardParser)
 
 @pytest.mark.parametrize(
     ("namecard_parser"),
-    [("Dekk-2677")],
+    [("TeKrop-2217")],
     indirect=True,
 )
 @pytest.mark.asyncio
 async def test_namecard_parser_player_without_namecard(namecard_parser: NamecardParser):
     search_data = [
         {
-            "battleTag": "Dekk#2677",
+            "battleTag": "TeKrop#2217",
             "frame": "0x0250000000000FC1",
             "isPublic": True,
             "lastUpdated": 1678488893,
@@ -143,7 +144,7 @@ async def test_namecard_parser_player_without_namecard(namecard_parser: Namecard
         await namecard_parser.parse()
 
     logger_info_mock.assert_any_call(
-        "Player {} doesn't have any {}", "Dekk-2677", SearchDataType.NAMECARD
+        "Player {} doesn't have any {}", "TeKrop-2217", SearchDataType.NAMECARD
     )
 
     assert namecard_parser.data == {"namecard": None}
@@ -151,7 +152,7 @@ async def test_namecard_parser_player_without_namecard(namecard_parser: Namecard
 
 @pytest.mark.parametrize(
     ("namecard_parser"),
-    [("Dekk-2677")],
+    [("TeKrop-2217")],
     indirect=True,
 )
 @pytest.mark.asyncio
@@ -175,8 +176,8 @@ async def test_namecard_parser_no_cache_no_namecard(
     logger_warning_mock.assert_any_call(
         "URL for {} {} of player {} not found at all",
         SearchDataType.NAMECARD,
-        "0x0250000000005510",
-        "Dekk-2677",
+        "0x02500000000056EA",
+        "TeKrop-2217",
     )
 
     assert namecard_parser.data == {"namecard": None}
@@ -184,7 +185,7 @@ async def test_namecard_parser_no_cache_no_namecard(
 
 @pytest.mark.parametrize(
     ("namecard_parser"),
-    [("Dekk-2677")],
+    [("TeKrop-2217")],
     indirect=True,
 )
 @pytest.mark.asyncio
@@ -201,11 +202,11 @@ async def test_namecard_parser_with_cache(
         patch.object(
             namecard_parser.cache_manager,
             "get_search_data_cache",
-            return_value="https://d15f34w2p8l1cc.cloudfront.net/overwatch/757219956129146d84617a7e713dfca1bc33ea27cf6c73df60a33d02a147edc1.png",
+            return_value="https://d15f34w2p8l1cc.cloudfront.net/overwatch/52ee742d4e2fc734e3cd7fdb74b0eac64bcdf26d58372a503c712839595802c5.png",
         ),
     ):
         await namecard_parser.parse()
 
     assert namecard_parser.data == {
-        "namecard": search_data_json_data[SearchDataType.NAMECARD]["0x0250000000005510"]
+        "namecard": search_data_json_data[SearchDataType.NAMECARD]["0x02500000000056EA"]
     }

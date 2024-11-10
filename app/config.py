@@ -147,6 +147,14 @@ class Settings(BaseSettings):
     # Discord Webhook URL
     discord_webhook_url: str = ""
 
+    # Error message to be displayed to API users
+    internal_server_error_message: str = (
+        "An internal server error occurred during the process. The developer "
+        "received a notification, but don't hesitate to create a GitHub "
+        "issue if you want any news concerning the bug resolution : "
+        "https://github.com/TeKrop/overfast-api/issues"
+    )
+
     ############
     # LOCAL
     ############

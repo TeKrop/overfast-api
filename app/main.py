@@ -7,7 +7,6 @@ from fastapi.exceptions import ResponseValidationError
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .config import settings
@@ -45,7 +44,6 @@ async def lifespan(_: FastAPI):  # pragma: no cover
     await overfast_client.aclose()
 
 
-app = FastAPI(title="OverFast API", docs_url=None, redoc_url=None, lifespan=lifespan)
 description = f"""OverFast API provides comprehensive data on Overwatch 2 heroes,
 game modes, maps, and player statistics by scraping Blizzard pages. Developed with
 the efficiency of **FastAPI** and **Selectolax**, it leverages **nginx** as a
@@ -74,72 +72,85 @@ In player career statistics, various conversions are applied for ease of use:
 - Integer and float string representations are converted to their respective types
 """
 
+app = FastAPI(
+    title="OverFast API",
+    description=description,
+    version=settings.app_version,
+    openapi_tags=[
+        {
+            "name": RouteTag.HEROES,
+            "description": "Overwatch heroes details : lore, abilities, etc.",
+            "externalDocs": {
+                "description": "Blizzard heroes page, source of the information",
+                "url": "https://overwatch.blizzard.com/en-us/heroes/",
+            },
+        },
+        {
+            "name": RouteTag.GAMEMODES,
+            "description": "Overwatch gamemodes details",
+            "externalDocs": {
+                "description": "Overwatch home page, source of the information",
+                "url": "https://overwatch.blizzard.com/en-us/",
+            },
+        },
+        {
+            "name": RouteTag.MAPS,
+            "description": "Overwatch maps details",
+        },
+        {
+            "name": RouteTag.PLAYERS,
+            "description": players_section_description,
+            "externalDocs": {
+                "description": "Blizzard profile pages, source of the information",
+                "url": "https://overwatch.blizzard.com/en-us/search/",
+            },
+        },
+    ],
+    servers=[{"url": settings.app_base_url, "description": "Production server"}],
+    docs_url=None,
+    redoc_url=None,
+    lifespan=lifespan,
+    contact={
+        "name": 'Valentin "TeKrop" PORCHET',
+        "url": "https://github.com/TeKrop/overfast-api",
+        "email": "valentin.porchet@proton.me",
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://github.com/TeKrop/overfast-api/blob/main/LICENSE",
+    },
+)
+
+# Add customized OpenAPI specs with app logo
+
 
 def custom_openapi():  # pragma: no cover
     if app.openapi_schema:
         return app.openapi_schema
 
     openapi_schema = get_openapi(
-        title="OverFast API",
-        description=description,
-        version=settings.app_version,
-        contact={
-            "name": 'Valentin "TeKrop" PORCHET',
-            "url": "https://github.com/TeKrop/overfast-api",
-            "email": "valentin.porchet@proton.me",
-        },
-        license_info={
-            "name": "MIT",
-            "url": "https://github.com/TeKrop/overfast-api/blob/main/LICENSE",
-        },
+        title=app.title,
+        description=app.description,
+        version=app.version,
+        contact=app.contact,
+        license_info=app.license_info,
         routes=app.routes,
-        tags=[
-            {
-                "name": RouteTag.HEROES,
-                "description": "Overwatch heroes details : lore, abilities, etc.",
-                "externalDocs": {
-                    "description": "Blizzard heroes page, source of the information",
-                    "url": "https://overwatch.blizzard.com/en-us/heroes/",
-                },
-            },
-            {
-                "name": RouteTag.GAMEMODES,
-                "description": "Overwatch gamemodes details",
-                "externalDocs": {
-                    "description": "Overwatch home page, source of the information",
-                    "url": "https://overwatch.blizzard.com/en-us/",
-                },
-            },
-            {
-                "name": RouteTag.MAPS,
-                "description": "Overwatch maps details",
-            },
-            {
-                "name": RouteTag.PLAYERS,
-                "description": players_section_description,
-                "externalDocs": {
-                    "description": "Blizzard profile pages, source of the information",
-                    "url": "https://overwatch.blizzard.com/en-us/search/",
-                },
-            },
-        ],
-        servers=[{"url": settings.app_base_url, "description": "Production server"}],
+        tags=app.openapi_tags,
+        servers=app.servers,
     )
     openapi_schema["info"]["x-logo"] = {
         "url": "https://files.tekrop.fr/overfast_api_logo_full_1000.png",
         "altText": "OverFast API Logo",
     }
+
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
 
 app.openapi = custom_openapi
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-app.logger = logger
-logger.info("OverFast API... Online !")
-logger.info("Version : {}", settings.app_version)
+# Add custom exception handlers for Starlet HTTP exceptions, but also
+# for Pydantic Validation Errors
 
 
 @app.exception_handler(StarletteHTTPException)
@@ -182,7 +193,7 @@ async def overridden_swagger():
 
 
 # Add supported profiler as middleware
-if settings.profiler:
+if settings.profiler:  # pragma: no cover
     supported_profilers = {
         Profiler.MEMRAY: MemrayInMemoryMiddleware,
         Profiler.PYINSTRUMENT: PyInstrumentMiddleware,
@@ -205,3 +216,6 @@ app.include_router(roles.router, prefix="/roles")
 app.include_router(gamemodes.router, prefix="/gamemodes")
 app.include_router(maps.router, prefix="/maps")
 app.include_router(players.router, prefix="/players")
+
+logger.info("OverFast API... Online !")
+logger.info("Version : {}", settings.app_version)

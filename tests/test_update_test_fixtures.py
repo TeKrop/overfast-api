@@ -7,15 +7,17 @@ from httpx import AsyncClient
 
 from app.config import settings
 from app.heroes.enums import HeroKey
-from app.players.commands.update_test_fixtures import main as update_test_fixtures_main
-from app.players.helpers import players_ids
+from tests.helpers import players_ids
+from tests.update_test_fixtures import (  # sourcery skip: dont-import-test-modules
+    main as update_test_fixtures_main,
+)
 
 
 @pytest.fixture(scope="module", autouse=True)
 def _setup_update_test_fixtures_test():
     with (
         patch(
-            "app.players.commands.update_test_fixtures.save_fixture_file",
+            "tests.update_test_fixtures.save_fixture_file",
             return_value=Mock(),
         ),
         patch("app.overfast_logger.logger.debug"),
@@ -59,7 +61,7 @@ def test_update_with_different_options(parameters, expected_calls: list[str]):
 
     with (
         patch(
-            "app.players.commands.update_test_fixtures.parse_parameters",
+            "tests.update_test_fixtures.parse_parameters",
             return_value=parameters,
         ),
         patch.object(
@@ -88,7 +90,7 @@ def test_update_with_blizzard_error():
 
     with (
         patch(
-            "app.players.commands.update_test_fixtures.parse_parameters",
+            "tests.update_test_fixtures.parse_parameters",
             return_value=Mock(heroes=False, players=False, maps=True),
         ),
         patch.object(

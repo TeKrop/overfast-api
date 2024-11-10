@@ -57,7 +57,7 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
     # If we're using a profiler, it means we're debugging, raise the error
     # directly in order to have proper backtrace in logs
     if settings.profiler:
-        raise error
+        raise error  # pragma: no cover
 
     # Else, send a message to the given channel using Discord Webhook URL
     send_discord_webhook_message(
@@ -68,12 +68,7 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
 
     return HTTPException(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail=(
-            "An internal server error occurred during the process. The developer "
-            "received a notification, but don't hesitate to create a GitHub "
-            "issue if you want any news concerning the bug resolution : "
-            "https://github.com/TeKrop/overfast-api/issues"
-        ),
+        detail=settings.internal_server_error_message,
     )
 
 
@@ -85,7 +80,7 @@ def send_discord_webhook_message(message: str) -> httpx.Response | None:
         logger.error(message)
         return None
 
-    return httpx.post(
+    return httpx.post(  # pragma: no cover
         settings.discord_webhook_url, data={"content": message}, timeout=10
     )
 

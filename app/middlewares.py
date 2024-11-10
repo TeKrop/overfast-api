@@ -16,7 +16,7 @@ with suppress(ModuleNotFoundError):
     import pyinstrument
 
 
-class OverFastMiddleware(BaseHTTPMiddleware):
+class OverFastMiddleware(BaseHTTPMiddleware):  # pragma: no cover
     async def dispatch(
         self, request: Request, call_next: Callable
     ) -> HTMLResponse | JSONResponse:
@@ -28,7 +28,7 @@ class OverFastMiddleware(BaseHTTPMiddleware):
         return await self._dispatch(request, call_next)
 
 
-class MemrayInMemoryMiddleware(OverFastMiddleware):
+class MemrayInMemoryMiddleware(OverFastMiddleware):  # pragma: no cover
     async def _dispatch(self, request: Request, call_next: Callable) -> HTMLResponse:
         # Create an temporary file
         with tempfile.NamedTemporaryFile(suffix=".bin", delete=False) as tmp_bin_file:
@@ -77,7 +77,7 @@ class MemrayInMemoryMiddleware(OverFastMiddleware):
         return html_content
 
 
-class PyInstrumentMiddleware(OverFastMiddleware):
+class PyInstrumentMiddleware(OverFastMiddleware):  # pragma: no cover
     async def _dispatch(self, request: Request, call_next: Callable) -> HTMLResponse:
         with pyinstrument.Profiler(interval=0.001, async_mode="enabled") as profiler:
             await call_next(request)
@@ -85,7 +85,7 @@ class PyInstrumentMiddleware(OverFastMiddleware):
         return HTMLResponse(profiler.output_html())
 
 
-class TraceMallocMiddleware(OverFastMiddleware):
+class TraceMallocMiddleware(OverFastMiddleware):  # pragma: no cover
     def __init__(self, app: FastAPI):
         super().__init__(app)
         tracemalloc.start()
@@ -118,7 +118,7 @@ class TraceMallocMiddleware(OverFastMiddleware):
         return JSONResponse(content=memory_report)
 
 
-class ObjGraphMiddleware(OverFastMiddleware):
+class ObjGraphMiddleware(OverFastMiddleware):  # pragma: no cover
     async def _dispatch(self, request: Request, call_next: Callable) -> JSONResponse:
         # Capture common object types before processing
         objects_before = objgraph.most_common_types(limit=10)

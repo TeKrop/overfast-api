@@ -20,3 +20,14 @@ def read_json_file(filepath: str) -> dict | list | None:
         encoding="utf-8",
     ) as json_file:
         return json.load(json_file)
+
+
+# List of players used for testing
+players_ids = [
+    "KIRIKO-21253",  # Profile with rank on only two roles
+    "TeKrop-2217",  # Classic profile
+    "JohnV1-1190",  # Player without any title ingame
+]
+
+# Non-existent player ID used for testing
+unknown_player_id = "Unknown-1234"
