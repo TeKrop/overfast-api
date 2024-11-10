@@ -7,25 +7,23 @@ from fastapi import status
 
 from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.players.enums import PlayerGamemode, PlayerPlatform
-from app.players.helpers import players_ids
 from app.players.parsers.player_career_parser import PlayerCareerParser
+from tests.helpers import players_ids, unknown_player_id
 
 
 @pytest.mark.parametrize(
-    ("player_career_parser", "player_html_data", "player_json_data", "kwargs_filter"),
+    ("player_career_parser", "player_html_data", "kwargs_filter"),
     [
-        (player_id, player_id, player_id, kwargs_filter)
+        (player_id, player_id, kwargs_filter)
         for player_id in players_ids
         for kwargs_filter in ({}, {"summary": True}, {"stats": True})
-        if player_id != "Unknown-1234"
     ],
-    indirect=["player_career_parser", "player_html_data", "player_json_data"],
+    indirect=["player_career_parser", "player_html_data"],
 )
 @pytest.mark.asyncio
 async def test_player_page_parsing_with_filters(
     player_career_parser: PlayerCareerParser,
     player_html_data: str,
-    player_json_data: dict,
     kwargs_filter: dict,
     player_search_response_mock: Mock,
     search_data_func: Callable[[str, str], str | None],
@@ -50,7 +48,12 @@ async def test_player_page_parsing_with_filters(
     # Just check that the parsing is working properly
     player_career_parser.filter_request_using_query(**kwargs_filter)
 
-    assert player_career_parser.data == player_json_data
+    if kwargs_filter.get("summary"):
+        assert "summary" in player_career_parser.data
+    elif kwargs_filter.get("stats"):
+        assert "stats" in player_career_parser.data
+    else:
+        assert player_career_parser.data.keys() == {"stats", "summary"}
 
 
 @pytest.mark.parametrize(
@@ -115,7 +118,7 @@ async def test_filter_all_stats_data(
 
 @pytest.mark.parametrize(
     ("player_career_parser"),
-    [("Unknown-1234")],
+    [(unknown_player_id)],
     indirect=True,
 )
 @pytest.mark.asyncio

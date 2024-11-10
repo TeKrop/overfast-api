@@ -83,4 +83,7 @@ clean: down ## Clean up Docker environment
 lock: ## Update lock file
 	uv lock
 
-.PHONY: help build start lint format shell exec test up down clean lock
+update_test_fixtures: ## Update test fixtures (heroes, players, etc.)
+	$(DOCKER RUN) uv run python -m tests.update_test_fixtures $(PARAMS)
+
+.PHONY: help build start lint format shell exec test up down clean lock update_test_fixtures

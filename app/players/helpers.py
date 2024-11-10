@@ -13,19 +13,6 @@ INT_PATTERN = re.compile(r"^-?\d+(,\d+)*%?$")
 FLOAT_PATTERN = re.compile(r"^-?\d+(,\d+)*\.\d+$")
 
 
-# List of players used for testing
-players_ids = [
-    "copypasting-1216",  # Player with an empty hero career stats (lucio)
-    "Dekk-2677",  # Classic profile without rank
-    "KIRIKO-21253",  # Profile with rank on only two roles
-    "Player-1112937",  # Console player
-    "quibble-11594",  # Profile without endorsement
-    "TeKrop-2217",  # Classic profile
-    "Unknown-1234",  # No player
-    "JohnV1-1190",  # Player without any title ingame
-]
-
-
 @cache
 def get_hero_name(hero_key: HeroKey) -> str:
     """Get a hero name based on the CSV file"""

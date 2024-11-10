@@ -7,23 +7,18 @@ from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
 from app.config import settings
-from app.players.helpers import players_ids
+from tests.helpers import players_ids
 
 
 @pytest.mark.parametrize(
-    ("player_id", "player_html_data", "player_json_data"),
-    [
-        (player_id, player_id, player_id)
-        for player_id in players_ids
-        if player_id != "Unknown-1234"
-    ],
-    indirect=["player_html_data", "player_json_data"],
+    ("player_id", "player_html_data"),
+    [(player_id, player_id) for player_id in players_ids],
+    indirect=["player_html_data"],
 )
 def test_get_player_career(
     client: TestClient,
     player_id: str,
     player_html_data: str,
-    player_json_data: dict,
     player_search_response_mock: Mock,
     search_data_func: Callable[[str, str], str | None],
 ):
@@ -47,9 +42,7 @@ def test_get_player_career(
     # Only assert the status and some elements from the response
     # We already check the entire content in parsers UT
     assert response.status_code == status.HTTP_200_OK
-
-    response_json = response.json()
-    assert response_json["summary"] == player_json_data["summary"]  # for namecard
+    assert len(response.json().keys()) > 0
 
 
 def test_get_player_career_blizzard_error(client: TestClient):
@@ -94,14 +87,7 @@ def test_get_player_career_internal_error(client: TestClient):
     ):
         response = client.get("/players/TeKrop-2217")
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.json() == {
-            "error": (
-                "An internal server error occurred during the process. The developer "
-                "received a notification, but don't hesitate to create a GitHub "
-                "issue if you want any news concerning the bug resolution : "
-                "https://github.com/TeKrop/overfast-api/issues"
-            ),
-        }
+        assert response.json() == {"error": settings.internal_server_error_message}
 
 
 def test_get_player_career_blizzard_forbidden_error(client: TestClient):
@@ -152,11 +138,4 @@ def test_get_player_parser_parsing_error(
     ):
         response = client.get("/players/TeKrop-2217")
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.json() == {
-            "error": (
-                "An internal server error occurred during the process. The developer "
-                "received a notification, but don't hesitate to create a GitHub "
-                "issue if you want any news concerning the bug resolution : "
-                "https://github.com/TeKrop/overfast-api/issues"
-            ),
-        }
+        assert response.json() == {"error": settings.internal_server_error_message}

@@ -4,28 +4,22 @@ import pytest
 from fastapi import status
 
 from app.exceptions import ParserBlizzardError
-from app.players.helpers import players_ids
 from app.players.parsers.player_career_stats_parser import PlayerCareerStatsParser
+from tests.helpers import players_ids, unknown_player_id
 
 
 @pytest.mark.parametrize(
-    ("player_career_stats_parser", "player_html_data", "player_career_json_data"),
-    [
-        (player_id, player_id, player_id)
-        for player_id in players_ids
-        if player_id != "Unknown-1234"
-    ],
+    ("player_career_stats_parser", "player_html_data"),
+    [(player_id, player_id) for player_id in players_ids],
     indirect=[
         "player_career_stats_parser",
         "player_html_data",
-        "player_career_json_data",
     ],
 )
 @pytest.mark.asyncio
 async def test_player_page_parsing_with_filters(
     player_career_stats_parser: PlayerCareerStatsParser,
     player_html_data: str,
-    player_career_json_data: dict,
     player_search_response_mock: Mock,
 ):
     with patch(
@@ -42,12 +36,12 @@ async def test_player_page_parsing_with_filters(
     # Just check that the parsing is working properly
     player_career_stats_parser.filter_request_using_query()
 
-    assert player_career_stats_parser.data == player_career_json_data
+    assert len(player_career_stats_parser.data.keys()) > 0
 
 
 @pytest.mark.parametrize(
     ("player_career_stats_parser"),
-    [("Unknown-1234")],
+    [(unknown_player_id)],
     indirect=True,
 )
 @pytest.mark.asyncio

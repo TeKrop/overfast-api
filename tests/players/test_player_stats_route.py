@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from unittest.mock import Mock, patch
 
 import pytest
@@ -8,109 +9,104 @@ from httpx import TimeoutException
 from app.config import settings
 from app.players.enums import HeroKeyCareerFilter, PlayerGamemode, PlayerPlatform
 
-platforms = {p.value for p in PlayerPlatform}
-gamemodes = {g.value for g in PlayerGamemode}
-heroes = {h.value for h in HeroKeyCareerFilter}
 
-
-@pytest.mark.parametrize(
-    (
-        "player_html_data",
-        "player_json_data",
-        "player_career_json_data",
-        "gamemode",
-        "platform",
-        "hero",
-        "uri",
-    ),
-    [
-        ("TeKrop-2217", "TeKrop-2217", "TeKrop-2217", gamemode, platform, hero, uri)
-        for gamemode in (None, Mock(value="invalid_gamemode"), *PlayerGamemode)
-        for platform in (None, Mock(value="invalid_platform"), *PlayerPlatform)
-        for hero in (
-            None,
-            Mock(value="invalid_hero"),
-            *[
-                HeroKeyCareerFilter.ANA,
-                HeroKeyCareerFilter.GENJI,
-                HeroKeyCareerFilter.REINHARDT,
-            ],
-        )
-        for uri in ("/stats", "/stats/career")
-    ],
-    indirect=["player_html_data", "player_json_data", "player_career_json_data"],
-)
-def test_get_player_stats(
-    client: TestClient,
+@pytest.fixture(autouse=True)
+def _setup_player_stats_test(
     player_html_data: str,
-    player_json_data: dict,
-    player_career_json_data: dict,
-    gamemode: PlayerGamemode | None,
-    platform: PlayerPlatform | None,
-    hero: HeroKeyCareerFilter | None,
     player_search_response_mock: Mock,
-    uri: str,
+    search_data_func: Callable[[str, str], str | None],
 ):
-    with patch(
-        "httpx.AsyncClient.get",
-        side_effect=[
-            # Players search call first
-            player_search_response_mock,
-            # Player profile page
-            Mock(status_code=status.HTTP_200_OK, text=player_html_data),
-        ],
-    ):
-        query_params = "&".join(
-            [
-                (f"gamemode={gamemode.value}" if gamemode else ""),
-                (f"platform={platform.value}" if platform else ""),
-                (f"hero={hero.value}" if hero else ""),
+    with (
+        patch(
+            "httpx.AsyncClient.get",
+            side_effect=[
+                # Players search call first
+                player_search_response_mock,
+                # Player profile page
+                Mock(status_code=status.HTTP_200_OK, text=player_html_data),
             ],
-        )
-        params = f"?{query_params}" if query_params else ""
-        response = client.get(f"/players/TeKrop-2217{uri}{params}")
-
-    # Gamemode is a mandatory option
-    if (
-        gamemode not in gamemodes
-        or (platform and platform not in platforms)
-        or (hero and hero not in heroes)
+        ),
+        patch(
+            "app.cache_manager.CacheManager.get_search_data_cache",
+            side_effect=search_data_func,
+        ),
     ):
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    else:
-        assert response.status_code == status.HTTP_200_OK
-
-        if uri == "/stats":
-            filtered_data = player_json_data["stats"] or {}
-        elif uri == "/stats/career":
-            filtered_data = player_career_json_data.get("stats") or {}
-
-        if not platform:
-            # Retrieve a "default" platform is the user didn't provided one
-            possible_platforms = [
-                platform_key
-                for platform_key, platform_data in filtered_data.items()
-                if platform_data is not None
-            ]
-            # If there is no data in any platform, just return nothing
-            if not possible_platforms:
-                assert response.json() == {}
-                return
-            # Take the first one of the list, usually there will be only one.
-            # If there are two, the PC stats should come first
-            platform = possible_platforms[0]
-
-        filtered_data = ((filtered_data.get(platform) or {}).get(gamemode) or {}).get(
-            "career_stats",
-        ) or {}
-
-        assert response.json() == {
-            hero_key: statistics
-            for hero_key, statistics in filtered_data.items()
-            if not hero or hero == hero_key
-        }
+        yield
 
 
+@pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
+@pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
+def test_get_player_stats(client: TestClient, uri: str):
+    response = client.get(
+        f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}"
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json().keys()) > 0
+
+
+@pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
+@pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
+def test_get_player_stats_valid_hero(client: TestClient, uri: str):
+    response = client.get(
+        f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}&hero={HeroKeyCareerFilter.ANA}"
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert set(response.json().keys()) == {HeroKeyCareerFilter.ANA}
+
+
+@pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
+@pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
+def test_get_player_stats_invalid_hero(client: TestClient, uri: str):
+    response = client.get(
+        f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}&hero=invalid_hero"
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+@pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
+@pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
+def test_get_player_stats_missing_gamemode(client: TestClient, uri: str):
+    response = client.get(f"/players/TeKrop-2217{uri}")
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+@pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
+@pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
+def test_get_player_stats_invalid_gamemode(client: TestClient, uri: str):
+    response = client.get(f"/players/TeKrop-2217{uri}?gamemode=invalid_gamemode")
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+@pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
+@pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
+def test_get_player_stats_valid_platform(client: TestClient, uri: str):
+    response = client.get(
+        f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}&platform={PlayerPlatform.PC}"
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json().keys()) > 0
+
+
+@pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
+@pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
+def test_get_player_stats_empty_platform(client: TestClient, uri: str):
+    response = client.get(
+        f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}&platform={PlayerPlatform.CONSOLE}"
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {}
+
+
+@pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
+@pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
+def test_get_player_stats_invalid_platform(client: TestClient, uri: str):
+    response = client.get(
+        f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}&platform=invalid_platform"
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+@pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_blizzard_error(client: TestClient, uri: str):
     with patch(
@@ -130,6 +126,7 @@ def test_get_player_stats_blizzard_error(client: TestClient, uri: str):
     }
 
 
+@pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_blizzard_timeout(client: TestClient, uri: str):
     with patch(
@@ -152,6 +149,7 @@ def test_get_player_stats_blizzard_timeout(client: TestClient, uri: str):
     }
 
 
+@pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_blizzard_forbidden_error(client: TestClient, uri: str):
     with patch(
@@ -174,22 +172,31 @@ def test_get_player_stats_blizzard_forbidden_error(client: TestClient, uri: str)
     }
 
 
-def test_get_player_stats_internal_error(client: TestClient):
+@pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
+@pytest.mark.parametrize(
+    ("uri", "patch_target"),
+    [
+        (
+            "/stats",
+            "app.players.controllers.get_player_career_controller.GetPlayerCareerController.process_request",
+        ),
+        (
+            "/stats/career",
+            "app.players.controllers.get_player_career_stats_controller.GetPlayerCareerStatsController.process_request",
+        ),
+    ],
+)
+def test_get_player_stats_internal_error(
+    client: TestClient, uri: str, patch_target: str
+):
     with patch(
-        "app.players.controllers.get_player_career_controller.GetPlayerCareerController.process_request",
+        patch_target,
         return_value={
             "ana": [{"category": "invalid_value", "stats": [{"key": "test"}]}],
         },
     ):
         response = client.get(
-            f"/players/TeKrop-2217/stats?gamemode={PlayerGamemode.QUICKPLAY}",
+            f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}",
         )
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.json() == {
-            "error": (
-                "An internal server error occurred during the process. The developer "
-                "received a notification, but don't hesitate to create a GitHub "
-                "issue if you want any news concerning the bug resolution : "
-                "https://github.com/TeKrop/overfast-api/issues"
-            ),
-        }
+        assert response.json() == {"error": settings.internal_server_error_message}

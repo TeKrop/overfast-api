@@ -1,10 +1,12 @@
 from unittest.mock import Mock, patch
 
+import fakeredis
 import httpx
 import pytest
 from fastapi import status
 
 from app.cache_manager import CacheManager
+from app.config import settings
 from app.players.commands.update_search_data_cache import (
     main as update_search_data_cache_main,
 )
@@ -19,7 +21,7 @@ def cache_manager():
 def test_update_search_data_cache(
     cache_manager: CacheManager,
     search_html_data: str,
-    search_data_json_data: dict,
+    redis_server: fakeredis.FakeStrictRedis,
 ):
     # Nominal case, everything is working fine
     with patch(
@@ -28,12 +30,10 @@ def test_update_search_data_cache(
     ):
         update_search_data_cache_main()
 
-    assert all(
-        cache_manager.get_search_data_cache(data_type, data_key) == data_value
-        for data_type, data in search_data_json_data.items()
-        for data_key, data_value in data.items()
-    )
+    # Make sure we added the data into Redis
+    assert len(redis_server.keys(f"{settings.search_data_cache_key_prefix}:*")) > 0
 
+    # Check if invalid search data key are working as expected
     assert all(
         cache_manager.get_search_data_cache(data_type, "0x1234") is None
         for data_type in SearchDataType

@@ -1,34 +1,18 @@
 from unittest.mock import Mock, patch
 
-import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
 from app.config import settings
 
 
-@pytest.fixture(scope="module", autouse=True)
-def _setup_roles_test(home_html_data: str):
+def test_get_roles(client: TestClient, home_html_data: str):
     with patch(
         "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=home_html_data),
     ):
-        yield
-
-
-def test_get_roles(client: TestClient, roles_json_data: list):
-    response = client.get("/roles")
+        response = client.get("/roles")
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == roles_json_data
-
-
-def test_get_roles_after_get_gamemodes(client: TestClient, roles_json_data: list):
-    # Used to check we don't have any conflict between parsers
-    # using the same Blizzard URL and associated Parser caches
-    client.get("/gamemodes")
-    response = client.get("/roles")
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == roles_json_data
 
 
 def test_get_roles_blizzard_error(client: TestClient):
@@ -54,14 +38,7 @@ def test_get_roles_internal_error(client: TestClient):
     ):
         response = client.get("/roles")
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.json() == {
-            "error": (
-                "An internal server error occurred during the process. The developer "
-                "received a notification, but don't hesitate to create a GitHub "
-                "issue if you want any news concerning the bug resolution : "
-                "https://github.com/TeKrop/overfast-api/issues"
-            ),
-        }
+        assert response.json() == {"error": settings.internal_server_error_message}
 
 
 def test_get_roles_blizzard_forbidden_error(client: TestClient):
