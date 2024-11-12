@@ -24,6 +24,7 @@ def _patch_before_every_test(redis_server: fakeredis.FakeStrictRedis):
 
     with (
         patch("app.helpers.settings.discord_webhook_enabled", False),
+        patch("app.helpers.settings.profiler", None),
         patch(
             "app.cache_manager.CacheManager.redis_server",
             redis_server,

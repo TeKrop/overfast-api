@@ -139,7 +139,9 @@ class HTMLParser(APIParser):
         self.create_parser_tag(response.text)
 
     def create_parser_tag(self, html_content: str) -> None:
-        self.root_tag = LexborHTMLParser(html_content).css_first("main")
+        self.root_tag = LexborHTMLParser(html_content).css_first(
+            "div.main-content,main"
+        )
 
 
 class JSONParser(APIParser):
