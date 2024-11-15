@@ -208,6 +208,7 @@ Projects using OverFast API as a data source are listed below. Using it in your 
 - Overfast API client (https://github.com/Sipixer/overfast-api-client)
 - Overwatch Career Profile (https://github.com/EliaRenov/ow-career-profile)
 - OverwatchPy, a Python wrapper for the API (https://github.com/alexraskin/overwatchpy)
+- OWCOUNTER, a tool to help players learn and improve their hero selection and team strategy (https://owcounter.com/)
 - Watch Over, mobile app by @Backxtar (https://play.google.com/store/apps/details?id=de.backxtar.watchoveroverwatch)
 
 ## 🙏 Credits
