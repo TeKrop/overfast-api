@@ -19,6 +19,9 @@ def test_get_hero(
     hero_html_data: str,
     heroes_html_data: str,
 ):
+    if not hero_html_data:
+        pytest.skip("Hero HTML file not saved yet, skipping")
+
     with patch(
         "httpx.AsyncClient.get",
         side_effect=[
