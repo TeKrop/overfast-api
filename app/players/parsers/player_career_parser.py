@@ -44,7 +44,6 @@ class PlayerCareerParser(BasePlayerParser):
     """Overwatch player profile page Parser class"""
 
     root_path = settings.career_path
-    timeout = settings.career_path_cache_timeout
     valid_http_codes: ClassVar[list] = [
         200,  # Classic response
         404,  # Player Not Found response, we want to handle it here

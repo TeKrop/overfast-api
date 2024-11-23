@@ -1,5 +1,7 @@
 """Heroes endpoints router : heroes list, heroes details, etc."""
 
+from typing import Annotated
+
 from fastapi import APIRouter, Path, Query, Request, status
 
 from app.enums import Locale, RouteTag
@@ -27,8 +29,10 @@ router = APIRouter()
 )
 async def list_heroes(
     request: Request,
-    role: Role = Query(None, title="Role filter"),
-    locale: Locale = Query(Locale.ENGLISH_US, title="Locale to be displayed"),
+    role: Annotated[Role | None, Query(title="Role filter")] = None,
+    locale: Annotated[
+        Locale, Query(title="Locale to be displayed")
+    ] = Locale.ENGLISH_US,
 ) -> list[HeroShort]:
     return await ListHeroesController(request).process_request(
         role=role,
@@ -55,8 +59,10 @@ async def list_heroes(
 )
 async def get_hero(
     request: Request,
-    hero_key: HeroKey = Path(title="Key name of the hero"),
-    locale: Locale = Query(Locale.ENGLISH_US, title="Locale to be displayed"),
+    hero_key: Annotated[HeroKey, Path(title="Key name of the hero")],
+    locale: Annotated[
+        Locale, Query(title="Locale to be displayed")
+    ] = Locale.ENGLISH_US,
 ) -> Hero:
     return await GetHeroController(request).process_request(
         hero_key=hero_key,

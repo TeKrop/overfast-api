@@ -1,5 +1,7 @@
 """Maps endpoints router : maps list, etc."""
 
+from typing import Annotated
+
 from fastapi import APIRouter, Query, Request
 
 from app.enums import RouteTag
@@ -23,10 +25,12 @@ router = APIRouter()
 )
 async def list_maps(
     request: Request,
-    gamemode: MapGamemode = Query(
-        None,
-        title="Gamemode filter",
-        description="Filter maps available for a specific gamemode",
-    ),
+    gamemode: Annotated[
+        MapGamemode | None,
+        Query(
+            title="Gamemode filter",
+            description="Filter maps available for a specific gamemode",
+        ),
+    ] = None,
 ) -> list[Map]:
     return await ListMapsController(request).process_request(gamemode=gamemode)

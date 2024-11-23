@@ -1,6 +1,6 @@
 [project]
 name = "overfast-api"
-version = "3.6.0"
+version = "3.6.1"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = {file = "LICENSE"}
 authors = [
@@ -34,7 +34,7 @@ dev-dependencies = [
     "pytest-cov==6.0.*",
     "pytest-randomly==3.16.*",
     "pytest-xdist==3.6.*",
-    "ruff==0.7.*",
+    "ruff==0.8.*",
     "pre-commit==4.0.*",
     "pyinstrument>=5.0.0",
     "memray>=1.14.0",
@@ -61,6 +61,7 @@ select = [
     "S",     # flake8-bandit
     "BLE",   # flake8-blind-except
     "B",     # flake8-bugbear
+    "A",     # flake8-builtins
     "COM",   # flake8-commas
     "C4",    # flake8-comprehensions
     "DTZ",   # flake8-datetimez
@@ -72,6 +73,7 @@ select = [
     "INT",   # flake8-gettext
     "ISC",   # flake8-implicit-str-concat
     "ICN",   # flake8-import-conventions
+    "LOG",   # flake8-logging
     "G",     # flake8-logging-format
     "INP",   # flake8-no-pep420
     "PIE",   # flake8-pie
@@ -85,7 +87,6 @@ select = [
     "SLOT",  # flake8-slots
     "SIM",   # flake8-simplify
     "TID",   # flake8-tidy-imports
-    "TD",    # flake8-todos
     "TCH",   # flake8-type-checking
     "ARG",   # flake8-unused-arguments
     "PTH",   # flake8-use-pathlib
@@ -94,6 +95,7 @@ select = [
     "PL",    # pylint
     "TRY",   # tryceratops
     "FLY",   # flynt
+    "FAST",  # FastAPI rules
     "PERF",  # perflint
     "FURB",  # refurb
     "RUF",   # ruff-specific rules
