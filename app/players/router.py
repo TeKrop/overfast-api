@@ -110,17 +110,22 @@ router = APIRouter()
 )
 async def search_players(
     request: Request,
-    name: str = Query(
-        title="Player nickname to search",
-        examples=["TeKrop"],
-    ),
-    order_by: str = Query(
-        "name:asc",
-        title="Ordering field and the way it's arranged (asc[ending]/desc[ending])",
-        pattern=r"^(player_id|name|last_updated_at):(asc|desc)$",
-    ),
-    offset: int = Query(0, title="Offset of the results", ge=0),
-    limit: int = Query(20, title="Limit of results per page", gt=0),
+    name: Annotated[
+        str,
+        Query(
+            title="Player nickname to search",
+            examples=["TeKrop"],
+        ),
+    ],
+    order_by: Annotated[
+        str,
+        Query(
+            title="Ordering field and the way it's arranged (asc[ending]/desc[ending])",
+            pattern=r"^(player_id|name|last_updated_at):(asc|desc)$",
+        ),
+    ] = "name:asc",
+    offset: Annotated[int, Query(title="Offset of the results", ge=0)] = 0,
+    limit: Annotated[int, Query(title="Limit of results per page", gt=0)] = 20,
 ) -> PlayerSearchResult:
     return await SearchPlayersController(request).process_request(
         name=name,
@@ -172,24 +177,28 @@ async def get_player_summary(
 async def get_player_stats_summary(
     request: Request,
     commons: CommonsPlayerDep,
-    gamemode: PlayerGamemode = Query(
-        None,
-        title="Gamemode",
-        description=(
-            "Filter on a specific gamemode. If not specified, the data of "
-            "every gamemode will be combined."
+    gamemode: Annotated[
+        PlayerGamemode | None,
+        Query(
+            title="Gamemode",
+            description=(
+                "Filter on a specific gamemode. If not specified, the data of "
+                "every gamemode will be combined."
+            ),
+            examples=["competitive"],
         ),
-        examples=["competitive"],
-    ),
-    platform: PlayerPlatform = Query(
-        None,
-        title="Platform",
-        description=(
-            "Filter on a specific platform. If not specified, the data of "
-            "every platform will be combined."
+    ] = None,
+    platform: Annotated[
+        PlayerPlatform | None,
+        Query(
+            title="Platform",
+            description=(
+                "Filter on a specific platform. If not specified, the data of "
+                "every platform will be combined."
+            ),
+            examples=["pc"],
         ),
-        examples=["pc"],
-    ),
+    ] = None,
 ) -> PlayerStatsSummary:
     return await GetPlayerStatsSummaryController(request).process_request(
         player_id=commons.get("player_id"),
@@ -260,18 +269,22 @@ async def get_player_stats(
 async def get_player_career(
     request: Request,
     commons: CommonsPlayerDep,
-    gamemode: PlayerGamemode = Query(
-        None,
-        title="Gamemode",
-        description="Filter on a specific gamemode. All gamemodes are displayed by default.",
-        examples=["competitive"],
-    ),
-    platform: PlayerPlatform = Query(
-        None,
-        title="Platform",
-        description="Filter on a specific platform. All platforms are displayed by default.",
-        examples=["pc"],
-    ),
+    gamemode: Annotated[
+        PlayerGamemode | None,
+        Query(
+            title="Gamemode",
+            description="Filter on a specific gamemode. All gamemodes are displayed by default.",
+            examples=["competitive"],
+        ),
+    ] = None,
+    platform: Annotated[
+        PlayerPlatform | None,
+        Query(
+            title="Platform",
+            description="Filter on a specific platform. All platforms are displayed by default.",
+            examples=["pc"],
+        ),
+    ] = None,
 ) -> Player:
     return await GetPlayerCareerController(request).process_request(
         player_id=commons.get("player_id"),
