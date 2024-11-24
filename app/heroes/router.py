@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Path, Query, Request, status
+from fastapi import APIRouter, Path, Query, Request, Response, status
 
 from app.enums import Locale, RouteTag
 from app.helpers import routes_responses
@@ -29,12 +29,13 @@ router = APIRouter()
 )
 async def list_heroes(
     request: Request,
+    response: Response,
     role: Annotated[Role | None, Query(title="Role filter")] = None,
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
 ) -> list[HeroShort]:
-    return await ListHeroesController(request).process_request(
+    return await ListHeroesController(request, response).process_request(
         role=role,
         locale=locale,
     )
@@ -59,12 +60,13 @@ async def list_heroes(
 )
 async def get_hero(
     request: Request,
+    response: Response,
     hero_key: Annotated[HeroKey, Path(title="Key name of the hero")],
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
 ) -> Hero:
-    return await GetHeroController(request).process_request(
+    return await GetHeroController(request, response).process_request(
         hero_key=hero_key,
         locale=locale,
     )

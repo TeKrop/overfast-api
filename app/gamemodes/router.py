@@ -1,8 +1,9 @@
 """Gamemodes endpoints router : gamemodes list, etc."""
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response
 
 from app.enums import RouteTag
+from app.helpers import success_responses
 
 from .controllers.list_gamemodes_controller import ListGamemodesController
 from .models import GamemodeDetails
@@ -12,6 +13,7 @@ router = APIRouter()
 
 @router.get(
     "",
+    responses=success_responses,
     tags=[RouteTag.GAMEMODES],
     summary="Get a list of gamemodes",
     description=(
@@ -20,5 +22,7 @@ router = APIRouter()
     ),
     operation_id="list_map_gamemodes",
 )
-async def list_map_gamemodes(request: Request) -> list[GamemodeDetails]:
-    return await ListGamemodesController(request).process_request()
+async def list_map_gamemodes(
+    request: Request, response: Response
+) -> list[GamemodeDetails]:
+    return await ListGamemodesController(request, response).process_request()

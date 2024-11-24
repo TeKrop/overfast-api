@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query, Request, status
+from fastapi import APIRouter, Depends, Path, Query, Request, Response, status
 
 from app.enums import RouteTag
 from app.helpers import routes_responses as common_routes_responses
@@ -110,6 +110,7 @@ router = APIRouter()
 )
 async def search_players(
     request: Request,
+    response: Response,
     name: Annotated[
         str,
         Query(
@@ -127,7 +128,7 @@ async def search_players(
     offset: Annotated[int, Query(title="Offset of the results", ge=0)] = 0,
     limit: Annotated[int, Query(title="Limit of results per page", gt=0)] = 20,
 ) -> PlayerSearchResult:
-    return await SearchPlayersController(request).process_request(
+    return await SearchPlayersController(request, response).process_request(
         name=name,
         order_by=order_by,
         offset=offset,
@@ -148,9 +149,10 @@ async def search_players(
 )
 async def get_player_summary(
     request: Request,
+    response: Response,
     commons: CommonsPlayerDep,
 ) -> PlayerSummary:
-    return await GetPlayerCareerController(request).process_request(
+    return await GetPlayerCareerController(request, response).process_request(
         summary=True,
         player_id=commons.get("player_id"),
     )
@@ -176,6 +178,7 @@ async def get_player_summary(
 )
 async def get_player_stats_summary(
     request: Request,
+    response: Response,
     commons: CommonsPlayerDep,
     gamemode: Annotated[
         PlayerGamemode | None,
@@ -200,7 +203,7 @@ async def get_player_stats_summary(
         ),
     ] = None,
 ) -> PlayerStatsSummary:
-    return await GetPlayerStatsSummaryController(request).process_request(
+    return await GetPlayerStatsSummaryController(request, response).process_request(
         player_id=commons.get("player_id"),
         platform=platform,
         gamemode=gamemode,
@@ -224,9 +227,10 @@ async def get_player_stats_summary(
 )
 async def get_player_career_stats(
     request: Request,
+    response: Response,
     commons: CommonsPlayerCareerDep,
 ) -> PlayerCareerStats:
-    return await GetPlayerCareerStatsController(request).process_request(
+    return await GetPlayerCareerStatsController(request, response).process_request(
         stats=True,
         **commons,
     )
@@ -247,9 +251,10 @@ async def get_player_career_stats(
 )
 async def get_player_stats(
     request: Request,
+    response: Response,
     commons: CommonsPlayerCareerDep,
 ) -> CareerStats:
-    return await GetPlayerCareerController(request).process_request(
+    return await GetPlayerCareerController(request, response).process_request(
         stats=True,
         **commons,
     )
@@ -268,6 +273,7 @@ async def get_player_stats(
 )
 async def get_player_career(
     request: Request,
+    response: Response,
     commons: CommonsPlayerDep,
     gamemode: Annotated[
         PlayerGamemode | None,
@@ -286,7 +292,7 @@ async def get_player_career(
         ),
     ] = None,
 ) -> Player:
-    return await GetPlayerCareerController(request).process_request(
+    return await GetPlayerCareerController(request, response).process_request(
         player_id=commons.get("player_id"),
         gamemode=gamemode,
         platform=platform,

@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     # RATE LIMITING
     ############
 
+    # Name for the response header which will contain
+    # the number of seconds before retrying if being rate limited
+    retry_after_header: str = "Retry-After"
+
     # Redis key for Blizzard rate limit storage
     blizzard_rate_limit_key: str = "blizzard-rate-limit"
 
@@ -77,6 +81,10 @@ class Settings(BaseSettings):
     ############
     # CACHE CONFIGURATION
     ############
+
+    # Name for the response header which will contain
+    # the API Cache TTL when calling the API
+    cache_ttl_header: str = "X-Cache-TTL"
 
     # Prefix for keys in API Cache with entire payload (Redis).
     # Used by nginx as main API cache.

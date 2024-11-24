@@ -1,9 +1,8 @@
 import httpx
 from fastapi import HTTPException, status
 
-from app.config import settings
-
 from .cache_manager import CacheManager
+from .config import settings
 from .helpers import send_discord_webhook_message
 from .metaclasses import Singleton
 from .overfast_logger import logger
@@ -110,5 +109,5 @@ class OverFastClient(metaclass=Singleton):
                 "API has been rate limited by Blizzard, please wait for "
                 f"{retry_after} seconds before retrying"
             ),
-            headers={"Retry-After": str(retry_after)},
+            headers={settings.retry_after_header: str(retry_after)},
         )

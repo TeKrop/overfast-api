@@ -1,0 +1,35 @@
+local redis = require "resty.redis"
+
+local function handle_redis_request()
+    -- Initialize Redis client
+    local red = redis:new()
+    red:set_timeout(1000) -- 1 second timeout
+
+    -- Connect to Redis using hostname and port
+    local ok, err = red:connect("${REDIS_HOST}", ${REDIS_PORT})
+    if not ok then
+        ngx.log(ngx.ERR, "Failed to connect to Redis upstream: ", err)
+        return ngx.exit(502)
+    end
+
+    -- Redis operations (e.g., GET, TTL)
+    local key = "api-cache:" .. ngx.var.request_uri
+    local value, err = red:get(key)
+    if not value or value == ngx.null then
+        ngx.log(ngx.INFO, "Cache miss for key: ", key)
+        ngx.exec("@fallback")
+        return
+    end
+
+    local ttl, err = red:ttl(key)
+    if err then
+        ngx.log(ngx.ERR, "Failed to get TTL for key: ", key, " Error: ", err)
+        return ngx.exit(502)
+    end
+
+    -- Return response
+    ngx.header["${CACHE_TTL_HEADER}"] = ttl
+    ngx.say(value)
+end
+
+return handle_redis_request
