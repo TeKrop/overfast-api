@@ -17,12 +17,28 @@ from .models import (
 from .overfast_logger import logger
 
 # Typical routes responses to return
+success_responses = {
+    status.HTTP_200_OK: {
+        "description": "Successful Response",
+        "headers": {
+            settings.cache_ttl_header: {
+                "description": "The TTL value for the cached response, in seconds",
+                "schema": {
+                    "type": "string",
+                    "example": "600",
+                },
+            },
+        },
+    },
+}
+
 routes_responses = {
+    **success_responses,
     status.HTTP_429_TOO_MANY_REQUESTS: {
         "model": RateLimitErrorMessage,
         "description": "Rate Limit Error",
         "headers": {
-            "Retry-After": {
+            settings.retry_after_header: {
                 "description": "Indicates how long to wait before making a new request",
                 "schema": {
                     "type": "string",

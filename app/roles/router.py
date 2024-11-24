@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, Query, Request, Response
 
 from app.enums import Locale, RouteTag
 from app.helpers import routes_responses
@@ -26,8 +26,9 @@ router = APIRouter()
 )
 async def list_roles(
     request: Request,
+    response: Response,
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
 ) -> list[RoleDetail]:
-    return await ListRolesController(request).process_request(locale=locale)
+    return await ListRolesController(request, response).process_request(locale=locale)

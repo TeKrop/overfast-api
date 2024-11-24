@@ -2,9 +2,10 @@
 
 from abc import ABC, abstractmethod
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, Response
 
 from .cache_manager import CacheManager
+from .config import settings
 from .exceptions import ParserBlizzardError, ParserParsingError
 from .helpers import get_human_readable_duration, overfast_internal_error
 from .overfast_logger import logger
@@ -20,8 +21,9 @@ class AbstractController(ABC):
     # Generic cache manager class, used to manipulate Redis cache data
     cache_manager = CacheManager()
 
-    def __init__(self, request: Request):
+    def __init__(self, request: Request, response: Response):
         self.cache_key = CacheManager.get_cache_key_from_request(request)
+        self.response = response
 
     @property
     @classmethod
@@ -76,6 +78,7 @@ class AbstractController(ABC):
         self.cache_manager.update_api_cache(self.cache_key, computed_data, self.timeout)
 
         logger.info("Done ! Returning filtered data...")
+        self.response.headers[settings.cache_ttl_header] = str(self.timeout)
         return computed_data
 
     def merge_parsers_data(self, parsers_data: list[dict | list], **_) -> dict | list:

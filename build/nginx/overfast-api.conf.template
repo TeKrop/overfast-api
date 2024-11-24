@@ -6,6 +6,13 @@ limit_conn_status 429;
 limit_req_zone $http_x_forwarded_for zone=ofreq:10m rate=${RATE_LIMIT_PER_SECOND_PER_IP}r/s;
 limit_req_status 429;
 
+upstream appbackend {
+  server app:8080;
+}
+
+# Use Docker's internal DNS resolver for Lua script
+resolver 127.0.0.11 valid=30s;
+
 server {
   listen 80;
 
@@ -55,10 +62,12 @@ server {
       return 204;
     }
 
-    # Default behaviour using Redis cache
+    # Use Lua script for Redis logic
     default_type application/json;
-    set $redis_key "api-cache:$request_uri";
-    redis_pass redisbackend;
+    content_by_lua_block {
+      local redis_handler = require "redis_handler"
+      redis_handler()
+    }
 
     # Fallback to app if data not in cache
     error_page 404 502 504 = @fallback;
@@ -86,7 +95,7 @@ server {
   # nginx rate limit reached
   location @limit_reached {
     add_header Access-Control-Allow-Origin "*" always;
-    add_header Retry-After 1 always;
+    add_header ${RETRY_AFTER_HEADER} 1 always;
 
     default_type application/json;
     return 429 '{"error": "API rate limit reached, please wait for 1 second before retrying"}';
