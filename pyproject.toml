@@ -13,7 +13,7 @@ dependencies = [
     "httpx[http2]==0.27.*",
     "loguru==0.7.*",
     "redis==5.2.*",
-    "pydantic==2.9.*",
+    "pydantic==2.10.*",
     "pydantic-settings==2.6.*",
     "selectolax==0.3.*",
 ]
