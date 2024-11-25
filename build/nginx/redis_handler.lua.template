@@ -1,3 +1,4 @@
+local zlib = require "zlib"
 local redis = require "resty.redis"
 
 local function handle_redis_request()
@@ -14,8 +15,8 @@ local function handle_redis_request()
 
     -- Redis operations (e.g., GET, TTL)
     local key = "api-cache:" .. ngx.var.request_uri
-    local value, err = red:get(key)
-    if not value or value == ngx.null then
+    local compressed_value, err = red:get(key)
+    if not compressed_value or compressed_value == ngx.null then
         ngx.log(ngx.INFO, "Cache miss for key: ", key)
         ngx.exec("@fallback")
         return
@@ -25,6 +26,16 @@ local function handle_redis_request()
     if err then
         ngx.log(ngx.ERR, "Failed to get TTL for key: ", key, " Error: ", err)
         return ngx.exit(502)
+    end
+
+    -- Decompress JSON data
+    local status, value = pcall(function()
+        return zlib.inflate()(compressed_value)
+    end)
+    if not value or value == ngx.null then
+        ngx.log(ngx.ERR, "Cache error for key: ", key)
+        ngx.exec("@fallback")
+        return
     end
 
     -- Return response
