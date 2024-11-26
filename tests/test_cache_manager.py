@@ -46,7 +46,7 @@ def test_get_cache_key_from_request(
 @pytest.mark.parametrize(
     ("cache_key", "value", "expire", "sleep_time", "expected"),
     [
-        ("/heroes", [{"name": "Sojourn"}], 10, 0, b'[{"name":"Sojourn"}]'),
+        ("/heroes", [{"name": "Sojourn"}], 10, 0, [{"name": "Sojourn"}]),
         ("/heroes", [{"name": "Sojourn"}], 1, 1, None),
     ],
 )

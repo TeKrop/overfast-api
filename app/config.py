@@ -123,9 +123,6 @@ class Settings(BaseSettings):
     # URI of the page where search data are saved
     search_data_path: str = "/search/"
 
-    # Cache TTL for search data list
-    search_data_timeout: int = 7200
-
     ############
     # BLIZZARD
     ############

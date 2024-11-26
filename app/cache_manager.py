@@ -79,16 +79,20 @@ class CacheManager(metaclass=Singleton):
         return wrapper
 
     @redis_connection_handler
-    def get_api_cache(self, cache_key: str) -> str | None:
+    def get_api_cache(self, cache_key: str) -> dict | list | None:
         """Get the API Cache value associated with a given cache key"""
-        return self.redis_server.get(f"{settings.api_cache_key_prefix}:{cache_key}")
+        api_cache_key = f"{settings.api_cache_key_prefix}:{cache_key}"
+        if not (api_cache := self.redis_server.get(api_cache_key)):
+            return None
+
+        return self.__decompress_json_value(api_cache)
 
     @redis_connection_handler
     def update_api_cache(self, cache_key: str, value: dict | list, expire: int) -> None:
         """Update or set an API Cache value with an expiration value (in seconds)"""
 
         # Compress the JSON string
-        str_value = json.dumps(value, separators=(",", ":"))
+        str_value = self.__compress_json_value(value)
 
         # Store it in API Cache
         self.redis_server.set(
@@ -122,8 +126,8 @@ class CacheManager(metaclass=Singleton):
     def get_search_data_cache(
         self, data_type: SearchDataType, cache_key: str
     ) -> str | None:
-        data_cache = self.redis_server.get(
-            f"{settings.search_data_cache_key_prefix}:{data_type}:{cache_key}",
+        data_cache = self.redis_server.hget(
+            f"{settings.search_data_cache_key_prefix}:{data_type}", cache_key
         )
         return data_cache.decode("utf-8") if data_cache else None
 
@@ -133,10 +137,10 @@ class CacheManager(metaclass=Singleton):
     ) -> None:
         for data_type, data in search_data.items():
             for data_key, data_value in data.items():
-                self.redis_server.set(
-                    f"{settings.search_data_cache_key_prefix}:{data_type}:{data_key}",
-                    value=data_value,
-                    ex=settings.search_data_timeout,
+                self.redis_server.hset(
+                    f"{settings.search_data_cache_key_prefix}:{data_type}",
+                    data_key,
+                    data_value,
                 )
 
     @redis_connection_handler
