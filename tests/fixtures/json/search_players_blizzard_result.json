@@ -30,14 +30,14 @@
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
-        "battleTag": "KIRIKO#21253",
+        "battleTag": "KIRIKO#12460",
         "frame": "0x0250000000000918",
-        "isPublic": false,
-        "lastUpdated": 1676730323,
-        "namecard": "0x0000000000000000",
-        "portrait": "0x0250000000004D59",
-        "title": "0x0000000000000000",
-        "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
+        "isPublic": true,
+        "lastUpdated": 1734242338,
+        "namecard": "0x02500000000066FF",
+        "portrait": "0x0250000000007B7D",
+        "title": "0x0250000000006311",
+        "url": "d9779ea3985ed6fcbba421a0%7Cbc8b49f152a4ff7848f37d6df5ec5106"
     },
     {
         "battleTag": "Player#1112937",

@@ -24,7 +24,7 @@ def read_json_file(filepath: str) -> dict | list | None:
 
 # List of players used for testing
 players_ids = [
-    "KIRIKO-21253",  # Profile with rank on only two roles
+    "KIRIKO-12460",  # Console player
     "TeKrop-2217",  # Classic profile
     "JohnV1-1190",  # Player without any title ingame
 ]
