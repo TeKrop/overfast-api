@@ -67,12 +67,18 @@ def transform_search_data(
     search_data: dict, data_type: SearchDataType
 ) -> dict[str, str]:
     def get_data_type_value(data_value: dict) -> str:
-        match data_type:
-            case SearchDataType.PORTRAIT | SearchDataType.NAMECARD:
-                return data_value["icon"]
+        try:
+            match data_type:
+                case SearchDataType.PORTRAIT | SearchDataType.NAMECARD:
+                    return data_value["icon"]
 
-            case SearchDataType.TITLE:
-                return data_value["name"]["en_US"]
+                case SearchDataType.TITLE:
+                    return data_value["name"]
+        except (KeyError, TypeError):
+            error_message = f"Empty value for {data_type} in search data"
+            logger.exception(error_message)
+            send_discord_webhook_message(error_message)
+            return ""
 
     return {
         data_key: get_data_type_value(data_value)
