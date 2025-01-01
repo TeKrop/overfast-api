@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]==0.115.*",
-    "httpx[http2]==0.27.*",
+    "httpx[http2]==0.28.*",
     "loguru==0.7.*",
     "redis==5.2.*",
     "pydantic==2.9.*",
