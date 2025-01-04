@@ -102,8 +102,9 @@ router = APIRouter()
     tags=[RouteTag.PLAYERS],
     summary="Search for a specific player",
     description=(
-        "Search for a given player by using his username. You should be able to "
-        "find the associated player_id to use in order to request career data."
+        "Search for a given player by using its username or BattleTag (with # replaced by -). "
+        "If you don't find the player by using the name, please try with the BattleTag. "
+        "<br />You should be able to find the associated player_id to use in order to request career data."
         f"<br />**Cache TTL : {SearchPlayersController.get_human_readable_timeout()}.**"
     ),
     operation_id="search_players",
@@ -114,8 +115,8 @@ async def search_players(
     name: Annotated[
         str,
         Query(
-            title="Player nickname to search",
-            examples=["TeKrop"],
+            title="Player nickname or BattleTag to search",
+            examples=["TeKrop", "TeKrop-2217"],
         ),
     ],
     order_by: Annotated[
