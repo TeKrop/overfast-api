@@ -78,6 +78,9 @@ class Settings(BaseSettings):
     # Redis server port
     redis_port: int = 6379
 
+    # Redis memory limit
+    redis_memory_limit: str = "1gb"
+
     ############
     # CACHE CONFIGURATION
     ############
