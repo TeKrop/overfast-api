@@ -1,6 +1,8 @@
 """Project main file containing FastAPI app and routes definitions"""
 
+import json
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import ResponseValidationError
@@ -72,6 +74,19 @@ In player career statistics, various conversions are applied for ease of use:
 - Integer and float string representations are converted to their respective types
 """
 
+
+# Custom JSONResponse class that enforces ASCII encoding
+class ASCIIJSONResponse(JSONResponse):
+    def render(self, content: Any) -> bytes:
+        return json.dumps(
+            content,
+            ensure_ascii=True,
+            allow_nan=False,
+            indent=None,
+            separators=(",", ":"),
+        ).encode("utf-8")
+
+
 app = FastAPI(
     title="OverFast API",
     description=description,
@@ -119,6 +134,7 @@ app = FastAPI(
         "name": "MIT",
         "url": "https://github.com/TeKrop/overfast-api/blob/main/LICENSE",
     },
+    default_response_class=ASCIIJSONResponse,
 )
 
 # Add customized OpenAPI specs with app logo
@@ -155,7 +171,7 @@ app.openapi = custom_openapi
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(_: Request, exc: StarletteHTTPException):
-    return JSONResponse(
+    return ASCIIJSONResponse(
         content={"error": exc.detail},
         status_code=exc.status_code,
         headers=exc.headers,
