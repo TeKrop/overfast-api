@@ -181,8 +181,7 @@ class HeroStat(BaseModel):
     value: StrictInt | StrictFloat = Field(
         ...,
         description=(
-            "Value of the statistic for the given hero. "
-            "Duration values are in seconds."
+            "Value of the statistic for the given hero. Duration values are in seconds."
         ),
     )
 
