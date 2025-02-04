@@ -1,6 +1,6 @@
 [project]
 name = "overfast-api"
-version = "3.9.1"
+version = "3.9.2"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = {file = "LICENSE"}
 authors = [
@@ -34,8 +34,8 @@ dev-dependencies = [
     "pytest-cov==6.0.*",
     "pytest-randomly==3.16.*",
     "pytest-xdist==3.6.*",
-    "ruff==0.8.*",
-    "pre-commit==4.0.*",
+    "ruff==0.9.*",
+    "pre-commit==4.1.*",
     "pyinstrument>=5.0.0",
     "memray>=1.14.0",
     "objgraph>=3.6.2",
