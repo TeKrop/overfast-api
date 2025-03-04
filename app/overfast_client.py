@@ -34,7 +34,7 @@ class OverFastClient(metaclass=Singleton):
         try:
             response = await self.client.get(url)
         except httpx.TimeoutException as error:
-            # Sometimes Blizzard takes to much time to give a response (player profiles, etc.)
+            # Sometimes Blizzard takes too much time to give a response (player profiles, etc.)
             raise self._blizzard_response_error(
                 status_code=0,
                 error="Blizzard took more than 10 seconds to respond, resulting in a timeout",
