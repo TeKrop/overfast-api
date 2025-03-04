@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from httpx import TimeoutException
+from httpx import RemoteProtocolError, TimeoutException
 
 from app.config import settings
 from tests.helpers import players_ids
@@ -76,6 +76,24 @@ def test_get_player_career_blizzard_timeout(client: TestClient):
         "error": (
             "Couldn't get Blizzard page (HTTP 0 error) : Blizzard took more "
             "than 10 seconds to respond, resulting in a timeout"
+        ),
+    }
+
+
+def test_get_player_career_blizzard_remote_protocol_error(client: TestClient):
+    with patch(
+        "httpx.AsyncClient.get",
+        side_effect=RemoteProtocolError(
+            "<ConnectionTerminated error_code:0, last_stream_id:12101, additional_data:None>"
+        ),
+    ):
+        response = client.get("/players/TeKrop-2217")
+
+    assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
+    assert response.json() == {
+        "error": (
+            "Couldn't get Blizzard page (HTTP 0 error) : Blizzard closed the "
+            "connection, no data could be retrieved"
         ),
     }
 
