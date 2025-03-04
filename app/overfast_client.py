@@ -34,9 +34,16 @@ class OverFastClient(metaclass=Singleton):
         try:
             response = await self.client.get(url)
         except httpx.TimeoutException as error:
+            # Sometimes Blizzard takes too much time to give a response (player profiles, etc.)
             raise self._blizzard_response_error(
                 status_code=0,
                 error="Blizzard took more than 10 seconds to respond, resulting in a timeout",
+            ) from error
+        except httpx.RemoteProtocolError as error:
+            # Sometimes Blizzard sends an invalid response (search players, etc.)
+            raise self._blizzard_response_error(
+                status_code=0,
+                error="Blizzard closed the connection, no data could be retrieved",
             ) from error
 
         logger.debug("OverFast request done !")
