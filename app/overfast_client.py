@@ -98,10 +98,11 @@ class OverFastClient(metaclass=Singleton):
 
         # If Discord Webhook configuration is enabled, send a message to the
         # given channel using Discord Webhook URL
-        send_discord_webhook_message(
-            "Blizzard Rate Limit reached ! Blocking further calls for "
-            f"{settings.blizzard_rate_limit_retry_after} seconds..."
-        )
+        if settings.discord_message_on_rate_limit:
+            send_discord_webhook_message(
+                "Blizzard Rate Limit reached ! Blocking further calls for "
+                f"{settings.blizzard_rate_limit_retry_after} seconds..."
+            )
 
         return self._too_many_requests_response(
             retry_after=settings.blizzard_rate_limit_retry_after

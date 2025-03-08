@@ -163,6 +163,9 @@ class Settings(BaseSettings):
         "https://github.com/TeKrop/overfast-api/issues"
     )
 
+    # Enable Discord message when rate limiting is being applied
+    discord_message_on_rate_limit: bool = False
+
     ############
     # LOCAL
     ############
