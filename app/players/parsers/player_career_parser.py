@@ -462,12 +462,16 @@ class PlayerCareerParser(BasePlayerParser):
     def __get_heroes_options(
         parent_section: LexborNode, key_prefix: str = ""
     ) -> dict[str, str]:
+        # Sometimes, pages are not rendered correctly and select can be empty
+        if not (
+            options := parent_section.css_first(
+                "div.Profile-heroSummary--header > select"
+            )
+        ):
+            return {}
+
         return {
             f"{key_prefix}{option.attributes['value']}": option.attributes["option-id"]
-            for option in (
-                parent_section.css_first(
-                    "div.Profile-heroSummary--header > select"
-                ).iter()
-            )
+            for option in options.iter()
             if option.attributes.get("option-id")
         }
