@@ -7,7 +7,7 @@ brigitte,Brigitte,support,200,50,0
 cassidy,Cassidy,damage,275,0,0
 dva,D.Va,tank,350,375,0
 doomfist,Doomfist,tank,525,0,0
-echo,Echo,damage,250,0,0
+echo,Echo,damage,150,0,75
 freja,Freja,damage,250,0,0
 genji,Genji,damage,250,0,0
 hazard,Hazard,tank,525,0,0
@@ -34,10 +34,10 @@ sojourn,Sojourn,damage,250,0,0
 soldier-76,Soldier: 76,damage,250,0,0
 sombra,Sombra,damage,250,0,0
 symmetra,Symmetra,damage,100,0,150
-torbjorn,Torbjörn,damage,250,50,0
+torbjorn,Torbjörn,damage,225,50,0
 tracer,Tracer,damage,175,0,0
 venture,Venture,damage,250,0,0
-widowmaker,Widowmaker,damage,200,0,0
+widowmaker,Widowmaker,damage,225,0,0
 winston,Winston,tank,375,250,0
 wrecking-ball,Wrecking Ball,tank,450,175,150
 zarya,Zarya,tank,325,0,225
