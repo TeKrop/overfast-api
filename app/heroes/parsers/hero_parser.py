@@ -198,6 +198,7 @@ class HeroParser(HTMLParser):
         chapters_picture = [
             picture.attributes["src"] for picture in accordion.css("blz-image")
         ]
+        titles = [node for node in accordion.iter() if node.tag == "span"]
 
         return [
             {
@@ -205,5 +206,5 @@ class HeroParser(HTMLParser):
                 "content": chapters_content[title_index],
                 "picture": chapters_picture[title_index],
             }
-            for title_index, title_span in enumerate(accordion.css("span"))
+            for title_index, title_span in enumerate(titles)
         ]
