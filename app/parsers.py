@@ -81,6 +81,9 @@ class APIParser(AbstractParser):
     # List of valid HTTP codes when retrieving Blizzard pages
     valid_http_codes: ClassVar[list] = [status.HTTP_200_OK]
 
+    # Request headers to send while making the request
+    request_headers: ClassVar[dict] = {}
+
     def __init__(self, **kwargs):
         self.blizzard_url = self.get_blizzard_url(**kwargs)
         self.overfast_client = OverFastClient()
@@ -106,7 +109,10 @@ class APIParser(AbstractParser):
         """Method used to retrieve data from Blizzard (HTML data), parsing it
         and storing it into self.data attribute.
         """
-        response = await self.overfast_client.get(url=self.blizzard_url)
+        response = await self.overfast_client.get(
+            url=self.blizzard_url,
+            headers=self.request_headers,
+        )
         if response.status_code not in self.valid_http_codes:
             raise self.overfast_client.blizzard_response_error_from_response(response)
 
@@ -134,6 +140,8 @@ class APIParser(AbstractParser):
 
 
 class HTMLParser(APIParser):
+    request_headers: ClassVar[dict] = {"Accept": "text/html"}
+
     def store_response_data(self, response: httpx.Response) -> None:
         """Initialize parser tag with Blizzard response"""
         self.create_parser_tag(response.text)
@@ -145,6 +153,8 @@ class HTMLParser(APIParser):
 
 
 class JSONParser(APIParser):
+    request_headers: ClassVar[dict] = {"Accept": "application/json"}
+
     def store_response_data(self, response: httpx.Response) -> None:
         """Initialize object with Blizzard response"""
         self.json_data = response.json()

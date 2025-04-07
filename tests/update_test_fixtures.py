@@ -117,7 +117,9 @@ async def main():
             logger.info("Updating {}{}...", test_data_path, filepath)
             logger.info("GET {}/{}{}...", settings.blizzard_host, locale, route)
             response = await client.get(
-                f"{settings.blizzard_host}/{locale}{route}", follow_redirects=True
+                f"{settings.blizzard_host}/{locale}{route}",
+                headers={"Accept": "text/html"},
+                follow_redirects=True,
             )
             logger.debug(
                 "HTTP {} / Time : {}",
