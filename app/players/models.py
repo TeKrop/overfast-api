@@ -329,7 +329,7 @@ class HeroCareerStats(BaseModel):
 
 CareerStats = create_model(
     "CareerStats",
-    model_config=ConfigDict(json_schema_extra={"example": CareerStatsExample}),
+    __config__=ConfigDict(json_schema_extra={"example": CareerStatsExample}),
     all_heroes=(
         list[HeroCareerStats] | None,
         Field(
@@ -553,7 +553,7 @@ HeroPlayerCareerStats = create_model(
 
 PlayerCareerStats = create_model(
     "PlayerCareerStats",
-    model_config=ConfigDict(json_schema_extra={"example": PlayerCareerStatsExample}),
+    __config__=ConfigDict(json_schema_extra={"example": PlayerCareerStatsExample}),
     all_heroes=(
         HeroPlayerCareerStats | None,
         Field(
