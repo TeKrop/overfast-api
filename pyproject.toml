@@ -1,6 +1,6 @@
 [project]
 name = "overfast-api"
-version = "3.10.3"
+version = "3.10.4"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = {file = "LICENSE"}
 authors = [
@@ -27,15 +27,15 @@ Issues = "https://github.com/TeKrop/overfast-api/issues"
 [tool.uv]
 compile-bytecode = true
 dev-dependencies = [
-    "fakeredis==2.26.*",
+    "fakeredis==2.28.*",
     "ipdb==0.13.*",
     "pytest==8.3.*",
-    "pytest-asyncio==0.25.*",
-    "pytest-cov==6.0.*",
+    "pytest-asyncio==0.26.*",
+    "pytest-cov==6.1.*",
     "pytest-randomly==3.16.*",
     "pytest-xdist==3.6.*",
-    "ruff==0.9.*",
-    "pre-commit==4.1.*",
+    "ruff==0.11.*",
+    "pre-commit==4.2.*",
     "pyinstrument>=5.0.0",
     "memray>=1.14.0",
     "objgraph>=3.6.2",
@@ -110,6 +110,7 @@ ignore = [
     "PLE1205", # error checking doesn't support {} format
     "PLR0913", # allow 6/7 arguments for some functions
     "TID252",  # allow relative imports from parents
+    "FAST003", # false positive on router parameters
 
     # Rules already handled by ruff formatter
     "E501",    # line too long
