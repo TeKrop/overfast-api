@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from unittest.mock import Mock, patch
 
 import pytest
@@ -20,7 +19,7 @@ def test_get_player_summary(
     player_id: str,
     player_html_data: str,
     player_search_response_mock: Mock,
-    search_data_func: Callable[[str, str], str | None],
+    blizzard_unlock_response_mock: Mock,
 ):
     with (
         patch(
@@ -32,10 +31,8 @@ def test_get_player_summary(
                 Mock(status_code=status.HTTP_200_OK, text=player_html_data),
             ],
         ),
-        patch(
-            "app.cache_manager.CacheManager.get_search_data_cache",
-            side_effect=search_data_func,
-        ),
+        # UnlocksManager call
+        patch("httpx.get", return_value=blizzard_unlock_response_mock),
     ):
         response = client.get(f"/players/{player_id}/summary")
     assert response.status_code == status.HTTP_200_OK

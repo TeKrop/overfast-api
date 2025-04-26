@@ -28,7 +28,6 @@ from ..helpers import (
     string_to_snakecase,
 )
 from .base_player_parser import BasePlayerParser
-from .search_data_parser import LastUpdatedAtParser, NamecardParser
 
 platforms_div_mapping = {
     PlayerPlatform.PC: "mouseKeyboard-view",
@@ -169,22 +168,12 @@ class PlayerCareerParser(BasePlayerParser):
                     "src"
                 )
             ),
-            "namecard": self.__get_namecard_url(),
+            "namecard": self.player_data["summary"]["namecard"],
             "title": self.__get_title(profile_div),
             "endorsement": self.__get_endorsement(progression_div),
             "competitive": self.__get_competitive_ranks(progression_div),
-            "last_updated_at": self.__get_last_updated_at_value(),
+            "last_updated_at": self.player_data["summary"]["lastUpdated"],
         }
-
-    def __get_namecard_url(self) -> str | None:
-        return NamecardParser(player_id=self.player_id).retrieve_data_value(
-            self.player_data["summary"]
-        )
-
-    def __get_last_updated_at_value(self) -> int | None:
-        return LastUpdatedAtParser(player_id=self.player_id).retrieve_data_value(
-            self.player_data["summary"]
-        )
 
     @staticmethod
     def __get_title(profile_div: LexborNode) -> str | None:

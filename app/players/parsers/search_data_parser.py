@@ -1,15 +1,12 @@
 """Search Data Parser module"""
 
-from abc import ABC, abstractmethod
-
 from app.config import settings
 from app.overfast_logger import logger
 from app.parsers import JSONParser
+from app.unlocks_manager import UnlocksManager
 
-from ..enums import SearchDataType
 
-
-class SearchDataParser(JSONParser, ABC):
+class SearchDataParser(JSONParser):
     """Static Data Parser class"""
 
     root_path = settings.search_account_path
@@ -17,11 +14,7 @@ class SearchDataParser(JSONParser, ABC):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.player_id = kwargs.get("player_id")
-
-    @property
-    @abstractmethod
-    def data_type(self) -> SearchDataType:
-        """Data for which the Parser is implemented (namecard, title, etc.)"""
+        self.unlocks_manager = UnlocksManager()
 
     def parse_data(self) -> dict:
         # We'll use the battletag for searching
@@ -37,80 +30,36 @@ class SearchDataParser(JSONParser, ABC):
         except StopIteration:
             # We didn't find the player, return nothing
             logger.warning(
-                "Player {} not found in search results, couldn't retrieve its {}",
+                "Player {} not found in search results, couldn't retrieve data",
                 self.player_id,
-                self.data_type,
             )
-            return {self.data_type: None}
+            return {}
 
-        # Once we found the player, retrieve the data url
-        data_value = self.retrieve_data_value(player_data)
-        return {self.data_type: data_value}
+        # Once we found the player, add unlock values in data (avatar, namecard, title)
+        return self._enrich_with_unlock_values(player_data)
 
     def get_blizzard_url(self, **kwargs) -> str:
         # Replace dash by encoded number sign (#) for search
-        player_name = kwargs.get("player_id").replace("-", "%23")
+        player_name = kwargs.get("player_id").split("-", 1)[0]
         return f"{super().get_blizzard_url(**kwargs)}/{player_name}/"
 
-    def retrieve_data_value(self, player_data: dict) -> str | None:
-        # If the player doesn't have any related data, directly return nothing here
-        if (
-            self.data_type not in player_data
-            or player_data[self.data_type] == "0x0000000000000000"
-        ):
-            logger.info("Player {} doesn't have any {}", self.player_id, self.data_type)
-            return None
+    def _enrich_with_unlock_values(self, player_data: dict) -> dict:
+        """Enrich player data with unlock values"""
 
-        # Retrieve the possible matching value in the cache
-        data_value = self.cache_manager.get_search_data_cache(
-            self.data_type, player_data[self.data_type]
-        )
+        # First cache unlock data if not already done
+        unlock_ids = {
+            player_data[key]
+            for key in settings.unlock_keys
+            if player_data[key] is not None
+        }
+        self.unlocks_manager.cache_values(unlock_ids)
 
-        # If we didn't retrieve the URL, it means the player doesn't
-        # have one, or we had an issue, log it and return None
-        if not data_value:
-            logger.warning(
-                "URL for {} {} of player {} not found at all",
-                self.data_type,
-                player_data[self.data_type],
-                self.player_id,
+        # Then return values with existing unlock keys replaced by their respective values
+        return {
+            key: (
+                self.unlocks_manager.get(value)
+                if key in settings.unlock_keys
+                else value
             )
-            return None
-
-        return data_value
-
-
-class NamecardParser(SearchDataParser):
-    """Namecard Parser class"""
-
-    data_type = SearchDataType.NAMECARD
-
-
-class PortraitParser(SearchDataParser):
-    """Portrait Parser class"""
-
-    data_type = SearchDataType.PORTRAIT
-
-
-class TitleParser(SearchDataParser):
-    """Title Parser class"""
-
-    data_type = SearchDataType.TITLE
-
-
-class LastUpdatedAtParser(SearchDataParser):
-    """LastUpdatedAt Parser class"""
-
-    data_type = SearchDataType.LAST_UPDATED_AT
-
-    def retrieve_data_value(self, player_data: dict) -> int:
-        return player_data["lastUpdated"]
-
-
-class PlayerSummaryParser(SearchDataParser):
-    """Player Summary Parser"""
-
-    data_type = SearchDataType.SUMMARY
-
-    def retrieve_data_value(self, player_data: dict) -> dict:
-        return player_data
+            for key, value in player_data.items()
+        }

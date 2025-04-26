@@ -4,9 +4,7 @@ from fastapi import status
 from app.exceptions import ParserBlizzardError
 from app.overfast_logger import logger
 from app.parsers import HTMLParser
-
-from ..enums import SearchDataType
-from .search_data_parser import PlayerSummaryParser
+from app.players.parsers.search_data_parser import SearchDataParser
 
 
 class BasePlayerParser(HTMLParser):
@@ -67,8 +65,9 @@ class BasePlayerParser(HTMLParser):
         self.cache_manager.update_player_cache(self.player_id, self.player_data)
 
     async def __retrieve_player_summary_data(self) -> dict | None:
-        # Call Blizzard search page with user name to
-        # check last_updated_at and URL values
-        player_summary_parser = PlayerSummaryParser(player_id=self.player_id)
+        """Call Blizzard search page with user name to
+        check last_updated_at and retrieve unlock values
+        """
+        player_summary_parser = SearchDataParser(player_id=self.player_id)
         await player_summary_parser.parse()
-        return player_summary_parser.data[SearchDataType.SUMMARY]
+        return player_summary_parser.data

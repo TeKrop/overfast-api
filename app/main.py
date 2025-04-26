@@ -26,16 +26,11 @@ from .middlewares import (
 from .overfast_client import OverFastClient
 from .overfast_logger import logger
 from .players import router as players
-from .players.commands.update_search_data_cache import update_search_data_cache
 from .roles import router as roles
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):  # pragma: no cover
-    # Update search data list from Blizzard before starting up
-    logger.info("Updating search data cache (avatars, namecards, titles)")
-    update_search_data_cache()
-
     # Instanciate HTTPX Async Client
     logger.info("Instanciating HTTPX AsyncClient...")
     overfast_client = OverFastClient()
@@ -155,7 +150,7 @@ def custom_openapi():  # pragma: no cover
         servers=app.servers,
     )
     openapi_schema["info"]["x-logo"] = {
-        "url": "https://files.tekrop.fr/overfast_api_logo_full_1000.png",
+        "url": "/static/logo.png",
         "altText": "OverFast API Logo",
     }
 

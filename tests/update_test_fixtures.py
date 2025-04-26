@@ -86,7 +86,6 @@ def list_routes_to_update(args: argparse.Namespace) -> dict[str, str]:
     if args.home:
         logger.info("Adding home routes...")
         route_file_mapping[settings.home_path] = "/home.html"
-        route_file_mapping[settings.search_data_path] = "/search.html"
 
     return route_file_mapping
 

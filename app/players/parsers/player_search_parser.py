@@ -5,9 +5,9 @@ from collections.abc import Iterable
 from app.config import settings
 from app.overfast_logger import logger
 from app.parsers import JSONParser
+from app.unlocks_manager import UnlocksManager
 
 from ..helpers import get_player_title
-from .search_data_parser import NamecardParser, PortraitParser, TitleParser
 
 
 class PlayerSearchParser(JSONParser):
@@ -20,10 +20,11 @@ class PlayerSearchParser(JSONParser):
         self.order_by = kwargs.get("order_by")
         self.offset = kwargs.get("offset")
         self.limit = kwargs.get("limit")
+        self.unlocks_manager = UnlocksManager()
 
     def get_blizzard_url(self, **kwargs) -> str:
         """URL used when requesting data to Blizzard."""
-        search_name = kwargs.get("name").replace("-", "%23")
+        search_name = kwargs.get("name").split("-", 1)[0]
         return f"{super().get_blizzard_url(**kwargs)}/{search_name}/"
 
     def parse_data(self) -> dict:
@@ -48,15 +49,23 @@ class PlayerSearchParser(JSONParser):
         in the OverFast API format. We'll also retrieve some data from parsers.
         """
         transformed_players = []
+
+        # Retrieve and cache Unlock IDs
+        unlock_ids = self.__retrieve_unlock_ids(players)
+        self.unlocks_manager.cache_values(unlock_ids)
+
         for player in players:
             player_id = player["battleTag"].replace("#", "-")
+
             transformed_players.append(
                 {
                     "player_id": player_id,
                     "name": player["battleTag"],
-                    "avatar": self.__get_avatar_url(player, player_id),
-                    "namecard": self.__get_namecard_url(player, player_id),
-                    "title": self.__get_title(player, player_id),
+                    "avatar": self.unlocks_manager.get(player["portrait"]),
+                    "namecard": self.unlocks_manager.get(player["namecard"]),
+                    "title": get_player_title(
+                        self.unlocks_manager.get(player["title"])
+                    ),
                     "career_url": f"{settings.app_base_url}/players/{player_id}",
                     "blizzard_id": player["url"],
                     "last_updated_at": player["lastUpdated"],
@@ -73,12 +82,5 @@ class PlayerSearchParser(JSONParser):
         )
         return players
 
-    def __get_avatar_url(self, player: dict, player_id: str) -> str | None:
-        return PortraitParser(player_id=player_id).retrieve_data_value(player)
-
-    def __get_namecard_url(self, player: dict, player_id: str) -> str | None:
-        return NamecardParser(player_id=player_id).retrieve_data_value(player)
-
-    def __get_title(self, player: dict, player_id: str) -> str | None:
-        title = TitleParser(player_id=player_id).retrieve_data_value(player)
-        return get_player_title(title)
+    def __retrieve_unlock_ids(self, players: list[dict]) -> set[str]:
+        return {player[key] for player in players for key in settings.unlock_keys}

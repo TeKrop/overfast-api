@@ -8,7 +8,6 @@ from redis.exceptions import RedisError
 from app.cache_manager import CacheManager
 from app.config import settings
 from app.enums import Locale
-from app.players.enums import SearchDataType
 
 
 @pytest.fixture
@@ -89,19 +88,12 @@ def test_redis_connection_error(cache_manager: CacheManager):
         assert cache_manager.get_api_cache(heroes_cache_key) is None
 
 
-@pytest.mark.parametrize(("data_type"), list(SearchDataType))
-def test_search_data_update_and_get(
-    cache_manager: CacheManager, data_type: SearchDataType
-):
+def test_search_data_update_and_get(cache_manager: CacheManager):
+    assert cache_manager.get_unlock_data_cache("key") != "value"
+
     # Insert search data only for one data type
-    cache_manager.update_search_data_cache({data_type: {"key": "value"}})
+    cache_manager.update_unlock_data_cache({"key": "value"})
 
     # Check we can retrieve the data by querying for this type
-    assert cache_manager.get_search_data_cache(data_type, "key") == "value"
-
-    # Check we don't retrieve it for other types
-    assert not any(
-        cache_manager.get_search_data_cache(search_type, "key")
-        for search_type in SearchDataType
-        if search_type != data_type
-    )
+    assert cache_manager.get_unlock_data_cache("key") == "value"
+    assert not cache_manager.get_unlock_data_cache("other_key")
