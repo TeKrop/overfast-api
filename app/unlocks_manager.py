@@ -87,7 +87,9 @@ class UnlocksManager(metaclass=Singleton):
                 )
                 logger.error(error_message)
                 send_discord_webhook_message(error_message)
-                return None
+
+                # Return already loaded unlock_data
+                return unlock_data
 
             unlock_data.extend(response.json())
 

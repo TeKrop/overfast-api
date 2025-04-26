@@ -30,10 +30,10 @@ class SearchDataParser(JSONParser):
         except StopIteration:
             # We didn't find the player, return nothing
             logger.warning(
-                "Player {} not found in search results, couldn't retrieve unlock data",
+                "Player {} not found in search results, couldn't retrieve data",
                 self.player_id,
             )
-            return None
+            return {}
 
         # Once we found the player, add unlock values in data (avatar, namecard, title)
         return self._enrich_with_unlock_values(player_data)
