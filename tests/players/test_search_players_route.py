@@ -10,8 +10,13 @@ from app.config import settings
 
 
 @pytest.fixture(scope="module", autouse=True)
-def _setup_search_players_test(player_search_response_mock: Mock):
-    with patch("httpx.AsyncClient.get", return_value=player_search_response_mock):
+def _setup_search_players_test(
+    player_search_response_mock: Mock, blizzard_unlock_response_mock: Mock
+):
+    with (
+        patch("httpx.AsyncClient.get", return_value=player_search_response_mock),
+        patch("httpx.get", return_value=blizzard_unlock_response_mock),
+    ):
         yield
 
 
@@ -92,7 +97,7 @@ def test_get_roles_blizzard_forbidden_error(client: TestClient):
 def test_search_players(client: TestClient, search_data_json_data: dict):
     # Add search data in cache as if we launched the server
     cache_manager = CacheManager()
-    cache_manager.update_search_data_cache(search_data_json_data)
+    cache_manager.update_unlock_data_cache(search_data_json_data)
 
     response = client.get("/players?name=Test")
     assert response.status_code == status.HTTP_200_OK
@@ -121,7 +126,7 @@ def test_search_players_with_offset_and_limit(
 ):
     # Add search data in cache as if we launched the server
     cache_manager = CacheManager()
-    cache_manager.update_search_data_cache(search_data_json_data)
+    cache_manager.update_unlock_data_cache(search_data_json_data)
 
     response = client.get(f"/players?name=Test&offset={offset}&limit={limit}")
     assert response.status_code == status.HTTP_200_OK
@@ -141,7 +146,7 @@ def test_search_players_ordering(
 ):
     # Add search data in cache as if we launched the server
     cache_manager = CacheManager()
-    cache_manager.update_search_data_cache(search_data_json_data)
+    cache_manager.update_unlock_data_cache(search_data_json_data)
 
     response = client.get(f"/players?name=Test&order_by={order_by}")
     assert response.status_code == status.HTTP_200_OK

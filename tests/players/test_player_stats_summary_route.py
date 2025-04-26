@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from unittest.mock import Mock, patch
 
 import pytest
@@ -14,7 +13,7 @@ from app.players.enums import PlayerGamemode, PlayerPlatform
 def _setup_player_stats_test(
     player_html_data: str,
     player_search_response_mock: Mock,
-    search_data_func: Callable[[str, str], str | None],
+    blizzard_unlock_response_mock: Mock,
 ):
     with (
         patch(
@@ -26,10 +25,8 @@ def _setup_player_stats_test(
                 Mock(status_code=status.HTTP_200_OK, text=player_html_data),
             ],
         ),
-        patch(
-            "app.cache_manager.CacheManager.get_search_data_cache",
-            side_effect=search_data_func,
-        ),
+        # UnlocksManager call
+        patch("httpx.get", return_value=blizzard_unlock_response_mock),
     ):
         yield
 

@@ -27,8 +27,6 @@ from collections.abc import Callable
 import redis
 from fastapi import Request
 
-from app.players.enums import SearchDataType
-
 from .config import settings
 from .metaclasses import Singleton
 from .overfast_logger import logger
@@ -123,25 +121,20 @@ class CacheManager(metaclass=Singleton):
         )
 
     @redis_connection_handler
-    def get_search_data_cache(
-        self, data_type: SearchDataType, cache_key: str
-    ) -> str | None:
+    def get_unlock_data_cache(self, cache_key: str) -> str | None:
         data_cache = self.redis_server.hget(
-            f"{settings.search_data_cache_key_prefix}:{data_type}", cache_key
+            settings.unlock_data_cache_key_prefix, cache_key
         )
         return data_cache.decode("utf-8") if data_cache else None
 
     @redis_connection_handler
-    def update_search_data_cache(
-        self, search_data: dict[SearchDataType, dict[str, str]]
-    ) -> None:
-        for data_type, data in search_data.items():
-            for data_key, data_value in data.items():
-                self.redis_server.hset(
-                    f"{settings.search_data_cache_key_prefix}:{data_type}",
-                    data_key,
-                    data_value,
-                )
+    def update_unlock_data_cache(self, unlock_data: dict[str, str]) -> None:
+        for data_key, data_value in unlock_data.items():
+            self.redis_server.hset(
+                settings.unlock_data_cache_key_prefix,
+                data_key,
+                data_value,
+            )
 
     @redis_connection_handler
     def is_being_rate_limited(self) -> bool:

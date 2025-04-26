@@ -88,7 +88,7 @@ class CompetitiveDivision(StrEnum):
     ULTIMATE = "ultimate"
 
 
-class SearchDataType(StrEnum):
+class UnlockDataType(StrEnum):
     NAMECARD = "namecard"
     PORTRAIT = "portrait"
     TITLE = "title"

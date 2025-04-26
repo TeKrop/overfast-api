@@ -117,14 +117,20 @@ class Settings(BaseSettings):
     search_account_path_cache_timeout: int = 600
 
     ############
-    # SEARCH DATA (AVATARS, NAMECARDS, TITLES)
+    # UNLOCKS DATA (AVATARS, NAMECARDS, TITLES)
     ############
 
-    # Cache key for search data cache in Redis.
-    search_data_cache_key_prefix: str = "search-data-cache"
+    # Cache key for unlock data cache in Redis.
+    unlock_data_cache_key_prefix: str = "unlock-data-cache"
 
-    # URI of the page where search data are saved
-    search_data_path: str = "/search/"
+    # URI of the page where unlock data can be retrieved
+    unlock_data_path: str = "/search/unlocks/"
+
+    # Batch size to use when requesting unlock data
+    unlock_data_batch_size: int = 50
+
+    # Keys that should be retrieved for unlocks
+    unlock_keys: set[str] = {"portrait", "namecard", "title"}
 
     ############
     # BLIZZARD

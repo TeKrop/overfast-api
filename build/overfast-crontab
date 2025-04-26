@@ -1,2 +1,1 @@
 0 2 * * * cd /code && .venv/bin/python -m app.heroes.commands.check_new_hero
-42 * * * * cd /code && .venv/bin/python -m app.players.commands.update_search_data_cache

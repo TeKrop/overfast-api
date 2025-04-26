@@ -54,7 +54,9 @@
         "frame": "0x02500000000009CD",
         "isPublic": false,
         "lastUpdated": 1671155709,
+        "namecard": "0x0000000000000000",
         "portrait": "0x0250000000000BBA",
+        "title": "0x0000000000000000",
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
@@ -62,7 +64,9 @@
         "frame": "0x0250000000000918",
         "isPublic": false,
         "lastUpdated": 1670258731,
+        "namecard": "0x02500000000056EA",
         "portrait": "0x02500000000002F7",
+        "title": "0x025000000000555E",
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
@@ -70,7 +74,9 @@
         "frame": "0x0250000000000918",
         "isPublic": false,
         "lastUpdated": 1668452370,
+        "namecard": "0x0000000000000000",
         "portrait": "0x02500000000002F7",
+        "title": "0x0000000000000000",
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
@@ -78,7 +84,9 @@
         "frame": "0x0250000000000918",
         "isPublic": false,
         "lastUpdated": 1668372404,
+        "namecard": "0x0000000000000000",
         "portrait": "0x0250000000005643",
+        "title": "0x0000000000000000",
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
@@ -86,7 +94,9 @@
         "frame": "0x0250000000000919",
         "isPublic": false,
         "lastUpdated": 1667959199,
+        "namecard": "0x0000000000000000",
         "portrait": "0x0250000000000D60",
+        "title": "0x0000000000000000",
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
@@ -94,7 +104,9 @@
         "frame": "0x0250000000000918",
         "isPublic": false,
         "lastUpdated": 1666924000,
+        "namecard": "0x0000000000000000",
         "portrait": "0x0250000000000B14",
+        "title": "0x0000000000000000",
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
@@ -102,7 +114,9 @@
         "frame": "0x0250000000000921",
         "isPublic": false,
         "lastUpdated": 1666737903,
+        "namecard": "0x0000000000000000",
         "portrait": "0x02500000000012DB",
+        "title": "0x0000000000000000",
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
@@ -110,7 +124,9 @@
         "frame": "0x0250000000000918",
         "isPublic": false,
         "lastUpdated": 1666538443,
+        "namecard": "0x0000000000000000",
         "portrait": "0x02500000000002F7",
+        "title": "0x0000000000000000",
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
@@ -118,7 +134,9 @@
         "frame": "0x0250000000000920",
         "isPublic": false,
         "lastUpdated": 1665953911,
+        "namecard": "0x0000000000000000",
         "portrait": "0x025000000000115C",
+        "title": "0x0000000000000000",
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
@@ -126,7 +144,9 @@
         "frame": "0x0250000000000918",
         "isPublic": false,
         "lastUpdated": 1665287787,
+        "namecard": "0x0000000000000000",
         "portrait": "0x02500000000002F7",
+        "title": "0x0000000000000000",
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     }
 ]

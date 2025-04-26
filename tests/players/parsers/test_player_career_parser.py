@@ -1,5 +1,4 @@
 import re
-from collections.abc import Callable
 from unittest.mock import Mock, patch
 
 import pytest
@@ -26,7 +25,7 @@ async def test_player_page_parsing_with_filters(
     player_html_data: str,
     kwargs_filter: dict,
     player_search_response_mock: Mock,
-    search_data_func: Callable[[str, str], str | None],
+    blizzard_unlock_response_mock: Mock,
 ):
     with (
         patch(
@@ -38,10 +37,8 @@ async def test_player_page_parsing_with_filters(
                 Mock(status_code=status.HTTP_200_OK, text=player_html_data),
             ],
         ),
-        patch(
-            "app.cache_manager.CacheManager.get_search_data_cache",
-            side_effect=search_data_func,
-        ),
+        # UnlocksManager call
+        patch("httpx.get", return_value=blizzard_unlock_response_mock),
     ):
         await player_career_parser.parse()
 
@@ -72,7 +69,7 @@ async def test_filter_all_stats_data(
     gamemode: PlayerGamemode | None,
     platform: PlayerPlatform | None,
     player_search_response_mock: Mock,
-    search_data_func: Callable[[str, str], str | None],
+    blizzard_unlock_response_mock: Mock,
 ):
     player_career_parser._init_filters(platform=platform, gamemode=gamemode)
 
@@ -86,10 +83,8 @@ async def test_filter_all_stats_data(
                 Mock(status_code=status.HTTP_200_OK, text=player_html_data),
             ],
         ),
-        patch(
-            "app.cache_manager.CacheManager.get_search_data_cache",
-            side_effect=search_data_func,
-        ),
+        # UnlocksManager call
+        patch("httpx.get", return_value=blizzard_unlock_response_mock),
     ):
         await player_career_parser.parse()
 
