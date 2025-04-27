@@ -139,7 +139,7 @@ class PlayerCareerParser(BasePlayerParser):
 
         return filtered_data
 
-    def parse_data(self) -> dict:
+    async def parse_data(self) -> dict:
         # We must check if we have the expected section for profile. If not,
         # it means the player doesn't exist or hasn't been found.
         if not self.root_tag.css_first("blz-section.Profile-masthead"):

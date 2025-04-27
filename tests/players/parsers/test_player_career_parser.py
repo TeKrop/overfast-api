@@ -27,18 +27,16 @@ async def test_player_page_parsing_with_filters(
     player_search_response_mock: Mock,
     blizzard_unlock_response_mock: Mock,
 ):
-    with (
-        patch(
-            "httpx.AsyncClient.get",
-            side_effect=[
-                # Players search call first
-                player_search_response_mock,
-                # Player profile page
-                Mock(status_code=status.HTTP_200_OK, text=player_html_data),
-            ],
-        ),
-        # UnlocksManager call
-        patch("httpx.get", return_value=blizzard_unlock_response_mock),
+    with patch(
+        "httpx.AsyncClient.get",
+        side_effect=[
+            # Players search call first
+            player_search_response_mock,
+            # UnlocksManager call
+            blizzard_unlock_response_mock,
+            # Player profile page
+            Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+        ],
     ):
         await player_career_parser.parse()
 
@@ -73,18 +71,16 @@ async def test_filter_all_stats_data(
 ):
     player_career_parser._init_filters(platform=platform, gamemode=gamemode)
 
-    with (
-        patch(
-            "httpx.AsyncClient.get",
-            side_effect=[
-                # Players search call first
-                player_search_response_mock,
-                # Player profile page
-                Mock(status_code=status.HTTP_200_OK, text=player_html_data),
-            ],
-        ),
-        # UnlocksManager call
-        patch("httpx.get", return_value=blizzard_unlock_response_mock),
+    with patch(
+        "httpx.AsyncClient.get",
+        side_effect=[
+            # Players search call first
+            player_search_response_mock,
+            # UnlocksManager call
+            blizzard_unlock_response_mock,
+            # Player profile page
+            Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+        ],
     ):
         await player_career_parser.parse()
 
@@ -141,6 +137,7 @@ async def test_player_career_parser_parsing_error_attribute_error(
     player_career_parser: PlayerCareerParser,
     player_html_data: str,
     player_search_response_mock: Mock,
+    blizzard_unlock_response_mock: Mock,
 ):
     player_attr_error = player_html_data.replace(
         'class="Profile-player--summaryWrapper"',
@@ -153,6 +150,8 @@ async def test_player_career_parser_parsing_error_attribute_error(
             side_effect=[
                 # Players search call first
                 player_search_response_mock,
+                # UnlocksManager call
+                blizzard_unlock_response_mock,
                 # Player profile page
                 Mock(status_code=status.HTTP_200_OK, text=player_attr_error),
             ],
@@ -177,6 +176,7 @@ async def test_player_career_parser_parsing_error_key_error(
     player_career_parser: PlayerCareerParser,
     player_html_data: str,
     player_search_response_mock: Mock,
+    blizzard_unlock_response_mock: Mock,
 ):
     player_key_error = re.sub(
         'class="Profile-playerSummary--endorsement" src="[^"]*"',
@@ -190,6 +190,8 @@ async def test_player_career_parser_parsing_error_key_error(
             side_effect=[
                 # Players search call first
                 player_search_response_mock,
+                # UnlocksManager call
+                blizzard_unlock_response_mock,
                 # Player profile page
                 Mock(status_code=status.HTTP_200_OK, text=player_key_error),
             ],

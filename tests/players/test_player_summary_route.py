@@ -21,18 +21,16 @@ def test_get_player_summary(
     player_search_response_mock: Mock,
     blizzard_unlock_response_mock: Mock,
 ):
-    with (
-        patch(
-            "httpx.AsyncClient.get",
-            side_effect=[
-                # Players search call first
-                player_search_response_mock,
-                # Player profile page
-                Mock(status_code=status.HTTP_200_OK, text=player_html_data),
-            ],
-        ),
-        # UnlocksManager call
-        patch("httpx.get", return_value=blizzard_unlock_response_mock),
+    with patch(
+        "httpx.AsyncClient.get",
+        side_effect=[
+            # Players search call first
+            player_search_response_mock,
+            # UnlocksManager call
+            blizzard_unlock_response_mock,
+            # Player profile page
+            Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+        ],
     ):
         response = client.get(f"/players/{player_id}/summary")
     assert response.status_code == status.HTTP_200_OK

@@ -27,10 +27,10 @@ class PlayerSearchParser(JSONParser):
         search_name = kwargs.get("name").split("-", 1)[0]
         return f"{super().get_blizzard_url(**kwargs)}/{search_name}/"
 
-    def parse_data(self) -> dict:
+    async def parse_data(self) -> dict:
         # Transform into PlayerSearchResult format
         logger.info("Applying transformation..")
-        players = self.apply_transformations(self.json_data)
+        players = await self.apply_transformations(self.json_data)
 
         # Apply ordering
         logger.info("Applying ordering..")
@@ -44,7 +44,7 @@ class PlayerSearchParser(JSONParser):
         logger.info("Done ! Returning players list...")
         return players_list
 
-    def apply_transformations(self, players: Iterable[dict]) -> list[dict]:
+    async def apply_transformations(self, players: Iterable[dict]) -> list[dict]:
         """Apply transformations to found players in order to return the data
         in the OverFast API format. We'll also retrieve some data from parsers.
         """
@@ -52,7 +52,7 @@ class PlayerSearchParser(JSONParser):
 
         # Retrieve and cache Unlock IDs
         unlock_ids = self.__retrieve_unlock_ids(players)
-        self.unlocks_manager.cache_values(unlock_ids)
+        await self.unlocks_manager.cache_values(unlock_ids)
 
         for player in players:
             player_id = player["battleTag"].replace("#", "-")

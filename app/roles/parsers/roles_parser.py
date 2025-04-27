@@ -11,7 +11,7 @@ class RolesParser(HTMLParser):
 
     root_path = settings.home_path
 
-    def parse_data(self) -> list[dict]:
+    async def parse_data(self) -> list[dict]:
         roles_container = self.root_tag.css_first(
             "div.homepage-features-heroes blz-feature-carousel-section"
         )

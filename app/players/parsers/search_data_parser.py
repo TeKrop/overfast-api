@@ -16,7 +16,7 @@ class SearchDataParser(JSONParser):
         self.player_id = kwargs.get("player_id")
         self.unlocks_manager = UnlocksManager()
 
-    def parse_data(self) -> dict:
+    async def parse_data(self) -> dict:
         # We'll use the battletag for searching
         player_battletag = self.player_id.replace("-", "#")
 
@@ -36,14 +36,14 @@ class SearchDataParser(JSONParser):
             return {}
 
         # Once we found the player, add unlock values in data (avatar, namecard, title)
-        return self._enrich_with_unlock_values(player_data)
+        return await self._enrich_with_unlock_values(player_data)
 
     def get_blizzard_url(self, **kwargs) -> str:
         # Replace dash by encoded number sign (#) for search
         player_name = kwargs.get("player_id").split("-", 1)[0]
         return f"{super().get_blizzard_url(**kwargs)}/{player_name}/"
 
-    def _enrich_with_unlock_values(self, player_data: dict) -> dict:
+    async def _enrich_with_unlock_values(self, player_data: dict) -> dict:
         """Enrich player data with unlock values"""
 
         # First cache unlock data if not already done
@@ -52,7 +52,8 @@ class SearchDataParser(JSONParser):
             for key in settings.unlock_keys
             if player_data[key] is not None
         }
-        self.unlocks_manager.cache_values(unlock_ids)
+
+        await self.unlocks_manager.cache_values(unlock_ids)
 
         # Then return values with existing unlock keys replaced by their respective values
         return {

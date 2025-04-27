@@ -9,7 +9,7 @@ class HeroesParser(HTMLParser):
 
     root_path = settings.heroes_path
 
-    def parse_data(self) -> list[dict]:
+    async def parse_data(self) -> list[dict]:
         return sorted(
             [
                 {

@@ -1,12 +1,13 @@
 from itertools import batched
 from typing import ClassVar
 
-import httpx
+from fastapi import HTTPException
 
 from app.cache_manager import CacheManager
 from app.config import settings
 from app.enums import Locale
 from app.helpers import send_discord_webhook_message
+from app.overfast_client import OverFastClient
 from app.overfast_logger import logger
 from app.players.enums import UnlockDataType
 
@@ -34,12 +35,13 @@ class UnlocksManager(metaclass=Singleton):
 
     def __init__(self):
         self.cache_manager = CacheManager()
+        self.overfast_client = OverFastClient()
 
     def get(self, unlock_id: str) -> str | None:
         """Retrieve unlock value from cache"""
         return self.cache_manager.get_unlock_data_cache(unlock_id)
 
-    def cache_values(self, unlock_ids: set[str]) -> None:
+    async def cache_values(self, unlock_ids: set[str]) -> None:
         """Cache values for unlock ids"""
 
         # We'll ignore already cached unlock values
@@ -53,14 +55,8 @@ class UnlocksManager(metaclass=Singleton):
 
         logger.info("Retrieving {} missing unlock ids...", len(missing_unlock_ids))
 
-        # Make an API call to Blizzard to retrieve and cache values
-        try:
-            raw_unlock_data = self._get_unlock_data_from_blizzard(missing_unlock_ids)
-        except httpx.RequestError as err:
-            error_message = f"Error while retrieving unlock data from Blizzard : {err}"
-            logger.exception(error_message)
-            send_discord_webhook_message(error_message)
-            return
+        # Make API calls to Blizzard to retrieve and cache values
+        raw_unlock_data = await self._get_unlock_data_from_blizzard(missing_unlock_ids)
 
         # Loop over the results and store data value depending on unlock type
         unlock_data: dict[str, str] = {
@@ -71,17 +67,17 @@ class UnlocksManager(metaclass=Singleton):
 
         self.cache_manager.update_unlock_data_cache(unlock_data)
 
-    def _get_unlock_data_from_blizzard(self, unlock_ids: set[str]) -> list[dict]:
+    async def _get_unlock_data_from_blizzard(self, unlock_ids: set[str]) -> list[dict]:
         """Retrieve unlock data from Blizzard. Chunk API calls as there is a limit."""
         unlock_data: list[dict] = []
 
         for batch in batched(unlock_ids, settings.unlock_data_batch_size, strict=False):
             try:
-                response = httpx.get(
-                    f"{settings.blizzard_host}/{Locale.ENGLISH_US}{settings.unlock_data_path}",
+                response = await self.overfast_client.get(
+                    url=f"{settings.blizzard_host}/{Locale.ENGLISH_US}{settings.unlock_data_path}",
                     params={"unlockIds": ",".join(batch)},
                 )
-            except httpx.RequestError as err:
+            except HTTPException as err:
                 error_message = (
                     f"Error while retrieving unlock data from Blizzard : {err}"
                 )
