@@ -24,7 +24,7 @@ class OverFastClient(metaclass=Singleton):
             follow_redirects=True,
         )
 
-    async def get(self, url: str, headers: dict) -> httpx.Response:
+    async def get(self, url: str, **kwargs) -> httpx.Response:
         """Make an HTTP GET request with custom headers and retrieve the result"""
 
         # First, check if we're being rate limited
@@ -32,7 +32,7 @@ class OverFastClient(metaclass=Singleton):
 
         # Make the API call
         try:
-            response = await self.client.get(url, headers=headers)
+            response = await self.client.get(url, **kwargs)
         except httpx.TimeoutException as error:
             # Sometimes Blizzard takes too much time to give a response (player profiles, etc.)
             raise self._blizzard_response_error(

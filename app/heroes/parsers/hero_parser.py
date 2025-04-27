@@ -31,7 +31,7 @@ class HeroParser(HTMLParser):
     def get_blizzard_url(self, **kwargs) -> str:
         return f"{super().get_blizzard_url(**kwargs)}{kwargs.get('hero_key')}/"
 
-    def parse_data(self) -> dict:
+    async def parse_data(self) -> dict:
         # We must check if we have the expected section for hero. If not,
         # it means the hero hasn't been found and/or released yet.
         if not (

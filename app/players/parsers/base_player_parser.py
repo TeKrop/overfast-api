@@ -48,7 +48,7 @@ class BasePlayerParser(HTMLParser):
         ):
             logger.info("Player Cache found and up-to-date, using it")
             self.create_parser_tag(player_cache["profile"])
-            self.parse_response_data()
+            await self.parse_response_data()
             return
 
         # Data is not in Player Cache or not up-to-date,

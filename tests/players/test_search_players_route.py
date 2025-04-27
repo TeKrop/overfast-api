@@ -9,13 +9,13 @@ from app.cache_manager import CacheManager
 from app.config import settings
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(autouse=True)
 def _setup_search_players_test(
     player_search_response_mock: Mock, blizzard_unlock_response_mock: Mock
 ):
-    with (
-        patch("httpx.AsyncClient.get", return_value=player_search_response_mock),
-        patch("httpx.get", return_value=blizzard_unlock_response_mock),
+    with patch(
+        "httpx.AsyncClient.get",
+        side_effect=[player_search_response_mock, blizzard_unlock_response_mock],
     ):
         yield
 

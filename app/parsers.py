@@ -99,7 +99,7 @@ class APIParser(AbstractParser):
         """Submethod to handle response data storage"""
 
     @abstractmethod
-    def parse_data(self) -> dict | list[dict]:
+    async def parse_data(self) -> dict | list[dict]:
         """Main submethod of the parser, mainly doing the parsing of input data and
         returning a dict, which will be cached and used by the API. Can
         raise an error if there is an issue when parsing the data.
@@ -120,7 +120,7 @@ class APIParser(AbstractParser):
         self.store_response_data(response)
 
         # Parse stored request data
-        self.parse_response_data()
+        await self.parse_response_data()
 
     def get_blizzard_url(self, **kwargs) -> str:
         """URL used when requesting data to Blizzard. It usually is a concatenation
@@ -131,10 +131,10 @@ class APIParser(AbstractParser):
         locale = kwargs.get("locale") or Locale.ENGLISH_US
         return f"{settings.blizzard_host}/{locale}{self.root_path}"
 
-    def parse_response_data(self) -> None:
+    async def parse_response_data(self) -> None:
         logger.info("Parsing data...")
         try:
-            self.data = self.parse_data()
+            self.data = await self.parse_data()
         except (AttributeError, KeyError, IndexError, TypeError) as error:
             raise ParserParsingError(repr(error)) from error
 
