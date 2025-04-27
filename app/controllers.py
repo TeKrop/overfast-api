@@ -77,8 +77,10 @@ class AbstractController(ABC):
         # Update API Cache
         self.cache_manager.update_api_cache(self.cache_key, computed_data, self.timeout)
 
-        logger.info("Done ! Returning filtered data...")
+        # Ensure response headers contains Cache TTL
         self.response.headers[settings.cache_ttl_header] = str(self.timeout)
+
+        logger.info("Done ! Returning filtered data...")
         return computed_data
 
     def merge_parsers_data(self, parsers_data: list[dict | list], **_) -> dict | list:
