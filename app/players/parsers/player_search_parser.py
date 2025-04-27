@@ -17,6 +17,7 @@ class PlayerSearchParser(JSONParser):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.search_nickname = kwargs["name"]
         self.order_by = kwargs.get("order_by")
         self.offset = kwargs.get("offset")
         self.limit = kwargs.get("limit")
@@ -24,13 +25,16 @@ class PlayerSearchParser(JSONParser):
 
     def get_blizzard_url(self, **kwargs) -> str:
         """URL used when requesting data to Blizzard."""
-        search_name = kwargs.get("name").split("-", 1)[0]
+        search_name = kwargs["name"].split("-", 1)[0]
         return f"{super().get_blizzard_url(**kwargs)}/{search_name}/"
 
     async def parse_data(self) -> dict:
+        # If provided search nickname is a battletag, filter the list
+        players = self.filter_players()
+
         # Transform into PlayerSearchResult format
         logger.info("Applying transformation..")
-        players = await self.apply_transformations(self.json_data)
+        players = await self.apply_transformations(players)
 
         # Apply ordering
         logger.info("Applying ordering..")
@@ -43,6 +47,16 @@ class PlayerSearchParser(JSONParser):
 
         logger.info("Done ! Returning players list...")
         return players_list
+
+    def filter_players(self) -> list[dict]:
+        """Filter players before transforming. If provided nickname is a battletag,
+        filter results by battle tags before returning them.
+        """
+        if "-" not in self.search_nickname:
+            return self.json_data
+
+        battletag = self.search_nickname.replace("-", "#")
+        return [player for player in self.json_data if player["battleTag"] == battletag]
 
     async def apply_transformations(self, players: Iterable[dict]) -> list[dict]:
         """Apply transformations to found players in order to return the data
