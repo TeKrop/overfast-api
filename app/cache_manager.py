@@ -122,16 +122,14 @@ class CacheManager(metaclass=Singleton):
 
     @redis_connection_handler
     def get_unlock_data_cache(self, cache_key: str) -> str | None:
-        data_cache = self.redis_server.hget(
-            settings.unlock_data_cache_key_prefix, cache_key
-        )
+        data_cache = self.redis_server.hget(settings.unlock_data_cache_key, cache_key)
         return data_cache.decode("utf-8") if data_cache else None
 
     @redis_connection_handler
     def update_unlock_data_cache(self, unlock_data: dict[str, str]) -> None:
         for data_key, data_value in unlock_data.items():
             self.redis_server.hset(
-                settings.unlock_data_cache_key_prefix,
+                settings.unlock_data_cache_key,
                 data_key,
                 data_value,
             )
@@ -150,4 +148,31 @@ class CacheManager(metaclass=Singleton):
             settings.blizzard_rate_limit_key,
             value=0,
             ex=settings.blizzard_rate_limit_retry_after,
+        )
+
+    @redis_connection_handler
+    def is_player_unknown(self, player_id: str) -> bool:
+        if not (
+            player_counter := self.redis_server.hget(
+                settings.unknown_players_cache_key, player_id
+            )
+        ):
+            return False
+
+        return int(player_counter) > settings.unknown_players_counter_limit
+
+    @redis_connection_handler
+    def reset_player_unknown_counter(self, player_id: str) -> None:
+        self.redis_server.hset(
+            settings.unknown_players_cache_key,
+            player_id,
+            0,
+        )
+
+    @redis_connection_handler
+    def increase_player_unknown_counter(self, player_id: str) -> None:
+        self.redis_server.hincrby(
+            settings.unknown_players_cache_key,
+            player_id,
+            1,
         )

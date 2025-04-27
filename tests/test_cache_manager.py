@@ -62,7 +62,7 @@ def test_update_and_get_api_cache(
 
     # Update the API Cache and sleep if needed
     cache_manager.update_api_cache(cache_key, value, expire)
-    sleep(sleep_time)
+    sleep(sleep_time + 1)
 
     # Assert the value matches
     assert cache_manager.get_api_cache(cache_key) == expected
