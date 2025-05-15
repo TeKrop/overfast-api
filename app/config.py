@@ -116,12 +116,6 @@ class Settings(BaseSettings):
     # Cache TTL for search account data (seconds)
     search_account_path_cache_timeout: int = 600
 
-    # Cache key for unknown players cache in Redis.
-    unknown_players_cache_key: str = "unknown-players-cache"
-
-    # Number of trials before a player is considered as unknown
-    unknown_players_counter_limit: int = 10
-
     ############
     # UNLOCKS DATA (AVATARS, NAMECARDS, TITLES)
     ############
