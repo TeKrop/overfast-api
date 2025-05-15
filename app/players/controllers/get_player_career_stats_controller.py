@@ -3,12 +3,12 @@
 from typing import ClassVar
 
 from app.config import settings
+from app.controllers import AbstractController
 
 from ..parsers.player_career_stats_parser import PlayerCareerStatsParser
-from .base_player_controller import BasePlayerController
 
 
-class GetPlayerCareerStatsController(BasePlayerController):
+class GetPlayerCareerStatsController(AbstractController):
     """Player Career Stats Controller used in order to retrieve career
     statistics of a player without labels, easily explorable
     """

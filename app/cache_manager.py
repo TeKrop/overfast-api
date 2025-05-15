@@ -149,30 +149,3 @@ class CacheManager(metaclass=Singleton):
             value=0,
             ex=settings.blizzard_rate_limit_retry_after,
         )
-
-    @redis_connection_handler
-    def is_player_unknown(self, player_id: str) -> bool:
-        if not (
-            player_counter := self.redis_server.hget(
-                settings.unknown_players_cache_key, player_id
-            )
-        ):
-            return False
-
-        return int(player_counter) > settings.unknown_players_counter_limit
-
-    @redis_connection_handler
-    def reset_player_unknown_counter(self, player_id: str) -> None:
-        self.redis_server.hset(
-            settings.unknown_players_cache_key,
-            player_id,
-            0,
-        )
-
-    @redis_connection_handler
-    def increase_player_unknown_counter(self, player_id: str) -> None:
-        self.redis_server.hincrby(
-            settings.unknown_players_cache_key,
-            player_id,
-            1,
-        )
