@@ -12,7 +12,7 @@ dependencies = [
     "fastapi[standard]==0.115.*",
     "httpx[http2]==0.28.*",
     "loguru==0.7.*",
-    "redis==5.2.*",
+    "redis==6.1.*",
     "pydantic==2.11.*",
     "pydantic-settings==2.9.*",
     "selectolax==0.3.*",
