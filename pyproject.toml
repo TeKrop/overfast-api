@@ -15,7 +15,7 @@ dependencies = [
     "redis==6.2.*",
     "pydantic==2.11.*",
     "pydantic-settings==2.10.*",
-    "selectolax==0.3.29",
+    "selectolax==0.3.31",
 ]
 
 [project.urls]
