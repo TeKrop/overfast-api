@@ -13,12 +13,14 @@ class HeroesParser(HTMLParser):
         return sorted(
             [
                 {
-                    "key": hero.attributes["data-hero-id"],
-                    "name": hero.attributes["hero-name"],
-                    "portrait": hero.css_first("blz-image").attributes["src"],
+                    "key": hero.attributes["href"].split("/")[-1],
+                    "name": hero.css_first("blz-card blz-content-block h2").text(),
+                    "portrait": hero.css_first("blz-card blz-image").attributes["src"],
                     "role": hero.attributes["data-role"],
                 }
-                for hero in self.root_tag.css("blz-media-gallery blz-hero-card")
+                for hero in self.root_tag.css(
+                    "div.heroIndexWrapper blz-media-gallery a"
+                )
             ],
             key=lambda hero: hero["key"],
         )
