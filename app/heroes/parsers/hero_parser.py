@@ -62,7 +62,7 @@ class HeroParser(HTMLParser):
             "name": header_section.css_first("h2").text(),
             "description": header_section.css_first("p").text().strip(),
             "role": get_role_from_icon_url(
-                extra_list_items[0].css_first("image").attributes.get("href")
+                extra_list_items[0].css_first("blz-icon").attributes["src"]
             ),
             "location": extra_list_items[1].text().strip(),
             "birthday": birthday,
@@ -112,7 +112,7 @@ class HeroParser(HTMLParser):
 
         abilities_desc = [
             (
-                desc_div.css_first("blz-header span")
+                desc_div.css_first("p")
                 .text()
                 .strip()
                 .replace("\r", "")
@@ -129,7 +129,7 @@ class HeroParser(HTMLParser):
                     "webm": video_div.attributes["webm"],
                 },
             }
-            for video_div in carousel_section_div.css("blz-video")
+            for video_div in carousel_section_div.css("blz-web-video")
         ]
 
         return [
@@ -161,7 +161,7 @@ class HeroParser(HTMLParser):
         }
 
     def __get_media(self, showcase_section: LexborNode) -> dict | None:
-        if video := showcase_section.css_first("blz-video"):
+        if video := showcase_section.css_first("blz-youtube-video"):
             return {
                 "type": MediaType.VIDEO,
                 "link": f"https://youtu.be/{video.attributes['youtube-id']}",
