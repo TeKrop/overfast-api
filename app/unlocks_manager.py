@@ -76,6 +76,7 @@ class UnlocksManager(metaclass=Singleton):
                 response = await self.overfast_client.get(
                     url=f"{settings.blizzard_host}/{Locale.ENGLISH_US}{settings.unlock_data_path}",
                     params={"unlockIds": ",".join(batch)},
+                    headers={"X-Requested-With": "XMLHttpRequest"},
                 )
             except HTTPException as err:
                 error_message = (
