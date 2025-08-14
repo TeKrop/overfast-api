@@ -356,9 +356,16 @@ class PlayerCareerParser(BasePlayerParser):
                 ),
                 "values": [
                     {
-                        "hero": progress_bar_container.first_child.attributes[
-                            "data-hero-id"
-                        ],
+                        # Normally, a valid data-hero-id is present. However, in some
+                        # cases — such as when a hero is newly available for testing —
+                        # stats may lack an associated ID. In these instances, we fall
+                        # back to using the hero's title in lowercase.
+                        "hero": (
+                            progress_bar_container.first_child.attributes.get(
+                                "data-hero-id"
+                            )
+                            or progress_bar_container.last_child.first_child.text().lower()
+                        ),
                         "value": get_computed_stat_value(
                             progress_bar_container.last_child.last_child.text()
                         ),
