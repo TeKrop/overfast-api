@@ -21,4 +21,5 @@ crond
 # Start redis server
 redis-server \
     --maxmemory ${REDIS_MEMORY_LIMIT} \
-    --maxmemory-policy allkeys-lru
+    --maxmemory-policy allkeys-lru \
+    --save ""
