@@ -13,19 +13,38 @@ local function handle_redis_request()
         return ngx.exit(502)
     end
 
-    -- Redis operations (e.g., GET, TTL)
-    local key = "api-cache:" .. ngx.var.request_uri
-    local compressed_value, err = red:get(key)
-    if not compressed_value or compressed_value == ngx.null then
-        ngx.log(ngx.INFO, "Cache miss for key: ", key)
-        ngx.exec("@fallback")
-        return
+    -- Create local cleanup method
+    local function cleanup()
+        local ok_keepalive, kerr = red:set_keepalive(10000, 100)
+        if not ok_keepalive then
+            ngx.log(ngx.ERR, "Failed to set Redis keepalive: ", kerr)
+            red:close()
+        end
     end
 
-    local ttl, err = red:ttl(key)
-    if err then
-        ngx.log(ngx.ERR, "Failed to get TTL for key: ", key, " Error: ", err)
+    -- Redis operations (e.g., GET, TTL)
+    local key = "api-cache:" .. ngx.var.request_uri
+
+    -- Use pipeline to reduce round trips
+    red:init_pipeline()
+    red:get(key)
+    red:ttl(key)
+    local results, perr = red:commit_pipeline()
+    if not results then
+        ngx.log(ngx.ERR, "Redis pipeline error: ", perr)
+        cleanup()
         return ngx.exit(502)
+    end
+
+    local compressed_value = results[1]
+    local ttl = results[2]
+
+    -- Cache miss
+    if not compressed_value or compressed_value == ngx.null then
+        ngx.log(ngx.INFO, "Cache miss for key: ", key)
+        cleanup()
+        ngx.exec("@fallback")
+        return
     end
 
     -- Decompress JSON data
@@ -34,13 +53,19 @@ local function handle_redis_request()
     end)
     if not value or value == ngx.null then
         ngx.log(ngx.ERR, "Cache error for key: ", key)
+        cleanup()
         ngx.exec("@fallback")
         return
     end
 
-    -- Return response
+    -- Send TTL header
     ngx.header["${CACHE_TTL_HEADER}"] = ttl
-    ngx.say(value)
+
+    -- Output response without adding a newline
+    ngx.print(value)
+
+    -- Return connection to Redis pool
+    cleanup()
 end
 
 return handle_redis_request
