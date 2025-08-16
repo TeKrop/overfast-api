@@ -1,5 +1,5 @@
 # Build arguments
-ARG OPENRESTY_VERSION=1.27.1.2-2
+ARG OPENRESTY_VERSION=1.27.1.2-3
 
 # Use the OpenResty Alpine base image
 FROM openresty/openresty:${OPENRESTY_VERSION}-alpine-fat
@@ -9,7 +9,7 @@ ARG OPENRESTY_VERSION
 ENV OPENRESTY_VERSION=${OPENRESTY_VERSION}
 
 # For envsubst command in entrypoint
-RUN apk add gettext git zlib-dev
+RUN apk add --no-cache gettext git zlib-dev
 
 # Install zlib
 RUN luarocks install lua-zlib
