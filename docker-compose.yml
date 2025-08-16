@@ -35,7 +35,7 @@ services:
   redis:
     build:
       context: ./build/redis
-    command: sh -c "./init.sh"
+    command: sh -c "./entrypoint.sh"
     env_file: ${APP_VOLUME_PATH:-.}/.env
     # Run as privileged to allow the container to change the vm.overcommit_memory setting
     privileged: true

@@ -12,9 +12,13 @@
 # the sum of the size of physical memory and the size of exchange workspace to the process.
 sysctl vm.overcommit_memory=1
 
+# Start cron in the background
+crond
+
+# Start the restore script in the background
+/usr/local/bin/redis-unlock-restore.sh &
+
 # Start redis server
 redis-server \
-    --save 60 1 \
-    --loglevel warning \
     --maxmemory ${REDIS_MEMORY_LIMIT} \
     --maxmemory-policy allkeys-lru
