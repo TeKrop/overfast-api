@@ -1,7 +1,7 @@
 from itertools import batched
 from typing import ClassVar
 
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 
 from app.cache_manager import CacheManager
 from app.config import settings
@@ -83,7 +83,14 @@ class UnlocksManager(metaclass=Singleton):
                     f"Error while retrieving unlock data from Blizzard : {err}"
                 )
                 logger.error(error_message)
-                send_discord_webhook_message(error_message)
+
+                # Ensure we're not notifying Discord if 429 and
+                # associated setting is disabled
+                if not (
+                    err.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+                    and not settings.discord_message_on_rate_limit
+                ):
+                    send_discord_webhook_message(error_message)
 
                 # Return already loaded unlock_data
                 return unlock_data
