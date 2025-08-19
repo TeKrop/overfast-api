@@ -18,8 +18,14 @@ crond
 # Start the restore script in the background
 /usr/local/bin/valkey-unlock-restore.sh &
 
-# Start valkey server
+# Determine how many CPU cores to use for Valkey
+CORES=$(nproc)
+THREADS=$((CORES > 1 ? CORES - 1 : 1))
+echo ">>> Detected $CORES cores, using $THREADS IO threads for Valkey"
+
+# Start valkey server by letting one CPU core available
 valkey-server \
+    --io-threads $THREADS \
     --maxmemory ${VALKEY_MEMORY_LIMIT} \
     --maxmemory-policy allkeys-lru \
     --save ""
