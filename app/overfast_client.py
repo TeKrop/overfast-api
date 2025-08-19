@@ -93,7 +93,7 @@ class OverFastClient(metaclass=Singleton):
         Also prevent further calls to Blizzard for a given amount of time.
         """
 
-        # We have to block future requests to Blizzard, cache the information on Redis
+        # We have to block future requests to Blizzard, cache the information on Valkey
         self.cache_manager.set_global_rate_limit()
 
         # If Discord Webhook configuration is enabled, send a message to the

@@ -13,23 +13,23 @@ def client() -> TestClient:
 
 
 @pytest.fixture(scope="session")
-def redis_server():
-    return fakeredis.FakeStrictRedis()
+def valkey_server():
+    return fakeredis.FakeValkey(protocol=3)
 
 
 @pytest.fixture(autouse=True)
-def _patch_before_every_test(redis_server: fakeredis.FakeStrictRedis):
-    # Flush Redis before and after every tests
-    redis_server.flushdb()
+def _patch_before_every_test(valkey_server: fakeredis.FakeValkey):
+    # Flush Valkey before and after every tests
+    valkey_server.flushdb()
 
     with (
         patch("app.helpers.settings.discord_webhook_enabled", False),
         patch("app.helpers.settings.profiler", None),
         patch(
-            "app.cache_manager.CacheManager.redis_server",
-            redis_server,
+            "app.cache_manager.CacheManager.valkey_server",
+            valkey_server,
         ),
     ):
         yield
 
-    redis_server.flushdb()
+    valkey_server.flushdb()

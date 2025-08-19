@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     # the number of seconds before retrying if being rate limited
     retry_after_header: str = "Retry-After"
 
-    # Redis key for Blizzard rate limit storage
+    # Valkey key for Blizzard rate limit storage
     blizzard_rate_limit_key: str = "blizzard-rate-limit"
 
     # Number of seconds before the user is authorized to make calls to Blizzard again
@@ -69,17 +69,17 @@ class Settings(BaseSettings):
     max_connections_per_ip: int = 10
 
     ############
-    # REDIS CONFIGURATION
+    # VALKEY CONFIGURATION
     ############
 
-    # Redis server host
-    redis_host: str = "127.0.0.1"
+    # Valkey server host
+    valkey_host: str = "127.0.0.1"
 
-    # Redis server port
-    redis_port: int = 6379
+    # Valkey server port
+    valkey_port: int = 6379
 
-    # Redis memory limit
-    redis_memory_limit: str = "1gb"
+    # Valkey memory limit
+    valkey_memory_limit: str = "1gb"
 
     ############
     # CACHE CONFIGURATION
@@ -89,11 +89,11 @@ class Settings(BaseSettings):
     # the API Cache TTL when calling the API
     cache_ttl_header: str = "X-Cache-TTL"
 
-    # Prefix for keys in API Cache with entire payload (Redis).
+    # Prefix for keys in API Cache with entire payload (Valkey).
     # Used by nginx as main API cache.
     api_cache_key_prefix: str = "api-cache"
 
-    # Prefix for keys in Player Cache (Redis). Used by player classes
+    # Prefix for keys in Player Cache (Valkey). Used by player classes
     # in order to avoid parsing data which has already been parsed.
     player_cache_key_prefix: str = "player-cache"
 
@@ -120,7 +120,7 @@ class Settings(BaseSettings):
     # UNLOCKS DATA (AVATARS, NAMECARDS, TITLES)
     ############
 
-    # Cache key for unlock data cache in Redis.
+    # Cache key for unlock data cache in Valkey.
     unlock_data_cache_key: str = "unlock-data-cache"
 
     # URI of the page where unlock data can be retrieved

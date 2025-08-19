@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)
 ![Mockup OverFast API](https://files.tekrop.fr/overfast_api_logo_full_1000.png)
 
-> OverFast API provides comprehensive data on Overwatch 2 heroes, game modes, maps, and player statistics by scraping Blizzard pages. Developed with the efficiency of **FastAPI** and **Selectolax**, it leverages **nginx (OpenResty)** as a reverse proxy and **Redis** for caching. Its tailored caching mechanism significantly reduces calls to Blizzard pages, ensuring swift and precise data delivery to users.
+> OverFast API provides comprehensive data on Overwatch 2 heroes, game modes, maps, and player statistics by scraping Blizzard pages. Developed with the efficiency of **FastAPI** and **Selectolax**, it leverages **nginx (OpenResty)** as a reverse proxy and **Valkey** for caching. Its tailored caching mechanism significantly reduces calls to Blizzard pages, ensuring swift and precise data delivery to users.
 
 ## Table of contents
 * [✨ Live instance](#-live-instance)
@@ -51,7 +51,7 @@ The dev server will be running on the port `8000`. Reverse proxy will be running
 ### Generic settings
 Should you wish to customize according to your specific requirements, here is a detailed list of available settings:
 
-- `APP_VOLUME_PATH`: Folder for shared app data like logs, Redis save file and dotenv file (app settings)
+- `APP_VOLUME_PATH`: Folder for shared app data like logs, Valkey save file and dotenv file (app settings)
 - `APP_PORT`: Port for the app container (default is `80`).
 - `APP_BASE_URL` : Base URL for exposed links in endpoints like player search and maps listing.
 
@@ -94,9 +94,9 @@ In player career statistics, various conversions are applied for ease of use:
 - **Percent values** are represented as **integers**, omitting the percent symbol
 - Integer and float string representations are converted to their respective types
 
-### Redis caching
+### Valkey caching
 
-OverFast API integrates a **Redis**-based cache system, divided into three main components:
+OverFast API integrates a **Valkey**-based cache system, divided into three main components:
 - **API Cache**: This high-level cache associates URIs (cache keys) with raw JSON data. Upon the initial request, if a cache entry exists, the **nginx** server returns the JSON data directly. Cached values are stored with varying TTL (Time-To-Live) parameters depending on the requested route.
 - **Player Cache**: Specifically designed for the API's players data endpoints, this cache stores both HTML Blizzard pages (`profile`) and search results (`summary`) for a given player. Its purpose is to minimize calls to Blizzard servers whenever an associated API Cache is expired, and player's career hasn't changed since last call, by using `lastUpdated` value from `summary`. This cache will only expire if not accessed for a given TTL (default is 3 days).
 - **Search Data Cache**: Cache the player search endpoint to store mappings between `avatar`, `namecard`, and `title` URLs and their corresponding IDs. On profile pages, only the ID values are accessible, so we initialize this "Search Data" cache when the app launches.
@@ -114,32 +114,32 @@ Below is the current list of TTL values configured for the API cache. The latest
 
 ### Default case
 
-The default case is pretty straightforward. When a `User` makes an API request, `Nginx` first checks `Redis` for cached data :
-* If available, `Redis` returns the data directly to `Nginx`, which forwards it to the `User` (cache hit).
+The default case is pretty straightforward. When a `User` makes an API request, `Nginx` first checks `Valkey` for cached data :
+* If available, `Valkey` returns the data directly to `Nginx`, which forwards it to the `User` (cache hit).
 * If the cache is empty (cache miss), `Nginx` sends the request to the `App` server, which retrieves and parses data from `Blizzard`.
 
-The `App` then stores this data in `Redis` and returns it to `Nginx`, which sends the response to the `User`. This approach minimizes external requests and speeds up response times by prioritizing cached data.
+The `App` then stores this data in `Valkey` and returns it to `Nginx`, which sends the response to the `User`. This approach minimizes external requests and speeds up response times by prioritizing cached data.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor User
     participant Nginx
-    participant Redis
+    participant Valkey
     participant App
     participant Blizzard
     User->>+Nginx: Make an API request
-    Nginx->>+Redis: Make an API Cache request
+    Nginx->>+Valkey: Make an API Cache request
     alt API Cache is available
-        Redis-->>Nginx: Return API Cache data
+        Valkey-->>Nginx: Return API Cache data
         Nginx-->>User: Return API Cache data
     else
-        Redis-->>-Nginx: Return no result
+        Valkey-->>-Nginx: Return no result
         Nginx->>+App: Transmit the request to App server
         App->>+Blizzard: Retrieve data
         Blizzard-->>-App: Return data
         App->>App: Parse HTML page
-        App->>Redis: Store data into API Cache
+        App->>Valkey: Store data into API Cache
         App-->>-Nginx: Return API data
         Nginx-->>-User: Return API data
     end
@@ -149,9 +149,9 @@ sequenceDiagram
 
 The player profile request flow is similar to the previous setup, but with an extra layer of caching for player-specific data, including HTML data (profile page) and player search data (JSON data).
 
-When a `User` makes an API request, `Nginx` checks `Redis` for cached API data. If found, it’s returned directly. If not, `Nginx` forwards the request to the `App` server.
+When a `User` makes an API request, `Nginx` checks `Valkey` for cached API data. If found, it’s returned directly. If not, `Nginx` forwards the request to the `App` server.
 
-It then retrieves Search data from `Blizzard` and checks a Player Cache in `Redis` :
+It then retrieves Search data from `Blizzard` and checks a Player Cache in `Valkey` :
 * If the player data is cached and up-to-date (`lastUpdated` from Search data has not changed), `App` parses it
 * If not, `App` retrieves and parses the data from `Blizzard`, then stores it in both the Player Cache and API Cache.
 
@@ -162,31 +162,31 @@ sequenceDiagram
     autonumber
     actor User
     participant Nginx
-    participant Redis
+    participant Valkey
     participant App
     participant Blizzard
     User->>+Nginx: Make an API request
-    Nginx->>+Redis: Make an API Cache request
+    Nginx->>+Valkey: Make an API Cache request
     alt API Cache is available
-        Redis-->>Nginx: Return API Cache data
+        Valkey-->>Nginx: Return API Cache data
         Nginx-->>User: Return API Cache data
     else
-        Redis-->>-Nginx: Return no result
+        Valkey-->>-Nginx: Return no result
         Nginx->>+App: Transmit the request to App server
         App->>+Blizzard: Make a Player Search request
         Blizzard-->>-App: Return Player Search data
-        App->>+Redis: Make Player Cache request
+        App->>+Valkey: Make Player Cache request
         alt Player Cache is available and up-to-date
-            Redis-->>App: Return Player Cache
+            Valkey-->>App: Return Player Cache
             App->>App: Parse HTML page
         else
-            Redis-->>-App: Return no result
+            Valkey-->>-App: Return no result
             App->>+Blizzard: Retrieve Player data (HTML)
             Blizzard-->>-App: Return Player data
             App->>App: Parse HTML page
-            App->>Redis: Store data into Player Cache
+            App->>Valkey: Store data into Player Cache
         end
-        App->>Redis: Store data into API Cache
+        App->>Valkey: Store data into API Cache
         App-->>-Nginx: Return API data
         Nginx-->>-User: Return API data
     end
@@ -220,6 +220,6 @@ All maps screenshots hosted by the API are owned by Blizzard. Sources :
 
 ## 📝 License
 
-Copyright © 2021-2024 [Valentin PORCHET](https://github.com/TeKrop).
+Copyright © 2021-2025 [Valentin PORCHET](https://github.com/TeKrop).
 
 This project is [MIT](https://github.com/TeKrop/overfast-api/blob/master/LICENSE) licensed.

@@ -124,7 +124,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Redis dump
+# Redis / Valkey dump
 dump.rdb
 
 # Loguru gzipped logs

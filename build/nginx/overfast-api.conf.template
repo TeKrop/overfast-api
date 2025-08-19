@@ -62,11 +62,11 @@ server {
       return 204;
     }
 
-    # Use Lua script for Redis logic
+    # Use Lua script for Valkey logic
     default_type application/json;
     content_by_lua_block {
-      local redis_handler = require "redis_handler"
-      redis_handler()
+      local valkey_handler = require "valkey_handler"
+      valkey_handler()
     }
 
     # Fallback to app if data not in cache

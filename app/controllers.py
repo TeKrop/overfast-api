@@ -18,7 +18,7 @@ class AbstractController(ABC):
     The API Cache system is handled here.
     """
 
-    # Generic cache manager class, used to manipulate Redis cache data
+    # Generic cache manager class, used to manipulate Valkey cache data
     cache_manager = CacheManager()
 
     def __init__(self, request: Request, response: Response):
