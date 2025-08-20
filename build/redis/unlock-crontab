@@ -1,2 +1,0 @@
-# m h dom mon dow user  command
-0 * * * * /usr/local/bin/redis-unlock-backup.sh

@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import Request
-from redis.exceptions import RedisError
+from valkey.exceptions import ValkeyError
 
 from app.cache_manager import CacheManager
 from app.config import settings
@@ -69,16 +69,16 @@ def test_update_and_get_api_cache(
     assert cache_manager.get_api_cache("another_cache_key") is None
 
 
-def test_redis_connection_error(cache_manager: CacheManager):
-    redis_connection_error = RedisError(
+def test_valkey_connection_error(cache_manager: CacheManager):
+    valkey_connection_error = ValkeyError(
         "Error 111 connecting to 127.0.0.1:6379. Connection refused.",
     )
     heroes_cache_key = (
         f"HeroesParser-{settings.blizzard_host}/{locale}{settings.heroes_path}"
     )
     with patch(
-        "app.cache_manager.redis.Redis.get",
-        side_effect=redis_connection_error,
+        "app.cache_manager.valkey.Valkey.get",
+        side_effect=valkey_connection_error,
     ):
         cache_manager.update_api_cache(
             heroes_cache_key,

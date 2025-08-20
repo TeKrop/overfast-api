@@ -16,10 +16,16 @@ sysctl vm.overcommit_memory=1
 crond
 
 # Start the restore script in the background
-/usr/local/bin/redis-unlock-restore.sh &
+/usr/local/bin/valkey-unlock-restore.sh &
 
-# Start redis server
-redis-server \
-    --maxmemory ${REDIS_MEMORY_LIMIT} \
+# Determine how many CPU cores to use for Valkey
+CORES=$(nproc)
+THREADS=$((CORES > 1 ? CORES - 1 : 1))
+echo ">>> Detected $CORES cores, using $THREADS IO threads for Valkey"
+
+# Start valkey server by letting one CPU core available
+valkey-server \
+    --io-threads $THREADS \
+    --maxmemory ${VALKEY_MEMORY_LIMIT} \
     --maxmemory-policy allkeys-lru \
     --save ""

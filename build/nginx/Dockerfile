@@ -18,7 +18,7 @@ RUN luarocks install lua-zlib
 COPY overfast-api.conf.template /etc/nginx/conf.d/default.conf.template
 
 # Copy Lua scripts
-COPY redis_handler.lua.template /usr/local/openresty/lualib/redis_handler.lua.template
+COPY valkey_handler.lua.template /usr/local/openresty/lualib/valkey_handler.lua.template
 
 # Add an entrypoint script (optional)
 COPY entrypoint.sh /entrypoint.sh

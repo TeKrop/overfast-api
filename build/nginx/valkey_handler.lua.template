@@ -1,37 +1,37 @@
 local zlib = require "zlib"
-local redis = require "resty.redis"
+local valkey = require "resty.redis"
 
-local function handle_redis_request()
-    -- Initialize Redis client
-    local red = redis:new()
-    red:set_timeout(1000) -- 1 second timeout
+local function handle_valkey_request()
+    -- Initialize Valkey client
+    local valk = valkey:new()
+    valk:set_timeout(1000) -- 1 second timeout
 
-    -- Connect to Redis using hostname and port
-    local ok, err = red:connect("${REDIS_HOST}", ${REDIS_PORT})
+    -- Connect to Valkey using hostname and port
+    local ok, err = valk:connect("${VALKEY_HOST}", ${VALKEY_PORT})
     if not ok then
-        ngx.log(ngx.ERR, "Failed to connect to Redis upstream: ", err)
+        ngx.log(ngx.ERR, "Failed to connect to Valkey upstream: ", err)
         return ngx.exit(502)
     end
 
     -- Create local cleanup method
     local function cleanup()
-        local ok_keepalive, kerr = red:set_keepalive(10000, 100)
+        local ok_keepalive, kerr = valk:set_keepalive(10000, 100)
         if not ok_keepalive then
-            ngx.log(ngx.ERR, "Failed to set Redis keepalive: ", kerr)
-            red:close()
+            ngx.log(ngx.ERR, "Failed to set Valkey keepalive: ", kerr)
+            valk:close()
         end
     end
 
-    -- Redis operations (e.g., GET, TTL)
+    -- Valkey operations (e.g., GET, TTL)
     local key = "api-cache:" .. ngx.var.request_uri
 
     -- Use pipeline to reduce round trips
-    red:init_pipeline()
-    red:get(key)
-    red:ttl(key)
-    local results, perr = red:commit_pipeline()
+    valk:init_pipeline()
+    valk:get(key)
+    valk:ttl(key)
+    local results, perr = valk:commit_pipeline()
     if not results then
-        ngx.log(ngx.ERR, "Redis pipeline error: ", perr)
+        ngx.log(ngx.ERR, "Valkey pipeline error: ", perr)
         cleanup()
         return ngx.exit(502)
     end
@@ -64,8 +64,8 @@ local function handle_redis_request()
     -- Output response without adding a newline
     ngx.print(value)
 
-    -- Return connection to Redis pool
+    -- Return connection to Valkey pool
     cleanup()
 end
 
-return handle_redis_request
+return handle_valkey_request
