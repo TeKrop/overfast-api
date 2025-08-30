@@ -29,6 +29,6 @@ COPY ./build/overfast-crontab /etc/crontabs/root
 RUN chmod +x /etc/crontabs/root
 
 # For dev image, copy the tests and install necessary dependencies
-FROM main as dev
+FROM main AS dev
 RUN uv sync --frozen --no-cache
 COPY ./tests /code/tests
