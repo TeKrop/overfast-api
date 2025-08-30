@@ -119,6 +119,9 @@ class Settings(BaseSettings):
     # Cache TTL for search account data (seconds)
     search_account_path_cache_timeout: int = 600
 
+    # Cache TTL for hero stats data (seconds)
+    hero_stats_cache_timeout: int = 3600
+
     ############
     # UNLOCKS DATA (AVATARS, NAMECARDS, TITLES)
     ############
@@ -153,6 +156,9 @@ class Settings(BaseSettings):
 
     # Route for searching Overwatch accounts by name
     search_account_path: str = "/search/account-by-name"
+
+    # Route for retrieving usage statistics about Overwatch heroes
+    hero_stats_path: str = "/rates/data/"
 
     ############
     # CRITICAL ERROR DISCORD WEBHOOK

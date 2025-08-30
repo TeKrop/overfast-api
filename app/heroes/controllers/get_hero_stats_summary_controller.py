@@ -14,4 +14,4 @@ class GetHeroStatsSummaryController(AbstractController):
     """
 
     parser_classes: ClassVar[list[type]] = [HeroStatsSummaryParser]
-    timeout = settings.heroes_path_cache_timeout
+    timeout = settings.hero_stats_cache_timeout

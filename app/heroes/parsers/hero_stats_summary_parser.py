@@ -1,44 +1,67 @@
 """Search Data Parser module"""
 
+from typing import ClassVar
+
 from app.config import settings
-from app.overfast_logger import logger
 from app.parsers import JSONParser
-from app.unlocks_manager import UnlocksManager
+from app.players.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
 
 
 class HeroStatsSummaryParser(JSONParser):
     """Static Data Parser class"""
 
-    root_path = settings.search_account_path
+    request_headers_headers: ClassVar[dict] = JSONParser.request_headers | {
+        "X-Requested-With": "XMLHttpRequest"
+    }
+
+    root_path: str = settings.hero_stats_path
+
+    platform_mapping: ClassVar[dict[PlayerPlatform, str]] = {
+        PlayerPlatform.PC: "PC",
+        PlayerPlatform.CONSOLE: "Console",
+    }
+
+    gamemode_mapping: ClassVar[dict[PlayerGamemode, str]] = {
+        PlayerGamemode.QUICKPLAY: "0",
+        PlayerGamemode.COMPETITIVE: "1",
+    }
+
+    region_mapping: ClassVar[dict[PlayerRegion, str]] = {
+        PlayerRegion.EUROPE: "Europe",
+        PlayerRegion.AMERICAS: "Americas",
+        PlayerRegion.ASIA: "Asia",
+    }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.player_id = kwargs.get("player_id")
-        self.unlocks_manager = UnlocksManager()
+        self.order_by: str | None = kwargs.get("order_by")
+        self.role_filter: str | None = kwargs.get("role")
 
     async def parse_data(self) -> dict:
-        # We'll use the battletag for searching
-        player_battletag = self.player_id.replace("-", "#")
-
-        # Find the right player
-        try:
-            player_data = next(
-                player
-                for player in self.json_data
-                if player["battleTag"] == player_battletag
+        return [
+            {
+                "key": rate["id"],
+                "name": rate["hero"]["name"],
+                "pickrate": rate["cells"]["pickrate"],
+                "winrate": rate["cells"]["winrate"],
+            }
+            for rate in self.json_data["rates"]
+            if (
+                self.role_filter is None
+                or rate["hero"]["role"].lower() == self.role_filter
             )
-        except StopIteration:
-            # We didn't find the player, return nothing
-            logger.warning(
-                "Player {} not found in search results, couldn't retrieve data",
-                self.player_id,
-            )
-            return {}
+        ]
 
-        # Once we found the player, add unlock values in data (avatar, namecard, title)
-        return await self._enrich_with_unlock_values(player_data)
+    def get_blizzard_query_params(self, **kwargs) -> dict:
+        platform_filter = self.platform_mapping[kwargs["platform"]]
+        gamemode_filter = self.gamemode_mapping[kwargs["gamemode"]]
+        region_filter = self.region_mapping[kwargs["region"]]
 
-    def get_blizzard_url(self, **kwargs) -> str:
-        # Replace dash by encoded number sign (#) for search
-        player_name = kwargs.get("player_id").split("-", 1)[0]
-        return f"{super().get_blizzard_url(**kwargs)}/{player_name}/"
+        # tier
+        # map
+
+        return {
+            "input": platform_filter,
+            "rq": gamemode_filter,
+            "region": region_filter,
+        }

@@ -211,3 +211,10 @@ class HeroParserErrorMessage(BaseModel):
         description="Message describing the hero parser error",
         examples=["Hero not found or not released yet"],
     )
+
+
+class HeroStatsSummary(BaseModel):
+    key: HeroKey = Field(..., description="Key name of the hero")
+    name: str = Field(..., description="Name of the hero", examples=["Ana"])
+    pickrate: float = Field(..., description="Pickrate (in percent)", ge=0.0, le=100.0)
+    winrate: float = Field(..., description="Winrate (in percent)", ge=0.0, le=100.0)

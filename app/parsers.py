@@ -86,6 +86,7 @@ class APIParser(AbstractParser):
 
     def __init__(self, **kwargs):
         self.blizzard_url = self.get_blizzard_url(**kwargs)
+        self.blizzard_query_params = self.get_blizzard_query_params(**kwargs)
         self.overfast_client = OverFastClient()
         super().__init__(**kwargs)
 
@@ -106,12 +107,13 @@ class APIParser(AbstractParser):
         """
 
     async def parse(self) -> None:
-        """Method used to retrieve data from Blizzard (HTML data), parsing it
+        """Method used to retrieve data from Blizzard, parsing it
         and storing it into self.data attribute.
         """
         response = await self.overfast_client.get(
             url=self.blizzard_url,
             headers=self.request_headers,
+            params=self.blizzard_query_params
         )
         if response.status_code not in self.valid_http_codes:
             raise self.overfast_client.blizzard_response_error_from_response(response)
@@ -130,6 +132,10 @@ class APIParser(AbstractParser):
         """
         locale = kwargs.get("locale") or Locale.ENGLISH_US
         return f"{settings.blizzard_host}/{locale}{self.root_path}"
+
+    def get_blizzard_query_params(self, **kwargs) -> dict:
+        """Query params to use when calling Blizzard URL. Defaults to empty dict"""
+        return {}
 
     async def parse_response_data(self) -> None:
         logger.info("Parsing data...")

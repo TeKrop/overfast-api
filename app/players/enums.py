@@ -98,3 +98,9 @@ class UnlockDataType(StrEnum):
 
     # Special value to retrieve all the player data from search endpoint
     SUMMARY = "summary"
+
+
+class PlayerRegion(StrEnum):
+    EUROPE = "europe"
+    AMERICAS = "americas"
+    ASIA = "asia"

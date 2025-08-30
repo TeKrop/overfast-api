@@ -6,13 +6,14 @@ from fastapi import APIRouter, Path, Query, Request, Response, status
 
 from app.enums import Locale, RouteTag
 from app.helpers import routes_responses
+from app.players.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
 from app.roles.enums import Role
 
 from .controllers.get_hero_controller import GetHeroController
 from .controllers.get_hero_stats_summary_controller import GetHeroStatsSummaryController
 from .controllers.list_heroes_controller import ListHeroesController
 from .enums import HeroKey
-from .models import Hero, HeroParserErrorMessage, HeroShort
+from .models import Hero, HeroParserErrorMessage, HeroShort, HeroStatsSummary
 
 router = APIRouter()
 
@@ -39,6 +40,58 @@ async def list_heroes(
     return await ListHeroesController(request, response).process_request(
         role=role,
         locale=locale,
+    )
+
+
+@router.get(
+    "/stats",
+    responses=routes_responses,
+    tags=[RouteTag.HEROES],
+    summary="Get hero statistics",
+    description=(
+        "Get hero statistics usage, filtered by region, role, tier, map, etc. "
+        "Only Role Queue gamemodes are concerned."
+        f"<br />**Cache TTL : {GetHeroStatsSummaryController.get_human_readable_timeout()}.**"
+    ),
+    operation_id="get_hero_stats",
+)
+async def get_hero_stats(
+    request: Request,
+    response: Response,
+    platform: Annotated[
+        PlayerPlatform, Query(title="Player platform filter", examples=["pc"])
+    ],
+    gamemode: Annotated[
+        PlayerGamemode,
+        Query(
+            title="Gamemode",
+            description=("Filter on a specific gamemode."),
+            examples=["competitive"],
+        ),
+    ],
+    region: Annotated[
+        PlayerRegion,
+        Query(
+            title="Region",
+            description=("Filter on a specific player region."),
+            examples=["europe"],
+        ),
+    ],
+    role: Annotated[Role | None, Query(title="Role filter")] = None,
+    order_by: Annotated[
+        str,
+        Query(
+            title="Ordering field and the way it's arranged (asc[ending]/desc[ending])",
+            pattern=r"^(name|winrate|pickrate):(asc|desc)$",
+        ),
+    ] = "name:asc",
+) -> list[HeroStatsSummary]:
+    return await GetHeroStatsSummaryController(request, response).process_request(
+        platform=platform,
+        gamemode=gamemode,
+        region=region,
+        role=role,
+        order_by=order_by,
     )
 
 
@@ -70,25 +123,4 @@ async def get_hero(
     return await GetHeroController(request, response).process_request(
         hero_key=hero_key,
         locale=locale,
-    )
-
-
-@router.get(
-    "/stats",
-    responses=routes_responses,
-    tags=[RouteTag.HEROES],
-    summary="Get hero statistics",
-    description=(
-        "Get hero statistics usage, filtered by region, role, tier, map, etc. "
-        f"<br />**Cache TTL : {GetHeroStatsSummaryController.get_human_readable_timeout()}.**"
-    ),
-    operation_id="get_hero_stats",
-)
-async def get_hero_stats(
-    request: Request,
-    response: Response,
-    role: Annotated[Role | None, Query(title="Role filter")] = None,
-) -> list[HeroShort]:
-    return await GetHeroStatsSummaryController(request, response).process_request(
-        role=role,
     )
