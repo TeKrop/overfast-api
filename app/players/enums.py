@@ -104,3 +104,13 @@ class PlayerRegion(StrEnum):
     EUROPE = "europe"
     AMERICAS = "americas"
     ASIA = "asia"
+
+
+# ULTIMATE competitive division doesn't exists in hero stats endpoint
+CompetitiveDivisionFilter = StrEnum(
+    "CompetitiveDivisionFilter",
+    {tier.name: tier.value for tier in CompetitiveDivision if tier.name != "ULTIMATE"},
+)
+CompetitiveDivisionFilter.__doc__ = (
+    "Competitive divisions ('grandmaster' includes 'champion')"
+)

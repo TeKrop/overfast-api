@@ -29,3 +29,4 @@ class RateLimitErrorMessage(BaseModel):
             "API has been rate limited by Blizzard, please wait for 5 seconds before retrying"
         ],
     )
+

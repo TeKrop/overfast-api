@@ -218,3 +218,13 @@ class HeroStatsSummary(BaseModel):
     name: str = Field(..., description="Name of the hero", examples=["Ana"])
     pickrate: float = Field(..., description="Pickrate (in percent)", ge=0.0, le=100.0)
     winrate: float = Field(..., description="Winrate (in percent)", ge=0.0, le=100.0)
+
+
+class BadRequestErrorMessage(BaseModel):
+    error: str = Field(
+        ...,
+        description="Message describing the error",
+        examples=[
+            "Selected map 'hanaoka' is not compatible with 'competitive' gamemode."
+        ],
+    )

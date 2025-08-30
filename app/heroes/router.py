@@ -6,14 +6,26 @@ from fastapi import APIRouter, Path, Query, Request, Response, status
 
 from app.enums import Locale, RouteTag
 from app.helpers import routes_responses
-from app.players.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
+from app.maps.enums import MapKey
+from app.players.enums import (
+    CompetitiveDivisionFilter,
+    PlayerGamemode,
+    PlayerPlatform,
+    PlayerRegion,
+)
 from app.roles.enums import Role
 
 from .controllers.get_hero_controller import GetHeroController
 from .controllers.get_hero_stats_summary_controller import GetHeroStatsSummaryController
 from .controllers.list_heroes_controller import ListHeroesController
 from .enums import HeroKey
-from .models import Hero, HeroParserErrorMessage, HeroShort, HeroStatsSummary
+from .models import (
+    BadRequestErrorMessage,
+    Hero,
+    HeroParserErrorMessage,
+    HeroShort,
+    HeroStatsSummary,
+)
 
 router = APIRouter()
 
@@ -45,7 +57,13 @@ async def list_heroes(
 
 @router.get(
     "/stats",
-    responses=routes_responses,
+    responses={
+        **routes_responses,
+        status.HTTP_400_BAD_REQUEST: {
+            "model": BadRequestErrorMessage,
+            "description": "Bad Request Error",
+        },
+    },
     tags=[RouteTag.HEROES],
     summary="Get hero statistics",
     description=(
@@ -77,7 +95,19 @@ async def get_hero_stats(
             examples=["europe"],
         ),
     ],
-    role: Annotated[Role | None, Query(title="Role filter")] = None,
+    role: Annotated[
+        Role | None, Query(title="Role filter", examples=["support"])
+    ] = None,
+    map_key: Annotated[
+        MapKey | None, Query(title="Map key filter", examples=["hanaoka"])
+    ] = None,
+    competitive_division: Annotated[
+        CompetitiveDivisionFilter | None,
+        Query(
+            title="Competitive division filter",
+            examples=["diamond"],
+        ),
+    ] = None,
     order_by: Annotated[
         str,
         Query(
@@ -91,6 +121,8 @@ async def get_hero_stats(
         gamemode=gamemode,
         region=region,
         role=role,
+        map_key=map_key,
+        competitive_division=competitive_division,
         order_by=order_by,
     )
 
