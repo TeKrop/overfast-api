@@ -9,6 +9,7 @@ from app.helpers import routes_responses
 from app.roles.enums import Role
 
 from .controllers.get_hero_controller import GetHeroController
+from .controllers.get_hero_stats_summary_controller import GetHeroStatsSummaryController
 from .controllers.list_heroes_controller import ListHeroesController
 from .enums import HeroKey
 from .models import Hero, HeroParserErrorMessage, HeroShort
@@ -69,4 +70,25 @@ async def get_hero(
     return await GetHeroController(request, response).process_request(
         hero_key=hero_key,
         locale=locale,
+    )
+
+
+@router.get(
+    "/stats",
+    responses=routes_responses,
+    tags=[RouteTag.HEROES],
+    summary="Get hero statistics",
+    description=(
+        "Get hero statistics usage, filtered by region, role, tier, map, etc. "
+        f"<br />**Cache TTL : {GetHeroStatsSummaryController.get_human_readable_timeout()}.**"
+    ),
+    operation_id="get_hero_stats",
+)
+async def get_hero_stats(
+    request: Request,
+    response: Response,
+    role: Annotated[Role | None, Query(title="Role filter")] = None,
+) -> list[HeroShort]:
+    return await GetHeroStatsSummaryController(request, response).process_request(
+        role=role,
     )

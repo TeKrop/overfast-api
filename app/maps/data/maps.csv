@@ -1,57 +1,57 @@
 key,name,gamemodes,location,country_code
-hanamura,Hanamura,assault,"Tokyo, Japan",JP
-horizon,Horizon Lunar Colony,assault,Earth's moon,
-paris,Paris,assault,"Paris, France",FR
-anubis,Temple of Anubis,assault,"Giza Plateau, Egypt",EG
-volskaya,Volskaya Industries,assault,"St. Petersburg, Russia",RU
-ayutthaya,Ayutthaya,capture-the-flag,Thailand,TH
-busan,Busan,control,South Korea,KR
-nepal,Nepal,control,Nepal,NP
-ilios,Ilios,control,Greece,GR
-oasis,Oasis,control,Iraq,IQ
-lijiang,Lijiang Tower,control,China,CN
-chateau_guillard,Château Guillard,"deathmatch,team-deathmatch","Annecy, France",FR
-kanezaka,Kanezaka,"deathmatch,team-deathmatch","Tokyo, Japan",JP
-malevento,Malevento,"deathmatch,team-deathmatch",Italy,IT
-petra,Petra,"deathmatch,team-deathmatch",Southern Jordan,JO
-black_forest,Black Forest,elimination,Germany,DE
-castillo,Castillo,elimination,Mexico,MX
-ecopoint_antarctica,Ecopoint: Antarctica,elimination,Antarctica,AQ
-necropolis,Necropolis,elimination,Egypt,EG
-circuit_royal,Circuit Royal,escort,"Monte Carlo, Monaco",MC
-dorado,Dorado,escort,Mexico,MX
-route_66,Route 66,escort,"Albuquerque, New Mexico, United States",US
-junkertown,Junkertown,escort,Central Australia,AU
-rialto,Rialto,escort,"Venice, Italy",IT
-havana,Havana,escort,"Havana, Cuba",CU
-gibraltar,Watchpoint: Gibraltar,escort,Gibraltar,GI
-shambali,Shambali Monastery,escort,Nepal,NP
-blizzard_world,Blizzard World,hybrid,"Irvine, California, United States",US
-numbani,Numbani,hybrid,Numbani (near Nigeria),
-hollywood,Hollywood,hybrid,"Los Angeles, United States",US
-eichenwalde,Eichenwalde,hybrid,"Stuttgart, Germany",DE
-kings_row,King’s Row,hybrid,"London, United Kingdom",UK
-midtown,Midtown,hybrid,"New York, United States",US
-paraiso,Paraíso,hybrid,"Rio de Janeiro, Brazil",BR
-colosseo,Colosseo,push,"Rome, Italy",IT
-esperanca,Esperança,push,Portugal,PT
-new_queen_street,New Queen Street,push,"Toronto, Canada",CA
-antarctic_peninsula,Antarctic Peninsula,control,Antarctica,AQ
-new_junk_city,New Junk City,flashpoint,Central Australia,AU
-suravasa,Suravasa,flashpoint,India,IN
-samoa,Samoa,control,Samoa,WS
-runasapi,Runasapi,push,Peru,PE
-hanaoka,Hanaoka,clash,"Tokyo, Japan",JP
-throne_of_anubis,Throne of Anubis,clash,"Giza Plateau, Egypt",EG
-gogadoro,Gogadoro,control,"Busan, South Korea",KR
-place_lacroix,Place Lacroix,push,"Paris, France",FR
-redwood_dam,Redwood Dam,push,Gibraltar,GI
-arena_victoriae,Arena Victoriae,control,"Colosseo, Rome, Italy",IT
-practice_range,Practice Range,practice-range,Swiss HQ,CH
-workshop_chamber,Workshop Chamber,workshop,Earth,
-workshop_expanse,Workshop Expanse,workshop,Earth,
-workshop_green_screen,Workshop Green Screen,workshop,Earth,
-workshop_island,Workshop Island,workshop,Earth,
 aatlis,Aatlis,flashpoint,Morocco,MA
-thames_district,Thames District,payload-race,"London, United Kingdom",UK
-powder_keg_mine,Powder Keg Mine,payload-race,"Deadlock Gorge, Arizona, United States",US
+antarctic-peninsula,Antarctic Peninsula,control,Antarctica,AQ
+anubis,Temple of Anubis,assault,"Giza Plateau, Egypt",EG
+arena-victoriae,Arena Victoriae,control,"Colosseo, Rome, Italy",IT
+ayutthaya,Ayutthaya,capture-the-flag,Thailand,TH
+black-forest,Black Forest,elimination,Germany,DE
+blizzard-world,Blizzard World,hybrid,"Irvine, California, United States",US
+busan,Busan,control,South Korea,KR
+castillo,Castillo,elimination,Mexico,MX
+chateau-guillard,Château Guillard,"deathmatch,team-deathmatch","Annecy, France",FR
+circuit-royal,Circuit Royal,escort,"Monte Carlo, Monaco",MC
+colosseo,Colosseo,push,"Rome, Italy",IT
+dorado,Dorado,escort,Mexico,MX
+ecopoint-antarctica,Ecopoint: Antarctica,elimination,Antarctica,AQ
+eichenwalde,Eichenwalde,hybrid,"Stuttgart, Germany",DE
+esperanca,Esperança,push,Portugal,PT
+gogadoro,Gogadoro,control,"Busan, South Korea",KR
+hanamura,Hanamura,assault,"Tokyo, Japan",JP
+hanaoka,Hanaoka,clash,"Tokyo, Japan",JP
+havana,Havana,escort,"Havana, Cuba",CU
+hollywood,Hollywood,hybrid,"Los Angeles, United States",US
+horizon,Horizon Lunar Colony,assault,Earth's moon,
+ilios,Ilios,control,Greece,GR
+junkertown,Junkertown,escort,Central Australia,AU
+lijiang-tower,Lijiang Tower,control,China,CN
+kanezaka,Kanezaka,"deathmatch,team-deathmatch","Tokyo, Japan",JP
+kings-row,King’s Row,hybrid,"London, United Kingdom",UK
+malevento,Malevento,"deathmatch,team-deathmatch",Italy,IT
+midtown,Midtown,hybrid,"New York, United States",US
+necropolis,Necropolis,elimination,Egypt,EG
+nepal,Nepal,control,Nepal,NP
+new-junk-city,New Junk City,flashpoint,Central Australia,AU
+new-queen-street,New Queen Street,push,"Toronto, Canada",CA
+numbani,Numbani,hybrid,Numbani (near Nigeria),
+oasis,Oasis,control,Iraq,IQ
+paraiso,Paraíso,hybrid,"Rio de Janeiro, Brazil",BR
+paris,Paris,assault,"Paris, France",FR
+petra,Petra,"deathmatch,team-deathmatch",Southern Jordan,JO
+place-lacroix,Place Lacroix,push,"Paris, France",FR
+powder-keg-mine,Powder Keg Mine,payload-race,"Deadlock Gorge, Arizona, United States",US
+practice-range,Practice Range,practice-range,Swiss HQ,CH
+redwood-dam,Redwood Dam,push,Gibraltar,GI
+rialto,Rialto,escort,"Venice, Italy",IT
+route-66,Route 66,escort,"Albuquerque, New Mexico, United States",US
+runasapi,Runasapi,push,Peru,PE
+samoa,Samoa,control,Samoa,WS
+shambali-monastery,Shambali Monastery,escort,Nepal,NP
+suravasa,Suravasa,flashpoint,India,IN
+thames-district,Thames District,payload-race,"London, United Kingdom",UK
+throne-of-anubis,Throne of Anubis,clash,"Giza Plateau, Egypt",EG
+volskaya,Volskaya Industries,assault,"St. Petersburg, Russia",RU
+watchpoint-gibraltar,Watchpoint: Gibraltar,escort,Gibraltar,GI
+workshop-chamber,Workshop Chamber,workshop,Earth,
+workshop-expanse,Workshop Expanse,workshop,Earth,
+workshop-green-screen,Workshop Green Screen,workshop,Earth,
+workshop-island,Workshop Island,workshop,Earth,

@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     # Profiler to use for debug purposes, disabled by default
     profiler: str | None = None
 
+    # Route path to display as new on the documentation
+    new_route_path: str | None = None
+
     ############
     # RATE LIMITING
     ############

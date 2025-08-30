@@ -154,6 +154,14 @@ def custom_openapi():  # pragma: no cover
         "altText": "OverFast API Logo",
     }
 
+    # If specified, add the "New" badge on new route path
+    if settings.new_route_path and (
+        new_route_config := openapi_schema["paths"].get(settings.new_route_path)
+    ):
+        new_badge = {"name": "New", "color": "#00bfae"}
+        for route_config in new_route_config.values():
+            route_config["x-badges"] = [new_badge]
+
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
