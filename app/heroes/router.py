@@ -67,7 +67,7 @@ async def list_heroes(
     tags=[RouteTag.HEROES],
     summary="Get hero statistics",
     description=(
-        "Get hero statistics usage, filtered by region, role, tier, map, etc. "
+        "Get hero statistics usage, filtered by platform, region, role, etc."
         "Only Role Queue gamemodes are concerned."
         f"<br />**Cache TTL : {GetHeroStatsSummaryController.get_human_readable_timeout()}.**"
     ),
@@ -98,8 +98,8 @@ async def get_hero_stats(
     role: Annotated[
         Role | None, Query(title="Role filter", examples=["support"])
     ] = None,
-    map_key: Annotated[
-        MapKey | None, Query(title="Map key filter", examples=["hanaoka"])
+    map_: Annotated[
+        MapKey | None, Query(alias="map", title="Map key filter", examples=["hanaoka"])
     ] = None,
     competitive_division: Annotated[
         CompetitiveDivisionFilter | None,
@@ -112,16 +112,16 @@ async def get_hero_stats(
         str,
         Query(
             title="Ordering field and the way it's arranged (asc[ending]/desc[ending])",
-            pattern=r"^(name|winrate|pickrate):(asc|desc)$",
+            pattern=r"^(hero|winrate|pickrate):(asc|desc)$",
         ),
-    ] = "name:asc",
+    ] = "hero:asc",
 ) -> list[HeroStatsSummary]:
     return await GetHeroStatsSummaryController(request, response).process_request(
         platform=platform,
         gamemode=gamemode,
         region=region,
         role=role,
-        map_key=map_key,
+        map=map_,
         competitive_division=competitive_division,
         order_by=order_by,
     )

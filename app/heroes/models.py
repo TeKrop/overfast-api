@@ -214,8 +214,9 @@ class HeroParserErrorMessage(BaseModel):
 
 
 class HeroStatsSummary(BaseModel):
-    key: HeroKey = Field(..., description="Key name of the hero")
-    name: str = Field(..., description="Name of the hero", examples=["Ana"])
+    hero: HeroKey = Field(
+        ..., description="Hero key used to identify Overwatch heroes in general"
+    )
     pickrate: float = Field(..., description="Pickrate (in percent)", ge=0.0, le=100.0)
     winrate: float = Field(..., description="Winrate (in percent)", ge=0.0, le=100.0)
 

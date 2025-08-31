@@ -37,7 +37,7 @@ class HeroStatsSummaryParser(JSONParser):
         self.region_filter: str = kwargs["region"].capitalize()
 
         # Optional query params
-        self.map_key_filter: str = kwargs.get("map_key") or "all-maps"
+        self.map_filter: str = kwargs.get("map") or "all-maps"
         self.role_filter: str | None = kwargs.get("role")
         self.competitive_division_filter: str = (
             kwargs.get("competitive_division") or "all"
@@ -75,11 +75,11 @@ class HeroStatsSummaryParser(JSONParser):
         Raises:
             ParserBlizzardError: If the selected map does not match the gamemode.
         """
-        if self.map_key_filter != self.json_data["selected"]["map"]:
+        if self.map_filter != self.json_data["selected"]["map"]:
             raise ParserBlizzardError(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 message=(
-                    f"Selected map '{self.map_key_filter}' is not compatible with '{self.gamemode}' gamemode."
+                    f"Selected map '{self.map_filter}' is not compatible with '{self.gamemode}' gamemode."
                 ),
             )
 
@@ -111,8 +111,7 @@ class HeroStatsSummaryParser(JSONParser):
         """
         return [
             {
-                "key": rate["id"],
-                "name": rate["hero"]["name"],
+                "hero": rate["id"],
                 "pickrate": rate["cells"]["pickrate"],
                 "winrate": rate["cells"]["winrate"],
             }
@@ -151,7 +150,7 @@ class HeroStatsSummaryParser(JSONParser):
             "input": self.platform_filter,
             "rq": self.gamemode_filter,
             "region": self.region_filter,
-            "map": self.map_key_filter,
+            "map": self.map_filter,
         }
 
         if kwargs["gamemode"] == PlayerGamemode.COMPETITIVE:

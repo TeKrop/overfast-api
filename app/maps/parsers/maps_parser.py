@@ -11,6 +11,7 @@ class MapsParser(CSVParser):
     def parse_data(self) -> list[dict]:
         return [
             {
+                "key": map_dict["key"],
                 "name": map_dict["name"],
                 "screenshot": self.get_static_url(map_dict["key"]),
                 "gamemodes": map_dict["gamemodes"].split(","),
