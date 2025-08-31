@@ -1,4 +1,4 @@
-"""Search Data Parser module"""
+"""Hero Stats Summary Parser module"""
 
 from typing import ClassVar
 
@@ -11,7 +11,7 @@ from app.players.enums import PlayerGamemode, PlayerPlatform
 
 
 class HeroStatsSummaryParser(JSONParser):
-    """Static Data Parser class"""
+    """Hero Stats Summary Parser class"""
 
     request_headers_headers: ClassVar[dict] = JSONParser.request_headers | {
         "X-Requested-With": "XMLHttpRequest"

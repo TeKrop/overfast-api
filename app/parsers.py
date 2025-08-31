@@ -113,7 +113,7 @@ class APIParser(AbstractParser):
         response = await self.overfast_client.get(
             url=self.blizzard_url,
             headers=self.request_headers,
-            params=self.blizzard_query_params
+            params=self.blizzard_query_params,
         )
         if response.status_code not in self.valid_http_codes:
             raise self.overfast_client.blizzard_response_error_from_response(response)
@@ -133,7 +133,7 @@ class APIParser(AbstractParser):
         locale = kwargs.get("locale") or Locale.ENGLISH_US
         return f"{settings.blizzard_host}/{locale}{self.root_path}"
 
-    def get_blizzard_query_params(self, **kwargs) -> dict:
+    def get_blizzard_query_params(self, **_) -> dict:
         """Query params to use when calling Blizzard URL. Defaults to empty dict"""
         return {}
 
