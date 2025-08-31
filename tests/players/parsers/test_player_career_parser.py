@@ -156,14 +156,14 @@ async def test_player_career_parser_parsing_error_attribute_error(
                 Mock(status_code=status.HTTP_200_OK, text=player_attr_error),
             ],
         ),
-        pytest.raises(ParserParsingError) as error,
+        pytest.raises(
+            ParserParsingError,
+            match=re.escape(
+                "AttributeError(\"'NoneType' object has no attribute 'css_first'\")"
+            ),
+        ),
     ):
         await player_career_parser.parse()
-
-    assert (
-        error.value.message
-        == "AttributeError(\"'NoneType' object has no attribute 'css_first'\")"
-    )
 
 
 @pytest.mark.parametrize(
@@ -196,8 +196,6 @@ async def test_player_career_parser_parsing_error_key_error(
                 Mock(status_code=status.HTTP_200_OK, text=player_key_error),
             ],
         ),
-        pytest.raises(ParserParsingError) as error,
+        pytest.raises(ParserParsingError, match=re.escape("KeyError('src')")),
     ):
         await player_career_parser.parse()
-
-    assert error.value.message == "KeyError('src')"

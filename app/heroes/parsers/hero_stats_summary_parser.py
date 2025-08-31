@@ -35,6 +35,7 @@ class HeroStatsSummaryParser(JSONParser):
         self.gamemode = kwargs["gamemode"]
         self.gamemode_filter: str = self.gamemode_mapping[self.gamemode]
         self.region_filter: str = kwargs["region"].capitalize()
+        self.order_by: str = kwargs["order_by"]
 
         # Optional query params
         self.map_filter: str = kwargs.get("map") or "all-maps"
@@ -42,7 +43,6 @@ class HeroStatsSummaryParser(JSONParser):
         self.competitive_division_filter: str = (
             kwargs.get("competitive_division") or "all"
         ).capitalize()
-        self.order_by: str | None = kwargs.get("order_by")
 
         super().__init__(**kwargs)
 

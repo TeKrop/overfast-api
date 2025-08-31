@@ -1,0 +1,698 @@
+{
+    "rates": [
+        {
+            "id": "ana",
+            "cells": {
+                "name": "Ana",
+                "pickrate": 22.3,
+                "winrate": 43.1
+            },
+            "hero": {
+                "color": "48699eff",
+                "name": "Ana",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/3429c394716364bbef802180e9763d04812757c205e1b4568bc321772096ed86.png",
+                "role": "SUPPORT",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt8cf279e9b3126ef8/dark_circle_support.svg"
+            }
+        },
+        {
+            "id": "ashe",
+            "cells": {
+                "name": "Ashe",
+                "pickrate": 28.9,
+                "winrate": 55.1
+            },
+            "hero": {
+                "color": "3e3c3aff",
+                "name": "Ashe",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/8dc2a024c9b7d95c7141b2ef065590dbc8d9018d12ad15f76b01923986702228.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "baptiste",
+            "cells": {
+                "name": "Baptiste",
+                "pickrate": 47.8,
+                "winrate": 57.4
+            },
+            "hero": {
+                "color": "28a5c3ff",
+                "name": "Baptiste",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/f979896f74ba22db2a92a85ae1260124ab0a26665957a624365e0f96e5ac5b5c.png",
+                "role": "SUPPORT",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt8cf279e9b3126ef8/dark_circle_support.svg"
+            }
+        },
+        {
+            "id": "bastion",
+            "cells": {
+                "name": "Bastion",
+                "pickrate": 2.7,
+                "winrate": 57
+            },
+            "hero": {
+                "color": "5b7351ff",
+                "name": "Bastion",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/4d715f722c42215072b5dd0240904aaed7b5285df0b2b082d0a7f1865b5ea992.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "brigitte",
+            "cells": {
+                "name": "Brigitte",
+                "pickrate": 25.2,
+                "winrate": 46.8
+            },
+            "hero": {
+                "color": "72332aff",
+                "name": "Brigitte",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/48392820c6976ee1cd8dde13e71df85bf15560083ee5c8658fe7c298095d619a.png",
+                "role": "SUPPORT",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt8cf279e9b3126ef8/dark_circle_support.svg"
+            }
+        },
+        {
+            "id": "cassidy",
+            "cells": {
+                "name": "Cassidy",
+                "pickrate": 21.3,
+                "winrate": 41
+            },
+            "hero": {
+                "color": "a62927ff",
+                "name": "Cassidy",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/6cfb48b5597b657c2eafb1277dc5eef4a07eae90c265fcd37ed798189619f0a5.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "dva",
+            "cells": {
+                "name": "D.Va",
+                "pickrate": 12.9,
+                "winrate": 64.8
+            },
+            "hero": {
+                "color": "fc79bdff",
+                "name": "D.Va",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/ca114f72193e4d58a85c087e9409242f1a31e808cf4058678b8cbf767c2a9a0a.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "doomfist",
+            "cells": {
+                "name": "Doomfist",
+                "pickrate": 7.2,
+                "winrate": 43.5
+            },
+            "hero": {
+                "color": "661e0fff",
+                "name": "Doomfist",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/13750471c693c1a360eb19d5ace229c8599a729cd961d72ebee0e157657b7d18.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "echo",
+            "cells": {
+                "name": "Echo",
+                "pickrate": 1,
+                "winrate": 59.1
+            },
+            "hero": {
+                "color": "89c8ffff",
+                "name": "Echo",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/f086bf235cc6b7f138609594218a8385c8e5f6405a39eceb0deb9afb429619fe.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "freja",
+            "cells": {
+                "name": "Freja",
+                "pickrate": 2.7,
+                "winrate": 46
+            },
+            "hero": {
+                "color": "3f93ffff",
+                "name": "Freja",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/5d1a515607b70f87fd391d0478fb4d706e31a7aebfbcb0edd2cfce04efad256c.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "genji",
+            "cells": {
+                "name": "Genji",
+                "pickrate": 10.4,
+                "winrate": 49.8
+            },
+            "hero": {
+                "color": "80fb00ff",
+                "name": "Genji",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/4edf5ea6d58c449a2aeb619a3fda9fff36a069dfbe4da8bc5d8ec1c758ddb8dc.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "hanzo",
+            "cells": {
+                "name": "Hanzo",
+                "pickrate": 4.5,
+                "winrate": 50.2
+            },
+            "hero": {
+                "color": "b2a865ff",
+                "name": "Hanzo",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/aecd8fa677f0093344fab7ccb7c37516c764df3f5ff339a5a845a030a27ba7e0.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "hazard",
+            "cells": {
+                "name": "Hazard",
+                "pickrate": 7.9,
+                "winrate": 50.7
+            },
+            "hero": {
+                "color": "985ec0ff",
+                "name": "Hazard",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/612ae1e6d28125bd4d4d18c2c4e5b004936c094556239ed24a1c0a806410a020.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "illari",
+            "cells": {
+                "name": "Illari",
+                "pickrate": 32.2,
+                "winrate": 57.2
+            },
+            "hero": {
+                "color": "a58c54ff",
+                "name": "Illari",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/5ea986038f9d307bd4613d5e6f2c4c8e7f15f30ceeeabbdd7a06637a38f17e1f.png",
+                "role": "SUPPORT",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt8cf279e9b3126ef8/dark_circle_support.svg"
+            }
+        },
+        {
+            "id": "junker-queen",
+            "cells": {
+                "name": "Junker Queen",
+                "pickrate": 4.3,
+                "winrate": 45.9
+            },
+            "hero": {
+                "color": "579fcfff",
+                "name": "Junker Queen",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/b4fa5f937fe07ef56c78bca80be9602c062b8d4451692aecff50e2f68c5c6476.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "junkrat",
+            "cells": {
+                "name": "Junkrat",
+                "pickrate": 1.1,
+                "winrate": 33.9
+            },
+            "hero": {
+                "color": "f7b217ff",
+                "name": "Junkrat",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/037e3df083624e5480f8996821287479a375f62b470572a22773da0eaf9441d0.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "juno",
+            "cells": {
+                "name": "Juno",
+                "pickrate": 3.1,
+                "winrate": 56.4
+            },
+            "hero": {
+                "color": "721fa3ff",
+                "name": "Juno",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/585b2d60cbd3c271b6ad5ad0922537af0c6836fab6c89cb9979077f7bb0832b5.png",
+                "role": "SUPPORT",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt8cf279e9b3126ef8/dark_circle_support.svg"
+            }
+        },
+        {
+            "id": "kiriko",
+            "cells": {
+                "name": "Kiriko",
+                "pickrate": 19.7,
+                "winrate": 41.2
+            },
+            "hero": {
+                "color": "d04656ff",
+                "name": "Kiriko",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/088aff2153bdfa426984b1d5c912f6af0ab313f0865a81be0edd114e9a2f79f9.png",
+                "role": "SUPPORT",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt8cf279e9b3126ef8/dark_circle_support.svg"
+            }
+        },
+        {
+            "id": "lifeweaver",
+            "cells": {
+                "name": "Lifeweaver",
+                "pickrate": 3.8,
+                "winrate": 31
+            },
+            "hero": {
+                "color": "e1a5baff",
+                "name": "Lifeweaver",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/39d4514f1b858bc228035b09d5a74ed41f8eeefc9a0d1873570b216ba04334df.png",
+                "role": "SUPPORT",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt8cf279e9b3126ef8/dark_circle_support.svg"
+            }
+        },
+        {
+            "id": "lucio",
+            "cells": {
+                "name": "Lúcio",
+                "pickrate": 8.4,
+                "winrate": 52.7
+            },
+            "hero": {
+                "color": "67c519ff",
+                "name": "Lúcio",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/e2ff2527610a0fbe0c9956f80925123ef3e66c213003e29d37436de30b90e4e1.png",
+                "role": "SUPPORT",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt8cf279e9b3126ef8/dark_circle_support.svg"
+            }
+        },
+        {
+            "id": "mauga",
+            "cells": {
+                "name": "Mauga",
+                "pickrate": 15.2,
+                "winrate": 52.5
+            },
+            "hero": {
+                "color": "db4216ff",
+                "name": "Mauga",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/9ee3f5a62893091d575ec0a0d66df878597086374202c6fc7da2d63320a7d02e.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "mei",
+            "cells": {
+                "name": "Mei",
+                "pickrate": 4.4,
+                "winrate": 43.9
+            },
+            "hero": {
+                "color": "469af0ff",
+                "name": "Mei",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/1533fcb0ee1d3f9586f84b4067c6f63eca3322c1c661f69bfb41cd9e4f4bcc11.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "mercy",
+            "cells": {
+                "name": "Mercy",
+                "pickrate": 10.4,
+                "winrate": 48.5
+            },
+            "hero": {
+                "color": "faf2adff",
+                "name": "Mercy",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/2508ddd39a178d5f6ae993ab43eeb3e7961e5a54a9507e6ae347381193f28943.png",
+                "role": "SUPPORT",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt8cf279e9b3126ef8/dark_circle_support.svg"
+            }
+        },
+        {
+            "id": "moira",
+            "cells": {
+                "name": "Moira",
+                "pickrate": 6,
+                "winrate": 35
+            },
+            "hero": {
+                "color": "804be5ff",
+                "name": "Moira",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/000beeb5606e01497897fa9210dd3b1e78e1159ebfd8afdc9e989047d7d3d08f.png",
+                "role": "SUPPORT",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt8cf279e9b3126ef8/dark_circle_support.svg"
+            }
+        },
+        {
+            "id": "orisa",
+            "cells": {
+                "name": "Orisa",
+                "pickrate": 19.8,
+                "winrate": 56.4
+            },
+            "hero": {
+                "color": "106f04ff",
+                "name": "Orisa",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/71e96294617e81051d120b5d04b491bb1ea40e2933da44d6631aae149aac411d.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "pharah",
+            "cells": {
+                "name": "Pharah",
+                "pickrate": 2.4,
+                "winrate": 62.8
+            },
+            "hero": {
+                "color": "58bcff",
+                "name": "Pharah",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/f8261595eca3e43e3b37cadb8161902cc416e38b7e0caa855f4555001156d814.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "ramattra",
+            "cells": {
+                "name": "Ramattra",
+                "pickrate": 4.2,
+                "winrate": 37.7
+            },
+            "hero": {
+                "color": "7d55c7ff",
+                "name": "Ramattra",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/3e0367155e1940a24da076c6f1f065aacede88dbc323631491aa0cd5a51e0b66.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "reaper",
+            "cells": {
+                "name": "Reaper",
+                "pickrate": 4.2,
+                "winrate": 49.5
+            },
+            "hero": {
+                "color": "5e001aff",
+                "name": "Reaper",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/2edb9af69d987bb503cd31f7013ae693640e692b321a73d175957b9e64394f40.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "reinhardt",
+            "cells": {
+                "name": "Reinhardt",
+                "pickrate": 5.3,
+                "winrate": 48.8
+            },
+            "hero": {
+                "color": "7c8b8cff",
+                "name": "Reinhardt",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/490d2f79f8547d6e364306af60c8184fb8024b8e55809e4cc501126109981a65.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "roadhog",
+            "cells": {
+                "name": "Roadhog",
+                "pickrate": 3.5,
+                "winrate": 42.6
+            },
+            "hero": {
+                "color": "ae6f1cff",
+                "name": "Roadhog",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/72e02e747b66b61fcbc02d35d350770b3ec7cbaabd0a7ca17c0d82743d43a7e8.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "sigma",
+            "cells": {
+                "name": "Sigma",
+                "pickrate": 9.2,
+                "winrate": 54.6
+            },
+            "hero": {
+                "color": "7c8b8cff",
+                "name": "Sigma",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/cd7a4c0a0df8924afb2c9f6df864ed040f20250440c36ca2eb634acf6609c5e4.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "sojourn",
+            "cells": {
+                "name": "Sojourn",
+                "pickrate": 33.3,
+                "winrate": 45.2
+            },
+            "hero": {
+                "color": "d73e2cff",
+                "name": "Sojourn",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a53bf7ad9d2f33aaf9199a00989f86d4ba1f67c281ba550312c7d96e70fec4ea.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "soldier-76",
+            "cells": {
+                "name": "Soldier: 76",
+                "pickrate": 36.6,
+                "winrate": 50
+            },
+            "hero": {
+                "color": "445275ff",
+                "name": "Soldier: 76",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/20b4ef00ed05d6dba75df228241ed528df7b6c9556f04c8070bad1e2f89e0ff5.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "sombra",
+            "cells": {
+                "name": "Sombra",
+                "pickrate": 5,
+                "winrate": 50
+            },
+            "hero": {
+                "color": "5128a9ff",
+                "name": "Sombra",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/bca8532688f01b071806063b9472f1c0f9fc9c7948e6b59e210006e69cec9022.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "symmetra",
+            "cells": {
+                "name": "Symmetra",
+                "pickrate": 4.2,
+                "winrate": 61.1
+            },
+            "hero": {
+                "color": "76b4c9ff",
+                "name": "Symmetra",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/7f2024c5387c9d76d944a5db021c2774d1e9d7cbf39e9b6a35b364d38ea250ac.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "torbjorn",
+            "cells": {
+                "name": "Torbjörn",
+                "pickrate": 1.8,
+                "winrate": 38.3
+            },
+            "hero": {
+                "color": "ba4c3fff",
+                "name": "Torbjörn",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/1309ab1add1cc19189a2c8bc7b1471f88efa1073e9705d2397fdb37d45707d01.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "tracer",
+            "cells": {
+                "name": "Tracer",
+                "pickrate": 22.1,
+                "winrate": 54.1
+            },
+            "hero": {
+                "color": "de7a00ff",
+                "name": "Tracer",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a66413200e934da19540afac965cfe8a2de4ada593d9a52d53108bb28e8bbc9c.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "venture",
+            "cells": {
+                "name": "Venture",
+                "pickrate": 4.5,
+                "winrate": 45.8
+            },
+            "hero": {
+                "color": "79614eff",
+                "name": "Venture",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/5d87623006ccc77578396831d4629f91b5162235a553b3f442e1a43161898e94.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "widowmaker",
+            "cells": {
+                "name": "Widowmaker",
+                "pickrate": 10.6,
+                "winrate": 56
+            },
+            "hero": {
+                "color": "8b3f8fff",
+                "name": "Widowmaker",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a714f1cb33cc91c6b5b3e89ffe7e325b99e7c89cc8e8feced594f81305147efe.png",
+                "role": "DAMAGE",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt052e8b02aef879b0/dark_circle_damage.svg"
+            }
+        },
+        {
+            "id": "winston",
+            "cells": {
+                "name": "Winston",
+                "pickrate": 3.1,
+                "winrate": 44.7
+            },
+            "hero": {
+                "color": "8f92aeff",
+                "name": "Winston",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/bd9c8e634d89488459dfc1aeb21b602fa5c39aa05601a4167682f3a3fed4e0ee.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "wrecking-ball",
+            "cells": {
+                "name": "Wrecking Ball",
+                "pickrate": 4.2,
+                "winrate": 45
+            },
+            "hero": {
+                "color": "e2790aff",
+                "name": "Wrecking Ball",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/5c18e39ce567ee8a84078f775b9f76a2ba891de601c059a3d2b46b61ae4afb42.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "wuyang",
+            "cells": {
+                "name": "Wuyang",
+                "pickrate": 14.5,
+                "winrate": 58.7
+            },
+            "hero": {
+                "color": "4c7fefff",
+                "name": "Wuyang",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/e4157a71bb307b4ca910d901773f43d187c22101c5f4284a0a5f3caba8ec4bdd.png",
+                "role": "SUPPORT",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt8cf279e9b3126ef8/dark_circle_support.svg"
+            }
+        },
+        {
+            "id": "zarya",
+            "cells": {
+                "name": "Zarya",
+                "pickrate": 3.7,
+                "winrate": 42
+            },
+            "hero": {
+                "color": "f65ea6ff",
+                "name": "Zarya",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/8819ba85823136640d8eba2af6fd7b19d46b9ee8ab192a4e06f396d1e5231f7a.png",
+                "role": "TANK",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/bltcb94e9203be4088a/dark_circle_tank.svg"
+            }
+        },
+        {
+            "id": "zenyatta",
+            "cells": {
+                "name": "Zenyatta",
+                "pickrate": 6.7,
+                "winrate": 47.1
+            },
+            "hero": {
+                "color": "fcee5aff",
+                "name": "Zenyatta",
+                "portrait": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/71cabc939c577581f66b952f9c70891db779251e8e70f29de3c7bf494edacfe4.png",
+                "role": "SUPPORT",
+                "roleIcon": "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt8cf279e9b3126ef8/dark_circle_support.svg"
+            }
+        }
+    ],
+    "extrema": {
+        "all": {
+            "maxwr": 64.8,
+            "minwr": 31,
+            "maxpr": 47.8,
+            "minpr": 1
+        },
+        "tank": {
+            "maxwr": 64.8,
+            "minwr": 37.7,
+            "maxpr": 19.8,
+            "minpr": 3.1
+        },
+        "damage": {
+            "maxwr": 62.8,
+            "minwr": 33.9,
+            "maxpr": 36.6,
+            "minpr": 1
+        },
+        "support": {
+            "maxwr": 58.7,
+            "minwr": 31,
+            "maxpr": 47.8,
+            "minpr": 3.1
+        }
+    },
+    "selected": {
+        "input": "Console",
+        "map": "all-maps",
+        "region": "Europe",
+        "role": "All",
+        "rq": "1",
+        "tier": "Master"
+    }
+}

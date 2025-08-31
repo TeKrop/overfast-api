@@ -25,13 +25,13 @@ def test_get_heroes(client: TestClient):
 
 @pytest.mark.parametrize("role", [r.value for r in Role])
 def test_get_heroes_filter_by_role(client: TestClient, role: Role):
-    response = client.get(f"/heroes?role={role}")
+    response = client.get("/heroes", params={"role": role})
     assert response.status_code == status.HTTP_200_OK
     assert all(hero["role"] == role for hero in response.json())
 
 
 def test_get_heroes_invalid_role(client: TestClient):
-    response = client.get("/heroes?role=invalid")
+    response = client.get("/heroes", params={"role": "invalid"})
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 

@@ -13,11 +13,11 @@ def test_get_maps(client: TestClient):
 
 @pytest.mark.parametrize("gamemode", [g.value for g in MapGamemode])
 def test_get_maps_filter_by_gamemode(client: TestClient, gamemode: MapGamemode):
-    response = client.get(f"/maps?gamemode={gamemode}")
+    response = client.get("/maps", params={"gamemode": gamemode})
     assert response.status_code == status.HTTP_200_OK
     assert all(gamemode in map_dict["gamemodes"] for map_dict in response.json())
 
 
 def test_get_maps_invalid_gamemode(client: TestClient):
-    response = client.get("/maps?gamemode=invalid")
+    response = client.get("/maps", params={"gamemode": "invalid"})
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
