@@ -4,13 +4,20 @@ from pydantic import BaseModel, Field, HttpUrl
 
 from app.gamemodes.enums import MapGamemode
 
+from .enums import MapKey
+
 
 class Map(BaseModel):
-    name: str = Field(..., description="Name of the map", examples=["Hanamura"])
+    key: MapKey = Field(
+        ...,
+        description="Key name of the map",
+        examples=["aatlis"],
+    )
+    name: str = Field(..., description="Name of the map", examples=["Aatlis"])
     screenshot: HttpUrl = Field(
         ...,
         description="Screenshot of the map",
-        examples=["https://overfast-api.tekrop.fr/static/maps/hanamura.jpg"],
+        examples=["https://overfast-api.tekrop.fr/static/maps/aatlis.jpg"],
     )
     gamemodes: list[MapGamemode] = Field(
         ...,
@@ -19,7 +26,7 @@ class Map(BaseModel):
     location: str = Field(
         ...,
         description="Location of the map",
-        examples=["Tokyo, Japan"],
+        examples=["Morocco"],
     )
     country_code: str | None = Field(
         ...,
@@ -28,5 +35,5 @@ class Map(BaseModel):
         description=(
             "Country Code of the location of the map. If not defined, it's null."
         ),
-        examples=["JP"],
+        examples=["MA"],
     )

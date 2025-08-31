@@ -33,7 +33,8 @@ def _setup_player_stats_test(
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats(client: TestClient, uri: str):
     response = client.get(
-        f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}"
+        f"/players/TeKrop-2217{uri}",
+        params={"gamemode": PlayerGamemode.QUICKPLAY},
     )
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json().keys()) > 0
@@ -43,7 +44,11 @@ def test_get_player_stats(client: TestClient, uri: str):
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_valid_hero(client: TestClient, uri: str):
     response = client.get(
-        f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}&hero={HeroKeyCareerFilter.ANA}"
+        f"/players/TeKrop-2217{uri}",
+        params={
+            "gamemode": PlayerGamemode.QUICKPLAY,
+            "hero": HeroKeyCareerFilter.ANA,
+        },
     )
     assert response.status_code == status.HTTP_200_OK
     assert set(response.json().keys()) == {HeroKeyCareerFilter.ANA}
@@ -53,7 +58,11 @@ def test_get_player_stats_valid_hero(client: TestClient, uri: str):
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_invalid_hero(client: TestClient, uri: str):
     response = client.get(
-        f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}&hero=invalid_hero"
+        f"/players/TeKrop-2217{uri}",
+        params={
+            "gamemode": PlayerGamemode.QUICKPLAY,
+            "hero": "invalid_hero",
+        },
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -68,7 +77,10 @@ def test_get_player_stats_missing_gamemode(client: TestClient, uri: str):
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_invalid_gamemode(client: TestClient, uri: str):
-    response = client.get(f"/players/TeKrop-2217{uri}?gamemode=invalid_gamemode")
+    response = client.get(
+        f"/players/TeKrop-2217{uri}",
+        params={"gamemode": "invalid_gamemode"},
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -76,7 +88,11 @@ def test_get_player_stats_invalid_gamemode(client: TestClient, uri: str):
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_valid_platform(client: TestClient, uri: str):
     response = client.get(
-        f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}&platform={PlayerPlatform.PC}"
+        f"/players/TeKrop-2217{uri}",
+        params={
+            "gamemode": PlayerGamemode.QUICKPLAY,
+            "platform": PlayerPlatform.PC,
+        },
     )
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json().keys()) > 0
@@ -86,7 +102,11 @@ def test_get_player_stats_valid_platform(client: TestClient, uri: str):
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_empty_platform(client: TestClient, uri: str):
     response = client.get(
-        f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}&platform={PlayerPlatform.CONSOLE}"
+        f"/players/TeKrop-2217{uri}",
+        params={
+            "gamemode": PlayerGamemode.QUICKPLAY,
+            "platform": PlayerPlatform.CONSOLE,
+        },
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {}
@@ -96,7 +116,11 @@ def test_get_player_stats_empty_platform(client: TestClient, uri: str):
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_invalid_platform(client: TestClient, uri: str):
     response = client.get(
-        f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}&platform=invalid_platform"
+        f"/players/TeKrop-2217{uri}",
+        params={
+            "gamemode": PlayerGamemode.QUICKPLAY,
+            "platform": "invalid_platform",
+        },
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -112,7 +136,8 @@ def test_get_player_stats_blizzard_error(client: TestClient, uri: str):
         ),
     ):
         response = client.get(
-            f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}",
+            f"/players/TeKrop-2217{uri}",
+            params={"gamemode": PlayerGamemode.QUICKPLAY},
         )
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
@@ -132,7 +157,8 @@ def test_get_player_stats_blizzard_timeout(client: TestClient, uri: str):
         ),
     ):
         response = client.get(
-            f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}",
+            f"/players/TeKrop-2217{uri}",
+            params={"gamemode": PlayerGamemode.QUICKPLAY},
         )
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
@@ -155,7 +181,8 @@ def test_get_player_stats_blizzard_forbidden_error(client: TestClient, uri: str)
         ),
     ):
         response = client.get(
-            f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}",
+            f"/players/TeKrop-2217{uri}",
+            params={"gamemode": PlayerGamemode.QUICKPLAY},
         )
 
     assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
@@ -191,7 +218,8 @@ def test_get_player_stats_internal_error(
         },
     ):
         response = client.get(
-            f"/players/TeKrop-2217{uri}?gamemode={PlayerGamemode.QUICKPLAY}",
+            f"/players/TeKrop-2217{uri}",
+            params={"gamemode": PlayerGamemode.QUICKPLAY},
         )
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert response.json() == {"error": settings.internal_server_error_message}

@@ -13,9 +13,10 @@ async def test_maps_page_parsing(maps_parser: MapsParser):
 
     # Just check the format of the first map in the list
     assert maps_parser.data[0] == {
-        "name": "Hanamura",
-        "screenshot": "https://overfast-api.tekrop.fr/static/maps/hanamura.jpg",
-        "gamemodes": ["assault"],
-        "location": "Tokyo, Japan",
-        "country_code": "JP",
+        "key": "aatlis",
+        "name": "Aatlis",
+        "screenshot": "https://overfast-api.tekrop.fr/static/maps/aatlis.jpg",
+        "gamemodes": ["flashpoint"],
+        "location": "Morocco",
+        "country_code": "MA",
     }

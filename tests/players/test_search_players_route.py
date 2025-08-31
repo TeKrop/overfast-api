@@ -30,7 +30,7 @@ def test_search_players_no_result(client: TestClient):
         "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text="[]", json=list),
     ):
-        response = client.get("/players?name=Player")
+        response = client.get("/players", params={"name": "Player"})
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"total": 0, "results": []}
@@ -48,7 +48,7 @@ def test_search_players_blizzard_error(client: TestClient, status_code: int, tex
         "httpx.AsyncClient.get",
         return_value=Mock(status_code=status_code, text=text),
     ):
-        response = client.get("/players?name=Player")
+        response = client.get("/players", params={"name": "Player"})
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
@@ -64,7 +64,7 @@ def test_search_players_blizzard_timeout(client: TestClient):
             "Read timed out. (read timeout=10)",
         ),
     ):
-        response = client.get("/players?name=Player")
+        response = client.get("/players", params={"name": "Player"})
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
@@ -83,7 +83,7 @@ def test_get_roles_blizzard_forbidden_error(client: TestClient):
             text="403 Forbidden",
         ),
     ):
-        response = client.get("/players?name=Player")
+        response = client.get("/players", params={"name": "Player"})
 
     assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
     assert response.json() == {
@@ -99,7 +99,7 @@ def test_search_players(client: TestClient, search_data_json_data: dict):
     cache_manager = CacheManager()
     cache_manager.update_unlock_data_cache(search_data_json_data)
 
-    response = client.get("/players?name=Test")
+    response = client.get("/players", params={"name": "Test"})
     assert response.status_code == status.HTTP_200_OK
 
     json_response = response.json()
@@ -128,7 +128,14 @@ def test_search_players_with_offset_and_limit(
     cache_manager = CacheManager()
     cache_manager.update_unlock_data_cache(search_data_json_data)
 
-    response = client.get(f"/players?name=Test&offset={offset}&limit={limit}")
+    response = client.get(
+        "/players",
+        params={
+            "name": "Test",
+            "offset": offset,
+            "limit": limit,
+        },
+    )
     assert response.status_code == status.HTTP_200_OK
 
     json_response = response.json()
@@ -148,7 +155,13 @@ def test_search_players_ordering(
     cache_manager = CacheManager()
     cache_manager.update_unlock_data_cache(search_data_json_data)
 
-    response = client.get(f"/players?name=Test&order_by={order_by}")
+    response = client.get(
+        "/players",
+        params={
+            "name": "Test",
+            "order_by": order_by,
+        },
+    )
     assert response.status_code == status.HTTP_200_OK
 
     order_field, order_arrangement = order_by.split(":")
@@ -165,6 +178,6 @@ def test_search_players_internal_error(client: TestClient):
         "app.players.controllers.search_players_controller.SearchPlayersController.process_request",
         return_value={"invalid_key": "invalid_value"},
     ):
-        response = client.get("/players?name=Test")
+        response = client.get("/players", params={"name": "Test"})
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert response.json() == {"error": settings.internal_server_error_message}
