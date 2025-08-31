@@ -364,8 +364,8 @@
             "id": "orisa",
             "cells": {
                 "name": "Orisa",
-                "pickrate": 19.8,
-                "winrate": 56.4
+                "pickrate": -1,
+                "winrate": -1
             },
             "hero": {
                 "color": "106f04ff",

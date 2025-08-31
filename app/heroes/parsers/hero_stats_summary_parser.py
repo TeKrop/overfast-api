@@ -112,8 +112,8 @@ class HeroStatsSummaryParser(JSONParser):
         return [
             {
                 "hero": rate["id"],
-                "pickrate": rate["cells"]["pickrate"],
-                "winrate": rate["cells"]["winrate"],
+                "pickrate": self.get_rate_value(rate["cells"]["pickrate"]),
+                "winrate": self.get_rate_value(rate["cells"]["winrate"]),
             }
             for rate in hero_stats_data
         ]
@@ -157,3 +157,13 @@ class HeroStatsSummaryParser(JSONParser):
             blizzard_query_params["tier"] = self.competitive_division_filter
 
         return blizzard_query_params
+
+    @staticmethod
+    def get_rate_value(rate: float) -> float:
+        """
+        Get the output rate value to display to users.
+
+        Whenever data isn't available for some reason, data from Blizzard will be -1
+        We're converting it to zero in order to be coherent regarding API return values.
+        """
+        return rate if rate != -1 else 0.0
