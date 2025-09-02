@@ -19,7 +19,7 @@ class GamemodeDetails(BaseModel):
         ...,
         description="Icon URL of the gamemode",
         examples=[
-            "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt054b513cd6e95acf/62fd5b4a8972f93d1e325243/Push.svg",
+            "https://overfast-api.tekrop.fr/static/gamemodes/push-icon.svg",
         ],
     )
     description: str = Field(
@@ -33,6 +33,6 @@ class GamemodeDetails(BaseModel):
         ...,
         description="URL of an example screenshot of a map for the gamemode",
         examples=[
-            "https://blz-contentstack-images.akamaized.net/v3/assets/blt9c12f249ac15c7ec/blt93eefb6e91347639/62fc2d9eda42240856c1459c/Toronto_Push.jpg",
+            "https://overfast-api.tekrop.fr/static/gamemodes/push.avif",
         ],
     )
