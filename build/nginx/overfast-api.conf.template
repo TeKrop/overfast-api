@@ -13,6 +13,8 @@ upstream appbackend {
 # Use Docker's internal DNS resolver for Lua script
 resolver 127.0.0.11 valid=30s;
 
+server_tokens off;
+
 server {
   listen 80;
 
