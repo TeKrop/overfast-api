@@ -15,7 +15,7 @@ dependencies = [
     "valkey[libvalkey]==6.1.*",
     "pydantic==2.11.*",
     "pydantic-settings==2.10.*",
-    "selectolax==0.3.29",
+    "selectolax==0.3.*",
 ]
 
 [project.urls]
@@ -31,7 +31,7 @@ dev-dependencies = [
     "ipdb==0.13.*",
     "pytest==8.4.*",
     "pytest-asyncio==1.1.*",
-    "pytest-cov==6.2.*",
+    "pytest-cov==6.3.*",
     "pytest-randomly==3.16.*",
     "pytest-xdist==3.8.*",
     "ruff==0.12.*",
