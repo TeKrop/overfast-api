@@ -22,4 +22,5 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          script_path: ${{ secrets.DEPLOY_SCRIPT_PATH }}
+          script: |
+            bash "${{ secrets.DEPLOY_SCRIPT_PATH }}"
