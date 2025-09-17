@@ -32,7 +32,7 @@ class PlayerSearchParser(JSONParser):
 
         # Transform into PlayerSearchResult format
         logger.info("Applying transformation..")
-        players = await self.apply_transformations(players)
+        players = self.apply_transformations(players)
 
         # Apply ordering
         logger.info("Applying ordering..")
@@ -56,7 +56,7 @@ class PlayerSearchParser(JSONParser):
         battletag = self.search_nickname.replace("-", "#")
         return [player for player in self.json_data if player["battleTag"] == battletag]
 
-    async def apply_transformations(self, players: Iterable[dict]) -> list[dict]:
+    def apply_transformations(self, players: Iterable[dict]) -> list[dict]:
         """Apply transformations to found players in order to return the data
         in the OverFast API format. We'll also retrieve some data from parsers.
         """
