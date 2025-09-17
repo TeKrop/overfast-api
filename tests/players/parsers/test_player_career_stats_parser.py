@@ -21,15 +21,12 @@ async def test_player_page_parsing_with_filters(
     player_career_stats_parser: PlayerCareerStatsParser,
     player_html_data: str,
     player_search_response_mock: Mock,
-    blizzard_unlock_response_mock: Mock,
 ):
     with patch(
         "httpx.AsyncClient.get",
         side_effect=[
             # Players search call first
             player_search_response_mock,
-            # Unlocks response
-            blizzard_unlock_response_mock,
             # Player profile page
             Mock(status_code=status.HTTP_200_OK, text=player_html_data),
         ],

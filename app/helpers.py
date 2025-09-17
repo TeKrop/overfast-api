@@ -1,6 +1,7 @@
 """Parser Helpers module"""
 
 import csv
+import traceback
 from functools import cache
 from pathlib import Path
 
@@ -65,9 +66,10 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
 
     # Log the critical error
     logger.critical(
-        "Internal server error for URL {} : {}",
+        "Internal server error for URL {} : {}\n{}",
         url,
         str(error),
+        traceback.format_stack(),
     )
 
     # If we're using a profiler, it means we're debugging, raise the error

@@ -88,18 +88,6 @@ class CompetitiveDivision(StrEnum):
     ULTIMATE = "ultimate"
 
 
-class UnlockDataType(StrEnum):
-    NAMECARD = "namecard"
-    PORTRAIT = "portrait"
-    TITLE = "title"
-
-    # Special value to only retrieve last_updated_at value
-    LAST_UPDATED_AT = "lastUpdatedAt"
-
-    # Special value to retrieve all the player data from search endpoint
-    SUMMARY = "summary"
-
-
 class PlayerRegion(StrEnum):
     EUROPE = "europe"
     AMERICAS = "americas"

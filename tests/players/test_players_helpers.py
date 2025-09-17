@@ -258,10 +258,23 @@ def test_key_to_label(key: str, result_label: str):
 @pytest.mark.parametrize(
     ("title", "resulting_title"),
     [
-        (None, None),
-        ("No Title", None),
-        ("Philosopher", "Philosopher"),
+        ("", None),
+        (
+            {
+                "en_US": "Extraterrestrial",
+                "es_MX": "Extraterrestre",
+                "pt_BR": "Extraterrestre",
+                "de_DE": "Außerirdischer",
+                "en_GB": "Extraterrestrial",
+                "es_ES": "Extraterrestre",
+                "fr_FR": "Extraterrestre",
+                "it_IT": "Extraterrestre",
+                "pl_PL": "Kosmita",
+                "pt_PT": "Extraterrestre",
+            },
+            "Extraterrestrial",
+        ),
     ],
 )
-def test_get_player_title(title: str | None, resulting_title: str | None):
+def test_get_player_title(title: str | dict, resulting_title: str | None):
     assert helpers.get_player_title(title) == resulting_title

@@ -78,6 +78,12 @@ class PlayerShort(BaseModel):
         ),
         examples=[1704209332],
     )
+    is_public: bool | None = Field(
+        None,
+        title="Is public",
+        description="Whether or not the player profile is public",
+        examples=[True],
+    )
 
 
 class PlayerSearchResult(BaseModel):

@@ -39,8 +39,6 @@ services:
     env_file: ${APP_VOLUME_PATH:-.}/.env
     # Run as privileged to allow the container to change the vm.overcommit_memory setting
     privileged: true
-    volumes:
-      - ${APP_VOLUME_PATH}/valkey-data:/data
     restart: always
     deploy:
       resources:

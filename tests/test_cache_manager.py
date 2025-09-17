@@ -86,14 +86,3 @@ def test_valkey_connection_error(cache_manager: CacheManager):
             settings.heroes_path_cache_timeout,
         )
         assert cache_manager.get_api_cache(heroes_cache_key) is None
-
-
-def test_search_data_update_and_get(cache_manager: CacheManager):
-    assert cache_manager.get_unlock_data_cache("key") != "value"
-
-    # Insert search data only for one data type
-    cache_manager.update_unlock_data_cache({"key": "value"})
-
-    # Check we can retrieve the data by querying for this type
-    assert cache_manager.get_unlock_data_cache("key") == "value"
-    assert not cache_manager.get_unlock_data_cache("other_key")
