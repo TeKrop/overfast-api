@@ -123,22 +123,6 @@ class Settings(BaseSettings):
     hero_stats_cache_timeout: int = 3600
 
     ############
-    # UNLOCKS DATA (AVATARS, NAMECARDS, TITLES)
-    ############
-
-    # Cache key for unlock data cache in Valkey.
-    unlock_data_cache_key: str = "unlock-data-cache"
-
-    # URI of the page where unlock data can be retrieved
-    unlock_data_path: str = "/search/unlocks/"
-
-    # Batch size to use when requesting unlock data
-    unlock_data_batch_size: int = 50
-
-    # Keys that should be retrieved for unlocks
-    unlock_keys: set[str] = {"portrait", "namecard", "title"}
-
-    ############
     # BLIZZARD
     ############
 

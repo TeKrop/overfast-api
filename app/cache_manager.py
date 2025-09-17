@@ -123,20 +123,6 @@ class CacheManager(metaclass=Singleton):
         )
 
     @valkey_connection_handler
-    def get_unlock_data_cache(self, cache_key: str) -> str | None:
-        data_cache = self.valkey_server.hget(settings.unlock_data_cache_key, cache_key)
-        return data_cache.decode("utf-8") if data_cache else None
-
-    @valkey_connection_handler
-    def update_unlock_data_cache(self, unlock_data: dict[str, str]) -> None:
-        for data_key, data_value in unlock_data.items():
-            self.valkey_server.hset(
-                settings.unlock_data_cache_key,
-                data_key,
-                data_value,
-            )
-
-    @valkey_connection_handler
     def is_being_rate_limited(self) -> bool:
         return self.valkey_server.exists(settings.blizzard_rate_limit_key)
 

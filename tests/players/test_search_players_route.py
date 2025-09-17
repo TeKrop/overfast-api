@@ -5,17 +5,14 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
-from app.cache_manager import CacheManager
 from app.config import settings
 
 
 @pytest.fixture(autouse=True)
-def _setup_search_players_test(
-    player_search_response_mock: Mock, blizzard_unlock_response_mock: Mock
-):
+def _setup_search_players_test(player_search_response_mock: Mock):
     with patch(
         "httpx.AsyncClient.get",
-        side_effect=[player_search_response_mock, blizzard_unlock_response_mock],
+        return_value=player_search_response_mock,
     ):
         yield
 
@@ -94,11 +91,7 @@ def test_get_roles_blizzard_forbidden_error(client: TestClient):
     }
 
 
-def test_search_players(client: TestClient, search_data_json_data: dict):
-    # Add search data in cache as if we launched the server
-    cache_manager = CacheManager()
-    cache_manager.update_unlock_data_cache(search_data_json_data)
-
+def test_search_players(client: TestClient):
     response = client.get("/players", params={"name": "Test"})
     assert response.status_code == status.HTTP_200_OK
 
@@ -120,14 +113,9 @@ def test_search_players(client: TestClient, search_data_json_data: dict):
 )
 def test_search_players_with_offset_and_limit(
     client: TestClient,
-    search_data_json_data: dict,
     offset: int,
     limit: int,
 ):
-    # Add search data in cache as if we launched the server
-    cache_manager = CacheManager()
-    cache_manager.update_unlock_data_cache(search_data_json_data)
-
     response = client.get(
         "/players",
         params={
@@ -148,13 +136,8 @@ def test_search_players_with_offset_and_limit(
 @pytest.mark.parametrize("order_by", ["name:asc", "name:desc"])
 def test_search_players_ordering(
     client: TestClient,
-    search_data_json_data: dict,
     order_by: str,
 ):
-    # Add search data in cache as if we launched the server
-    cache_manager = CacheManager()
-    cache_manager.update_unlock_data_cache(search_data_json_data)
-
     response = client.get(
         "/players",
         params={

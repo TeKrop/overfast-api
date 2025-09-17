@@ -66,7 +66,7 @@ class BasePlayerParser(HTMLParser):
 
     async def __retrieve_player_summary_data(self) -> dict | None:
         """Call Blizzard search page with user name to
-        check last_updated_at and retrieve unlock values
+        check last_updated_at and retrieve summary values
         """
         player_summary_parser = SearchDataParser(player_id=self.player_id)
         await player_summary_parser.parse()

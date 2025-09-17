@@ -163,29 +163,13 @@ class PlayerCareerParser(BasePlayerParser):
 
         return {
             "username": summary_div.css_first("h1.Profile-player--name").text(),
-            "avatar": (
-                summary_div.css_first("img.Profile-player--portrait").attributes.get(
-                    "src"
-                )
-            ),
-            "namecard": self.player_data["summary"]["namecard"],
-            "title": self.__get_title(profile_div),
+            "avatar": self.player_data["summary"]["avatar"],
+            "namecard": self.player_data["summary"].get("namecard"),
+            "title": get_player_title(self.player_data["summary"]["title"]),
             "endorsement": self.__get_endorsement(progression_div),
             "competitive": self.__get_competitive_ranks(progression_div),
             "last_updated_at": self.player_data["summary"]["lastUpdated"],
         }
-
-    @staticmethod
-    def __get_title(profile_div: LexborNode) -> str | None:
-        # We return None is there isn't any player title div
-        if not (title_tag := profile_div.css_first("h2.Profile-player--title")):
-            return None
-
-        # Retrieve the title text
-        title = title_tag.text() or None
-
-        # Special case : the "no title" means there is no title
-        return get_player_title(title)
 
     @staticmethod
     def __get_endorsement(progression_div: LexborNode) -> dict | None:

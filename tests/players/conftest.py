@@ -19,11 +19,6 @@ def search_players_blizzard_json_data() -> list[dict]:
 
 
 @pytest.fixture(scope="package")
-def blizzard_unlock_json_data() -> list[dict]:
-    return read_json_file("blizzard_unlock_data.json")
-
-
-@pytest.fixture(scope="package")
 def search_data_json_data() -> list:
     return read_json_file("formatted_search_data.json")
 
@@ -34,13 +29,4 @@ def player_search_response_mock(search_players_blizzard_json_data: list[dict]) -
         status_code=status.HTTP_200_OK,
         text=json.dumps(search_players_blizzard_json_data),
         json=lambda: search_players_blizzard_json_data,
-    )
-
-
-@pytest.fixture(scope="package")
-def blizzard_unlock_response_mock(blizzard_unlock_json_data: list[dict]) -> Mock:
-    return Mock(
-        status_code=status.HTTP_200_OK,
-        text=json.dumps(blizzard_unlock_json_data),
-        json=lambda: blizzard_unlock_json_data,
     )
