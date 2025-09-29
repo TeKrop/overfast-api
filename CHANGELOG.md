@@ -2,6 +2,32 @@
 
 <!-- version list -->
 
+## v3.23.0 (2025-09-29)
+
+### Build System
+
+- **deps**: Bump pydantic-settings from 2.10.1 to 2.11.0
+  ([#300](https://github.com/TeKrop/overfast-api/pull/300),
+  [`ef99174`](https://github.com/TeKrop/overfast-api/commit/ef991749da7d304aa38ef42909a7d74b52cccce1))
+
+- **deps**: Bump selectolax from 0.3.34 to 0.4.0
+  ([#301](https://github.com/TeKrop/overfast-api/pull/301),
+  [`0da8f45`](https://github.com/TeKrop/overfast-api/commit/0da8f45f831e4c6b3ac0aa3c5a51844df138a50b))
+
+- **deps**: Update fastapi[standard-no-fastapi-cloud-cli] requirement
+  ([#302](https://github.com/TeKrop/overfast-api/pull/302),
+  [`a58750b`](https://github.com/TeKrop/overfast-api/commit/a58750bb63aee6af9278dc1bfcd9601d6c323a77))
+
+- **deps**: Update fastapi[standard-no-fastapi-cloud-cli] requirement
+  ([#298](https://github.com/TeKrop/overfast-api/pull/298),
+  [`f452fb0`](https://github.com/TeKrop/overfast-api/commit/f452fb05d090f422b8e6d0f64ebd8bdd59d7a9e9))
+
+### Features
+
+- Added justfile as makefile alternative ([#303](https://github.com/TeKrop/overfast-api/pull/303),
+  [`22fde57`](https://github.com/TeKrop/overfast-api/commit/22fde5792d636607995ddecbb1b8ffb1efbc3ec3))
+
+
 ## v3.22.1 (2025-09-21)
 
 ### Bug Fixes
