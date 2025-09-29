@@ -30,7 +30,13 @@ The live instance operates with a rate limit applied per second, shared across a
 - Status page : https://uptime-overfast-api.tekrop.fr/
 
 ## 🐋 Run for production
-Running the project is straightforward. Ensure you have `docker` and `docker compose` installed. Next, generate a `.env` file using the provided `.env.dist` template. Finally, execute the following command:
+Running the project is straightforward. Ensure you have `docker` and `docker compose` installed. Next, generate a `.env` file using the provided `.env.dist` template. Finally, if `just` is already installed on your machine, execute the following command :
+
+```shell
+just up
+```
+
+You can also use the `Makefile` alternative :
 
 ```shell
 make up
@@ -39,14 +45,14 @@ make up
 ## 💽 Run as developer
 Same as earlier, ensure you have `docker` and `docker compose` installed, and generate a `.env` file using the provided `.env.dist` template. You can customize the `.env` file according to your requirements to configure the volumes used by the OverFast API.
 
-Then, execute the following commands to launch the dev server :
+Then, execute the following commands to launch the dev server (you can still use the `make` alternative if `just` is not installed on your machine) :
 
 ```shell
-make build                     # Build the images, needed for all further commands
-make start                     # Launch OverFast API (dev mode with autoreload)
-make start TESTING_MODE=true   # Launch OverFast API (testing mode, with reverse proxy)
+just build          # Build the images, needed for all further commands
+just start          # Launch OverFast API (dev mode with autoreload)
+just start_testing  # Launch OverFast API (testing mode, with reverse proxy)
 ```
-The dev server will be running on the port `8000`. Reverse proxy will be running on the port `8080` in testing mode. You can use the `make down` command to stop and remove the containers. Feel free to type `make` or `make help` to access a comprehensive list of all available commands for your reference.
+The dev server will be running on the port `8000`. Reverse proxy will be running on the port `8080` in testing mode. You can use the `just down` command to stop and remove the containers. Feel free to type `just` or `just help` to access a comprehensive list of all available commands for your reference.
 
 ### Generic settings
 Should you wish to customize according to your specific requirements, here is a detailed list of available settings:
@@ -61,8 +67,8 @@ You likely won't need to modify other generic settings, but if you're curious ab
 The code quality is checked using `ruff`. I'm also using `ruff format` for imports ordering and code formatting, enforcing PEP-8 convention on my code. To check the quality of the code, you just have to run the following command :
 
 ```shell
-make lint      # Run ruff linter
-make format    # Run ruff formatter
+just lint      # Run ruff linter
+just format    # Run ruff formatter
 ```
 
 ### Testing
@@ -70,13 +76,15 @@ The code has been tested using unit testing, except some rare parts which are no
 
 Running tests with coverage (default)
 ```shell
-make test
+just test
 ```
 
 Running tests with given args (without coverage)
 ```shell
+just test tests/common
 make test PYTEST_ARGS="tests/common"
 ```
+
 
 ### Pre-commit
 The project is using [pre-commit](https://pre-commit.com/) framework to ensure code quality before making any commit on the repository. After installing the project dependencies, you can install the pre-commit by using the `pre-commit install` command.

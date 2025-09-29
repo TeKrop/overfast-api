@@ -8,9 +8,6 @@ FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv-stage
 # Main stage
 FROM python:${PYTHON_VERSION}-alpine AS main
 
-# Install dependencies
-RUN apk add --no-cache build-base
-
 # Copy the uv binary from the temporary stage to the main stage
 COPY --from=uv-stage /uv /bin/uv
 

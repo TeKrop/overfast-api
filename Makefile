@@ -29,14 +29,13 @@ build: ## Build project images
 	@echo "Building OverFastAPI (dev mode)..."
 	BUILD_TARGET="dev" $(DOCKER_COMPOSE) build
 
-start: ## Run OverFastAPI application (dev or testing mode)
-ifdef TESTING_MODE
-	@echo "Launching OverFastAPI (testing mode with reverse proxy)..."
-	$(DOCKER_COMPOSE) --profile testing up -d
-else
+start: ## Run OverFastAPI application (dev mode)
 	@echo "Launching OverFastAPI (dev mode with autoreload)..."
 	$(DOCKER_RUN) uv run fastapi dev app/main.py --host 0.0.0.0
-endif
+
+start_testing: ## Run OverFastAPI application (testing mode)
+	@echo "Launching OverFastAPI (testing mode with reverse proxy)..."
+	$(DOCKER_COMPOSE) --profile testing up -d
 
 lint: ## Run linter
 	@echo "Running linter..."
