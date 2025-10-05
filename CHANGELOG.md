@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.23.1 (2025-10-05)
+
+### Bug Fixes
+
+- Added support for old player summary format still being used in some regions
+  ([#304](https://github.com/TeKrop/overfast-api/pull/304),
+  [`c5c7c73`](https://github.com/TeKrop/overfast-api/commit/c5c7c739c440c208a8c92c648d36fe46cd35d721))
+
+
 ## v3.23.0 (2025-09-29)
 
 ### Build System
