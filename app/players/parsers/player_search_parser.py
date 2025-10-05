@@ -65,6 +65,16 @@ class PlayerSearchParser(JSONParser):
         for player in players:
             player_id = player["battleTag"].replace("#", "-")
 
+            # Normalize optional fields that may be missing or inconsistently formatted
+            # due to Blizzard's region-specific changes. In some regions, the "portrait"
+            # field is still used instead of the newer "avatar", "namecard", or "title" fields.
+            # If "portrait" is present, explicitly set "avatar", "namecard", and "title" to None
+            # to ensure consistent data structure across all regions.
+            if player.get("portrait"):
+                player["avatar"] = None
+                player["namecard"] = None
+                player["title"] = None
+
             transformed_players.append(
                 {
                     "player_id": player_id,

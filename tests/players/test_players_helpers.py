@@ -258,7 +258,10 @@ def test_key_to_label(key: str, result_label: str):
 @pytest.mark.parametrize(
     ("title", "resulting_title"),
     [
+        (None, None),
         ("", None),
+        ("No Title", None),
+        ("Philosopher", "Philosopher"),
         (
             {
                 "en_US": "Extraterrestrial",
@@ -276,5 +279,5 @@ def test_key_to_label(key: str, result_label: str):
         ),
     ],
 )
-def test_get_player_title(title: str | dict, resulting_title: str | None):
+def test_get_player_title(title: dict | str | None, resulting_title: str | None):
     assert helpers.get_player_title(title) == resulting_title

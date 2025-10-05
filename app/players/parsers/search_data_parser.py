@@ -36,6 +36,16 @@ class SearchDataParser(JSONParser):
             )
             return {}
 
+        # Normalize optional fields that may be missing or inconsistently formatted
+        # due to Blizzard's region-specific changes. In some regions, the "portrait"
+        # field is still used instead of the newer "avatar", "namecard", or "title" fields.
+        # If "portrait" is present, explicitly set "avatar", "namecard", and "title" to None
+        # to ensure consistent data structure across all regions.
+        if player_data.get("portrait"):
+            player_data["avatar"] = None
+            player_data["namecard"] = None
+            player_data["title"] = None
+
         return player_data
 
     def get_blizzard_url(self, **kwargs) -> str:

@@ -32,11 +32,24 @@ def key_to_label(key: str) -> str:
     return " ".join(s.capitalize() for s in key.split("_"))
 
 
-def get_player_title(title: dict | str) -> str | None:
-    """Get player title from string or dict extracted from Blizzard API.
-    This is where we're handling the special "empty string" case for which we return None
+def get_player_title(title: dict | str | None) -> str | None:
     """
-    return title["en_US"] if title else None
+    Get player title from string or dict extracted from Blizzard API.
+    Handles:
+      - None or empty string: returns None
+      - String "No Title" (case-insensitive): returns None
+      - Dict: returns 'en_US' value or None if not found
+    """
+    if not title:
+        return None
+
+    if isinstance(title, str):
+        return None if title.lower() == "no title" else title
+
+    if isinstance(title, dict):
+        return title.get("en_US") or None
+
+    return None
 
 
 def get_computed_stat_value(input_str: str) -> str | float | int:
