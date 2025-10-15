@@ -8,9 +8,6 @@ FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv-stage
 # Main stage
 FROM python:${PYTHON_VERSION}-alpine AS main
 
-# Install dependencies
-RUN apk add --no-cache build-base
-
 # Copy the uv binary from the temporary stage to the main stage
 COPY --from=uv-stage /uv /bin/uv
 
@@ -25,7 +22,9 @@ COPY ./app /code/app
 COPY ./static /code/static
 
 # Install the project
-RUN uv sync --frozen --no-cache --no-dev
+RUN apk add --no-cache build-base \
+    && uv sync --frozen --no-cache --no-dev \
+    && apk del build-base
 
 # Copy crontabs file and make it executable
 COPY ./build/overfast-crontab /etc/crontabs/root
