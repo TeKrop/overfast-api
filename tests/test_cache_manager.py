@@ -1,13 +1,16 @@
 from time import sleep
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
-from fastapi import Request
 from valkey.exceptions import ValkeyError
 
 from app.cache_manager import CacheManager
 from app.config import settings
 from app.enums import Locale
+
+if TYPE_CHECKING:
+    from fastapi import Request
 
 
 @pytest.fixture

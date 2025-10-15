@@ -1,11 +1,14 @@
 import json
+from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import pytest
-from _pytest.fixtures import SubRequest
 from fastapi import status
 
 from tests.helpers import read_html_file, read_json_file
+
+if TYPE_CHECKING:
+    from _pytest.fixtures import SubRequest
 
 
 @pytest.fixture(scope="package")

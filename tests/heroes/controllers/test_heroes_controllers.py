@@ -1,8 +1,9 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from app.heroes.controllers.get_hero_controller import GetHeroController
+if TYPE_CHECKING:
+    from app.heroes.controllers.get_hero_controller import GetHeroController
 
 
 @pytest.mark.parametrize(

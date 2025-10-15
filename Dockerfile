@@ -1,12 +1,15 @@
 # Build arguments
-ARG PYTHON_VERSION=3.13
-ARG UV_VERSION=0.8.8
+ARG PYTHON_VERSION=3.14
+ARG UV_VERSION=0.9.2
 
 # Create a temporary stage to pull the uv binary
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv-stage
 
 # Main stage
 FROM python:${PYTHON_VERSION}-alpine AS main
+
+# Install dependencies
+RUN apk add --no-cache build-base
 
 # Copy the uv binary from the temporary stage to the main stage
 COPY --from=uv-stage /uv /bin/uv

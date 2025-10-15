@@ -1,7 +1,11 @@
+from typing import TYPE_CHECKING
+
 import pytest
 
 from app.exceptions import OverfastError
-from app.gamemodes.parsers.gamemodes_parser import GamemodesParser
+
+if TYPE_CHECKING:
+    from app.gamemodes.parsers.gamemodes_parser import GamemodesParser
 
 
 @pytest.mark.asyncio

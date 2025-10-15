@@ -1,11 +1,14 @@
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import status
-from fastapi.testclient import TestClient
 
 from app.config import settings
 from app.roles.enums import Role
+
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
 
 
 @pytest.fixture(scope="module", autouse=True)

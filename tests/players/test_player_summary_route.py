@@ -1,12 +1,15 @@
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import status
-from fastapi.testclient import TestClient
 from httpx import TimeoutException
 
 from app.config import settings
 from tests.helpers import players_ids
+
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
 
 
 @pytest.mark.parametrize(

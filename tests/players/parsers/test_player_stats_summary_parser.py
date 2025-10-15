@@ -1,11 +1,14 @@
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import status
 
 from app.exceptions import ParserBlizzardError
-from app.players.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
 from tests.helpers import players_ids, unknown_player_id
+
+if TYPE_CHECKING:
+    from app.players.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
 
 
 @pytest.mark.parametrize(

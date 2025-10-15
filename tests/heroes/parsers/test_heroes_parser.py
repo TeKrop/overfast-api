@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
@@ -5,7 +6,9 @@ from fastapi import status
 
 from app.exceptions import OverfastError
 from app.heroes.enums import HeroKey
-from app.heroes.parsers.heroes_parser import HeroesParser
+
+if TYPE_CHECKING:
+    from app.heroes.parsers.heroes_parser import HeroesParser
 
 
 @pytest.mark.asyncio

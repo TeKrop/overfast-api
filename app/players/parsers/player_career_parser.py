@@ -1,9 +1,8 @@
 """Player profile page Parser module"""
 
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from fastapi import status
-from selectolax.lexbor import LexborNode
 
 from app.config import settings
 from app.exceptions import ParserBlizzardError
@@ -28,6 +27,9 @@ from ..helpers import (
     string_to_snakecase,
 )
 from .base_player_parser import BasePlayerParser
+
+if TYPE_CHECKING:
+    from selectolax.lexbor import LexborNode
 
 platforms_div_mapping = {
     PlayerPlatform.PC: "mouseKeyboard-view",

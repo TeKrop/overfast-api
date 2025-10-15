@@ -39,11 +39,11 @@ start_testing: ## Run OverFastAPI application (testing mode)
 
 lint: ## Run linter
 	@echo "Running linter..."
-	$(DOCKER_RUN) uv run ruff check --fix --exit-non-zero-on-fix
+	uvx ruff check --fix --exit-non-zero-on-fix
 
 format: ## Run formatter
 	@echo "Running formatter..."
-	$(DOCKER_RUN) uv run ruff format
+	uvx ruff format
 
 shell: ## Access an interactive shell inside the app container
 	@echo "Running shell on app container..."

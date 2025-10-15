@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
@@ -7,7 +8,9 @@ from app.config import settings
 from app.enums import Locale
 from app.exceptions import OverfastError, ParserBlizzardError
 from app.heroes.enums import HeroKey
-from app.heroes.parsers.hero_parser import HeroParser
+
+if TYPE_CHECKING:
+    from app.heroes.parsers.hero_parser import HeroParser
 
 
 @pytest.mark.parametrize(
