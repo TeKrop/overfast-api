@@ -2,6 +2,29 @@
 
 <!-- version list -->
 
+## v3.24.0 (2025-10-15)
+
+### Build System
+
+- **deps**: Bump pydantic from 2.11.10 to 2.12.0
+  ([#307](https://github.com/TeKrop/overfast-api/pull/307),
+  [`77716eb`](https://github.com/TeKrop/overfast-api/commit/77716eb470fd954eb0f124ed47df3331f779e65e))
+
+- **deps**: Bump pydantic from 2.11.9 to 2.11.10
+  ([#305](https://github.com/TeKrop/overfast-api/pull/305),
+  [`701b6df`](https://github.com/TeKrop/overfast-api/commit/701b6dfeb31b3a08239324066835eda31450abf0))
+
+- **deps**: Update fastapi[standard-no-fastapi-cloud-cli] requirement
+  ([#306](https://github.com/TeKrop/overfast-api/pull/306),
+  [`1916eed`](https://github.com/TeKrop/overfast-api/commit/1916eed24a9f5abb48e8a56225b060f8d1f43019))
+
+### Features
+
+- Updated python to 3.14 and updated dependencies
+  ([#308](https://github.com/TeKrop/overfast-api/pull/308),
+  [`f6861fb`](https://github.com/TeKrop/overfast-api/commit/f6861fb926a89026728221b811cfc3f3c0b149d7))
+
+
 ## v3.23.1 (2025-10-05)
 
 ### Bug Fixes
