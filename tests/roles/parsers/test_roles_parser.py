@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
@@ -5,7 +6,9 @@ from fastapi import status
 
 from app.exceptions import OverfastError
 from app.roles.enums import Role
-from app.roles.parsers.roles_parser import RolesParser
+
+if TYPE_CHECKING:
+    from app.roles.parsers.roles_parser import RolesParser
 
 
 @pytest.mark.asyncio

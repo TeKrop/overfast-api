@@ -1,13 +1,17 @@
 import subprocess
 import tempfile
 import tracemalloc
-from collections.abc import Callable
 from contextlib import suppress
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from fastapi import FastAPI, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import HTMLResponse, JSONResponse
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from fastapi import FastAPI, Request
 
 # Profiling packages aren't installed on production environment
 with suppress(ModuleNotFoundError):

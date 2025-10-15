@@ -7,7 +7,7 @@ authors = [
   {name = "Valentin PORCHET", email = "valentin.porchet@proton.me"}
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
     "fastapi[standard-no-fastapi-cloud-cli]==0.119.*",
     "httpx[http2]==0.28.*",
@@ -24,29 +24,31 @@ Documentation = "https://overfast-api.tekrop.fr"
 Repository = "https://github.com/TeKrop/overfast-api"
 Issues = "https://github.com/TeKrop/overfast-api/issues"
 
-[tool.uv]
-compile-bytecode = true
-dev-dependencies = [
-    "fakeredis[valkey]==2.31.*",
+[dependency-groups]
+dev = [
+    "fakeredis[valkey]==2.32.*",
     "ipdb==0.13.*",
     "pytest==8.4.*",
-    "pytest-asyncio==1.1.*",
-    "pytest-cov==6.3.*",
-    "pytest-randomly==3.16.*",
+    "pytest-asyncio==1.2.*",
+    "pytest-cov==7.0.*",
+    "pytest-randomly==4.0.*",
     "pytest-xdist==3.8.*",
-    "ruff==0.12.*",
+    "ruff==0.14.*",
     "pre-commit==4.3.*",
     "pyinstrument==5.1.*",
     "memray==1.18.*",
     "objgraph==3.6.*",
 ]
 
+[tool.uv]
+compile-bytecode = true
+
 [tool.ruff]
 # Check app code and tests
 src = ["app", "tests"]
 
-# Assume Python 3.13
-target-version = "py313"
+# Assume Python 3.14
+target-version = "py314"
 
 [tool.ruff.lint]
 select = [
@@ -128,6 +130,8 @@ allowed-confusables = ["（", "）", "："]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["SLF001"]  # Ignore private member access on tests
+"router.py" = ["TC001"]  # Ignore type-checking block (FastAPI routes definition)
+"models.py" = ["TC001"]  # Ignore type-checking block (Pydantic models definition)
 
 [tool.ruff.lint.isort]
 # Consider app as first-party for imports in tests

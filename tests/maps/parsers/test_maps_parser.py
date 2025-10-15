@@ -1,7 +1,11 @@
+from typing import TYPE_CHECKING
+
 import pytest
 
 from app.exceptions import OverfastError
-from app.maps.parsers.maps_parser import MapsParser
+
+if TYPE_CHECKING:
+    from app.maps.parsers.maps_parser import MapsParser
 
 
 @pytest.mark.asyncio

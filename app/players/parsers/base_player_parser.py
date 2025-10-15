@@ -1,10 +1,14 @@
-import httpx
+from typing import TYPE_CHECKING
+
 from fastapi import status
 
 from app.exceptions import ParserBlizzardError
 from app.overfast_logger import logger
 from app.parsers import HTMLParser
 from app.players.parsers.search_data_parser import SearchDataParser
+
+if TYPE_CHECKING:
+    import httpx
 
 
 class BasePlayerParser(HTMLParser):

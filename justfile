@@ -31,12 +31,12 @@ start_testing:
 # run linter
 lint:
     @echo "Running linter..."
-    {{docker_run}} uv run ruff check --fix --exit-non-zero-on-fix
+    uvx ruff check --fix --exit-non-zero-on-fix
 
 # run formatter
 format:
     @echo "Running formatter..."
-    {{docker_run}} uv run ruff format
+    uvx ruff format
 
 # access an interactive shell inside the app container
 shell:

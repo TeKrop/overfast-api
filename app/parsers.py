@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
-import httpx
 from fastapi import status
 from selectolax.lexbor import LexborHTMLParser
 
@@ -12,6 +11,9 @@ from .exceptions import ParserParsingError
 from .helpers import read_csv_data_file
 from .overfast_client import OverFastClient
 from .overfast_logger import logger
+
+if TYPE_CHECKING:
+    import httpx
 
 
 class AbstractParser(ABC):

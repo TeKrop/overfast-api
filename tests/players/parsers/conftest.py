@@ -1,9 +1,13 @@
+from typing import TYPE_CHECKING
+
 import pytest
-from _pytest.fixtures import SubRequest
 
 from app.players.parsers.player_career_parser import PlayerCareerParser
 from app.players.parsers.player_career_stats_parser import PlayerCareerStatsParser
 from app.players.parsers.player_stats_summary_parser import PlayerStatsSummaryParser
+
+if TYPE_CHECKING:
+    from _pytest.fixtures import SubRequest
 
 
 @pytest.fixture(scope="package")

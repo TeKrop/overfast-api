@@ -1,11 +1,14 @@
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import status
-from fastapi.testclient import TestClient
 
 from app.config import settings
 from app.heroes.enums import HeroKey
+
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
 
 
 @pytest.mark.parametrize(

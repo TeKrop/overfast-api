@@ -1,7 +1,10 @@
 import re
+from typing import TYPE_CHECKING
 
 from fastapi import status
-from fastapi.testclient import TestClient
+
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
 
 
 def test_get_redoc_documentation(client: TestClient):

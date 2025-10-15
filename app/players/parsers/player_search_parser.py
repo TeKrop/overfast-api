@@ -1,12 +1,15 @@
 """Player stats summary Parser module"""
 
-from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 from app.config import settings
 from app.overfast_logger import logger
 from app.parsers import JSONParser
 
 from ..helpers import get_player_title
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class PlayerSearchParser(JSONParser):

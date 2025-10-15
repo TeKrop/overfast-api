@@ -1,11 +1,14 @@
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi import status
-from fastapi.testclient import TestClient
 
 from app.config import settings
 from app.gamemodes.enums import MapGamemode
+
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
 
 
 def test_get_maps(client: TestClient):

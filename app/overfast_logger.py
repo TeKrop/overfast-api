@@ -2,12 +2,14 @@
 
 import logging
 import sys
-from pathlib import Path
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from loguru import logger as loguru_logger
 
 from .config import settings
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class InterceptHandler(logging.Handler):

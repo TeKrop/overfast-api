@@ -1,6 +1,6 @@
 # Build arguments
-ARG PYTHON_VERSION=3.13
-ARG UV_VERSION=0.8.8
+ARG PYTHON_VERSION=3.14
+ARG UV_VERSION=0.9.2
 
 # Create a temporary stage to pull the uv binary
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv-stage
@@ -22,7 +22,9 @@ COPY ./app /code/app
 COPY ./static /code/static
 
 # Install the project
-RUN uv sync --frozen --no-cache --no-dev
+RUN apk add --no-cache build-base \
+    && uv sync --frozen --no-cache --no-dev \
+    && apk del build-base
 
 # Copy crontabs file and make it executable
 COPY ./build/overfast-crontab /etc/crontabs/root

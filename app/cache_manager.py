@@ -22,14 +22,18 @@ player-cache:TeKrop-2217
 
 import json
 import zlib
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import valkey
-from fastapi import Request
 
 from .config import settings
 from .metaclasses import Singleton
 from .overfast_logger import logger
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from fastapi import Request
 
 
 class CacheManager(metaclass=Singleton):

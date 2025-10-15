@@ -1,10 +1,13 @@
 """Decorators module"""
 
 import time
-from collections.abc import Callable
 from functools import wraps
+from typing import TYPE_CHECKING
 
 from .overfast_logger import logger
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def rate_limited(max_calls: int, interval: int):

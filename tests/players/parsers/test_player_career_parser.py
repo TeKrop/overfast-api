@@ -1,4 +1,5 @@
 import re
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
@@ -6,8 +7,10 @@ from fastapi import status
 
 from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.players.enums import PlayerGamemode, PlayerPlatform
-from app.players.parsers.player_career_parser import PlayerCareerParser
 from tests.helpers import players_ids, unknown_player_id
+
+if TYPE_CHECKING:
+    from app.players.parsers.player_career_parser import PlayerCareerParser
 
 
 @pytest.mark.parametrize(

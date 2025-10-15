@@ -1,9 +1,12 @@
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 from fastapi import status
-from fastapi.testclient import TestClient
 
 from app.config import settings
+
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
 
 
 def test_get_roles(client: TestClient, home_html_data: str):

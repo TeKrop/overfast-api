@@ -1,10 +1,9 @@
 """Hero page Parser module"""
 
 import re
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from fastapi import status
-from selectolax.lexbor import LexborNode
 
 from app.config import settings
 from app.enums import Locale
@@ -13,6 +12,9 @@ from app.parsers import HTMLParser
 from app.roles.helpers import get_role_from_icon_url
 
 from ..enums import MediaType
+
+if TYPE_CHECKING:
+    from selectolax.lexbor import LexborNode
 
 
 class HeroParser(HTMLParser):
