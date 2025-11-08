@@ -9,7 +9,7 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "fastapi[standard-no-fastapi-cloud-cli]==0.120.*",
+    "fastapi[standard-no-fastapi-cloud-cli]==0.121.*",
     "httpx[http2]==0.28.*",
     "loguru==0.7.*",
     "valkey[libvalkey]==6.1.*",

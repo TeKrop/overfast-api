@@ -84,7 +84,7 @@ class PlayerSearchParser(JSONParser):
                     "name": player["battleTag"],
                     "avatar": player["avatar"],
                     "namecard": player.get("namecard"),
-                    "title": get_player_title(player["title"]),
+                    "title": get_player_title(player.get("title")),
                     "career_url": f"{settings.app_base_url}/players/{player_id}",
                     "blizzard_id": player["url"],
                     "last_updated_at": player["lastUpdated"],
