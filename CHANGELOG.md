@@ -2,6 +2,36 @@
 
 <!-- version list -->
 
+## v3.24.1 (2025-11-08)
+
+### Bug Fixes
+
+- Fixed ponctual issue with KeyError ([#315](https://github.com/TeKrop/overfast-api/pull/315),
+  [`4523e14`](https://github.com/TeKrop/overfast-api/commit/4523e144f5a68d6ed55c5f35ac98495edbf6ea69))
+
+### Build System
+
+- **deps**: Bump memray from 1.18.0 to 1.19.1
+  ([#312](https://github.com/TeKrop/overfast-api/pull/312),
+  [`48399f8`](https://github.com/TeKrop/overfast-api/commit/48399f87684fdbdeefd2238fddfb6caab5cd8b72))
+
+- **deps**: Bump pydantic from 2.12.0 to 2.12.3
+  ([#310](https://github.com/TeKrop/overfast-api/pull/310),
+  [`3d72d64`](https://github.com/TeKrop/overfast-api/commit/3d72d64d39581c05e1ec22e9e3dcfc5b1ef52656))
+
+- **deps**: Bump ruff from 0.14.0 to 0.14.2
+  ([#311](https://github.com/TeKrop/overfast-api/pull/311),
+  [`9dc5f96`](https://github.com/TeKrop/overfast-api/commit/9dc5f9608ace71a3cc16a0bb361d77a12fe846b0))
+
+- **deps**: Bump ruff from 0.14.2 to 0.14.3
+  ([#313](https://github.com/TeKrop/overfast-api/pull/313),
+  [`9b9b6dc`](https://github.com/TeKrop/overfast-api/commit/9b9b6dc4b940d70dae34e707f32f41c937e5790b))
+
+- **deps**: Update fastapi[standard-no-fastapi-cloud-cli] requirement
+  ([#309](https://github.com/TeKrop/overfast-api/pull/309),
+  [`6628026`](https://github.com/TeKrop/overfast-api/commit/6628026343f42a62d89f1ebf4c764b201697127b))
+
+
 ## v3.24.0 (2025-10-15)
 
 ### Build System
