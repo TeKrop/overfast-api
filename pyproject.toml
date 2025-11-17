@@ -14,7 +14,7 @@ dependencies = [
     "loguru==0.7.*",
     "valkey[libvalkey]==6.1.*",
     "pydantic==2.12.*",
-    "pydantic-settings==2.11.*",
+    "pydantic-settings==2.12.*",
     "selectolax==0.4.*",
 ]
 
