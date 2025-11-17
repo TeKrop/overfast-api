@@ -2,6 +2,44 @@
 
 <!-- version list -->
 
+## v3.25.0 (2025-11-17)
+
+### Build System
+
+- **deps**: Bump pre-commit from 4.3.0 to 4.4.0
+  ([#318](https://github.com/TeKrop/overfast-api/pull/318),
+  [`7dd43e7`](https://github.com/TeKrop/overfast-api/commit/7dd43e79420f078f70b8cdd42cace0ad1472a30f))
+
+- **deps**: Bump pydantic from 2.12.3 to 2.12.4
+  ([#316](https://github.com/TeKrop/overfast-api/pull/316),
+  [`0c5d426`](https://github.com/TeKrop/overfast-api/commit/0c5d4260b564d2b38bed009fcdd68846f2ba61f7))
+
+- **deps**: Bump pydantic-settings from 2.11.0 to 2.12.0
+  ([#321](https://github.com/TeKrop/overfast-api/pull/321),
+  [`f788439`](https://github.com/TeKrop/overfast-api/commit/f788439907cd5dbb6856e28fbc1810788025ac6b))
+
+- **deps**: Bump pytest-asyncio from 1.2.0 to 1.3.0
+  ([#322](https://github.com/TeKrop/overfast-api/pull/322),
+  [`fed39dd`](https://github.com/TeKrop/overfast-api/commit/fed39ddbb7df10638f2c1087a1b9fc2e9d77208b))
+
+- **deps**: Bump ruff from 0.14.3 to 0.14.4
+  ([#317](https://github.com/TeKrop/overfast-api/pull/317),
+  [`193d229`](https://github.com/TeKrop/overfast-api/commit/193d229bc3f0aa7a1c37449d2bb1ce8b3c07a727))
+
+- **deps**: Bump ruff from 0.14.4 to 0.14.5
+  ([#320](https://github.com/TeKrop/overfast-api/pull/320),
+  [`85dc7fb`](https://github.com/TeKrop/overfast-api/commit/85dc7fb6c448151100697c356357a4e6a1646edd))
+
+- **deps**: Bump selectolax from 0.4.0 to 0.4.3
+  ([#319](https://github.com/TeKrop/overfast-api/pull/319),
+  [`774cb9b`](https://github.com/TeKrop/overfast-api/commit/774cb9b68d989d53d0f1e83739284eef405fb210))
+
+### Features
+
+- Added support for Vendetta hero ([#323](https://github.com/TeKrop/overfast-api/pull/323),
+  [`8f467e2`](https://github.com/TeKrop/overfast-api/commit/8f467e256ff04e5bb8d6ddfc7fcfd3032428c2f7))
+
+
 ## v3.24.1 (2025-11-08)
 
 ### Bug Fixes
