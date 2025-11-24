@@ -34,7 +34,7 @@ dev = [
     "pytest-randomly==4.0.*",
     "pytest-xdist==3.8.*",
     "ruff==0.14.*",
-    "pre-commit==4.4.*",
+    "pre-commit==4.5.*",
     "pyinstrument==5.1.*",
     "memray==1.19.*",
     "objgraph==3.6.*",
