@@ -2,6 +2,34 @@
 
 <!-- version list -->
 
+## v3.26.0 (2025-11-25)
+
+### Build System
+
+- **deps**: Bump pre-commit from 4.4.0 to 4.5.0
+  ([#326](https://github.com/TeKrop/overfast-api/pull/326),
+  [`3f75440`](https://github.com/TeKrop/overfast-api/commit/3f7544021c71418321c0411d12fd84e1335c7c32))
+
+- **deps**: Bump pytest from 8.4.2 to 9.0.1
+  ([#325](https://github.com/TeKrop/overfast-api/pull/325),
+  [`09da432`](https://github.com/TeKrop/overfast-api/commit/09da432826ca061e6061fa3923c1d48a8913b69f))
+
+- **deps**: Bump ruff from 0.14.5 to 0.14.6
+  ([#324](https://github.com/TeKrop/overfast-api/pull/324),
+  [`8d9abbb`](https://github.com/TeKrop/overfast-api/commit/8d9abbb77a1941384c09fce9c3d8874522c4420c))
+
+### Chores
+
+- Added AGENTS.md
+  ([`669e9f1`](https://github.com/TeKrop/overfast-api/commit/669e9f16e9139ebece69b83c5a1da7e300cd15f3))
+
+### Features
+
+- **redoc**: Added style to Redoc documentation
+  ([#327](https://github.com/TeKrop/overfast-api/pull/327),
+  [`08e480a`](https://github.com/TeKrop/overfast-api/commit/08e480a8655da245cf80e4c9c2d29914bdf40445))
+
+
 ## v3.25.0 (2025-11-17)
 
 ### Build System
