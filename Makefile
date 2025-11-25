@@ -15,6 +15,7 @@ DOCKER_RUN := $(DOCKER_COMPOSE) run \
 	--volume ${PWD}/tests:/code/tests \
 	--volume ${PWD}/htmlcov:/code/htmlcov \
 	--volume ${PWD}/logs:/code/logs \
+    --volume ${PWD}/static:/code/static \
 	--publish 8000:8000 \
 	--rm \
 	app

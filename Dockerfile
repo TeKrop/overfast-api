@@ -17,14 +17,14 @@ COPY pyproject.toml uv.lock /code/
 # Sync the project into a new environment (no dev dependencies)
 WORKDIR /code
 
-# Copy code and static folders
-COPY ./app /code/app
-COPY ./static /code/static
-
 # Install the project
 RUN apk add --no-cache build-base \
     && uv sync --frozen --no-cache --no-dev \
     && apk del build-base
+
+# Copy code and static folders
+COPY ./app /code/app
+COPY ./static /code/static
 
 # Copy crontabs file and make it executable
 COPY ./build/overfast-crontab /etc/crontabs/root

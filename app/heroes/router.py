@@ -65,7 +65,7 @@ async def list_heroes(
         },
     },
     tags=[RouteTag.HEROES],
-    summary="Get hero statistics",
+    summary="Get hero stats",
     description=(
         "Get hero statistics usage, filtered by platform, region, role, etc."
         "Only Role Queue gamemodes are concerned."
