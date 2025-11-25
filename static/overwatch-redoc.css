@@ -1,0 +1,205 @@
+:root {
+  --of-bg: #04070f;
+  --of-bg-alt: #0e1321;
+  --of-orange: #ff9c00;
+  --of-blue: #1fb8ff;
+  --of-text: #f4f5f7;
+  --of-muted: #94a2c3;
+  --of-border: rgba(255, 255, 255, 0.08);
+  --of-code-bg: rgba(3, 6, 12, 0.85);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Roboto", "Segoe UI", Arial, sans-serif;
+  color: var(--of-text);
+  background: #121a31;
+  background-attachment: fixed;
+}
+
+a {
+  color: inherit;
+}
+
+.redoc-wrap {
+  background: transparent !important;
+}
+
+.redoc-wrap .menu-content {
+  background: rgba(4, 7, 15, 0.85) !important;
+  border-right: 1px solid var(--of-border);
+}
+
+.redoc-wrap .menu-content label {
+  color: var(--of-muted) !important;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.redoc-wrap .menu-content .menu-item,
+.redoc-wrap .menu-content .menu-item span {
+  color: var(--of-text) !important;
+}
+
+.redoc-wrap .menu-content .menu-item.active {
+  color: var(--of-orange) !important;
+}
+
+.redoc-wrap .api-content {
+  background: transparent !important;
+}
+
+.redoc-wrap .api-content > div > div > div:last-child {
+  background: none;
+}
+
+.redoc-wrap .api-content > div > div > div:last-child > div:first-child > div:last-child {
+  background: #090e1b;
+  color: var(--of-text);
+}
+
+.redoc-wrap .api-content > div > div > div:last-child > div:first-child > div:last-child div[role=button] > div {
+  background: var(--of-bg);
+}
+
+.redoc-wrap > div:last-child {
+  background: #090e1b;
+}
+
+.redoc-wrap .api-content span {
+  color: var(--of-text);
+}
+
+.redoc-wrap h1,
+.redoc-wrap h2,
+.redoc-wrap h3,
+.redoc-wrap h4,
+.redoc-wrap h5,
+.redoc-wrap h5 span {
+  color: var(--of-text) !important;
+  font-family: Roboto;
+}
+
+.redoc-wrap .section-title,
+.redoc-wrap .section-title span,
+.redoc-wrap .section-title small,
+.redoc-wrap .response-title,
+.redoc-wrap .response-section__title,
+.redoc-wrap .responses-title,
+.redoc-wrap .tab-item,
+.redoc-wrap .tab-item span {
+  color: var(--of-text) !important;
+}
+
+.redoc-wrap .label,
+.redoc-wrap .response__status,
+.redoc-wrap .body-title,
+.redoc-wrap .param-name {
+  color: var(--of-muted) !important;
+}
+
+.redoc-wrap code,
+.redoc-wrap .code,
+.redoc-wrap pre code {
+  font-family: "Fira Code", Consolas, monospace !important;
+  font-weight: 500;
+  background: var(--of-code-bg) !important;
+  color: #ffd37a !important;
+}
+
+.redoc-wrap pre {
+  border-radius: 1rem !important;
+  border: 1px solid var(--of-border) !important;
+  background: var(--of-code-bg) !important;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.35);
+}
+
+.redoc-wrap table {
+  border-color: var(--of-border) !important;
+}
+
+.redoc-wrap table caption {
+  color: var(--of-text);
+  border-color: var(--of-border);
+}
+
+.redoc-wrap table thead th,
+.redoc-wrap table tbody td {
+  color: var(--of-text) !important;
+}
+
+.redoc-wrap table tbody tr:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.redoc-wrap table tbody tr td div {
+  background: none !important;
+}
+
+.redoc-wrap [class*="json-schema"],
+.redoc-wrap [class*="json-tree"] {
+  color: var(--of-text) !important;
+}
+
+.redoc-wrap [class*="json-schema"] .property-name,
+.redoc-wrap [class*="json-schema"] .json-property,
+.redoc-wrap [class*="json-tree"] .token.property {
+  color: #ffd37a !important;
+}
+
+.redoc-wrap [class*="json-schema"] .json-value,
+.redoc-wrap [class*="json-tree"] .token.string {
+  color: #ffe7a3 !important;
+}
+
+.redoc-wrap [class*="json-tree"] .token.number {
+  color: var(--of-blue) !important;
+}
+
+.redoc-wrap .hljs-string {
+  color: #ffe7a3 !important;
+}
+
+.redoc-wrap .hljs-number {
+  color: var(--of-blue) !important;
+}
+
+.redoc-wrap .hljs-attr,
+.redoc-wrap .hljs-attribute {
+  color: #ffd37a !important;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 156, 0, 0.4);
+  border-radius: 999px;
+}
+
+#overfast-loader {
+  width: 50px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 8px solid;
+  border-color: var(--of-text) #121a31;
+  animation: l1 1s infinite;
+  padding: 8px;
+  background: var(--of-text) content-box;
+  margin: 100px auto;
+}
+
+@keyframes l1 {to{transform: rotate(.5turn)}}

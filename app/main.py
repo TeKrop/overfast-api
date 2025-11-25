@@ -6,12 +6,14 @@ from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import ResponseValidationError
-from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
+from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .config import settings
+from .docs import render_documentation
 from .enums import Profiler, RouteTag
 from .gamemodes import router as gamemodes
 from .helpers import overfast_internal_error
@@ -132,9 +134,11 @@ app = FastAPI(
     default_response_class=ASCIIJSONResponse,
 )
 
+# Mount static folder for development server
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
 # Add customized OpenAPI specs with app logo
-
-
 def custom_openapi():  # pragma: no cover
     if app.openapi_schema:
         return app.openapi_schema
@@ -150,7 +154,7 @@ def custom_openapi():  # pragma: no cover
         servers=app.servers,
     )
     openapi_schema["info"]["x-logo"] = {
-        "url": "/static/logo.png",
+        "url": "/static/logo_light.png",
         "altText": "OverFast API Logo",
     }
 
@@ -158,7 +162,7 @@ def custom_openapi():  # pragma: no cover
     if settings.new_route_path and (
         new_route_config := openapi_schema["paths"].get(settings.new_route_path)
     ):
-        new_badge = {"name": "NEW", "color": "#1fb8ff"}
+        new_badge = {"name": "NEW", "color": "#ff9c00"}
         for route_config in new_route_config.values():
             route_config["x-badges"] = [new_badge]
 
@@ -168,10 +172,9 @@ def custom_openapi():  # pragma: no cover
 
 app.openapi = custom_openapi
 
+
 # Add custom exception handlers for Starlet HTTP exceptions, but also
 # for Pydantic Validation Errors
-
-
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(_: Request, exc: StarletteHTTPException):
     return ASCIIJSONResponse(
@@ -199,9 +202,11 @@ common_doc_settings = {
 
 @app.get("/", include_in_schema=False)
 async def overridden_redoc():
-    redoc_settings = common_doc_settings.copy()
-    redoc_settings["redoc_favicon_url"] = redoc_settings.pop("favicon_url")
-    return get_redoc_html(**redoc_settings)
+    return render_documentation(
+        title=common_doc_settings["title"],
+        favicon_url=common_doc_settings["favicon_url"],
+        openapi_url=common_doc_settings["openapi_url"],
+    )
 
 
 @app.get("/docs", include_in_schema=False)
