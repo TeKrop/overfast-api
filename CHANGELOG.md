@@ -2,6 +2,10 @@
 
 <!-- version list -->
 
+## v1.0.0 (2025-11-26)
+
+- Initial Release
+
 ## v3.26.0 (2025-11-25)
 
 ### Build System
