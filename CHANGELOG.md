@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.26.1 (2025-11-26)
+
+### Bug Fixes
+
+- Update game mode screenshots ([#329](https://github.com/TeKrop/overfast-api/pull/329),
+  [`6d02203`](https://github.com/TeKrop/overfast-api/commit/6d022036ef4fbefface8c8319a95d4d6332c21fe))
+
+
 ## v3.26.0 (2025-11-25)
 
 ### Build System
