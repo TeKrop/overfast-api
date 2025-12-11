@@ -36,7 +36,7 @@ sombra,Sombra,damage,225,0,0
 symmetra,Symmetra,damage,125,0,150
 torbjorn,Torbjörn,damage,225,75,0
 tracer,Tracer,damage,175,0,0
-vendetta,Vendetta,damage,250,0,0
+vendetta,Vendetta,damage,150,125,0
 venture,Venture,damage,250,0,0
 widowmaker,Widowmaker,damage,225,0,0
 winston,Winston,tank,425,200,0
