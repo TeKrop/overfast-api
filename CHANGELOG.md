@@ -2,6 +2,32 @@
 
 <!-- version list -->
 
+## v3.28.0 (2025-12-11)
+
+### Build System
+
+- **deps**: Bump pydantic from 2.12.4 to 2.12.5
+  ([#331](https://github.com/TeKrop/overfast-api/pull/331),
+  [`ec65741`](https://github.com/TeKrop/overfast-api/commit/ec65741068bc3ab02e29c528a0c38ac96eb34901))
+
+- **deps**: Bump ruff from 0.14.6 to 0.14.7
+  ([#332](https://github.com/TeKrop/overfast-api/pull/332),
+  [`3f929b0`](https://github.com/TeKrop/overfast-api/commit/3f929b01c1aa307d68e33dbc2772b833d4b3369e))
+
+- **deps**: Bump selectolax from 0.4.3 to 0.4.4
+  ([#334](https://github.com/TeKrop/overfast-api/pull/334),
+  [`792b382`](https://github.com/TeKrop/overfast-api/commit/792b3821af95d73746cb2afe40d8a4dd416c2546))
+
+- **deps**: Update fastapi[standard-no-fastapi-cloud-cli] requirement
+  ([#333](https://github.com/TeKrop/overfast-api/pull/333),
+  [`8e7d59c`](https://github.com/TeKrop/overfast-api/commit/8e7d59cc242c0a7e505336ca07b2392a694c7b4b))
+
+### Features
+
+- Update Vendetta hitpoints ([#335](https://github.com/TeKrop/overfast-api/pull/335),
+  [`a4c596d`](https://github.com/TeKrop/overfast-api/commit/a4c596dcdea15ff535d1e9b8b6021f366e4d28a1))
+
+
 ## v3.27.0 (2025-11-28)
 
 ### Features
