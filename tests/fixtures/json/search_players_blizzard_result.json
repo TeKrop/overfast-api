@@ -1,6 +1,6 @@
 [
     {
-        "battleTag": "Dekk#2677",
+        "name": "Dekk",
         "isPublic": true,
         "lastUpdated": 1678488893,
         "namecard": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/ccde200bc6842b2e4d27fc8b9a90769a01a8cb2385d63cd3eed0f89fa0af97be.png",
@@ -27,7 +27,7 @@
         "url": "d65ba781fe23cdfabe%7C9b3063608098cdbf1b9825d8664f4d96"
     },
     {
-        "battleTag": "TeKrop#2217",
+        "name": "TeKrop",
         "isPublic": true,
         "lastUpdated": 1678536999,
         "namecard": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/59fd62bca585b43d480d8c4868f40309e1eda3d1a73955f1396847d9d562aad8.png",
@@ -54,7 +54,7 @@
         "url": "c65b8798bc61d6ffbba120%7Ccfe9dd77a4382165e2b920bdcc035949"
     },
     {
-        "battleTag": "copypasting#1216",
+        "name": "copypasting",
         "isPublic": false,
         "lastUpdated": 1676811985,
         "avatar": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/e7f20bca334f65b2eaa9a53fd7d306e5bfae55e8dab25e525e55dbbc7992124c.png",
@@ -62,7 +62,7 @@
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
-        "battleTag": "KIRIKO#12460",
+        "name": "KIRIKO",
         "isPublic": true,
         "lastUpdated": 1734242338,
         "namecard": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/fa42866f91488dbf1b1e4fb41683d8e9de4233067a75a58b93029544f36a0f99.png",
@@ -89,7 +89,7 @@
         "url": "d9779ea3985ed6fcbba421a0%7Cbc8b49f152a4ff7848f37d6df5ec5106"
     },
     {
-        "battleTag": "Player#1112937",
+        "name": "Player",
         "isPublic": true,
         "lastUpdated": 1676555200,
         "avatar": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/45a96627194d51a8557bc83ca0af7861b856553453da1feb2484b16b215922f1.png",
@@ -97,7 +97,7 @@
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
-        "battleTag": "quibble#11594",
+        "name": "quibble",
         "isPublic": false,
         "lastUpdated": 1671155709,
         "avatar": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/e09bbb7736ac5dff8430c88f0237cbcb9b79786ebd96d033177e4b63e1a58923.png",
@@ -105,7 +105,7 @@
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
-        "battleTag": "JohnV1#1190",
+        "name": "JohnV1",
         "isPublic": true,
         "lastUpdated": 1670258731,
         "namecard": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/fa42866f91488dbf1b1e4fb41683d8e9de4233067a75a58b93029544f36a0f99.png",
@@ -132,7 +132,7 @@
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
-        "battleTag": "Dekk#21260",
+        "name": "Dekk",
         "isPublic": false,
         "lastUpdated": 1668452370,
         "avatar": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/7b224e8b56d378963663044dbb54f6f3583e0068ef311f38a81be6719e3a874a.png",
@@ -140,7 +140,7 @@
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
-        "battleTag": "Dekk#21129",
+        "name": "Dekk",
         "isPublic": false,
         "lastUpdated": 1668372404,
         "avatar": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/3389dad97f6628230e68522b98409a1674bef0b701dc1b37c98766094a6e4785.png",
@@ -148,7 +148,7 @@
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
-        "battleTag": "Dekk#11906",
+        "name": "Dekk",
         "isPublic": false,
         "lastUpdated": 1667959199,
         "avatar": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/11aba4100f3bc686490f864ae8a24a2103b5ef389225a184d43d3c6bca5b8ade.png",
@@ -156,7 +156,7 @@
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
-        "battleTag": "Dekk#11904",
+        "name": "Dekk",
         "isPublic": false,
         "lastUpdated": 1666924000,
         "avatar": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/11aba4100f3bc686490f864ae8a24a2103b5ef389225a184d43d3c6bca5b8ade.png",
@@ -164,7 +164,7 @@
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
-        "battleTag": "Dekk#21771",
+        "name": "Dekk",
         "isPublic": false,
         "lastUpdated": 1666737903,
         "avatar": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/11aba4100f3bc686490f864ae8a24a2103b5ef389225a184d43d3c6bca5b8ade.png",
@@ -172,7 +172,7 @@
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
-        "battleTag": "Dekk#1380",
+        "name": "Dekk",
         "isPublic": false,
         "lastUpdated": 1666538443,
         "avatar": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/11aba4100f3bc686490f864ae8a24a2103b5ef389225a184d43d3c6bca5b8ade.png",
@@ -180,7 +180,7 @@
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
-        "battleTag": "DEKK#11775",
+        "name": "DEKK",
         "isPublic": false,
         "lastUpdated": 1665953911,
         "avatar": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/11aba4100f3bc686490f864ae8a24a2103b5ef389225a184d43d3c6bca5b8ade.png",
@@ -188,7 +188,7 @@
         "url": "d67b87a1fe23caffbca9%7Ce071d6c2df64c91dc7ad8f0eb73d5d05"
     },
     {
-        "battleTag": "Dekk#1766",
+        "name": "Dekk",
         "isPublic": false,
         "lastUpdated": 1665287787,
         "avatar": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/11aba4100f3bc686490f864ae8a24a2103b5ef389225a184d43d3c6bca5b8ade.png",
