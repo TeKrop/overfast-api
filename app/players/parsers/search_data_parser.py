@@ -13,28 +13,28 @@ class SearchDataParser(JSONParser):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.player_id = kwargs.get("player_id")
+        self.player_name = self.player_id.split("-", 1)[0]
 
     async def parse_data(self) -> dict:
-        # We'll use the battletag for searching
-        player_battletag = self.player_id.replace("-", "#")
+        # As the battletag is not available on search endpoint
+        # anymore, we'll use the name for search, by taking case into account
 
         # Find the right player
-        try:
-            player_data = next(
-                player
-                for player in self.json_data
-                if (
-                    player["battleTag"] == player_battletag
-                    and player["isPublic"] is True
-                )
-            )
-        except StopIteration:
+        matching_players = [
+            player
+            for player in self.json_data
+            if player["name"] == self.player_name and player["isPublic"] is True
+        ]
+        if len(matching_players) != 1:
             # We didn't find the player, return nothing
             logger.warning(
-                "Player {} not found in search results, couldn't retrieve data",
+                "Player {} not found in search results ({} matching players)",
                 self.player_id,
+                len(matching_players),
             )
             return {}
+
+        player_data = matching_players[0]
 
         # Normalize optional fields that may be missing or inconsistently formatted
         # due to Blizzard's region-specific changes. In some regions, the "portrait"
@@ -49,6 +49,5 @@ class SearchDataParser(JSONParser):
         return player_data
 
     def get_blizzard_url(self, **kwargs) -> str:
-        # Replace dash by encoded number sign (#) for search
         player_name = kwargs.get("player_id").split("-", 1)[0]
         return f"{super().get_blizzard_url(**kwargs)}/{player_name}/"

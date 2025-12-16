@@ -166,18 +166,19 @@ class PlayerCareerParser(BasePlayerParser):
         return {
             "username": summary_div.css_first("h1.Profile-player--name").text(),
             "avatar": (
-                self.player_data["summary"]["avatar"]
+                self.player_data["summary"].get("avatar")
                 or summary_div.css_first("img.Profile-player--portrait").attributes.get(
                     "src"
                 )
             ),
             "namecard": self.player_data["summary"].get("namecard"),
             "title": get_player_title(
-                self.player_data["summary"]["title"] or self.__get_title(profile_div)
+                self.player_data["summary"].get("title")
+                or self.__get_title(profile_div)
             ),
             "endorsement": self.__get_endorsement(progression_div),
             "competitive": self.__get_competitive_ranks(progression_div),
-            "last_updated_at": self.player_data["summary"]["lastUpdated"],
+            "last_updated_at": self.player_data["summary"].get("lastUpdated"),
         }
 
     @staticmethod

@@ -29,14 +29,17 @@ from .helpers import get_hero_name, key_to_label
 class PlayerShort(BaseModel):
     player_id: str = Field(
         ...,
-        title="Player unique name",
-        description='Identifier of the player : BattleTag (with "#" replaced by "-")',
-        examples=["TeKrop-2217"],
+        title="Player unique identifier",
+        description="Identifier of the player, BattleTag if found, else Blizzard hexadecimal ID",
+        examples=[
+            "TeKrop-2217",
+            "e651af82ba3ccafcbfa120%7C41daffa5861594b6cd5a6c27dc961232",
+        ],
     )
     name: str = Field(
         ...,
         description="Player nickname displayed in the game",
-        examples=["TeKrop#2217"],
+        examples=["TeKrop"],
     )
     avatar: HttpUrl | None = Field(
         None,
@@ -61,7 +64,10 @@ class PlayerShort(BaseModel):
         ...,
         title="Career URL",
         description="Player's career OverFast API URL (Get player career data)",
-        examples=["https://overfast-api.tekrop.fr/players/TeKrop-2217"],
+        examples=[
+            "https://overfast-api.tekrop.fr/players/TeKrop-2217",
+            "https://overfast-api.tekrop.fr/players/e651af82ba3ccafcbfa120%7C41daffa5861594b6cd5a6c27dc961232",
+        ],
     )
     blizzard_id: str = Field(
         ...,

@@ -1,8 +1,5 @@
 from typing import TYPE_CHECKING
 
-from fastapi import status
-
-from app.exceptions import ParserBlizzardError
 from app.overfast_logger import logger
 from app.parsers import HTMLParser
 from app.players.parsers.search_data_parser import SearchDataParser
@@ -36,12 +33,14 @@ class BasePlayerParser(HTMLParser):
         logger.info("Retrieving Player Summary...")
         self.player_data["summary"] = await self.__retrieve_player_summary_data()
 
-        # If the player doesn't exist, summary will be empty, raise associated error
+        # If the player wasn't found in search endpoint, we won't be able to
+        # use internal cache using the lastUpdated value.
         if not self.player_data["summary"]:
-            raise ParserBlizzardError(
-                status_code=status.HTTP_404_NOT_FOUND,
-                message="Player not found",
-            )
+            # Just retrieve and parse the page using the input player_id.
+            # It could either be a Battle Tag with a name used by several players,
+            # or the Blizzard ID retrieved from players search
+            await super().parse()
+            return
 
         logger.info("Checking Player Cache...")
         player_cache = self.cache_manager.get_player_cache(self.player_id)

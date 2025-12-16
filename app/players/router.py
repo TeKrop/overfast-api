@@ -45,9 +45,10 @@ async def get_player_common_parameters(
         title="Player unique name",
         description=(
             'Identifier of the player : BattleTag (with "#" replaced by "-"). '
+            "You can also put your username if you're the only one using it on Blizzard. "
             "Be careful, letter case (capital/non-capital letters) is important !"
         ),
-        examples=["TeKrop-2217"],
+        examples=["TeKrop-2217", "TeKrop"],
     ),
 ):
     return {"player_id": player_id}
@@ -103,7 +104,6 @@ router = APIRouter()
     summary="Search for a specific player",
     description=(
         "Search for a given player by using its username or BattleTag (with # replaced by -). "
-        "If you don't find the player by using the name, please try with the BattleTag. "
         "<br />You should be able to find the associated player_id to use in order to request career data."
         f"<br />**Cache TTL : {SearchPlayersController.get_human_readable_timeout()}.**"
     ),

@@ -20,6 +20,7 @@ class PlayerSearchParser(JSONParser):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.search_nickname = kwargs["name"]
+        self.search_name = kwargs["name"].split("-", 1)[0]
         self.order_by = kwargs.get("order_by")
         self.offset = kwargs.get("offset")
         self.limit = kwargs.get("limit")
@@ -30,7 +31,7 @@ class PlayerSearchParser(JSONParser):
         return f"{super().get_blizzard_url(**kwargs)}/{search_name}/"
 
     async def parse_data(self) -> dict:
-        # If provided search nickname is a battletag, filter the list
+        # First filter players given their name
         players = self.filter_players()
 
         # Transform into PlayerSearchResult format
@@ -50,14 +51,14 @@ class PlayerSearchParser(JSONParser):
         return players_list
 
     def filter_players(self) -> list[dict]:
-        """Filter players before transforming. If provided nickname is a battletag,
-        filter results by battle tags before returning them.
+        """Filter players before transforming. Ensure resulting players
+        have the exact same name, with same letter case.
         """
-        if "-" not in self.search_nickname:
-            return self.json_data
-
-        battletag = self.search_nickname.replace("-", "#")
-        return [player for player in self.json_data if player["battleTag"] == battletag]
+        return [
+            player
+            for player in self.json_data
+            if player["name"] == self.search_name and player["isPublic"] is True
+        ]
 
     def apply_transformations(self, players: Iterable[dict]) -> list[dict]:
         """Apply transformations to found players in order to return the data
@@ -66,7 +67,11 @@ class PlayerSearchParser(JSONParser):
         transformed_players = []
 
         for player in players:
-            player_id = player["battleTag"].replace("#", "-")
+            player_id = (
+                self.search_nickname
+                if len(players) == 1 and "-" in self.search_nickname
+                else player["url"]
+            )
 
             # Normalize optional fields that may be missing or inconsistently formatted
             # due to Blizzard's region-specific changes. In some regions, the "portrait"
@@ -81,7 +86,7 @@ class PlayerSearchParser(JSONParser):
             transformed_players.append(
                 {
                     "player_id": player_id,
-                    "name": player["battleTag"],
+                    "name": player["name"],
                     "avatar": player["avatar"],
                     "namecard": player.get("namecard"),
                     "title": get_player_title(player.get("title")),
