@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.28.1 (2025-12-16)
+
+### Bug Fixes
+
+- Fixed players search endpoint after Blizzard removal of Battle Tag on search
+  ([#338](https://github.com/TeKrop/overfast-api/pull/338),
+  [`d13e64c`](https://github.com/TeKrop/overfast-api/commit/d13e64cf17f8b446d6e0a497b5290732cdb6ea29))
+
+
 ## v3.28.0 (2025-12-11)
 
 ### Build System
