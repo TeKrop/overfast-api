@@ -63,7 +63,6 @@ async def test_unknown_player_parser_blizzard_error(
                 # Player profile page
                 Mock(status_code=status.HTTP_200_OK, text=player_html_data),
             ],
-            return_value=player_search_response_mock,
         ),
     ):
         await player_career_stats_parser.parse()
