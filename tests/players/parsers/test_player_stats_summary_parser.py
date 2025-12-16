@@ -40,20 +40,26 @@ async def test_player_page_parsing(
 
 
 @pytest.mark.parametrize(
-    ("player_stats_summary_parser"),
-    [(unknown_player_id)],
+    ("player_stats_summary_parser", "player_html_data"),
+    [(unknown_player_id, unknown_player_id)],
     indirect=True,
 )
 @pytest.mark.asyncio
 async def test_unknown_player_parser_blizzard_error(
     player_stats_summary_parser: PlayerStatsSummaryParser,
+    player_html_data: str,
     player_search_response_mock: Mock,
 ):
     with (
         pytest.raises(ParserBlizzardError),
         patch(
             "httpx.AsyncClient.get",
-            return_value=player_search_response_mock,
+            side_effect=[
+                # Players search call first
+                player_search_response_mock,
+                # Player profile page
+                Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+            ],
         ),
     ):
         await player_stats_summary_parser.parse()

@@ -122,10 +122,16 @@ def test_get_player_career_blizzard_forbidden_error(client: TestClient):
     }
 
 
-def test_get_player_parser_init_error(client: TestClient):
+@pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
+def test_get_player_parser_init_error(client: TestClient, player_html_data: str):
     with patch(
         "httpx.AsyncClient.get",
-        return_value=Mock(status_code=status.HTTP_200_OK, text="[]", json=list),
+        side_effect=[
+            # Players search call first
+            Mock(status_code=status.HTTP_200_OK, text="[]", json=list),
+            # Player profile page
+            Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+        ],
     ):
         response = client.get("/players/Unknown-1234")
         assert response.status_code == status.HTTP_404_NOT_FOUND
