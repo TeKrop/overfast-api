@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.parametrize(
     ("hero_name", "hero_html_data"),
-    [(h.value, h.value) for h in HeroKey],
+    [(h, h) for h in HeroKey],
     indirect=["hero_html_data"],
 )
 def test_get_hero(

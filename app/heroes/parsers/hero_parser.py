@@ -56,7 +56,7 @@ class HeroParser(HTMLParser):
     def __get_summary(self, overview_section: LexborNode) -> dict:
         header_section = overview_section.css_first("blz-header")
         extra_list_items = overview_section.css_first("blz-list").css("blz-list-item")
-        birthday, age = self.__get_birthday_and_age(
+        birthday, age = self._get_birthday_and_age(
             text=extra_list_items[2].css_first("p").text(), locale=self.locale
         )
 
@@ -72,7 +72,7 @@ class HeroParser(HTMLParser):
         }
 
     @staticmethod
-    def __get_birthday_and_age(
+    def _get_birthday_and_age(
         text: str, locale: Locale
     ) -> tuple[str | None, int | None]:
         """Get birthday and age from text for a given hero"""
@@ -176,13 +176,13 @@ class HeroParser(HTMLParser):
                     if button.attributes["analytics-label"] == "short-story"
                     else MediaType.COMIC
                 ),
-                "link": self.__get_full_url(button.attributes["href"]),
+                "link": self._get_full_url(button.attributes["href"]),
             }
 
         return None
 
     @staticmethod
-    def __get_full_url(url: str) -> str:
+    def _get_full_url(url: str) -> str:
         """Get full URL from extracted URL. If URL begins with /, we use the
         blizzard host to get the full URL"""
         return f"{settings.blizzard_host}{url}" if url.startswith("/") else url

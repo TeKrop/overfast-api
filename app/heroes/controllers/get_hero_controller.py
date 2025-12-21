@@ -40,7 +40,7 @@ class GetHeroController(AbstractController):
             portrait_value = None
         else:
             # We want to insert the portrait before the "role" key
-            hero_data = self.__dict_insert_value_before_key(
+            hero_data = self._dict_insert_value_before_key(
                 hero_data,
                 "role",
                 "portrait",
@@ -55,7 +55,7 @@ class GetHeroController(AbstractController):
             hitpoints = None
         else:
             # We want to insert hitpoints before "abilities" key
-            hero_data = self.__dict_insert_value_before_key(
+            hero_data = self._dict_insert_value_before_key(
                 hero_data,
                 "abilities",
                 "hitpoints",
@@ -65,7 +65,7 @@ class GetHeroController(AbstractController):
         return hero_data
 
     @staticmethod
-    def __dict_insert_value_before_key(
+    def _dict_insert_value_before_key(
         data: dict,
         key: str,
         new_key: str,

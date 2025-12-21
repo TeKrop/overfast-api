@@ -25,8 +25,8 @@ def test_get_maps(client: TestClient):
         assert path.is_file(), f"Screenshot file does not exist: {path}"
 
 
-@pytest.mark.parametrize("gamemode", [g.value for g in MapGamemode])
-def test_get_maps_filter_by_gamemode(client: TestClient, gamemode: MapGamemode):
+@pytest.mark.parametrize("gamemode", list(MapGamemode))
+def test_get_maps_filter_by_gamemode(client: TestClient, gamemode: str):
     response = client.get("/maps", params={"gamemode": gamemode})
     assert response.status_code == status.HTTP_200_OK
     assert all(gamemode in map_dict["gamemodes"] for map_dict in response.json())
