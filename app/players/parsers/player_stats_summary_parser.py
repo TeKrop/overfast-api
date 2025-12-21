@@ -99,6 +99,10 @@ class PlayerStatsSummaryParser(PlayerCareerParser):
 
         # Calculate special values (winrate, kda, averages)
         for hero_key, hero_stats in computed_heroes_stats.items():
+            # Ignore computation for heroes for which we don't have stats
+            if hero_stats["time_played"] <= 0:
+                continue
+
             computed_heroes_stats[hero_key]["winrate"] = self.__get_winrate_from_stat(
                 hero_stats,
             )

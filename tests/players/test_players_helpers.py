@@ -160,7 +160,7 @@ def test_get_hero_keyname(input_str: str, result: str):
         ),
     ],
 )
-def test_get_role_key_from_icon(icon_url: str, role: CompetitiveRole):
+def test_get_role_key_from_icon(icon_url: str, role: str):
     assert helpers.get_role_key_from_icon(icon_url) == role
 
 
@@ -171,7 +171,7 @@ def test_get_role_key_from_icon(icon_url: str, role: CompetitiveRole):
         ("stats-container option-1", "option-1"),
     ],
 )
-def test_get_stats_hero_class(hero_classes: list[str], result: str):
+def test_get_stats_hero_class(hero_classes: str, result: str):
     assert helpers.get_stats_hero_class(hero_classes) == result
 
 
@@ -235,8 +235,8 @@ def test_string_to_snakecase(input_str: str, result: str):
     assert helpers.string_to_snakecase(input_str) == result
 
 
-@pytest.mark.parametrize(("hero_key"), [(h.value) for h in HeroKey])
-def test_get_hero_role(hero_key: HeroKey):
+@pytest.mark.parametrize(("hero_key"), list(HeroKey))
+def test_get_hero_role(hero_key: str):
     try:
         helpers.get_hero_role(hero_key)
     except StopIteration:
