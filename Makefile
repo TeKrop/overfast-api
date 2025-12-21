@@ -38,9 +38,14 @@ start_testing: ## Run OverFastAPI application (testing mode)
 	@echo "Launching OverFastAPI (testing mode with reverse proxy)..."
 	$(DOCKER_COMPOSE) --profile testing up -d
 
-check: ## Run type checker
+check: ## Run type checker, CHECKER_ARGS can be specified
+ifdef CHECKER_ARGS
+	@echo "Running type checker on $(CHECKER_ARGS=)..."
+	uvx ty check $(CHECKER_ARGS)
+else
 	@echo "Running type checker..."
 	uvx ty check
+endif
 
 lint: ## Run linter
 	@echo "Running linter..."

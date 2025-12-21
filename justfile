@@ -30,9 +30,9 @@ start_testing:
     {{docker_compose}} --profile testing up -d
 
 # run type checker
-check:
-    @echo "Running type checker..."
-    uvx ty check
+check checker_args="":
+    @echo {{ if checker_args != "" { "Running type checker on " + checker_args + "..." } else { "Running type checker..." } }}
+    {{ if checker_args != "" { "uvx ty check " + checker_args } else { "uvx ty check" } }}
 
 # run linter
 lint:

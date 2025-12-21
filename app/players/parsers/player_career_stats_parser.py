@@ -24,9 +24,9 @@ class PlayerCareerStatsParser(PlayerCareerParser):
 
         # Only return heroes stats, which will be used for calculation
         # depending on the parameters
-        return self.__get_career_stats(self.get_stats())
+        return self.__get_career_summary_stats(self.get_stats())
 
-    def __get_career_stats(self, raw_stats: dict | None) -> dict | None:
+    def __get_career_summary_stats(self, raw_stats: dict | None) -> dict | None:
         if not raw_stats:
             return None
 
