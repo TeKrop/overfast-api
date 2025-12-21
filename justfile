@@ -29,6 +29,11 @@ start_testing:
     @echo "Launching OverFastAPI in testing mode with reverse proxy..."
     {{docker_compose}} --profile testing up -d
 
+# run type checker
+check:
+    @echo "Running type checker..."
+    uvx ty check
+
 # run linter
 lint:
     @echo "Running linter..."

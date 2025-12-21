@@ -57,7 +57,7 @@ def test_update_and_get_api_cache(
     cache_key: str,
     value: list,
     expire: int,
-    sleep_time: int | None,
+    sleep_time: int,
     expected: str | None,
 ):
     # Assert the value is not here before update

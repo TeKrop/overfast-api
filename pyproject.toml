@@ -38,6 +38,7 @@ dev = [
     "pyinstrument==5.1.*",
     "memray==1.19.*",
     "objgraph==3.6.*",
+    "ty==0.0.*",
 ]
 
 [tool.uv]

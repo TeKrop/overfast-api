@@ -38,6 +38,10 @@ start_testing: ## Run OverFastAPI application (testing mode)
 	@echo "Launching OverFastAPI (testing mode with reverse proxy)..."
 	$(DOCKER_COMPOSE) --profile testing up -d
 
+check: ## Run type checker
+	@echo "Running type checker..."
+	uvx ty check
+
 lint: ## Run linter
 	@echo "Running linter..."
 	uvx ruff check --fix --exit-non-zero-on-fix
