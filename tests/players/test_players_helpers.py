@@ -169,9 +169,10 @@ def test_get_role_key_from_icon(icon_url: str, role: str):
     [
         ("stats-container option-0 is-active", "option-0"),
         ("stats-container option-1", "option-1"),
+        (None, ""),
     ],
 )
-def test_get_stats_hero_class(hero_classes: str, result: str):
+def test_get_stats_hero_class(hero_classes: str | None, result: str):
     assert helpers.get_stats_hero_class(hero_classes) == result
 
 
@@ -194,9 +195,10 @@ def test_get_stats_hero_class(hero_classes: str, result: str):
             "https://static.playoverwatch.com/img/pages/career/icons/rank/6b6e7959d4.png",
             0,
         ),
+        (None, 0),
     ],
 )
-def test_get_tier_from_icon(tier_url: str, tier: int):
+def test_get_tier_from_icon(tier_url: str | None, tier: int):
     assert helpers.get_tier_from_icon(tier_url) == tier
 
 

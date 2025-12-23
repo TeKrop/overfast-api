@@ -281,10 +281,10 @@ class PlayerCareerParser(BasePlayerParser):
         PC players, svg for console players
         """
         if role_div := role_wrapper.css_first("div.Profile-playerSummary--role"):
-            return role_div.css_first("img").attributes["src"]
+            return role_div.css_first("img").attributes["src"] or ""
 
         role_svg = role_wrapper.css_first("svg.Profile-playerSummary--role")
-        return role_svg.css_first("use").attributes["xlink:href"]
+        return role_svg.css_first("use").attributes["xlink:href"] or ""
 
     def get_stats(self) -> dict | None:
         # If the user filtered the page on summary, no need to parse the stats
@@ -380,7 +380,8 @@ class PlayerCareerParser(BasePlayerParser):
             }
             for category in top_heroes_section.iter()
             if (
-                "Profile-progressBars" in category.attributes["class"]
+                category.attributes["class"] is not None
+                and "Profile-progressBars" in category.attributes["class"]
                 and category.attributes["data-category-id"] in categories
             )
         }
@@ -435,7 +436,8 @@ class PlayerCareerParser(BasePlayerParser):
                     },
                 )
                 for stat_row in content_div.iter():
-                    if "stat-item" not in stat_row.attributes["class"]:
+                    stat_row_class = stat_row.attributes["class"] or ""
+                    if "stat-item" not in stat_row_class:
                         continue
 
                     stat_name = stat_row.first_child.text()
