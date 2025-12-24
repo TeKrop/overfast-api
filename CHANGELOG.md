@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.29.1 (2025-12-24)
+
+### Bug Fixes
+
+- Added unknown players negative caching to improve performances
+  ([#340](https://github.com/TeKrop/overfast-api/pull/340),
+  [`fe66b14`](https://github.com/TeKrop/overfast-api/commit/fe66b142680b8b30bf913eb5afdc2099e39597a9))
+
+
 ## v3.29.0 (2025-12-24)
 
 ### Features
