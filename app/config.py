@@ -122,6 +122,12 @@ class Settings(BaseSettings):
     # Cache TTL for hero stats data (seconds)
     hero_stats_cache_timeout: int = 3600
 
+    # Cache key for unknown players cache in Redis.
+    unknown_players_cache_key_prefix: str = "unknown-players-cache"
+
+    # Cache TTL for not unknown players (seconds)
+    unknown_players_cache_timeout: int = 3600
+
     ############
     # BLIZZARD
     ############

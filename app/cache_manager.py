@@ -141,3 +141,17 @@ class CacheManager(metaclass=Singleton):
             value=0,
             ex=settings.blizzard_rate_limit_retry_after,
         )
+
+    @valkey_connection_handler
+    def is_player_unknown(self, player_id: str) -> bool:
+        return self.valkey_server.exists(
+            f"{settings.unknown_players_cache_key_prefix}:{player_id}"
+        )
+
+    @valkey_connection_handler
+    def set_player_as_unknown(self, player_id: str) -> None:
+        self.valkey_server.set(
+            f"{settings.unknown_players_cache_key_prefix}:{player_id}",
+            value=0,
+            ex=settings.unknown_players_cache_timeout,
+        )

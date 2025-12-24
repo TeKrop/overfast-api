@@ -1,9 +1,5 @@
 """Player stats summary Parser module"""
 
-from fastapi import status
-
-from app.exceptions import ParserBlizzardError
-
 from .player_career_parser import PlayerCareerParser
 
 
@@ -13,16 +9,8 @@ class PlayerCareerStatsParser(PlayerCareerParser):
     def filter_request_using_query(self, **_) -> dict:
         return self._filter_stats() if self.data else {}
 
-    async def parse_data(self) -> dict | None:
-        # We must check if we have the expected section for profile. If not,
-        # it means the player doesn't exist or hasn't been found.
-        if not self.root_tag.css_first("blz-section.Profile-masthead"):
-            raise ParserBlizzardError(
-                status_code=status.HTTP_404_NOT_FOUND,
-                message="Player not found",
-            )
-
-        # Only return heroes stats, which will be used for calculation
+    def _compute_parsed_data(self) -> dict | None:
+        # Only return career stats, which will be used for calculation
         # depending on the parameters
         return self.__get_career_stats(self.get_stats())
 
