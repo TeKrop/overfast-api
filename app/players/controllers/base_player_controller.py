@@ -2,6 +2,7 @@
 
 from fastapi import HTTPException, status
 
+from app.config import settings
 from app.controllers import AbstractController
 from app.overfast_logger import logger
 
@@ -16,6 +17,10 @@ class BasePlayerController(AbstractController):
         """Process request as usual, but ensure to properly handle players
         we already know aren't existing to prevent spamming Blizzard.
         """
+
+        # Ensure unknown players caching system is enabled
+        if not settings.unknown_players_cache_enabled:
+            return await super().process_request(**kwargs)
 
         # First check if player is known to not exist
         player_id = kwargs["player_id"]

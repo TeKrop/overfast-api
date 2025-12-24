@@ -153,7 +153,7 @@ class PlayerCareerParser(BasePlayerParser):
         # Return the right parsed data
         return self._compute_parsed_data()
 
-    def _compute_parsed_data(self) -> dict:
+    def _compute_parsed_data(self) -> dict | None:
         return {"summary": self.__get_summary(), "stats": self.get_stats()}
 
     def __get_summary(self) -> dict:
