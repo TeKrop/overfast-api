@@ -123,6 +123,19 @@ class Settings(BaseSettings):
     hero_stats_cache_timeout: int = 3600
 
     ############
+    # UNKNOWN PLAYERS SYSTEM
+    ############
+
+    # Indicate if unknown players cache is enabled or not
+    unknown_players_cache_enabled: bool = True
+
+    # Cache key for unknown players cache in Redis.
+    unknown_players_cache_key_prefix: str = "unknown-players-cache"
+
+    # Cache TTL for not unknown players (seconds)
+    unknown_players_cache_timeout: int = 3600
+
+    ############
     # BLIZZARD
     ############
 
