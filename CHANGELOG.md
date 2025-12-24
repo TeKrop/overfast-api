@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.29.0 (2025-12-24)
+
+### Features
+
+- **maps**: Added Wuxing University ([#339](https://github.com/TeKrop/overfast-api/pull/339),
+  [`52d90fa`](https://github.com/TeKrop/overfast-api/commit/52d90fa561edc91b9746e91734044cdbb5ef5ba6))
+
+
 ## v3.28.1 (2025-12-16)
 
 ### Bug Fixes
