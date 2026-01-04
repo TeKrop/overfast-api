@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.30.0 (2026-01-04)
+
+### Features
+
+- **monitoring**: Added Sentry support for monitoring
+  ([#341](https://github.com/TeKrop/overfast-api/pull/341),
+  [`0bf2f26`](https://github.com/TeKrop/overfast-api/commit/0bf2f261d7e41c177a6ab10ad9f23562c10b4baf))
+
+
 ## v3.29.1 (2025-12-24)
 
 ### Bug Fixes
