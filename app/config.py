@@ -179,6 +179,13 @@ class Settings(BaseSettings):
     discord_message_on_rate_limit: bool = False
 
     ############
+    # SENTRY CONFIGURATION
+    ############
+
+    # Sentry DSN
+    sentry_dsn: str = ""
+
+    ############
     # LOCAL
     ############
 
