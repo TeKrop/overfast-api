@@ -13,6 +13,7 @@
 ## Table of contents
 * [✨ Live instance](#-live-instance)
 * [🐋 Run for production](#-run-for-production)
+* [🌐 Deploy to Hetzner Cloud](#-deploy-to-hetzner-cloud)
 * [💽 Run as developer](#-run-as-developer)
 * [👨‍💻 Technical details](#-technical-details)
 * [🐍 Architecture](#-architecture)
@@ -40,6 +41,149 @@ You can also use the `Makefile` alternative :
 
 ```shell
 make up
+```
+
+## 🌐 Deploy to Hetzner Cloud
+
+This section documents how to deploy OverFast API to a Hetzner Cloud VPS with Docker and HTTPS.
+
+### Server Requirements
+
+| Component | Recommended |
+|-----------|-------------|
+| Plan | CX33 (4 vCPU, 8GB RAM) |
+| OS | Ubuntu 24.04 with Docker CE |
+| Cost | ~€5.49/month |
+
+### Initial Server Setup
+
+1. **Create Server** in [Hetzner Cloud Console](https://console.hetzner.cloud):
+   - Select **Apps → Docker CE** image
+   - Choose **CX33** or higher
+   - Add your SSH key
+   - Configure Cloud Firewall (allow ports 22, 80, 443)
+
+2. **SSH into server** and clone the repository:
+   ```bash
+   ssh root@YOUR_SERVER_IP
+   cd /opt
+   git clone https://github.com/YOUR_USERNAME/overfast-api.git
+   cd overfast-api
+   ```
+
+3. **Configure environment**:
+   ```bash
+   cp .env.dist .env
+   nano .env
+   ```
+
+   Update these values:
+   ```bash
+   APP_PORT=8080  # Use 8080 if using Caddy for HTTPS
+   APP_BASE_URL=https://your-domain.com
+   ```
+
+4. **Build and start**:
+   ```bash
+   docker compose build
+   docker compose up -d
+   ```
+
+5. **Create systemd service** for auto-start on reboot:
+   ```bash
+   cat > /etc/systemd/system/overfast-api.service << 'EOF'
+   [Unit]
+   Description=OverFast API
+   Requires=docker.service
+   After=docker.service
+
+   [Service]
+   Type=oneshot
+   RemainAfterExit=yes
+   WorkingDirectory=/opt/overfast-api
+   ExecStart=/usr/bin/docker compose up -d
+   ExecStop=/usr/bin/docker compose down
+   TimeoutStartSec=0
+
+   [Install]
+   WantedBy=multi-user.target
+   EOF
+
+   systemctl daemon-reload
+   systemctl enable overfast-api
+   systemctl start overfast-api
+   ```
+
+### HTTPS with Caddy (Optional)
+
+To add automatic HTTPS with a custom domain:
+
+1. **Install Caddy**:
+   ```bash
+   apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+   apt update && apt install -y caddy
+   ```
+
+2. **Configure Caddy** (`/etc/caddy/Caddyfile`):
+   ```
+   your-domain.com {
+       reverse_proxy localhost:8080
+   }
+
+   www.your-domain.com {
+       redir https://your-domain.com{uri} permanent
+   }
+   ```
+
+3. **Start Caddy**:
+   ```bash
+   systemctl restart caddy
+   ```
+
+Caddy automatically obtains and renews SSL certificates from Let's Encrypt.
+
+### Updating the Deployment
+
+**Update from your fork:**
+```bash
+cd /opt/overfast-api
+git pull
+docker compose down
+docker compose build
+docker compose up -d
+```
+
+**Sync with upstream (original repo):**
+```bash
+cd /opt/overfast-api
+git remote add upstream https://github.com/TeKrop/overfast-api.git  # Only once
+git fetch upstream
+git merge upstream/main
+docker compose down
+docker compose build
+docker compose up -d
+```
+
+### Useful Commands
+
+```bash
+# Check container status
+docker compose ps
+
+# View logs
+docker compose logs -f
+
+# Restart services
+docker compose restart
+
+# Check systemd service
+systemctl status overfast-api
+
+# Check Caddy status (if using HTTPS)
+systemctl status caddy
+journalctl -u caddy -f
 ```
 
 ## 💽 Run as developer
