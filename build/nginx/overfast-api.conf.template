@@ -17,6 +17,7 @@ server_tokens off;
 
 server {
   listen 80;
+  server_name localhost api.*;
 
   # Use nginx to serve static content
   location /static {
