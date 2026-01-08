@@ -17,7 +17,7 @@ server_tokens off;
 
 server {
   listen 80;
-  server_name localhost api.*;
+  server_name localhost api.mercy-stats.app;
 
   # Use nginx to serve static content
   location /static {
