@@ -2,6 +2,32 @@
 
 <!-- version list -->
 
+## v3.30.0 (2026-01-04)
+
+### Features
+
+- **monitoring**: Added Sentry support for monitoring
+  ([#341](https://github.com/TeKrop/overfast-api/pull/341),
+  [`0bf2f26`](https://github.com/TeKrop/overfast-api/commit/0bf2f261d7e41c177a6ab10ad9f23562c10b4baf))
+
+
+## v3.29.1 (2025-12-24)
+
+### Bug Fixes
+
+- Added unknown players negative caching to improve performances
+  ([#340](https://github.com/TeKrop/overfast-api/pull/340),
+  [`fe66b14`](https://github.com/TeKrop/overfast-api/commit/fe66b142680b8b30bf913eb5afdc2099e39597a9))
+
+
+## v3.29.0 (2025-12-24)
+
+### Features
+
+- **maps**: Added Wuxing University ([#339](https://github.com/TeKrop/overfast-api/pull/339),
+  [`52d90fa`](https://github.com/TeKrop/overfast-api/commit/52d90fa561edc91b9746e91734044cdbb5ef5ba6))
+
+
 ## v3.28.1 (2025-12-16)
 
 ### Bug Fixes

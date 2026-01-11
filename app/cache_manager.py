@@ -128,7 +128,7 @@ class CacheManager(metaclass=Singleton):
 
     @valkey_connection_handler
     def is_being_rate_limited(self) -> bool:
-        return self.valkey_server.exists(settings.blizzard_rate_limit_key)
+        return bool(self.valkey_server.exists(settings.blizzard_rate_limit_key))
 
     @valkey_connection_handler
     def get_global_rate_limit_remaining_time(self) -> int:
@@ -140,4 +140,20 @@ class CacheManager(metaclass=Singleton):
             settings.blizzard_rate_limit_key,
             value=0,
             ex=settings.blizzard_rate_limit_retry_after,
+        )
+
+    @valkey_connection_handler
+    def is_player_unknown(self, player_id: str) -> bool:
+        return bool(
+            self.valkey_server.exists(
+                f"{settings.unknown_players_cache_key_prefix}:{player_id}"
+            )
+        )
+
+    @valkey_connection_handler
+    def set_player_as_unknown(self, player_id: str) -> None:
+        self.valkey_server.set(
+            f"{settings.unknown_players_cache_key_prefix}:{player_id}",
+            value=0,
+            ex=settings.unknown_players_cache_timeout,
         )

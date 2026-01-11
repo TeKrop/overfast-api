@@ -109,11 +109,11 @@ def get_hero_keyname(input_str: str) -> str:
 
 def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:
     """Extract role key from the role icon."""
-    icon_role_key = icon_url.split("/")[-1].split("-")[0]
+    icon_role_key = icon_url.split("/")[-1].split("-")[0].upper()
     return (
         CompetitiveRole.DAMAGE
-        if icon_role_key == "offense"
-        else CompetitiveRole(icon_role_key)
+        if icon_role_key == "OFFENSE"
+        else CompetitiveRole[icon_role_key]
     )
 
 

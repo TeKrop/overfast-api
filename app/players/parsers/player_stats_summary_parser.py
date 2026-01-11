@@ -4,9 +4,6 @@ from collections import defaultdict
 from copy import deepcopy
 from typing import ClassVar
 
-from fastapi import status
-
-from app.exceptions import ParserBlizzardError
 from app.roles.enums import Role
 
 from ..enums import HeroKey, PlayerGamemode, PlayerPlatform
@@ -67,19 +64,6 @@ class PlayerStatsSummaryParser(PlayerCareerParser):
             "roles": roles_stats,
             "heroes": heroes_stats,
         }
-
-    async def parse_data(self) -> dict | None:
-        # We must check if we have the expected section for profile. If not,
-        # it means the player doesn't exist or hasn't been found.
-        if not self.root_tag.css_first("blz-section.Profile-masthead"):
-            raise ParserBlizzardError(
-                status_code=status.HTTP_404_NOT_FOUND,
-                message="Player not found",
-            )
-
-        # Only return heroes stats, which will be used for calculation
-        # depending on the parameters
-        return self.__get_heroes_stats(self.get_stats())
 
     def __compute_heroes_data(
         self,
@@ -170,6 +154,11 @@ class PlayerStatsSummaryParser(PlayerCareerParser):
             return next(stat_value)["value"]
         except StopIteration:
             return 0
+
+    def _compute_parsed_data(self) -> dict | None:
+        # Only return heroes stats, which will be used for calculation
+        # depending on the parameters
+        return self.__get_heroes_stats(self.get_stats())
 
     def __get_heroes_stats(self, raw_stats: dict | None) -> dict | None:
         if not raw_stats:

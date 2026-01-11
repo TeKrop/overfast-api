@@ -60,25 +60,19 @@ class MemrayInMemoryMiddleware(OverFastMiddleware):  # pragma: no cover
             tmp_html_path = Path(tmp_html_file.name)
 
         # Use subprocess to call memray CLI to generate HTML flamegraph
-        try:
-            subprocess.run(  # noqa: S603
-                [
-                    "/bin/uv",
-                    "run",
-                    "memray",
-                    "flamegraph",
-                    "-o",
-                    str(tmp_html_path),
-                    str(tmp_bin_path),
-                ],
-                check=True,
-            )
-            # Read the generated HTML content
-            html_content = tmp_html_path.read_text()
-        finally:
-            pass
-
-        return html_content
+        subprocess.run(  # noqa: S603
+            [
+                "/bin/uv",
+                "run",
+                "memray",
+                "flamegraph",
+                "-o",
+                str(tmp_html_path),
+                str(tmp_bin_path),
+            ],
+            check=True,
+        )
+        return tmp_html_path.read_text()
 
 
 class PyInstrumentMiddleware(OverFastMiddleware):  # pragma: no cover

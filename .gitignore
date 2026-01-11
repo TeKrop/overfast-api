@@ -129,3 +129,12 @@ dump.rdb
 
 # Loguru gzipped logs
 *.log.gz
+
+# Zed editor
+.zed/
+
+# uv related folders and files
+.uv-*/
+
+# ruff related folders
+.ruff_*/
