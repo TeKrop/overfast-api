@@ -1,6 +1,6 @@
 """Player profile page Parser module"""
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from fastapi import status
 
@@ -50,22 +50,21 @@ class PlayerCareerParser(BasePlayerParser):
         404,  # Player Not Found response, we want to handle it here
     ]
 
-    # Filters coming from user query
-    filters: ClassVar[dict[str, bool | str]]
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.data: dict[str, Any] = {}
         self._init_filters(**kwargs)
 
     def _init_filters(self, **kwargs) -> None:
-        self.filters = {
+        # Filters coming from user query
+        self.filters: dict[str, bool | str] = {
             filter_key: kwargs.get(filter_key)
             for filter_key in ("summary", "stats", "platform", "gamemode", "hero")
         }
 
     def filter_request_using_query(self, **_) -> dict:
         if self.filters["summary"]:
-            return self.data.get("summary")
+            return self.data.get("summary") or {}
 
         if self.filters["stats"]:
             return self._filter_stats()
@@ -202,9 +201,12 @@ class PlayerCareerParser(BasePlayerParser):
         if not endorsement_span:
             return None
 
-        endorsement_frame_url = endorsement_span.css_first(
-            "img.Profile-playerSummary--endorsement"
-        ).attributes["src"]
+        endorsement_frame_url = (
+            endorsement_span.css_first(
+                "img.Profile-playerSummary--endorsement"
+            ).attributes["src"]
+            or ""
+        )
 
         return {
             "level": get_endorsement_value_from_frame(endorsement_frame_url),
@@ -244,8 +246,8 @@ class PlayerCareerParser(BasePlayerParser):
 
             rank_tier_icons = role_wrapper.css("img.Profile-playerSummary--rank")
             rank_icon, tier_icon = (
-                rank_tier_icons[0].attributes["src"],
-                rank_tier_icons[1].attributes["src"],
+                rank_tier_icons[0].attributes["src"] or "",
+                rank_tier_icons[1].attributes["src"] or "",
             )
 
             competitive_ranks[role_key] = {
@@ -329,7 +331,7 @@ class PlayerCareerParser(BasePlayerParser):
         if self.filters["gamemode"] and self.filters["gamemode"] != gamemode:
             return None
 
-        if not statistics_section:
+        if not statistics_section or not statistics_section.first_child:
             return None
 
         top_heroes_section = statistics_section.first_child.css_first(
@@ -380,6 +382,10 @@ class PlayerCareerParser(BasePlayerParser):
                     for progress_bar in category.iter()
                     for progress_bar_container in progress_bar.iter()
                     if progress_bar_container.tag == "div"
+                    and progress_bar_container.first_child is not None
+                    and progress_bar_container.last_child is not None
+                    and progress_bar_container.last_child.first_child is not None
+                    and progress_bar_container.last_child.last_child is not None
                 ],
             }
             for category in top_heroes_section.iter()
