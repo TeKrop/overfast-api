@@ -17,7 +17,7 @@ from app.heroes.parsers.hero_parser import HeroParser
 )
 @pytest.mark.asyncio
 async def test_hero_page_parsing(
-    hero_parser: HeroParser, hero_key: str, hero_html_data: str
+    hero_parser: HeroParser, hero_key: HeroKey, hero_html_data: str
 ):
     if not hero_html_data:
         pytest.skip("Hero HTML file not saved yet, skipping")

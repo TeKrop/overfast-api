@@ -157,7 +157,7 @@ def remove_accents(input_str: str) -> str:
 
 
 @cache
-def get_hero_role(hero_key: str) -> Role:
+def get_hero_role(hero_key: HeroKey) -> Role:
     """Get the role of a given hero based on the CSV file"""
     heroes_data = read_csv_data_file("heroes")
     role_key = next(

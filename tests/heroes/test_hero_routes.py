@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 )
 def test_get_hero(
     client: TestClient,
-    hero_name: str,
+    hero_name: HeroKey,
     hero_html_data: str,
     heroes_html_data: str,
 ):
@@ -106,7 +106,7 @@ def test_get_hero_blizzard_forbidden_error(client: TestClient):
 )
 def test_get_hero_no_portrait(
     client: TestClient,
-    hero_name: str,
+    hero_name: HeroKey,
     hero_html_data: str,
     heroes_html_data: str,
 ):
@@ -135,7 +135,7 @@ def test_get_hero_no_portrait(
 )
 def test_get_hero_no_hitpoints(
     client: TestClient,
-    hero_name: str,
+    hero_name: HeroKey,
     hero_html_data: str,
     heroes_html_data: str,
 ):
