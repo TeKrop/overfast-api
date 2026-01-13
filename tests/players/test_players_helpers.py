@@ -144,23 +144,23 @@ def test_get_hero_keyname(input_str: str, result: str):
     [
         (
             "https://static.playoverwatch.com/img/pages/career/icons/role/offense-ab1756f419.svg#icon",
-            CompetitiveRole.DAMAGE,
+            CompetitiveRole.DAMAGE,  # ty: ignore[unresolved-attribute]
         ),
         (
             "https://static.playoverwatch.com/img/pages/career/icons/role/tank-f64702b684.svg#icon",
-            CompetitiveRole.TANK,
+            CompetitiveRole.TANK,  # ty: ignore[unresolved-attribute]
         ),
         (
             "https://static.playoverwatch.com/img/pages/career/icons/role/support-0258e13d85.svg#icon",
-            CompetitiveRole.SUPPORT,
+            CompetitiveRole.SUPPORT,  # ty: ignore[unresolved-attribute]
         ),
         (
             "https://static.playoverwatch.com/img/pages/career/icons/role/open-163b3b8ddc.svg#icon",
-            CompetitiveRole.OPEN,
+            CompetitiveRole.OPEN,  # ty: ignore[unresolved-attribute]
         ),
     ],
 )
-def test_get_role_key_from_icon(icon_url: str, role: CompetitiveRole):
+def test_get_role_key_from_icon(icon_url: str, role: CompetitiveRole):  # ty: ignore[invalid-type-form]
     assert helpers.get_role_key_from_icon(icon_url) == role
 
 
@@ -238,7 +238,7 @@ def test_string_to_snakecase(input_str: str, result: str):
 
 
 @pytest.mark.parametrize(("hero_key"), list(HeroKey))
-def test_get_hero_role(hero_key: HeroKey):
+def test_get_hero_role(hero_key: HeroKey):  # ty: ignore[invalid-type-form]
     try:
         helpers.get_hero_role(hero_key)
     except StopIteration:

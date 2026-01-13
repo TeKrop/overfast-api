@@ -26,7 +26,7 @@ def test_get_maps(client: TestClient):
 
 
 @pytest.mark.parametrize("gamemode", list(MapGamemode))
-def test_get_maps_filter_by_gamemode(client: TestClient, gamemode: MapGamemode):
+def test_get_maps_filter_by_gamemode(client: TestClient, gamemode: MapGamemode):  # ty: ignore[invalid-type-form]
     response = client.get("/maps", params={"gamemode": gamemode})
     assert response.status_code == status.HTTP_200_OK
     assert all(gamemode in map_dict["gamemodes"] for map_dict in response.json())
