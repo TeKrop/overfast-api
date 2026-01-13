@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 class BasePlayerParser(HTMLParser):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.player_id = kwargs.get("player_id")
+        self.player_id = kwargs["player_id"]
 
         # Player Data is made of two sets of data :
         # - summary, retrieve from players search endpoint
@@ -19,7 +19,7 @@ class BasePlayerParser(HTMLParser):
         self.player_data = {"summary": None, "profile": None}
 
     def get_blizzard_url(self, **kwargs) -> str:
-        return f"{super().get_blizzard_url(**kwargs)}/{kwargs.get('player_id')}/"
+        return f"{super().get_blizzard_url(**kwargs)}/{kwargs['player_id']}/"
 
     def store_response_data(self, response: httpx.Response) -> None:
         """Store HTML data in player_data to save for Player Cache"""

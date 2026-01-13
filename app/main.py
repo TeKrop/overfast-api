@@ -162,7 +162,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 # Add customized OpenAPI specs with app logo
-def custom_openapi():  # pragma: no cover
+def custom_openapi() -> dict[str, Any]:  # pragma: no cover
     if app.openapi_schema:
         return app.openapi_schema
 
@@ -217,7 +217,7 @@ async def pydantic_validation_error_handler(
 # We need to override default Redoc page in order to be
 # able to customize the favicon, same for Swagger
 common_doc_settings = {
-    "openapi_url": app.openapi_url,
+    "openapi_url": str(app.openapi_url),
     "title": f"{app.title} - Documentation",
     "favicon_url": "/static/favicon.png",
 }

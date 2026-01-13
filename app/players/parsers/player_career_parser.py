@@ -6,6 +6,7 @@ from fastapi import status
 
 from app.config import settings
 from app.exceptions import ParserBlizzardError
+from app.overfast_logger import logger
 
 from ..enums import (
     CareerHeroesComparisonsCategory,
@@ -160,6 +161,7 @@ class PlayerCareerParser(BasePlayerParser):
         if self.filters["stats"]:
             return {}
 
+        player_summary = self.player_data.get("summary") or {}
         profile_div = self.root_tag.css_first(
             "blz-section.Profile-masthead > div.Profile-player"
         )
@@ -169,19 +171,18 @@ class PlayerCareerParser(BasePlayerParser):
         return {
             "username": summary_div.css_first("h1.Profile-player--name").text(),
             "avatar": (
-                self.player_data["summary"].get("avatar")
+                player_summary.get("avatar")
                 or summary_div.css_first("img.Profile-player--portrait").attributes.get(
                     "src"
                 )
             ),
-            "namecard": self.player_data["summary"].get("namecard"),
+            "namecard": player_summary.get("namecard"),
             "title": get_player_title(
-                self.player_data["summary"].get("title")
-                or self.__get_title(profile_div)
+                player_summary.get("title") or self.__get_title(profile_div)
             ),
             "endorsement": self.__get_endorsement(progression_div),
             "competitive": self.__get_competitive_ranks(progression_div),
-            "last_updated_at": self.player_data["summary"].get("lastUpdated"),
+            "last_updated_at": player_summary.get("lastUpdated"),
         }
 
     @staticmethod
@@ -435,6 +436,15 @@ class PlayerCareerParser(BasePlayerParser):
                 # Content div should be the only child ("content" class)
                 content_div = card_stat.first_child
 
+                # Ensure we have everything we need
+                if (
+                    not content_div
+                    or not content_div.first_child
+                    or not content_div.first_child.first_child
+                ):
+                    logger.warning(f"Missing content div for hero {hero_key}")
+                    continue
+
                 # Label should be the first div within content ("header" class)
                 category_label = content_div.first_child.first_child.text()
 
@@ -448,6 +458,10 @@ class PlayerCareerParser(BasePlayerParser):
                 for stat_row in content_div.iter():
                     stat_row_class = stat_row.attributes["class"] or ""
                     if "stat-item" not in stat_row_class:
+                        continue
+
+                    if not stat_row.first_child or not stat_row.last_child:
+                        logger.warning(f"Missing stat name or value in {stat_row}")
                         continue
 
                     stat_name = stat_row.first_child.text()

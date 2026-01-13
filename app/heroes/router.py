@@ -101,10 +101,10 @@ async def get_hero_stats(
         Role | None, Query(title="Role filter", examples=["support"])
     ] = None,
     map_: Annotated[
-        MapKey | None, Query(alias="map", title="Map key filter", examples=["hanaoka"])
+        MapKey | None, Query(alias="map", title="Map key filter", examples=["hanaoka"])  # ty: ignore[invalid-type-form]
     ] = None,
     competitive_division: Annotated[
-        CompetitiveDivisionFilter | None,
+        CompetitiveDivisionFilter | None,  # ty: ignore[invalid-type-form]
         Query(
             title="Competitive division filter",
             examples=["diamond"],
@@ -150,7 +150,7 @@ async def get_hero_stats(
 async def get_hero(
     request: Request,
     response: Response,
-    hero_key: Annotated[HeroKey, Path(title="Key name of the hero")],
+    hero_key: Annotated[HeroKey, Path(title="Key name of the hero")],  # ty: ignore[invalid-type-form]
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,

@@ -14,7 +14,7 @@ FLOAT_PATTERN = re.compile(r"^-?\d+(,\d+)*\.\d+$")
 
 
 @cache
-def get_hero_name(hero_key: HeroKey) -> str:
+def get_hero_name(hero_key: HeroKey) -> str:  # ty: ignore[invalid-type-form]
     """Get a hero name based on the CSV file"""
     heroes_data = read_csv_data_file("heroes")
     return next(
@@ -107,7 +107,7 @@ def get_hero_keyname(input_str: str) -> str:
     return string_to_snakecase(input_str).replace("_", "-")
 
 
-def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:
+def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:  # ty: ignore[invalid-type-form]
     """Extract role key from the role icon."""
     icon_role_key = icon_url.split("/")[-1].split("-")[0].upper()
     return (
@@ -157,7 +157,7 @@ def remove_accents(input_str: str) -> str:
 
 
 @cache
-def get_hero_role(hero_key: HeroKey) -> Role:
+def get_hero_role(hero_key: HeroKey) -> Role:  # ty: ignore[invalid-type-form]
     """Get the role of a given hero based on the CSV file"""
     heroes_data = read_csv_data_file("heroes")
     role_key = next(

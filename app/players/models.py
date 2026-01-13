@@ -189,7 +189,7 @@ class PlayerEndorsement(BaseModel):
 
 
 class HeroStat(BaseModel):
-    hero: HeroKey = Field(...)
+    hero: HeroKey = Field(...)  # ty: ignore[invalid-type-form]
     value: StrictInt | StrictFloat = Field(
         ...,
         description=(
@@ -339,7 +339,7 @@ class HeroCareerStats(BaseModel):
     )
 
 
-CareerStats = create_model(
+CareerStats = create_model(  # ty: ignore[no-matching-overload]
     "CareerStats",
     __config__=ConfigDict(json_schema_extra={"example": CareerStatsExample}),
     all_heroes=(
@@ -506,7 +506,7 @@ class PlayerRolesStats(BaseModel):
     )
 
 
-PlayerHeroesStats = create_model(
+PlayerHeroesStats = create_model(  # ty: ignore[no-matching-overload]
     "PlayerHeroesStats",
     **{
         hero_key.name.lower(): (
@@ -545,7 +545,7 @@ class PlayerStatsSummary(BaseModel):
 
 
 # Player career stats
-HeroPlayerCareerStats = create_model(
+HeroPlayerCareerStats = create_model(  # ty: ignore[no-matching-overload]
     "HeroPlayerCareerStats",
     **{
         stat_category.name.lower(): (
@@ -563,7 +563,7 @@ HeroPlayerCareerStats = create_model(
 )
 
 
-PlayerCareerStats = create_model(
+PlayerCareerStats = create_model(  # ty: ignore[no-matching-overload]
     "PlayerCareerStats",
     __config__=ConfigDict(json_schema_extra={"example": PlayerCareerStatsExample}),
     all_heroes=(

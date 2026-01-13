@@ -8,6 +8,7 @@ from fastapi import status
 from app.config import settings
 from app.enums import Locale
 from app.exceptions import ParserBlizzardError
+from app.overfast_logger import logger
 from app.parsers import HTMLParser
 from app.roles.helpers import get_role_from_icon_url
 
@@ -170,6 +171,10 @@ class HeroParser(HTMLParser):
             }
 
         if button := showcase_section.css_first("blz-button"):
+            if not button.attributes["href"]:
+                logger.warning("Missing href attribute in button element")
+                return None
+
             return {
                 "type": (
                     MediaType.SHORT_STORY

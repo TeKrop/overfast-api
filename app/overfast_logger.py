@@ -2,14 +2,12 @@
 
 import logging
 import sys
-from typing import TYPE_CHECKING, ClassVar
+from pathlib import Path
+from typing import ClassVar
 
 from loguru import logger as loguru_logger
 
 from .config import settings
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 class InterceptHandler(logging.Handler):
@@ -47,7 +45,7 @@ class OverFastLogger:
     @classmethod
     def make_logger(cls):
         return cls.customize_logging(
-            f"{settings.logs_root_path}/access.log",
+            Path(f"{settings.logs_root_path}/access.log"),
             level=settings.log_level,
             rotation="1 day",
             retention="1 year",
