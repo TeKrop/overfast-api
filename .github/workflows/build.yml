@@ -2,13 +2,13 @@ name: "Build"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
-    name: Ruff & Pytest
+    name: ruff, ty & pytest
     runs-on: ubuntu-latest
 
     strategy:
@@ -17,48 +17,51 @@ jobs:
         uv-version: ["0.9.2"]
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up uv
-      uses: astral-sh/setup-uv@v3
-      with:
-        version: "${{ matrix.uv-version }}"
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "${{ matrix.uv-version }}"
 
-    - name: Set up Python ${{ matrix.python-version }}
-      run: uv python install ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
 
-    - name: Install the project
-      run: uv sync --frozen --no-cache
+      - name: Install the project
+        run: uv sync --frozen --no-cache
 
-    - name: Run Ruff code analysis
-      run: uv run ruff check .
+      - name: Run ruff code analysis
+        run: uv run ruff check .
 
-    - name: Run tests suite
-      run: |
-        PYTHONPATH=app/ uv run python -m pytest -v --cov-fail-under=80 --cov-report=html --cov=app/ tests/
-        PERCENT=$(cat htmlcov/index.html | grep "pc_cov" | awk -F '>' '{print $2}' | awk -F '%' '{print $1}')
-        echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
+      - name: Run ty code analysis
+        run: uv run ty check .
 
-    - name: Update test coverage badge
-      if: github.event_name == 'push'
-      uses: schneegans/dynamic-badges-action@v1.7.0
-      with:
-        auth: ${{ secrets.GIST_SECRET }}
-        gistID: 1362ebafcd51d3f65dae7935b1d322eb
-        filename: pytest.json
-        label: coverage
-        message: ${{ env.COVERAGE }}%
-        minColorRange: 50
-        maxColorRange: 90
-        valColorRange: ${{ env.COVERAGE }}
+      - name: Run tests suite
+        run: |
+          PYTHONPATH=app/ uv run python -m pytest -v --cov-fail-under=80 --cov-report=html --cov=app/ tests/
+          PERCENT=$(cat htmlcov/index.html | grep "pc_cov" | awk -F '>' '{print $2}' | awk -F '%' '{print $1}')
+          echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
 
-    - name: Update python version badge
-      if: github.event_name == 'push'
-      uses: schneegans/dynamic-badges-action@v1.7.0
-      with:
-        auth: ${{ secrets.GIST_SECRET }}
-        gistID: 15a234815aa74059953a766a10e92688
-        filename: python-version.json
-        label: python
-        message: v${{ matrix.python-version }}
-        color: blue
+      - name: Update test coverage badge
+        if: github.event_name == 'push'
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 1362ebafcd51d3f65dae7935b1d322eb
+          filename: pytest.json
+          label: coverage
+          message: ${{ env.COVERAGE }}%
+          minColorRange: 50
+          maxColorRange: 90
+          valColorRange: ${{ env.COVERAGE }}
+
+      - name: Update python version badge
+        if: github.event_name == 'push'
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 15a234815aa74059953a766a10e92688
+          filename: python-version.json
+          label: python
+          message: v${{ matrix.python-version }}
+          color: blue
