@@ -60,13 +60,12 @@ class HeroParser(HTMLParser):
         birthday, age = self._get_birthday_and_age(
             text=extra_list_items[2].css_first("p").text(), locale=self.locale
         )
+        icon_url = extra_list_items[0].css_first("blz-icon").attributes["src"] or ""
 
         return {
             "name": header_section.css_first("h2").text(),
             "description": header_section.css_first("p").text().strip(),
-            "role": get_role_from_icon_url(
-                extra_list_items[0].css_first("blz-icon").attributes["src"]
-            ),
+            "role": get_role_from_icon_url(icon_url),
             "location": extra_list_items[1].text().strip(),
             "birthday": birthday,
             "age": age,

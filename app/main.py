@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import ResponseValidationError
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -224,7 +224,7 @@ common_doc_settings = {
 
 
 @app.get("/", include_in_schema=False)
-async def overridden_redoc():
+async def overridden_redoc() -> HTMLResponse:
     return render_documentation(
         title=common_doc_settings["title"],
         favicon_url=common_doc_settings["favicon_url"],
@@ -233,7 +233,7 @@ async def overridden_redoc():
 
 
 @app.get("/docs", include_in_schema=False)
-async def overridden_swagger():
+async def overridden_swagger() -> HTMLResponse:
     swagger_settings = common_doc_settings.copy()
     swagger_settings["swagger_favicon_url"] = swagger_settings.pop("favicon_url")
     return get_swagger_ui_html(**swagger_settings)
