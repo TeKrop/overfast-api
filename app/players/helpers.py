@@ -111,7 +111,7 @@ def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:  # ty: ignore[inva
     """Extract role key from the role icon."""
     icon_role_key = icon_url.split("/")[-1].split("-")[0].upper()
     return (
-        CompetitiveRole.DAMAGE
+        CompetitiveRole.DAMAGE  # ty: ignore[unresolved-attribute]
         if icon_role_key == "OFFENSE"
         else CompetitiveRole[icon_role_key]
     )

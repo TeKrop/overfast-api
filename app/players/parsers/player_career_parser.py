@@ -260,8 +260,8 @@ class PlayerCareerParser(BasePlayerParser):
             }
 
         for role in CompetitiveRole:
-            if role.value not in competitive_ranks:
-                competitive_ranks[role.value] = None
+            if role.value not in competitive_ranks:  # ty: ignore[unresolved-attribute]
+                competitive_ranks[role.value] = None  # ty: ignore[unresolved-attribute]
 
         competitive_ranks["season"] = last_season_played
 

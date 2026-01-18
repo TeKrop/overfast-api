@@ -352,12 +352,12 @@ CareerStats = create_model(  # ty: ignore[no-matching-overload]
         ),
     ),
     **{
-        hero_key.name.lower(): (
+        hero_key.name.lower(): (  # ty: ignore[unresolved-attribute]
             list[HeroCareerStats] | None,
             Field(
                 None,
                 description=f"Career statistics for {get_hero_name(hero_key)}",
-                alias=hero_key.value,
+                alias=hero_key.value,  # ty: ignore[unresolved-attribute]
                 min_length=1,
             ),
         )
@@ -509,7 +509,7 @@ class PlayerRolesStats(BaseModel):
 PlayerHeroesStats = create_model(  # ty: ignore[no-matching-overload]
     "PlayerHeroesStats",
     **{
-        hero_key.name.lower(): (
+        hero_key.name.lower(): (  # ty: ignore[unresolved-attribute]
             StatsSummary | None,
             Field(
                 None,
@@ -517,7 +517,7 @@ PlayerHeroesStats = create_model(  # ty: ignore[no-matching-overload]
                     f"Stats summary for {get_hero_name(hero_key)}. "
                     "Not defined if he never played the hero."
                 ),
-                alias=hero_key.value,
+                alias=hero_key.value,  # ty: ignore[unresolved-attribute]
             ),
         )
         for hero_key in HeroKey
@@ -575,12 +575,12 @@ PlayerCareerStats = create_model(  # ty: ignore[no-matching-overload]
         ),
     ),
     **{
-        hero_key.name.lower(): (
+        hero_key.name.lower(): (  # ty: ignore[unresolved-attribute]
             HeroPlayerCareerStats | None,
             Field(
                 None,
                 description=f"Career statistics for {get_hero_name(hero_key)}",
-                alias=hero_key.value,
+                alias=hero_key.value,  # ty: ignore[unresolved-attribute]
             ),
         )
         for hero_key in HeroKey
