@@ -1,5 +1,7 @@
 """Heroes page Parser module"""
 
+from typing import cast
+
 from app.config import settings
 from app.exceptions import ParserParsingError
 from app.parsers import HTMLParser
@@ -28,9 +30,11 @@ class HeroesParser(HTMLParser):
         return sorted(heroes, key=lambda hero: hero["key"])
 
     def filter_request_using_query(self, **kwargs) -> list[dict]:
+        # Type assertion: we know parse_data returns list[dict]
+        data = cast("list[dict]", self.data)
         role = kwargs.get("role")
         return (
-            self.data
+            data
             if not role
-            else [hero_dict for hero_dict in self.data if hero_dict["role"] == role]
+            else [hero_dict for hero_dict in data if hero_dict["role"] == role]
         )
