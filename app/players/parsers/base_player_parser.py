@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from app.overfast_logger import logger
 from app.parsers import HTMLParser
@@ -67,10 +67,12 @@ class BasePlayerParser(HTMLParser):
         # Update the Player Cache
         self.cache_manager.update_player_cache(self.player_id, self.player_data)
 
-    async def __retrieve_player_summary_data(self) -> dict | None:
+    async def __retrieve_player_summary_data(self) -> dict:
         """Call Blizzard search page with user name to
         check last_updated_at and retrieve summary values
         """
         player_summary_parser = SearchDataParser(player_id=self.player_id)
         await player_summary_parser.parse()
-        return player_summary_parser.data
+
+        # Type assertion: we know SearchDataParser parse_data returns dict
+        return cast("dict", player_summary_parser.data)

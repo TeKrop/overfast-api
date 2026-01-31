@@ -155,14 +155,14 @@ class PlayerStatsSummaryParser(PlayerCareerParser):
         except StopIteration:
             return 0
 
-    def _compute_parsed_data(self) -> dict | None:
+    def _compute_parsed_data(self) -> dict:
         # Only return heroes stats, which will be used for calculation
         # depending on the parameters
         return self.__get_heroes_stats(self.get_stats())
 
-    def __get_heroes_stats(self, raw_stats: dict | None) -> dict | None:
+    def __get_heroes_stats(self, raw_stats: dict | None) -> dict:
         if not raw_stats:
-            return None
+            return {}
 
         # Filter only platforms with stats
         raw_heroes_stats = {
