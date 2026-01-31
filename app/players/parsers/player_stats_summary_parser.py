@@ -46,14 +46,10 @@ class PlayerStatsSummaryParser(PlayerCareerParser):
 
     def filter_request_using_query(self, **kwargs) -> dict:
         gamemodes = (
-            [kwargs.get("gamemode")]
-            if kwargs.get("gamemode")
-            else [gamemode.value for gamemode in PlayerGamemode]
+            [kwargs["gamemode"]] if kwargs.get("gamemode") else list(PlayerGamemode)
         )
         platforms = (
-            [kwargs.get("platform")]
-            if kwargs.get("platform")
-            else [platform.value for platform in PlayerPlatform]
+            [kwargs["platform"]] if kwargs.get("platform") else list(PlayerPlatform)
         )
 
         heroes_stats = self.__compute_heroes_data(gamemodes, platforms)
@@ -83,6 +79,10 @@ class PlayerStatsSummaryParser(PlayerCareerParser):
 
         # Calculate special values (winrate, kda, averages)
         for hero_key, hero_stats in computed_heroes_stats.items():
+            # Ignore computation for heroes for which we don't have stats
+            if hero_stats["time_played"] <= 0:
+                continue
+
             computed_heroes_stats[hero_key]["winrate"] = self.__get_winrate_from_stat(
                 hero_stats,
             )
@@ -137,12 +137,12 @@ class PlayerStatsSummaryParser(PlayerCareerParser):
         return computed_heroes_stats
 
     @staticmethod
-    def _get_category_stats(category: str, hero_stats: list[dict]) -> dict:
+    def _get_category_stats(category: str, hero_stats: list[dict]) -> list[dict]:
         category_stats = filter(lambda x: x["category"] == category, hero_stats)
         try:
             return next(category_stats)["stats"]
         except StopIteration:
-            return {}
+            return []
 
     @staticmethod
     def _get_stat_value(stat_name: str, stats_list: list[dict]) -> int | float:
@@ -155,14 +155,14 @@ class PlayerStatsSummaryParser(PlayerCareerParser):
         except StopIteration:
             return 0
 
-    def _compute_parsed_data(self) -> dict | None:
+    def _compute_parsed_data(self) -> dict:
         # Only return heroes stats, which will be used for calculation
         # depending on the parameters
         return self.__get_heroes_stats(self.get_stats())
 
-    def __get_heroes_stats(self, raw_stats: dict | None) -> dict | None:
+    def __get_heroes_stats(self, raw_stats: dict | None) -> dict:
         if not raw_stats:
-            return None
+            return {}
 
         # Filter only platforms with stats
         raw_heroes_stats = {
@@ -206,7 +206,7 @@ class PlayerStatsSummaryParser(PlayerCareerParser):
 
         return heroes_stats
 
-    def __compute_hero_stats(self, hero_stats: dict) -> dict:
+    def __compute_hero_stats(self, hero_stats: list[dict]) -> dict:
         """Compute a single hero statistics."""
 
         game_stats = self._get_category_stats("game", hero_stats)

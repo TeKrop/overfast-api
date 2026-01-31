@@ -8,7 +8,7 @@ from .enums import MapKey
 
 
 class Map(BaseModel):
-    key: MapKey = Field(
+    key: MapKey = Field(  # ty: ignore[invalid-type-form]
         ...,
         description="Key name of the map",
         examples=["aatlis"],
@@ -19,7 +19,7 @@ class Map(BaseModel):
         description="Screenshot of the map",
         examples=["https://overfast-api.tekrop.fr/static/maps/aatlis.jpg"],
     )
-    gamemodes: list[MapGamemode] = Field(
+    gamemodes: list[MapGamemode] = Field(  # ty: ignore[invalid-type-form]
         ...,
         description="Main gamemodes on which the map is playable",
     )

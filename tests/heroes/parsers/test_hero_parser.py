@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
@@ -8,19 +7,19 @@ from app.config import settings
 from app.enums import Locale
 from app.exceptions import OverfastError, ParserBlizzardError
 from app.heroes.enums import HeroKey
-
-if TYPE_CHECKING:
-    from app.heroes.parsers.hero_parser import HeroParser
+from app.heroes.parsers.hero_parser import HeroParser
 
 
 @pytest.mark.parametrize(
     ("hero_key", "hero_html_data"),
-    [(h.value, h.value) for h in HeroKey],
+    [(h, h) for h in HeroKey],
     indirect=["hero_html_data"],
 )
 @pytest.mark.asyncio
 async def test_hero_page_parsing(
-    hero_parser: HeroParser, hero_key: str, hero_html_data: str
+    hero_parser: HeroParser,
+    hero_key: HeroKey,  # ty: ignore[invalid-type-form]
+    hero_html_data: str,
 ):
     if not hero_html_data:
         pytest.skip("Hero HTML file not saved yet, skipping")
@@ -62,8 +61,8 @@ async def test_not_released_hero_parser_blizzard_error(
         ("/media/stories/bastet", f"{settings.blizzard_host}/media/stories/bastet"),
     ],
 )
-def test_get_full_url(hero_parser: HeroParser, url: str, full_url: str):
-    assert hero_parser._HeroParser__get_full_url(url) == full_url
+def test_get_full_url(url: str, full_url: str):
+    assert HeroParser._get_full_url(url) == full_url
 
 
 @pytest.mark.parametrize(
@@ -94,10 +93,9 @@ def test_get_full_url(hero_parser: HeroParser, url: str, full_url: str):
     ],
 )
 def test_get_birthday_and_age(
-    hero_parser: HeroParser,
     input_str: str,
     locale: Locale,
     result: tuple[str | None, int | None],
 ):
     """Get birthday and age from text for a given hero"""
-    assert hero_parser._HeroParser__get_birthday_and_age(input_str, locale) == result
+    assert HeroParser._get_birthday_and_age(input_str, locale) == result

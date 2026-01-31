@@ -185,7 +185,7 @@ class Hero(BaseModel):
 
 
 class HeroShort(BaseModel):
-    key: HeroKey = Field(
+    key: HeroKey = Field(  # ty: ignore[invalid-type-form]
         ...,
         description="Key name of the hero",
         examples=["ana"],
@@ -214,7 +214,7 @@ class HeroParserErrorMessage(BaseModel):
 
 
 class HeroStatsSummary(BaseModel):
-    hero: HeroKey = Field(
+    hero: HeroKey = Field(  # ty: ignore[invalid-type-form]
         ..., description="Hero key used to identify Overwatch heroes in general"
     )
     pickrate: float = Field(..., description="Pickrate (in percent)", ge=0.0, le=100.0)

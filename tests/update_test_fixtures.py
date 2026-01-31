@@ -69,7 +69,7 @@ def list_routes_to_update(args: argparse.Namespace) -> dict[str, str]:
         route_file_mapping |= {
             f"{settings.heroes_path}/": "/heroes.html",
             **{
-                f"{settings.heroes_path}/{hero.value}/": f"/heroes/{hero.value}.html"
+                f"{settings.heroes_path}/{hero}/": f"/heroes/{hero}.html"
                 for hero in HeroKey
             },
         }

@@ -10,9 +10,9 @@ class SearchDataParser(JSONParser):
 
     root_path = settings.search_account_path
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.player_id = kwargs.get("player_id")
+    def __init__(self, player_id: str):
+        super().__init__(player_id=player_id)
+        self.player_id = player_id
         self.player_name = self.player_id.split("-", 1)[0]
 
     async def parse_data(self) -> dict:
@@ -49,5 +49,5 @@ class SearchDataParser(JSONParser):
         return player_data
 
     def get_blizzard_url(self, **kwargs) -> str:
-        player_name = kwargs.get("player_id").split("-", 1)[0]
+        player_name = kwargs["player_id"].split("-", 1)[0]
         return f"{super().get_blizzard_url(**kwargs)}/{player_name}/"

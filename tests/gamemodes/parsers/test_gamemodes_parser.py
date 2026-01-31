@@ -16,6 +16,7 @@ async def test_gamemodes_page_parsing(gamemodes_parser: GamemodesParser):
         pytest.fail("Game modes list parsing failed")
 
     # Just check the format of the first gamemode in the list
+    assert isinstance(gamemodes_parser.data, list)
     assert gamemodes_parser.data[0] == {
         "key": "assault",
         "name": "Assault",

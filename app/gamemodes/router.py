@@ -1,5 +1,7 @@
 """Gamemodes endpoints router : gamemodes list, etc."""
 
+from typing import Any
+
 from fastapi import APIRouter, Request, Response
 
 from app.enums import RouteTag
@@ -21,8 +23,7 @@ router = APIRouter()
         f"<br />**Cache TTL : {ListGamemodesController.get_human_readable_timeout()}.**"
     ),
     operation_id="list_map_gamemodes",
+    response_model=list[GamemodeDetails],
 )
-async def list_map_gamemodes(
-    request: Request, response: Response
-) -> list[GamemodeDetails]:
+async def list_map_gamemodes(request: Request, response: Response) -> Any:
     return await ListGamemodesController(request, response).process_request()

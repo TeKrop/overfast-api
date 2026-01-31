@@ -39,6 +39,7 @@ async def test_player_page_parsing_with_filters(
     # Just check that the parsing is working properly
     player_career_stats_parser.filter_request_using_query()
 
+    assert isinstance(player_career_stats_parser.data, dict)
     assert len(player_career_stats_parser.data.keys()) > 0
 
 

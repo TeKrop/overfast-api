@@ -22,4 +22,5 @@ async def test_heroes_page_parsing(heroes_parser: HeroesParser, heroes_html_data
         except OverfastError:
             pytest.fail("Heroes list parsing failed")
 
+    assert isinstance(heroes_parser.data, list)
     assert all(hero["key"] in iter(HeroKey) for hero in heroes_parser.data)

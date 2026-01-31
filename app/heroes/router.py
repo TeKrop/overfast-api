@@ -1,6 +1,6 @@
 """Heroes endpoints router : heroes list, heroes details, etc."""
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Path, Query, Request, Response, status
 
@@ -40,6 +40,7 @@ router = APIRouter()
         f"<br />**Cache TTL : {ListHeroesController.get_human_readable_timeout()}.**"
     ),
     operation_id="list_heroes",
+    response_model=list[HeroShort],
 )
 async def list_heroes(
     request: Request,
@@ -48,7 +49,7 @@ async def list_heroes(
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
-) -> list[HeroShort]:
+) -> Any:
     return await ListHeroesController(request, response).process_request(
         role=role,
         locale=locale,
@@ -72,6 +73,7 @@ async def list_heroes(
         f"<br />**Cache TTL : {GetHeroStatsSummaryController.get_human_readable_timeout()}.**"
     ),
     operation_id="get_hero_stats",
+    response_model=list[HeroStatsSummary],
 )
 async def get_hero_stats(
     request: Request,
@@ -99,10 +101,10 @@ async def get_hero_stats(
         Role | None, Query(title="Role filter", examples=["support"])
     ] = None,
     map_: Annotated[
-        MapKey | None, Query(alias="map", title="Map key filter", examples=["hanaoka"])
+        MapKey | None, Query(alias="map", title="Map key filter", examples=["hanaoka"])  # ty: ignore[invalid-type-form]
     ] = None,
     competitive_division: Annotated[
-        CompetitiveDivisionFilter | None,
+        CompetitiveDivisionFilter | None,  # ty: ignore[invalid-type-form]
         Query(
             title="Competitive division filter",
             examples=["diamond"],
@@ -115,7 +117,7 @@ async def get_hero_stats(
             pattern=r"^(hero|winrate|pickrate):(asc|desc)$",
         ),
     ] = "hero:asc",
-) -> list[HeroStatsSummary]:
+) -> Any:
     return await GetHeroStatsSummaryController(request, response).process_request(
         platform=platform,
         gamemode=gamemode,
@@ -143,15 +145,16 @@ async def get_hero_stats(
         f"<br />**Cache TTL : {GetHeroController.get_human_readable_timeout()}.**"
     ),
     operation_id="get_hero",
+    response_model=Hero,
 )
 async def get_hero(
     request: Request,
     response: Response,
-    hero_key: Annotated[HeroKey, Path(title="Key name of the hero")],
+    hero_key: Annotated[HeroKey, Path(title="Key name of the hero")],  # ty: ignore[invalid-type-form]
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
-) -> Hero:
+) -> Any:
     return await GetHeroController(request, response).process_request(
         hero_key=hero_key,
         locale=locale,

@@ -58,12 +58,12 @@ class CacheManager(metaclass=Singleton):
         )
 
     @staticmethod
-    def __compress_json_value(value: dict | list) -> str:
+    def __compress_json_value(value: dict | list) -> bytes:
         """Helper method to transform a value into compressed JSON data"""
         return zlib.compress(json.dumps(value, separators=(",", ":")).encode("utf-8"))
 
     @staticmethod
-    def __decompress_json_value(value: str) -> dict | list:
+    def __decompress_json_value(value: bytes) -> dict | list:
         """Helper method to retrieve a value from a compressed JSON data"""
         return json.loads(zlib.decompress(value).decode("utf-8"))
 
@@ -86,7 +86,9 @@ class CacheManager(metaclass=Singleton):
     def get_api_cache(self, cache_key: str) -> dict | list | None:
         """Get the API Cache value associated with a given cache key"""
         api_cache_key = f"{settings.api_cache_key_prefix}:{cache_key}"
-        if not (api_cache := self.valkey_server.get(api_cache_key)):
+
+        api_cache = self.valkey_server.get(api_cache_key)
+        if not api_cache or not isinstance(api_cache, bytes):
             return None
 
         return self.__decompress_json_value(api_cache)
@@ -96,12 +98,12 @@ class CacheManager(metaclass=Singleton):
         """Update or set an API Cache value with an expiration value (in seconds)"""
 
         # Compress the JSON string
-        str_value = self.__compress_json_value(value)
+        bytes_value = self.__compress_json_value(value)
 
         # Store it in API Cache
         self.valkey_server.set(
             f"{settings.api_cache_key_prefix}:{cache_key}",
-            str_value,
+            bytes_value,
             ex=expire,
         )
 
@@ -109,7 +111,9 @@ class CacheManager(metaclass=Singleton):
     def get_player_cache(self, player_id: str) -> dict | list | None:
         """Get the Player Cache value associated with a given cache key"""
         player_key = f"{settings.player_cache_key_prefix}:{player_id}"
-        if not (player_cache := self.valkey_server.get(player_key)):
+
+        player_cache = self.valkey_server.get(player_key)
+        if not player_cache or not isinstance(player_cache, bytes):
             return None
 
         # Reset the TTL before returning the value
@@ -132,7 +136,8 @@ class CacheManager(metaclass=Singleton):
 
     @valkey_connection_handler
     def get_global_rate_limit_remaining_time(self) -> int:
-        return self.valkey_server.ttl(settings.blizzard_rate_limit_key)
+        blizzard_rate_limit = self.valkey_server.ttl(settings.blizzard_rate_limit_key)
+        return blizzard_rate_limit if isinstance(blizzard_rate_limit, int) else 0
 
     @valkey_connection_handler
     def set_global_rate_limit(self) -> None:

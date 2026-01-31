@@ -1,11 +1,12 @@
 """Player profile page Parser module"""
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from fastapi import status
 
 from app.config import settings
 from app.exceptions import ParserBlizzardError
+from app.overfast_logger import logger
 
 from ..enums import (
     CareerHeroesComparisonsCategory,
@@ -50,22 +51,21 @@ class PlayerCareerParser(BasePlayerParser):
         404,  # Player Not Found response, we want to handle it here
     ]
 
-    # Filters coming from user query
-    filters: ClassVar[dict[str, bool | str]]
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.data: dict[str, Any] = {}
         self._init_filters(**kwargs)
 
     def _init_filters(self, **kwargs) -> None:
-        self.filters = {
+        # Filters coming from user query
+        self.filters: dict[str, bool | str] = {
             filter_key: kwargs.get(filter_key)
             for filter_key in ("summary", "stats", "platform", "gamemode", "hero")
         }
 
     def filter_request_using_query(self, **_) -> dict:
         if self.filters["summary"]:
-            return self.data.get("summary")
+            return self.data.get("summary") or {}
 
         if self.filters["stats"]:
             return self._filter_stats()
@@ -153,7 +153,7 @@ class PlayerCareerParser(BasePlayerParser):
         # Return the right parsed data
         return self._compute_parsed_data()
 
-    def _compute_parsed_data(self) -> dict | None:
+    def _compute_parsed_data(self) -> dict:
         return {"summary": self.__get_summary(), "stats": self.get_stats()}
 
     def __get_summary(self) -> dict:
@@ -161,6 +161,7 @@ class PlayerCareerParser(BasePlayerParser):
         if self.filters["stats"]:
             return {}
 
+        player_summary = self.player_data.get("summary") or {}
         profile_div = self.root_tag.css_first(
             "blz-section.Profile-masthead > div.Profile-player"
         )
@@ -170,19 +171,18 @@ class PlayerCareerParser(BasePlayerParser):
         return {
             "username": summary_div.css_first("h1.Profile-player--name").text(),
             "avatar": (
-                self.player_data["summary"].get("avatar")
+                player_summary.get("avatar")
                 or summary_div.css_first("img.Profile-player--portrait").attributes.get(
                     "src"
                 )
             ),
-            "namecard": self.player_data["summary"].get("namecard"),
+            "namecard": player_summary.get("namecard"),
             "title": get_player_title(
-                self.player_data["summary"].get("title")
-                or self.__get_title(profile_div)
+                player_summary.get("title") or self.__get_title(profile_div)
             ),
             "endorsement": self.__get_endorsement(progression_div),
             "competitive": self.__get_competitive_ranks(progression_div),
-            "last_updated_at": self.player_data["summary"].get("lastUpdated"),
+            "last_updated_at": player_summary.get("lastUpdated"),
         }
 
     @staticmethod
@@ -202,9 +202,12 @@ class PlayerCareerParser(BasePlayerParser):
         if not endorsement_span:
             return None
 
-        endorsement_frame_url = endorsement_span.css_first(
-            "img.Profile-playerSummary--endorsement"
-        ).attributes["src"]
+        endorsement_frame_url = (
+            endorsement_span.css_first(
+                "img.Profile-playerSummary--endorsement"
+            ).attributes["src"]
+            or ""
+        )
 
         return {
             "level": get_endorsement_value_from_frame(endorsement_frame_url),
@@ -244,8 +247,8 @@ class PlayerCareerParser(BasePlayerParser):
 
             rank_tier_icons = role_wrapper.css("img.Profile-playerSummary--rank")
             rank_icon, tier_icon = (
-                rank_tier_icons[0].attributes["src"],
-                rank_tier_icons[1].attributes["src"],
+                rank_tier_icons[0].attributes["src"] or "",
+                rank_tier_icons[1].attributes["src"] or "",
             )
 
             competitive_ranks[role_key] = {
@@ -257,8 +260,8 @@ class PlayerCareerParser(BasePlayerParser):
             }
 
         for role in CompetitiveRole:
-            if role.value not in competitive_ranks:
-                competitive_ranks[role.value] = None
+            if role.value not in competitive_ranks:  # ty: ignore[unresolved-attribute]
+                competitive_ranks[role.value] = None  # ty: ignore[unresolved-attribute]
 
         competitive_ranks["season"] = last_season_played
 
@@ -285,10 +288,10 @@ class PlayerCareerParser(BasePlayerParser):
         PC players, svg for console players
         """
         if role_div := role_wrapper.css_first("div.Profile-playerSummary--role"):
-            return role_div.css_first("img").attributes["src"]
+            return role_div.css_first("img").attributes["src"] or ""
 
         role_svg = role_wrapper.css_first("svg.Profile-playerSummary--role")
-        return role_svg.css_first("use").attributes["xlink:href"]
+        return role_svg.css_first("use").attributes["xlink:href"] or ""
 
     def get_stats(self) -> dict | None:
         # If the user filtered the page on summary, no need to parse the stats
@@ -329,7 +332,7 @@ class PlayerCareerParser(BasePlayerParser):
         if self.filters["gamemode"] and self.filters["gamemode"] != gamemode:
             return None
 
-        if not statistics_section:
+        if not statistics_section or not statistics_section.first_child:
             return None
 
         top_heroes_section = statistics_section.first_child.css_first(
@@ -380,11 +383,16 @@ class PlayerCareerParser(BasePlayerParser):
                     for progress_bar in category.iter()
                     for progress_bar_container in progress_bar.iter()
                     if progress_bar_container.tag == "div"
+                    and progress_bar_container.first_child is not None
+                    and progress_bar_container.last_child is not None
+                    and progress_bar_container.last_child.first_child is not None
+                    and progress_bar_container.last_child.last_child is not None
                 ],
             }
             for category in top_heroes_section.iter()
             if (
-                "Profile-progressBars" in category.attributes["class"]
+                category.attributes["class"] is not None
+                and "Profile-progressBars" in category.attributes["class"]
                 and category.attributes["data-category-id"] in categories
             )
         }
@@ -428,6 +436,15 @@ class PlayerCareerParser(BasePlayerParser):
                 # Content div should be the only child ("content" class)
                 content_div = card_stat.first_child
 
+                # Ensure we have everything we need
+                if (
+                    not content_div
+                    or not content_div.first_child
+                    or not content_div.first_child.first_child
+                ):
+                    logger.warning(f"Missing content div for hero {hero_key}")
+                    continue
+
                 # Label should be the first div within content ("header" class)
                 category_label = content_div.first_child.first_child.text()
 
@@ -439,7 +456,12 @@ class PlayerCareerParser(BasePlayerParser):
                     },
                 )
                 for stat_row in content_div.iter():
-                    if "stat-item" not in stat_row.attributes["class"]:
+                    stat_row_class = stat_row.attributes["class"] or ""
+                    if "stat-item" not in stat_row_class:
+                        continue
+
+                    if not stat_row.first_child or not stat_row.last_child:
+                        logger.warning(f"Missing stat name or value in {stat_row}")
                         continue
 
                     stat_name = stat_row.first_child.text()
@@ -474,7 +496,9 @@ class PlayerCareerParser(BasePlayerParser):
             return {}
 
         return {
-            f"{key_prefix}{option.attributes['value']}": option.attributes["option-id"]
+            f"{key_prefix}{option.attributes['value']}": str(
+                option.attributes["option-id"]
+            )
             for option in options.iter()
             if option.attributes.get("option-id")
         }

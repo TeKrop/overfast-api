@@ -6,7 +6,7 @@ from .enums import MapGamemode
 
 
 class GamemodeDetails(BaseModel):
-    key: MapGamemode = Field(
+    key: MapGamemode = Field(  # ty: ignore[invalid-type-form]
         ...,
         description=(
             "Key corresponding to the gamemode. Can be "

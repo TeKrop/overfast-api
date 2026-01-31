@@ -41,7 +41,7 @@ class AbstractController(ABC):
     def get_human_readable_timeout(cls) -> str:
         return get_human_readable_duration(cls.timeout)
 
-    async def process_request(self, **kwargs) -> dict:
+    async def process_request(self, **kwargs) -> dict | list:
         """Main method used to process the request from user and return final data. Raises
         an HTTPException in case of error when retrieving or parsing data.
 

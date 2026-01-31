@@ -189,7 +189,7 @@ class PlayerEndorsement(BaseModel):
 
 
 class HeroStat(BaseModel):
-    hero: HeroKey = Field(...)
+    hero: HeroKey = Field(...)  # ty: ignore[invalid-type-form]
     value: StrictInt | StrictFloat = Field(
         ...,
         description=(
@@ -339,7 +339,7 @@ class HeroCareerStats(BaseModel):
     )
 
 
-CareerStats = create_model(
+CareerStats = create_model(  # ty: ignore[no-matching-overload]
     "CareerStats",
     __config__=ConfigDict(json_schema_extra={"example": CareerStatsExample}),
     all_heroes=(
@@ -352,12 +352,12 @@ CareerStats = create_model(
         ),
     ),
     **{
-        hero_key.name.lower(): (
+        hero_key.name.lower(): (  # ty: ignore[unresolved-attribute]
             list[HeroCareerStats] | None,
             Field(
                 None,
                 description=f"Career statistics for {get_hero_name(hero_key)}",
-                alias=hero_key.value,
+                alias=hero_key.value,  # ty: ignore[unresolved-attribute]
                 min_length=1,
             ),
         )
@@ -506,10 +506,10 @@ class PlayerRolesStats(BaseModel):
     )
 
 
-PlayerHeroesStats = create_model(
+PlayerHeroesStats = create_model(  # ty: ignore[no-matching-overload]
     "PlayerHeroesStats",
     **{
-        hero_key.name.lower(): (
+        hero_key.name.lower(): (  # ty: ignore[unresolved-attribute]
             StatsSummary | None,
             Field(
                 None,
@@ -517,7 +517,7 @@ PlayerHeroesStats = create_model(
                     f"Stats summary for {get_hero_name(hero_key)}. "
                     "Not defined if he never played the hero."
                 ),
-                alias=hero_key.value,
+                alias=hero_key.value,  # ty: ignore[unresolved-attribute]
             ),
         )
         for hero_key in HeroKey
@@ -545,7 +545,7 @@ class PlayerStatsSummary(BaseModel):
 
 
 # Player career stats
-HeroPlayerCareerStats = create_model(
+HeroPlayerCareerStats = create_model(  # ty: ignore[no-matching-overload]
     "HeroPlayerCareerStats",
     **{
         stat_category.name.lower(): (
@@ -563,7 +563,7 @@ HeroPlayerCareerStats = create_model(
 )
 
 
-PlayerCareerStats = create_model(
+PlayerCareerStats = create_model(  # ty: ignore[no-matching-overload]
     "PlayerCareerStats",
     __config__=ConfigDict(json_schema_extra={"example": PlayerCareerStatsExample}),
     all_heroes=(
@@ -575,12 +575,12 @@ PlayerCareerStats = create_model(
         ),
     ),
     **{
-        hero_key.name.lower(): (
+        hero_key.name.lower(): (  # ty: ignore[unresolved-attribute]
             HeroPlayerCareerStats | None,
             Field(
                 None,
                 description=f"Career statistics for {get_hero_name(hero_key)}",
-                alias=hero_key.value,
+                alias=hero_key.value,  # ty: ignore[unresolved-attribute]
             ),
         )
         for hero_key in HeroKey

@@ -1,6 +1,6 @@
 """Players endpoints router : players search, players career, statistics, etc."""
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Path, Query, Request, Response, status
 
@@ -75,7 +75,7 @@ async def get_player_career_common_parameters(
         ),
         examples=["pc"],
     ),
-    hero: HeroKeyCareerFilter = Query(
+    hero: HeroKeyCareerFilter = Query(  # ty: ignore[invalid-type-form]
         None,
         title="Hero key",
         description=(
@@ -108,6 +108,7 @@ router = APIRouter()
         f"<br />**Cache TTL : {SearchPlayersController.get_human_readable_timeout()}.**"
     ),
     operation_id="search_players",
+    response_model=PlayerSearchResult,
 )
 async def search_players(
     request: Request,
@@ -128,7 +129,7 @@ async def search_players(
     ] = "name:asc",
     offset: Annotated[int, Query(title="Offset of the results", ge=0)] = 0,
     limit: Annotated[int, Query(title="Limit of results per page", gt=0)] = 20,
-) -> PlayerSearchResult:
+) -> Any:
     return await SearchPlayersController(request, response).process_request(
         name=name,
         order_by=order_by,
@@ -147,12 +148,13 @@ async def search_players(
         f"<br />**Cache TTL : {GetPlayerCareerController.get_human_readable_timeout()}.**"
     ),
     operation_id="get_player_summary",
+    response_model=PlayerSummary,
 )
 async def get_player_summary(
     request: Request,
     response: Response,
     commons: CommonsPlayerDep,
-) -> PlayerSummary:
+) -> Any:
     return await GetPlayerCareerController(request, response).process_request(
         summary=True,
         player_id=commons.get("player_id"),
@@ -176,6 +178,7 @@ async def get_player_summary(
         f"<br />**Cache TTL : {GetPlayerStatsSummaryController.get_human_readable_timeout()}.**"
     ),
     operation_id="get_player_stats_summary",
+    response_model=PlayerStatsSummary,
 )
 async def get_player_stats_summary(
     request: Request,
@@ -203,7 +206,7 @@ async def get_player_stats_summary(
             examples=["pc"],
         ),
     ] = None,
-) -> PlayerStatsSummary:
+) -> Any:
     return await GetPlayerStatsSummaryController(request, response).process_request(
         player_id=commons.get("player_id"),
         platform=platform,
@@ -225,12 +228,13 @@ async def get_player_stats_summary(
         f"<br />**Cache TTL : {GetPlayerCareerStatsController.get_human_readable_timeout()}.**"
     ),
     operation_id="get_player_career_stats",
+    response_model=PlayerCareerStats,
 )
 async def get_player_career_stats(
     request: Request,
     response: Response,
     commons: CommonsPlayerCareerDep,
-) -> PlayerCareerStats:
+) -> Any:
     return await GetPlayerCareerStatsController(request, response).process_request(
         stats=True,
         **commons,
@@ -249,12 +253,13 @@ async def get_player_career_stats(
         f"<br />**Cache TTL : {GetPlayerCareerController.get_human_readable_timeout()}.**"
     ),
     operation_id="get_player_stats",
+    response_model=CareerStats,
 )
 async def get_player_stats(
     request: Request,
     response: Response,
     commons: CommonsPlayerCareerDep,
-) -> CareerStats:
+) -> Any:
     return await GetPlayerCareerController(request, response).process_request(
         stats=True,
         **commons,
@@ -271,6 +276,7 @@ async def get_player_stats(
         f"<br />**Cache TTL : {GetPlayerCareerController.get_human_readable_timeout()}.**"
     ),
     operation_id="get_player_career",
+    response_model=Player,
 )
 async def get_player_career(
     request: Request,
@@ -292,7 +298,7 @@ async def get_player_career(
             examples=["pc"],
         ),
     ] = None,
-) -> Player:
+) -> Any:
     return await GetPlayerCareerController(request, response).process_request(
         player_id=commons.get("player_id"),
         gamemode=gamemode,

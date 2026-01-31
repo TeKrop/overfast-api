@@ -1,15 +1,10 @@
 """Player stats summary Parser module"""
 
-from typing import TYPE_CHECKING
-
 from app.config import settings
 from app.overfast_logger import logger
 from app.parsers import JSONParser
 
 from ..helpers import get_player_title
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
 
 
 class PlayerSearchParser(JSONParser):
@@ -21,9 +16,9 @@ class PlayerSearchParser(JSONParser):
         super().__init__(**kwargs)
         self.search_nickname = kwargs["name"]
         self.search_name = kwargs["name"].split("-", 1)[0]
-        self.order_by = kwargs.get("order_by")
-        self.offset = kwargs.get("offset")
-        self.limit = kwargs.get("limit")
+        self.order_by = kwargs["order_by"]
+        self.offset = kwargs["offset"]
+        self.limit = kwargs["limit"]
 
     def get_blizzard_url(self, **kwargs) -> str:
         """URL used when requesting data to Blizzard."""
@@ -60,7 +55,7 @@ class PlayerSearchParser(JSONParser):
             if player["name"] == self.search_name and player["isPublic"] is True
         ]
 
-    def apply_transformations(self, players: Iterable[dict]) -> list[dict]:
+    def apply_transformations(self, players: list[dict]) -> list[dict]:
         """Apply transformations to found players in order to return the data
         in the OverFast API format. We'll also retrieve some data from parsers.
         """
