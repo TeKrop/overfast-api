@@ -9,14 +9,14 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "fastapi[standard-no-fastapi-cloud-cli]==0.123.*",
+    "fastapi[standard-no-fastapi-cloud-cli]==0.128.*",
     "httpx[http2]==0.28.*",
     "loguru==0.7.*",
     "valkey[libvalkey]==6.1.*",
     "pydantic==2.12.*",
     "pydantic-settings==2.12.*",
     "selectolax==0.4.*",
-    "sentry-sdk[fastapi]==2.48.*",
+    "sentry-sdk[fastapi]==2.51.*",
 ]
 
 [project.urls]
@@ -27,7 +27,7 @@ Issues = "https://github.com/TeKrop/overfast-api/issues"
 
 [dependency-groups]
 dev = [
-    "fakeredis[valkey]==2.32.*",
+    "fakeredis[valkey]==2.33.*",
     "ipdb==0.13.*",
     "pytest==9.0.*",
     "pytest-asyncio==1.3.*",
