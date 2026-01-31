@@ -193,7 +193,7 @@ def custom_openapi() -> dict[str, Any]:  # pragma: no cover
     return app.openapi_schema
 
 
-app.openapi = custom_openapi
+app.openapi = custom_openapi  # type: ignore[method-assign]
 
 
 # Add custom exception handlers for Starlet HTTP exceptions, but also
@@ -234,9 +234,11 @@ async def overridden_redoc() -> HTMLResponse:
 
 @app.get("/docs", include_in_schema=False)
 async def overridden_swagger() -> HTMLResponse:
-    swagger_settings = common_doc_settings.copy()
-    swagger_settings["swagger_favicon_url"] = swagger_settings.pop("favicon_url")
-    return get_swagger_ui_html(**swagger_settings)
+    return get_swagger_ui_html(
+        openapi_url=common_doc_settings["openapi_url"],
+        title=common_doc_settings["title"],
+        swagger_favicon_url=common_doc_settings["favicon_url"],
+    )
 
 
 # Add supported profiler as middleware
@@ -255,7 +257,7 @@ if settings.profiler:  # pragma: no cover
         raise SystemExit
 
     logger.info(f"Profiling is enabled with {settings.profiler}")
-    app.add_middleware(supported_profilers[settings.profiler])
+    app.add_middleware(supported_profilers[settings.profiler])  # type: ignore[arg-type]
 
 # Add application routers
 app.include_router(heroes.router, prefix="/heroes")
