@@ -90,7 +90,7 @@ clean: down ## Clean up Docker environment
 	docker network prune -f
 
 lock: ## Update lock file
-	uv lock
+	uv lock --upgrade
 
 update_test_fixtures: ## Update test fixtures (heroes, players, etc.)
 	$(DOCKER RUN) uv run python -m tests.update_test_fixtures $(PARAMS)
