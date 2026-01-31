@@ -17,7 +17,7 @@ def rate_limited(max_calls: int, interval: int):
     webhook if there is a critical parsing error.
     """
 
-    def decorator(func: Callable):
+    def decorator(func: Callable) -> Callable:
         call_history = {}
 
         @wraps(func)
@@ -45,7 +45,7 @@ def rate_limited(max_calls: int, interval: int):
                 logger.warning(
                     "Rate limit exceeded for {} with the same "
                     "parameters. Try again later.",
-                    func.__name__,
+                    func.__name__,  # ty: ignore[unresolved-attribute]
                 )
                 return None
 
