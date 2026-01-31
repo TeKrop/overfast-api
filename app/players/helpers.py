@@ -113,7 +113,7 @@ def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:  # ty: ignore[inva
     return (
         CompetitiveRole.DAMAGE  # ty: ignore[unresolved-attribute]
         if icon_role_key == "OFFENSE"
-        else CompetitiveRole[icon_role_key]
+        else CompetitiveRole[icon_role_key]  # type: ignore[invalid-argument-type]
     )
 
 
