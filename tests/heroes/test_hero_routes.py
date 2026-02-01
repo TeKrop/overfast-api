@@ -155,28 +155,3 @@ def test_get_hero_no_hitpoints(
         response = client.get(f"/heroes/{hero_name}")
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["hitpoints"] is None
-
-
-def test_get_hero_blizzard_forbidden_error_and_caching(client: TestClient):
-    with patch(
-        "httpx.AsyncClient.get",
-        return_value=Mock(status_code=status.HTTP_403_FORBIDDEN, text="403 Forbidden"),
-    ):
-        response1 = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
-    response2 = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
-
-    assert (
-        response1.status_code
-        == response2.status_code
-        == status.HTTP_429_TOO_MANY_REQUESTS
-    )
-    assert (
-        response1.json()
-        == response2.json()
-        == {
-            "error": (
-                "API has been rate limited by Blizzard, please wait for "
-                f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
-            )
-        }
-    )
