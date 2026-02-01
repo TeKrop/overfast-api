@@ -74,10 +74,11 @@ def test_get_heroes_blizzard_forbidden_error(client: TestClient):
     ):
         response = client.get("/heroes")
 
-    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
     assert response.json() == {
         "error": (
-            "API has been rate limited by Blizzard, please wait for "
-            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
+            "Blizzard is currently rate limiting requests. "
+            "Your request has been queued and will be retried automatically. "
+            "Please try again in a moment."
         )
     }

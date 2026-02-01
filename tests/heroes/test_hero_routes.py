@@ -90,11 +90,12 @@ def test_get_hero_blizzard_forbidden_error(client: TestClient):
     ):
         response = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
 
-    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
     assert response.json() == {
         "error": (
-            "API has been rate limited by Blizzard, please wait for "
-            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
+            "Blizzard is currently rate limiting requests. "
+            "Your request has been queued and will be retried automatically. "
+            "Please try again in a moment."
         )
     }
 
@@ -157,26 +158,5 @@ def test_get_hero_no_hitpoints(
     assert response.json()["hitpoints"] is None
 
 
-def test_get_hero_blizzard_forbidden_error_and_caching(client: TestClient):
-    with patch(
-        "httpx.AsyncClient.get",
-        return_value=Mock(status_code=status.HTTP_403_FORBIDDEN, text="403 Forbidden"),
-    ):
-        response1 = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
-    response2 = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
-
-    assert (
-        response1.status_code
-        == response2.status_code
-        == status.HTTP_429_TOO_MANY_REQUESTS
-    )
-    assert (
-        response1.json()
-        == response2.json()
-        == {
-            "error": (
-                "API has been rate limited by Blizzard, please wait for "
-                f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
-            )
-        }
-    )
+# Test removed: With adaptive rate limiting, we no longer globally block all requests
+# after a 403. Each request is handled individually with adaptive throttling.

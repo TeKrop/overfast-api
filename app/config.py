@@ -60,7 +60,30 @@ class Settings(BaseSettings):
     blizzard_rate_limit_key: str = "blizzard-rate-limit"
 
     # Number of seconds before the user is authorized to make calls to Blizzard again
+    # DEPRECATED: No longer used with adaptive rate limiting, kept for backward compatibility
     blizzard_rate_limit_retry_after: int = 5
+
+    ############
+    # ADAPTIVE RATE LIMITING FOR BLIZZARD REQUESTS
+    ############
+
+    # Maximum number of concurrent requests to Blizzard
+    blizzard_max_concurrent_requests: int = 10
+
+    # Initial rate limit (requests per second) when starting the app
+    blizzard_initial_rate_limit: float = 10.0
+
+    # Minimum rate limit (requests per second) - will never go below this
+    blizzard_min_rate_limit: float = 1.0
+
+    # Maximum rate limit (requests per second) - will never go above this
+    blizzard_max_rate_limit: float = 50.0
+
+    # Factor by which to decrease rate when hitting 403 (0.5 = cut in half)
+    blizzard_rate_decrease_factor: float = 0.5
+
+    # Step by which to increase rate on successful requests
+    blizzard_rate_increase_step: float = 0.5
 
     # Global rate limit of requests per second per ip to apply on the API
     rate_limit_per_second_per_ip: int = 30
@@ -177,6 +200,17 @@ class Settings(BaseSettings):
 
     # Enable Discord message when rate limiting is being applied
     discord_message_on_rate_limit: bool = False
+
+    ############
+    # MONITORING
+    ############
+
+    # Admin token for accessing monitoring endpoints
+    # Leave empty to disable monitoring endpoints
+    monitoring_admin_token: str = ""
+
+    # Enable monitoring endpoint (requires admin token to be set)
+    monitoring_enabled: bool = False
 
     ############
     # SENTRY CONFIGURATION
