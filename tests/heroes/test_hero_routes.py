@@ -58,7 +58,7 @@ def test_get_hero_blizzard_error(client: TestClient):
     with patch(
         "httpx.AsyncClient.get",
         return_value=Mock(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             text="Service Unavailable",
         ),
     ):
@@ -66,7 +66,7 @@ def test_get_hero_blizzard_error(client: TestClient):
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
-        "error": "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable",
+        "error": "Couldn't get Blizzard page (HTTP 429 error) : Service Unavailable",
     }
 
 
@@ -90,12 +90,11 @@ def test_get_hero_blizzard_forbidden_error(client: TestClient):
     ):
         response = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
 
-    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
     assert response.json() == {
         "error": (
-            "Blizzard is currently rate limiting requests. "
-            "Your request has been queued and will be retried automatically. "
-            "Please try again in a moment."
+            "API has been rate limited by Blizzard, please wait for "
+            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
         )
     }
 

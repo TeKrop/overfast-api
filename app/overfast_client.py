@@ -336,7 +336,8 @@ class OverFastClient(metaclass=Singleton):
 
     def _blizzard_forbidden_error(self) -> HTTPException:
         """Retrieve a generic error response when Blizzard returns forbidden error.
-        Note: With adaptive rate limiting, we no longer block all users globally.
+        Note: With adaptive rate limiting, we no longer block all users globally,
+        but we keep the same error code/message for backward compatibility.
         """
 
         # If Discord Webhook configuration is enabled, send a message
@@ -346,12 +347,16 @@ class OverFastClient(metaclass=Singleton):
                 f"{self.rate_limiter.current_rate:.2f} req/s"
             )
 
-        # Return error only for this specific request, not globally
+        # Return HTTP 429 with original message for backward compatibility
         return HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail=(
-                "Blizzard is currently rate limiting requests. "
-                "Your request has been queued and will be retried automatically. "
-                "Please try again in a moment."
+                "API has been rate limited by Blizzard, please wait for "
+                f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
             ),
+            headers={
+                settings.retry_after_header: str(
+                    settings.blizzard_rate_limit_retry_after
+                )
+            },
         )

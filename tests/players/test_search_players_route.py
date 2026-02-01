@@ -39,7 +39,7 @@ def test_search_players_no_result(client: TestClient):
 @pytest.mark.parametrize(
     ("status_code", "text"),
     [
-        (status.HTTP_503_SERVICE_UNAVAILABLE, "Service Unavailable"),
+        (status.HTTP_429_TOO_MANY_REQUESTS, "Service Unavailable"),
         (status.HTTP_500_INTERNAL_SERVER_ERROR, '{"error":"searchByName error"}'),
     ],
 )
@@ -85,12 +85,11 @@ def test_get_roles_blizzard_forbidden_error(client: TestClient):
     ):
         response = client.get("/players", params={"name": "Player"})
 
-    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
     assert response.json() == {
         "error": (
-            "Blizzard is currently rate limiting requests. "
-            "Your request has been queued and will be retried automatically. "
-            "Please try again in a moment."
+            "API has been rate limited by Blizzard, please wait for "
+            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
         )
     }
 
