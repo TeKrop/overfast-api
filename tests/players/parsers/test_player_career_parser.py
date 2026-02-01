@@ -43,6 +43,8 @@ async def test_player_page_parsing_with_filters(
     # Just check that the parsing is working properly
     player_career_parser.filter_request_using_query(**kwargs_filter)
 
+    assert isinstance(player_career_parser.data, dict)
+
     if kwargs_filter.get("summary"):
         assert "summary" in player_career_parser.data
     elif kwargs_filter.get("stats"):
@@ -101,6 +103,7 @@ async def test_filter_all_stats_data(
         )
 
     if not platform and not gamemode:
+        assert isinstance(player_career_parser.data, dict)
         assert filtered_data == player_career_parser.data["stats"]
 
 

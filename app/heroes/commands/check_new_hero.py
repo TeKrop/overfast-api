@@ -8,6 +8,7 @@ import asyncio
 from fastapi import HTTPException
 
 from app.config import settings
+from app.exceptions import ParserParsingError
 from app.helpers import send_discord_webhook_message
 from app.overfast_client import OverFastClient
 from app.overfast_logger import logger
@@ -22,15 +23,18 @@ async def get_distant_hero_keys(client: OverFastClient) -> set[str]:
 
     try:
         await heroes_parser.parse()
-    except HTTPException as error:
+    except (HTTPException, ParserParsingError) as error:
         raise SystemExit from error
+
+    if not isinstance(heroes_parser.data, list):
+        raise SystemExit
 
     return {hero["key"] for hero in heroes_parser.data}
 
 
 def get_local_hero_keys() -> set[str]:
     """Get a set of Overwatch hero keys from the local HeroKey enum"""
-    return {h.value for h in HeroKey}
+    return set(HeroKey)
 
 
 async def main():

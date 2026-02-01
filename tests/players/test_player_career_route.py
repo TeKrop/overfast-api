@@ -20,9 +20,11 @@ if TYPE_CHECKING:
 def test_get_player_career(
     client: TestClient,
     player_id: str,
-    player_html_data: str,
+    player_html_data: str | None,
     player_search_response_mock: Mock,
 ):
+    assert player_html_data is not None
+
     with patch(
         "httpx.AsyncClient.get",
         side_effect=[
@@ -123,7 +125,9 @@ def test_get_player_career_blizzard_forbidden_error(client: TestClient):
 
 
 @pytest.mark.parametrize("player_html_data", ["Unknown-1234"], indirect=True)
-def test_get_player_parser_init_error(client: TestClient, player_html_data: str):
+def test_get_player_parser_init_error(client: TestClient, player_html_data: str | None):
+    assert player_html_data is not None
+
     with patch(
         "httpx.AsyncClient.get",
         side_effect=[
@@ -140,8 +144,10 @@ def test_get_player_parser_init_error(client: TestClient, player_html_data: str)
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 def test_get_player_parser_parsing_error(
-    client: TestClient, player_html_data: str, player_search_response_mock: Mock
+    client: TestClient, player_html_data: str | None, player_search_response_mock: Mock
 ):
+    assert player_html_data is not None
+
     player_attr_error = player_html_data.replace(
         'class="Profile-player--summaryWrapper"',
         'class="blabla"',

@@ -1,6 +1,6 @@
 """Hero Controller module"""
 
-from typing import Any, ClassVar
+from typing import Any, ClassVar, cast
 
 from app.config import settings
 from app.controllers import AbstractController
@@ -19,13 +19,15 @@ class GetHeroController(AbstractController):
     parser_classes: ClassVar[list[type]] = [HeroParser, HeroesParser, HeroesStatsParser]
     timeout = settings.hero_path_cache_timeout
 
-    def merge_parsers_data(self, parsers_data: list[dict], **kwargs) -> dict:
+    def merge_parsers_data(self, parsers_data: list[dict | list], **kwargs) -> dict:
         """Merge parsers data together :
         - HeroParser for detailed data
         - HeroesParser for portrait (not here in the specific page)
         - HeroesStatsParser for stats (health, armor, shields)
         """
-        hero_data, heroes_data, heroes_stats_data = parsers_data
+        hero_data = cast("dict", parsers_data[0])
+        heroes_data = cast("list", parsers_data[1])
+        heroes_stats_data = cast("dict", parsers_data[2])
 
         try:
             portrait_value = next(
@@ -40,7 +42,7 @@ class GetHeroController(AbstractController):
             portrait_value = None
         else:
             # We want to insert the portrait before the "role" key
-            hero_data = self.__dict_insert_value_before_key(
+            hero_data = self._dict_insert_value_before_key(
                 hero_data,
                 "role",
                 "portrait",
@@ -55,7 +57,7 @@ class GetHeroController(AbstractController):
             hitpoints = None
         else:
             # We want to insert hitpoints before "abilities" key
-            hero_data = self.__dict_insert_value_before_key(
+            hero_data = self._dict_insert_value_before_key(
                 hero_data,
                 "abilities",
                 "hitpoints",
@@ -65,7 +67,7 @@ class GetHeroController(AbstractController):
         return hero_data
 
     @staticmethod
-    def __dict_insert_value_before_key(
+    def _dict_insert_value_before_key(
         data: dict,
         key: str,
         new_key: str,

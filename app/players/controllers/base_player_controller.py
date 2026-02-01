@@ -1,5 +1,7 @@
 """Base Player Controller module"""
 
+from typing import cast
+
 from fastapi import HTTPException, status
 
 from app.config import settings
@@ -20,7 +22,7 @@ class BasePlayerController(AbstractController):
 
         # Ensure unknown players caching system is enabled
         if not settings.unknown_players_cache_enabled:
-            return await super().process_request(**kwargs)
+            return cast("dict", await super().process_request(**kwargs))
 
         # First check if player is known to not exist
         player_id = kwargs["player_id"]
@@ -36,7 +38,7 @@ class BasePlayerController(AbstractController):
         # Then run process as usual, but intercept HTTP 404 to be able
         # to store result in cache, to prevent calling Blizzard next time
         try:
-            return await super().process_request(**kwargs)
+            return cast("dict", await super().process_request(**kwargs))
         except HTTPException as err:
             if err.status_code == status.HTTP_404_NOT_FOUND:
                 self.cache_manager.set_player_as_unknown(player_id)

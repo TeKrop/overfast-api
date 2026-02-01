@@ -35,7 +35,7 @@ def test_get_heroes_filter_by_role(client: TestClient, role: Role):
 
 def test_get_heroes_invalid_role(client: TestClient):
     response = client.get("/heroes", params={"role": "invalid"})
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_get_heroes_blizzard_error(client: TestClient):

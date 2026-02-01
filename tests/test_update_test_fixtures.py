@@ -28,10 +28,7 @@ def _setup_update_test_fixtures_test():
 test_data_path = f"{settings.test_fixtures_root_path}/html"
 heroes_calls = [
     ("Updating {}{}...", test_data_path, "/heroes.html"),
-    *[
-        ("Updating {}{}...", test_data_path, f"/heroes/{hero.value}.html")
-        for hero in HeroKey
-    ],
+    *[("Updating {}{}...", test_data_path, f"/heroes/{hero}.html") for hero in HeroKey],
 ]
 players_calls = [
     ("Updating {}{}...", test_data_path, f"/players/{player}.html")

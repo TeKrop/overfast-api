@@ -1,6 +1,6 @@
 """Roles endpoints router : roles list, etc."""
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Query, Request, Response
 
@@ -23,6 +23,7 @@ router = APIRouter()
         f"<br />**Cache TTL : {ListRolesController.get_human_readable_timeout()}.**"
     ),
     operation_id="list_roles",
+    response_model=list[RoleDetail],
 )
 async def list_roles(
     request: Request,
@@ -30,5 +31,5 @@ async def list_roles(
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
-) -> list[RoleDetail]:
+) -> Any:
     return await ListRolesController(request, response).process_request(locale=locale)

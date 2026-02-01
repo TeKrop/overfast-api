@@ -19,7 +19,7 @@ def _setup_hero_stats_test(hero_stats_response_mock: Mock):
 
 def test_get_hero_stats_missing_parameters(client: TestClient):
     response = client.get("/heroes/stats")
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_get_hero_stats_success(client: TestClient):
@@ -44,7 +44,7 @@ def test_get_hero_stats_invalid_platform(client: TestClient):
             "region": PlayerRegion.EUROPE,
         },
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_get_hero_stats_invalid_gamemode(client: TestClient):
@@ -56,7 +56,7 @@ def test_get_hero_stats_invalid_gamemode(client: TestClient):
             "region": PlayerRegion.EUROPE,
         },
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_get_hero_stats_invalid_region(client: TestClient):
@@ -68,7 +68,7 @@ def test_get_hero_stats_invalid_region(client: TestClient):
             "region": "invalid_region",
         },
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_get_hero_stats_blizzard_error(client: TestClient):

@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -40,7 +40,7 @@ async def test_hero_stats_summary_parser(
     parser_init_kwargs: dict,
     blizzard_query_params: dict,
     raises_error: bool,
-    hero_stats_response_mock: str,
+    hero_stats_response_mock: Mock,
 ):
     base_kwargs = {
         "platform": PlayerPlatform.PC,

@@ -47,11 +47,11 @@ def test_get_player_stats_valid_hero(client: TestClient, uri: str):
         f"/players/TeKrop-2217{uri}",
         params={
             "gamemode": PlayerGamemode.QUICKPLAY,
-            "hero": HeroKeyCareerFilter.ANA,
+            "hero": HeroKeyCareerFilter.ANA,  # ty: ignore[unresolved-attribute]
         },
     )
     assert response.status_code == status.HTTP_200_OK
-    assert set(response.json().keys()) == {HeroKeyCareerFilter.ANA}
+    assert set(response.json().keys()) == {HeroKeyCareerFilter.ANA}  # ty: ignore[unresolved-attribute]
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
@@ -64,14 +64,14 @@ def test_get_player_stats_invalid_hero(client: TestClient, uri: str):
             "hero": "invalid_hero",
         },
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_missing_gamemode(client: TestClient, uri: str):
     response = client.get(f"/players/TeKrop-2217{uri}")
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
@@ -81,7 +81,7 @@ def test_get_player_stats_invalid_gamemode(client: TestClient, uri: str):
         f"/players/TeKrop-2217{uri}",
         params={"gamemode": "invalid_gamemode"},
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
@@ -122,7 +122,7 @@ def test_get_player_stats_invalid_platform(client: TestClient, uri: str):
             "platform": "invalid_platform",
         },
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)

@@ -22,7 +22,7 @@ def _setup_search_players_test(player_search_response_mock: Mock):
 
 def test_search_players_missing_name(client: TestClient):
     response = client.get("/players")
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_search_players_no_result(client: TestClient):

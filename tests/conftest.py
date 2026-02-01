@@ -14,11 +14,11 @@ def client() -> TestClient:
 
 @pytest.fixture(scope="session")
 def valkey_server():
-    return fakeredis.FakeValkey(protocol=3)
+    return fakeredis.FakeValkey(protocol=3)  # ty: ignore[possibly-missing-attribute]
 
 
 @pytest.fixture(autouse=True)
-def _patch_before_every_test(valkey_server: fakeredis.FakeValkey):
+def _patch_before_every_test(valkey_server: fakeredis.FakeValkey):  # ty: ignore[possibly-missing-attribute]
     # Flush Valkey before and after every tests
     valkey_server.flushdb()
 

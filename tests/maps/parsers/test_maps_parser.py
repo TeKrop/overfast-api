@@ -16,6 +16,7 @@ async def test_maps_page_parsing(maps_parser: MapsParser):
         pytest.fail("Maps list parsing failed")
 
     # Just check the format of the first map in the list
+    assert isinstance(maps_parser.data, list)
     assert maps_parser.data[0] == {
         "key": "aatlis",
         "name": "Aatlis",
