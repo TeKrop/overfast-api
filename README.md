@@ -64,9 +64,10 @@ Should you wish to customize according to your specific requirements, here is a 
 You likely won't need to modify other generic settings, but if you're curious about their functionality, consult the docstrings within the `app/config.py` file for further details.
 
 ### Code Quality
-The code quality is checked using `ruff`. I'm also using `ruff format` for imports ordering and code formatting, enforcing PEP-8 convention on my code. To check the quality of the code, you just have to run the following command :
+The code quality is checked using `ruff` for linting and formatting, and `ty` for type checking. I'm also using `ruff format` for imports ordering and code formatting, enforcing PEP-8 convention on my code. To check the quality of the code, you just have to run the following commands :
 
 ```shell
+just check     # Run ty type checker
 just lint      # Run ruff linter
 just format    # Run ruff formatter
 ```

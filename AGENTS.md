@@ -22,6 +22,7 @@ just build              # Build Docker images (required first)
 just start              # Run app with autoreload on localhost:8000
 just start_testing      # Run with nginx reverse proxy on localhost:8080
 just down               # Stop all containers
+just check              # Run ty type checker
 just lint               # Run ruff linter with --fix
 just format             # Run ruff formatter
 just test               # Run all tests with coverage
@@ -75,6 +76,7 @@ Caching strategy:
 - Python 3.14+
 - 4-space indentation
 - Explicit type hints on public APIs
+- ty is the type checker: run `just check` to validate types
 - Ruff is the linter/formatter: run `just lint` and `just format` before commits
 - Naming:
   - snake_case for functions/variables
@@ -142,7 +144,7 @@ When an agent (automated assistant) works with this repository, follow these rul
 - Minimize assumptions:
   - If a change requires an environment-specific value (branch name, secret, remote), ask the maintainer.
 - Safety checks before code changes:
-  - Run linter (`just lint`) and tests (`just test`) locally (or request CI run) before suggesting code to be merged.
+  - Run type checker (`just check`), linter (`just lint`), and tests (`just test`) locally (or request CI run) before suggesting code to be merged.
 - Be explicit about automated actions:
   - If an agent can open a PR, include a human-readable summary of what changed, why, how it was tested, and any follow-ups.
 - Respect repository conventions:
