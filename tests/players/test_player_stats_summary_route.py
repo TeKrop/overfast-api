@@ -89,7 +89,7 @@ def test_get_player_stats_summary_blizzard_error(client: TestClient):
     with patch(
         "httpx.AsyncClient.get",
         return_value=Mock(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
         ),
     ):
@@ -100,7 +100,7 @@ def test_get_player_stats_summary_blizzard_error(client: TestClient):
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
-        "error": "Couldn't get Blizzard page (HTTP 429 error) : Service Unavailable",
+        "error": "Couldn't get Blizzard page (HTTP 503 error) : Service Unavailable",
     }
 
 

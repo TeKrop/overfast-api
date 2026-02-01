@@ -25,6 +25,7 @@ from .middlewares import (
     PyInstrumentMiddleware,
     TraceMallocMiddleware,
 )
+from .monitoring import router as monitoring
 from .overfast_client import OverFastClient
 from .overfast_logger import logger
 from .players import router as players
@@ -268,8 +269,6 @@ app.include_router(players.router, prefix="/players")
 
 # Add monitoring router if enabled
 if settings.monitoring_enabled and settings.monitoring_admin_token:
-    from .monitoring import router as monitoring
-
     app.include_router(monitoring, prefix="/monitoring")
     logger.info("Monitoring endpoints enabled")
 

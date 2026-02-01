@@ -39,7 +39,7 @@ def test_search_players_no_result(client: TestClient):
 @pytest.mark.parametrize(
     ("status_code", "text"),
     [
-        (status.HTTP_429_TOO_MANY_REQUESTS, "Service Unavailable"),
+        (status.HTTP_503_SERVICE_UNAVAILABLE, "Service Unavailable"),
         (status.HTTP_500_INTERNAL_SERVER_ERROR, '{"error":"searchByName error"}'),
     ],
 )
