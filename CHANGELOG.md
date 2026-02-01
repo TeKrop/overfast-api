@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.32.1 (2026-02-01)
+
+### Bug Fixes
+
+- Revert "feat: added monitoring regarding Blizzard rate limits (#343)"
+  ([#344](https://github.com/TeKrop/overfast-api/pull/344),
+  [`2e9a3b6`](https://github.com/TeKrop/overfast-api/commit/2e9a3b6e05ec2d9f2771714149ae7e4b05f0c64b))
+
+
 ## v3.32.0 (2026-02-01)
 
 ### Features
