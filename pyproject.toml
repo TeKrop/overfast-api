@@ -140,8 +140,10 @@ allowed-confusables = ["（", "）", "："]
 known-first-party = ["app"]
 
 [tool.pytest.ini_options]
-# Put this default value to prevent warnings
-asyncio_default_fixture_loop_scope = "function"
+# fakeredis is still using get_connection with deprecated usage
+filterwarnings = [
+    "ignore:Call to 'get_connection' function with deprecated usage:DeprecationWarning:valkey.client",
+]
 
 [tool.semantic_release]
 commit_parser = "conventional"
