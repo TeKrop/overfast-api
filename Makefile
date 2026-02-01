@@ -40,7 +40,7 @@ start_testing: ## Run OverFastAPI application (testing mode)
 
 check: ## Run type checker, CHECKER_ARGS can be specified
 ifdef CHECKER_ARGS
-	@echo "Running type checker on $(CHECKER_ARGS=)..."
+	@echo "Running type checker on $(CHECKER_ARGS)..."
 	uvx ty check $(CHECKER_ARGS)
 else
 	@echo "Running type checker..."

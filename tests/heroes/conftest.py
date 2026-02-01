@@ -28,7 +28,7 @@ def hero_stats_json_data() -> dict:
 
 
 @pytest.fixture(scope="package")
-def hero_stats_response_mock(hero_stats_json_data: list[dict]) -> Mock:
+def hero_stats_response_mock(hero_stats_json_data: dict) -> Mock:
     return Mock(
         status_code=status.HTTP_200_OK,
         text=json.dumps(hero_stats_json_data),
