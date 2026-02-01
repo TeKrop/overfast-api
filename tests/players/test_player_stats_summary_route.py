@@ -52,7 +52,7 @@ def test_get_player_stats_summary_invalid_gamemode(client: TestClient):
         "/players/TeKrop-2217/stats/summary",
         params={"gamemode": "invalid_gamemode"},
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
@@ -81,7 +81,7 @@ def test_get_player_stats_summary_invalid_platform(client: TestClient):
         "/players/TeKrop-2217/stats/summary",
         params={"platform": "invalid_platform"},
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)

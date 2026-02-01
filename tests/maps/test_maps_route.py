@@ -34,4 +34,4 @@ def test_get_maps_filter_by_gamemode(client: TestClient, gamemode: MapGamemode):
 
 def test_get_maps_invalid_gamemode(client: TestClient):
     response = client.get("/maps", params={"gamemode": "invalid"})
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
