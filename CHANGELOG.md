@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.31.0 (2026-02-01)
+
+### Features
+
+- Added ty type checker ([#342](https://github.com/TeKrop/overfast-api/pull/342),
+  [`dc5548a`](https://github.com/TeKrop/overfast-api/commit/dc5548afed2c2d3ec78b3752ff20486ef059dfba))
+
+
 ## v3.30.0 (2026-01-04)
 
 ### Features
