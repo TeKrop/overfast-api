@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -10,4 +10,4 @@ def get_hero_controller() -> GetHeroController:
     with patch(
         "app.controllers.AbstractController.__init__", MagicMock(return_value=None)
     ):
-        return GetHeroController()
+        return GetHeroController(request=Mock(), response=Mock())

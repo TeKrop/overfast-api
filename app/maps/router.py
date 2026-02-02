@@ -1,6 +1,6 @@
 """Maps endpoints router : maps list, etc."""
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Query, Request, Response
 
@@ -24,18 +24,19 @@ router = APIRouter()
         f"<br />**Cache TTL : {ListMapsController.get_human_readable_timeout()}.**"
     ),
     operation_id="list_maps",
+    response_model=list[Map],
 )
 async def list_maps(
     request: Request,
     response: Response,
     gamemode: Annotated[
-        MapGamemode | None,
+        MapGamemode | None,  # ty: ignore[invalid-type-form]
         Query(
             title="Gamemode filter",
             description="Filter maps available for a specific gamemode",
         ),
     ] = None,
-) -> list[Map]:
+) -> Any:
     return await ListMapsController(request, response).process_request(
         gamemode=gamemode
     )

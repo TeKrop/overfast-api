@@ -12,22 +12,23 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope="package")
-def heroes_html_data():
+def heroes_html_data() -> str | None:
     return read_html_file("heroes.html")
 
 
 @pytest.fixture(scope="package")
-def hero_html_data(request: SubRequest):
+def hero_html_data(request: SubRequest) -> str | None:
     return read_html_file(f"heroes/{request.param}.html")
 
 
 @pytest.fixture(scope="package")
-def hero_stats_json_data() -> list[dict]:
-    return read_json_file("blizzard_hero_stats.json")
+def hero_stats_json_data() -> dict:
+    json_data = read_json_file("blizzard_hero_stats.json")
+    return json_data if isinstance(json_data, dict) else {}
 
 
 @pytest.fixture(scope="package")
-def hero_stats_response_mock(hero_stats_json_data: list[dict]) -> Mock:
+def hero_stats_response_mock(hero_stats_json_data: dict) -> Mock:
     return Mock(
         status_code=status.HTTP_200_OK,
         text=json.dumps(hero_stats_json_data),

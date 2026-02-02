@@ -12,13 +12,14 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope="package")
-def player_html_data(request: SubRequest) -> str:
+def player_html_data(request: SubRequest) -> str | None:
     return read_html_file(f"players/{request.param}.html")
 
 
 @pytest.fixture(scope="package")
 def search_players_blizzard_json_data() -> list[dict]:
-    return read_json_file("search_players_blizzard_result.json")
+    json_data = read_json_file("search_players_blizzard_result.json")
+    return json_data if isinstance(json_data, list) else []
 
 
 @pytest.fixture(scope="package")

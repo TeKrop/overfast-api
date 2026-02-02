@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import ResponseValidationError
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -49,6 +49,8 @@ if settings.sentry_dsn:
         # Set profile_lifecycle to "trace" to automatically
         # run the profiler on when there is an active transaction
         profile_lifecycle="trace",
+        # Set a human-readable release identifier.
+        release=settings.app_version,
     )
 
 
@@ -160,7 +162,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 # Add customized OpenAPI specs with app logo
-def custom_openapi():  # pragma: no cover
+def custom_openapi() -> dict[str, Any]:  # pragma: no cover
     if app.openapi_schema:
         return app.openapi_schema
 
@@ -191,7 +193,7 @@ def custom_openapi():  # pragma: no cover
     return app.openapi_schema
 
 
-app.openapi = custom_openapi
+app.openapi = custom_openapi  # type: ignore[method-assign]
 
 
 # Add custom exception handlers for Starlet HTTP exceptions, but also
@@ -215,14 +217,14 @@ async def pydantic_validation_error_handler(
 # We need to override default Redoc page in order to be
 # able to customize the favicon, same for Swagger
 common_doc_settings = {
-    "openapi_url": app.openapi_url,
+    "openapi_url": str(app.openapi_url),
     "title": f"{app.title} - Documentation",
     "favicon_url": "/static/favicon.png",
 }
 
 
 @app.get("/", include_in_schema=False)
-async def overridden_redoc():
+async def overridden_redoc() -> HTMLResponse:
     return render_documentation(
         title=common_doc_settings["title"],
         favicon_url=common_doc_settings["favicon_url"],
@@ -231,10 +233,12 @@ async def overridden_redoc():
 
 
 @app.get("/docs", include_in_schema=False)
-async def overridden_swagger():
-    swagger_settings = common_doc_settings.copy()
-    swagger_settings["swagger_favicon_url"] = swagger_settings.pop("favicon_url")
-    return get_swagger_ui_html(**swagger_settings)
+async def overridden_swagger() -> HTMLResponse:
+    return get_swagger_ui_html(
+        openapi_url=common_doc_settings["openapi_url"],
+        title=common_doc_settings["title"],
+        swagger_favicon_url=common_doc_settings["favicon_url"],
+    )
 
 
 # Add supported profiler as middleware
@@ -253,7 +257,7 @@ if settings.profiler:  # pragma: no cover
         raise SystemExit
 
     logger.info(f"Profiling is enabled with {settings.profiler}")
-    app.add_middleware(supported_profilers[settings.profiler])
+    app.add_middleware(supported_profilers[settings.profiler])  # type: ignore[arg-type]
 
 # Add application routers
 app.include_router(heroes.router, prefix="/heroes")

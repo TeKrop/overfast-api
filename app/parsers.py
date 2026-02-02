@@ -34,7 +34,7 @@ class AbstractParser(ABC):
         storing it into self.data attribute.
         """
 
-    def filter_request_using_query(self, **_) -> dict | list:
+    def filter_request_using_query(self, **_) -> dict | list | None:
         """If the route contains subroutes accessible using GET queries, this method
         will filter data using the query data. This method should be
         redefined in child classes if needed. The default behaviour is to return

@@ -1,5 +1,7 @@
 """Maps Parser module"""
 
+from typing import cast
+
 from app.parsers import CSVParser
 
 
@@ -22,11 +24,11 @@ class MapsParser(CSVParser):
         ]
 
     def filter_request_using_query(self, **kwargs) -> list:
+        # Type assertion: we know parse_data returns list[dict]
+        data = cast("list[dict]", self.data)
         gamemode = kwargs.get("gamemode")
         return (
-            self.data
+            data
             if not gamemode
-            else [
-                map_dict for map_dict in self.data if gamemode in map_dict["gamemodes"]
-            ]
+            else [map_dict for map_dict in data if gamemode in map_dict["gamemodes"]]
         )

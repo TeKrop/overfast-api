@@ -36,6 +36,7 @@ async def test_player_page_parsing(
     ):
         await player_stats_summary_parser.parse()
 
+    assert isinstance(player_stats_summary_parser.data, dict)
     assert len(player_stats_summary_parser.data.keys()) > 0
 
 

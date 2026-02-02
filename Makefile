@@ -38,6 +38,15 @@ start_testing: ## Run OverFastAPI application (testing mode)
 	@echo "Launching OverFastAPI (testing mode with reverse proxy)..."
 	$(DOCKER_COMPOSE) --profile testing up -d
 
+check: ## Run type checker, CHECKER_ARGS can be specified
+ifdef CHECKER_ARGS
+	@echo "Running type checker on $(CHECKER_ARGS)..."
+	uvx ty check $(CHECKER_ARGS)
+else
+	@echo "Running type checker..."
+	uvx ty check
+endif
+
 lint: ## Run linter
 	@echo "Running linter..."
 	uvx ruff check --fix --exit-non-zero-on-fix
@@ -81,7 +90,7 @@ clean: down ## Clean up Docker environment
 	docker network prune -f
 
 lock: ## Update lock file
-	uv lock
+	uv lock --upgrade
 
 update_test_fixtures: ## Update test fixtures (heroes, players, etc.)
 	$(DOCKER RUN) uv run python -m tests.update_test_fixtures $(PARAMS)

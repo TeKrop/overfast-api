@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from app.overfast_logger import logger
 from app.parsers import HTMLParser
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 class BasePlayerParser(HTMLParser):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.player_id = kwargs.get("player_id")
+        self.player_id = kwargs["player_id"]
 
         # Player Data is made of two sets of data :
         # - summary, retrieve from players search endpoint
@@ -19,7 +19,7 @@ class BasePlayerParser(HTMLParser):
         self.player_data = {"summary": None, "profile": None}
 
     def get_blizzard_url(self, **kwargs) -> str:
-        return f"{super().get_blizzard_url(**kwargs)}/{kwargs.get('player_id')}/"
+        return f"{super().get_blizzard_url(**kwargs)}/{kwargs['player_id']}/"
 
     def store_response_data(self, response: httpx.Response) -> None:
         """Store HTML data in player_data to save for Player Cache"""
@@ -67,10 +67,12 @@ class BasePlayerParser(HTMLParser):
         # Update the Player Cache
         self.cache_manager.update_player_cache(self.player_id, self.player_data)
 
-    async def __retrieve_player_summary_data(self) -> dict | None:
+    async def __retrieve_player_summary_data(self) -> dict:
         """Call Blizzard search page with user name to
         check last_updated_at and retrieve summary values
         """
         player_summary_parser = SearchDataParser(player_id=self.player_id)
         await player_summary_parser.parse()
-        return player_summary_parser.data
+
+        # Type assertion: we know SearchDataParser parse_data returns dict
+        return cast("dict", player_summary_parser.data)

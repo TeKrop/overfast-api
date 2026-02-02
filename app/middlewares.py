@@ -1,6 +1,7 @@
 import subprocess
 import tempfile
 import tracemalloc
+from abc import ABC, abstractmethod
 from contextlib import suppress
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -20,7 +21,7 @@ with suppress(ModuleNotFoundError):
     import pyinstrument
 
 
-class OverFastMiddleware(BaseHTTPMiddleware):  # pragma: no cover
+class OverFastMiddleware(BaseHTTPMiddleware, ABC):  # pragma: no cover
     async def dispatch(
         self, request: Request, call_next: Callable
     ) -> HTMLResponse | JSONResponse:
@@ -30,6 +31,12 @@ class OverFastMiddleware(BaseHTTPMiddleware):  # pragma: no cover
 
         # Proceed if requested
         return await self._dispatch(request, call_next)
+
+    @abstractmethod
+    async def _dispatch(
+        self, request: Request, call_next: Callable
+    ) -> HTMLResponse | JSONResponse:
+        """Concrete dispatch method"""
 
 
 class MemrayInMemoryMiddleware(OverFastMiddleware):  # pragma: no cover

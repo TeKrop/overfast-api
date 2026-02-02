@@ -22,4 +22,5 @@ async def test_roles_page_parsing(roles_parser: RolesParser, home_html_data: str
         except OverfastError:
             pytest.fail("Roles list parsing failed")
 
+    assert isinstance(roles_parser.data, list)
     assert {role["key"] for role in roles_parser.data} == {r.value for r in Role}

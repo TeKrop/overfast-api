@@ -9,14 +9,14 @@ class PlayerCareerStatsParser(PlayerCareerParser):
     def filter_request_using_query(self, **_) -> dict:
         return self._filter_stats() if self.data else {}
 
-    def _compute_parsed_data(self) -> dict | None:
+    def _compute_parsed_data(self) -> dict:
         # Only return career stats, which will be used for calculation
         # depending on the parameters
-        return self.__get_career_stats(self.get_stats())
+        return self.__get_career_summary_stats(self.get_stats()) or {}
 
-    def __get_career_stats(self, raw_stats: dict | None) -> dict | None:
+    def __get_career_summary_stats(self, raw_stats: dict | None) -> dict:
         if not raw_stats:
-            return None
+            return {}
 
         return {
             "stats": {
