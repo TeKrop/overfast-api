@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.33.0 (2026-02-02)
+
+### Features
+
+- Add automated upstream sync workflow and update deploy path
+  ([`e577fe6`](https://github.com/danielsogl/overfast-api/commit/e577fe627cb56770b89cca2ad7dcadfdc6d7701c))
+
+
 ## v3.32.1 (2026-02-01)
 
 ### Bug Fixes
