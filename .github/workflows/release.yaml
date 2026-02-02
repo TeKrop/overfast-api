@@ -44,4 +44,4 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            bash "${{ secrets.DEPLOY_SCRIPT_PATH }}"
+            /opt/deploy-overfast.sh

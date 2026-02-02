@@ -1,0 +1,102 @@
+name: "Sync Upstream & Deploy"
+
+on:
+  schedule:
+    # Run daily at 6:00 UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: "Force deployment even if no updates"
+        required: false
+        default: "false"
+        type: boolean
+
+jobs:
+  sync:
+    name: Sync with upstream
+    runs-on: ubuntu-latest
+    outputs:
+      has_updates: ${{ steps.sync.outputs.has_updates }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/TeKrop/overfast-api.git || true
+          git fetch upstream
+
+      - name: Check for updates and sync
+        id: sync
+        run: |
+          # Get current and upstream commits
+          CURRENT=$(git rev-parse HEAD)
+          UPSTREAM=$(git rev-parse upstream/main)
+
+          echo "Current: $CURRENT"
+          echo "Upstream: $UPSTREAM"
+
+          # Check if there are new commits
+          NEW_COMMITS=$(git log HEAD..upstream/main --oneline)
+
+          if [ -n "$NEW_COMMITS" ]; then
+            echo "New commits found:"
+            echo "$NEW_COMMITS"
+
+            # Merge upstream
+            git merge upstream/main -m "Merge upstream changes"
+
+            # Push to origin
+            git push origin main
+
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+          else
+            echo "No new commits from upstream"
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+          fi
+
+  deploy:
+    name: Deploy to VPS
+    needs: sync
+    runs-on: ubuntu-latest
+    if: needs.sync.outputs.has_updates == 'true' || github.event.inputs.force_deploy == 'true'
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            /opt/deploy-overfast.sh
+
+  notify:
+    name: Send notification
+    needs: [sync, deploy]
+    runs-on: ubuntu-latest
+    if: always() && needs.sync.outputs.has_updates == 'true'
+
+    steps:
+      - name: Notify on success
+        if: needs.deploy.result == 'success'
+        run: |
+          echo "Deployment successful!"
+          # Add notification logic here (Slack, Discord, email, etc.)
+
+      - name: Notify on failure
+        if: needs.deploy.result == 'failure'
+        run: |
+          echo "Deployment failed!"
+          # Add notification logic here
