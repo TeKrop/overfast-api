@@ -8,7 +8,7 @@ This document is intended to be a concise, repository-specific checklist and ref
 
 ## Project overview
 
-OverFast API is a FastAPI-based Overwatch 2 data API that scrapes Blizzard pages to provide data about heroes, game modes, maps, and player statistics. It uses a three-tier caching strategy backed by Valkey, with Nginx/OpenResty as a reverse proxy.
+OverFast API is a FastAPI-based Overwatch data API that scrapes Blizzard pages to provide data about heroes, game modes, maps, and player statistics. It uses a three-tier caching strategy backed by Valkey, with Nginx/OpenResty as a reverse proxy.
 
 ---
 
