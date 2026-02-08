@@ -66,7 +66,7 @@ async def lifespan(_: FastAPI):  # pragma: no cover
     await overfast_client.aclose()
 
 
-description = f"""OverFast API provides comprehensive data on Overwatch 2 heroes,
+description = f"""OverFast API provides comprehensive data on Overwatch heroes,
 game modes, maps, and player statistics by scraping Blizzard pages. Developed with
 the efficiency of **FastAPI** and **Selectolax**, it leverages **nginx (OpenResty)** as a
 reverse proxy and **Valkey** for caching. Its tailored caching mechanism significantly
