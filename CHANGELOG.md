@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.34.0 (2026-02-08)
+
+### Features
+
+- Started to rework project with DDD (ports and adapters)
+  ([#346](https://github.com/TeKrop/overfast-api/pull/346),
+  [`17cb27e`](https://github.com/TeKrop/overfast-api/commit/17cb27e8ef43a885ccf9f558cf5411a5a66856d8))
+
+
 ## v3.33.0 (2026-02-05)
 
 ### Features
