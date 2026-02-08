@@ -12,13 +12,11 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from .api import gamemodes, heroes, maps, players, roles
 from .config import settings
 from .docs import render_documentation
 from .enums import Profiler, RouteTag
-from .gamemodes import router as gamemodes
 from .helpers import overfast_internal_error
-from .heroes import router as heroes
-from .maps import router as maps
 from .middlewares import (
     MemrayInMemoryMiddleware,
     ObjGraphMiddleware,
@@ -27,8 +25,6 @@ from .middlewares import (
 )
 from .overfast_client import OverFastClient
 from .overfast_logger import logger
-from .players import router as players
-from .roles import router as roles
 
 if settings.sentry_dsn:
     import sentry_sdk
@@ -260,11 +256,11 @@ if settings.profiler:  # pragma: no cover
     app.add_middleware(supported_profilers[settings.profiler])  # type: ignore[arg-type]
 
 # Add application routers
-app.include_router(heroes.router, prefix="/heroes")
-app.include_router(roles.router, prefix="/roles")
-app.include_router(gamemodes.router, prefix="/gamemodes")
-app.include_router(maps.router, prefix="/maps")
-app.include_router(players.router, prefix="/players")
+app.include_router(heroes, prefix="/heroes")
+app.include_router(roles, prefix="/roles")
+app.include_router(gamemodes, prefix="/gamemodes")
+app.include_router(maps, prefix="/maps")
+app.include_router(players, prefix="/players")
 
 logger.info("OverFast API... Online !")
 logger.info("Version : {}", settings.app_version)

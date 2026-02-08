@@ -7,9 +7,8 @@ from fastapi import APIRouter, Query, Request, Response
 from app.enums import RouteTag
 from app.gamemodes.enums import MapGamemode
 from app.helpers import success_responses
-
-from .controllers.list_maps_controller import ListMapsController
-from .models import Map
+from app.maps.controllers.list_maps_controller import ListMapsController
+from app.maps.models import Map
 
 router = APIRouter()
 
