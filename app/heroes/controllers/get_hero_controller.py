@@ -11,7 +11,8 @@ from app.adapters.blizzard.parsers.heroes_stats import parse_heroes_stats
 from app.config import settings
 from app.controllers import AbstractController
 from app.enums import Locale
-from app.exceptions import ParserBlizzardError
+from app.exceptions import ParserBlizzardError, ParserParsingError
+from app.helpers import overfast_internal_error
 
 
 class GetHeroController(AbstractController):
@@ -42,6 +43,12 @@ class GetHeroController(AbstractController):
                 status_code=error.status_code,
                 detail=error.message,
             ) from error
+        except ParserParsingError as error:
+            # Get Blizzard URL for error reporting
+            blizzard_url = (
+                f"{settings.blizzard_host}/{locale}{settings.heroes_path}{hero_key}/"
+            )
+            raise overfast_internal_error(blizzard_url, error) from error
 
         # Update API Cache
         self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)

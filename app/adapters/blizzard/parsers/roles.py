@@ -10,6 +10,7 @@ from app.adapters.blizzard.parsers.utils import (
 )
 from app.config import settings
 from app.enums import Locale
+from app.exceptions import ParserParsingError
 from app.roles.helpers import get_role_from_icon_url
 
 if TYPE_CHECKING:
@@ -33,34 +34,55 @@ def parse_roles_html(html: str) -> list[dict]:
 
     Returns:
         List of role dicts with keys: key, name, icon, description
+
+    Raises:
+        ParserParsingError: If HTML structure is unexpected
     """
-    root_tag = parse_html_root(html)
+    try:
+        root_tag = parse_html_root(html)
 
-    roles_container = root_tag.css_first(
-        "div.homepage-features-heroes blz-feature-carousel-section"
-    )
-
-    # Get all role icons
-    roles_icons = [
-        safe_get_attribute(role_icon_div.css_first("blz-image"), "src")
-        for role_icon_div in roles_container.css_first("blz-tab-controls").css(
-            "blz-tab-control"
-        )
-    ]
-
-    # Parse role details
-    roles = []
-    for role_index, role_div in list(enumerate(roles_container.css("blz-feature")))[:3]:
-        roles.append(
-            {
-                "key": get_role_from_icon_url(roles_icons[role_index]),
-                "name": safe_get_text(role_div.css_first("blz-header h3")).capitalize(),
-                "icon": roles_icons[role_index],
-                "description": safe_get_text(role_div.css_first("blz-header div")),
-            }
+        roles_container = root_tag.css_first(
+            "div.homepage-features-heroes blz-feature-carousel-section"
         )
 
-    return roles
+        if not roles_container:
+            msg = "Roles container not found in homepage HTML"
+            raise ParserParsingError(msg)
+
+        # Get all role icons
+        tab_controls = roles_container.css_first("blz-tab-controls")
+        if not tab_controls:
+            msg = "Role tab controls not found in homepage HTML"
+            raise ParserParsingError(msg)
+
+        roles_icons = [
+            safe_get_attribute(role_icon_div.css_first("blz-image"), "src")
+            for role_icon_div in tab_controls.css("blz-tab-control")
+        ]
+
+        # Parse role details
+        roles = []
+        role_features = roles_container.css("blz-feature")
+        for role_index, role_div in list(enumerate(role_features))[:3]:
+            header = role_div.css_first("blz-header")
+            if not header:
+                msg = f"Role header not found for role index {role_index}"
+                raise ParserParsingError(msg)
+
+            roles.append(
+                {
+                    "key": get_role_from_icon_url(roles_icons[role_index]),
+                    "name": safe_get_text(header.css_first("h3")).capitalize(),
+                    "icon": roles_icons[role_index],
+                    "description": safe_get_text(header.css_first("div")),
+                }
+            )
+
+    except (AttributeError, KeyError, IndexError, TypeError) as error:
+        msg = f"Unexpected Blizzard homepage structure: {error}"
+        raise ParserParsingError(msg) from error
+    else:
+        return roles
 
 
 async def parse_roles(
@@ -72,6 +94,9 @@ async def parse_roles(
 
     Returns:
         List of role dicts
+
+    Raises:
+        ParserParsingError: If HTML structure is unexpected
     """
     html = await fetch_roles_html(client, locale)
     return parse_roles_html(html)

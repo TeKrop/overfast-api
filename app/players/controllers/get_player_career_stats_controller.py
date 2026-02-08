@@ -12,7 +12,8 @@ from app.adapters.blizzard.parsers.player_career_stats import (
 from app.adapters.blizzard.parsers.player_profile import fetch_player_html
 from app.adapters.blizzard.parsers.player_summary import parse_player_summary
 from app.config import settings
-from app.exceptions import ParserBlizzardError
+from app.exceptions import ParserBlizzardError, ParserParsingError
+from app.helpers import overfast_internal_error
 from app.overfast_logger import logger
 
 from .base_player_controller import BasePlayerController
@@ -97,6 +98,13 @@ class GetPlayerCareerStatsController(BasePlayerController):
                 status_code=error.status_code,
                 detail=error.message,
             ) from error
+        except ParserParsingError as error:
+            # Get Blizzard URL for error reporting
+            blizzard_url = (
+                f"{settings.blizzard_host}{settings.career_path}/"
+                f"{player_summary['url'] if player_summary else player_id}/"
+            )
+            raise overfast_internal_error(blizzard_url, error) from error
 
         # Update API Cache
         self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)

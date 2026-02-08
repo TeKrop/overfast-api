@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from app.adapters.blizzard.parsers.utils import validate_response_status
 from app.config import settings
+from app.exceptions import ParserParsingError
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
@@ -42,35 +43,43 @@ def parse_player_summary_json(json_data: list[dict], player_id: str) -> dict:
 
     Returns:
         Player summary dict, or empty dict if not found uniquely
+
+    Raises:
+        ParserParsingError: If unexpected payload structure
     """
-    player_name = player_id.split("-", 1)[0]
+    try:
+        player_name = player_id.split("-", 1)[0]
 
-    # Find matching players (exact name match, case-sensitive, public only)
-    matching_players = [
-        player
-        for player in json_data
-        if player["name"] == player_name and player["isPublic"] is True
-    ]
+        # Find matching players (exact name match, case-sensitive, public only)
+        matching_players = [
+            player
+            for player in json_data
+            if player["name"] == player_name and player["isPublic"] is True
+        ]
 
-    if len(matching_players) != 1:
-        # Player not found or multiple matches
-        logger.warning(
-            "Player {} not found in search results ({} matching players)",
-            player_id,
-            len(matching_players),
-        )
-        return {}
+        if len(matching_players) != 1:
+            # Player not found or multiple matches
+            logger.warning(
+                "Player {} not found in search results ({} matching players)",
+                player_id,
+                len(matching_players),
+            )
+            return {}
 
-    player_data = matching_players[0]
+        player_data = matching_players[0]
 
-    # Normalize optional fields for regional consistency
-    # Some regions still use "portrait" instead of "avatar", "namecard", "title"
-    if player_data.get("portrait"):
-        player_data["avatar"] = None
-        player_data["namecard"] = None
-        player_data["title"] = None
+        # Normalize optional fields for regional consistency
+        # Some regions still use "portrait" instead of "avatar", "namecard", "title"
+        if player_data.get("portrait"):
+            player_data["avatar"] = None
+            player_data["namecard"] = None
+            player_data["title"] = None
 
-    return player_data
+    except (KeyError, TypeError) as error:
+        msg = f"Unexpected Blizzard search payload structure: {error}"
+        raise ParserParsingError(msg) from error
+    else:
+        return player_data
 
 
 async def parse_player_summary(client: BlizzardClient, player_id: str) -> dict:
@@ -84,6 +93,9 @@ async def parse_player_summary(client: BlizzardClient, player_id: str) -> dict:
     Returns:
         Player summary dict with url, lastUpdated, avatar, etc.
         Empty dict if player not found
+
+    Raises:
+        ParserParsingError: If unexpected payload structure
     """
     json_data = await fetch_player_summary_json(client, player_id)
     return parse_player_summary_json(json_data, player_id)
