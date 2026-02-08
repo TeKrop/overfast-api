@@ -5,7 +5,11 @@ from typing import ClassVar
 from fastapi import HTTPException
 
 from app.adapters.blizzard import BlizzardClient
-from app.adapters.blizzard.parsers.player_stats import parse_player_stats_summary
+from app.adapters.blizzard.parsers.player_profile import fetch_player_html
+from app.adapters.blizzard.parsers.player_stats import (
+    parse_player_stats_summary,
+    parse_player_stats_summary_from_html,
+)
 from app.adapters.blizzard.parsers.player_summary import parse_player_summary
 from app.config import settings
 from app.exceptions import ParserBlizzardError
@@ -36,8 +40,18 @@ class GetPlayerStatsSummaryController(BasePlayerController):
             logger.info("Retrieving Player Summary...")
             player_summary = await parse_player_summary(client, player_id)
 
-            # Check Player Cache if summary found
-            if player_summary:
+            # If player not found in search, fetch directly with player_id
+            if not player_summary:
+                logger.info("Player not found in search, fetching directly")
+                data = await parse_player_stats_summary(
+                    client,
+                    player_id,
+                    None,
+                    gamemode,
+                    platform,
+                )
+            else:
+                # Check Player Cache
                 logger.info("Checking Player Cache...")
                 player_cache = self.cache_manager.get_player_cache(player_id)
 
@@ -46,16 +60,33 @@ class GetPlayerStatsSummaryController(BasePlayerController):
                     and player_cache["summary"]["lastUpdated"]  # ty: ignore[invalid-argument-type]
                     == player_summary["lastUpdated"]
                 ):
-                    logger.info("Player Cache found and up-to-date")
+                    logger.info("Player Cache found and up-to-date, using it")
+                    html = player_cache["profile"]  # ty: ignore[invalid-argument-type]
+                    data = parse_player_stats_summary_from_html(
+                        html,
+                        player_summary,
+                        gamemode,
+                        platform,
+                    )
+                else:
+                    # Fetch from Blizzard with Blizzard ID
+                    logger.info(
+                        "Player Cache not found or not up-to-date, calling Blizzard"
+                    )
+                    blizzard_id = player_summary["url"]
+                    html = await fetch_player_html(client, blizzard_id)
+                    data = parse_player_stats_summary_from_html(
+                        html,
+                        player_summary,
+                        gamemode,
+                        platform,
+                    )
 
-            # Parse stats summary with aggregations
-            data = await parse_player_stats_summary(
-                client,
-                player_id if not player_summary else player_summary["url"],
-                player_summary,
-                gamemode,
-                platform,
-            )
+                    # Update Player Cache
+                    self.cache_manager.update_player_cache(
+                        player_id,
+                        {"summary": player_summary, "profile": html},
+                    )
 
         except ParserBlizzardError as error:
             raise HTTPException(

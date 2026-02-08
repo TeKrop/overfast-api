@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from app.adapters.blizzard.parsers.player_profile import (
     filter_stats_by_query,
     parse_player_profile,
+    parse_player_profile_html,
 )
 
 if TYPE_CHECKING:
@@ -57,6 +58,44 @@ def extract_career_stats_from_profile(profile_data: dict) -> dict:
             if platform_stats
         },
     }
+
+
+def parse_player_career_stats_from_html(
+    html: str,
+    player_summary: dict | None = None,
+    platform: PlayerPlatform | None = None,
+    gamemode: PlayerGamemode | None = None,
+    hero: str | None = None,
+) -> dict:
+    """
+    Parse player career stats from HTML (for Player Cache usage)
+
+    Args:
+        html: Player profile HTML
+        player_summary: Optional player summary from search endpoint
+        platform: Optional platform filter
+        gamemode: Optional gamemode filter
+        hero: Optional hero filter
+
+    Returns:
+        Career stats dict, filtered by query parameters
+    """
+    # Parse HTML to get profile data
+    profile_data = parse_player_profile_html(html, player_summary)
+
+    # Extract career stats structure
+    career_stats_data = extract_career_stats_from_profile(profile_data)
+
+    # Return stats only (no summary)
+    if not career_stats_data:
+        return {}
+
+    # If filters provided, apply them
+    if platform or gamemode or hero:
+        stats = career_stats_data.get("stats")
+        return filter_stats_by_query(stats, platform, gamemode, hero)
+
+    return career_stats_data
 
 
 async def parse_player_career_stats(

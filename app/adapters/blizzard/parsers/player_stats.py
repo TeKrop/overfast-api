@@ -10,7 +10,10 @@ from collections import defaultdict
 from copy import deepcopy
 from typing import TYPE_CHECKING
 
-from app.adapters.blizzard.parsers.player_profile import parse_player_profile
+from app.adapters.blizzard.parsers.player_profile import (
+    parse_player_profile,
+    parse_player_profile_html,
+)
 from app.players.enums import HeroKey, PlayerGamemode, PlayerPlatform
 from app.players.helpers import get_hero_role, get_plural_stat_key
 from app.roles.enums import Role
@@ -316,6 +319,50 @@ def _calculate_averages(stat: dict) -> dict:
             else 0
         )
         for key in stat["total"]
+    }
+
+
+def parse_player_stats_summary_from_html(
+    html: str,
+    player_summary: dict | None = None,
+    gamemode: PlayerGamemode | None = None,
+    platform: PlayerPlatform | None = None,
+) -> dict:
+    """
+    Parse player stats summary from HTML (for Player Cache usage)
+
+    Args:
+        html: Player profile HTML
+        player_summary: Optional player summary from search endpoint
+        gamemode: Optional gamemode filter
+        platform: Optional platform filter
+
+    Returns:
+        Dict with "general", "roles", and "heroes" stats
+    """
+    # Determine filters
+    gamemodes = [gamemode] if gamemode else list(PlayerGamemode)
+    platforms = [platform] if platform else list(PlayerPlatform)
+
+    # Parse HTML to get profile data
+    profile_data = parse_player_profile_html(html, player_summary)
+
+    # Extract heroes stats
+    heroes_stats = extract_heroes_stats_from_profile(profile_data.get("stats") or {})
+
+    # Compute heroes data with filters
+    heroes_data = compute_heroes_data(heroes_stats, gamemodes, platforms)
+    if not heroes_data:
+        return {}
+
+    # Compute roles and general stats
+    roles_stats = compute_roles_stats(heroes_data)
+    general_stats = compute_general_stats(roles_stats)
+
+    return {
+        "general": general_stats,
+        "roles": roles_stats,
+        "heroes": heroes_data,
     }
 
 
