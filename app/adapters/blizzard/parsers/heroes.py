@@ -1,8 +1,7 @@
 """Stateless parser functions for Blizzard heroes data"""
 
-from selectolax.lexbor import LexborHTMLParser, LexborNode
-
 from app.adapters.blizzard.client import BlizzardClient
+from app.adapters.blizzard.parsers.utils import parse_html_root, safe_get_attribute, safe_get_text
 from app.config import settings
 from app.enums import Locale
 from app.exceptions import ParserParsingError
@@ -16,22 +15,13 @@ async def fetch_heroes_html(
     Fetch heroes list HTML from Blizzard
     
     Raises:
-        HTTPException: If Blizzard returns an error status code
+        HTTPException: If Blizzard returns non-200 status
     """
+    from app.adapters.blizzard.parsers.utils import validate_response_status
+    
     url = f"{settings.blizzard_host}/{locale}{settings.heroes_path}"
     response = await client.get(url, headers={"Accept": "text/html"})
-    
-    # Check for valid HTTP status
-    if response.status_code != 200:
-        # BlizzardClient already handles this in its get() method,
-        # but if somehow we get here, raise the error
-        from fastapi import status as http_status
-        from fastapi import HTTPException
-        raise HTTPException(
-            status_code=http_status.HTTP_504_GATEWAY_TIMEOUT,
-            detail=f"Couldn't get Blizzard page (HTTP {response.status_code} error) : {response.text}",
-        )
-    
+    validate_response_status(response, client)
     return response.text
 
 
@@ -43,21 +33,17 @@ def parse_heroes_html(html: str) -> list[dict]:
         html: Raw HTML content from Blizzard heroes page
         
     Returns:
-        List of hero dicts with keys: key, name, portrait, role
+        List of hero dicts with keys: key, name, portrait, role (sorted by key)
         
     Raises:
         ParserParsingError: If parsing fails
     """
     try:
-        parser = LexborHTMLParser(html)
-        root_tag = parser.css_first("div.main-content,main")
-        
-        if not root_tag:
-            raise ParserParsingError("Could not find main content in heroes HTML")
+        root_tag = parse_html_root(html)
         
         heroes = []
         for hero_element in root_tag.css("div.heroIndexWrapper blz-media-gallery a"):
-            hero_url = hero_element.attributes.get("href")
+            hero_url = safe_get_attribute(hero_element, "href")
             if not hero_url:
                 raise ParserParsingError("Invalid hero URL")
             
@@ -66,9 +52,9 @@ def parse_heroes_html(html: str) -> list[dict]:
             
             heroes.append({
                 "key": hero_url.split("/")[-1],
-                "name": name_element.text() if name_element else "",
-                "portrait": portrait_element.attributes.get("src", "") if portrait_element else "",
-                "role": hero_element.attributes.get("data-role", ""),
+                "name": safe_get_text(name_element),
+                "portrait": safe_get_attribute(portrait_element, "src"),
+                "role": safe_get_attribute(hero_element, "data-role"),
             })
         
         return sorted(heroes, key=lambda hero: hero["key"])

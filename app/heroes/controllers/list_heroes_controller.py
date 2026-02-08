@@ -3,7 +3,7 @@
 from typing import ClassVar
 
 from app.adapters.blizzard import BlizzardClient
-from app.adapters.blizzard.parsers.heroes_parser import parse_heroes
+from app.adapters.blizzard.parsers.heroes import parse_heroes
 from app.config import settings
 from app.controllers import AbstractController
 from app.enums import Locale
