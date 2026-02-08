@@ -53,8 +53,23 @@ jobs:
             echo "New commits found:"
             echo "$NEW_COMMITS"
 
-            # Merge upstream
-            git merge upstream/main -m "Merge upstream changes"
+            # Merge upstream, auto-resolve conflicts by preferring upstream
+            # for auto-generated files (CHANGELOG.md, pyproject.toml version)
+            if ! git merge upstream/main -m "Merge upstream changes"; then
+              echo "Merge conflict detected, resolving automatically..."
+
+              # For conflicted files, prefer upstream version
+              CONFLICTED=$(git diff --name-only --diff-filter=U)
+              echo "Conflicted files: $CONFLICTED"
+
+              for file in $CONFLICTED; do
+                echo "Resolving $file with upstream version"
+                git checkout --theirs "$file"
+                git add "$file"
+              done
+
+              git commit -m "Merge upstream changes (auto-resolved conflicts)"
+            fi
 
             # Push to origin
             git push origin main
