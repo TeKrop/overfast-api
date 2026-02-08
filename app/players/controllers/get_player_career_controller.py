@@ -48,8 +48,8 @@ class GetPlayerCareerController(BasePlayerController):
 
             try:
                 # Get player summary from search endpoint
-                logger.info("Retrieving Player Summary...")
                 player_summary = await parse_player_summary(client, player_id)
+                logger.info("Player Summary retrieved !")
 
                 # If player not found in search, fetch directly with player_id
                 if not player_summary:
