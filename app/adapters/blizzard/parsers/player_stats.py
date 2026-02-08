@@ -322,18 +322,16 @@ def _calculate_averages(stat: dict) -> dict:
     }
 
 
-def parse_player_stats_summary_from_html(
-    html: str,
-    player_summary: dict | None = None,
+def _process_player_stats_summary(
+    profile_data: dict,
     gamemode: PlayerGamemode | None = None,
     platform: PlayerPlatform | None = None,
 ) -> dict:
     """
-    Parse player stats summary from HTML (for Player Cache usage)
+    Common logic to compute player stats summary from profile data
 
     Args:
-        html: Player profile HTML
-        player_summary: Optional player summary from search endpoint
+        profile_data: Full profile dict with "summary" and "stats"
         gamemode: Optional gamemode filter
         platform: Optional platform filter
 
@@ -343,9 +341,6 @@ def parse_player_stats_summary_from_html(
     # Determine filters
     gamemodes = [gamemode] if gamemode else list(PlayerGamemode)
     platforms = [platform] if platform else list(PlayerPlatform)
-
-    # Parse HTML to get profile data
-    profile_data = parse_player_profile_html(html, player_summary)
 
     # Extract heroes stats
     heroes_stats = extract_heroes_stats_from_profile(profile_data.get("stats") or {})
@@ -364,6 +359,28 @@ def parse_player_stats_summary_from_html(
         "roles": roles_stats,
         "heroes": heroes_data,
     }
+
+
+def parse_player_stats_summary_from_html(
+    html: str,
+    player_summary: dict | None = None,
+    gamemode: PlayerGamemode | None = None,
+    platform: PlayerPlatform | None = None,
+) -> dict:
+    """
+    Parse player stats summary from HTML (for Player Cache usage)
+
+    Args:
+        html: Player profile HTML
+        player_summary: Optional player summary from search endpoint
+        gamemode: Optional gamemode filter
+        platform: Optional platform filter
+
+    Returns:
+        Dict with "general", "roles", and "heroes" stats
+    """
+    profile_data = parse_player_profile_html(html, player_summary)
+    return _process_player_stats_summary(profile_data, gamemode, platform)
 
 
 async def parse_player_stats_summary(
@@ -386,27 +403,5 @@ async def parse_player_stats_summary(
     Returns:
         Dict with "general", "roles", and "heroes" stats
     """
-    # Determine filters
-    gamemodes = [gamemode] if gamemode else list(PlayerGamemode)
-    platforms = [platform] if platform else list(PlayerPlatform)
-
-    # Fetch full profile
     profile_data = await parse_player_profile(client, player_id, player_summary)
-
-    # Extract heroes stats
-    heroes_stats = extract_heroes_stats_from_profile(profile_data.get("stats") or {})
-
-    # Compute heroes data with filters
-    heroes_data = compute_heroes_data(heroes_stats, gamemodes, platforms)
-    if not heroes_data:
-        return {}
-
-    # Compute roles and general stats
-    roles_stats = compute_roles_stats(heroes_data)
-    general_stats = compute_general_stats(roles_stats)
-
-    return {
-        "general": general_stats,
-        "roles": roles_stats,
-        "heroes": heroes_data,
-    }
+    return _process_player_stats_summary(profile_data, gamemode, platform)

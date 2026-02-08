@@ -60,11 +60,44 @@ def extract_career_stats_from_profile(profile_data: dict) -> dict:
     }
 
 
+def _process_career_stats(
+    profile_data: dict,
+    platform: PlayerPlatform | str | None = None,
+    gamemode: PlayerGamemode | str | None = None,
+    hero: str | None = None,
+) -> dict:
+    """
+    Common logic to extract and filter career stats from profile data
+
+    Args:
+        profile_data: Full profile dict with "summary" and "stats"
+        platform: Optional platform filter
+        gamemode: Optional gamemode filter
+        hero: Optional hero filter
+
+    Returns:
+        Career stats dict, filtered by query parameters
+    """
+    # Extract career stats structure
+    career_stats_data = extract_career_stats_from_profile(profile_data)
+
+    # Return empty if no stats
+    if not career_stats_data:
+        return {}
+
+    # If filters provided, apply them
+    if platform or gamemode or hero:
+        stats = career_stats_data.get("stats")
+        return filter_stats_by_query(stats, platform, gamemode, hero)
+
+    return career_stats_data
+
+
 def parse_player_career_stats_from_html(
     html: str,
     player_summary: dict | None = None,
-    platform: PlayerPlatform | None = None,
-    gamemode: PlayerGamemode | None = None,
+    platform: PlayerPlatform | str | None = None,
+    gamemode: PlayerGamemode | str | None = None,
     hero: str | None = None,
 ) -> dict:
     """
@@ -80,30 +113,16 @@ def parse_player_career_stats_from_html(
     Returns:
         Career stats dict, filtered by query parameters
     """
-    # Parse HTML to get profile data
     profile_data = parse_player_profile_html(html, player_summary)
-
-    # Extract career stats structure
-    career_stats_data = extract_career_stats_from_profile(profile_data)
-
-    # Return stats only (no summary)
-    if not career_stats_data:
-        return {}
-
-    # If filters provided, apply them
-    if platform or gamemode or hero:
-        stats = career_stats_data.get("stats")
-        return filter_stats_by_query(stats, platform, gamemode, hero)
-
-    return career_stats_data
+    return _process_career_stats(profile_data, platform, gamemode, hero)
 
 
 async def parse_player_career_stats(
     client: BlizzardClient,
     player_id: str,
     player_summary: dict | None = None,
-    platform: PlayerPlatform | None = None,
-    gamemode: PlayerGamemode | None = None,
+    platform: PlayerPlatform | str | None = None,
+    gamemode: PlayerGamemode | str | None = None,
     hero: str | None = None,
 ) -> dict:
     """
@@ -120,19 +139,5 @@ async def parse_player_career_stats(
     Returns:
         Career stats dict, filtered by query parameters
     """
-    # Fetch full profile
     profile_data = await parse_player_profile(client, player_id, player_summary)
-
-    # Extract career stats structure
-    career_stats_data = extract_career_stats_from_profile(profile_data)
-
-    # Return stats only (no summary)
-    if not career_stats_data:
-        return {}
-
-    # If filters provided, apply them
-    if platform or gamemode or hero:
-        stats = career_stats_data.get("stats")
-        return filter_stats_by_query(stats, platform, gamemode, hero)
-
-    return career_stats_data
+    return _process_career_stats(profile_data, platform, gamemode, hero)
