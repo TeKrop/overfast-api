@@ -2,10 +2,11 @@
 
 from typing import ClassVar
 
+from app.adapters.blizzard import BlizzardClient
+from app.adapters.blizzard.parsers.roles import parse_roles
 from app.config import settings
 from app.controllers import AbstractController
-
-from ..parsers.roles_parser import RolesParser
+from app.enums import Locale
 
 
 class ListRolesController(AbstractController):
@@ -13,5 +14,17 @@ class ListRolesController(AbstractController):
     retrieve a list of available Overwatch roles.
     """
 
-    parser_classes: ClassVar[list[type]] = [RolesParser]
+    parser_classes: ClassVar[list[type]] = []
     timeout = settings.heroes_path_cache_timeout
+
+    async def process_request(self, **kwargs) -> list[dict]:
+        """Process request using stateless parser function"""
+        locale = kwargs.get("locale") or Locale.ENGLISH_US
+        client = BlizzardClient()
+        data = await parse_roles(client, locale=locale)
+
+        # Update API Cache
+        self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
+        self.response.headers[settings.cache_ttl_header] = str(self.timeout)
+
+        return data

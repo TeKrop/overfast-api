@@ -6,21 +6,22 @@ from fastapi import APIRouter, Depends, Path, Query, Request, Response, status
 
 from app.enums import RouteTag
 from app.helpers import routes_responses as common_routes_responses
-
-from .controllers.get_player_career_controller import GetPlayerCareerController
-from .controllers.get_player_career_stats_controller import (
+from app.players.controllers.get_player_career_controller import (
+    GetPlayerCareerController,
+)
+from app.players.controllers.get_player_career_stats_controller import (
     GetPlayerCareerStatsController,
 )
-from .controllers.get_player_stats_summary_controller import (
+from app.players.controllers.get_player_stats_summary_controller import (
     GetPlayerStatsSummaryController,
 )
-from .controllers.search_players_controller import SearchPlayersController
-from .enums import (
+from app.players.controllers.search_players_controller import SearchPlayersController
+from app.players.enums import (
     HeroKeyCareerFilter,
     PlayerGamemode,
     PlayerPlatform,
 )
-from .models import (
+from app.players.models import (
     CareerStats,
     Player,
     PlayerCareerStats,

@@ -5,10 +5,9 @@ from typing import Any
 from fastapi import APIRouter, Request, Response
 
 from app.enums import RouteTag
+from app.gamemodes.controllers.list_gamemodes_controller import ListGamemodesController
+from app.gamemodes.models import GamemodeDetails
 from app.helpers import success_responses
-
-from .controllers.list_gamemodes_controller import ListGamemodesController
-from .models import GamemodeDetails
 
 router = APIRouter()
 
