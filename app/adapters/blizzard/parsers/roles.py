@@ -26,16 +26,16 @@ async def fetch_roles_html(
 def parse_roles_html(html: str) -> list[dict]:
     """
     Parse roles from Blizzard homepage HTML
-    
+
     Returns:
         List of role dicts with keys: key, name, icon, description
     """
     root_tag = parse_html_root(html)
-    
+
     roles_container = root_tag.css_first(
         "div.homepage-features-heroes blz-feature-carousel-section"
     )
-    
+
     # Get all role icons
     roles_icons = [
         safe_get_attribute(role_icon_div.css_first("blz-image"), "src")
@@ -43,17 +43,19 @@ def parse_roles_html(html: str) -> list[dict]:
             "blz-tab-control"
         )
     ]
-    
+
     # Parse role details
     roles = []
     for role_index, role_div in list(enumerate(roles_container.css("blz-feature")))[:3]:
-        roles.append({
-            "key": get_role_from_icon_url(roles_icons[role_index]),
-            "name": safe_get_text(role_div.css_first("blz-header h3")).capitalize(),
-            "icon": roles_icons[role_index],
-            "description": safe_get_text(role_div.css_first("blz-header div")),
-        })
-    
+        roles.append(
+            {
+                "key": get_role_from_icon_url(roles_icons[role_index]),
+                "name": safe_get_text(role_div.css_first("blz-header h3")).capitalize(),
+                "icon": roles_icons[role_index],
+                "description": safe_get_text(role_div.css_first("blz-header div")),
+            }
+        )
+
     return roles
 
 
@@ -63,7 +65,7 @@ async def parse_roles(
 ) -> list[dict]:
     """
     High-level function to fetch and parse roles
-    
+
     Returns:
         List of role dicts
     """

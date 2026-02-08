@@ -19,7 +19,7 @@ class GetHeroStatsSummaryController(AbstractController):
     async def process_request(self, **kwargs) -> list[dict]:
         """Process request using stateless parser function"""
         client = BlizzardClient()
-        
+
         data = await parse_hero_stats_summary(
             client,
             platform=kwargs["platform"],
@@ -30,9 +30,9 @@ class GetHeroStatsSummaryController(AbstractController):
             competitive_division=kwargs.get("competitive_division"),
             order_by=kwargs.get("order_by", "hero:asc"),
         )
-        
+
         # Update API Cache
         self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
         self.response.headers[settings.cache_ttl_header] = str(self.timeout)
-        
+
         return data

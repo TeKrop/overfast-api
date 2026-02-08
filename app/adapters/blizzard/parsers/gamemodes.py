@@ -12,13 +12,13 @@ def get_static_url_gamemodes(key: str, extension: str) -> str:
 def parse_gamemodes_csv() -> list[dict]:
     """
     Parse gamemodes list from CSV file
-    
+
     Returns:
         List of gamemode dicts with keys: key, name, icon, description, screenshot
     """
     csv_reader = CSVReader()
     csv_data = csv_reader.read_csv_file("gamemodes")
-    
+
     return [
         {
             "key": gamemode["key"],
@@ -34,7 +34,7 @@ def parse_gamemodes_csv() -> list[dict]:
 def parse_gamemodes() -> list[dict]:
     """
     High-level function to parse gamemodes
-    
+
     Returns:
         List of gamemode dicts
     """

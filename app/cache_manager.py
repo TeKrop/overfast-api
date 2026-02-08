@@ -8,4 +8,3 @@ Import from app.adapters.cache instead.
 from app.adapters.cache import CacheManager
 
 __all__ = ["CacheManager"]
-

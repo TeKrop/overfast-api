@@ -12,13 +12,13 @@ def get_static_url_maps(key: str, extension: str = "jpg") -> str:
 def parse_maps_csv() -> list[dict]:
     """
     Parse maps list from CSV file
-    
+
     Returns:
         List of map dicts with keys: key, name, screenshot, gamemodes, location, country_code
     """
     csv_reader = CSVReader()
     csv_data = csv_reader.read_csv_file("maps")
-    
+
     return [
         {
             "key": map_dict["key"],
@@ -42,10 +42,10 @@ def filter_maps_by_gamemode(maps: list[dict], gamemode: str | None) -> list[dict
 def parse_maps(gamemode: str | None = None) -> list[dict]:
     """
     High-level function to parse and filter maps
-    
+
     Args:
         gamemode: Optional gamemode filter
-        
+
     Returns:
         List of map dicts, optionally filtered by gamemode
     """

@@ -8,4 +8,3 @@ Import from app.adapters.blizzard instead.
 from app.adapters.blizzard import OverFastClient
 
 __all__ = ["OverFastClient"]
-

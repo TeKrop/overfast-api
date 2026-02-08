@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 class ValkeyCache(metaclass=Singleton):
     """
     Valkey cache adapter implementing CachePort protocol.
-    
+
     Implements CachePort protocol via structural typing (duck typing).
     Protocol compliance is verified by type checkers at injection points.
     """
@@ -78,6 +78,7 @@ class ValkeyCache(metaclass=Singleton):
     # CachePort protocol methods
     async def get(self, key: str) -> bytes | None:
         """Get raw value from cache by key"""
+
         def _get():
             value = self.valkey_server.get(key)
             return value if isinstance(value, bytes) else None
@@ -91,6 +92,7 @@ class ValkeyCache(metaclass=Singleton):
         expire: int | None = None,
     ) -> None:
         """Set raw value in cache with optional expiration (seconds)"""
+
         def _set():
             self.valkey_server.set(key, value, ex=expire)
 
@@ -98,6 +100,7 @@ class ValkeyCache(metaclass=Singleton):
 
     async def delete(self, key: str) -> None:
         """Delete key from cache"""
+
         def _delete():
             self.valkey_server.delete(key)
 
@@ -105,6 +108,7 @@ class ValkeyCache(metaclass=Singleton):
 
     async def exists(self, key: str) -> bool:
         """Check if key exists in cache"""
+
         def _exists():
             return bool(self.valkey_server.exists(key))
 
@@ -113,6 +117,7 @@ class ValkeyCache(metaclass=Singleton):
     # Legacy application-specific methods (kept for backward compatibility during migration)
     def get_api_cache(self, cache_key: str) -> dict | list | None:
         """Get the API Cache value associated with a given cache key"""
+
         def _get_api_cache():
             api_cache_key = f"{settings.api_cache_key_prefix}:{cache_key}"
             api_cache = self.valkey_server.get(api_cache_key)
@@ -124,6 +129,7 @@ class ValkeyCache(metaclass=Singleton):
 
     def update_api_cache(self, cache_key: str, value: dict | list, expire: int) -> None:
         """Update or set an API Cache value with an expiration value (in seconds)"""
+
         def _update_api_cache():
             bytes_value = self._compress_json_value(value)
             self.valkey_server.set(
@@ -136,6 +142,7 @@ class ValkeyCache(metaclass=Singleton):
 
     def get_player_cache(self, player_id: str) -> dict | list | None:
         """Get the Player Cache value associated with a given cache key"""
+
         def _get_player_cache():
             player_key = f"{settings.player_cache_key_prefix}:{player_id}"
             player_cache = self.valkey_server.get(player_key)
@@ -149,6 +156,7 @@ class ValkeyCache(metaclass=Singleton):
 
     def update_player_cache(self, player_id: str, value: dict) -> None:
         """Update or set a Player Cache value"""
+
         def _update_player_cache():
             compressed_value = self._compress_json_value(value)
             self.valkey_server.set(
@@ -167,7 +175,9 @@ class ValkeyCache(metaclass=Singleton):
 
     def get_global_rate_limit_remaining_time(self) -> int:
         def _get_remaining_time():
-            blizzard_rate_limit = self.valkey_server.ttl(settings.blizzard_rate_limit_key)
+            blizzard_rate_limit = self.valkey_server.ttl(
+                settings.blizzard_rate_limit_key
+            )
             return blizzard_rate_limit if isinstance(blizzard_rate_limit, int) else 0
 
         return self._handle_valkey_error(_get_remaining_time) or 0

@@ -2,6 +2,8 @@
 
 from typing import Any, ClassVar
 
+from fastapi import HTTPException
+
 from app.adapters.blizzard import BlizzardClient
 from app.adapters.blizzard.parsers.hero import parse_hero
 from app.adapters.blizzard.parsers.heroes import parse_heroes
@@ -9,6 +11,7 @@ from app.adapters.blizzard.parsers.heroes_stats import parse_heroes_stats
 from app.config import settings
 from app.controllers import AbstractController
 from app.enums import Locale
+from app.exceptions import ParserBlizzardError
 
 
 class GetHeroController(AbstractController):
@@ -26,13 +29,19 @@ class GetHeroController(AbstractController):
 
         client = BlizzardClient()
 
-        # Fetch data from all three sources
-        hero_data = await parse_hero(client, hero_key, locale)
-        heroes_list = await parse_heroes(client, locale)
-        heroes_stats = parse_heroes_stats()
+        try:
+            # Fetch data from all three sources
+            hero_data = await parse_hero(client, hero_key, locale)
+            heroes_list = await parse_heroes(client, locale)
+            heroes_stats = parse_heroes_stats()
 
-        # Merge data
-        data = self._merge_hero_data(hero_data, heroes_list, heroes_stats, hero_key)
+            # Merge data
+            data = self._merge_hero_data(hero_data, heroes_list, heroes_stats, hero_key)
+        except ParserBlizzardError as error:
+            raise HTTPException(
+                status_code=error.status_code,
+                detail=error.message,
+            ) from error
 
         # Update API Cache
         self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)

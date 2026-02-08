@@ -13,7 +13,7 @@ from app.overfast_logger import logger
 class BlizzardClient(metaclass=Singleton):
     """
     HTTP client for Blizzard API/web requests with rate limiting.
-    
+
     Implements BlizzardClientPort protocol via structural typing (duck typing).
     Protocol compliance is verified by type checkers at injection points.
     """
