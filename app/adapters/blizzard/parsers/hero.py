@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 from fastapi import status
 
-from app.adapters.blizzard.client import BlizzardClient
 from app.adapters.blizzard.parsers.utils import (
     parse_html_root,
     safe_get_attribute,
@@ -13,6 +12,9 @@ from app.adapters.blizzard.parsers.utils import (
     validate_response_status,
 )
 from app.config import settings
+
+if TYPE_CHECKING:
+    from app.adapters.blizzard.client import BlizzardClient
 from app.enums import Locale
 from app.exceptions import ParserBlizzardError
 from app.heroes.enums import MediaType

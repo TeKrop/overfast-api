@@ -1,10 +1,14 @@
 """Stateless parser for player search endpoint"""
 
-from app.adapters.blizzard.client import BlizzardClient
+from typing import TYPE_CHECKING
+
 from app.adapters.blizzard.parsers.utils import validate_response_status
 from app.config import settings
 from app.overfast_logger import logger
 from app.players.helpers import get_player_title
+
+if TYPE_CHECKING:
+    from app.adapters.blizzard.client import BlizzardClient
 
 
 async def fetch_player_search_json(client: BlizzardClient, name: str) -> list[dict]:

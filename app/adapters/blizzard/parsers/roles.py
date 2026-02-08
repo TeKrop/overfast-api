@@ -1,6 +1,7 @@
 """Stateless parser functions for roles data"""
 
-from app.adapters.blizzard.client import BlizzardClient
+from typing import TYPE_CHECKING
+
 from app.adapters.blizzard.parsers.utils import (
     parse_html_root,
     safe_get_attribute,
@@ -10,6 +11,9 @@ from app.adapters.blizzard.parsers.utils import (
 from app.config import settings
 from app.enums import Locale
 from app.roles.helpers import get_role_from_icon_url
+
+if TYPE_CHECKING:
+    from app.adapters.blizzard.client import BlizzardClient
 
 
 async def fetch_roles_html(

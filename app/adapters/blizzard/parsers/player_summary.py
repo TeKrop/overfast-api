@@ -1,9 +1,13 @@
 """Stateless parser for player summary data from Blizzard search endpoint"""
 
-from app.adapters.blizzard.client import BlizzardClient
+from typing import TYPE_CHECKING
+
 from app.adapters.blizzard.parsers.utils import validate_response_status
 from app.config import settings
 from app.overfast_logger import logger
+
+if TYPE_CHECKING:
+    from app.adapters.blizzard.client import BlizzardClient
 
 
 async def fetch_player_summary_json(client: BlizzardClient, player_id: str) -> dict:

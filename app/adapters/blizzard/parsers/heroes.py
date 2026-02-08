@@ -1,14 +1,19 @@
 """Stateless parser functions for Blizzard heroes data"""
 
-from app.adapters.blizzard.client import BlizzardClient
+from typing import TYPE_CHECKING
+
 from app.adapters.blizzard.parsers.utils import (
     parse_html_root,
     safe_get_attribute,
     safe_get_text,
+    validate_response_status,
 )
 from app.config import settings
 from app.enums import Locale
 from app.exceptions import ParserParsingError
+
+if TYPE_CHECKING:
+    from app.adapters.blizzard.client import BlizzardClient
 
 
 async def fetch_heroes_html(
@@ -21,7 +26,6 @@ async def fetch_heroes_html(
     Raises:
         HTTPException: If Blizzard returns non-200 status
     """
-    from app.adapters.blizzard.parsers.utils import validate_response_status
 
     url = f"{settings.blizzard_host}/{locale}{settings.heroes_path}"
     response = await client.get(url, headers={"Accept": "text/html"})
@@ -42,6 +46,7 @@ def parse_heroes_html(html: str) -> list[dict]:
     Raises:
         ParserParsingError: If parsing fails
     """
+    msg = "Invalid hero URL"
     try:
         root_tag = parse_html_root(html)
 
@@ -49,7 +54,7 @@ def parse_heroes_html(html: str) -> list[dict]:
         for hero_element in root_tag.css("div.heroIndexWrapper blz-media-gallery a"):
             hero_url = safe_get_attribute(hero_element, "href")
             if not hero_url:
-                raise ParserParsingError("Invalid hero URL")
+                raise ParserParsingError(msg)
 
             name_element = hero_element.css_first("blz-card blz-content-block h2")
             portrait_element = hero_element.css_first("blz-card blz-image")
@@ -66,7 +71,8 @@ def parse_heroes_html(html: str) -> list[dict]:
         return sorted(heroes, key=lambda hero: hero["key"])
 
     except (AttributeError, KeyError, IndexError, TypeError) as error:
-        raise ParserParsingError(f"Failed to parse heroes HTML: {error!r}") from error
+        error_msg = f"Failed to parse heroes HTML: {error!r}"
+        raise ParserParsingError(error_msg) from error
 
 
 def filter_heroes_by_role(heroes: list[dict], role: str | None) -> list[dict]:

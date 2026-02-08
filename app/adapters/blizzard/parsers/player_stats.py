@@ -8,12 +8,15 @@ This module computes aggregated player statistics with:
 
 from collections import defaultdict
 from copy import deepcopy
+from typing import TYPE_CHECKING
 
-from app.adapters.blizzard.client import BlizzardClient
 from app.adapters.blizzard.parsers.player_profile import parse_player_profile
 from app.players.enums import HeroKey, PlayerGamemode, PlayerPlatform
 from app.players.helpers import get_hero_role, get_plural_stat_key
 from app.roles.enums import Role
+
+if TYPE_CHECKING:
+    from app.adapters.blizzard.client import BlizzardClient
 
 # Stat names for aggregation
 GENERIC_STATS_NAMES = [

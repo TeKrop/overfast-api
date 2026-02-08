@@ -15,7 +15,7 @@ class ListGamemodesController(AbstractController):
     parser_classes: ClassVar[list[type]] = []
     timeout = settings.csv_cache_timeout
 
-    async def process_request(self, **kwargs) -> list[dict]:
+    async def process_request(self, **kwargs) -> list[dict]:  # noqa: ARG002
         """Process request using stateless parser function"""
         data = parse_gamemodes()
 

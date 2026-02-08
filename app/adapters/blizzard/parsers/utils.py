@@ -51,8 +51,9 @@ def parse_html_root(html: str) -> LexborNode:
     parser = LexborHTMLParser(html)
     root_tag = parser.css_first("div.main-content,main")
 
+    msg = "Could not find main content in HTML"
     if not root_tag:
-        raise ParserParsingError("Could not find main content in HTML")
+        raise ParserParsingError(msg)
 
     return root_tag
 

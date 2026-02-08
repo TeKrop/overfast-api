@@ -11,13 +11,15 @@ from typing import TYPE_CHECKING
 
 from fastapi import status
 
-from app.adapters.blizzard.client import BlizzardClient
 from app.adapters.blizzard.parsers.utils import (
     parse_html_root,
     validate_response_status,
 )
 from app.config import settings
-from app.exceptions import ParserBlizzardError
+from app.exceptions import ParserBlizzardError, ParserParsingError
+
+if TYPE_CHECKING:
+    from app.adapters.blizzard.client import BlizzardClient
 from app.overfast_logger import logger
 from app.players.enums import (
     CareerHeroesComparisonsCategory,
@@ -110,9 +112,8 @@ def parse_player_profile_html(
 
 def _parse_summary(root_tag: LexborNode, player_summary: dict | None) -> dict:
     """Parse player summary section (username, avatar, endorsement, ranks)"""
-    from app.exceptions import ParserParsingError
-
     player_summary = player_summary or {}
+    error_msg_prefix = "Failed to parse player summary"
 
     try:
         profile_div = root_tag.css_first(
@@ -138,9 +139,8 @@ def _parse_summary(root_tag: LexborNode, player_summary: dict | None) -> dict:
             "last_updated_at": player_summary.get("lastUpdated"),
         }
     except (AttributeError, KeyError, IndexError, TypeError) as error:
-        raise ParserParsingError(
-            f"Failed to parse player summary: {error!r}"
-        ) from error
+        error_msg = f"{error_msg_prefix}: {error!r}"
+        raise ParserParsingError(error_msg) from error
 
 
 def _get_title(profile_div: LexborNode) -> str | None:
@@ -182,7 +182,6 @@ def _get_competitive_ranks(
         platform.value: _get_platform_competitive_ranks(
             root_tag,
             progression_div,
-            platform,
             platform_class,
         )
         for platform, platform_class in PLATFORMS_DIV_MAPPING.items()
@@ -195,7 +194,6 @@ def _get_competitive_ranks(
 def _get_platform_competitive_ranks(
     root_tag: LexborNode,
     progression_div: LexborNode,
-    platform: PlayerPlatform,
     platform_class: str,
 ) -> dict | None:
     """Extract competitive ranks for a specific platform"""
@@ -266,7 +264,7 @@ def _get_role_icon(role_wrapper: LexborNode) -> str:
 def _parse_stats(root_tag: LexborNode) -> dict | None:
     """Parse stats for all platforms"""
     stats = {
-        platform.value: _parse_platform_stats(root_tag, platform, platform_class)
+        platform.value: _parse_platform_stats(root_tag, platform_class)
         for platform, platform_class in PLATFORMS_DIV_MAPPING.items()
     }
 
@@ -276,7 +274,6 @@ def _parse_stats(root_tag: LexborNode) -> dict | None:
 
 def _parse_platform_stats(
     root_tag: LexborNode,
-    platform: PlayerPlatform,
     platform_class: str,
 ) -> dict | None:
     """Parse stats for a specific platform"""

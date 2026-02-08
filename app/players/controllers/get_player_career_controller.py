@@ -6,12 +6,15 @@ from fastapi import HTTPException
 
 from app.adapters.blizzard import BlizzardClient
 from app.adapters.blizzard.parsers.player_profile import (
+    fetch_player_html,
     filter_all_stats_data,
+    filter_stats_by_query,
     parse_player_profile_html,
 )
 from app.adapters.blizzard.parsers.player_summary import parse_player_summary
 from app.config import settings
-from app.exceptions import ParserBlizzardError
+from app.exceptions import ParserBlizzardError, ParserParsingError
+from app.helpers import overfast_internal_error
 from app.overfast_logger import logger
 
 from .base_player_controller import BasePlayerController
@@ -90,18 +93,13 @@ class GetPlayerCareerController(BasePlayerController):
                 status_code=error.status_code,
                 detail=error.message,
             ) from error
-        except Exception as error:
-            from app.exceptions import ParserParsingError
-            from app.helpers import overfast_internal_error
-
-            if isinstance(error, ParserParsingError):
-                # Get Blizzard URL for error reporting
-                blizzard_url = (
-                    f"{settings.blizzard_host}{settings.career_path}/"
-                    f"{player_summary.get('url', player_id) if player_summary else player_id}/"
-                )
-                raise overfast_internal_error(blizzard_url, error) from error
-            raise
+        except ParserParsingError as error:
+            # Get Blizzard URL for error reporting
+            blizzard_url = (
+                f"{settings.blizzard_host}{settings.career_path}/"
+                f"{player_summary.get('url', player_id) if player_summary else player_id}/"
+            )
+            raise overfast_internal_error(blizzard_url, error) from error
 
         # Update API Cache
         self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
@@ -111,8 +109,6 @@ class GetPlayerCareerController(BasePlayerController):
 
     async def _fetch_player_html(self, client: BlizzardClient, player_id: str) -> str:
         """Fetch player HTML from Blizzard"""
-        from app.adapters.blizzard.parsers.player_profile import fetch_player_html
-
         return await fetch_player_html(client, player_id)
 
     def _filter_profile_data(
@@ -131,10 +127,6 @@ class GetPlayerCareerController(BasePlayerController):
 
         # If only stats requested
         if stats_filter:
-            from app.adapters.blizzard.parsers.player_profile import (
-                filter_stats_by_query,
-            )
-
             return filter_stats_by_query(
                 profile_data.get("stats"),
                 platform_filter,

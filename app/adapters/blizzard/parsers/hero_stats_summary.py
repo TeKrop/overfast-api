@@ -1,12 +1,16 @@
 """Stateless parser functions for hero stats summary (pickrate/winrate from Blizzard API)"""
 
+from typing import TYPE_CHECKING
+
 from fastapi import status
 
-from app.adapters.blizzard.client import BlizzardClient
 from app.adapters.blizzard.parsers.utils import validate_response_status
 from app.config import settings
 from app.exceptions import ParserBlizzardError
 from app.players.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
+
+if TYPE_CHECKING:
+    from app.adapters.blizzard.client import BlizzardClient
 
 # Mappings for query parameters
 PLATFORM_MAPPING: dict[PlayerPlatform, str] = {

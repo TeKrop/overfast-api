@@ -4,12 +4,16 @@ This module provides simplified access to career stats extracted
 from the full player profile data.
 """
 
-from app.adapters.blizzard.client import BlizzardClient
+from typing import TYPE_CHECKING
+
 from app.adapters.blizzard.parsers.player_profile import (
     filter_stats_by_query,
     parse_player_profile,
 )
-from app.players.enums import PlayerGamemode, PlayerPlatform
+
+if TYPE_CHECKING:
+    from app.adapters.blizzard.client import BlizzardClient
+    from app.players.enums import PlayerGamemode, PlayerPlatform
 
 
 def extract_career_stats_from_profile(profile_data: dict) -> dict:
@@ -90,7 +94,6 @@ async def parse_player_career_stats(
     # If filters provided, apply them
     if platform or gamemode or hero:
         stats = career_stats_data.get("stats")
-        filtered_stats = filter_stats_by_query(stats, platform, gamemode, hero)
-        return filtered_stats
+        return filter_stats_by_query(stats, platform, gamemode, hero)
 
     return career_stats_data
