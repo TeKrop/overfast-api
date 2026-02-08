@@ -27,7 +27,7 @@ async def fetch_player_summary_json(
     url = f"{settings.blizzard_host}{settings.search_account_path}/{player_name}/"
 
     response = await client.get(url)
-    validate_response_status(response, client)
+    validate_response_status(response)
 
     return response.json()
 

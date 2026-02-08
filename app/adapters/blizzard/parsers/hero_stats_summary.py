@@ -53,7 +53,7 @@ async def fetch_hero_stats_json(
     }
 
     response = await client.get(url, headers=headers, params=query_params)
-    validate_response_status(response, client)
+    validate_response_status(response)
 
     return response.json()
 

@@ -2,19 +2,18 @@
 
 from typing import TYPE_CHECKING
 
+from fastapi import HTTPException, status
 from selectolax.lexbor import LexborHTMLParser, LexborNode
 
 from app.exceptions import ParserParsingError
+from app.overfast_logger import logger
 
 if TYPE_CHECKING:
     import httpx
 
-    from app.adapters.blizzard.client import BlizzardClient
-
 
 def validate_response_status(
     response: httpx.Response,
-    client: BlizzardClient,
     valid_codes: list[int] | None = None,
 ) -> None:
     """
@@ -22,7 +21,6 @@ def validate_response_status(
 
     Args:
         response: HTTP response from Blizzard
-        client: BlizzardClient instance for error handling
         valid_codes: List of valid status codes (default: [200])
 
     Raises:
@@ -32,7 +30,15 @@ def validate_response_status(
         valid_codes = [200]
 
     if response.status_code not in valid_codes:
-        raise client.blizzard_response_error_from_response(response)
+        logger.error(
+            "Received an error from Blizzard. HTTP {} : {}",
+            response.status_code,
+            response.text,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            detail=f"Couldn't get Blizzard page (HTTP {response.status_code} error) : {response.text}",
+        )
 
 
 def parse_html_root(html: str) -> LexborNode:

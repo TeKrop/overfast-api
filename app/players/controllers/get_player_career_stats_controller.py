@@ -34,6 +34,7 @@ class GetPlayerCareerStatsController(BasePlayerController):
         hero = kwargs.get("hero")
 
         client = BlizzardClient()
+        player_summary: dict | None = None
 
         try:
             # Get player summary

@@ -34,6 +34,7 @@ class GetPlayerStatsSummaryController(BasePlayerController):
         platform = kwargs.get("platform")
 
         client = BlizzardClient()
+        player_summary: dict | None = None
 
         try:
             # Get player summary

@@ -19,6 +19,7 @@ player-cache:TeKrop-2217
 => {"summary": {"...": "...""}, "profile": "<html>....</html>"}
 """
 
+import asyncio
 import json
 import zlib
 from typing import TYPE_CHECKING
@@ -83,7 +84,7 @@ class ValkeyCache(metaclass=Singleton):
             value = self.valkey_server.get(key)
             return value if isinstance(value, bytes) else None
 
-        return self._handle_valkey_error(_get)
+        return await asyncio.to_thread(lambda: self._handle_valkey_error(_get))
 
     async def set(
         self,
@@ -96,7 +97,7 @@ class ValkeyCache(metaclass=Singleton):
         def _set():
             self.valkey_server.set(key, value, ex=expire)
 
-        self._handle_valkey_error(_set)
+        await asyncio.to_thread(lambda: self._handle_valkey_error(_set))
 
     async def delete(self, key: str) -> None:
         """Delete key from cache"""
@@ -104,7 +105,7 @@ class ValkeyCache(metaclass=Singleton):
         def _delete():
             self.valkey_server.delete(key)
 
-        self._handle_valkey_error(_delete)
+        await asyncio.to_thread(lambda: self._handle_valkey_error(_delete))
 
     async def exists(self, key: str) -> bool:
         """Check if key exists in cache"""
@@ -112,7 +113,8 @@ class ValkeyCache(metaclass=Singleton):
         def _exists():
             return bool(self.valkey_server.exists(key))
 
-        return self._handle_valkey_error(_exists) or False
+        result = await asyncio.to_thread(lambda: self._handle_valkey_error(_exists))
+        return result or False
 
     # Legacy application-specific methods (kept for backward compatibility during migration)
     def get_api_cache(self, cache_key: str) -> dict | list | None:

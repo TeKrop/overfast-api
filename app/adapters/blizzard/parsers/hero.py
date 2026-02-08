@@ -33,7 +33,7 @@ async def fetch_hero_html(
     """Fetch single hero HTML from Blizzard"""
     url = f"{settings.blizzard_host}/{locale}{settings.heroes_path}{hero_key}/"
     response = await client.get(url, headers={"Accept": "text/html"})
-    validate_response_status(response, client, valid_codes=[200, 404])
+    validate_response_status(response, valid_codes=[200, 404])
     return response.text
 
 

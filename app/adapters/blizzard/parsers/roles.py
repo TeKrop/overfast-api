@@ -23,7 +23,7 @@ async def fetch_roles_html(
     """Fetch roles HTML from Blizzard homepage"""
     url = f"{settings.blizzard_host}/{locale}{settings.home_path}"
     response = await client.get(url, headers={"Accept": "text/html"})
-    validate_response_status(response, client)
+    validate_response_status(response)
     return response.text
 
 

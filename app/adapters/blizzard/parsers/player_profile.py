@@ -72,7 +72,7 @@ async def fetch_player_html(client: BlizzardClient, player_id: str) -> str:
     url = f"{settings.blizzard_host}{settings.career_path}/{player_id}/"
 
     response = await client.get(url)
-    validate_response_status(response, client, valid_codes=[200, 404])
+    validate_response_status(response, valid_codes=[200, 404])
 
     return response.text
 
@@ -464,17 +464,17 @@ def _get_heroes_options(
 
 def filter_stats_by_query(
     stats: dict | None,
-    platform: PlayerPlatform | None = None,
-    gamemode: PlayerGamemode | None = None,
+    platform: PlayerPlatform | str | None = None,
+    gamemode: PlayerGamemode | str | None = None,
     hero: str | None = None,
 ) -> dict:
     """
     Filter career stats by query parameters
 
     Args:
-        stats: Raw stats dict from parser
-        platform: Optional platform filter
-        gamemode: Optional gamemode filter
+        stats: Raw stats dict from parser (keys are strings: platform.value, gamemode.value)
+        platform: Optional platform filter (enum or string)
+        gamemode: Optional gamemode filter (enum or string)
         hero: Optional hero filter
 
     Returns:
@@ -482,25 +482,33 @@ def filter_stats_by_query(
     """
     filtered_data = stats or {}
 
-    # Determine platform if not specified
-    if not platform:
+    # Normalize platform to string key
+    platform_key: str | None = None
+    if platform:
+        platform_key = platform.value if hasattr(platform, "value") else str(platform)  # type: ignore[arg-type]
+    else:
+        # Determine platform if not specified
         possible_platforms = [
-            platform_key
-            for platform_key, platform_data in filtered_data.items()
+            pk
+            for pk, platform_data in filtered_data.items()
             if platform_data is not None
         ]
         if possible_platforms:
             # Take the first one of the list, usually there will be only one.
             # If there are two, the PC stats should come first
-            platform = possible_platforms[0]
+            platform_key = possible_platforms[0]
         else:
             return {}
 
-    filtered_data = filtered_data.get(platform) or {}
+    filtered_data = filtered_data.get(platform_key) or {}
     if not filtered_data:
         return {}
 
-    filtered_data = filtered_data.get(gamemode) or {}
+    # Normalize gamemode to string key
+    gamemode_key: str | None = None
+    if gamemode:
+        gamemode_key = gamemode.value if hasattr(gamemode, "value") else str(gamemode)  # type: ignore[arg-type]
+    filtered_data = filtered_data.get(gamemode_key) or {}
     if not filtered_data:
         return {}
 
@@ -515,16 +523,16 @@ def filter_stats_by_query(
 
 def filter_all_stats_data(
     stats: dict | None,
-    platform: PlayerPlatform | None = None,
-    gamemode: PlayerGamemode | None = None,
+    platform: PlayerPlatform | str | None = None,
+    gamemode: PlayerGamemode | str | None = None,
 ) -> dict:
     """
     Filter all stats data by platform and/or gamemode
 
     Args:
-        stats: Raw stats dict from parser
-        platform: Optional platform filter
-        gamemode: Optional gamemode filter
+        stats: Raw stats dict from parser (keys are strings: platform.value, gamemode.value)
+        platform: Optional platform filter (enum or string)
+        gamemode: Optional gamemode filter (enum or string)
 
     Returns:
         Filtered stats dict (may set platforms/gamemodes to None if not matching)
@@ -535,10 +543,23 @@ def filter_all_stats_data(
     if not platform and not gamemode:
         return stats_data
 
+    # Normalize filters to string keys
+    platform_filter: str | None = None
+    if platform:
+        platform_filter = (
+            platform.value if hasattr(platform, "value") else str(platform)
+        )  # type: ignore[arg-type]
+
+    gamemode_filter: str | None = None
+    if gamemode:
+        gamemode_filter = (
+            gamemode.value if hasattr(gamemode, "value") else str(gamemode)
+        )  # type: ignore[arg-type]
+
     filtered_data = {}
 
     for platform_key, platform_data in stats_data.items():
-        if platform and platform_key != platform:
+        if platform_filter and platform_key != platform_filter:
             filtered_data[platform_key] = None
             continue
 
@@ -546,12 +567,12 @@ def filter_all_stats_data(
             filtered_data[platform_key] = None
             continue
 
-        if gamemode is None:
+        if gamemode_filter is None:
             filtered_data[platform_key] = platform_data
             continue
 
         filtered_data[platform_key] = {
-            gamemode_key: (gamemode_data if gamemode_key == gamemode else None)
+            gamemode_key: (gamemode_data if gamemode_key == gamemode_filter else None)
             for gamemode_key, gamemode_data in platform_data.items()
         }
 

@@ -35,6 +35,7 @@ class GetPlayerCareerController(BasePlayerController):
         """Process request with Player Cache support"""
         player_id = kwargs["player_id"]
         client = BlizzardClient()
+        player_summary: dict | None = None
 
         # Filters from query
         summary_filter = bool(kwargs.get("summary"))
