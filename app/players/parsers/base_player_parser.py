@@ -46,11 +46,11 @@ class BasePlayerParser(HTMLParser):
         player_cache = self.cache_manager.get_player_cache(self.player_id)
         if (
             player_cache is not None
-            and player_cache["summary"]["lastUpdated"]
+            and player_cache["summary"]["lastUpdated"]  # ty: ignore[invalid-argument-type]
             == self.player_data["summary"]["lastUpdated"]
         ):
             logger.info("Player Cache found and up-to-date, using it")
-            self.create_parser_tag(player_cache["profile"])
+            self.create_parser_tag(player_cache["profile"])  # ty: ignore[invalid-argument-type]
             await self.parse_response_data()
             return
 

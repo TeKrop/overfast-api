@@ -1,6 +1,6 @@
 """Player Career Controller module"""
 
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from fastapi import HTTPException
 
@@ -16,6 +16,9 @@ from app.config import settings
 from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.helpers import overfast_internal_error
 from app.overfast_logger import logger
+
+if TYPE_CHECKING:
+    from app.players.enums import PlayerGamemode, PlayerPlatform
 
 from .base_player_controller import BasePlayerController
 
@@ -34,8 +37,8 @@ class GetPlayerCareerController(BasePlayerController):
         client = BlizzardClient()
 
         # Filters from query
-        summary_filter = kwargs.get("summary")
-        stats_filter = kwargs.get("stats")
+        summary_filter = bool(kwargs.get("summary"))
+        stats_filter = bool(kwargs.get("stats"))
         platform_filter = kwargs.get("platform")
         gamemode_filter = kwargs.get("gamemode")
         hero_filter = kwargs.get("hero")
@@ -57,11 +60,11 @@ class GetPlayerCareerController(BasePlayerController):
 
                 if (
                     player_cache is not None
-                    and player_cache["summary"]["lastUpdated"]
+                    and player_cache["summary"]["lastUpdated"]  # ty: ignore[invalid-argument-type]
                     == player_summary["lastUpdated"]
                 ):
                     logger.info("Player Cache found and up-to-date, using it")
-                    html = player_cache["profile"]
+                    html = player_cache["profile"]  # ty: ignore[invalid-argument-type]
                     profile_data = parse_player_profile_html(html, player_summary)
                 else:
                     # Fetch from Blizzard with Blizzard ID
@@ -116,8 +119,8 @@ class GetPlayerCareerController(BasePlayerController):
         profile_data: dict,
         summary_filter: bool,
         stats_filter: bool,
-        platform_filter: str | None,
-        gamemode_filter: str | None,
+        platform_filter: PlayerPlatform | None,
+        gamemode_filter: PlayerGamemode | None,
         hero_filter: str | None,
     ) -> dict:
         """Apply query filters to profile data"""
@@ -128,7 +131,7 @@ class GetPlayerCareerController(BasePlayerController):
         # If only stats requested
         if stats_filter:
             return filter_stats_by_query(
-                profile_data.get("stats"),
+                profile_data.get("stats") or {},
                 platform_filter,
                 gamemode_filter,
                 hero_filter,
@@ -136,9 +139,9 @@ class GetPlayerCareerController(BasePlayerController):
 
         # Both summary and stats (with optional platform/gamemode filters)
         return {
-            "summary": profile_data["summary"],
+            "summary": profile_data.get("summary") or {},
             "stats": filter_all_stats_data(
-                profile_data.get("stats"),
+                profile_data.get("stats") or {},
                 platform_filter,
                 gamemode_filter,
             ),

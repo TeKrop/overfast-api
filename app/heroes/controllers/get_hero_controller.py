@@ -24,14 +24,14 @@ class GetHeroController(AbstractController):
 
     async def process_request(self, **kwargs) -> dict:
         """Process request using stateless parser functions"""
-        hero_key = kwargs.get("hero_key")
+        hero_key = kwargs["hero_key"]
         locale = kwargs.get("locale") or Locale.ENGLISH_US
 
         client = BlizzardClient()
 
         try:
             # Fetch data from all three sources
-            hero_data = await parse_hero(client, hero_key, locale)
+            hero_data = await parse_hero(client, str(hero_key), locale)
             heroes_list = await parse_heroes(client, locale)
             heroes_stats = parse_heroes_stats()
 

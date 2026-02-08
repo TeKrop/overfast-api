@@ -45,7 +45,7 @@ class GetPlayerCareerStatsController(BasePlayerController):
 
                 if (
                     player_cache is not None
-                    and player_cache["summary"]["lastUpdated"]
+                    and player_cache["summary"]["lastUpdated"]  # ty: ignore[invalid-argument-type]
                     == player_summary["lastUpdated"]
                 ):
                     logger.info("Player Cache found and up-to-date")

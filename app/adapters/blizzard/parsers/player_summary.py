@@ -10,7 +10,9 @@ if TYPE_CHECKING:
     from app.adapters.blizzard.client import BlizzardClient
 
 
-async def fetch_player_summary_json(client: BlizzardClient, player_id: str) -> dict:
+async def fetch_player_summary_json(
+    client: BlizzardClient, player_id: str
+) -> list[dict]:
     """
     Fetch player summary data from Blizzard search endpoint
 
@@ -19,7 +21,7 @@ async def fetch_player_summary_json(client: BlizzardClient, player_id: str) -> d
         player_id: Player ID (name-discriminator format)
 
     Returns:
-        Raw JSON response from Blizzard
+        Raw JSON response from Blizzard (list of player dicts)
     """
     player_name = player_id.split("-", 1)[0]
     url = f"{settings.blizzard_host}{settings.search_account_path}/{player_name}/"

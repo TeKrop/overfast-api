@@ -67,7 +67,7 @@ def safe_get_attribute(
     node: LexborNode | None,
     attribute: str,
     default: str = "",
-) -> str:
+) -> str | None:
     """Safely get attribute from a node, return default if None"""
     if not node or not node.attributes:
         return default

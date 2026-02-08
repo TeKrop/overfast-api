@@ -260,7 +260,7 @@ def compute_roles_stats(heroes_stats: dict) -> dict:
     return {
         role_key: role_stat
         for role_key, role_stat in roles_stats.items()
-        if role_stat["time_played"] > 0
+        if isinstance(role_stat["time_played"], int) and role_stat["time_played"] > 0
     }
 
 
@@ -347,7 +347,7 @@ async def parse_player_stats_summary(
     profile_data = await parse_player_profile(client, player_id, player_summary)
 
     # Extract heroes stats
-    heroes_stats = extract_heroes_stats_from_profile(profile_data.get("stats"))
+    heroes_stats = extract_heroes_stats_from_profile(profile_data.get("stats") or {})
 
     # Compute heroes data with filters
     heroes_data = compute_heroes_data(heroes_stats, gamemodes, platforms)

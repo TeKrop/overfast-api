@@ -14,15 +14,15 @@ from app.adapters.blizzard.parsers.utils import (
 from app.config import settings
 
 if TYPE_CHECKING:
+    from selectolax.lexbor import LexborNode
+
     from app.adapters.blizzard.client import BlizzardClient
+
 from app.enums import Locale
 from app.exceptions import ParserBlizzardError
 from app.heroes.enums import MediaType
 from app.overfast_logger import logger
 from app.roles.helpers import get_role_from_icon_url
-
-if TYPE_CHECKING:
-    from selectolax.lexbor import LexborNode
 
 
 async def fetch_hero_html(
@@ -85,7 +85,7 @@ def _parse_hero_summary(overview_section: LexborNode, locale: Locale) -> dict:
     return {
         "name": safe_get_text(header_section.css_first("h2")),
         "description": safe_get_text(header_section.css_first("p")),
-        "role": get_role_from_icon_url(icon_url),
+        "role": get_role_from_icon_url(icon_url or ""),
         "location": safe_get_text(extra_list_items[1]),
         "birthday": birthday,
         "age": age,
