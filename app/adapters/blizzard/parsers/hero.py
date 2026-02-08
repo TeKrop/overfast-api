@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from app.adapters.blizzard.client import BlizzardClient
 
 from app.enums import Locale
-from app.exceptions import ParserBlizzardError
+from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.heroes.enums import MediaType
 from app.overfast_logger import logger
 from app.roles.helpers import get_role_from_icon_url
@@ -50,25 +50,37 @@ def parse_hero_html(html: str, locale: Locale = Locale.ENGLISH_US) -> dict:
 
     Raises:
         ParserBlizzardError: If hero not found (404)
+        ParserParsingError: If HTML structure is unexpected
     """
-    root_tag = parse_html_root(html)
+    try:
+        root_tag = parse_html_root(html)
 
-    # Check if hero exists
-    abilities_section = root_tag.css_first("div.abilities-container")
-    if not abilities_section:
-        raise ParserBlizzardError(
-            status_code=status.HTTP_404_NOT_FOUND,
-            message="Hero not found or not released yet",
-        )
+        # Check if hero exists
+        abilities_section = root_tag.css_first("div.abilities-container")
+        if not abilities_section:
+            raise ParserBlizzardError(  # noqa: TRY301
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Hero not found or not released yet",
+            )
 
-    overview_section = root_tag.css_first("blz-page-header")
-    lore_section = root_tag.css_first("blz-section.lore")
+        overview_section = root_tag.css_first("blz-page-header")
+        lore_section = root_tag.css_first("blz-section.lore")
 
-    return {
-        **_parse_hero_summary(overview_section, locale),
-        "abilities": _parse_hero_abilities(abilities_section),
-        "story": _parse_hero_story(lore_section),
-    }
+        if not overview_section:
+            msg = "Hero overview section (blz-page-header) not found"
+            raise ParserParsingError(msg)
+
+        return {
+            **_parse_hero_summary(overview_section, locale),
+            "abilities": _parse_hero_abilities(abilities_section),
+            "story": _parse_hero_story(lore_section),
+        }
+    except ParserBlizzardError:
+        # Re-raise Blizzard errors (404s) without wrapping
+        raise
+    except (AttributeError, KeyError, IndexError, TypeError) as error:
+        msg = f"Unexpected Blizzard hero page structure: {error}"
+        raise ParserParsingError(msg) from error
 
 
 def _parse_hero_summary(overview_section: LexborNode, locale: Locale) -> dict:
