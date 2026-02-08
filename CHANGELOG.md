@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.34.2 (2026-02-08)
+
+### Bug Fixes
+
+- Forcing en-us versions of player profile pages to be loaded for the API
+  ([#348](https://github.com/TeKrop/overfast-api/pull/348),
+  [`1f5bceb`](https://github.com/TeKrop/overfast-api/commit/1f5bceb5ce42fd9ca253d457f73de5fcac781796))
+
+
 ## v3.34.1 (2026-02-08)
 
 ### Bug Fixes
