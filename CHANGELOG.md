@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.34.1 (2026-02-08)
+
+### Bug Fixes
+
+- Fixed unknown player issue ([#347](https://github.com/TeKrop/overfast-api/pull/347),
+  [`dc4a536`](https://github.com/TeKrop/overfast-api/commit/dc4a536d956943519bda4487e653771685efdebb))
+
+
 ## v3.34.0 (2026-02-08)
 
 ### Features
