@@ -1,0 +1,22 @@
+# Prometheus configuration for OverFast API monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'overfast-api'
+
+scrape_configs:
+  # Nginx metrics (lua-resty-prometheus)
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:9145']
+    scrape_interval: 10s
+    metrics_path: /metrics
+
+  # FastAPI metrics (prometheus_client)
+  - job_name: 'fastapi'
+    static_configs:
+      - targets: ['app:8080']
+    scrape_interval: 10s
+    metrics_path: /metrics

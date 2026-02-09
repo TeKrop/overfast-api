@@ -61,13 +61,22 @@ test pytest_args="":
     {{ docker_run }} {{ if pytest_args != "" { "uv run python -m pytest " + pytest_args } else { "uv run python -m pytest --cov app/ --cov-report html -n auto tests/" } }}
 
 # build & run OverFastAPI application (production mode)
-up:
+up profile="":
     @echo "Building OverFastAPI (production mode)..."
     {{ docker_compose }} build
     @echo "Stopping OverFastAPI and cleaning containers..."
     {{ docker_compose }} down -v --remove-orphans
     @echo "Launching OverFastAPI (production mode)..."
-    {{ docker_compose }} up -d
+    {{ if profile != "" { docker_compose + " --profile " + profile + " up -d" } else { docker_compose + " up -d" } }}
+
+# build & run with monitoring (Prometheus + Grafana)
+up_monitoring:
+    @echo "Building OverFastAPI with monitoring..."
+    {{ docker_compose }} build
+    @echo "Stopping OverFastAPI and cleaning containers..."
+    {{ docker_compose }} down -v --remove-orphans
+    @echo "Launching OverFastAPI with monitoring..."
+    {{ docker_compose }} --profile monitoring up -d
 
 # stop the app and remove containers
 down:

@@ -80,6 +80,14 @@ up: ## Build & run OverFastAPI application (production mode)
 	@echo "Launching OverFastAPI (production mode)..."
 	$(DOCKER_COMPOSE) up -d
 
+up_monitoring: ## Build & run with monitoring (Prometheus + Grafana)
+	@echo "Building OverFastAPI with monitoring..."
+	$(DOCKER_COMPOSE) build
+	@echo "Stopping OverFastAPI and cleaning containers..."
+	$(DOCKER_COMPOSE) down -v --remove-orphans
+	@echo "Launching OverFastAPI with monitoring..."
+	$(DOCKER_COMPOSE) --profile monitoring up -d
+
 down: ## Stop the app and remove containers
 	@echo "Stopping OverFastAPI and cleaning containers..."
 	$(DOCKER_COMPOSE) --profile "*" down  -v --remove-orphans
@@ -95,4 +103,4 @@ lock: ## Update lock file
 update_test_fixtures: ## Update test fixtures (heroes, players, etc.)
 	$(DOCKER RUN) uv run python -m tests.update_test_fixtures $(PARAMS)
 
-.PHONY: help build start lint format shell exec test up down clean lock update_test_fixtures
+.PHONY: help build start lint format shell exec test up up_monitoring down clean lock update_test_fixtures
