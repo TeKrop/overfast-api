@@ -525,7 +525,7 @@ def filter_all_stats_data(
     stats: dict | None,
     platform: PlayerPlatform | str | None = None,
     gamemode: PlayerGamemode | str | None = None,
-) -> dict:
+) -> dict | None:
     """
     Filter all stats data by platform and/or gamemode
 
@@ -535,13 +535,25 @@ def filter_all_stats_data(
         gamemode: Optional gamemode filter (enum or string)
 
     Returns:
-        Filtered stats dict (may set platforms/gamemodes to None if not matching)
+        Filtered stats dict (may set platforms/gamemodes to None if not matching),
+        or None if no stats data exists
     """
-    stats_data = stats or {}
+    # Return None if no stats data
+    if stats is None:
+        return None
 
-    # Return early if no filters
+    # Check if stats dict is empty or all values are None
+    if not stats or all(v is None for v in stats.values()):
+        return None
+
+    stats_data = stats
+
+    # Return early if no filters (ensure both platform keys exist)
     if not platform and not gamemode:
-        return stats_data
+        return {
+            PlayerPlatform.PC.value: stats_data.get(PlayerPlatform.PC.value),
+            PlayerPlatform.CONSOLE.value: stats_data.get(PlayerPlatform.CONSOLE.value),
+        }
 
     # Normalize filters to string keys
     platform_filter: str | None = None
@@ -556,9 +568,12 @@ def filter_all_stats_data(
             gamemode.value if hasattr(gamemode, "value") else str(gamemode)
         )  # type: ignore[arg-type]
 
+    # Ensure both platform keys exist in output
     filtered_data = {}
+    for platform_enum in PlayerPlatform:
+        platform_key = platform_enum.value
+        platform_data = stats_data.get(platform_key)
 
-    for platform_key, platform_data in stats_data.items():
         if platform_filter and platform_key != platform_filter:
             filtered_data[platform_key] = None
             continue
