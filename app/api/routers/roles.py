@@ -6,9 +6,8 @@ from fastapi import APIRouter, Query, Request, Response
 
 from app.enums import Locale, RouteTag
 from app.helpers import routes_responses
-
-from .controllers.list_roles_controller import ListRolesController
-from .models import RoleDetail
+from app.roles.controllers.list_roles_controller import ListRolesController
+from app.roles.models import RoleDetail
 
 router = APIRouter()
 

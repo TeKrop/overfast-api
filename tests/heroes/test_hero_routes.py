@@ -119,7 +119,7 @@ def test_get_hero_no_portrait(
             ],
         ),
         patch(
-            "app.heroes.parsers.heroes_parser.HeroesParser.filter_request_using_query",
+            "app.adapters.blizzard.parsers.heroes.filter_heroes_by_role",
             return_value=[],
         ),
     ):
@@ -148,7 +148,7 @@ def test_get_hero_no_hitpoints(
             ],
         ),
         patch(
-            "app.parsers.read_csv_data_file",
+            "app.adapters.csv.csv_reader.CSVReader.read_csv_file",
             return_value=[],
         ),
     ):

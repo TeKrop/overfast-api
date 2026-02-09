@@ -2,18 +2,30 @@
 
 <!-- version list -->
 
-## v3.34.0 (2026-02-08)
+## v3.34.2 (2026-02-08)
 
 ### Bug Fixes
 
-- **ci**: Auto-resolve merge conflicts in sync workflow
-  ([`6eac0e7`](https://github.com/danielsogl/overfast-api/commit/6eac0e77e82d4cb08474f90136b50b3373125840))
+- Forcing en-us versions of player profile pages to be loaded for the API
+  ([#348](https://github.com/TeKrop/overfast-api/pull/348),
+  [`1f5bceb`](https://github.com/TeKrop/overfast-api/commit/1f5bceb5ce42fd9ca253d457f73de5fcac781796))
+
+
+## v3.34.1 (2026-02-08)
+
+### Bug Fixes
+
+- Fixed unknown player issue ([#347](https://github.com/TeKrop/overfast-api/pull/347),
+  [`dc4a536`](https://github.com/TeKrop/overfast-api/commit/dc4a536d956943519bda4487e653771685efdebb))
+
+
+## v3.34.0 (2026-02-08)
 
 ### Features
 
-- Added new heroes and removed the 2 from game name
-  ([#345](https://github.com/danielsogl/overfast-api/pull/345),
-  [`2965796`](https://github.com/danielsogl/overfast-api/commit/2965796a36771dc25738c4a0471c1431236084d4))
+- Started to rework project with DDD (ports and adapters)
+  ([#346](https://github.com/TeKrop/overfast-api/pull/346),
+  [`17cb27e`](https://github.com/TeKrop/overfast-api/commit/17cb27e8ef43a885ccf9f558cf5411a5a66856d8))
 
 
 ## v3.33.0 (2026-02-05)

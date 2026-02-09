@@ -80,7 +80,7 @@ def test_valkey_connection_error(cache_manager: CacheManager):
         f"HeroesParser-{settings.blizzard_host}/{locale}{settings.heroes_path}"
     )
     with patch(
-        "app.cache_manager.valkey.Valkey.get",
+        "app.adapters.cache.valkey_cache.valkey.Valkey.get",
         side_effect=valkey_connection_error,
     ):
         cache_manager.update_api_cache(

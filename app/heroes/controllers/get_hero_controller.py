@@ -1,39 +1,81 @@
 """Hero Controller module"""
 
-from typing import Any, ClassVar, cast
+from typing import Any, ClassVar
 
+from fastapi import HTTPException
+
+from app.adapters.blizzard import BlizzardClient
+from app.adapters.blizzard.parsers.hero import parse_hero
+from app.adapters.blizzard.parsers.heroes import parse_heroes
+from app.adapters.blizzard.parsers.heroes_stats import parse_heroes_stats
 from app.config import settings
 from app.controllers import AbstractController
-
-from ..parsers.hero_parser import HeroParser
-from ..parsers.heroes_parser import HeroesParser
-from ..parsers.heroes_stats_parser import HeroesStatsParser
+from app.enums import Locale
+from app.exceptions import ParserBlizzardError, ParserParsingError
+from app.helpers import overfast_internal_error
 
 
 class GetHeroController(AbstractController):
     """Hero Controller used in order to retrieve data about a single
-    Overwatch hero. The hero key given by the ListHeroesController
-    should be used to display data about a specific hero.
+    Overwatch hero.
     """
 
-    parser_classes: ClassVar[list[type]] = [HeroParser, HeroesParser, HeroesStatsParser]
+    parser_classes: ClassVar[list[type]] = []
     timeout = settings.hero_path_cache_timeout
 
-    def merge_parsers_data(self, parsers_data: list[dict | list], **kwargs) -> dict:
-        """Merge parsers data together :
-        - HeroParser for detailed data
-        - HeroesParser for portrait (not here in the specific page)
-        - HeroesStatsParser for stats (health, armor, shields)
-        """
-        hero_data = cast("dict", parsers_data[0])
-        heroes_data = cast("list", parsers_data[1])
-        heroes_stats_data = cast("dict", parsers_data[2])
+    async def process_request(self, **kwargs) -> dict:
+        """Process request using stateless parser functions"""
+        hero_key = kwargs["hero_key"]
+        locale = kwargs.get("locale") or Locale.ENGLISH_US
+
+        client = BlizzardClient()
 
         try:
+            # Fetch data from all three sources
+            hero_data = await parse_hero(client, str(hero_key), locale)
+            heroes_list = await parse_heroes(client, locale)
+            heroes_stats = parse_heroes_stats()
+
+            # Merge data
+            data = self._merge_hero_data(hero_data, heroes_list, heroes_stats, hero_key)
+        except ParserBlizzardError as error:
+            raise HTTPException(
+                status_code=error.status_code,
+                detail=error.message,
+            ) from error
+        except ParserParsingError as error:
+            # Get Blizzard URL for error reporting
+            blizzard_url = (
+                f"{settings.blizzard_host}/{locale}{settings.heroes_path}{hero_key}/"
+            )
+            raise overfast_internal_error(blizzard_url, error) from error
+
+        # Update API Cache
+        self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
+        self.response.headers[settings.cache_ttl_header] = str(self.timeout)
+
+        return data
+
+    @staticmethod
+    def _merge_hero_data(
+        hero_data: dict,
+        heroes_list: list[dict],
+        heroes_stats: dict,
+        hero_key: str,
+    ) -> dict:
+        """
+        Merge data from hero details, heroes list, and heroes stats
+
+        Args:
+            hero_data: Detailed hero data from hero parser
+            heroes_list: List of all heroes (for portrait)
+            heroes_stats: Stats dict (for hitpoints)
+            hero_key: Hero key for lookups
+        """
+        # Add portrait from heroes list
+        try:
             portrait_value = next(
-                hero["portrait"]
-                for hero in heroes_data
-                if hero["key"] == kwargs.get("hero_key")
+                hero["portrait"] for hero in heroes_list if hero["key"] == hero_key
             )
         except StopIteration:
             # The hero key may not be here in some specific edge cases,
@@ -41,23 +83,22 @@ class GetHeroController(AbstractController):
             # heroes list yet, or the list cache is outdated
             portrait_value = None
         else:
-            # We want to insert the portrait before the "role" key
-            hero_data = self._dict_insert_value_before_key(
+            hero_data = dict_insert_value_before_key(
                 hero_data,
                 "role",
                 "portrait",
                 portrait_value,
             )
 
+        # Add hitpoints from stats
         try:
-            hitpoints = heroes_stats_data[kwargs.get("hero_key")]["hitpoints"]
+            hitpoints = heroes_stats[hero_key]["hitpoints"]
         except KeyError:
             # Hero hitpoints may not be here if the CSV file
             # containing the data hasn't been updated
             hitpoints = None
         else:
-            # We want to insert hitpoints before "abilities" key
-            hero_data = self._dict_insert_value_before_key(
+            hero_data = dict_insert_value_before_key(
                 hero_data,
                 "abilities",
                 "hitpoints",
@@ -66,6 +107,7 @@ class GetHeroController(AbstractController):
 
         return hero_data
 
+    # Keep legacy method name for backward compatibility with tests
     @staticmethod
     def _dict_insert_value_before_key(
         data: dict,
@@ -73,18 +115,22 @@ class GetHeroController(AbstractController):
         new_key: str,
         new_value: Any,
     ) -> dict:
-        """Insert a given key/value pair before another key in a given dict"""
-        if key not in data:
-            raise KeyError
+        """Backward compatibility wrapper for tests"""
+        return dict_insert_value_before_key(data, key, new_key, new_value)
 
-        # Retrieve the key position
-        key_pos = list(data.keys()).index(key)
 
-        # Retrieve dict items as a list of tuples
-        data_items = list(data.items())
+def dict_insert_value_before_key(
+    data: dict,
+    key: str,
+    new_key: str,
+    new_value: Any,
+) -> dict:
+    """Insert a given key/value pair before another key in a given dict"""
+    if key not in data:
+        raise KeyError
 
-        # Insert the new tuple in the given position
-        data_items.insert(key_pos, (new_key, new_value))
+    key_pos = list(data.keys()).index(key)
+    data_items = list(data.items())
+    data_items.insert(key_pos, (new_key, new_value))
 
-        # Convert back the list into a dict and return it
-        return dict(data_items)
+    return dict(data_items)

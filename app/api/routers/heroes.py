@@ -6,6 +6,19 @@ from fastapi import APIRouter, Path, Query, Request, Response, status
 
 from app.enums import Locale, RouteTag
 from app.helpers import routes_responses
+from app.heroes.controllers.get_hero_controller import GetHeroController
+from app.heroes.controllers.get_hero_stats_summary_controller import (
+    GetHeroStatsSummaryController,
+)
+from app.heroes.controllers.list_heroes_controller import ListHeroesController
+from app.heroes.enums import HeroKey
+from app.heroes.models import (
+    BadRequestErrorMessage,
+    Hero,
+    HeroParserErrorMessage,
+    HeroShort,
+    HeroStatsSummary,
+)
 from app.maps.enums import MapKey
 from app.players.enums import (
     CompetitiveDivisionFilter,
@@ -14,18 +27,6 @@ from app.players.enums import (
     PlayerRegion,
 )
 from app.roles.enums import Role
-
-from .controllers.get_hero_controller import GetHeroController
-from .controllers.get_hero_stats_summary_controller import GetHeroStatsSummaryController
-from .controllers.list_heroes_controller import ListHeroesController
-from .enums import HeroKey
-from .models import (
-    BadRequestErrorMessage,
-    Hero,
-    HeroParserErrorMessage,
-    HeroShort,
-    HeroStatsSummary,
-)
 
 router = APIRouter()
 
