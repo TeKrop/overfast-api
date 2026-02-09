@@ -152,10 +152,10 @@ class Settings(BaseSettings):
     heroes_path: str = "/heroes/"
 
     # Route for players career pages
-    career_path: str = "/career"
+    career_path: str = "/en-us/career"
 
     # Route for searching Overwatch accounts by name
-    search_account_path: str = "/search/account-by-name"
+    search_account_path: str = "/en-us/search/account-by-name"
 
     # Route for retrieving usage statistics about Overwatch heroes
     hero_stats_path: str = "/rates/data/"

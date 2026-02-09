@@ -48,8 +48,8 @@ class GetPlayerCareerController(BasePlayerController):
 
             try:
                 # Get player summary from search endpoint
-                logger.info("Retrieving Player Summary...")
                 player_summary = await parse_player_summary(client, player_id)
+                logger.info("Player Summary retrieved !")
 
                 # If player not found in search, fetch directly with player_id
                 if not player_summary:
@@ -100,6 +100,14 @@ class GetPlayerCareerController(BasePlayerController):
                     detail=error.message,
                 ) from error
             except ParserParsingError as error:
+                # Check if error message indicates player not found
+                # This can happen when HTML structure is malformed or missing expected elements
+                if "Could not find main content in HTML" in str(error):
+                    raise HTTPException(
+                        status_code=404,
+                        detail="Player not found",
+                    ) from error
+
                 # Get Blizzard URL for error reporting
                 blizzard_url = (
                     f"{settings.blizzard_host}{settings.career_path}/"
