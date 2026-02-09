@@ -38,6 +38,7 @@ from app.players.helpers import (
     get_role_key_from_icon,
     get_stats_hero_class,
     get_tier_from_icon,
+    normalize_career_stat_category_name,
     string_to_snakecase,
 )
 
@@ -407,10 +408,15 @@ def _parse_career_stats(career_stats_section: LexborNode) -> dict:
             # Label should be the first div within content ("header" class)
             category_label = content_div.first_child.first_child.text()
 
+            # Normalize localized category names to English
+            normalized_category_label = normalize_career_stat_category_name(
+                category_label
+            )
+
             career_stats[hero_key].append(
                 {
-                    "category": string_to_snakecase(category_label),
-                    "label": category_label,
+                    "category": string_to_snakecase(normalized_category_label),
+                    "label": normalized_category_label,
                     "stats": [],
                 },
             )

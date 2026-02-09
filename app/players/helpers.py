@@ -171,6 +171,8 @@ def get_real_category_name(category_name: str) -> str:
     """Specific method used because Blizzard sometimes name their categories
     in singular or plural. Example : "Objective Kill" or "Objective Kills".
     For consistency, I forced categories in one form (plural).
+
+    Also handles localized category names from non-English profiles.
     """
     category_names_mapping = {
         "Game Won": "Games Won",
@@ -178,6 +180,129 @@ def get_real_category_name(category_name: str) -> str:
         "Objective Kill": "Objective Kills",
     }
     return category_names_mapping.get(category_name, category_name)
+
+
+@cache
+def normalize_career_stat_category_name(category_label: str) -> str:
+    """Normalize localized career stat category names to English.
+
+    Blizzard returns category names in the user's language, but we need
+    to normalize them to English for our API enum validation.
+
+    Args:
+        category_label: The category label extracted from Blizzard HTML (may be localized)
+
+    Returns:
+        English category name
+    """
+    # Lowercase for case-insensitive matching
+    category_lower = category_label.lower()
+
+    # Localization mappings for career stat categories
+    localization_map = {
+        # Portuguese
+        "assistências": "Assists",
+        "média": "Average",
+        "melhor": "Best",
+        "jogo": "Game",
+        "para cada herói": "Hero Specific",
+        "prêmios de partida": "Match Awards",
+        "diversos": "Miscellaneous",
+        # Spanish (combate same as Portuguese)
+        "asistencias": "Assists",
+        "promedio": "Average",
+        "mejor": "Best",
+        "combate": "Combat",
+        "juego": "Game",
+        "específico del héroe": "Hero Specific",
+        "premios de partida": "Match Awards",
+        "varios": "Miscellaneous",
+        # French
+        "assistances": "Assists",
+        "moyenne": "Average",
+        "meilleur": "Best",
+        "combat": "Combat",
+        "jeu": "Game",
+        "spécifique au héros": "Hero Specific",
+        "récompenses de match": "Match Awards",
+        "divers": "Miscellaneous",
+        # German
+        "assists": "Assists",
+        "durchschnitt": "Average",
+        "bester wert": "Best",
+        "kampf": "Combat",
+        "spiel": "Game",
+        "heldenspezifisch": "Hero Specific",
+        "match-auszeichnungen": "Match Awards",
+        "verschiedenes": "Miscellaneous",
+        # Italian
+        "assistenze": "Assists",
+        "media": "Average",
+        "migliore": "Best",
+        "combattimento": "Combat",
+        "partita": "Game",
+        "specifico dell'eroe": "Hero Specific",
+        "premi partita": "Match Awards",
+        "varie": "Miscellaneous",
+        # Japanese
+        "アシスト": "Assists",
+        "ベスト": "Best",
+        "戦闘": "Combat",
+        "ゲーム": "Game",
+        "ヒーロー特有": "Hero Specific",
+        "試合の報酬": "Match Awards",
+        "その他": "Miscellaneous",
+        # Korean
+        "지원": "Assists",
+        "평균": "Average",
+        "최고 기록": "Best",
+        "전투": "Combat",
+        "게임": "Game",
+        "영웅별": "Hero Specific",
+        "경기 포상": "Match Awards",
+        "기타": "Miscellaneous",
+        # Chinese Simplified
+        "助攻": "Assists",
+        "最佳": "Best",
+        "战斗": "Combat",
+        "比赛": "Game",
+        "英雄特有": "Hero Specific",
+        "比赛奖励": "Match Awards",
+        "综合": "Miscellaneous",
+        # Chinese Traditional (different characters)
+        "戰鬥": "Combat",
+        "遊戲": "Game",
+        "英雄專屬": "Hero Specific",
+        "比賽獎勵": "Match Awards",
+        "綜合": "Miscellaneous",
+        # Russian
+        "помощь": "Assists",
+        "среднее": "Average",
+        "лучшее": "Best",
+        "бой": "Combat",
+        "игра": "Game",
+        "уникальное для героя": "Hero Specific",
+        "награды матча": "Match Awards",
+        "разное": "Miscellaneous",
+        # Polish
+        "asysty": "Assists",
+        "średnia": "Average",
+        "najlepszy wynik": "Best",
+        "walka": "Combat",
+        "gra": "Game",
+        "dla bohatera": "Hero Specific",
+        "nagrody meczowe": "Match Awards",
+        "różne": "Miscellaneous",
+    }
+
+    # Try to find a match
+    normalized = localization_map.get(category_lower)
+    if normalized:
+        return normalized
+
+    # If no localization match found, return original
+    # (handles English and any future languages)
+    return category_label
 
 
 @cache
