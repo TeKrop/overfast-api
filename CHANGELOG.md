@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.34.3 (2026-02-09)
+
+### Bug Fixes
+
+- Fixed issue when players didn't have stats
+  ([#349](https://github.com/TeKrop/overfast-api/pull/349),
+  [`4e7cf15`](https://github.com/TeKrop/overfast-api/commit/4e7cf15ebb986ed47f206648c7b08ca4583e6e5c))
+
+
 ## v3.34.2 (2026-02-08)
 
 ### Bug Fixes
