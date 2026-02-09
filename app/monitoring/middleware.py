@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from app.config import settings
+from app.monitoring.helpers import normalize_endpoint
 from app.monitoring.metrics import (
     api_request_duration_seconds,
     api_requests_in_progress,
@@ -46,8 +47,11 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
         if path == "/metrics":
             return await call_next(request)
 
+        # Normalize path to avoid high cardinality
+        normalized_path = normalize_endpoint(path)
+
         # Track in-progress requests
-        api_requests_in_progress.labels(method=method, endpoint=path).inc()
+        api_requests_in_progress.labels(method=method, endpoint=normalized_path).inc()
 
         start_time = time.perf_counter()
         try:
@@ -55,19 +59,23 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
             status = response.status_code
         except Exception:
             # Track failed requests
-            api_requests_total.labels(method=method, endpoint=path, status="500").inc()
+            api_requests_total.labels(
+                method=method, endpoint=normalized_path, status="500"
+            ).inc()
             raise
         finally:
             # Track request duration and decrement in-progress
             duration = time.perf_counter() - start_time
-            api_request_duration_seconds.labels(method=method, endpoint=path).observe(
-                duration
-            )
-            api_requests_in_progress.labels(method=method, endpoint=path).dec()
+            api_request_duration_seconds.labels(
+                method=method, endpoint=normalized_path
+            ).observe(duration)
+            api_requests_in_progress.labels(
+                method=method, endpoint=normalized_path
+            ).dec()
 
         # Track completed requests
         api_requests_total.labels(
-            method=method, endpoint=path, status=str(status)
+            method=method, endpoint=normalized_path, status=str(status)
         ).inc()
 
         return response

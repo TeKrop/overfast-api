@@ -42,12 +42,6 @@ local function handle_valkey_request()
     -- Cache miss
     if not compressed_value or compressed_value == ngx.null then
         ngx.log(ngx.INFO, "Cache miss for key: ", key)
-        
-        -- Track cache miss in Prometheus (conditional)
-        if "${PROMETHEUS_ENABLED}" == "true" and metric_requests then
-            metric_requests:inc(1, {ngx.var.uri, ngx.var.request_method, "miss", "miss"})
-        end
-        
         cleanup()
         ngx.exec("@fallback")
         return
@@ -66,11 +60,6 @@ local function handle_valkey_request()
 
     -- Send TTL header
     ngx.header["${CACHE_TTL_HEADER}"] = ttl
-
-    -- Track cache hit in Prometheus (conditional)
-    if "${PROMETHEUS_ENABLED}" == "true" and metric_requests then
-        metric_requests:inc(1, {ngx.var.uri, ngx.var.request_method, "200", "hit"})
-    end
 
     -- Output response without adding a newline
     ngx.print(value)

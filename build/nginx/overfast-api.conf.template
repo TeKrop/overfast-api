@@ -84,6 +84,9 @@ server {
     error_page 404 502 504 = @fallback;
   }
 
+  # Prometheus logging (conditional on PROMETHEUS_ENABLED)
+  ${PROMETHEUS_LOG_BY_LUA}
+
   # FastAPI app fallback
   location @fallback {
     # As we're in fallback, we need to specify the header again

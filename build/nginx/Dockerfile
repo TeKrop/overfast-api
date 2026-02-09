@@ -20,6 +20,7 @@ COPY overfast-api.conf.template /etc/nginx/conf.d/default.conf.template
 # Copy Prometheus templates to a separate directory (not conf.d to avoid auto-loading)
 COPY prometheus_shared_dict.conf /etc/nginx/prometheus-templates/prometheus_shared_dict.conf
 COPY prometheus_init_worker.conf /etc/nginx/prometheus-templates/prometheus_init_worker.conf
+COPY prometheus_log.conf /etc/nginx/prometheus-templates/prometheus_log.conf
 COPY prometheus_metrics_server.conf /etc/nginx/prometheus-templates/prometheus_metrics_server.conf
 
 # Copy Lua scripts
