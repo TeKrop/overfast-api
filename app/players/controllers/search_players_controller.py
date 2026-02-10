@@ -6,6 +6,8 @@ from app.adapters.blizzard import BlizzardClient
 from app.adapters.blizzard.parsers.player_search import parse_player_search
 from app.config import settings
 from app.controllers import AbstractController
+from app.exceptions import ParserParsingError
+from app.helpers import overfast_internal_error
 
 
 class SearchPlayersController(AbstractController):
@@ -18,13 +20,21 @@ class SearchPlayersController(AbstractController):
         """Process request using stateless parser function"""
         client = BlizzardClient()
 
-        data = await parse_player_search(
-            client,
-            name=kwargs["name"],
-            order_by=kwargs.get("order_by", "name:asc"),
-            offset=kwargs.get("offset", 0),
-            limit=kwargs.get("limit", 10),
-        )
+        try:
+            data = await parse_player_search(
+                client,
+                name=kwargs["name"],
+                order_by=kwargs.get("order_by", "name:asc"),
+                offset=kwargs.get("offset", 0),
+                limit=kwargs.get("limit", 10),
+            )
+        except ParserParsingError as error:
+            # Get Blizzard URL for error reporting
+            search_name = kwargs["name"].split("-", 1)[0]
+            blizzard_url = (
+                f"{settings.blizzard_host}{settings.search_account_path}/{search_name}/"
+            )
+            raise overfast_internal_error(blizzard_url, error) from error
 
         # Update API Cache
         self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
