@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.34.4 (2026-02-10)
+
+### Bug Fixes
+
+- Several bugfixes on player profiles edge cases
+  ([#350](https://github.com/TeKrop/overfast-api/pull/350),
+  [`0192bdf`](https://github.com/TeKrop/overfast-api/commit/0192bdf540c16aacb37040bbe86547c86c48bbb6))
+
+
 ## v3.34.3 (2026-02-09)
 
 ### Bug Fixes
