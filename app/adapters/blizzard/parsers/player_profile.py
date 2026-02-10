@@ -408,6 +408,11 @@ def _parse_career_stats(career_stats_section: LexborNode) -> dict:
             # Label should be the first div within content ("header" class)
             category_label = content_div.first_child.first_child.text()
 
+            # Skip empty category labels (malformed HTML)
+            if not category_label or not category_label.strip():
+                logger.warning(f"Empty category label for hero {hero_key}, skipping")
+                continue
+
             # Normalize localized category names to English
             normalized_category_label = normalize_career_stat_category_name(
                 category_label
