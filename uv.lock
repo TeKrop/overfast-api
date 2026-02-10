@@ -587,7 +587,7 @@ wheels = [
 
 [[package]]
 name = "overfast-api"
-version = "3.30.0"
+version = "3.34.4"
 source = { virtual = "." }
 dependencies = [
     { name = "fastapi", extra = ["standard-no-fastapi-cloud-cli"] },
