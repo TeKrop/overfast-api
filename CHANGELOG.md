@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.35.1 (2026-02-10)
+
+### Bug Fixes
+
+- Fixed issue with missing category names on profile pages sometimes
+  ([#352](https://github.com/TeKrop/overfast-api/pull/352),
+  [`a4ae304`](https://github.com/TeKrop/overfast-api/commit/a4ae304bc2b7c30114de8830b8cdd88cf4a6b11e))
+
+
 ## v3.35.0 (2026-02-10)
 
 ### Features
