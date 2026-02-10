@@ -195,7 +195,7 @@ def custom_openapi() -> dict[str, Any]:  # pragma: no cover
 app.openapi = custom_openapi  # type: ignore[method-assign]
 
 
-# Add custom exception handlers for Starlet HTTP exceptions, but also
+# Add custom exception handlers for Starlette HTTP exceptions, but also
 # for Pydantic Validation Errors
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(_: Request, exc: StarletteHTTPException):

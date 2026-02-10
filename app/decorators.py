@@ -17,13 +17,26 @@ def rate_limited(max_calls: int, interval: int):
     webhook if there is a critical parsing error.
     """
 
+    def _make_hashable(obj):
+        """Convert unhashable types to hashable equivalents"""
+        if isinstance(obj, dict):
+            return tuple(sorted((k, _make_hashable(v)) for k, v in obj.items()))
+        if isinstance(obj, list):
+            return tuple(_make_hashable(item) for item in obj)
+        return obj
+
     def decorator(func: Callable) -> Callable:
         call_history = {}
 
         @wraps(func)
         def wrapper(*args, **kwargs):
             # Define a unique key by using given parameters
-            key = (args, tuple(kwargs.items()))
+            # Convert unhashable types (list, dict) to hashable ones
+            hashable_args = tuple(_make_hashable(arg) for arg in args)
+            hashable_kwargs = tuple(
+                sorted((k, _make_hashable(v)) for k, v in kwargs.items())
+            )
+            key = (hashable_args, hashable_kwargs)
             now = time.time()
 
             # If the key is not already in history, insert it and make the call

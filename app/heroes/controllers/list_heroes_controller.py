@@ -7,6 +7,8 @@ from app.adapters.blizzard.parsers.heroes import parse_heroes
 from app.config import settings
 from app.controllers import AbstractController
 from app.enums import Locale
+from app.exceptions import ParserParsingError
+from app.helpers import overfast_internal_error
 
 
 class ListHeroesController(AbstractController):
@@ -26,7 +28,13 @@ class ListHeroesController(AbstractController):
 
         # Use stateless parser function
         client = BlizzardClient()
-        data = await parse_heroes(client, locale=locale, role=role)
+
+        try:
+            data = await parse_heroes(client, locale=locale, role=role)
+        except ParserParsingError as error:
+            # Get Blizzard URL for error reporting
+            blizzard_url = f"{settings.blizzard_host}/{locale}{settings.heroes_path}"
+            raise overfast_internal_error(blizzard_url, error) from error
 
         # Update API Cache
         self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)

@@ -148,7 +148,7 @@ class Settings(BaseSettings):
     # Blizzard home page with some details
     home_path: str = "/"
 
-    # Route for Overwatch heroes pages
+    # Route for Overwatch heroes pages (locale can be specified by API users)
     heroes_path: str = "/heroes/"
 
     # Route for players career pages
@@ -158,7 +158,7 @@ class Settings(BaseSettings):
     search_account_path: str = "/en-us/search/account-by-name"
 
     # Route for retrieving usage statistics about Overwatch heroes
-    hero_stats_path: str = "/rates/data/"
+    hero_stats_path: str = "/en-us/rates/data/"
 
     ############
     # CRITICAL ERROR DISCORD WEBHOOK

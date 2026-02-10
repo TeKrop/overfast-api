@@ -59,8 +59,21 @@ async def main():
     if len(new_hero_keys) > 0:
         logger.info("New hero keys were found : {}", new_hero_keys)
         send_discord_webhook_message(
-            "New Overwatch heroes detected, please add the following "
-            f"keys into the configuration : {new_hero_keys}",
+            title="🎮 New Heroes Detected",
+            description="New Overwatch heroes have been released!",
+            fields=[
+                {
+                    "name": "Hero Keys",
+                    "value": f"`{', '.join(sorted(new_hero_keys))}`",
+                    "inline": False,
+                },
+                {
+                    "name": "Action Required",
+                    "value": "Please add these keys to the `HeroKey` enum configuration.",
+                    "inline": False,
+                },
+            ],
+            color=0x2ECC71,  # Green
         )
     else:
         logger.info("No new hero found. Exiting.")
