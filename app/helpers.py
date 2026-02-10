@@ -74,7 +74,7 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
         "Internal server error for URL {} : {}\n{}",
         url,
         error_str,
-        traceback.format_stack(),
+        traceback.format_exc(),
     )
 
     # If we're using a profiler, it means we're debugging, raise the error
