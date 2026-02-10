@@ -2,6 +2,7 @@
 
 import csv
 import traceback
+from datetime import UTC, datetime
 from functools import cache
 from pathlib import Path
 
@@ -64,11 +65,15 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
     a Discord notification via a webhook if configured.
     """
 
-    # Log the critical error
+    # Get error details
+    error_str = str(error)
+    error_type = type(error).__name__
+
+    # Log the critical error with full traceback
     logger.critical(
         "Internal server error for URL {} : {}\n{}",
         url,
-        str(error),
+        error_str,
         traceback.format_stack(),
     )
 
@@ -77,11 +82,34 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
     if settings.profiler:
         raise error  # pragma: no cover
 
-    # Else, send a message to the given channel using Discord Webhook URL
+    # Truncate error message for Discord (keep first part which is most relevant)
+    max_error_length = 900  # Field value limit is 1024, leave room for formatting
+    if len(error_str) > max_error_length:
+        # For validation errors, try to show just the summary
+        if "validation error" in error_str.lower():
+            lines = error_str.split("\n")
+            error_str = "\n".join(
+                lines[:5]
+            )  # First 5 lines usually contain the key info
+            if len(error_str) > max_error_length:
+                error_str = error_str[:max_error_length]
+        else:
+            error_str = error_str[:max_error_length]
+
+    # Send a message to the given channel using Discord Webhook URL
     send_discord_webhook_message(
-        f"* **URL** : {url}\n"
-        f"* **Error type** : {type(error).__name__}\n"
-        f"* **Message** : {error}",
+        title="🚨 Internal Server Error",
+        url=f"{settings.app_base_url}{url}" if not url.startswith("http") else url,
+        fields=[
+            {"name": "Error Type", "value": f"`{error_type}`", "inline": True},
+            {"name": "Endpoint", "value": f"`{url}`", "inline": True},
+            {
+                "name": "Error Message",
+                "value": f"```\n{error_str}\n```",
+                "inline": False,
+            },
+        ],
+        color=0xE74C3C,  # Red
     )
 
     return HTTPException(
@@ -90,16 +118,84 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
     )
 
 
+def _truncate_text(text: str, max_length: int, suffix: str = "...") -> str:
+    """Truncate text to max length with suffix if needed."""
+    if len(text) <= max_length:
+        return text
+    return text[: max_length - len(suffix)] + suffix
+
+
+def _truncate_embed_fields(
+    fields: list[dict[str, str | bool]],
+) -> list[dict[str, str | bool]]:
+    """Truncate field names and values to Discord limits."""
+    max_field_name_length = 250  # Actual limit: 256
+    max_field_value_length = 1000  # Actual limit: 1024
+
+    for field in fields:
+        name = field.get("name", "")
+        value = field.get("value", "")
+
+        if isinstance(name, str) and len(name) > max_field_name_length:
+            field["name"] = _truncate_text(name, max_field_name_length)
+        if isinstance(value, str) and len(value) > max_field_value_length:
+            field["value"] = _truncate_text(
+                value, max_field_value_length, "\n*(truncated)*"
+            )
+
+    return fields
+
+
 @rate_limited(max_calls=1, interval=1800)
-def send_discord_webhook_message(message: str) -> httpx.Response | None:
-    """Helper method for sending a Discord webhook message. It's limited to
-    one call per 30 minutes with the same parameters."""
+def send_discord_webhook_message(
+    *,
+    title: str | None = None,
+    description: str | None = None,
+    url: str | None = None,
+    fields: list[dict[str, str | bool]] | None = None,
+    color: int | None = None,
+) -> httpx.Response | None:
+    """Helper method for sending a Discord webhook message using modern embed syntax.
+    It's limited to one call per 30 minutes with the same parameters.
+
+    Args:
+        title: Optional title for the embed (max 256 chars)
+        description: Optional description text (max 4096 chars)
+        url: Optional URL to make the title clickable
+        fields: Optional list of field dicts with 'name', 'value', and optional 'inline' keys
+        color: Optional color for the embed (decimal format, e.g., 0xFF0000 for red)
+    """
     if not settings.discord_webhook_enabled:
-        logger.error(message)
+        logger.error(f"{title}: {description}")
         return None
 
+    # Apply Discord embed length limits
+    if title:
+        title = _truncate_text(title, 250)
+    if description:
+        description = _truncate_text(description, 4000, "\n\n*(truncated)*")
+    if fields:
+        fields = _truncate_embed_fields(fields)
+
+    # Build the embed payload
+    embed = {
+        "color": color or 0xE74C3C,  # Default to red for errors/alerts
+        "timestamp": datetime.now(UTC).isoformat(),
+    }
+
+    if title:
+        embed["title"] = title
+    if description:
+        embed["description"] = description
+    if url:
+        embed["url"] = url
+    if fields:
+        embed["fields"] = fields
+
+    payload = {"username": "OverFast API", "embeds": [embed]}
+
     return httpx.post(  # pragma: no cover
-        settings.discord_webhook_url, data={"content": message}, timeout=10
+        settings.discord_webhook_url, json=payload, timeout=10
     )
 
 

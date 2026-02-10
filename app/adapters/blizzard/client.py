@@ -125,8 +125,16 @@ class BlizzardClient(metaclass=Singleton):
         # given channel using Discord Webhook URL
         if settings.discord_message_on_rate_limit:
             send_discord_webhook_message(
-                "Blizzard Rate Limit reached ! Blocking further calls for "
-                f"{settings.blizzard_rate_limit_retry_after} seconds..."
+                title="⚠️ Blizzard Rate Limit Reached",
+                description="Blocking further calls to Blizzard API.",
+                fields=[
+                    {
+                        "name": "Retry After",
+                        "value": f"{settings.blizzard_rate_limit_retry_after} seconds",
+                        "inline": True,
+                    },
+                ],
+                color=0xF39C12,  # Orange/Warning color
             )
 
         return self._too_many_requests_response(
