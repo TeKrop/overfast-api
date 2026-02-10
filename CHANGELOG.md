@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.35.0 (2026-02-10)
+
+### Features
+
+- Improved discord webhook message format ([#351](https://github.com/TeKrop/overfast-api/pull/351),
+  [`5b319aa`](https://github.com/TeKrop/overfast-api/commit/5b319aa20e24facd2d0a696ccc0cd95011ba0578))
+
+
 ## v3.34.4 (2026-02-10)
 
 ### Bug Fixes
