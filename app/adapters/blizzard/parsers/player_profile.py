@@ -369,6 +369,35 @@ def _parse_heroes_comparisons(top_heroes_section: LexborNode) -> dict:
     return heroes_comparisons
 
 
+def _parse_stat_row(stat_row: LexborNode) -> dict | None:
+    """Parse a single stat row and return stat dict or None if invalid."""
+    if not stat_row.first_child or not stat_row.last_child:
+        logger.warning(f"Missing stat name or value in {stat_row}")
+        return None
+
+    stat_name = stat_row.first_child.text()
+    return {
+        "key": get_plural_stat_key(string_to_snakecase(stat_name)),
+        "label": stat_name,
+        "value": get_computed_stat_value(stat_row.last_child.text()),
+    }
+
+
+def _parse_category_stats(content_div: LexborNode) -> list[dict]:
+    """Parse all stat rows for a given category."""
+    stats = []
+    for stat_row in content_div.iter():
+        stat_row_class = stat_row.attributes["class"] or ""
+        if "stat-item" not in stat_row_class:
+            continue
+
+        stat = _parse_stat_row(stat_row)
+        if stat:
+            stats.append(stat)
+
+    return stats
+
+
 def _parse_career_stats(career_stats_section: LexborNode) -> dict:
     """Parse detailed career stats per hero"""
     heroes_options = _get_heroes_options(career_stats_section, key_prefix="option-")
@@ -418,30 +447,16 @@ def _parse_career_stats(career_stats_section: LexborNode) -> dict:
                 category_label
             )
 
+            # Parse all stats for this category
+            stats = _parse_category_stats(content_div)
+
             career_stats[hero_key].append(
                 {
                     "category": string_to_snakecase(normalized_category_label),
                     "label": normalized_category_label,
-                    "stats": [],
+                    "stats": stats,
                 },
             )
-            for stat_row in content_div.iter():
-                stat_row_class = stat_row.attributes["class"] or ""
-                if "stat-item" not in stat_row_class:
-                    continue
-
-                if not stat_row.first_child or not stat_row.last_child:
-                    logger.warning(f"Missing stat name or value in {stat_row}")
-                    continue
-
-                stat_name = stat_row.first_child.text()
-                career_stats[hero_key][-1]["stats"].append(
-                    {
-                        "key": get_plural_stat_key(string_to_snakecase(stat_name)),
-                        "label": stat_name,
-                        "value": get_computed_stat_value(stat_row.last_child.text()),
-                    },
-                )
 
         # For a reason, sometimes the hero is in the dropdown but there
         # is no stat to show. In this case, remove it as if there was

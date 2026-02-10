@@ -5,7 +5,7 @@ from functools import cache
 from app.helpers import read_csv_data_file
 from app.roles.enums import Role
 
-from .enums import CompetitiveDivision, CompetitiveRole, HeroKey
+from .enums import CareerStatCategory, CompetitiveDivision, CompetitiveRole, HeroKey
 
 DURATION_HOURS_PATTERN = re.compile(r"^(-?\d+,?\d*?):(\d+):(\d+)$")
 DURATION_MINUTES_PATTERN = re.compile(r"^(-?\d+):(\d+)$")
@@ -27,6 +27,7 @@ def get_hero_name(hero_key: HeroKey) -> str:  # ty: ignore[invalid-type-form]
     )
 
 
+@cache
 def key_to_label(key: str) -> str:
     """Transform a given key in lowercase format into a human format"""
     return " ".join(s.capitalize() for s in key.split("_"))
@@ -195,114 +196,116 @@ def normalize_career_stat_category_name(category_label: str) -> str:
     Returns:
         English category name
     """
+
+    # Normalize whitespace and case for consistent matching
+    # - Collapse all runs of whitespace (including Unicode spaces) to a single ASCII space
+    # - Strip leading/trailing whitespace
+    normalized_label = " ".join(category_label.split())
+
     # Lowercase for case-insensitive matching
-    category_lower = category_label.lower()
+    category_lower = normalized_label.lower()
 
     # Localization mappings for career stat categories
+    # Maps localized category names to CareerStatCategory enum values (not labels)
     localization_map = {
         # Portuguese
-        "assistências": "Assists",
-        "média": "Average",
-        "melhor": "Best",
-        "jogo": "Game",
-        "para cada herói": "Hero Specific",
-        "prêmios de partida": "Match Awards",
-        "diversos": "Miscellaneous",
+        "assistências": CareerStatCategory.ASSISTS,
+        "média": CareerStatCategory.AVERAGE,
+        "melhor": CareerStatCategory.BEST,
+        "jogo": CareerStatCategory.GAME,
+        "para cada herói": CareerStatCategory.HERO_SPECIFIC,
+        "prêmios de partida": CareerStatCategory.MATCH_AWARDS,
+        "diversos": CareerStatCategory.MISCELLANEOUS,
         # Spanish (combate same as Portuguese)
-        "asistencias": "Assists",
-        "promedio": "Average",
-        "mejor": "Best",
-        "combate": "Combat",
-        "juego": "Game",
-        "específico del héroe": "Hero Specific",
-        "premios de partida": "Match Awards",
-        "varios": "Miscellaneous",
+        "asistencias": CareerStatCategory.ASSISTS,
+        "promedio": CareerStatCategory.AVERAGE,
+        "mejor": CareerStatCategory.BEST,
+        "combate": CareerStatCategory.COMBAT,
+        "juego": CareerStatCategory.GAME,
+        "específico del héroe": CareerStatCategory.HERO_SPECIFIC,
+        "premios de partida": CareerStatCategory.MATCH_AWARDS,
+        "varios": CareerStatCategory.MISCELLANEOUS,
         # French
-        "assistances": "Assists",
-        "moyenne": "Average",
-        "meilleur": "Best",
-        "combat": "Combat",
-        "jeu": "Game",
-        "spécifique au héros": "Hero Specific",
-        "récompenses de match": "Match Awards",
-        "divers": "Miscellaneous",
+        "assistances": CareerStatCategory.ASSISTS,
+        "moyenne": CareerStatCategory.AVERAGE,
+        "meilleur": CareerStatCategory.BEST,
+        "combat": CareerStatCategory.COMBAT,
+        "jeu": CareerStatCategory.GAME,
+        "spécifique au héros": CareerStatCategory.HERO_SPECIFIC,
+        "récompenses de match": CareerStatCategory.MATCH_AWARDS,
+        "divers": CareerStatCategory.MISCELLANEOUS,
         # German
-        "assists": "Assists",
-        "durchschnitt": "Average",
-        "bester wert": "Best",
-        "kampf": "Combat",
-        "spiel": "Game",
-        "heldenspezifisch": "Hero Specific",
-        "match-auszeichnungen": "Match Awards",
-        "verschiedenes": "Miscellaneous",
+        "assists": CareerStatCategory.ASSISTS,
+        "durchschnitt": CareerStatCategory.AVERAGE,
+        "bester wert": CareerStatCategory.BEST,
+        "kampf": CareerStatCategory.COMBAT,
+        "spiel": CareerStatCategory.GAME,
+        "heldenspezifisch": CareerStatCategory.HERO_SPECIFIC,
+        "match-auszeichnungen": CareerStatCategory.MATCH_AWARDS,
+        "verschiedenes": CareerStatCategory.MISCELLANEOUS,
         # Italian
-        "assistenze": "Assists",
-        "media": "Average",
-        "migliore": "Best",
-        "combattimento": "Combat",
-        "partita": "Game",
-        "specifico dell'eroe": "Hero Specific",
-        "premi partita": "Match Awards",
-        "varie": "Miscellaneous",
+        "assistenze": CareerStatCategory.ASSISTS,
+        "media": CareerStatCategory.AVERAGE,
+        "migliore": CareerStatCategory.BEST,
+        "combattimento": CareerStatCategory.COMBAT,
+        "partita": CareerStatCategory.GAME,
+        "specifico dell'eroe": CareerStatCategory.HERO_SPECIFIC,
+        "premi partita": CareerStatCategory.MATCH_AWARDS,
+        "varie": CareerStatCategory.MISCELLANEOUS,
         # Japanese
-        "アシスト": "Assists",
-        "ベスト": "Best",
-        "戦闘": "Combat",
-        "ゲーム": "Game",
-        "ヒーロー特有": "Hero Specific",
-        "試合の報酬": "Match Awards",
-        "その他": "Miscellaneous",
+        "アシスト": CareerStatCategory.ASSISTS,
+        "ベスト": CareerStatCategory.BEST,
+        "戦闘": CareerStatCategory.COMBAT,
+        "ゲーム": CareerStatCategory.GAME,
+        "ヒーロー特有": CareerStatCategory.HERO_SPECIFIC,
+        "試合の報酬": CareerStatCategory.MATCH_AWARDS,
+        "その他": CareerStatCategory.MISCELLANEOUS,
         # Korean
-        "지원": "Assists",
-        "평균": "Average",
-        "최고 기록": "Best",
-        "전투": "Combat",
-        "게임": "Game",
-        "영웅별": "Hero Specific",
-        "경기 포상": "Match Awards",
-        "기타": "Miscellaneous",
+        "지원": CareerStatCategory.ASSISTS,
+        "평균": CareerStatCategory.AVERAGE,
+        "최고 기록": CareerStatCategory.BEST,
+        "전투": CareerStatCategory.COMBAT,
+        "게임": CareerStatCategory.GAME,
+        "영웅별": CareerStatCategory.HERO_SPECIFIC,
+        "경기 포상": CareerStatCategory.MATCH_AWARDS,
+        "기타": CareerStatCategory.MISCELLANEOUS,
         # Chinese Simplified
-        "助攻": "Assists",
-        "最佳": "Best",
-        "战斗": "Combat",
-        "比赛": "Game",
-        "英雄特有": "Hero Specific",
-        "比赛奖励": "Match Awards",
-        "综合": "Miscellaneous",
+        "助攻": CareerStatCategory.ASSISTS,
+        "最佳": CareerStatCategory.BEST,
+        "战斗": CareerStatCategory.COMBAT,
+        "比赛": CareerStatCategory.GAME,
+        "英雄特有": CareerStatCategory.HERO_SPECIFIC,
+        "比赛奖励": CareerStatCategory.MATCH_AWARDS,
+        "综合": CareerStatCategory.MISCELLANEOUS,
         # Chinese Traditional (different characters)
-        "戰鬥": "Combat",
-        "遊戲": "Game",
-        "英雄專屬": "Hero Specific",
-        "比賽獎勵": "Match Awards",
-        "綜合": "Miscellaneous",
+        "戰鬥": CareerStatCategory.COMBAT,
+        "遊戲": CareerStatCategory.GAME,
+        "英雄專屬": CareerStatCategory.HERO_SPECIFIC,
+        "比賽獎勵": CareerStatCategory.MATCH_AWARDS,
+        "綜合": CareerStatCategory.MISCELLANEOUS,
         # Russian
-        "помощь": "Assists",
-        "среднее": "Average",
-        "лучшее": "Best",
-        "бой": "Combat",
-        "игра": "Game",
-        "уникальное для героя": "Hero Specific",
-        "награды матча": "Match Awards",
-        "разное": "Miscellaneous",
+        "помощь": CareerStatCategory.ASSISTS,
+        "среднее": CareerStatCategory.AVERAGE,
+        "лучшее": CareerStatCategory.BEST,
+        "бой": CareerStatCategory.COMBAT,
+        "игра": CareerStatCategory.GAME,
+        "уникальное для героя": CareerStatCategory.HERO_SPECIFIC,
+        "награды матча": CareerStatCategory.MATCH_AWARDS,
+        "разное": CareerStatCategory.MISCELLANEOUS,
         # Polish
-        "asysty": "Assists",
-        "średnia": "Average",
-        "najlepszy wynik": "Best",
-        "walka": "Combat",
-        "gra": "Game",
-        "dla bohatera": "Hero Specific",
-        "nagrody meczowe": "Match Awards",
-        "różne": "Miscellaneous",
+        "asysty": CareerStatCategory.ASSISTS,
+        "średnia": CareerStatCategory.AVERAGE,
+        "najlepszy wynik": CareerStatCategory.BEST,
+        "walka": CareerStatCategory.COMBAT,
+        "gra": CareerStatCategory.GAME,
+        "dla bohatera": CareerStatCategory.HERO_SPECIFIC,
+        "nagrody meczowe": CareerStatCategory.MATCH_AWARDS,
+        "różne": CareerStatCategory.MISCELLANEOUS,
     }
 
-    # Try to find a match
-    normalized = localization_map.get(category_lower)
-    if normalized:
-        return normalized
-
-    # If no localization match found, return original
-    # (handles English and any future languages)
-    return category_label
+    # Return normalized English category label if known, otherwise the normalized original
+    category_enum = localization_map.get(category_lower)
+    return key_to_label(category_enum.value) if category_enum else normalized_label
 
 
 @cache
