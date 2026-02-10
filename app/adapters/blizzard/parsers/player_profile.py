@@ -447,6 +447,14 @@ def _parse_career_stats(career_stats_section: LexborNode) -> dict:
                 category_label
             )
 
+            # Skip if normalization resulted in empty string
+            if not normalized_category_label or not normalized_category_label.strip():
+                logger.warning(
+                    f"Category label normalized to empty for hero {hero_key} "
+                    f"(original: {category_label!r}), skipping"
+                )
+                continue
+
             # Parse all stats for this category
             stats = _parse_category_stats(content_div)
 
