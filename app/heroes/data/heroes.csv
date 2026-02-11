@@ -7,7 +7,7 @@ bastion,Bastion,damage,250,100,0
 brigitte,Brigitte,support,200,50,0
 cassidy,Cassidy,damage,250,0,0
 dva,D.Va,tank,325,325,0
-domina,Domina,tank,525,0,0
+domina,Domina,tank,250,400,0
 doomfist,Doomfist,tank,525,0,0
 echo,Echo,damage,150,0,75
 emre,Emre,damage,250,0,0
@@ -16,7 +16,7 @@ genji,Genji,damage,250,0,0
 hazard,Hazard,tank,425,225,0
 hanzo,Hanzo,damage,250,0,0
 illari,Illari,support,250,0,0
-jetpack-cat,Jetpack Cat,support,250,0,0
+jetpack-cat,Jetpack Cat,support,225,0,0
 junker-queen,Junker Queen,tank,525,0,0
 junkrat,Junkrat,damage,250,0,0
 juno,Juno,support,75,0,150
@@ -26,7 +26,7 @@ lucio,Lúcio,support,225,0,0
 mauga,Mauga,tank,575,150,0
 mei,Mei,damage,300,0,0
 mercy,Mercy,support,225,0,0
-mizuki,Mizuki,support,225,0,0
+mizuki,Mizuki,support,250,0,0
 moira,Moira,support,225,0,0
 orisa,Orisa,tank,300,300,0
 pharah,Pharah,damage,225,0,0
