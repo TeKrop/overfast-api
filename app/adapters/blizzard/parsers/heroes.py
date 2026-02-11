@@ -11,6 +11,7 @@ from app.adapters.blizzard.parsers.utils import (
 from app.config import settings
 from app.enums import Locale
 from app.exceptions import ParserParsingError
+from app.heroes.enums import HeroGamemode
 
 if TYPE_CHECKING:
     from app.adapters.blizzard.client import BlizzardClient
@@ -46,7 +47,6 @@ def parse_heroes_html(html: str) -> list[dict]:
     Raises:
         ParserParsingError: If parsing fails
     """
-    msg = "Invalid hero URL"
     try:
         root_tag = parse_html_root(html)
 
@@ -54,10 +54,15 @@ def parse_heroes_html(html: str) -> list[dict]:
         for hero_element in root_tag.css("div.heroIndexWrapper blz-media-gallery a"):
             hero_url = safe_get_attribute(hero_element, "href")
             if not hero_url:
+                msg = "Invalid hero URL"
                 raise ParserParsingError(msg)
 
             name_element = hero_element.css_first("blz-card blz-content-block h2")
             portrait_element = hero_element.css_first("blz-card blz-image")
+
+            gamemodes = [HeroGamemode.QUICKPLAY]
+            if hero_element.css_matches("blz-card blz-badge.stadium-badge"):
+                gamemodes.append(HeroGamemode.STADIUM)
 
             heroes.append(
                 {
@@ -65,6 +70,7 @@ def parse_heroes_html(html: str) -> list[dict]:
                     "name": safe_get_text(name_element),
                     "portrait": safe_get_attribute(portrait_element, "src"),
                     "role": safe_get_attribute(hero_element, "data-role"),
+                    "gamemodes": gamemodes,
                 }
             )
 
@@ -75,17 +81,24 @@ def parse_heroes_html(html: str) -> list[dict]:
         raise ParserParsingError(error_msg) from error
 
 
-def filter_heroes_by_role(heroes: list[dict], role: str | None) -> list[dict]:
-    """Filter heroes list by role"""
-    if not role:
-        return heroes
-    return [hero for hero in heroes if hero["role"] == role]
+def filter_heroes(
+    heroes: list[dict], role: str | None, gamemode: HeroGamemode | None
+) -> list[dict]:
+    """Filter heroes list by role and gamemode"""
+    if role:
+        heroes = [hero for hero in heroes if hero["role"] == role]
+
+    if gamemode:
+        heroes = [hero for hero in heroes if gamemode in hero["gamemodes"]]
+
+    return heroes
 
 
 async def parse_heroes(
     client: BlizzardClient,
     locale: Locale = Locale.ENGLISH_US,
     role: str | None = None,
+    gamemode: HeroGamemode | None = None,
 ) -> list[dict]:
     """
     High-level function to fetch and parse heroes list
@@ -100,4 +113,4 @@ async def parse_heroes(
     """
     html = await fetch_heroes_html(client, locale)
     heroes = parse_heroes_html(html)
-    return filter_heroes_by_role(heroes, role)
+    return filter_heroes(heroes, role, gamemode)

@@ -21,3 +21,10 @@ HeroKey = StrEnum(
     },
 )
 HeroKey.__doc__ = "Hero keys used to identify Overwatch heroes in general"
+
+
+class HeroGamemode(StrEnum):
+    """Available gamemodes for heroes"""
+
+    QUICKPLAY = "quickplay"
+    STADIUM = "stadium"
