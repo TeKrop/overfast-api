@@ -1,6 +1,5 @@
 """Tests for monitoring helpers"""
 
-
 from app.monitoring.helpers import normalize_endpoint
 
 
@@ -37,10 +36,7 @@ class TestNormalizeEndpoint:
 
     def test_normalize_player_career(self):
         """Test normalization of player career path"""
-        assert (
-            normalize_endpoint("/players/TeKrop-2217")
-            == "/players/{player_id}"
-        )
+        assert normalize_endpoint("/players/TeKrop-2217") == "/players/{player_id}"
 
     def test_normalize_player_with_hash(self):
         """Test normalization of player ID with hash"""

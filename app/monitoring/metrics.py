@@ -21,7 +21,22 @@ api_request_duration_seconds = Histogram(
     "api_request_duration_seconds",
     "Request duration at FastAPI level in seconds",
     ["method", "endpoint"],
-    buckets=(0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0),
+    buckets=(
+        0.005,
+        0.01,
+        0.025,
+        0.05,
+        0.075,
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        1.0,
+        2.5,
+        5.0,
+        7.5,
+        10.0,
+    ),
 )
 
 api_requests_in_progress = Gauge(
@@ -54,7 +69,10 @@ stale_responses_total = Counter(
 background_tasks_total = Counter(
     "background_tasks_total",
     "Background refresh tasks",
-    ["task_type", "status"],  # task_type: "player", "hero", etc. | status: "success", "failure"
+    [
+        "task_type",
+        "status",
+    ],  # task_type: "player", "hero", etc. | status: "success", "failure"
 )
 
 background_tasks_queue_size = Gauge(
@@ -82,7 +100,14 @@ aimd_current_rate = Gauge(
 blizzard_requests_total = Counter(
     "blizzard_requests_total",
     "Total HTTP requests to Blizzard",
-    ["status"],  # "200", "403", "404", "500", etc.
+    ["endpoint", "status"],
+)
+
+blizzard_request_duration_seconds = Histogram(
+    "blizzard_request_duration_seconds",
+    "Blizzard request duration in seconds",
+    ["endpoint"],
+    buckets=(0.05, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0),
 )
 
 blizzard_rate_limited_total = Counter(

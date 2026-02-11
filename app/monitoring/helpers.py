@@ -5,6 +5,7 @@ in Prometheus metrics (replacing dynamic segments like player IDs with placehold
 """
 
 import re
+from urllib.parse import urlparse
 
 
 def normalize_endpoint(path: str) -> str:
@@ -54,3 +55,52 @@ def normalize_endpoint(path: str) -> str:
             )
 
     return path
+
+
+def normalize_blizzard_url(url: str) -> str:
+    """
+    Normalize a Blizzard URL to a pattern for Prometheus labels.
+
+    Extracts the path from a full Blizzard URL and replaces dynamic segments
+    (player names, hero keys, search terms, locale) with placeholders.
+
+    Args:
+        url: Full Blizzard URL (e.g., "https://overwatch.blizzard.com/en-us/career/TeKrop-2217/")
+
+    Returns:
+        Normalized path pattern (e.g., "/career/{player_id}")
+
+    Examples:
+        >>> normalize_blizzard_url("https://overwatch.blizzard.com/en-us/career/TeKrop-2217/")
+        '/career/{player_id}'
+        >>> normalize_blizzard_url("https://overwatch.blizzard.com/en-us/heroes/ana/")
+        '/heroes/{hero_key}'
+        >>> normalize_blizzard_url("https://overwatch.blizzard.com/en-us/heroes/")
+        '/heroes'
+        >>> normalize_blizzard_url("https://overwatch.blizzard.com/en-us/search/account-by-name/TeKrop/")
+        '/search/account-by-name/{search_name}'
+        >>> normalize_blizzard_url("https://overwatch.blizzard.com/en-us/rates/data/")
+        '/rates/data'
+        >>> normalize_blizzard_url("https://overwatch.blizzard.com/en-us/")
+        '/'
+    """
+    path = urlparse(url).path.rstrip("/")
+
+    # Strip locale prefix (e.g., /en-us, /fr-fr, /ko-kr)
+    path = re.sub(r"^/[a-z]{2}-[a-z]{2}", "", path)
+
+    # Normalize career pages: /career/<player_id> → /career/{player_id}
+    path = re.sub(r"^/career/[^/]+", "/career/{player_id}", path)
+
+    # Normalize hero pages: /heroes/<hero_key> → /heroes/{hero_key}
+    if re.match(r"^/heroes/[^/]+", path):
+        path = "/heroes/{hero_key}"
+
+    # Normalize search: /search/account-by-name/<name> → /search/account-by-name/{search_name}
+    path = re.sub(
+        r"^/search/account-by-name/[^/]+",
+        "/search/account-by-name/{search_name}",
+        path,
+    )
+
+    return path or "/"

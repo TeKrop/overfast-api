@@ -86,6 +86,26 @@ services:
       interval: 5s
       timeout: 2s
 
+  valkey-exporter:
+    profiles:
+      - monitoring
+      - prometheus
+    image: oliver006/redis_exporter:latest
+    environment:
+      - REDIS_ADDR=valkey:6379
+    ports:
+      - "${VALKEY_EXPORTER_PORT:-9121}:9121"
+    depends_on:
+      valkey:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9121/metrics"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
   prometheus:
     profiles:
       - monitoring

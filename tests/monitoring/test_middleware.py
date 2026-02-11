@@ -90,6 +90,7 @@ def test_prometheus_middleware_tracks_failed_requests(client):
 
 def test_prometheus_middleware_skips_metrics_endpoint(test_app):
     """Test that middleware skips /metrics endpoint itself"""
+
     # Add a /metrics endpoint
     @test_app.get("/metrics")
     async def metrics_endpoint():
