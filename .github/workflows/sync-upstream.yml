@@ -31,6 +31,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Configure merge drivers
+        run: |
+          # "accept-upstream" driver: replaces our file with upstream's version
+          git config merge.accept-upstream.name "Accept upstream version"
+          git config merge.accept-upstream.driver "cp '%B' '%A'"
+
+          # "keep-fork" driver: keeps our fork version unchanged
+          git config merge.keep-fork.name "Keep fork version"
+          git config merge.keep-fork.driver true
+
       - name: Add upstream remote
         run: |
           git remote add upstream https://github.com/TeKrop/overfast-api.git || true
@@ -53,22 +63,29 @@ jobs:
             echo "New commits found:"
             echo "$NEW_COMMITS"
 
-            # Merge upstream, auto-resolve conflicts by preferring upstream
-            # for auto-generated files (CHANGELOG.md, pyproject.toml version)
+            # Merge upstream - .gitattributes merge drivers handle conflict resolution:
+            # - CHANGELOG.md: accepts upstream version (accept-upstream driver)
+            # - Fork-specific files (nginx, README, etc.): keeps fork version (keep-fork driver)
             if ! git merge upstream/main -m "Merge upstream changes"; then
-              echo "Merge conflict detected, resolving automatically..."
+              echo "Merge conflict detected, attempting automatic resolution..."
 
-              # For conflicted files, prefer upstream version
+              # List any remaining conflicted files not covered by .gitattributes
               CONFLICTED=$(git diff --name-only --diff-filter=U)
-              echo "Conflicted files: $CONFLICTED"
 
-              for file in $CONFLICTED; do
-                echo "Resolving $file with upstream version"
-                git checkout --theirs "$file"
-                git add "$file"
-              done
+              if [ -n "$CONFLICTED" ]; then
+                echo "Conflicted files: $CONFLICTED"
 
-              git commit -m "Merge upstream changes (auto-resolved conflicts)"
+                for file in $CONFLICTED; do
+                  echo "Resolving $file with upstream version"
+                  git checkout --theirs "$file"
+                  git add "$file"
+                done
+
+                git commit -m "Merge upstream changes (auto-resolved conflicts)"
+              else
+                echo "All conflicts resolved by merge drivers"
+                git commit -m "Merge upstream changes"
+              fi
             fi
 
             # Push to origin

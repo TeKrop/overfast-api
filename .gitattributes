@@ -1,0 +1,17 @@
+# Merge strategies for upstream sync
+# Prevents merge conflicts when syncing fork with upstream
+
+# Auto-generated files: always accept upstream version
+CHANGELOG.md merge=accept-upstream
+pyproject.toml merge=accept-upstream
+uv.lock merge=accept-upstream
+
+# Fork-specific customizations: always keep fork version
+.github/workflows/release.yaml merge=keep-fork
+.github/workflows/sync-upstream.yml merge=keep-fork
+build/nginx/overfast-api.conf.template merge=keep-fork
+build/reverse-proxy/default.conf merge=keep-fork
+README.md merge=keep-fork
+CLAUDE.md merge=keep-fork
+AGENTS.md merge=keep-fork
+.mcp.json merge=keep-fork
