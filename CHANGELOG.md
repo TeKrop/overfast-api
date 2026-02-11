@@ -2,6 +2,41 @@
 
 <!-- version list -->
 
+## v3.35.2 (2026-02-10)
+
+### Bug Fixes
+
+- Put back proper error management on some controllers after rework
+  ([#353](https://github.com/TeKrop/overfast-api/pull/353),
+  [`e916d98`](https://github.com/TeKrop/overfast-api/commit/e916d986828cdbac4f5b795a554383cad69e0514))
+
+
+## v3.35.1 (2026-02-10)
+
+### Bug Fixes
+
+- Fixed issue with missing category names on profile pages sometimes
+  ([#352](https://github.com/TeKrop/overfast-api/pull/352),
+  [`a4ae304`](https://github.com/TeKrop/overfast-api/commit/a4ae304bc2b7c30114de8830b8cdd88cf4a6b11e))
+
+
+## v3.35.0 (2026-02-10)
+
+### Features
+
+- Improved discord webhook message format ([#351](https://github.com/TeKrop/overfast-api/pull/351),
+  [`5b319aa`](https://github.com/TeKrop/overfast-api/commit/5b319aa20e24facd2d0a696ccc0cd95011ba0578))
+
+
+## v3.34.4 (2026-02-10)
+
+### Bug Fixes
+
+- Several bugfixes on player profiles edge cases
+  ([#350](https://github.com/TeKrop/overfast-api/pull/350),
+  [`0192bdf`](https://github.com/TeKrop/overfast-api/commit/0192bdf540c16aacb37040bbe86547c86c48bbb6))
+
+
 ## v3.34.3 (2026-02-09)
 
 ### Bug Fixes
