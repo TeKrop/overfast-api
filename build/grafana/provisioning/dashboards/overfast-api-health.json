@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": "overfast-api-health",
-  "title": "OverFast API - API Health",
+  "title": "\ud83d\udc9a OverFast API - API Health",
   "editable": true,
   "graphTooltip": 1,
   "schemaVersion": 39,
@@ -42,16 +42,29 @@
   "panels": [
     {
       "type": "row",
-      "title": "Valkey Cache",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "title": "\ud83d\uddc4\ufe0f Valkey Cache",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
       "collapsed": false,
       "panels": []
     },
     {
       "type": "stat",
       "title": "Cache Memory Used",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
       "targets": [
         {
           "expr": "redis_memory_used_bytes{job=\"valkey\"}",
@@ -64,9 +77,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 536870912 },
-              { "color": "red", "value": 1073741824 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 536870912
+              },
+              {
+                "color": "red",
+                "value": 1073741824
+              }
             ]
           }
         },
@@ -74,7 +96,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "area",
@@ -85,8 +109,16 @@
     {
       "type": "stat",
       "title": "Cache Hit Rate",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
       "targets": [
         {
           "expr": "redis_keyspace_hits_total{job=\"valkey\"} / (redis_keyspace_hits_total{job=\"valkey\"} + redis_keyspace_misses_total{job=\"valkey\"}) * 100",
@@ -99,9 +131,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "red", "value": null },
-              { "color": "yellow", "value": 50 },
-              { "color": "green", "value": 80 }
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
             ]
           }
         },
@@ -109,7 +150,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "area",
@@ -120,8 +163,16 @@
     {
       "type": "stat",
       "title": "Cache Miss Rate",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
       "targets": [
         {
           "expr": "redis_keyspace_misses_total{job=\"valkey\"} / (redis_keyspace_hits_total{job=\"valkey\"} + redis_keyspace_misses_total{job=\"valkey\"}) * 100",
@@ -134,9 +185,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 30 },
-              { "color": "red", "value": 50 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 30
+              },
+              {
+                "color": "red",
+                "value": 50
+              }
             ]
           }
         },
@@ -144,7 +204,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "area",
@@ -155,8 +217,16 @@
     {
       "type": "stat",
       "title": "Number of Keys",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
       "targets": [
         {
           "expr": "sum(redis_db_keys{job=\"valkey\"})",
@@ -173,7 +243,10 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "blue", "value": null }
+              {
+                "color": "blue",
+                "value": null
+              }
             ]
           }
         },
@@ -181,7 +254,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "area",
@@ -192,8 +267,16 @@
     {
       "type": "timeseries",
       "title": "Cache Memory Over Time",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
       "targets": [
         {
           "expr": "redis_memory_used_bytes{job=\"valkey\"}",
@@ -224,8 +307,16 @@
     {
       "type": "timeseries",
       "title": "Number of Keys Over Time",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
       "targets": [
         {
           "expr": "sum(redis_db_keys{job=\"valkey\"})",
@@ -256,8 +347,16 @@
     {
       "type": "stat",
       "title": "Expired Keys",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 13 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 13
+      },
       "targets": [
         {
           "expr": "redis_expired_keys_total{job=\"valkey\"}",
@@ -274,7 +373,10 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "orange", "value": null }
+              {
+                "color": "orange",
+                "value": null
+              }
             ]
           }
         },
@@ -282,7 +384,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "area",
@@ -293,8 +397,16 @@
     {
       "type": "stat",
       "title": "Valkey Commands/sec",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 13 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 13
+      },
       "targets": [
         {
           "expr": "rate(redis_commands_processed_total{job=\"valkey\"}[5m])",
@@ -311,7 +423,10 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "purple", "value": null }
+              {
+                "color": "purple",
+                "value": null
+              }
             ]
           }
         },
@@ -319,7 +434,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "area",
@@ -330,11 +447,19 @@
     {
       "type": "stat",
       "title": "Valkey Avg Response Time",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 13 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 13
+      },
       "targets": [
         {
-          "expr": "rate(redis_commands_duration_seconds_total{job=\"valkey\"}[5m]) / rate(redis_commands_processed_total{job=\"valkey\"}[5m]) * 1000",
+          "expr": "sum(rate(redis_commands_duration_seconds_total{job=\"valkey\"}[5m])) / sum(rate(redis_commands_processed_total{job=\"valkey\"}[5m])) * 1000",
           "refId": "A"
         }
       ],
@@ -344,9 +469,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 5 },
-              { "color": "red", "value": 10 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
             ]
           }
         },
@@ -354,7 +488,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "area",
@@ -365,8 +501,16 @@
     {
       "type": "timeseries",
       "title": "Expired Keys Over Time",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 17 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 17
+      },
       "targets": [
         {
           "expr": "rate(redis_expired_keys_total{job=\"valkey\"}[5m])",
@@ -398,8 +542,16 @@
     {
       "type": "timeseries",
       "title": "Valkey Commands/sec Over Time",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 17 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 17
+      },
       "targets": [
         {
           "expr": "rate(redis_commands_processed_total{job=\"valkey\"}[5m])",
@@ -431,11 +583,19 @@
     {
       "type": "timeseries",
       "title": "Valkey Response Time Over Time",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 17 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 17
+      },
       "targets": [
         {
-          "expr": "rate(redis_commands_duration_seconds_total{job=\"valkey\"}[5m]) / rate(redis_commands_processed_total{job=\"valkey\"}[5m]) * 1000",
+          "expr": "sum(rate(redis_commands_duration_seconds_total{job=\"valkey\"}[5m])) / sum(rate(redis_commands_processed_total{job=\"valkey\"}[5m])) * 1000",
           "legendFormat": "Avg response time",
           "refId": "A"
         }
@@ -463,16 +623,29 @@
     },
     {
       "type": "row",
-      "title": "API Performance",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 },
+      "title": "\u26a1 API Performance",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
       "collapsed": false,
       "panels": []
     },
     {
       "type": "stat",
       "title": "API Response Time (p50)",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 26 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 26
+      },
       "targets": [
         {
           "expr": "histogram_quantile(0.5, sum(rate(nginx_http_request_duration_seconds_bucket{job=\"nginx\"}[5m])) by (le))",
@@ -485,9 +658,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 0.5 },
-              { "color": "red", "value": 1 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
             ]
           }
         },
@@ -495,7 +677,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "area",
@@ -506,8 +690,16 @@
     {
       "type": "stat",
       "title": "API Requests/sec",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 26 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 26
+      },
       "targets": [
         {
           "expr": "sum(rate(nginx_http_requests_total{job=\"nginx\"}[5m]))",
@@ -524,7 +716,10 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "blue", "value": null }
+              {
+                "color": "blue",
+                "value": null
+              }
             ]
           }
         },
@@ -532,7 +727,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "area",
@@ -543,8 +740,16 @@
     {
       "type": "stat",
       "title": "API Error Rate",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 26 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 26
+      },
       "targets": [
         {
           "expr": "sum(rate(nginx_http_requests_total{job=\"nginx\", status=~\"[45]..\"}[5m])) / sum(rate(nginx_http_requests_total{job=\"nginx\"}[5m])) * 100",
@@ -557,9 +762,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 5 },
-              { "color": "red", "value": 10 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
             ]
           }
         },
@@ -567,7 +781,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "area",
@@ -578,8 +794,16 @@
     {
       "type": "stat",
       "title": "Active Connections",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 26 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 26
+      },
       "targets": [
         {
           "expr": "nginx_connections{job=\"nginx\", state=\"active\"}",
@@ -596,7 +820,10 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "purple", "value": null }
+              {
+                "color": "purple",
+                "value": null
+              }
             ]
           }
         },
@@ -604,7 +831,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "area",
@@ -615,8 +844,16 @@
     {
       "type": "timeseries",
       "title": "API Response Time Over Time",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
       "targets": [
         {
           "expr": "histogram_quantile(0.5, sum(rate(nginx_http_request_duration_seconds_bucket{job=\"nginx\"}[5m])) by (le))",
@@ -658,8 +895,16 @@
     {
       "type": "timeseries",
       "title": "API Requests/sec Over Time",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 30
+      },
       "targets": [
         {
           "expr": "sum(rate(nginx_http_requests_total{job=\"nginx\"}[5m])) by (status)",
@@ -694,8 +939,16 @@
     {
       "type": "timeseries",
       "title": "API Error Rate Over Time",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 38 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 38
+      },
       "targets": [
         {
           "expr": "sum(rate(nginx_http_requests_total{job=\"nginx\", status=~\"[45]..\"}[5m])) / sum(rate(nginx_http_requests_total{job=\"nginx\"}[5m])) * 100",
@@ -727,8 +980,16 @@
     {
       "type": "timeseries",
       "title": "Connections Over Time",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 38 },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 38
+      },
       "targets": [
         {
           "expr": "nginx_connections{job=\"nginx\"}",

@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": "overfast-api-tasks",
-  "title": "OverFast API - Tasks & Rate Limiting",
+  "title": "\u2699\ufe0f OverFast API - Tasks & Rate Limiting",
   "editable": true,
   "graphTooltip": 1,
   "schemaVersion": 39,
@@ -42,19 +42,32 @@
   "panels": [
     {
       "type": "row",
-      "title": "Background Tasks",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "title": "\ud83d\udd04 Background Tasks",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
       "collapsed": false,
       "panels": []
     },
     {
       "type": "stat",
       "title": "Tasks Completed (24h)",
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
-          "expr": "sum(increase(background_tasks_total{job=\"fastapi\", status=\"success\"}[1d]))",
+          "expr": "round(sum(increase(background_tasks_total{job=\"fastapi\", status=\"success\"}[1d])))",
           "refId": "A"
         }
       ],
@@ -68,15 +81,21 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "value": null, "color": "green" }
+              {
+                "value": null,
+                "color": "green"
+              }
             ]
-          }
+          },
+          "decimals": 0
         },
         "overrides": []
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -87,11 +106,19 @@
     {
       "type": "stat",
       "title": "Tasks Failed (24h)",
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
-          "expr": "sum(increase(background_tasks_total{job=\"fastapi\", status=\"failure\"}[1d]))",
+          "expr": "round(sum(increase(background_tasks_total{job=\"fastapi\", status=\"failure\"}[1d])))",
           "refId": "A"
         }
       ],
@@ -101,18 +128,33 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "value": null, "color": "green" },
-              { "value": 0, "color": "green" },
-              { "value": 1, "color": "yellow" },
-              { "value": 5, "color": "red" }
+              {
+                "value": null,
+                "color": "green"
+              },
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 1,
+                "color": "yellow"
+              },
+              {
+                "value": 5,
+                "color": "red"
+              }
             ]
-          }
+          },
+          "decimals": 0
         },
         "overrides": []
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -123,8 +165,16 @@
     {
       "type": "stat",
       "title": "Current Queue Size",
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "sum(background_tasks_queue_size{job=\"fastapi\"})",
@@ -137,10 +187,22 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "value": null, "color": "green" },
-              { "value": 0, "color": "green" },
-              { "value": 10, "color": "yellow" },
-              { "value": 50, "color": "red" }
+              {
+                "value": null,
+                "color": "green"
+              },
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 10,
+                "color": "yellow"
+              },
+              {
+                "value": 50,
+                "color": "red"
+              }
             ]
           }
         },
@@ -148,7 +210,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -159,8 +223,16 @@
     {
       "type": "stat",
       "title": "Task Duration (p95)",
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum(rate(background_tasks_duration_seconds_bucket{job=\"fastapi\"}[5m])) by (le))",
@@ -173,10 +245,22 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "value": null, "color": "green" },
-              { "value": 0, "color": "green" },
-              { "value": 30, "color": "yellow" },
-              { "value": 120, "color": "red" }
+              {
+                "value": null,
+                "color": "green"
+              },
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 30,
+                "color": "yellow"
+              },
+              {
+                "value": 120,
+                "color": "red"
+              }
             ]
           }
         },
@@ -184,7 +268,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -195,8 +281,16 @@
     {
       "type": "timeseries",
       "title": "Task Rate Over Time",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "sum by (task_type) (rate(background_tasks_total{job=\"fastapi\", status=\"success\"}[5m]))",
@@ -233,8 +327,16 @@
     {
       "type": "timeseries",
       "title": "Queue Size Over Time",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "sum by (task_type) (background_tasks_queue_size{job=\"fastapi\"})",
@@ -266,8 +368,16 @@
     {
       "type": "timeseries",
       "title": "Task Duration Over Time",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 13 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "histogram_quantile(0.5, sum by (le, task_type) (rate(background_tasks_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
@@ -308,16 +418,29 @@
     },
     {
       "type": "row",
-      "title": "Rate Limiting",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 21 },
+      "title": "\ud83d\uded1 Rate Limiting",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
       "collapsed": false,
       "panels": []
     },
     {
       "type": "stat",
       "title": "AIMD Current Rate",
-      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 22 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 22
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "aimd_current_rate{job=\"fastapi\"}",
@@ -334,7 +457,10 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "value": null, "color": "purple" }
+              {
+                "value": null,
+                "color": "purple"
+              }
             ]
           }
         },
@@ -342,7 +468,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -353,11 +481,19 @@
     {
       "type": "stat",
       "title": "Rate Limit Events (24h)",
-      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 22 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 22
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
-          "expr": "increase(blizzard_rate_limited_total{job=\"fastapi\"}[1d])",
+          "expr": "round(increase(blizzard_rate_limited_total{job=\"fastapi\"}[1d]))",
           "refId": "A"
         }
       ],
@@ -367,18 +503,33 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "value": null, "color": "green" },
-              { "value": 0, "color": "green" },
-              { "value": 1, "color": "yellow" },
-              { "value": 5, "color": "red" }
+              {
+                "value": null,
+                "color": "green"
+              },
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 1,
+                "color": "yellow"
+              },
+              {
+                "value": 5,
+                "color": "red"
+              }
             ]
-          }
+          },
+          "decimals": 0
         },
         "overrides": []
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -389,8 +540,16 @@
     {
       "type": "stat",
       "title": "Blizzard Error Rate",
-      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 22 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 22
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "sum(rate(blizzard_requests_total{job=\"fastapi\", status=~\"4..|5..|timeout|error\"}[5m])) / sum(rate(blizzard_requests_total{job=\"fastapi\"}[5m])) * 100",
@@ -403,10 +562,22 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "value": null, "color": "green" },
-              { "value": 0, "color": "green" },
-              { "value": 5, "color": "yellow" },
-              { "value": 10, "color": "red" }
+              {
+                "value": null,
+                "color": "green"
+              },
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 5,
+                "color": "yellow"
+              },
+              {
+                "value": 10,
+                "color": "red"
+              }
             ]
           }
         },
@@ -414,7 +585,9 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -425,8 +598,16 @@
     {
       "type": "timeseries",
       "title": "AIMD Rate Over Time",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 26 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 26
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "aimd_current_rate{job=\"fastapi\"}",
@@ -458,8 +639,16 @@
     {
       "type": "timeseries",
       "title": "Rate Limit Events Over Time",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 26 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 26
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "expr": "rate(blizzard_rate_limited_total{job=\"fastapi\"}[5m])",

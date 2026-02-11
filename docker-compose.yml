@@ -99,12 +99,6 @@ services:
       valkey:
         condition: service_healthy
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9121/metrics"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 5s
 
   prometheus:
     profiles:
