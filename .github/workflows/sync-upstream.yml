@@ -9,7 +9,7 @@ on:
       force_deploy:
         description: "Force deployment even if no updates"
         required: false
-        default: "false"
+        default: false
         type: boolean
 
 jobs:
