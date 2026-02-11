@@ -68,6 +68,24 @@ class Media(BaseModel):
     )
 
 
+class StadiumPower(BaseModel):
+    name: str = Field(..., description="Name of the power", examples=["Quick Draw"])
+    description: str = Field(
+        ...,
+        description="Description of the power",
+        examples=[
+            "After using Combat Roll, Peacekeeper's next primary fire can auto-aim within 15m while under cooldown."
+        ],
+    )
+    icon: HttpUrl = Field(
+        ...,
+        description="Icon URL of the power",
+        examples=[
+            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/4ccb06c8fa111bf0cbe6d0c7812917df89a44f949601e24844b1fae0c3b89d4e.png",
+        ],
+    )
+
+
 class StoryChapter(BaseModel):
     title: str = Field(..., description="Title of the chapter", examples=["Blackwatch"])
     content: str = Field(
@@ -180,6 +198,12 @@ class Hero(BaseModel):
         ...,
         description="List of hero abilities",
         min_length=1,
+    )
+    stadium_powers: list[StadiumPower] | None = Field(
+        None,
+        description="List of Stadium powers. Can be null if hero isn't available on Stadium gamemode.",
+        min_length=12,
+        max_length=12,
     )
     story: Story = Field(..., description="Story of the hero")
 

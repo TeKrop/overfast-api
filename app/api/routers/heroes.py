@@ -144,7 +144,7 @@ async def get_hero_stats(
     tags=[RouteTag.HEROES],
     summary="Get hero data",
     description=(
-        "Get data about an Overwatch hero : description, abilities, story, etc. "
+        "Get data about an Overwatch hero : description, abilities, stadium powers, story, etc. "
         f"<br />**Cache TTL : {GetHeroController.get_human_readable_timeout()}.**"
     ),
     operation_id="get_hero",

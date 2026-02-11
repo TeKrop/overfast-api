@@ -70,17 +70,22 @@ def parse_hero_html(html: str, locale: Locale = Locale.ENGLISH_US) -> dict:
             msg = "Hero overview section (blz-page-header) not found"
             raise ParserParsingError(msg)
 
-        return {
+        hero_data = {
             **_parse_hero_summary(overview_section, locale),
             "abilities": _parse_hero_abilities(abilities_section),
             "story": _parse_hero_story(lore_section),
         }
+        if stadium_wrapper := root_tag.css_first("div.stadium-wrapper"):
+            hero_data["stadium_powers"] = _parse_hero_stadium_powers(stadium_wrapper)
+
     except ParserBlizzardError:
         # Re-raise Blizzard errors (404s) without wrapping
         raise
     except (AttributeError, KeyError, IndexError, TypeError) as error:
         msg = f"Unexpected Blizzard hero page structure: {error}"
         raise ParserParsingError(msg) from error
+    else:
+        return hero_data
 
 
 def _parse_hero_summary(overview_section: LexborNode, locale: Locale) -> dict:
@@ -254,6 +259,21 @@ def _parse_story_chapters(accordion: LexborNode) -> list[dict]:
             "picture": chapters_picture[title_index],
         }
         for title_index, title_span in enumerate(titles)
+    ]
+
+
+def _parse_hero_stadium_powers(stadium_wrapper: LexborNode) -> list[dict]:
+    stadium_carousel = stadium_wrapper.css_first(
+        "blz-section#stadium blz-carousel-beta"
+    )
+
+    return [
+        {
+            "name": power.css_first("p.talent-name").text(),
+            "description": power.css_first("p.talent-desc").text(),
+            "icon": safe_get_attribute(power.css_first("img"), "src"),
+        }
+        for power in stadium_carousel.css("blz-card.talent-card")
     ]
 
 
