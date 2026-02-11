@@ -8,8 +8,10 @@ As of now, only some specific stuff can easily be updated by anyone, even withou
 - The CSV file containing the list of gamemodes of the game
 - The CSV file containing the list of maps of the game
 
+All CSV files are located in `app/adapters/csv/data` folder.
+
 ## 🦸 Heroes data
-The CSV file containing heroes statistics data is located in `app/heroes/data/heroes.csv`. Data is divided into 6 columns :
+The CSV file containing heroes statistics data is `heroes.csv`. Data is divided into 6 columns :
 - `key` : Key of the hero name, used in URLs of the API (and by Blizzard for their pages)
 - `name` : Display name of the hero (with the right accentuation). Used in the documentation.
 - `role` : Role key of the hero, which is either `damage`, `support` or `tank`
@@ -18,13 +20,13 @@ The CSV file containing heroes statistics data is located in `app/heroes/data/he
 - `shields` : Shields of the hero
 
 ## 🎲 Gamemodes list
-The CSV file containing gamemodes list is located in `app/gamemodes/data/gamemodes.csv`. Data is divided into 3 columns :
+The CSV file containing gamemodes list is `gamemodes.csv`. Data is divided into 3 columns :
 - `key` : Key of the gamemode, used in URLs of the API, and for the name of the corresponding screenshot and icon files
 - `name` : Name of the gamemode (in english)
 - `description` : Description of the gamemode (in english)
 
 ## 🗺️ Maps list
-The CSV file containing maps list is located in `app/maps/data/maps.csv`. Data is divided into 5 columns :
+The CSV file containing maps list is `maps.csv`. Data is divided into 5 columns :
 - `key` : Key of the map, used in URLs of the API, and for the name of the corresponding screenshot file
 - `name` : Name of the map (in english)
 - `gamemodes` : List of gamemodes in which the map is playable by default
