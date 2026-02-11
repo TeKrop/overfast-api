@@ -119,7 +119,7 @@ def test_get_hero_no_portrait(
             ],
         ),
         patch(
-            "app.adapters.blizzard.parsers.heroes.filter_heroes_by_role",
+            "app.adapters.blizzard.parsers.heroes.filter_heroes",
             return_value=[],
         ),
     ):

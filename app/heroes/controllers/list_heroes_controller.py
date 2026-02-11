@@ -25,12 +25,15 @@ class ListHeroesController(AbstractController):
         # Extract params
         role = kwargs.get("role")
         locale = kwargs.get("locale") or Locale.ENGLISH_US
+        gamemode = kwargs.get("gamemode")
 
         # Use stateless parser function
         client = BlizzardClient()
 
         try:
-            data = await parse_heroes(client, locale=locale, role=role)
+            data = await parse_heroes(
+                client, locale=locale, role=role, gamemode=gamemode
+            )
         except ParserParsingError as error:
             # Get Blizzard URL for error reporting
             blizzard_url = f"{settings.blizzard_host}/{locale}{settings.heroes_path}"
