@@ -11,7 +11,7 @@ from app.heroes.controllers.get_hero_stats_summary_controller import (
     GetHeroStatsSummaryController,
 )
 from app.heroes.controllers.list_heroes_controller import ListHeroesController
-from app.heroes.enums import HeroKey
+from app.heroes.enums import HeroGamemode, HeroKey
 from app.heroes.models import (
     BadRequestErrorMessage,
     Hero,
@@ -37,7 +37,7 @@ router = APIRouter()
     tags=[RouteTag.HEROES],
     summary="Get a list of heroes",
     description=(
-        "Get a list of Overwatch heroes, which can be filtered using roles. "
+        "Get a list of Overwatch heroes, which can be filtered using roles or gamemodes. "
         f"<br />**Cache TTL : {ListHeroesController.get_human_readable_timeout()}.**"
     ),
     operation_id="list_heroes",
@@ -50,10 +50,12 @@ async def list_heroes(
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
+    gamemode: Annotated[HeroGamemode | None, Query(title="Gamemode filter")] = None,
 ) -> Any:
     return await ListHeroesController(request, response).process_request(
         role=role,
         locale=locale,
+        gamemode=gamemode,
     )
 
 

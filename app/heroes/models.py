@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, HttpUrl
 
 from app.roles.enums import Role
 
-from .enums import HeroKey, MediaType
+from .enums import HeroGamemode, HeroKey, MediaType
 
 
 class HitPoints(BaseModel):
@@ -202,6 +202,12 @@ class HeroShort(BaseModel):
         ...,
         description="Role of the hero",
         examples=["support"],
+    )
+    gamemodes: list[HeroGamemode] = Field(
+        ...,
+        description="List of gamemodes in which the hero is available",
+        min_length=1,
+        examples=["stadium"],
     )
 
 
