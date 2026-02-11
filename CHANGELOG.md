@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v3.36.0 (2026-02-11)
+
+### Features
+
+- Add support for heroes data related to Stadium
+  ([#355](https://github.com/TeKrop/overfast-api/pull/355),
+  [`54591e0`](https://github.com/TeKrop/overfast-api/commit/54591e06c6c9137815258e89abd21fff13b2e4a5))
+
+
+## v3.35.2 (2026-02-10)
+
+### Bug Fixes
+
+- Put back proper error management on some controllers after rework
+  ([#353](https://github.com/TeKrop/overfast-api/pull/353),
+  [`e916d98`](https://github.com/TeKrop/overfast-api/commit/e916d986828cdbac4f5b795a554383cad69e0514))
+
+
 ## v3.35.1 (2026-02-10)
 
 ### Bug Fixes

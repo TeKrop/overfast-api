@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, HttpUrl
 
 from app.roles.enums import Role
 
-from .enums import HeroKey, MediaType
+from .enums import HeroGamemode, HeroKey, MediaType
 
 
 class HitPoints(BaseModel):
@@ -65,6 +65,24 @@ class Media(BaseModel):
         ...,
         description="Link to the media",
         examples=["https://youtu.be/PKYVvPNhRR0"],
+    )
+
+
+class StadiumPower(BaseModel):
+    name: str = Field(..., description="Name of the power", examples=["Quick Draw"])
+    description: str = Field(
+        ...,
+        description="Description of the power",
+        examples=[
+            "After using Combat Roll, Peacekeeper's next primary fire can auto-aim within 15m while under cooldown."
+        ],
+    )
+    icon: HttpUrl = Field(
+        ...,
+        description="Icon URL of the power",
+        examples=[
+            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/4ccb06c8fa111bf0cbe6d0c7812917df89a44f949601e24844b1fae0c3b89d4e.png",
+        ],
     )
 
 
@@ -181,6 +199,12 @@ class Hero(BaseModel):
         description="List of hero abilities",
         min_length=1,
     )
+    stadium_powers: list[StadiumPower] | None = Field(
+        None,
+        description="List of Stadium powers. Can be null if hero isn't available on Stadium gamemode.",
+        min_length=12,
+        max_length=12,
+    )
     story: Story = Field(..., description="Story of the hero")
 
 
@@ -202,6 +226,12 @@ class HeroShort(BaseModel):
         ...,
         description="Role of the hero",
         examples=["support"],
+    )
+    gamemodes: list[HeroGamemode] = Field(
+        ...,
+        description="List of gamemodes in which the hero is available",
+        min_length=1,
+        examples=["stadium"],
     )
 
 

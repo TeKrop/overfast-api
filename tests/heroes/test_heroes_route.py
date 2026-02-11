@@ -5,6 +5,7 @@ import pytest
 from fastapi import status
 
 from app.config import settings
+from app.heroes.enums import HeroGamemode
 from app.roles.enums import Role
 
 if TYPE_CHECKING:
@@ -35,6 +36,18 @@ def test_get_heroes_filter_by_role(client: TestClient, role: Role):
 
 def test_get_heroes_invalid_role(client: TestClient):
     response = client.get("/heroes", params={"role": "invalid"})
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+@pytest.mark.parametrize("gamemode", [g.value for g in HeroGamemode])
+def test_get_heroes_filter_by_gamemode(client: TestClient, gamemode: HeroGamemode):
+    response = client.get("/heroes", params={"gamemode": gamemode})
+    assert response.status_code == status.HTTP_200_OK
+    assert all(gamemode in hero["gamemodes"] for hero in response.json())
+
+
+def test_get_heroes_invalid_gamemode(client: TestClient):
+    response = client.get("/heroes", params={"gamemode": "invalid"})
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
