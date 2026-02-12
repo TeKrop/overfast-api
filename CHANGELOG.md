@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.37.0 (2026-02-11)
+
+### Features
+
+- Update heroes hitpoints ([#356](https://github.com/TeKrop/overfast-api/pull/356),
+  [`97bbdb7`](https://github.com/TeKrop/overfast-api/commit/97bbdb7055254039c9b54e38a5e5382a2bc7e15e))
+
+
 ## v3.36.0 (2026-02-11)
 
 ### Features
