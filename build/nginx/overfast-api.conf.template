@@ -15,6 +15,10 @@ resolver 127.0.0.11 valid=30s;
 
 server_tokens off;
 
+# Prometheus metrics initialization (conditional on PROMETHEUS_ENABLED)
+${PROMETHEUS_LUA_SHARED_DICT}
+${PROMETHEUS_INIT_WORKER}
+
 server {
   listen 80;
 
@@ -37,6 +41,11 @@ server {
   }
   location /favicon.ico {
     alias /static/favicon.ico;
+  }
+
+  # Block /metrics from public access (FastAPI metrics endpoint)
+  location /metrics {
+    return 404;
   }
 
   # Redirect trailing slashes to routes without slashes
@@ -75,6 +84,9 @@ server {
     error_page 404 502 504 = @fallback;
   }
 
+  # Prometheus logging (conditional on PROMETHEUS_ENABLED)
+  ${PROMETHEUS_LOG_BY_LUA}
+
   # FastAPI app fallback
   location @fallback {
     # As we're in fallback, we need to specify the header again
@@ -103,3 +115,6 @@ server {
     return 429 '{"error": "API rate limit reached, please wait for 1 second before retrying"}';
   }
 }
+
+# Prometheus metrics server (conditional on PROMETHEUS_ENABLED)
+${PROMETHEUS_METRICS_SERVER}
