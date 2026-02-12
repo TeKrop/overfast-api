@@ -1,5 +1,7 @@
 """Tests for Prometheus middleware"""
 
+from unittest.mock import patch
+
 import pytest
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
@@ -37,8 +39,10 @@ def test_app():
 
 @pytest.fixture
 def client(test_app):
-    """Create test client"""
-    return TestClient(test_app)
+    """Create test client with prometheus enabled"""
+    # Mock prometheus_enabled to be True for all middleware tests
+    with patch.object(config.settings, "prometheus_enabled", True):
+        yield TestClient(test_app)
 
 
 def _get_in_progress_value(method: str, endpoint: str) -> float:
