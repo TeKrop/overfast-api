@@ -1,7 +1,7 @@
 """Tests for Prometheus middleware"""
 
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from prometheus_client import REGISTRY
 
@@ -23,8 +23,11 @@ def test_app():
 
     @app.get("/error")
     async def error_endpoint():
-        msg = "Test error"
-        raise ValueError(msg)
+        raise HTTPException(status_code=500, detail="Test error")
+
+    @app.get("/players/{player_id}/summary")
+    async def player_summary(player_id: str):
+        return {"player_id": player_id}
 
     # Add middleware directly
     app.add_middleware(PrometheusMiddleware)  # type: ignore[arg-type]
@@ -36,6 +39,15 @@ def test_app():
 def client(test_app):
     """Create test client"""
     return TestClient(test_app)
+
+
+def _get_in_progress_value(method: str, endpoint: str) -> float:
+    """Helper to read in-progress gauge, treating missing as 0."""
+    value = REGISTRY.get_sample_value(
+        "api_requests_in_progress",
+        {"method": method, "endpoint": endpoint},
+    )
+    return value or 0.0
 
 
 def test_prometheus_middleware_tracks_successful_requests(client):
@@ -76,8 +88,11 @@ def test_prometheus_middleware_tracks_request_duration(client):
 def test_prometheus_middleware_tracks_failed_requests(client):
     """Test that middleware tracks failed requests"""
     # Make request that will fail
-    with pytest.raises(ValueError, match="Test error"):
-        client.get("/error")
+    response = client.get("/error")
+
+    # Check response is 500
+    expected_status_code = 500
+    assert response.status_code == expected_status_code
 
     # Check metrics were recorded with 500 status
     metrics = REGISTRY.get_sample_value(
@@ -86,6 +101,63 @@ def test_prometheus_middleware_tracks_failed_requests(client):
     )
     assert metrics is not None
     assert metrics >= 1
+
+
+def test_prometheus_middleware_normalizes_dynamic_paths(client):
+    """Dynamic route metrics use normalized endpoint label"""
+    # Hit a route with a path parameter
+    response = client.get("/players/TeKrop-2217/summary")
+
+    expected_status_code = 200
+    assert response.status_code == expected_status_code
+
+    # The middleware should normalize the endpoint label
+    metrics = REGISTRY.get_sample_value(
+        "api_requests_total",
+        {
+            "method": "GET",
+            "endpoint": "/players/{player_id}/summary",
+            "status": "200",
+        },
+    )
+    assert metrics is not None
+    assert metrics >= 1
+
+
+def test_in_progress_gauge_resets_for_successful_request(client):
+    """Gauge is incremented and then decremented for successful requests."""
+    endpoint_label = "/test"
+    method = "GET"
+
+    before = _get_in_progress_value(method, endpoint_label)
+
+    response = client.get(endpoint_label)
+    expected_status_code = 200
+    assert response.status_code == expected_status_code
+
+    after = _get_in_progress_value(method, endpoint_label)
+
+    # Gauge should return to original value after request completes
+    assert after == before
+
+
+def test_in_progress_gauge_resets_for_failing_request(client):
+    """Gauge is incremented and then decremented even when the request fails."""
+    endpoint_label = "/error"
+    method = "GET"
+    min_error_code = 400
+    max_error_code = 600
+
+    before = _get_in_progress_value(method, endpoint_label)
+
+    response = client.get(endpoint_label)
+    # Route is expected to return an error (4xx/5xx)
+    assert min_error_code <= response.status_code < max_error_code
+
+    after = _get_in_progress_value(method, endpoint_label)
+
+    # Gauge should return to original value after request completes, even on error
+    assert after == before
 
 
 def test_prometheus_middleware_skips_metrics_endpoint(test_app):
@@ -98,19 +170,29 @@ def test_prometheus_middleware_skips_metrics_endpoint(test_app):
 
     client = TestClient(test_app)
 
+    # Snapshot metric value before the request
+    before = (
+        REGISTRY.get_sample_value(
+            "api_requests_total",
+            {"method": "GET", "endpoint": "/metrics", "status": "200"},
+        )
+        or 0
+    )
+
     # Make request to /metrics
     response = client.get("/metrics")
     expected_status_code = 200
     assert response.status_code == expected_status_code
 
-    # Check that /metrics endpoint itself is not tracked
-    metrics = REGISTRY.get_sample_value(
-        "api_requests_total",
-        {"method": "GET", "endpoint": "/metrics", "status": "200"},
+    # Ensure the /metrics endpoint itself is not tracked
+    after = (
+        REGISTRY.get_sample_value(
+            "api_requests_total",
+            {"method": "GET", "endpoint": "/metrics", "status": "200"},
+        )
+        or 0
     )
-    # Should be None or very small (from other tests if run in parallel)
-    # The point is it shouldn't increment for this specific call
-    assert metrics is None or metrics < 1
+    assert after == before
 
 
 def test_register_prometheus_middleware_when_enabled(monkeypatch):

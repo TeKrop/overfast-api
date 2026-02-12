@@ -16,6 +16,10 @@ def normalize_endpoint(path: str) -> str:
     in Prometheus labels. This allows metrics to be aggregated by endpoint pattern
     rather than by individual resource IDs.
 
+    IMPORTANT: This logic is duplicated in build/nginx/prometheus_log.conf for Nginx.
+    When modifying these patterns, update BOTH implementations.
+    See app/monitoring/README.md for synchronization guidelines.
+
     Args:
         path: Raw request path (e.g., "/players/TeKrop-2217/summary")
 

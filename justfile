@@ -71,12 +71,7 @@ up profile="":
 
 # build & run with monitoring (Prometheus + Grafana)
 up_monitoring:
-    @echo "Building OverFastAPI with monitoring..."
-    {{ docker_compose }} build
-    @echo "Stopping OverFastAPI and cleaning containers..."
-    {{ docker_compose }} down -v --remove-orphans
-    @echo "Launching OverFastAPI with monitoring..."
-    {{ docker_compose }} --profile monitoring up -d
+    just up monitoring
 
 # stop the app and remove containers
 down:

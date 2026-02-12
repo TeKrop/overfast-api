@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Fail fast on errors and unset variables; enable pipefail where supported
+set -eu
+set -o pipefail 2>/dev/null || true
+
 # Build Prometheus config conditionally by reading template files
 if [ "$PROMETHEUS_ENABLED" = "true" ]; then
   PROMETHEUS_LUA_SHARED_DICT=$(cat /etc/nginx/prometheus-templates/prometheus_shared_dict.conf)

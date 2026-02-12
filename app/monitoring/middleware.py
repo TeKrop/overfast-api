@@ -39,6 +39,10 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
         Returns:
             HTTP response
         """
+        # Skip if metrics are disabled (safety guard for future reuse)
+        if not settings.prometheus_enabled:
+            return await call_next(request)
+
         # Extract endpoint info
         method = request.method
         path = request.url.path
