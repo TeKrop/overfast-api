@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.38.0 (2026-02-12)
+
+### Features
+
+- Phase 2 - Complete monitoring infrastructure with enhanced dashboards
+  ([#357](https://github.com/TeKrop/overfast-api/pull/357),
+  [`ea563a2`](https://github.com/TeKrop/overfast-api/commit/ea563a2497a398974be0a97e4020cddbc2f56a81))
+
+
 ## v3.37.0 (2026-02-11)
 
 ### Features
