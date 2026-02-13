@@ -21,7 +21,7 @@ player-cache:TeKrop-2217
 
 import asyncio
 import json
-import zlib
+from compression.zstd import ZstdCompressor, ZstdDecompressor
 from typing import TYPE_CHECKING
 
 import valkey
@@ -47,6 +47,10 @@ class ValkeyCache(metaclass=Singleton):
         host=settings.valkey_host, port=settings.valkey_port, protocol=3
     )
 
+    # zstd compressor/decompressor (Python 3.14+)
+    _compressor = ZstdCompressor()
+    _decompressor = ZstdDecompressor()
+
     @staticmethod
     def log_warning(err: valkey.exceptions.ValkeyError) -> None:
         logger.warning("Valkey server error : {}", str(err))
@@ -60,13 +64,14 @@ class ValkeyCache(metaclass=Singleton):
 
     @staticmethod
     def _compress_json_value(value: dict | list) -> bytes:
-        """Helper method to transform a value into compressed JSON data"""
-        return zlib.compress(json.dumps(value, separators=(",", ":")).encode("utf-8"))
+        """Helper method to transform a value into compressed JSON data using zstd"""
+        json_str = json.dumps(value, separators=(",", ":"))
+        return ValkeyCache._compressor.compress(json_str.encode("utf-8"))
 
     @staticmethod
     def _decompress_json_value(value: bytes) -> dict | list:
-        """Helper method to retrieve a value from a compressed JSON data"""
-        return json.loads(zlib.decompress(value).decode("utf-8"))
+        """Helper method to retrieve a value from a compressed JSON data using zstd"""
+        return json.loads(ValkeyCache._decompressor.decompress(value).decode("utf-8"))
 
     def _handle_valkey_error(self, func):
         """Helper to handle Valkey connection errors"""

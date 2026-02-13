@@ -52,6 +52,23 @@ class Settings(BaseSettings):
     prometheus_enabled: bool = False
 
     ############
+    # PERSISTENT STORAGE CONFIGURATION
+    ############
+
+    # SQLite database path for persistent storage
+    storage_path: str = "data/overfast.db"
+
+    # Staleness thresholds (seconds) for cache invalidation
+    static_data_staleness_threshold: int = 86400  # 24 hours (heroes, maps, gamemodes, roles)
+    hero_stats_staleness_threshold: int = 3600  # 1 hour (pickrate/winrate data)
+    player_profile_staleness_threshold: int = 10800  # 3 hours
+
+    # Unknown player exponential backoff configuration
+    unknown_player_initial_retry: int = 600  # 10 minutes (first check)
+    unknown_player_retry_multiplier: int = 3  # retry_after *= 3 each check
+    unknown_player_max_retry: int = 21600  # 6 hours cap
+
+    ############
     # RATE LIMITING
     ############
 

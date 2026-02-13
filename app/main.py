@@ -14,6 +14,7 @@ from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import Response
 
+from .adapters.storage import SQLiteStorage
 from .api import gamemodes, heroes, maps, players, roles
 from .config import settings
 from .docs import render_documentation
@@ -55,6 +56,11 @@ if settings.sentry_dsn:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):  # pragma: no cover
+    # Initialize SQLite storage
+    logger.info("Initializing SQLite storage...")
+    storage = SQLiteStorage()
+    await storage.initialize()
+
     # Instanciate HTTPX Async Client
     logger.info("Instanciating HTTPX AsyncClient...")
     overfast_client = OverFastClient()
