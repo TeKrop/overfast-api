@@ -20,7 +20,7 @@ PLATFORM_MAPPING: dict[PlayerPlatform, str] = {
 
 GAMEMODE_MAPPING: dict[PlayerGamemode, str] = {
     PlayerGamemode.QUICKPLAY: "0",
-    PlayerGamemode.COMPETITIVE: "1",
+    PlayerGamemode.COMPETITIVE: "2",
 }
 
 
