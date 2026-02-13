@@ -20,8 +20,10 @@ class ListMapsController(AbstractController):
         gamemode = kwargs.get("gamemode")
         data = parse_maps(gamemode=gamemode)
 
-        # Update API Cache
-        self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
+        # Dual-write to API Cache (Valkey) and Storage (SQLite)
+        storage_key = "maps:en-us"  # Maps are not localized
+        await self.update_static_cache(data, storage_key, data_type="json")
+
         self.response.headers[settings.cache_ttl_header] = str(self.timeout)
 
         return data

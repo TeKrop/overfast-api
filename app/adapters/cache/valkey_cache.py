@@ -66,7 +66,10 @@ class ValkeyCache(metaclass=Singleton):
     def _compress_json_value(value: dict | list) -> bytes:
         """Helper method to transform a value into compressed JSON data using zstd"""
         json_str = json.dumps(value, separators=(",", ":"))
-        return ValkeyCache._compressor.compress(json_str.encode("utf-8"))
+        # Use FLUSH_FRAME mode to ensure complete compression
+        return ValkeyCache._compressor.compress(
+            json_str.encode("utf-8"), ValkeyCache._compressor.FLUSH_FRAME
+        )
 
     @staticmethod
     def _decompress_json_value(value: bytes) -> dict | list:

@@ -52,6 +52,10 @@ class GetHeroController(AbstractController):
 
         # Update API Cache
         self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
+
+        # Note: Single hero data is not stored in persistent storage (Phase 3)
+        # It's derived from heroes list + hero details, both of which are cached separately
+
         self.response.headers[settings.cache_ttl_header] = str(self.timeout)
 
         return data

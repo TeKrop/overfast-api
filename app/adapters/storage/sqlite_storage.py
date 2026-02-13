@@ -50,56 +50,20 @@ class SQLiteStorage:
             yield db
 
     async def initialize(self) -> None:
-        """Initialize database schema if not exists"""
+        """Initialize database schema from schema.sql file"""
         if self._initialized:
             return
 
         # Ensure directory exists
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
 
+        # Load schema from SQL file
+        schema_path = Path(__file__).parent / "schema.sql"
+        schema_sql = schema_path.read_text()
+
         async with self._get_connection() as db:
-            # Static data table
-            await db.execute("""
-                CREATE TABLE IF NOT EXISTS static_data (
-                    key TEXT PRIMARY KEY,
-                    data_type TEXT NOT NULL,
-                    data_compressed BLOB NOT NULL,
-                    created_at INTEGER NOT NULL,
-                    updated_at INTEGER NOT NULL,
-                    schema_version INTEGER DEFAULT 1
-                )
-            """)
-            await db.execute(
-                "CREATE INDEX IF NOT EXISTS idx_static_updated ON static_data(updated_at)"
-            )
-
-            # Player profiles table
-            await db.execute("""
-                CREATE TABLE IF NOT EXISTS player_profiles (
-                    player_id TEXT PRIMARY KEY,
-                    blizzard_id TEXT,
-                    html_compressed BLOB NOT NULL,
-                    last_updated_blizzard INTEGER,
-                    created_at INTEGER NOT NULL,
-                    updated_at INTEGER NOT NULL,
-                    schema_version INTEGER DEFAULT 1,
-                    UNIQUE(blizzard_id)
-                )
-            """)
-            await db.execute(
-                "CREATE INDEX IF NOT EXISTS idx_player_updated ON player_profiles(updated_at)"
-            )
-
-            # Player status table (for unknown players with exponential backoff)
-            await db.execute("""
-                CREATE TABLE IF NOT EXISTS player_status (
-                    player_id TEXT PRIMARY KEY,
-                    check_count INTEGER NOT NULL DEFAULT 1,
-                    last_checked_at INTEGER NOT NULL,
-                    retry_after INTEGER NOT NULL
-                )
-            """)
-
+            # Execute schema (supports multiple statements)
+            await db.executescript(schema_sql)
             await db.commit()
 
         self._initialized = True
@@ -107,7 +71,10 @@ class SQLiteStorage:
 
     def _compress(self, data: str) -> bytes:
         """Compress string data using zstd"""
-        return self._compressor.compress(data.encode("utf-8"))
+        # Use FLUSH_FRAME mode to ensure complete compression
+        return self._compressor.compress(
+            data.encode("utf-8"), self._compressor.FLUSH_FRAME
+        )
 
     def _decompress(self, data: bytes) -> str:
         """Decompress zstd data to string"""

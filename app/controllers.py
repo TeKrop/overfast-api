@@ -1,13 +1,16 @@
 """Abstract API Controller module"""
 
+import json
 from abc import ABC, abstractmethod
 
 from fastapi import HTTPException, Request, Response
 
+from .adapters.storage import SQLiteStorage
 from .cache_manager import CacheManager
 from .config import settings
 from .exceptions import ParserBlizzardError, ParserParsingError
 from .helpers import get_human_readable_duration, overfast_internal_error
+from .monitoring.metrics import storage_write_errors_total
 from .overfast_logger import logger
 
 
@@ -20,6 +23,9 @@ class AbstractController(ABC):
 
     # Generic cache manager class, used to manipulate Valkey cache data
     cache_manager = CacheManager()
+
+    # Storage adapter for persistent data
+    storage = SQLiteStorage()
 
     def __init__(self, request: Request, response: Response):
         self.cache_key = CacheManager.get_cache_key_from_request(request)
@@ -40,6 +46,47 @@ class AbstractController(ABC):
     @classmethod
     def get_human_readable_timeout(cls) -> str:
         return get_human_readable_duration(cls.timeout)
+
+    async def update_static_cache(
+        self, data: dict | list, storage_key: str, data_type: str = "json"
+    ) -> None:
+        """
+        Dual-write static data to both Valkey cache and SQLite storage.
+
+        Args:
+            data: Data to cache (will be JSON-serialized)
+            storage_key: Key for SQLite storage (e.g., "heroes:en-us")
+            data_type: Type of data ("json" or "html")
+        """
+        # Update API Cache (Valkey)
+        self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
+
+        # Update persistent storage (SQLite) - Phase 3 dual-write
+        try:
+            json_data = json.dumps(data, separators=(",", ":"))
+            await self.storage.put_static(
+                key=storage_key, data=json_data, data_type=data_type
+            )
+        except OSError as error:
+            # Disk/file I/O errors
+            logger.warning(f"Storage write failed (disk error) for {storage_key}: {error}")
+            self._track_storage_error("disk_error")
+        except RuntimeError as error:
+            # Compression/serialization errors
+            logger.warning(
+                f"Storage write failed (compression error) for {storage_key}: {error}"
+            )
+            self._track_storage_error("compression_error")
+        except Exception as error:  # noqa: BLE001
+            # Unexpected errors
+            logger.error(f"Storage write failed (unknown) for {storage_key}: {error}")
+            self._track_storage_error("unknown")
+
+    @staticmethod
+    def _track_storage_error(error_type: str) -> None:
+        """Track storage write errors in Prometheus if enabled"""
+        if settings.prometheus_enabled:
+            storage_write_errors_total.labels(error_type=error_type).inc()
 
     async def process_request(self, **kwargs) -> dict | list:
         """Main method used to process the request from user and return final data. Raises
