@@ -1,5 +1,7 @@
 """Blizzard HTTP client adapter implementing BlizzardClientPort"""
 
+import time
+
 import httpx
 from fastapi import HTTPException, status
 
@@ -7,6 +9,12 @@ from app.adapters.cache import CacheManager
 from app.config import settings
 from app.helpers import send_discord_webhook_message
 from app.metaclasses import Singleton
+from app.monitoring.helpers import normalize_blizzard_url
+from app.monitoring.metrics import (
+    blizzard_rate_limited_total,
+    blizzard_request_duration_seconds,
+    blizzard_requests_total,
+)
 from app.overfast_logger import logger
 
 
@@ -52,19 +60,48 @@ class BlizzardClient(metaclass=Singleton):
         if params:
             kwargs["params"] = params
 
+        # Normalize URL for metrics labels
+        normalized_endpoint = normalize_blizzard_url(url)
+
         # Make the API call
+        start_time = time.perf_counter()
         try:
             response = await self.client.get(url, **kwargs)
         except httpx.TimeoutException as error:
+            duration = time.perf_counter() - start_time
+            if settings.prometheus_enabled:
+                blizzard_requests_total.labels(
+                    endpoint=normalized_endpoint, status="timeout"
+                ).inc()
+                blizzard_request_duration_seconds.labels(
+                    endpoint=normalized_endpoint
+                ).observe(duration)
             raise self._blizzard_response_error(
                 status_code=0,
                 error="Blizzard took more than 10 seconds to respond, resulting in a timeout",
             ) from error
         except httpx.RemoteProtocolError as error:
+            duration = time.perf_counter() - start_time
+            if settings.prometheus_enabled:
+                blizzard_requests_total.labels(
+                    endpoint=normalized_endpoint, status="error"
+                ).inc()
+                blizzard_request_duration_seconds.labels(
+                    endpoint=normalized_endpoint
+                ).observe(duration)
             raise self._blizzard_response_error(
                 status_code=0,
                 error="Blizzard closed the connection, no data could be retrieved",
             ) from error
+
+        duration = time.perf_counter() - start_time
+        if settings.prometheus_enabled:
+            blizzard_requests_total.labels(
+                endpoint=normalized_endpoint, status=str(response.status_code)
+            ).inc()
+            blizzard_request_duration_seconds.labels(
+                endpoint=normalized_endpoint
+            ).observe(duration)
 
         logger.debug("OverFast request done !")
 
@@ -120,6 +157,10 @@ class BlizzardClient(metaclass=Singleton):
 
         # We have to block future requests to Blizzard, cache the information on Valkey
         self.cache_manager.set_global_rate_limit()
+
+        # Track rate limit event
+        if settings.prometheus_enabled:
+            blizzard_rate_limited_total.inc()
 
         # If Discord Webhook configuration is enabled, send a message to the
         # given channel using Discord Webhook URL

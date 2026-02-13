@@ -15,7 +15,7 @@ def get_app_version() -> str:
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     ############
     # APPLICATION SETTINGS
@@ -47,6 +47,9 @@ class Settings(BaseSettings):
 
     # Route path to display as new on the documentation
     new_route_path: str | None = None
+
+    # Enable Prometheus metrics collection and /metrics endpoint
+    prometheus_enabled: bool = False
 
     ############
     # RATE LIMITING
