@@ -358,7 +358,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (endpoint) (increase(blizzard_requests_total{job=\"fastapi\"}[1d]))",
+          "expr": "sum by (endpoint) (increase(blizzard_requests_total{job=\"fastapi\"}[1h]))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
@@ -422,7 +422,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (status) (increase(blizzard_requests_total{job=\"fastapi\"}[1d]))",
+          "expr": "sum by (status) (increase(blizzard_requests_total{job=\"fastapi\"}[1h]))",
           "legendFormat": "{{status}}",
           "refId": "A"
         }
@@ -841,7 +841,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sort(sum by (endpoint) (increase(blizzard_requests_total{job=\"fastapi\"}[1d])))",
+          "expr": "bottomk(10, sum by (endpoint) (increase(blizzard_requests_total{job=\"fastapi\"}[1h])))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
