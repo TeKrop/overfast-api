@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.38.1 (2026-02-13)
+
+### Bug Fixes
+
+- Fixed dashboard issues and missing category key on player profile endpoint
+  ([#358](https://github.com/TeKrop/overfast-api/pull/358),
+  [`6c72dab`](https://github.com/TeKrop/overfast-api/commit/6c72dabfd753f2af9a9973f5c5f8474faaaac591))
+
+
 ## v3.38.0 (2026-02-12)
 
 ### Features
