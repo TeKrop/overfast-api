@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.38.2 (2026-02-13)
+
+### Bug Fixes
+
+- **parsers**: Correct competitive gamemode mapping
+  ([#360](https://github.com/TeKrop/overfast-api/pull/360),
+  [`4049ce1`](https://github.com/TeKrop/overfast-api/commit/4049ce17bf2eddb1997d358689d581d6726f2e55))
+
+
 ## v3.38.1 (2026-02-13)
 
 ### Bug Fixes
