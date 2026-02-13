@@ -455,12 +455,23 @@ def _parse_career_stats(career_stats_section: LexborNode) -> dict:
                 )
                 continue
 
+            # Convert to snake_case for category key
+            category_key = string_to_snakecase(normalized_category_label)
+
+            # Skip if snake_case conversion resulted in empty string
+            if not category_key:
+                logger.warning(
+                    f"Category key is empty after snake_case conversion for hero {hero_key} "
+                    f"(normalized label: {normalized_category_label!r}, original: {category_label!r}), skipping"
+                )
+                continue
+
             # Parse all stats for this category
             stats = _parse_category_stats(content_div)
 
             career_stats[hero_key].append(
                 {
-                    "category": string_to_snakecase(normalized_category_label),
+                    "category": category_key,
                     "label": normalized_category_label,
                     "stats": stats,
                 },
