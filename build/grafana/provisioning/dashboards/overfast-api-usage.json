@@ -109,7 +109,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\"}[1d])))",
+          "expr": "topk(10, sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\"}[1h])))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
@@ -169,7 +169,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sort(sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\"}[1d])))",
+          "expr": "bottomk(10, sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\"}[1h])))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
@@ -244,7 +244,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/heroes.*\"}[1d]))",
+          "expr": "sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/heroes.*\"}[1h]))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
@@ -671,7 +671,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/players.*\"}[1d]))",
+          "expr": "sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/players.*\"}[1h]))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
@@ -1132,7 +1132,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "topk(10, sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/players.*\"}[1d])))",
+          "expr": "topk(10, sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/players.*\"}[1h])))",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -1374,8 +1374,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "round(sum(increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/players.*\"}[1d])))",
-          "legendFormat": "Calls/day",
+          "expr": "round(sum(increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/players.*\"}[1h])) * 24)",
+          "legendFormat": "Estimated calls/day",
           "refId": "A"
         }
       ],
