@@ -121,11 +121,14 @@ jobs:
     if: always() && needs.sync.outputs.has_updates == 'true'
 
     steps:
-      - name: Notify on success
+      - name: Notify app repo of API update
         if: needs.deploy.result == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.APP_REPO_PAT }}
         run: |
-          echo "Deployment successful!"
-          # Add notification logic here (Slack, Discord, email, etc.)
+          gh api \
+            repos/danielsogl/overwatch_app/dispatches \
+            -f event_type=api-updated
 
       - name: Notify on failure
         if: needs.deploy.result == 'failure'
