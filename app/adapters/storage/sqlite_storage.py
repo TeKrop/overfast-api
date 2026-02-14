@@ -10,13 +10,17 @@ from typing import TYPE_CHECKING
 import aiosqlite
 
 from app.config import settings
+from app.metaclasses import Singleton
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
+# Constants
+MEMORY_DB = ":memory:"  # Special SQLite path for in-memory database
 
-class SQLiteStorage:
+
+class SQLiteStorage(metaclass=Singleton):
     """
     SQLite storage adapter for persistent data with zstd compression.
 
@@ -26,6 +30,8 @@ class SQLiteStorage:
     - Player status tracking (replaces Unknown Players Cache with exponential backoff)
 
     All data is compressed with zstd (Python 3.14+ built-in) before storage.
+
+    Uses Singleton pattern to ensure single instance across application.
     """
 
     def __init__(self, db_path: str | None = None):
@@ -34,12 +40,22 @@ class SQLiteStorage:
 
         Args:
             db_path: Path to SQLite database file. Defaults to settings.storage_path
+
+        Note: Due to Singleton pattern, only first initialization sets db_path.
+        For tests, use _reset_singleton() to create a fresh instance.
         """
         self.db_path = db_path or settings.storage_path
         self._initialized = False
         self._shared_connection: aiosqlite.Connection | None = (
             None  # For :memory: databases
         )
+
+    @classmethod
+    def _reset_singleton(cls):
+        """Reset singleton instance (for testing only)"""
+        instances = Singleton._instances  # noqa: SLF001
+        if cls in instances:
+            del instances[cls]
 
     @asynccontextmanager
     async def _get_connection(self) -> AsyncIterator[aiosqlite.Connection]:
@@ -48,7 +64,7 @@ class SQLiteStorage:
         For :memory: databases, reuses a single connection to persist schema across operations.
         """
         # For in-memory databases, use a shared connection
-        if self.db_path == ":memory:":
+        if self.db_path == MEMORY_DB:
             if self._shared_connection is None:
                 # Create and store the shared connection
                 db = await aiosqlite.connect(self.db_path)
@@ -78,7 +94,7 @@ class SQLiteStorage:
             return
 
         # Ensure directory exists (skip for in-memory database)
-        if self.db_path != ":memory:":
+        if self.db_path != MEMORY_DB:
             Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
 
         # Load schema from SQL file
@@ -339,7 +355,7 @@ class SQLiteStorage:
                 status_count = row[0] if row else 0
 
         # Get file size (or estimate for in-memory database)
-        if self.db_path == ":memory:":
+        if self.db_path == MEMORY_DB:
             # Estimate size for in-memory database
             # Rough approximation: static_data ~1KB, player_profiles ~10KB, player_status ~100B
             size_bytes = (
@@ -356,9 +372,10 @@ class SQLiteStorage:
             "player_status_count": status_count,
         }
 
-    async def clear_player_data(self) -> None:
-        """Clear all player data (for testing)"""
+    async def clear_all_data(self) -> None:
+        """Clear all data including static data (for testing)"""
         async with self._get_connection() as db:
+            await db.execute("DELETE FROM static_data")
             await db.execute("DELETE FROM player_profiles")
             await db.execute("DELETE FROM player_status")
             await db.commit()

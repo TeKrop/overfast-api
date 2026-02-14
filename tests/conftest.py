@@ -27,6 +27,8 @@ async def valkey_server():
 @pytest_asyncio.fixture(scope="session")
 async def storage_db() -> AsyncIterator[SQLiteStorage]:
     """Provide an in-memory SQLite storage for tests"""
+    # Reset singleton before session to ensure clean state
+    SQLiteStorage._reset_singleton()
 
     storage = SQLiteStorage(db_path=":memory:")
     await storage.initialize()
@@ -39,9 +41,9 @@ async def _patch_before_every_test(
     valkey_server: fakeredis.FakeAsyncRedis,  # Async FakeValkey
     storage_db: SQLiteStorage,
 ):
-    # Flush Valkey and SQLite player data before and after every test
+    # Flush Valkey and clear all SQLite data before every test
     await valkey_server.flushdb()
-    await storage_db.clear_player_data()
+    await storage_db.clear_all_data()
 
     with (
         patch("app.helpers.settings.discord_webhook_enabled", False),
@@ -58,4 +60,4 @@ async def _patch_before_every_test(
         yield
 
     await valkey_server.flushdb()
-    await storage_db.clear_player_data()
+    await storage_db.clear_all_data()

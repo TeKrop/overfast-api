@@ -1,5 +1,5 @@
 """Storage adapters for persistent data"""
 
-from .sqlite_storage import SQLiteStorage
+from .sqlite_storage import MEMORY_DB, SQLiteStorage
 
-__all__ = ["SQLiteStorage"]
+__all__ = ["MEMORY_DB", "SQLiteStorage"]

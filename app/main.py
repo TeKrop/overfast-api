@@ -60,12 +60,10 @@ if settings.sentry_dsn:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):  # pragma: no cover
-    # Initialize SQLite storage
     logger.info("Initializing SQLite storage...")
     storage: StoragePort = SQLiteStorage()
     await storage.initialize()
 
-    # Instanciate HTTPX Async Client
     logger.info("Instanciating HTTPX AsyncClient...")
     overfast_client: BlizzardClientPort = OverFastClient()
 

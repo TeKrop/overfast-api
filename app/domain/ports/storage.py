@@ -11,6 +11,10 @@ class StoragePort(Protocol):
     caching of static data, player profiles, and unknown player tracking.
     """
 
+    async def initialize(self) -> None:
+        """Initialize storage (create tables, setup schema)"""
+        ...
+
     async def get_static_data(self, key: str) -> dict | None:
         """Get static data (heroes, maps, gamemodes, roles, hero_stats) by key"""
         ...
@@ -65,8 +69,8 @@ class StoragePort(Protocol):
         """Delete player status entry"""
         ...
 
-    async def clear_player_data(self) -> None:
-        """Clear all player data (for testing)"""
+    async def clear_all_data(self) -> None:
+        """Clear all data including static data (for testing)"""
         ...
 
     async def close(self) -> None:

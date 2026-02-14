@@ -36,7 +36,7 @@ def with_unknown_player_guard(func):
     """
 
     @wraps(func)
-    async def wrapper(self, **kwargs) -> dict:
+    async def wrapper(self, *args, **kwargs) -> dict:
         player_id = kwargs.get("player_id")
         if not player_id:
             msg = "with_unknown_player_guard requires player_id in kwargs"
@@ -47,7 +47,7 @@ def with_unknown_player_guard(func):
 
         # Execute handler with unknown player marking on 404
         try:
-            return await func(self, **kwargs)
+            return await func(self, *args, **kwargs)
         except HTTPException as exception:
             await self.mark_player_unknown_on_404(player_id, exception)
             raise
