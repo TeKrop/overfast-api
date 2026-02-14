@@ -39,8 +39,9 @@ class ListHeroesController(AbstractController):
             blizzard_url = f"{settings.blizzard_host}/{locale}{settings.heroes_path}"
             raise overfast_internal_error(blizzard_url, error) from error
 
-        # Update API Cache
-        self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
+        # Dual-write to API Cache (Valkey) and Storage (SQLite)
+        storage_key = f"heroes:{locale}"
+        await self.update_static_cache(data, storage_key, data_type="json")
 
         # Ensure response headers contains Cache TTL
         self.response.headers[settings.cache_ttl_header] = str(self.timeout)

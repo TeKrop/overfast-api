@@ -51,7 +51,7 @@ class BlizzardClient(metaclass=Singleton):
         """Make an HTTP GET request with custom headers and retrieve the result"""
 
         # First, check if we're being rate limited
-        self._check_rate_limit()
+        await self._check_rate_limit()
 
         # Prepare kwargs
         kwargs = {}
@@ -108,7 +108,7 @@ class BlizzardClient(metaclass=Singleton):
         # Make sure we catch HTTP 403 from Blizzard when it happens,
         # so we don't make any more call before some amount of time
         if response.status_code == status.HTTP_403_FORBIDDEN:
-            raise self._blizzard_forbidden_error()
+            raise await self._blizzard_forbidden_error()
 
         return response
 
@@ -121,13 +121,13 @@ class BlizzardClient(metaclass=Singleton):
         """Alias for close() - deprecated, use close() instead"""
         await self.close()
 
-    def _check_rate_limit(self) -> None:
+    async def _check_rate_limit(self) -> None:
         """Make sure we're not being rate limited by Blizzard before making
         any API call. Else, return an HTTP 429 with Retry-After header.
         """
-        if self.cache_manager.is_being_rate_limited():
+        if await self.cache_manager.is_being_rate_limited():
             raise self._too_many_requests_response(
-                retry_after=self.cache_manager.get_global_rate_limit_remaining_time()
+                retry_after=await self.cache_manager.get_global_rate_limit_remaining_time()
             )
 
     def blizzard_response_error_from_response(
@@ -150,13 +150,13 @@ class BlizzardClient(metaclass=Singleton):
             detail=f"Couldn't get Blizzard page (HTTP {status_code} error) : {error}",
         )
 
-    def _blizzard_forbidden_error(self) -> HTTPException:
+    async def _blizzard_forbidden_error(self) -> HTTPException:
         """Retrieve a generic error response when Blizzard returns forbidden error.
         Also prevent further calls to Blizzard for a given amount of time.
         """
 
         # We have to block future requests to Blizzard, cache the information on Valkey
-        self.cache_manager.set_global_rate_limit()
+        await self.cache_manager.set_global_rate_limit()
 
         # Track rate limit event
         if settings.prometheus_enabled:

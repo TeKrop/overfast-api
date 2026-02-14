@@ -25,7 +25,7 @@ from app.players.models import (
     CareerStats,
     Player,
     PlayerCareerStats,
-    PlayerParserErrorMessage,
+    PlayerNotFoundError,
     PlayerSearchResult,
     PlayerStatsSummary,
     PlayerSummary,
@@ -34,8 +34,13 @@ from app.players.models import (
 # Custom route responses for player careers
 career_routes_responses = {
     status.HTTP_404_NOT_FOUND: {
-        "model": PlayerParserErrorMessage,
-        "description": "Player Not Found",
+        "model": PlayerNotFoundError,
+        "description": (
+            "Player Not Found - Response includes retry timing information. "
+            "The API implements exponential backoff (600s → 1800s → 5400s → 21600s cap) "
+            "to avoid repeatedly checking Blizzard for non-existent players. "
+            "Retry after the indicated timestamp to trigger a fresh check."
+        ),
     },
     **common_routes_responses,
 }

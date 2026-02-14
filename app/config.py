@@ -52,6 +52,19 @@ class Settings(BaseSettings):
     prometheus_enabled: bool = False
 
     ############
+    # PERSISTENT STORAGE CONFIGURATION
+    ############
+
+    # SQLite database path for persistent storage
+    # Use ":memory:" for in-memory database (testing/ephemeral deployments)
+    storage_path: str = "data/overfast.db"
+
+    # Unknown player exponential backoff configuration
+    unknown_player_initial_retry: int = 600  # 10 minutes (first check)
+    unknown_player_retry_multiplier: int = 3  # retry_after *= 3 each check
+    unknown_player_max_retry: int = 21600  # 6 hours cap
+
+    ############
     # RATE LIMITING
     ############
 

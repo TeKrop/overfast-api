@@ -37,7 +37,7 @@ class SearchPlayersController(AbstractController):
             raise overfast_internal_error(blizzard_url, error) from error
 
         # Update API Cache
-        self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
+        await self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
         self.response.headers[settings.cache_ttl_header] = str(self.timeout)
 
         return data

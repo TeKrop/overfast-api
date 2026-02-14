@@ -129,3 +129,9 @@ storage_entries_total = Gauge(
     "Total entries in persistent storage",
     ["table"],  # "player_profiles", "player_status", etc.
 )
+
+storage_write_errors_total = Counter(
+    "storage_write_errors_total",
+    "Failed writes to persistent storage",
+    ["error_type"],  # "disk_error", "compression_error", "unknown"
+)

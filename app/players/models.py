@@ -588,9 +588,59 @@ PlayerCareerStats = create_model(  # ty: ignore[no-matching-overload]
 )
 
 
-class PlayerParserErrorMessage(BaseModel):
+class PlayerNotFoundError(BaseModel):
+    """
+    Enhanced 404 error response for unknown players with retry information.
+
+    When a player is not found, the API implements exponential backoff to avoid
+    repeatedly checking Blizzard for non-existent players. This response includes
+    timing information to help clients implement intelligent retry logic.
+    """
+
     error: str = Field(
         ...,
-        description="Message describing the player parser error",
+        description="Error message",
         examples=["Player not found"],
+    )
+    retry_after: int = Field(
+        ...,
+        description=(
+            "Seconds to wait before retrying this request. "
+            "Follows exponential backoff with settings: "
+            "base=600s (10min), multiplier=3, max=21600s (6h). "
+            "Progression: 600s → 1800s → 5400s → 21600s (capped)"
+        ),
+        examples=[600, 1800, 5400, 21600],
+        gt=0,
+    )
+    next_check_at: int = Field(
+        ...,
+        description=(
+            "Unix timestamp indicating when retries will be accepted. "
+            "The API does NOT automatically check the player after this time. "
+            "Instead, when a user retries after this timestamp, the API will "
+            "attempt to fetch fresh data from Blizzard."
+        ),
+        examples=[1708098000],
+        gt=0,
+    )
+    check_count: int = Field(
+        ...,
+        description=(
+            "Number of times the API has attempted to fetch this player from Blizzard. "
+            "Used to calculate exponential backoff delay."
+        ),
+        examples=[1, 2, 3, 4],
+        ge=1,
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "error": "Player not found",
+                "retry_after": 1800,
+                "next_check_at": 1739634000,
+                "check_count": 2,
+            }
+        }
     )

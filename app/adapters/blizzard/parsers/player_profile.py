@@ -19,7 +19,10 @@ from app.config import settings
 from app.exceptions import ParserBlizzardError, ParserParsingError
 
 if TYPE_CHECKING:
-    from app.adapters.blizzard.client import BlizzardClient
+    from selectolax.lexbor import LexborNode
+
+    from app.domain.ports import BlizzardClientPort
+
 from app.overfast_logger import logger
 from app.players.enums import (
     CareerHeroesComparisonsCategory,
@@ -42,9 +45,6 @@ from app.players.helpers import (
     string_to_snakecase,
 )
 
-if TYPE_CHECKING:
-    from selectolax.lexbor import LexborNode
-
 # Platform/gamemode CSS class mappings
 PLATFORMS_DIV_MAPPING = {
     PlayerPlatform.PC: "mouseKeyboard-view",
@@ -56,7 +56,7 @@ GAMEMODES_DIV_MAPPING = {
 }
 
 
-async def fetch_player_html(client: BlizzardClient, player_id: str) -> str:
+async def fetch_player_html(client: BlizzardClientPort, player_id: str) -> str:
     """
     Fetch player profile HTML from Blizzard
 
@@ -640,7 +640,7 @@ def filter_all_stats_data(
 
 
 async def parse_player_profile(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     player_id: str,
     player_summary: dict | None = None,
 ) -> dict:

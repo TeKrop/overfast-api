@@ -19,8 +19,10 @@ class ListGamemodesController(AbstractController):
         """Process request using stateless parser function"""
         data = parse_gamemodes()
 
-        # Update API Cache
-        self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
+        # Dual-write to API Cache (Valkey) and Storage (SQLite)
+        storage_key = "gamemodes:en-us"  # Gamemodes are not localized
+        await self.update_static_cache(data, storage_key, data_type="json")
+
         self.response.headers[settings.cache_ttl_header] = str(self.timeout)
 
         return data
