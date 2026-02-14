@@ -14,9 +14,10 @@ def client() -> TestClient:
     return TestClient(app)
 
 
-@pytest.fixture(scope="session")
-def valkey_server():
-    return fakeredis.FakeValkey(protocol=3)  # ty: ignore[possibly-missing-attribute]
+@pytest_asyncio.fixture(scope="session")
+async def valkey_server():
+    """Provide async FakeValkey server for tests"""
+    return fakeredis.FakeAsyncRedis(protocol=3)  # ty: ignore[possibly-missing-attribute]
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -28,13 +29,13 @@ async def storage_db() -> SQLiteStorage:
     return storage
 
 
-@pytest.fixture(autouse=True)
-def _patch_before_every_test(
-    valkey_server: fakeredis.FakeValkey,  # ty: ignore[possibly-missing-attribute]
+@pytest_asyncio.fixture(autouse=True)
+async def _patch_before_every_test(
+    valkey_server: fakeredis.FakeAsyncRedis,  # Async FakeValkey
     storage_db: SQLiteStorage,
 ):
     # Flush Valkey before and after every tests
-    valkey_server.flushdb()
+    await valkey_server.flushdb()
 
     with (
         patch("app.helpers.settings.discord_webhook_enabled", False),
@@ -50,4 +51,4 @@ def _patch_before_every_test(
     ):
         yield
 
-    valkey_server.flushdb()
+    await valkey_server.flushdb()

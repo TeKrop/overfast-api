@@ -58,8 +58,8 @@ class AbstractController(ABC):
             storage_key: Key for SQLite storage (e.g., "heroes:en-us")
             data_type: Type of data ("json" or "html")
         """
-        # Update API Cache (Valkey)
-        self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
+        # Update API Cache (Valkey) - async
+        await self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
 
         # Update persistent storage (SQLite) - Phase 3 dual-write
         try:
@@ -69,7 +69,9 @@ class AbstractController(ABC):
             )
         except OSError as error:
             # Disk/file I/O errors
-            logger.warning(f"Storage write failed (disk error) for {storage_key}: {error}")
+            logger.warning(
+                f"Storage write failed (disk error) for {storage_key}: {error}"
+            )
             self._track_storage_error("disk_error")
         except RuntimeError as error:
             # Compression/serialization errors
@@ -121,8 +123,10 @@ class AbstractController(ABC):
         # Merge parsers data together
         computed_data = self.merge_parsers_data(parsers_data, **kwargs)
 
-        # Update API Cache
-        self.cache_manager.update_api_cache(self.cache_key, computed_data, self.timeout)
+        # Update API Cache - async
+        await self.cache_manager.update_api_cache(
+            self.cache_key, computed_data, self.timeout
+        )
 
         # Ensure response headers contains Cache TTL
         self.response.headers[settings.cache_ttl_header] = str(self.timeout)

@@ -18,7 +18,7 @@ class BasePlayerController(AbstractController):
     to prevent spamming Blizzard with calls.
     """
 
-    def check_unknown_player(self, player_id: str) -> None:
+    async def check_unknown_player(self, player_id: str) -> None:
         """
         Check if player is known to not exist and raise 404 if so.
         Should be called at the start of any player controller logic.
@@ -32,7 +32,7 @@ class BasePlayerController(AbstractController):
         if not settings.unknown_players_cache_enabled:
             return
 
-        if self.cache_manager.is_player_unknown(player_id):
+        if await self.cache_manager.is_player_unknown(player_id):
             logger.warning(
                 "Player {} is unknown, skipping profile retrieval", player_id
             )
@@ -41,7 +41,7 @@ class BasePlayerController(AbstractController):
                 detail="Player not found",
             )
 
-    def mark_player_unknown_on_404(
+    async def mark_player_unknown_on_404(
         self, player_id: str, exception: HTTPException
     ) -> None:
         """
@@ -56,7 +56,7 @@ class BasePlayerController(AbstractController):
             return
 
         if exception.status_code == status.HTTP_404_NOT_FOUND:
-            self.cache_manager.set_player_as_unknown(player_id)
+            await self.cache_manager.set_player_as_unknown(player_id)
 
     async def with_unknown_player_guard(
         self,
@@ -79,13 +79,13 @@ class BasePlayerController(AbstractController):
             HTTPException: 404 if player is unknown or becomes unknown
         """
         # Check if player is known to not exist
-        self.check_unknown_player(player_id)
+        await self.check_unknown_player(player_id)
 
         # Execute handler and intercept 404 to mark player unknown
         try:
             return await handler()
         except HTTPException as err:
-            self.mark_player_unknown_on_404(player_id, err)
+            await self.mark_player_unknown_on_404(player_id, err)
             raise
 
     async def process_request(self, **kwargs) -> dict:
@@ -99,7 +99,7 @@ class BasePlayerController(AbstractController):
 
         # First check if player is known to not exist
         player_id = kwargs["player_id"]
-        if self.cache_manager.is_player_unknown(player_id):
+        if await self.cache_manager.is_player_unknown(player_id):
             logger.warning(
                 "Player {} is unknown, skipping profile retrieval", player_id
             )
@@ -114,5 +114,5 @@ class BasePlayerController(AbstractController):
             return cast("dict", await super().process_request(**kwargs))
         except HTTPException as err:
             if err.status_code == status.HTTP_404_NOT_FOUND:
-                self.cache_manager.set_player_as_unknown(player_id)
+                await self.cache_manager.set_player_as_unknown(player_id)
             raise

@@ -89,11 +89,14 @@ class SQLiteStorage:
         Returns:
             Dict with 'data', 'data_type', 'updated_at', 'schema_version' or None if not found
         """
-        async with self._get_connection() as db, db.execute(
-            """SELECT data_type, data_compressed, updated_at, schema_version
+        async with (
+            self._get_connection() as db,
+            db.execute(
+                """SELECT data_type, data_compressed, updated_at, schema_version
                    FROM static_data WHERE key = ?""",
-            (key,),
-        ) as cursor:
+                (key,),
+            ) as cursor,
+        ):
             row = await cursor.fetchone()
             if not row:
                 return None
@@ -143,12 +146,15 @@ class SQLiteStorage:
             Dict with 'html', 'blizzard_id', 'last_updated_blizzard', 'updated_at', 'schema_version'
             or None if not found
         """
-        async with self._get_connection() as db, db.execute(
-            """SELECT blizzard_id, html_compressed, last_updated_blizzard,
+        async with (
+            self._get_connection() as db,
+            db.execute(
+                """SELECT blizzard_id, html_compressed, last_updated_blizzard,
                           updated_at, schema_version
                    FROM player_profiles WHERE player_id = ?""",
-            (player_id,),
-        ) as cursor:
+                (player_id,),
+            ) as cursor,
+        ):
             row = await cursor.fetchone()
             if not row:
                 return None
@@ -212,11 +218,14 @@ class SQLiteStorage:
         Returns:
             Dict with 'check_count', 'last_checked_at', 'retry_after' or None if not found
         """
-        async with self._get_connection() as db, db.execute(
-            """SELECT check_count, last_checked_at, retry_after
+        async with (
+            self._get_connection() as db,
+            db.execute(
+                """SELECT check_count, last_checked_at, retry_after
                    FROM player_status WHERE player_id = ?""",
-            (player_id,),
-        ) as cursor:
+                (player_id,),
+            ) as cursor,
+        ):
             row = await cursor.fetchone()
             if not row:
                 return None
@@ -273,21 +282,15 @@ class SQLiteStorage:
         """
         async with self._get_connection() as db:
             # Count entries per table
-            async with db.execute(
-                "SELECT COUNT(*) FROM static_data"
-            ) as cursor:
+            async with db.execute("SELECT COUNT(*) FROM static_data") as cursor:
                 row = await cursor.fetchone()
                 static_count = row[0] if row else 0
 
-            async with db.execute(
-                "SELECT COUNT(*) FROM player_profiles"
-            ) as cursor:
+            async with db.execute("SELECT COUNT(*) FROM player_profiles") as cursor:
                 row = await cursor.fetchone()
                 profiles_count = row[0] if row else 0
 
-            async with db.execute(
-                "SELECT COUNT(*) FROM player_status"
-            ) as cursor:
+            async with db.execute("SELECT COUNT(*) FROM player_status") as cursor:
                 row = await cursor.fetchone()
                 status_count = row[0] if row else 0
 

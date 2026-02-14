@@ -56,7 +56,7 @@ class GetPlayerStatsSummaryController(BasePlayerController):
                 else:
                     # Check Player Cache
                     logger.info("Checking Player Cache...")
-                    player_cache = self.cache_manager.get_player_cache(player_id)
+                    player_cache = await self.cache_manager.get_player_cache(player_id)
 
                     if (
                         player_cache is not None
@@ -86,7 +86,7 @@ class GetPlayerStatsSummaryController(BasePlayerController):
                         )
 
                         # Update Player Cache
-                        self.cache_manager.update_player_cache(
+                        await self.cache_manager.update_player_cache(
                             player_id,
                             {"summary": player_summary, "profile": html},
                         )
@@ -113,7 +113,9 @@ class GetPlayerStatsSummaryController(BasePlayerController):
                 raise overfast_internal_error(blizzard_url, error) from error
 
             # Update API Cache
-            self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
+            await self.cache_manager.update_api_cache(
+                self.cache_key, data, self.timeout
+            )
             self.response.headers[settings.cache_ttl_header] = str(self.timeout)
 
             return data

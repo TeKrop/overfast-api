@@ -19,30 +19,60 @@ player-cache:TeKrop-2217
 => {"summary": {"...": "...""}, "profile": "<html>....</html>"}
 """
 
-import asyncio
 import json
 from compression.zstd import ZstdCompressor, ZstdDecompressor
-from typing import TYPE_CHECKING
+from functools import wraps
+from typing import TYPE_CHECKING, Any
 
-import valkey
+import valkey.asyncio as valkey
 
 from app.config import settings
 from app.metaclasses import Singleton
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from fastapi import Request
+
+
+def handle_valkey_error(
+    default_return: Any = None,
+) -> Callable[[Callable], Callable]:
+    """
+    Decorator to handle Valkey connection errors gracefully.
+
+    Args:
+        default_return: Value to return when ValkeyError is caught (default: None)
+
+    Returns:
+        Decorated async function that catches ValkeyError and returns default_return
+    """
+
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            try:
+                return await func(*args, **kwargs)
+            except valkey.ValkeyError as err:
+                func_name = getattr(func, "__name__", "unknown")
+                logger.warning(f"Valkey server error in {func_name}: {err}")
+                return default_return
+
+        return wrapper
+
+    return decorator
 
 
 class ValkeyCache(metaclass=Singleton):
     """
-    Valkey cache adapter implementing CachePort protocol.
+    Async Valkey cache adapter implementing CachePort protocol.
 
-    Implements CachePort protocol via structural typing (duck typing).
+    All methods are async for non-blocking I/O.
     Protocol compliance is verified by type checkers at injection points.
     """
 
-    # Valkey server global variable
+    # Valkey server global variable (async client)
     valkey_server = valkey.Valkey(
         host=settings.valkey_host, port=settings.valkey_port, protocol=3
     )
@@ -50,10 +80,6 @@ class ValkeyCache(metaclass=Singleton):
     # zstd compressor/decompressor (Python 3.14+)
     _compressor = ZstdCompressor()
     _decompressor = ZstdDecompressor()
-
-    @staticmethod
-    def log_warning(err: valkey.exceptions.ValkeyError) -> None:
-        logger.warning("Valkey server error : {}", str(err))
 
     @staticmethod
     def get_cache_key_from_request(request: Request) -> str:
@@ -76,24 +102,14 @@ class ValkeyCache(metaclass=Singleton):
         """Helper method to retrieve a value from a compressed JSON data using zstd"""
         return json.loads(ValkeyCache._decompressor.decompress(value).decode("utf-8"))
 
-    def _handle_valkey_error(self, func):
-        """Helper to handle Valkey connection errors"""
-        try:
-            return func()
-        except valkey.exceptions.ValkeyError as err:
-            self.log_warning(err)
-            return None
-
     # CachePort protocol methods
+    @handle_valkey_error(default_return=None)
     async def get(self, key: str) -> bytes | None:
         """Get raw value from cache by key"""
+        value = await self.valkey_server.get(key)
+        return value if isinstance(value, bytes) else None
 
-        def _get():
-            value = self.valkey_server.get(key)
-            return value if isinstance(value, bytes) else None
-
-        return await asyncio.to_thread(lambda: self._handle_valkey_error(_get))
-
+    @handle_valkey_error(default_return=None)
     async def set(
         self,
         key: str,
@@ -101,126 +117,101 @@ class ValkeyCache(metaclass=Singleton):
         expire: int | None = None,
     ) -> None:
         """Set raw value in cache with optional expiration (seconds)"""
+        await self.valkey_server.set(key, value, ex=expire)
 
-        def _set():
-            self.valkey_server.set(key, value, ex=expire)
-
-        await asyncio.to_thread(lambda: self._handle_valkey_error(_set))
-
+    @handle_valkey_error(default_return=None)
     async def delete(self, key: str) -> None:
         """Delete key from cache"""
+        await self.valkey_server.delete(key)
 
-        def _delete():
-            self.valkey_server.delete(key)
-
-        await asyncio.to_thread(lambda: self._handle_valkey_error(_delete))
-
+    @handle_valkey_error(default_return=False)
     async def exists(self, key: str) -> bool:
         """Check if key exists in cache"""
+        result = await self.valkey_server.exists(key)
+        return bool(result)
 
-        def _exists():
-            return bool(self.valkey_server.exists(key))
-
-        result = await asyncio.to_thread(lambda: self._handle_valkey_error(_exists))
-        return result or False
-
-    # Legacy application-specific methods (kept for backward compatibility during migration)
-    def get_api_cache(self, cache_key: str) -> dict | list | None:
+    # Application-specific cache methods
+    @handle_valkey_error(default_return=None)
+    async def get_api_cache(self, cache_key: str) -> dict | list | None:
         """Get the API Cache value associated with a given cache key"""
+        api_cache_key = f"{settings.api_cache_key_prefix}:{cache_key}"
+        api_cache = await self.valkey_server.get(api_cache_key)
+        if not api_cache or not isinstance(api_cache, bytes):
+            return None
+        return self._decompress_json_value(api_cache)
 
-        def _get_api_cache():
-            api_cache_key = f"{settings.api_cache_key_prefix}:{cache_key}"
-            api_cache = self.valkey_server.get(api_cache_key)
-            if not api_cache or not isinstance(api_cache, bytes):
-                return None
-            return self._decompress_json_value(api_cache)
-
-        return self._handle_valkey_error(_get_api_cache)
-
-    def update_api_cache(self, cache_key: str, value: dict | list, expire: int) -> None:
+    @handle_valkey_error(default_return=None)
+    async def update_api_cache(
+        self, cache_key: str, value: dict | list, expire: int
+    ) -> None:
         """Update or set an API Cache value with an expiration value (in seconds)"""
+        bytes_value = self._compress_json_value(value)
+        await self.valkey_server.set(
+            f"{settings.api_cache_key_prefix}:{cache_key}",
+            bytes_value,
+            ex=expire,
+        )
 
-        def _update_api_cache():
-            bytes_value = self._compress_json_value(value)
-            self.valkey_server.set(
-                f"{settings.api_cache_key_prefix}:{cache_key}",
-                bytes_value,
-                ex=expire,
-            )
-
-        self._handle_valkey_error(_update_api_cache)
-
-    def get_player_cache(self, player_id: str) -> dict | list | None:
+    @handle_valkey_error(default_return=None)
+    async def get_player_cache(self, player_id: str) -> dict | list | None:
         """Get the Player Cache value associated with a given cache key"""
+        player_key = f"{settings.player_cache_key_prefix}:{player_id}"
+        player_cache = await self.valkey_server.get(player_key)
+        if not player_cache or not isinstance(player_cache, bytes):
+            return None
+        # Reset the TTL before returning the value
+        await self.valkey_server.expire(player_key, settings.player_cache_timeout)
+        return self._decompress_json_value(player_cache)
 
-        def _get_player_cache():
-            player_key = f"{settings.player_cache_key_prefix}:{player_id}"
-            player_cache = self.valkey_server.get(player_key)
-            if not player_cache or not isinstance(player_cache, bytes):
-                return None
-            # Reset the TTL before returning the value
-            self.valkey_server.expire(player_key, settings.player_cache_timeout)
-            return self._decompress_json_value(player_cache)
-
-        return self._handle_valkey_error(_get_player_cache)
-
-    def update_player_cache(self, player_id: str, value: dict) -> None:
+    @handle_valkey_error(default_return=None)
+    async def update_player_cache(self, player_id: str, value: dict) -> None:
         """Update or set a Player Cache value"""
+        compressed_value = self._compress_json_value(value)
+        await self.valkey_server.set(
+            f"{settings.player_cache_key_prefix}:{player_id}",
+            value=compressed_value,
+            ex=settings.player_cache_timeout,
+        )
 
-        def _update_player_cache():
-            compressed_value = self._compress_json_value(value)
-            self.valkey_server.set(
-                f"{settings.player_cache_key_prefix}:{player_id}",
-                value=compressed_value,
-                ex=settings.player_cache_timeout,
-            )
+    @handle_valkey_error(default_return=False)
+    async def is_being_rate_limited(self) -> bool:
+        """Check if Blizzard rate limit is currently active"""
+        result = await self.valkey_server.exists(settings.blizzard_rate_limit_key)
+        return bool(result)
 
-        self._handle_valkey_error(_update_player_cache)
+    @handle_valkey_error(default_return=0)
+    async def get_global_rate_limit_remaining_time(self) -> int:
+        """Get remaining time in seconds for Blizzard rate limit"""
+        blizzard_rate_limit = await self.valkey_server.ttl(
+            settings.blizzard_rate_limit_key
+        )
+        return blizzard_rate_limit if isinstance(blizzard_rate_limit, int) else 0
 
-    def is_being_rate_limited(self) -> bool:
-        def _is_rate_limited():
-            return bool(self.valkey_server.exists(settings.blizzard_rate_limit_key))
+    @handle_valkey_error(default_return=None)
+    async def set_global_rate_limit(self) -> None:
+        """Set Blizzard rate limit flag"""
+        await self.valkey_server.set(
+            settings.blizzard_rate_limit_key,
+            value=0,
+            ex=settings.blizzard_rate_limit_retry_after,
+        )
 
-        return self._handle_valkey_error(_is_rate_limited) or False
+    @handle_valkey_error(default_return=False)
+    async def is_player_unknown(self, player_id: str) -> bool:
+        """Check if player is marked as unknown"""
+        result = await self.valkey_server.exists(
+            f"{settings.unknown_players_cache_key_prefix}:{player_id}"
+        )
+        return bool(result)
 
-    def get_global_rate_limit_remaining_time(self) -> int:
-        def _get_remaining_time():
-            blizzard_rate_limit = self.valkey_server.ttl(
-                settings.blizzard_rate_limit_key
-            )
-            return blizzard_rate_limit if isinstance(blizzard_rate_limit, int) else 0
-
-        return self._handle_valkey_error(_get_remaining_time) or 0
-
-    def set_global_rate_limit(self) -> None:
-        def _set_rate_limit():
-            self.valkey_server.set(
-                settings.blizzard_rate_limit_key,
-                value=0,
-                ex=settings.blizzard_rate_limit_retry_after,
-            )
-
-        self._handle_valkey_error(_set_rate_limit)
-
-    def is_player_unknown(self, player_id: str) -> bool:
-        def _is_unknown():
-            return bool(
-                self.valkey_server.exists(
-                    f"{settings.unknown_players_cache_key_prefix}:{player_id}"
-                )
-            )
-
-        return self._handle_valkey_error(_is_unknown) or False
-
-    def set_player_as_unknown(self, player_id: str) -> None:
-        def _set_unknown():
-            self.valkey_server.set(
-                f"{settings.unknown_players_cache_key_prefix}:{player_id}",
-                value=0,
-                ex=settings.unknown_players_cache_timeout,
-            )
-
-        self._handle_valkey_error(_set_unknown)
+    @handle_valkey_error(default_return=None)
+    async def set_player_as_unknown(self, player_id: str) -> None:
+        """Mark player as unknown"""
+        await self.valkey_server.set(
+            f"{settings.unknown_players_cache_key_prefix}:{player_id}",
+            value=0,
+            ex=settings.unknown_players_cache_timeout,
+        )
 
 
 # Backward compatibility alias
