@@ -588,14 +588,6 @@ PlayerCareerStats = create_model(  # ty: ignore[no-matching-overload]
 )
 
 
-class PlayerParserErrorMessage(BaseModel):
-    error: str = Field(
-        ...,
-        description="Message describing the player parser error",
-        examples=["Player not found"],
-    )
-
-
 class PlayerNotFoundError(BaseModel):
     """
     Enhanced 404 error response for unknown players with retry information.

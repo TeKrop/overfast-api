@@ -62,6 +62,7 @@ Should you wish to customize according to your specific requirements, here is a 
 - `APP_VOLUME_PATH`: Folder for shared app data like logs, Valkey save file and dotenv file (app settings)
 - `APP_PORT`: Port for the app container (default is `80`).
 - `APP_BASE_URL` : Base URL for exposed links in endpoints like player search and maps listing.
+- `STORAGE_PATH`: Path to SQLite database file for persistent storage. Use `:memory:` for in-memory database (useful for testing or ephemeral deployments where data persistence is not required).
 
 You likely won't need to modify other generic settings, but if you're curious about their functionality, consult the docstrings within the `app/config.py` file for further details.
 

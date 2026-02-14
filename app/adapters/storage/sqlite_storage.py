@@ -77,8 +77,9 @@ class SQLiteStorage:
         if self._initialized:
             return
 
-        # Ensure directory exists
-        Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
+        # Ensure directory exists (skip for in-memory database)
+        if self.db_path != ":memory:":
+            Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
 
         # Load schema from SQL file
         schema_path = Path(__file__).parent / "schema.sql"
@@ -337,9 +338,16 @@ class SQLiteStorage:
                 row = await cursor.fetchone()
                 status_count = row[0] if row else 0
 
-        # Get file size
-        db_file = Path(self.db_path)
-        size_bytes = db_file.stat().st_size if db_file.exists() else 0
+        # Get file size (or estimate for in-memory database)
+        if self.db_path == ":memory:":
+            # Estimate size for in-memory database
+            # Rough approximation: static_data ~1KB, player_profiles ~10KB, player_status ~100B
+            size_bytes = (
+                (static_count * 1024) + (profiles_count * 10240) + (status_count * 100)
+            )
+        else:
+            db_file = Path(self.db_path)
+            size_bytes = db_file.stat().st_size if db_file.exists() else 0
 
         return {
             "size_bytes": size_bytes,

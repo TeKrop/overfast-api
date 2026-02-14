@@ -1,16 +1,58 @@
 """Base Player Controller module"""
 
 import time
-from typing import TYPE_CHECKING, cast
-
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
+from functools import wraps
+from typing import cast
 
 from fastapi import HTTPException, status
 
 from app.config import settings
 from app.controllers import AbstractController
 from app.overfast_logger import logger
+
+
+def with_unknown_player_guard(func):
+    """
+    Decorator to guard player endpoints against unknown players.
+
+    Checks if player is unknown before executing the handler, and marks
+    player as unknown on 404. Requires the method to accept player_id in kwargs.
+
+    Example:
+        @with_unknown_player_guard
+        async def process_request(self, **kwargs) -> dict:
+            player_id = kwargs["player_id"]
+            # ... handler logic
+
+    Args:
+        func: Async method to decorate (must accept **kwargs with player_id)
+
+    Returns:
+        Decorated async method with unknown player protection
+
+    Raises:
+        HTTPException: 404 if player is unknown or becomes unknown
+        ValueError: If player_id is not in kwargs
+    """
+
+    @wraps(func)
+    async def wrapper(self, **kwargs) -> dict:
+        player_id = kwargs.get("player_id")
+        if not player_id:
+            msg = "with_unknown_player_guard requires player_id in kwargs"
+            raise ValueError(msg)
+
+        # Check if player is known to not exist
+        await self.check_unknown_player(player_id)
+
+        # Execute handler with unknown player marking on 404
+        try:
+            return await func(self, **kwargs)
+        except HTTPException as exception:
+            await self.mark_player_unknown_on_404(player_id, exception)
+            raise
+
+    return wrapper
 
 
 class BasePlayerController(AbstractController):
@@ -160,36 +202,6 @@ class BasePlayerController(AbstractController):
             logger.info(
                 f"Marked player {player_id} as unknown (check #{check_count}, retry in {retry_after}s)"
             )
-
-    async def with_unknown_player_guard(
-        self,
-        player_id: str,
-        handler: Callable[[], Awaitable[dict]],
-    ) -> dict:
-        """
-        Execute handler with unknown player caching guard.
-        Checks if player is unknown before calling handler,
-        and marks player as unknown if 404 is raised.
-
-        Args:
-            player_id: Player ID
-            handler: Async function to execute
-
-        Returns:
-            Result from handler
-
-        Raises:
-            HTTPException: 404 if player is unknown or becomes unknown
-        """
-        # Check if player is known to not exist
-        await self.check_unknown_player(player_id)
-
-        # Execute handler and intercept 404 to mark player unknown
-        try:
-            return await handler()
-        except HTTPException as err:
-            await self.mark_player_unknown_on_404(player_id, err)
-            raise
 
     async def process_request(self, **kwargs) -> dict:
         """Process request as usual, but ensure to properly handle players

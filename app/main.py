@@ -2,7 +2,7 @@
 
 import json
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import ResponseValidationError
@@ -29,6 +29,10 @@ from .middlewares import (
 from .monitoring.middleware import register_prometheus_middleware
 from .overfast_client import OverFastClient
 from .overfast_logger import logger
+
+if TYPE_CHECKING:
+    from app.domain.ports import BlizzardClientPort, StoragePort
+
 
 if settings.sentry_dsn:
     import sentry_sdk
@@ -58,17 +62,18 @@ if settings.sentry_dsn:
 async def lifespan(_: FastAPI):  # pragma: no cover
     # Initialize SQLite storage
     logger.info("Initializing SQLite storage...")
-    storage = SQLiteStorage()
+    storage: StoragePort = SQLiteStorage()
     await storage.initialize()
 
     # Instanciate HTTPX Async Client
     logger.info("Instanciating HTTPX AsyncClient...")
-    overfast_client = OverFastClient()
+    overfast_client: BlizzardClientPort = OverFastClient()
 
     yield
 
-    # Properly close HTTPX Async Client
+    # Properly close HTTPX Async Client and SQLite storage
     await overfast_client.aclose()
+    await storage.close()
 
 
 description = f"""OverFast API provides comprehensive data on Overwatch heroes,

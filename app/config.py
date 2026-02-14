@@ -56,14 +56,8 @@ class Settings(BaseSettings):
     ############
 
     # SQLite database path for persistent storage
+    # Use ":memory:" for in-memory database (testing/ephemeral deployments)
     storage_path: str = "data/overfast.db"
-
-    # Staleness thresholds (seconds) for cache invalidation
-    static_data_staleness_threshold: int = (
-        86400  # 24 hours (heroes, maps, gamemodes, roles)
-    )
-    hero_stats_staleness_threshold: int = 3600  # 1 hour (pickrate/winrate data)
-    player_profile_staleness_threshold: int = 10800  # 3 hours
 
     # Unknown player exponential backoff configuration
     unknown_player_initial_retry: int = 600  # 10 minutes (first check)
