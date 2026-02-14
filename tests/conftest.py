@@ -1,4 +1,8 @@
+from typing import TYPE_CHECKING
 from unittest.mock import patch
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
 
 import fakeredis
 import pytest
@@ -17,16 +21,17 @@ def client() -> TestClient:
 @pytest_asyncio.fixture(scope="session")
 async def valkey_server():
     """Provide async FakeValkey server for tests"""
-    return fakeredis.FakeAsyncRedis(protocol=3)  # ty: ignore[possibly-missing-attribute]
+    return fakeredis.FakeAsyncRedis(protocol=3)
 
 
 @pytest_asyncio.fixture(scope="session")
-async def storage_db() -> SQLiteStorage:
+async def storage_db() -> AsyncIterator[SQLiteStorage]:
     """Provide an in-memory SQLite storage for tests"""
 
     storage = SQLiteStorage(db_path=":memory:")
     await storage.initialize()
-    return storage
+    yield storage
+    await storage.close()
 
 
 @pytest_asyncio.fixture(autouse=True)
@@ -34,8 +39,9 @@ async def _patch_before_every_test(
     valkey_server: fakeredis.FakeAsyncRedis,  # Async FakeValkey
     storage_db: SQLiteStorage,
 ):
-    # Flush Valkey before and after every tests
+    # Flush Valkey and SQLite player data before and after every test
     await valkey_server.flushdb()
+    await storage_db.clear_player_data()
 
     with (
         patch("app.helpers.settings.discord_webhook_enabled", False),
@@ -52,3 +58,4 @@ async def _patch_before_every_test(
         yield
 
     await valkey_server.flushdb()
+    await storage_db.clear_player_data()

@@ -35,19 +35,39 @@ class SQLiteStorage:
             db_path: Path to SQLite database file. Defaults to settings.storage_path
         """
         self.db_path = db_path or settings.storage_path
-        self._compressor = ZstdCompressor()
-        self._decompressor = ZstdDecompressor()
         self._initialized = False
+        self._shared_connection: aiosqlite.Connection | None = None  # For :memory: databases
 
     @asynccontextmanager
     async def _get_connection(self) -> AsyncIterator[aiosqlite.Connection]:
-        """Get a database connection with proper configuration"""
+        """
+        Get a database connection with proper configuration.
+        For :memory: databases, reuses a single connection to persist schema across operations.
+        """
+        # For in-memory databases, use a shared connection
+        if self.db_path == ":memory:":
+            if self._shared_connection is None:
+                # Create and store the shared connection
+                db = await aiosqlite.connect(self.db_path)
+                await db.execute("PRAGMA journal_mode=WAL")
+                await db.execute("PRAGMA foreign_keys=ON")
+                self._shared_connection = db
+            yield self._shared_connection
+            return
+
+        # For file-based databases, create a new connection per operation
         async with aiosqlite.connect(self.db_path) as db:
             # Enable WAL mode for better concurrent read performance
             await db.execute("PRAGMA journal_mode=WAL")
             # Enable foreign keys
             await db.execute("PRAGMA foreign_keys=ON")
             yield db
+
+    async def close(self) -> None:
+        """Close the shared connection if it exists"""
+        if self._shared_connection is not None:
+            await self._shared_connection.close()
+            self._shared_connection = None
 
     async def initialize(self) -> None:
         """Initialize database schema from schema.sql file"""
@@ -71,14 +91,16 @@ class SQLiteStorage:
 
     def _compress(self, data: str) -> bytes:
         """Compress string data using zstd"""
+        # Create new compressor for each operation
+        compressor = ZstdCompressor()
         # Use FLUSH_FRAME mode to ensure complete compression
-        return self._compressor.compress(
-            data.encode("utf-8"), self._compressor.FLUSH_FRAME
-        )
+        return compressor.compress(data.encode("utf-8"), compressor.FLUSH_FRAME)
 
     def _decompress(self, data: bytes) -> str:
         """Decompress zstd data to string"""
-        return self._decompressor.decompress(data).decode("utf-8")
+        # Create new decompressor for each operation
+        decompressor = ZstdDecompressor()
+        return decompressor.decompress(data).decode("utf-8")
 
     # Static Data Methods
 
@@ -304,3 +326,10 @@ class SQLiteStorage:
             "player_profiles_count": profiles_count,
             "player_status_count": status_count,
         }
+
+    async def clear_player_data(self) -> None:
+        """Clear all player data (for testing)"""
+        async with self._get_connection() as db:
+            await db.execute("DELETE FROM player_profiles")
+            await db.execute("DELETE FROM player_status")
+            await db.commit()

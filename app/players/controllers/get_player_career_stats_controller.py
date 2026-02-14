@@ -1,6 +1,6 @@
 """Player Career Stats Controller module"""
 
-from typing import ClassVar
+from typing import ClassVar, cast
 
 from fastapi import HTTPException
 
@@ -56,9 +56,9 @@ class GetPlayerCareerStatsController(BasePlayerController):
                         hero,
                     )
                 else:
-                    # Check Player Cache
+                    # Check Player Cache (SQLite storage)
                     logger.info("Checking Player Cache...")
-                    player_cache = await self.cache_manager.get_player_cache(player_id)
+                    player_cache = await self.get_player_profile_cache(player_id)
 
                     if (
                         player_cache is not None
@@ -66,7 +66,7 @@ class GetPlayerCareerStatsController(BasePlayerController):
                         == player_summary["lastUpdated"]
                     ):
                         logger.info("Player Cache found and up-to-date, using it")
-                        html = player_cache["profile"]  # ty: ignore[invalid-argument-type]
+                        html = cast("str", player_cache["profile"])
                         data = parse_player_career_stats_from_html(
                             html,
                             player_summary,
@@ -89,10 +89,9 @@ class GetPlayerCareerStatsController(BasePlayerController):
                             hero,
                         )
 
-                        # Update Player Cache
-                        await self.cache_manager.update_player_cache(
-                            player_id,
-                            {"summary": player_summary, "profile": html},
+                        # Update Player Cache (SQLite storage)
+                        await self.update_player_profile_cache(
+                            player_id, player_summary, html
                         )
 
             except ParserBlizzardError as error:

@@ -1,6 +1,6 @@
 """Player Career Controller module"""
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from fastapi import HTTPException
 
@@ -57,9 +57,9 @@ class GetPlayerCareerController(BasePlayerController):
                     html = await self._fetch_player_html(client, player_id)
                     profile_data = parse_player_profile_html(html, None)
                 else:
-                    # Check Player Cache
+                    # Check Player Cache (SQLite storage)
                     logger.info("Checking Player Cache...")
-                    player_cache = await self.cache_manager.get_player_cache(player_id)
+                    player_cache = await self.get_player_profile_cache(player_id)
 
                     if (
                         player_cache is not None
@@ -67,7 +67,7 @@ class GetPlayerCareerController(BasePlayerController):
                         == player_summary["lastUpdated"]
                     ):
                         logger.info("Player Cache found and up-to-date, using it")
-                        html = player_cache["profile"]  # ty: ignore[invalid-argument-type]
+                        html = cast("str", player_cache["profile"])
                         profile_data = parse_player_profile_html(html, player_summary)
                     else:
                         # Fetch from Blizzard with Blizzard ID
@@ -78,10 +78,9 @@ class GetPlayerCareerController(BasePlayerController):
                         html = await self._fetch_player_html(client, blizzard_id)
                         profile_data = parse_player_profile_html(html, player_summary)
 
-                        # Update Player Cache
-                        await self.cache_manager.update_player_cache(
-                            player_id,
-                            {"summary": player_summary, "profile": html},
+                        # Update Player Cache (SQLite storage)
+                        await self.update_player_profile_cache(
+                            player_id, player_summary, html
                         )
 
                 # Apply filters
