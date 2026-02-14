@@ -88,11 +88,15 @@ up_monitoring: ## Build & run with monitoring (Prometheus + Grafana)
 	@echo "Launching OverFastAPI with monitoring..."
 	$(DOCKER_COMPOSE) --profile monitoring up -d
 
-down: ## Stop the app and remove containers
+down: ## Stop the app and remove containers (preserves data volumes)
 	@echo "Stopping OverFastAPI and cleaning containers..."
-	$(DOCKER_COMPOSE) --profile "*" down  -v --remove-orphans
+	$(DOCKER_COMPOSE) --profile "*" down --remove-orphans
 
-clean: down ## Clean up Docker environment
+down_clean: ## Stop the app, remove containers and volumes (clean slate)
+	@echo "Stopping OverFastAPI and cleaning containers and volumes..."
+	$(DOCKER_COMPOSE) --profile "*" down -v --remove-orphans
+
+clean: down_clean ## Clean up Docker environment
 	@echo "Cleaning Docker environment..."
 	docker image prune -af
 	docker network prune -f
@@ -103,4 +107,4 @@ lock: ## Update lock file
 update_test_fixtures: ## Update test fixtures (heroes, players, etc.)
 	$(DOCKER RUN) uv run python -m tests.update_test_fixtures $(PARAMS)
 
-.PHONY: help build start lint format shell exec test up up_monitoring down clean lock update_test_fixtures
+.PHONY: help build start lint format shell exec test up up_monitoring down down_clean clean lock update_test_fixtures

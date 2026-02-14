@@ -73,13 +73,18 @@ up profile="":
 up_monitoring:
     just up monitoring
 
-# stop the app and remove containers
+# stop the app and remove containers (preserves data volumes)
 down:
     @echo "Stopping OverFastAPI and cleaning containers..."
+    {{ docker_compose }} --profile "*" down --remove-orphans
+
+# stop the app, remove containers and volumes (clean slate)
+down_clean:
+    @echo "Stopping OverFastAPI and cleaning containers and volumes..."
     {{ docker_compose }} --profile "*" down -v --remove-orphans
 
 # clean up Docker environment
-clean: down
+clean: down_clean
     @echo "Cleaning Docker environment..."
     docker image prune -af
     docker network prune -f
