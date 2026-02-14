@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": "overfast-api-health",
-  "title": "\ud83d\udc9a OverFast API - API Health",
+  "title": "💚 OverFast API - API Health",
   "editable": true,
   "graphTooltip": 1,
   "schemaVersion": 39,
@@ -42,7 +42,7 @@
   "panels": [
     {
       "type": "row",
-      "title": "\ud83d\uddc4\ufe0f Valkey Cache",
+      "title": "🗄️ Valkey Cache",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -63,7 +63,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 1
+        "y": 10
       },
       "targets": [
         {
@@ -117,7 +117,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 1
+        "y": 10
       },
       "targets": [
         {
@@ -171,7 +171,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 1
+        "y": 10
       },
       "targets": [
         {
@@ -225,7 +225,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 1
+        "y": 10
       },
       "targets": [
         {
@@ -275,7 +275,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 5
+        "y": 14
       },
       "targets": [
         {
@@ -315,7 +315,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 5
+        "y": 14
       },
       "targets": [
         {
@@ -355,7 +355,7 @@
         "h": 4,
         "w": 8,
         "x": 0,
-        "y": 13
+        "y": 22
       },
       "targets": [
         {
@@ -405,7 +405,7 @@
         "h": 4,
         "w": 8,
         "x": 8,
-        "y": 13
+        "y": 22
       },
       "targets": [
         {
@@ -455,7 +455,7 @@
         "h": 4,
         "w": 8,
         "x": 16,
-        "y": 13
+        "y": 22
       },
       "targets": [
         {
@@ -509,7 +509,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 17
+        "y": 26
       },
       "targets": [
         {
@@ -550,7 +550,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 17
+        "y": 26
       },
       "targets": [
         {
@@ -591,7 +591,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 17
+        "y": 26
       },
       "targets": [
         {
@@ -623,12 +623,12 @@
     },
     {
       "type": "row",
-      "title": "\u26a1 API Performance",
+      "title": "⚡ API Performance",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 25
+        "y": 34
       },
       "collapsed": false,
       "panels": []
@@ -644,7 +644,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 26
+        "y": 35
       },
       "targets": [
         {
@@ -698,7 +698,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 26
+        "y": 35
       },
       "targets": [
         {
@@ -748,7 +748,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 26
+        "y": 35
       },
       "targets": [
         {
@@ -802,7 +802,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 26
+        "y": 35
       },
       "targets": [
         {
@@ -842,6 +842,197 @@
       }
     },
     {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 55
+      },
+      "id": 1,
+      "panels": [],
+      "title": "💾 Persistent Storage (SQLite)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10485760
+              },
+              {
+                "color": "red",
+                "value": 52428800
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 56
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "storage_size_bytes",
+          "refId": "A"
+        }
+      ],
+      "title": "Database Size",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 18,
+        "x": 6,
+        "y": 56
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "storage_entries_total{table=\"static_data\"}",
+          "legendFormat": "Static Data (Heroes/Maps/etc.)",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "storage_entries_total{table=\"player_profiles\"}",
+          "legendFormat": "Player Profiles",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "storage_entries_total{table=\"player_status\"}",
+          "legendFormat": "Unknown Players (404 tracking)",
+          "refId": "C"
+        }
+      ],
+      "title": "Storage Entries by Table",
+      "type": "timeseries"
+    },
+    {
       "type": "timeseries",
       "title": "API Response Time Over Time",
       "datasource": {
@@ -852,7 +1043,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 30
+        "y": 39
       },
       "targets": [
         {
@@ -903,7 +1094,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 30
+        "y": 39
       },
       "targets": [
         {
@@ -947,7 +1138,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 38
+        "y": 47
       },
       "targets": [
         {
@@ -988,7 +1179,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 38
+        "y": 47
       },
       "targets": [
         {
