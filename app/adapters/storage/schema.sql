@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS player_profiles (
     player_id TEXT PRIMARY KEY,
     blizzard_id TEXT,  -- Blizzard ID (for Battle Tag → ID mapping)
     html_compressed BLOB NOT NULL,  -- zstd compressed HTML
+    summary_json TEXT,  -- Full player summary from search endpoint (JSON)
     last_updated_blizzard INTEGER,  -- Blizzard's last-modified timestamp
     created_at INTEGER NOT NULL,  -- Unix timestamp (first write)
     updated_at INTEGER NOT NULL,  -- Unix timestamp (last write)

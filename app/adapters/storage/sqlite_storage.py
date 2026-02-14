@@ -1,7 +1,8 @@
 """SQLite storage adapter with zstd compression"""
 
+import json
 import time
-from compression.zstd import ZstdCompressor, ZstdDecompressor
+from compression import zstd
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -90,17 +91,12 @@ class SQLiteStorage:
         logger.info(f"SQLite storage initialized at {self.db_path}")
 
     def _compress(self, data: str) -> bytes:
-        """Compress string data using zstd"""
-        # Create new compressor for each operation
-        compressor = ZstdCompressor()
-        # Use FLUSH_FRAME mode to ensure complete compression
-        return compressor.compress(data.encode("utf-8"), compressor.FLUSH_FRAME)
+        """Compress string data using zstd (module-level function for performance)"""
+        return zstd.compress(data.encode("utf-8"))
 
     def _decompress(self, data: bytes) -> str:
-        """Decompress zstd data to string"""
-        # Create new decompressor for each operation
-        decompressor = ZstdDecompressor()
-        return decompressor.decompress(data).decode("utf-8")
+        """Decompress zstd data to string (module-level function for performance)"""
+        return zstd.decompress(data).decode("utf-8")
 
     # Static Data Methods
 
@@ -165,13 +161,13 @@ class SQLiteStorage:
         Get player profile by player_id.
 
         Returns:
-            Dict with 'html', 'blizzard_id', 'last_updated_blizzard', 'updated_at', 'schema_version'
-            or None if not found
+            Dict with 'html', 'blizzard_id', 'summary', 'last_updated_blizzard',
+            'updated_at', 'schema_version' or None if not found
         """
         async with (
             self._get_connection() as db,
             db.execute(
-                """SELECT blizzard_id, html_compressed, last_updated_blizzard,
+                """SELECT blizzard_id, html_compressed, summary_json, last_updated_blizzard,
                           updated_at, schema_version
                    FROM player_profiles WHERE player_id = ?""",
                 (player_id,),
@@ -181,18 +177,31 @@ class SQLiteStorage:
             if not row:
                 return None
 
+            # Parse summary_json if present, otherwise construct minimal summary
+            summary = None
+            if row[2]:  # summary_json column
+                summary = json.loads(row[2])
+            else:
+                # Legacy entries without summary_json - construct minimal summary
+                summary = {
+                    "url": row[0],  # blizzard_id
+                    "lastUpdated": row[3],  # last_updated_blizzard
+                }
+
             return {
                 "blizzard_id": row[0],
                 "html": self._decompress(row[1]),
-                "last_updated_blizzard": row[2],
-                "updated_at": row[3],
-                "schema_version": row[4],
+                "summary": summary,
+                "last_updated_blizzard": row[3],
+                "updated_at": row[4],
+                "schema_version": row[5],
             }
 
     async def put_player_profile(
         self,
         player_id: str,
         html: str,
+        summary: dict | None = None,
         blizzard_id: str | None = None,
         last_updated_blizzard: int | None = None,
         schema_version: int = 1,
@@ -203,25 +212,35 @@ class SQLiteStorage:
         Args:
             player_id: Player identifier (BattleTag)
             html: Raw career page HTML
-            blizzard_id: Blizzard ID from search endpoint
-            last_updated_blizzard: Blizzard's lastUpdated timestamp
+            summary: Full player summary from search endpoint (dict)
+            blizzard_id: Blizzard ID (deprecated, use summary["url"])
+            last_updated_blizzard: Blizzard's lastUpdated (deprecated, use summary["lastUpdated"])
             schema_version: Schema version for parser format
         """
         now = int(time.time())
         compressed = self._compress(html)
 
+        # If summary provided, extract blizzard_id and lastUpdated from it
+        if summary:
+            blizzard_id = summary.get("url", blizzard_id)
+            last_updated_blizzard = summary.get("lastUpdated", last_updated_blizzard)
+            summary_json = json.dumps(summary)
+        else:
+            summary_json = None
+
         async with self._get_connection() as db:
             await db.execute(
                 """INSERT OR REPLACE INTO player_profiles
-                   (player_id, blizzard_id, html_compressed, last_updated_blizzard,
+                   (player_id, blizzard_id, html_compressed, summary_json, last_updated_blizzard,
                     created_at, updated_at, schema_version)
-                   VALUES (?, ?, ?, ?,
+                   VALUES (?, ?, ?, ?, ?,
                            COALESCE((SELECT created_at FROM player_profiles WHERE player_id = ?), ?),
                            ?, ?)""",
                 (
                     player_id,
                     blizzard_id,
                     compressed,
+                    summary_json,
                     last_updated_blizzard,
                     player_id,
                     now,

@@ -20,7 +20,7 @@ player-cache:TeKrop-2217
 """
 
 import json
-from compression.zstd import ZstdCompressor, ZstdDecompressor
+from compression import zstd
 from functools import wraps
 from typing import TYPE_CHECKING, Any
 
@@ -77,10 +77,6 @@ class ValkeyCache(metaclass=Singleton):
         host=settings.valkey_host, port=settings.valkey_port, protocol=3
     )
 
-    # zstd compressor/decompressor (Python 3.14+)
-    _compressor = ZstdCompressor()
-    _decompressor = ZstdDecompressor()
-
     @staticmethod
     def get_cache_key_from_request(request: Request) -> str:
         """Get the cache key associated with a user request"""
@@ -92,15 +88,14 @@ class ValkeyCache(metaclass=Singleton):
     def _compress_json_value(value: dict | list) -> bytes:
         """Helper method to transform a value into compressed JSON data using zstd"""
         json_str = json.dumps(value, separators=(",", ":"))
-        # Use FLUSH_FRAME mode to ensure complete compression
-        return ValkeyCache._compressor.compress(
-            json_str.encode("utf-8"), ValkeyCache._compressor.FLUSH_FRAME
-        )
+        # Use module-level function for better performance
+        return zstd.compress(json_str.encode("utf-8"))
 
     @staticmethod
     def _decompress_json_value(value: bytes) -> dict | list:
         """Helper method to retrieve a value from a compressed JSON data using zstd"""
-        return json.loads(ValkeyCache._decompressor.decompress(value).decode("utf-8"))
+        # Use module-level function for better performance
+        return json.loads(zstd.decompress(value).decode("utf-8"))
 
     # CachePort protocol methods
     @handle_valkey_error(default_return=None)

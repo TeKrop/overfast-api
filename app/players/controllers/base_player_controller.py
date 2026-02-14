@@ -38,14 +38,10 @@ class BasePlayerController(AbstractController):
         if not profile:
             return None
 
-        # Convert storage format to cache format for backward compatibility
-        # Note: We don't have full summary, but we have the key field: lastUpdated
+        # Storage now returns full summary from summary_json column
         return {
             "profile": profile["html"],
-            "summary": {
-                "lastUpdated": profile.get("last_updated_blizzard"),
-                "url": profile.get("blizzard_id"),
-            },
+            "summary": profile["summary"],  # Full summary with all fields
         }
 
     async def update_player_profile_cache(
@@ -59,14 +55,13 @@ class BasePlayerController(AbstractController):
 
         Args:
             player_id: Player identifier (BattleTag)
-            player_summary: Summary from search endpoint (contains lastUpdated, url)
+            player_summary: Full summary from search endpoint (all fields)
             html: Raw career page HTML
         """
         await self.storage.put_player_profile(
             player_id=player_id,
             html=html,
-            blizzard_id=player_summary.get("url"),
-            last_updated_blizzard=player_summary.get("lastUpdated"),
+            summary=player_summary,  # Store complete summary
         )
 
     # Unknown Player Tracking Methods (SQLite-based with exponential backoff)
@@ -114,13 +109,24 @@ class BasePlayerController(AbstractController):
         time_since_check = now - player_status["last_checked_at"]
 
         if time_since_check < player_status["retry_after"]:
-            # Still in retry window - player is considered unknown
+            # Still in retry window - return detailed 404 response
+            retry_after_seconds = player_status["retry_after"] - time_since_check
+            next_check_at = player_status["last_checked_at"] + player_status["retry_after"]
+
             logger.warning(
-                f"Player {player_id} is unknown (retry in {player_status['retry_after'] - time_since_check}s)",
+                f"Player {player_id} is unknown (retry in {retry_after_seconds}s, "
+                f"check #{player_status['check_count']})"
             )
+
+            # Return detailed 404 with retry information
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Player not found",
+                detail={
+                    "error": "Player not found",
+                    "retry_after": retry_after_seconds,
+                    "next_check_at": next_check_at,
+                    "check_count": player_status["check_count"],
+                },
             )
         # Retry window passed - allow recheck by falling through
 
