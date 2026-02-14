@@ -8,7 +8,8 @@
 [![License: MIT](https://img.shields.io/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)
 ![Mockup OverFast API](https://files.tekrop.fr/overfast_api_logo_full_1000.png)
 
-> **⚠️ WORK IN PROGRESS**: OverFast API is currently undergoing a major refactoring to **version 4.0**. This refactoring introduces **Domain-Driven Design**, **persistent storage with SQLite**, **Stale-While-Revalidate caching**, **background refresh with arq workers**, **AIMD congestion control** for Blizzard requests, and **comprehensive monitoring with Prometheus + Grafana**. The refactoring is being done incrementally in phases.
+> [!WARNING]
+> **WIP**: OverFast API is currently undergoing a major refactoring to **version 4.0**. This refactoring introduces **Domain-Driven Design**, **persistent storage with SQLite**, **Stale-While-Revalidate caching**, **background refresh with arq workers**, **AIMD congestion control** for Blizzard requests, and **comprehensive monitoring with Prometheus + Grafana**. The refactoring is being done incrementally in phases.
 
 > OverFast API provides comprehensive data on Overwatch heroes, game modes, maps, and player statistics by scraping Blizzard pages. Developed with the efficiency of **FastAPI** and **Selectolax**, it leverages **nginx (OpenResty)** as a reverse proxy and **Valkey** for caching. Its tailored caching mechanism significantly reduces calls to Blizzard pages, ensuring swift and precise data delivery to users.
 
