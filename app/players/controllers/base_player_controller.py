@@ -111,7 +111,9 @@ class BasePlayerController(AbstractController):
         if time_since_check < player_status["retry_after"]:
             # Still in retry window - return detailed 404 response
             retry_after_seconds = player_status["retry_after"] - time_since_check
-            next_check_at = player_status["last_checked_at"] + player_status["retry_after"]
+            next_check_at = (
+                player_status["last_checked_at"] + player_status["retry_after"]
+            )
 
             logger.warning(
                 f"Player {player_id} is unknown (retry in {retry_after_seconds}s, "

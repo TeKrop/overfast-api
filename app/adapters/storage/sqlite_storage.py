@@ -37,7 +37,9 @@ class SQLiteStorage:
         """
         self.db_path = db_path or settings.storage_path
         self._initialized = False
-        self._shared_connection: aiosqlite.Connection | None = None  # For :memory: databases
+        self._shared_connection: aiosqlite.Connection | None = (
+            None  # For :memory: databases
+        )
 
     @asynccontextmanager
     async def _get_connection(self) -> AsyncIterator[aiosqlite.Connection]:

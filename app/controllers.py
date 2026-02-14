@@ -15,7 +15,7 @@ from .monitoring.metrics import storage_write_errors_total
 from .overfast_logger import logger
 
 if TYPE_CHECKING:
-    from .domain.ports import StoragePort
+    from .domain.ports import CachePort, StoragePort
 
 
 class AbstractController(ABC):
@@ -25,8 +25,8 @@ class AbstractController(ABC):
     The API Cache system is handled here.
     """
 
-    # Generic cache manager class, used to manipulate Valkey cache data
-    cache_manager = CacheManager()
+    # Cache manager for Valkey operations (Protocol type for dependency inversion)
+    cache_manager: CachePort = CacheManager()
 
     # Storage adapter for persistent data (Protocol type for dependency inversion)
     storage: StoragePort = SQLiteStorage()

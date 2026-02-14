@@ -18,6 +18,7 @@ from app.helpers import overfast_internal_error
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
+    from app.domain.ports import BlizzardClientPort
     from app.players.enums import PlayerGamemode, PlayerPlatform
 
 from .base_player_controller import BasePlayerController
@@ -124,7 +125,9 @@ class GetPlayerCareerController(BasePlayerController):
 
         return await self.with_unknown_player_guard(player_id, _handler)
 
-    async def _fetch_player_html(self, client: BlizzardClient, player_id: str) -> str:
+    async def _fetch_player_html(
+        self, client: BlizzardClientPort, player_id: str
+    ) -> str:
         """Fetch player HTML from Blizzard"""
         return await fetch_player_html(client, player_id)
 

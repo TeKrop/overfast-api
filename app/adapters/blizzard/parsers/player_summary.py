@@ -8,11 +8,11 @@ from app.exceptions import ParserParsingError
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
-    from app.adapters.blizzard.client import BlizzardClient
+    from app.domain.ports import BlizzardClientPort
 
 
 async def fetch_player_summary_json(
-    client: BlizzardClient, player_id: str
+    client: BlizzardClientPort, player_id: str
 ) -> list[dict]:
     """
     Fetch player summary data from Blizzard search endpoint
@@ -82,7 +82,7 @@ def parse_player_summary_json(json_data: list[dict], player_id: str) -> dict:
         return player_data
 
 
-async def parse_player_summary(client: BlizzardClient, player_id: str) -> dict:
+async def parse_player_summary(client: BlizzardClientPort, player_id: str) -> dict:
     """
     High-level function to fetch and parse player summary
 
