@@ -73,6 +73,15 @@ class StoragePort(Protocol):
         """Clear all data including static data (for testing)"""
         ...
 
+    async def get_stats(self) -> dict:
+        """
+        Get storage statistics for monitoring.
+
+        Returns dict with size_bytes, static_data_count, player_profiles_count,
+        player_status_count
+        """
+        ...
+
     async def close(self) -> None:
         """Close storage connections"""
         ...

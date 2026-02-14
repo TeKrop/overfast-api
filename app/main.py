@@ -10,9 +10,7 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from starlette.responses import Response
 
 from .adapters.storage import SQLiteStorage
 from .api import gamemodes, heroes, maps, players, roles
@@ -268,17 +266,12 @@ if settings.profiler:  # pragma: no cover
     app.add_middleware(supported_profilers[settings.profiler])  # type: ignore[arg-type]
 
 
-# Add Prometheus /metrics endpoint if enabled
+# Add Prometheus middleware and /metrics endpoint if enabled
 if settings.prometheus_enabled:
-    register_prometheus_middleware(app)
+    from app.monitoring import router as monitoring_router
 
-    @app.get("/metrics", include_in_schema=False)
-    async def metrics() -> Response:
-        """Prometheus metrics endpoint"""
-        return Response(
-            content=generate_latest(),
-            media_type=CONTENT_TYPE_LATEST,
-        )
+    register_prometheus_middleware(app)
+    app.include_router(monitoring_router.router)
 
 
 # Add application routers
