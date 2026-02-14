@@ -65,7 +65,7 @@ up profile="":
     @echo "Building OverFastAPI (production mode)..."
     {{ docker_compose }} build
     @echo "Stopping OverFastAPI and cleaning containers..."
-    {{ docker_compose }} down -v --remove-orphans
+    {{ docker_compose }} down --remove-orphans
     @echo "Launching OverFastAPI (production mode)..."
     {{ if profile != "" { docker_compose + " --profile " + profile + " up -d" } else { docker_compose + " up -d" } }}
 

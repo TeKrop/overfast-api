@@ -76,7 +76,7 @@ up: ## Build & run OverFastAPI application (production mode)
 	@echo "Building OverFastAPI (production mode)..."
 	$(DOCKER_COMPOSE) build
 	@echo "Stopping OverFastAPI and cleaning containers..."
-	$(DOCKER_COMPOSE) down -v --remove-orphans
+	$(DOCKER_COMPOSE) down --remove-orphans
 	@echo "Launching OverFastAPI (production mode)..."
 	$(DOCKER_COMPOSE) up -d
 
@@ -84,7 +84,7 @@ up_monitoring: ## Build & run with monitoring (Prometheus + Grafana)
 	@echo "Building OverFastAPI with monitoring..."
 	$(DOCKER_COMPOSE) build
 	@echo "Stopping OverFastAPI and cleaning containers..."
-	$(DOCKER_COMPOSE) down -v --remove-orphans
+	$(DOCKER_COMPOSE) down --remove-orphans
 	@echo "Launching OverFastAPI with monitoring..."
 	$(DOCKER_COMPOSE) --profile monitoring up -d
 
