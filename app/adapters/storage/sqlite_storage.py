@@ -100,7 +100,7 @@ class SQLiteStorage:
 
     # Static Data Methods
 
-    async def get_static(self, key: str) -> dict | None:
+    async def get_static_data(self, key: str) -> dict | None:
         """
         Get static data by key.
 
@@ -126,7 +126,7 @@ class SQLiteStorage:
                 "schema_version": row[3],
             }
 
-    async def put_static(
+    async def set_static_data(
         self,
         key: str,
         data: str,
@@ -197,7 +197,7 @@ class SQLiteStorage:
                 "schema_version": row[5],
             }
 
-    async def put_player_profile(
+    async def set_player_profile(
         self,
         player_id: str,
         html: str,

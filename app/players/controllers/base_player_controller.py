@@ -58,7 +58,7 @@ class BasePlayerController(AbstractController):
             player_summary: Full summary from search endpoint (all fields)
             html: Raw career page HTML
         """
-        await self.storage.put_player_profile(
+        await self.storage.set_player_profile(
             player_id=player_id,
             html=html,
             summary=player_summary,  # Store complete summary

@@ -2,6 +2,7 @@
 
 import json
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, Request, Response
 
@@ -12,6 +13,9 @@ from .exceptions import ParserBlizzardError, ParserParsingError
 from .helpers import get_human_readable_duration, overfast_internal_error
 from .monitoring.metrics import storage_write_errors_total
 from .overfast_logger import logger
+
+if TYPE_CHECKING:
+    from .domain.ports import StoragePort
 
 
 class AbstractController(ABC):
@@ -24,8 +28,8 @@ class AbstractController(ABC):
     # Generic cache manager class, used to manipulate Valkey cache data
     cache_manager = CacheManager()
 
-    # Storage adapter for persistent data
-    storage = SQLiteStorage()
+    # Storage adapter for persistent data (Protocol type for dependency inversion)
+    storage: StoragePort = SQLiteStorage()
 
     def __init__(self, request: Request, response: Response):
         self.cache_key = CacheManager.get_cache_key_from_request(request)
@@ -64,7 +68,7 @@ class AbstractController(ABC):
         # Update persistent storage (SQLite) - Phase 3 dual-write
         try:
             json_data = json.dumps(data, separators=(",", ":"))
-            await self.storage.put_static(
+            await self.storage.set_static_data(
                 key=storage_key, data=json_data, data_type=data_type
             )
         except OSError as error:
