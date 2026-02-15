@@ -17,6 +17,8 @@ from app.adapters.blizzard.parsers.player_summary import (
 from app.adapters.blizzard.parsers.utils import is_blizzard_id
 from app.config import settings
 from app.controllers import AbstractController
+from app.exceptions import ParserBlizzardError, ParserParsingError
+from app.helpers import overfast_internal_error
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
@@ -411,3 +413,71 @@ class BasePlayerController(AbstractController):
         # Always return HTML if we fetched it, even if blizzard_id or parsing failed
         # This avoids a second fetch in the controller
         return blizzard_id, {}, html, battletag_input
+
+    async def handle_player_request_exceptions(
+        self,
+        error: Exception,
+        cache_key: str,
+        battletag_input: str | None,
+        player_summary: dict,
+    ):
+        """
+        Shared exception handler for player controllers to eliminate code duplication.
+
+        Handles ParserBlizzardError, ParserParsingError, and HTTPException uniformly
+        across all player endpoints. Marks players as unknown on 404 errors.
+
+        This method always raises - it processes the error and then re-raises it.
+
+        Args:
+            error: The exception that was caught
+            cache_key: The cache key (usually Blizzard ID or player_id)
+            battletag_input: BattleTag from user input (optional)
+            player_summary: Player summary dict (may be empty)
+
+        Raises:
+            HTTPException: Always raises after processing the error
+        """
+        if isinstance(error, ParserBlizzardError):
+            exception = HTTPException(
+                status_code=error.status_code,
+                detail=error.message,
+            )
+            # Mark unknown on 404 from Blizzard
+            if error.status_code == status.HTTP_404_NOT_FOUND:
+                await self.mark_player_unknown_on_404(
+                    cache_key, exception, battletag=battletag_input
+                )
+            raise exception from error
+
+        if isinstance(error, ParserParsingError):
+            # Check if error message indicates player not found
+            # This can happen when HTML structure is malformed or missing expected elements
+            if "Could not find main content in HTML" in str(error):
+                exception = HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Player not found",
+                )
+                # Mark unknown with Blizzard ID (primary) and BattleTag (if available)
+                await self.mark_player_unknown_on_404(
+                    cache_key, exception, battletag=battletag_input
+                )
+                raise exception from error
+
+            # Get Blizzard URL for error reporting
+            blizzard_url = (
+                f"{settings.blizzard_host}{settings.career_path}/"
+                f"{player_summary.get('url', cache_key) if player_summary else cache_key}/"
+            )
+            raise overfast_internal_error(blizzard_url, error) from error
+
+        if isinstance(error, HTTPException):
+            # Mark unknown on any 404 (explicit HTTPException)
+            if error.status_code == status.HTTP_404_NOT_FOUND:
+                await self.mark_player_unknown_on_404(
+                    cache_key, error, battletag=battletag_input
+                )
+            raise error
+
+        # Unknown exception type - re-raise as-is
+        raise error

@@ -2,8 +2,6 @@
 
 from typing import TYPE_CHECKING, ClassVar, cast
 
-from fastapi import HTTPException, status
-
 from app.adapters.blizzard import BlizzardClient
 from app.adapters.blizzard.parsers.player_career_stats import (
     parse_player_career_stats_from_html,
@@ -13,8 +11,7 @@ from app.adapters.blizzard.parsers.player_profile import (
     fetch_player_html,
 )
 from app.config import settings
-from app.exceptions import ParserBlizzardError, ParserParsingError
-from app.helpers import overfast_internal_error
+from app.exceptions import ParserParsingError
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
@@ -41,9 +38,10 @@ class GetPlayerCareerStatsController(BasePlayerController):
         hero = kwargs.get("hero")
         client = BlizzardClient()
 
-        # Initialize variables for exception handling
+        # Initialize variables for exception handling (must be in scope for except block)
         cache_key = player_id
         battletag_input = None
+        player_summary = {}
 
         try:
             # Step 1: Resolve player identity (search + Blizzard ID resolution)
@@ -71,44 +69,11 @@ class GetPlayerCareerStatsController(BasePlayerController):
                 cached_html=cached_html,
             )
 
-        except ParserBlizzardError as error:
-            exception = HTTPException(
-                status_code=error.status_code,
-                detail=error.message,
+        except Exception as error:  # noqa: BLE001
+            # Use shared exception handler (always raises)
+            await self.handle_player_request_exceptions(
+                error, cache_key, battletag_input, player_summary
             )
-            # Mark unknown on 404 from Blizzard
-            if error.status_code == status.HTTP_404_NOT_FOUND:
-                await self.mark_player_unknown_on_404(
-                    cache_key, exception, battletag=battletag_input
-                )
-            raise exception from error
-        except ParserParsingError as error:
-            # Check if error message indicates player not found
-            # This can happen when HTML structure is malformed or missing expected elements
-            if "Could not find main content in HTML" in str(error):
-                exception = HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Player not found",
-                )
-                # Mark unknown with Blizzard ID (primary) and BattleTag (if available)
-                await self.mark_player_unknown_on_404(
-                    cache_key, exception, battletag=battletag_input
-                )
-                raise exception from error
-
-            # Get Blizzard URL for error reporting
-            blizzard_url = (
-                f"{settings.blizzard_host}{settings.career_path}/"
-                f"{player_summary['url'] if player_summary else player_id}/"
-            )
-            raise overfast_internal_error(blizzard_url, error) from error
-        except HTTPException as exception:
-            # Mark unknown on any 404 (explicit HTTPException)
-            if exception.status_code == status.HTTP_404_NOT_FOUND:
-                await self.mark_player_unknown_on_404(
-                    cache_key, exception, battletag=battletag_input
-                )
-            raise
 
         # Update API Cache
         await self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
