@@ -90,6 +90,31 @@ async def fetch_player_html(
     return response.text, blizzard_id
 
 
+def extract_name_from_profile_html(html: str) -> str | None:
+    """
+    Extract player display name from profile HTML.
+
+    The name is found in the <h1 class="Profile-player--name"> tag.
+    Note: This is ONLY the display name (e.g., "TeKrop"), NOT the full
+    BattleTag with discriminator (e.g., "TeKrop-2217").
+
+    Args:
+        html: Raw HTML from player profile page
+
+    Returns:
+        Player display name if found, None otherwise
+
+    Example:
+        >>> html = '<h1 class="Profile-player--name">TeKrop</h1>'
+        >>> extract_name_from_profile_html(html)
+        'TeKrop'
+    """
+    root_tag = parse_html_root(html)
+    name_tag = root_tag.css_first("h1.Profile-player--name")
+
+    return name_tag.text().strip() if name_tag and name_tag.text() else None
+
+
 def parse_player_profile_html(
     html: str,
     player_summary: dict | None = None,

@@ -16,10 +16,13 @@ CREATE TABLE IF NOT EXISTS static_data (
 );
 
 -- Player profiles: full career data from Blizzard
--- Key: player_id (BattleTag or Blizzard ID)
+-- Key: player_id (ALWAYS Blizzard ID as of Phase 3.5B)
+-- Note: battletag and name are optional metadata, can be NULL
 CREATE TABLE IF NOT EXISTS player_profiles (
-    player_id TEXT PRIMARY KEY,
-    blizzard_id TEXT,  -- Blizzard ID (for Battle Tag → ID mapping)
+    player_id TEXT PRIMARY KEY,  -- Blizzard ID (canonical identifier)
+    battletag TEXT,  -- Full BattleTag from user input (e.g., "TeKrop-2217"), can be NULL
+    name TEXT,  -- Display name only (e.g., "TeKrop"), extracted from HTML or summary
+    blizzard_id TEXT,  -- Deprecated: duplicate of player_id, kept for backward compat
     html_compressed BLOB NOT NULL,  -- zstd compressed HTML
     summary_json TEXT,  -- Full player summary from search endpoint (JSON)
     last_updated_blizzard INTEGER,  -- Blizzard's last-modified timestamp
@@ -31,8 +34,9 @@ CREATE TABLE IF NOT EXISTS player_profiles (
 
 -- Player status: unknown players with exponential backoff
 -- Tracks players that don't exist on Blizzard
+-- Key: player_id (ALWAYS Blizzard ID as of Phase 3.5B)
 CREATE TABLE IF NOT EXISTS player_status (
-    player_id TEXT PRIMARY KEY,
+    player_id TEXT PRIMARY KEY,  -- Blizzard ID (canonical identifier)
     check_count INTEGER NOT NULL DEFAULT 1,  -- Number of failed checks
     last_checked_at INTEGER NOT NULL,  -- Unix timestamp
     retry_after INTEGER NOT NULL  -- Seconds to wait before next check

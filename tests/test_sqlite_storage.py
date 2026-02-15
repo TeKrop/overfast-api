@@ -131,8 +131,8 @@ class TestPlayerProfiles:
         # Minimal summary should have basic structure (but values may be None)
         assert "url" in result["summary"]
         assert "lastUpdated" in result["summary"]
-        # Without summary, blizzard_id and last_updated_blizzard are None
-        assert result["blizzard_id"] is None
+        # Phase 3.5B: Without explicit blizzard_id, it defaults to player_id
+        assert result["blizzard_id"] == player_id
         assert result["last_updated_blizzard"] is None
 
     @pytest.mark.asyncio

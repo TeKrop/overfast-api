@@ -41,19 +41,19 @@ start_testing: ## Run OverFastAPI application (testing mode)
 check: ## Run type checker, CHECKER_ARGS can be specified
 ifdef CHECKER_ARGS
 	@echo "Running type checker on $(CHECKER_ARGS)..."
-	uvx ty check $(CHECKER_ARGS)
+	ty check $(CHECKER_ARGS)
 else
 	@echo "Running type checker..."
-	uvx ty check
+	ty check
 endif
 
 lint: ## Run linter
 	@echo "Running linter..."
-	uvx ruff check --fix --exit-non-zero-on-fix
+	ruff check --fix --exit-non-zero-on-fix
 
 format: ## Run formatter
 	@echo "Running formatter..."
-	uvx ruff format
+	ruff format
 
 shell: ## Access an interactive shell inside the app container
 	@echo "Running shell on app container..."

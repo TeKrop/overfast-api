@@ -33,8 +33,8 @@ class StoragePort(Protocol):
         """
         Get player profile HTML and parsed summary.
 
-        Returns dict with 'html', 'summary', 'blizzard_id', 'last_updated_blizzard',
-        'updated_at', 'schema_version' or None if not found
+        Returns dict with 'html', 'summary', 'blizzard_id', 'battletag', 'name',
+        'last_updated_blizzard', 'updated_at', 'schema_version' or None if not found
         """
         ...
 
@@ -43,11 +43,13 @@ class StoragePort(Protocol):
         player_id: str,
         html: str,
         summary: dict | None = None,
+        battletag: str | None = None,
+        name: str | None = None,
         blizzard_id: str | None = None,
         last_updated_blizzard: int | None = None,
         schema_version: int = 1,
     ) -> None:
-        """Store player profile HTML and parsed summary"""
+        """Store player profile HTML and parsed summary with optional metadata"""
         ...
 
     async def get_player_status(self, player_id: str) -> dict | None:

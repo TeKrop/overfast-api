@@ -33,17 +33,17 @@ start_testing:
 # run type checker
 check checker_args="":
     @echo {{ if checker_args != "" { "Running type checker on " + checker_args + "..." } else { "Running type checker..." } }}
-    {{ if checker_args != "" { "uvx ty check " + checker_args } else { "uvx ty check" } }}
+    {{ if checker_args != "" { "ty check " + checker_args } else { "ty check" } }}
 
 # run linter
 lint:
     @echo "Running linter..."
-    uvx ruff check --fix --exit-non-zero-on-fix
+    ruff check --fix --exit-non-zero-on-fix
 
 # run formatter
 format:
     @echo "Running formatter..."
-    uvx ruff format
+    ruff format
 
 # access an interactive shell inside the app container
 shell:

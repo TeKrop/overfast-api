@@ -185,17 +185,20 @@ class SQLiteStorage(metaclass=Singleton):
 
     async def get_player_profile(self, player_id: str) -> dict | None:
         """
-        Get player profile by player_id.
+        Get player profile by player_id (Blizzard ID).
+
+        Args:
+            player_id: Blizzard ID (canonical key)
 
         Returns:
-            Dict with 'html', 'blizzard_id', 'summary', 'last_updated_blizzard',
-            'updated_at', 'schema_version' or None if not found
+            Dict with 'html', 'blizzard_id', 'battletag', 'name', 'summary',
+            'last_updated_blizzard', 'updated_at', 'schema_version' or None if not found
         """
         async with (
             self._get_connection() as db,
             db.execute(
-                """SELECT blizzard_id, html_compressed, summary_json, last_updated_blizzard,
-                          updated_at, schema_version
+                """SELECT blizzard_id, battletag, name, html_compressed, summary_json,
+                          last_updated_blizzard, updated_at, schema_version
                    FROM player_profiles WHERE player_id = ?""",
                 (player_id,),
             ) as cursor,
@@ -206,22 +209,24 @@ class SQLiteStorage(metaclass=Singleton):
 
             # Parse summary_json if present, otherwise construct minimal summary
             summary = None
-            if row[2]:  # summary_json column
-                summary = json.loads(row[2])
+            if row[4]:  # summary_json column
+                summary = json.loads(row[4])
             else:
                 # Legacy entries without summary_json - construct minimal summary
                 summary = {
                     "url": row[0],  # blizzard_id
-                    "lastUpdated": row[3],  # last_updated_blizzard
+                    "lastUpdated": row[5],  # last_updated_blizzard
                 }
 
             return {
                 "blizzard_id": row[0],
-                "html": self._decompress(row[1]),
+                "battletag": row[1],
+                "name": row[2],
+                "html": self._decompress(row[3]),
                 "summary": summary,
-                "last_updated_blizzard": row[3],
-                "updated_at": row[4],
-                "schema_version": row[5],
+                "last_updated_blizzard": row[5],
+                "updated_at": row[6],
+                "schema_version": row[7],
             }
 
     async def set_player_profile(
@@ -229,6 +234,8 @@ class SQLiteStorage(metaclass=Singleton):
         player_id: str,
         html: str,
         summary: dict | None = None,
+        battletag: str | None = None,
+        name: str | None = None,
         blizzard_id: str | None = None,
         last_updated_blizzard: int | None = None,
         schema_version: int = 1,
@@ -237,10 +244,12 @@ class SQLiteStorage(metaclass=Singleton):
         Store or update player profile.
 
         Args:
-            player_id: Player identifier (BattleTag)
+            player_id: Blizzard ID (canonical key)
             html: Raw career page HTML
             summary: Full player summary from search endpoint (dict)
-            blizzard_id: Blizzard ID (deprecated, use summary["url"])
+            battletag: Full BattleTag from user input (e.g., "TeKrop-2217"), optional
+            name: Display name extracted from HTML or summary, optional
+            blizzard_id: Deprecated, use player_id
             last_updated_blizzard: Blizzard's lastUpdated (deprecated, use summary["lastUpdated"])
             schema_version: Schema version for parser format
         """
@@ -249,23 +258,29 @@ class SQLiteStorage(metaclass=Singleton):
 
         # If summary provided, extract blizzard_id and lastUpdated from it
         if summary:
-            blizzard_id = summary.get("url", blizzard_id)
+            blizzard_id = summary.get("url", blizzard_id or player_id)
             last_updated_blizzard = summary.get("lastUpdated", last_updated_blizzard)
+            # Extract name from summary if not provided
+            if not name:
+                name = summary.get("name")
             summary_json = json.dumps(summary)
         else:
             summary_json = None
+            blizzard_id = blizzard_id or player_id
 
         async with self._get_connection() as db:
             await db.execute(
                 """INSERT OR REPLACE INTO player_profiles
-                   (player_id, blizzard_id, html_compressed, summary_json, last_updated_blizzard,
-                    created_at, updated_at, schema_version)
-                   VALUES (?, ?, ?, ?, ?,
+                   (player_id, blizzard_id, battletag, name, html_compressed, summary_json,
+                    last_updated_blizzard, created_at, updated_at, schema_version)
+                   VALUES (?, ?, ?, ?, ?, ?, ?,
                            COALESCE((SELECT created_at FROM player_profiles WHERE player_id = ?), ?),
                            ?, ?)""",
                 (
                     player_id,
                     blizzard_id,
+                    battletag,
+                    name,
                     compressed,
                     summary_json,
                     last_updated_blizzard,

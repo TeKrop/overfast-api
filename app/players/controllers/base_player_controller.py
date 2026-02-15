@@ -27,10 +27,17 @@ def with_unknown_player_guard(func):
     Checks if player is unknown before executing the handler, and marks
     player as unknown on 404. Requires the method to accept player_id in kwargs.
 
+    Phase 3.5B: After identity resolution, the handler can set self._resolved_blizzard_id
+    and self._resolved_battletag so the decorator can store both identifiers when
+    marking unknown.
+
     Example:
         @with_unknown_player_guard
         async def process_request(self, **kwargs) -> dict:
             player_id = kwargs["player_id"]
+            # Resolve identity and set tracking attributes
+            self._resolved_blizzard_id = blizzard_id
+            self._resolved_battletag = battletag
             # ... handler logic
 
     Args:
@@ -51,6 +58,10 @@ def with_unknown_player_guard(func):
             msg = "with_unknown_player_guard requires player_id in kwargs"
             raise ValueError(msg)
 
+        # Reset tracking attributes
+        self._resolved_blizzard_id = None
+        self._resolved_battletag = None
+
         # Check if player is known to not exist
         await self.check_unknown_player(player_id)
 
@@ -58,7 +69,13 @@ def with_unknown_player_guard(func):
         try:
             return await func(self, *args, **kwargs)
         except HTTPException as exception:
-            await self.mark_player_unknown_on_404(player_id, exception)
+            # Use resolved identifiers if handler set them
+            await self.mark_player_unknown_on_404(
+                player_id,
+                exception,
+                blizzard_id=self._resolved_blizzard_id,
+                battletag=self._resolved_battletag,
+            )
             raise
 
     return wrapper
@@ -74,16 +91,18 @@ class BasePlayerController(AbstractController):
 
     async def get_player_profile_cache(
         self, player_id: str
-    ) -> dict[str, str | dict] | None:
+    ) -> dict[str, str | dict | None] | None:
         """
         Get player profile from persistent storage.
         Returns dict compatible with old Valkey cache format: {"summary": {...}, "profile": "..."}
 
+        Phase 3.5B: player_id is now always Blizzard ID.
+
         Args:
-            player_id: Player identifier (BattleTag)
+            player_id: Blizzard ID (canonical key)
 
         Returns:
-            Dict with 'summary' and 'profile' keys, or None if not found
+            Dict with 'summary', 'profile', 'battletag', 'name' keys, or None if not found
         """
         profile = await self.storage.get_player_profile(player_id)
         if not profile:
@@ -93,6 +112,8 @@ class BasePlayerController(AbstractController):
         return {
             "profile": profile["html"],
             "summary": profile["summary"],  # Full summary with all fields
+            "battletag": profile.get("battletag"),  # Optional metadata
+            "name": profile.get("name"),  # Display name
         }
 
     async def update_player_profile_cache(
@@ -100,19 +121,27 @@ class BasePlayerController(AbstractController):
         player_id: str,
         player_summary: dict,
         html: str,
+        battletag: str | None = None,
+        name: str | None = None,
     ) -> None:
         """
         Update player profile in persistent storage.
 
+        Phase 3.5B: Uses Blizzard ID as key, stores battletag/name as optional metadata.
+
         Args:
-            player_id: Player identifier (BattleTag)
-            player_summary: Full summary from search endpoint (all fields)
+            player_id: Blizzard ID (canonical key)
+            player_summary: Full summary from search endpoint (all fields), may be empty dict
             html: Raw career page HTML
+            battletag: Full BattleTag from user input (e.g., "TeKrop-2217"), optional
+            name: Display name from HTML or summary (e.g., "TeKrop"), optional
         """
         await self.storage.set_player_profile(
             player_id=player_id,
             html=html,
-            summary=player_summary,  # Store complete summary
+            summary=player_summary if player_summary else None,  # None if empty dict
+            battletag=battletag,
+            name=name,
         )
 
     # Unknown Player Tracking Methods (SQLite-based with exponential backoff)
@@ -184,46 +213,69 @@ class BasePlayerController(AbstractController):
         # Retry window passed - allow recheck by falling through
 
     async def mark_player_unknown_on_404(
-        self, player_id: str, exception: HTTPException
+        self,
+        player_id: str,
+        exception: HTTPException,
+        blizzard_id: str | None = None,
+        battletag: str | None = None,
     ) -> None:
         """
         Mark player as unknown if 404 exception is raised.
         Implements exponential backoff for retries.
 
+        Phase 3.5B: Stores both Blizzard ID and BattleTag (if available) so future
+        requests with either identifier get caught early by the guard.
+
         Updates the exception detail to match PlayerNotFoundError format
         with retry_after, next_check_at, and check_count fields.
 
         Args:
-            player_id: Player ID to mark
+            player_id: Original player_id from request (BattleTag or Blizzard ID)
             exception: HTTPException to modify and check for 404 status
+            blizzard_id: Resolved Blizzard ID (if available from identity resolution)
+            battletag: Resolved BattleTag (if available from identity resolution)
         """
         if not settings.unknown_players_cache_enabled:
             return
 
-        if exception.status_code == status.HTTP_404_NOT_FOUND:
-            # Get existing status to increment check count
-            player_status = await self.storage.get_player_status(player_id)
-            check_count = player_status["check_count"] + 1 if player_status else 1
+        if exception.status_code != status.HTTP_404_NOT_FOUND:
+            return
 
-            # Calculate exponential backoff and next check time
-            retry_after = self._calculate_retry_after(check_count)
-            next_check_at = int(time.time()) + retry_after
+        # Determine which identifiers to store
+        # Priority: Use resolved identifiers if available, fallback to player_id
+        primary_id = blizzard_id or player_id
 
-            # Store updated status
-            await self.storage.set_player_status(player_id, check_count, retry_after)
+        # Get existing status to increment check count (check primary ID first)
+        player_status = await self.storage.get_player_status(primary_id)
+        check_count = player_status["check_count"] + 1 if player_status else 1
 
-            # Update exception detail to match PlayerNotFoundError model
-            exception.detail = {
-                "error": "Player not found",
-                "retry_after": retry_after,
-                "next_check_at": next_check_at,
-                "check_count": check_count,
-            }
+        # Calculate exponential backoff and next check time
+        retry_after = self._calculate_retry_after(check_count)
+        next_check_at = int(time.time()) + retry_after
 
+        # Store under Blizzard ID (primary)
+        await self.storage.set_player_status(primary_id, check_count, retry_after)
+
+        # Also store under BattleTag if different and available
+        # This ensures future requests with BattleTag get caught early
+        if battletag and battletag != primary_id:
             logger.info(
-                f"Marked player {player_id} as unknown (check #{check_count}, "
-                f"retry in {retry_after}s, next check at {next_check_at})"
+                f"Also marking BattleTag {battletag} as unknown (linked to {primary_id})"
             )
+            await self.storage.set_player_status(battletag, check_count, retry_after)
+
+        # Update exception detail to match PlayerNotFoundError model
+        exception.detail = {
+            "error": "Player not found",
+            "retry_after": retry_after,
+            "next_check_at": next_check_at,
+            "check_count": check_count,
+        }
+
+        logger.info(
+            f"Marked player {primary_id} as unknown (check #{check_count}, "
+            f"retry in {retry_after}s, next check at {next_check_at})"
+        )
 
     async def process_request(self, **kwargs) -> dict:
         """Process request as usual, but ensure to properly handle players
@@ -247,84 +299,49 @@ class BasePlayerController(AbstractController):
             await self.mark_player_unknown_on_404(player_id, err)
             raise
 
-    async def _get_blizzard_id_from_battletag(self, player_id: str) -> str | None:
-        """Get stored Blizzard ID for a BattleTag from SQLite player cache.
-
-        Args:
-            player_id: BattleTag to lookup
-
-        Returns:
-            Blizzard ID if found in cache, None otherwise
-        """
-        if is_blizzard_id(player_id):
-            return None  # Already a Blizzard ID
-
-        # Check if we have profile cache for this BattleTag
-        player_cache = await self.storage.get_player_profile(player_id)
-        if not player_cache:
-            return None
-
-        # Ensure to log if we have a Blizzard ID
-        if blizzard_id := player_cache.get("blizzard_id"):
-            logger.info(f"Found cached Blizzard ID for {player_id}: {blizzard_id}")
-            return blizzard_id
-
-        return None
-
     async def _resolve_player_identity(
         self, client: BlizzardClientPort, player_id: str
-    ) -> tuple[dict, str | None]:
+    ) -> tuple[str | None, dict, str | None, str | None]:
         """Resolve player identity via search and Blizzard ID redirect if needed.
 
         This method implements the identity resolution flow:
         1. Skip search if player_id is already a Blizzard ID
         2. Fetch and parse search results
-        3. If multiple results, try to disambiguate using cached Blizzard ID (Step 3)
-        4. If not found, attempt Blizzard ID resolution via redirect (returns HTML)
-        5. Re-parse search results with Blizzard ID if obtained
+        3. If not found, attempt Blizzard ID resolution via redirect (returns HTML)
+        4. Re-parse search results with Blizzard ID if obtained
+
+        Phase 3.5B: Returns Blizzard ID and BattleTag separately for proper key management.
+        Note: Disambiguation (Step 3) removed as it requires BattleTag→Blizzard ID index.
 
         Args:
             client: Blizzard API client
             player_id: Player identifier (BattleTag or Blizzard ID)
 
         Returns:
-            Tuple of (player_summary, profile_html):
-            - player_summary: dict (may be empty if not found in search or direct Blizzard ID)
+            Tuple of (blizzard_id, player_summary, profile_html, battletag_input):
+            - blizzard_id: Canonical Blizzard ID (cache key), None if not resolved yet
+            - player_summary: dict from search (may be empty if direct Blizzard ID or not found)
             - profile_html: HTML from profile page if fetched during resolution, None otherwise
+            - battletag_input: Original BattleTag from user input if applicable, None for Blizzard ID input
         """
         logger.info("Retrieving Player Summary...")
 
         # Skip search if player_id is already a Blizzard ID
         if is_blizzard_id(player_id):
             logger.info("Player ID is a Blizzard ID, skipping search")
-            return {}, None
+            return player_id, {}, None, None  # Blizzard ID input, no BattleTag
+
+        # User provided BattleTag - track it for storage
+        battletag_input = player_id
 
         # Fetch and parse search results
         search_json = await fetch_player_summary_json(client, player_id)
-
-        # Step 3: If multiple results, try to disambiguate using cached Blizzard ID
-        if len(search_json) > 1:
-            cached_blizzard_id = await self._get_blizzard_id_from_battletag(player_id)
-            if cached_blizzard_id:
-                logger.info(
-                    f"Multiple search results ({len(search_json)}), "
-                    f"attempting to disambiguate with cached Blizzard ID"
-                )
-                player_summary = parse_player_summary_json(
-                    search_json, player_id, cached_blizzard_id
-                )
-                if player_summary:
-                    logger.info(
-                        "Successfully disambiguated player using cached Blizzard ID"
-                    )
-                    return player_summary, None
-
-        # Normal parsing (single result or no cached Blizzard ID)
         player_summary = parse_player_summary_json(search_json, player_id)
 
         if player_summary:
             logger.info("Player Summary retrieved!")
-            return player_summary, None
+            blizzard_id = player_summary.get("url")
+            return blizzard_id, player_summary, None, battletag_input
 
         # Player not found in search - try to resolve via Blizzard ID redirect
         logger.info("Player not found in search, attempting Blizzard ID resolution")
@@ -342,7 +359,7 @@ class BasePlayerController(AbstractController):
             if player_summary:
                 logger.info("Successfully resolved player via Blizzard ID")
                 # Return the HTML we already fetched
-                return player_summary, html
+                return blizzard_id, player_summary, html, battletag_input
 
             logger.warning(
                 "Could not resolve player even with Blizzard ID from redirect"
@@ -350,4 +367,4 @@ class BasePlayerController(AbstractController):
 
         # Always return HTML if we fetched it, even if blizzard_id or parsing failed
         # This avoids a second fetch in the controller
-        return {}, html
+        return blizzard_id, {}, html, battletag_input
