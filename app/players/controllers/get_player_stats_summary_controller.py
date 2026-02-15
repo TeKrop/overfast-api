@@ -40,11 +40,20 @@ class GetPlayerStatsSummaryController(BasePlayerController):
 
         try:
             # Step 1: Resolve player identity (search + Blizzard ID resolution)
-            player_summary = await self._resolve_player_identity(client, player_id)
+            # Returns player summary and optional cached HTML from resolution
+            player_summary, cached_html = await self._resolve_player_identity(
+                client, player_id
+            )
 
             # Step 2: Fetch stats with cache optimization
+            # Pass cached_html to avoid redundant Blizzard call
             data = await self._fetch_stats_with_cache(
-                client, player_id, player_summary, gamemode, platform
+                client,
+                player_id,
+                player_summary,
+                gamemode,
+                platform,
+                cached_html=cached_html,
             )
 
         except ParserBlizzardError as error:
@@ -81,18 +90,51 @@ class GetPlayerStatsSummaryController(BasePlayerController):
         player_summary: dict,
         gamemode: PlayerGamemode | None,
         platform: PlayerPlatform | None,
+        cached_html: str | None = None,
     ) -> dict:
         """Fetch player stats with cache optimization.
+
+        Implements Step 1 (use cached HTML) and Step 2 (BattleTag→Blizzard ID lookup).
+
+        Args:
+            client: Blizzard API client
+            player_id: Player identifier
+            player_summary: Player summary from search
+            gamemode: Optional gamemode filter
+            platform: Optional platform filter
+            cached_html: HTML already fetched during identity resolution (Step 1 optimization)
 
         Returns:
             Player stats summary data
         """
+        # Step 1 optimization: Use cached HTML from _resolve_player_identity
+        if cached_html:
+            logger.info(
+                "Using cached HTML from identity resolution (avoiding double-fetch)"
+            )
+            return parse_player_stats_summary_from_html(
+                cached_html, player_summary, gamemode, platform
+            )
+
         # No summary (Blizzard ID request or not in search) - fetch directly
         if not player_summary:
             logger.info("No summary available, fetching stats from Blizzard")
-            data, _ = await parse_player_stats_summary(
-                client, player_id, None, gamemode, platform
-            )
+
+            # Step 2 optimization: Check for cached Blizzard ID to skip redirects
+            cached_blizzard_id = await self._get_blizzard_id_from_battletag(player_id)
+
+            if cached_blizzard_id:
+                logger.info(
+                    f"Using cached Blizzard ID to skip redirects: {cached_blizzard_id}"
+                )
+                data, _ = await parse_player_stats_summary(
+                    client, cached_blizzard_id, None, gamemode, platform
+                )
+            else:
+                data, _ = await parse_player_stats_summary(
+                    client, player_id, None, gamemode, platform
+                )
+
             return data
 
         # Check Player Cache (SQLite storage)
@@ -110,10 +152,23 @@ class GetPlayerStatsSummaryController(BasePlayerController):
                 html, player_summary, gamemode, platform
             )
 
-        # Fetch from Blizzard with Blizzard ID
+        # Fetch from Blizzard
         logger.info("Player Cache not found or not up-to-date, calling Blizzard")
-        blizzard_id = player_summary["url"]
-        html, _ = await fetch_player_html(client, blizzard_id)
+
+        # Step 2 optimization: Use Blizzard ID from summary or cached mapping
+        blizzard_id = player_summary.get("url")
+
+        if not blizzard_id:
+            # If summary doesn't have Blizzard ID (edge case), try cached
+            blizzard_id = await self._get_blizzard_id_from_battletag(player_id)
+
+        if blizzard_id:
+            logger.info(f"Fetching stats with Blizzard ID: {blizzard_id}")
+            html, _ = await fetch_player_html(client, blizzard_id)
+        else:
+            logger.info(f"Fetching stats with player ID: {player_id}")
+            html, _ = await fetch_player_html(client, player_id)
+
         data = parse_player_stats_summary_from_html(
             html, player_summary, gamemode, platform
         )

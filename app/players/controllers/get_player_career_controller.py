@@ -39,11 +39,15 @@ class GetPlayerCareerController(BasePlayerController):
 
         try:
             # Step 1: Resolve player identity (search + Blizzard ID resolution)
-            player_summary = await self._resolve_player_identity(client, player_id)
+            # Returns player summary and optional cached HTML from resolution
+            player_summary, cached_html = await self._resolve_player_identity(
+                client, player_id
+            )
 
             # Step 2: Fetch profile with cache optimization
+            # Pass cached_html to avoid redundant Blizzard call
             _html, profile_data = await self._fetch_profile_with_cache(
-                client, player_id, player_summary
+                client, player_id, player_summary, cached_html=cached_html
             )
 
             # Step 3: Apply filters
@@ -88,16 +92,44 @@ class GetPlayerCareerController(BasePlayerController):
         client: BlizzardClientPort,
         player_id: str,
         player_summary: dict,
+        cached_html: str | None = None,
     ) -> tuple[str, dict]:
         """Fetch player profile HTML with cache optimization.
+
+        Implements Step 1 (use cached HTML) and Step 2 (BattleTag→Blizzard ID lookup).
+
+        Args:
+            client: Blizzard API client
+            player_id: Player identifier
+            player_summary: Player summary from search
+            cached_html: HTML already fetched during identity resolution (Step 1 optimization)
 
         Returns:
             Tuple of (html, profile_data)
         """
+        # Step 1 optimization: Use cached HTML from _resolve_player_identity
+        if cached_html:
+            logger.info(
+                "Using cached HTML from identity resolution (avoiding double-fetch)"
+            )
+            profile_data = parse_player_profile_html(cached_html, player_summary)
+            return cached_html, profile_data
+
         # No summary (Blizzard ID request or not in search) - fetch directly
         if not player_summary:
             logger.info("No summary available, fetching profile from Blizzard")
-            html, _ = await fetch_player_html(client, player_id)
+
+            # Step 2 optimization: Check for cached Blizzard ID to skip redirects
+            cached_blizzard_id = await self._get_blizzard_id_from_battletag(player_id)
+
+            if cached_blizzard_id:
+                logger.info(
+                    f"Using cached Blizzard ID to skip redirects: {cached_blizzard_id}"
+                )
+                html, _ = await fetch_player_html(client, cached_blizzard_id)
+            else:
+                html, _ = await fetch_player_html(client, player_id)
+
             profile_data = parse_player_profile_html(html, None)
             return html, profile_data
 
@@ -115,10 +147,23 @@ class GetPlayerCareerController(BasePlayerController):
             profile_data = parse_player_profile_html(html, player_summary)
             return html, profile_data
 
-        # Fetch from Blizzard with Blizzard ID
+        # Fetch from Blizzard
         logger.info("Player Cache not found or not up-to-date, calling Blizzard")
-        blizzard_id = player_summary["url"]
-        html, _ = await fetch_player_html(client, blizzard_id)
+
+        # Step 2 optimization: Use Blizzard ID from summary or cached mapping
+        blizzard_id = player_summary.get("url")
+
+        if not blizzard_id:
+            # If summary doesn't have Blizzard ID (edge case), try cached
+            blizzard_id = await self._get_blizzard_id_from_battletag(player_id)
+
+        if blizzard_id:
+            logger.info(f"Fetching profile with Blizzard ID: {blizzard_id}")
+            html, _ = await fetch_player_html(client, blizzard_id)
+        else:
+            logger.info(f"Fetching profile with player ID: {player_id}")
+            html, _ = await fetch_player_html(client, player_id)
+
         profile_data = parse_player_profile_html(html, player_summary)
 
         # Update Player Cache (SQLite storage)

@@ -247,42 +247,89 @@ class BasePlayerController(AbstractController):
             await self.mark_player_unknown_on_404(player_id, err)
             raise
 
+    async def _get_blizzard_id_from_battletag(self, player_id: str) -> str | None:
+        """Get stored Blizzard ID for a BattleTag from SQLite player cache.
+
+        Args:
+            player_id: BattleTag to lookup
+
+        Returns:
+            Blizzard ID if found in cache, None otherwise
+        """
+        if is_blizzard_id(player_id):
+            return None  # Already a Blizzard ID
+
+        # Check if we have profile cache for this BattleTag
+        player_cache = await self.storage.get_player_profile(player_id)
+        if not player_cache:
+            return None
+
+        # Ensure to log if we have a Blizzard ID
+        if blizzard_id := player_cache.get("blizzard_id"):
+            logger.info(f"Found cached Blizzard ID for {player_id}: {blizzard_id}")
+            return blizzard_id
+
+        return None
+
     async def _resolve_player_identity(
         self, client: BlizzardClientPort, player_id: str
-    ) -> dict:
+    ) -> tuple[dict, str | None]:
         """Resolve player identity via search and Blizzard ID redirect if needed.
 
         This method implements the identity resolution flow:
         1. Skip search if player_id is already a Blizzard ID
         2. Fetch and parse search results
-        3. If not found, attempt Blizzard ID resolution via redirect
-        4. Re-parse search results with Blizzard ID if obtained
+        3. If multiple results, try to disambiguate using cached Blizzard ID (Step 3)
+        4. If not found, attempt Blizzard ID resolution via redirect (returns HTML)
+        5. Re-parse search results with Blizzard ID if obtained
 
         Args:
             client: Blizzard API client
             player_id: Player identifier (BattleTag or Blizzard ID)
 
         Returns:
-            Player summary dict (may be empty if not found in search or direct Blizzard ID)
+            Tuple of (player_summary, profile_html):
+            - player_summary: dict (may be empty if not found in search or direct Blizzard ID)
+            - profile_html: HTML from profile page if fetched during resolution, None otherwise
         """
         logger.info("Retrieving Player Summary...")
 
         # Skip search if player_id is already a Blizzard ID
         if is_blizzard_id(player_id):
             logger.info("Player ID is a Blizzard ID, skipping search")
-            return {}
+            return {}, None
 
         # Fetch and parse search results
         search_json = await fetch_player_summary_json(client, player_id)
+
+        # Step 3: If multiple results, try to disambiguate using cached Blizzard ID
+        if len(search_json) > 1:
+            cached_blizzard_id = await self._get_blizzard_id_from_battletag(player_id)
+            if cached_blizzard_id:
+                logger.info(
+                    f"Multiple search results ({len(search_json)}), "
+                    f"attempting to disambiguate with cached Blizzard ID"
+                )
+                player_summary = parse_player_summary_json(
+                    search_json, player_id, cached_blizzard_id
+                )
+                if player_summary:
+                    logger.info(
+                        "Successfully disambiguated player using cached Blizzard ID"
+                    )
+                    return player_summary, None
+
+        # Normal parsing (single result or no cached Blizzard ID)
         player_summary = parse_player_summary_json(search_json, player_id)
 
         if player_summary:
             logger.info("Player Summary retrieved!")
-            return player_summary
+            return player_summary, None
 
         # Player not found in search - try to resolve via Blizzard ID redirect
         logger.info("Player not found in search, attempting Blizzard ID resolution")
-        _, blizzard_id = await fetch_player_html(client, player_id)
+        # Step 1: Capture HTML from this call to avoid double-fetch
+        html, blizzard_id = await fetch_player_html(client, player_id)
 
         if blizzard_id and search_json:
             logger.info(
@@ -294,10 +341,13 @@ class BasePlayerController(AbstractController):
 
             if player_summary:
                 logger.info("Successfully resolved player via Blizzard ID")
-                return player_summary
+                # Return the HTML we already fetched
+                return player_summary, html
 
             logger.warning(
                 "Could not resolve player even with Blizzard ID from redirect"
             )
 
-        return {}
+        # Always return HTML if we fetched it, even if blizzard_id or parsing failed
+        # This avoids a second fetch in the controller
+        return {}, html
