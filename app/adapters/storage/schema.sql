@@ -34,6 +34,10 @@ CREATE TABLE IF NOT EXISTS player_profiles (
 -- Used by get_player_id_by_battletag() for redirect optimization (Phase 3.5B)
 CREATE INDEX IF NOT EXISTS idx_player_profiles_battletag ON player_profiles(battletag);
 
+-- Index on updated_at for data freshness queries (metrics)
+-- Used by get_stats() to efficiently calculate p50/p90/p99 age distribution
+CREATE INDEX IF NOT EXISTS idx_player_profiles_updated ON player_profiles(updated_at);
+
 -- Player status: unknown players with exponential backoff
 -- Tracks players that don't exist on Blizzard
 -- Key: player_id (ALWAYS Blizzard ID as of Phase 3.5B)

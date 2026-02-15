@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": "overfast-api-health",
-  "title": "💚 OverFast API - API Health",
+  "title": "\ud83d\udc9a OverFast API - API Health",
   "editable": true,
   "graphTooltip": 1,
   "schemaVersion": 39,
@@ -42,7 +42,7 @@
   "panels": [
     {
       "type": "row",
-      "title": "🗄️ Valkey Cache",
+      "title": "\ud83d\uddc4\ufe0f Valkey Cache",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -623,7 +623,7 @@
     },
     {
       "type": "row",
-      "title": "⚡ API Performance",
+      "title": "\u26a1 API Performance",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -851,20 +851,34 @@
       },
       "id": 1,
       "panels": [],
-      "title": "💾 Persistent Storage (SQLite)",
+      "title": "\ud83d\udcbe Persistent Storage (SQLite)",
       "type": "row"
     },
     {
+      "type": "stat",
+      "title": "Database Size",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 56
+      },
+      "targets": [
+        {
+          "expr": "storage_size_bytes",
+          "refId": "A"
+        }
+      ],
       "fieldConfig": {
         "defaults": {
+          "unit": "bytes",
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -881,18 +895,10 @@
                 "value": 52428800
               }
             ]
-          },
-          "unit": "bytes"
+          }
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 0,
-        "y": 56
-      },
-      "id": 2,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -908,133 +914,194 @@
         "showPercentChange": false,
         "textMode": "auto",
         "wideLayout": true
-      },
-      "pluginVersion": "11.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "storage_size_bytes",
-          "refId": "A"
-        }
-      ],
-      "title": "Database Size",
-      "type": "stat"
+      }
     },
     {
+      "type": "stat",
+      "title": "WAL Size",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 56
+      },
+      "targets": [
+        {
+          "expr": "sqlite_wal_size_bytes",
+          "refId": "A"
+        }
+      ],
       "fieldConfig": {
         "defaults": {
+          "unit": "bytes",
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1048576
+              },
+              {
+                "color": "red",
+                "value": 10485760
               }
             ]
-          },
-          "unit": "short"
+          }
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 8,
-        "w": 18,
-        "x": 6,
-        "y": 56
-      },
-      "id": 3,
       "options": {
-        "legend": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Total Entries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 56
       },
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "storage_entries_total{table=\"static_data\"}",
-          "legendFormat": "Static Data (Heroes/Maps/etc.)",
+          "expr": "sum(storage_entries_total)",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "storage_entries_total{table=\"player_profiles\"}",
-          "legendFormat": "Player Profiles",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "storage_entries_total{table=\"player_status\"}",
-          "legendFormat": "Unknown Players (404 tracking)",
-          "refId": "C"
         }
       ],
-      "title": "Storage Entries by Table",
-      "type": "timeseries"
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 1000
+              },
+              {
+                "color": "purple",
+                "value": 10000
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      }
     },
     {
-      "type": "timeseries",
-      "title": "API Response Time Over Time",
+      "type": "gauge",
+      "title": "SQLite Cache Hit Rate",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 56
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(sqlite_cache_hit_total{status=\"hit\"}[5m])) / sum(rate(sqlite_cache_hit_total[5m])) * 100",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "type": "heatmap",
+      "title": "SQLite Query Duration Distribution",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -1043,21 +1110,245 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 39
+        "y": 62
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.5, sum(rate(nginx_http_request_duration_seconds_bucket{job=\"nginx\"}[5m])) by (le))",
+          "expr": "rate(sqlite_operation_duration_seconds_bucket[5m])",
+          "legendFormat": "{{table}}-{{operation}}",
+          "refId": "A",
+          "format": "heatmap"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "calculate": false,
+        "cellGap": 2,
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "Spectral",
+          "steps": 128
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1e-09
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "showValue": "never",
+        "tooltip": {
+          "show": true,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "s"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Slow Query Rate (>100ms, >1s)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 62
+      },
+      "targets": [
+        {
+          "expr": "rate(sqlite_slow_queries_total{threshold=\"100ms\"}[1m])",
+          "legendFormat": "{{table}}-{{operation}} >100ms",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(sqlite_slow_queries_total{threshold=\"1s\"}[1m])",
+          "legendFormat": "{{table}}-{{operation}} >1s",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "axisPlacement": "auto",
+            "axisBorderShow": false
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Storage Entries by Table",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 70
+      },
+      "targets": [
+        {
+          "expr": "storage_entries_total",
+          "legendFormat": "{{table}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "axisPlacement": "auto",
+            "axisBorderShow": false
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Database & WAL Size Over Time",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 70
+      },
+      "targets": [
+        {
+          "expr": "storage_size_bytes",
+          "legendFormat": "DB File",
+          "refId": "A"
+        },
+        {
+          "expr": "sqlite_wal_size_bytes",
+          "legendFormat": "WAL File",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "axisPlacement": "auto",
+            "axisBorderShow": false
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Player Profile Age (p50, p90, p99)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 78
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(sqlite_player_profile_age_seconds_bucket[5m])) by (le))",
           "legendFormat": "p50",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(nginx_http_request_duration_seconds_bucket{job=\"nginx\"}[5m])) by (le))",
-          "legendFormat": "p95",
+          "expr": "histogram_quantile(0.90, sum(rate(sqlite_player_profile_age_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p90",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(nginx_http_request_duration_seconds_bucket{job=\"nginx\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(sqlite_player_profile_age_seconds_bucket[5m])) by (le))",
           "legendFormat": "p99",
           "refId": "C"
         }
@@ -1068,144 +1359,75 @@
           "custom": {
             "lineWidth": 2,
             "fillOpacity": 10,
-            "showPoints": "never"
+            "showPoints": "never",
+            "axisPlacement": "auto",
+            "axisBorderShow": false
+          },
+          "color": {
+            "mode": "palette-classic"
           }
         },
         "overrides": []
       },
       "options": {
         "tooltip": {
-          "mode": "single"
+          "mode": "multi"
         },
         "legend": {
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "calcs": []
         }
       }
     },
     {
       "type": "timeseries",
-      "title": "API Requests/sec Over Time",
+      "title": "SQLite Operations/sec",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 12,
         "x": 12,
-        "y": 39
+        "y": 78
       },
       "targets": [
         {
-          "expr": "sum(rate(nginx_http_requests_total{job=\"nginx\"}[5m])) by (status)",
-          "legendFormat": "{{status}}",
+          "expr": "rate(sqlite_operations_total[1m])",
+          "legendFormat": "{{table}}-{{operation}} ({{status}})",
           "refId": "A"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "reqps",
+          "unit": "ops",
           "custom": {
-            "lineWidth": 2,
+            "lineWidth": 1,
             "fillOpacity": 10,
             "showPoints": "never",
+            "axisPlacement": "auto",
+            "axisBorderShow": false,
             "stacking": {
-              "mode": "normal"
+              "mode": "normal",
+              "group": "A"
             }
+          },
+          "color": {
+            "mode": "palette-classic"
           }
         },
         "overrides": []
       },
       "options": {
         "tooltip": {
-          "mode": "single"
+          "mode": "multi"
         },
         "legend": {
           "displayMode": "list",
-          "placement": "bottom"
-        }
-      }
-    },
-    {
-      "type": "timeseries",
-      "title": "API Error Rate Over Time",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 47
-      },
-      "targets": [
-        {
-          "expr": "sum(rate(nginx_http_requests_total{job=\"nginx\", status=~\"[45]..\"}[5m])) / sum(rate(nginx_http_requests_total{job=\"nginx\"}[5m])) * 100",
-          "legendFormat": "Error rate",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "custom": {
-            "lineWidth": 2,
-            "fillOpacity": 10,
-            "showPoints": "never"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "tooltip": {
-          "mode": "single"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
-        }
-      }
-    },
-    {
-      "type": "timeseries",
-      "title": "Connections Over Time",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 47
-      },
-      "targets": [
-        {
-          "expr": "nginx_connections{job=\"nginx\"}",
-          "legendFormat": "{{state}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "custom": {
-            "lineWidth": 2,
-            "fillOpacity": 10,
-            "showPoints": "never"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "tooltip": {
-          "mode": "single"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "calcs": []
         }
       }
     }

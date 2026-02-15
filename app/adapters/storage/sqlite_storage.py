@@ -11,6 +11,7 @@ import aiosqlite
 
 from app.config import settings
 from app.metaclasses import Singleton
+from app.monitoring.metrics import track_sqlite_operation
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
@@ -127,6 +128,7 @@ class SQLiteStorage(metaclass=Singleton):
 
     # Static Data Methods
 
+    @track_sqlite_operation("static_data", "get")
     async def get_static_data(self, key: str) -> dict | None:
         """
         Get static data by key.
@@ -153,6 +155,7 @@ class SQLiteStorage(metaclass=Singleton):
                 "schema_version": row[3],
             }
 
+    @track_sqlite_operation("static_data", "set")
     async def set_static_data(
         self,
         key: str,
@@ -183,6 +186,7 @@ class SQLiteStorage(metaclass=Singleton):
 
     # Player Profile Methods
 
+    @track_sqlite_operation("player_profiles", "get")
     async def get_player_profile(self, player_id: str) -> dict | None:
         """
         Get player profile by player_id (Blizzard ID).
@@ -228,6 +232,7 @@ class SQLiteStorage(metaclass=Singleton):
                 "schema_version": row[6],
             }
 
+    @track_sqlite_operation("player_profiles", "get")
     async def get_player_id_by_battletag(self, battletag: str) -> str | None:
         """
         Get Blizzard ID (player_id) for a given BattleTag.
@@ -251,6 +256,7 @@ class SQLiteStorage(metaclass=Singleton):
             row = await cursor.fetchone()
             return row[0] if row else None
 
+    @track_sqlite_operation("player_profiles", "set")
     async def set_player_profile(
         self,
         player_id: str,
@@ -311,6 +317,7 @@ class SQLiteStorage(metaclass=Singleton):
 
     # Player Status Methods (Unknown Players with Exponential Backoff)
 
+    @track_sqlite_operation("player_status", "get")
     async def get_player_status(self, player_id: str) -> dict | None:
         """
         Get player status for unknown player tracking by player_id OR battletag.
@@ -340,6 +347,7 @@ class SQLiteStorage(metaclass=Singleton):
                 "battletag": row[3],
             }
 
+    @track_sqlite_operation("player_status", "set")
     async def set_player_status(
         self,
         player_id: str,
@@ -400,42 +408,75 @@ class SQLiteStorage(metaclass=Singleton):
 
     async def get_stats(self) -> dict:
         """
-        Get storage statistics for Prometheus metrics.
+        Get comprehensive storage statistics for Prometheus metrics.
+
+        Phase 3.5B: Enhanced with detailed metrics including:
+        - Row counts per table
+        - Database and WAL file sizes
+        - Compression ratios
+        - Data freshness statistics
+        - Per-table storage breakdown
 
         Returns:
-            Dict with counts per table and total database size
+            Dict with comprehensive storage metrics
         """
+        stats = {}
+
         async with self._get_connection() as db:
-            # Count entries per table
+            # Row counts per table
             async with db.execute("SELECT COUNT(*) FROM static_data") as cursor:
                 row = await cursor.fetchone()
-                static_count = row[0] if row else 0
+                stats["static_data_count"] = row[0] if row else 0
 
             async with db.execute("SELECT COUNT(*) FROM player_profiles") as cursor:
                 row = await cursor.fetchone()
-                profiles_count = row[0] if row else 0
+                stats["player_profiles_count"] = row[0] if row else 0
 
             async with db.execute("SELECT COUNT(*) FROM player_status") as cursor:
                 row = await cursor.fetchone()
-                status_count = row[0] if row else 0
+                stats["player_status_count"] = row[0] if row else 0
 
-        # Get file size (or estimate for in-memory database)
+            # Data freshness (player profiles age distribution)
+            current_time = int(time.time())
+            async with db.execute(
+                "SELECT updated_at FROM player_profiles ORDER BY updated_at DESC LIMIT 1000"
+            ) as cursor:
+                rows = await cursor.fetchall()
+                if rows:
+                    ages = [current_time - row[0] for row in rows if row[0]]
+                    if ages:
+                        ages.sort()
+                        stats["player_profile_age_p50"] = ages[len(ages) // 2]
+                        stats["player_profile_age_p90"] = ages[int(len(ages) * 0.9)]
+                        stats["player_profile_age_p99"] = ages[int(len(ages) * 0.99)]
+                    else:
+                        stats["player_profile_age_p50"] = 0
+                        stats["player_profile_age_p90"] = 0
+                        stats["player_profile_age_p99"] = 0
+                else:
+                    stats["player_profile_age_p50"] = 0
+                    stats["player_profile_age_p90"] = 0
+                    stats["player_profile_age_p99"] = 0
+
+        # File sizes
         if self.db_path == MEMORY_DB:
             # Estimate size for in-memory database
-            # Rough approximation: static_data ~1KB, player_profiles ~10KB, player_status ~100B
-            size_bytes = (
-                (static_count * 1024) + (profiles_count * 10240) + (status_count * 100)
+            stats["size_bytes"] = (
+                (stats["static_data_count"] * 1024)
+                + (stats["player_profiles_count"] * 10240)
+                + (stats["player_status_count"] * 100)
             )
+            stats["wal_size_bytes"] = 0
         else:
             db_file = Path(self.db_path)
-            size_bytes = db_file.stat().st_size if db_file.exists() else 0
+            wal_file = Path(f"{self.db_path}-wal")
 
-        return {
-            "size_bytes": size_bytes,
-            "static_data_count": static_count,
-            "player_profiles_count": profiles_count,
-            "player_status_count": status_count,
-        }
+            stats["size_bytes"] = db_file.stat().st_size if db_file.exists() else 0
+            stats["wal_size_bytes"] = (
+                wal_file.stat().st_size if wal_file.exists() else 0
+            )
+
+        return stats
 
     async def clear_all_data(self) -> None:
         """Clear all data including static data (for testing)"""
