@@ -30,6 +30,10 @@ CREATE TABLE IF NOT EXISTS player_profiles (
     schema_version INTEGER DEFAULT 1
 );
 
+-- Index to enable fast BattleTag lookups in player_profiles
+-- Used by get_player_id_by_battletag() for redirect optimization (Phase 3.5B)
+CREATE INDEX IF NOT EXISTS idx_player_profiles_battletag ON player_profiles(battletag);
+
 -- Player status: unknown players with exponential backoff
 -- Tracks players that don't exist on Blizzard
 -- Key: player_id (ALWAYS Blizzard ID as of Phase 3.5B)

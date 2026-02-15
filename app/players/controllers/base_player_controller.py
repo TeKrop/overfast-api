@@ -259,11 +259,13 @@ class BasePlayerController(AbstractController):
         This method implements the identity resolution flow:
         1. Skip search if player_id is already a Blizzard ID
         2. Fetch and parse search results
-        3. If not found, attempt Blizzard ID resolution via redirect (returns HTML)
-        4. Re-parse search results with Blizzard ID if obtained
+        3. If not found, check SQLite for cached BattleTag→Blizzard ID mapping
+        4. If still not found, attempt Blizzard ID resolution via redirect (returns HTML)
+        5. Re-parse search results with Blizzard ID if obtained
 
-        Phase 3.5B: Returns Blizzard ID and BattleTag separately for proper key management.
-        Note: Disambiguation (Step 3) removed as it requires BattleTag→Blizzard ID index.
+        Phase 3.5B optimization: Check SQLite before redirect to avoid redundant Blizzard calls.
+        When a user provides a BattleTag we've seen before, we use the cached Blizzard ID
+        instead of hitting Blizzard's redirect endpoint again.
 
         Args:
             client: Blizzard API client
@@ -295,8 +297,34 @@ class BasePlayerController(AbstractController):
             blizzard_id = player_summary.get("url")
             return blizzard_id, player_summary, None, battletag_input
 
-        # Player not found in search - try to resolve via Blizzard ID redirect
-        logger.info("Player not found in search, attempting Blizzard ID resolution")
+        # Player not found in search - check SQLite cache before attempting redirect
+        logger.info(
+            "Player not found in search, checking SQLite for cached Blizzard ID mapping"
+        )
+        cached_blizzard_id = await self.storage.get_player_id_by_battletag(
+            battletag_input
+        )
+
+        if cached_blizzard_id:
+            logger.info(
+                f"Found cached Blizzard ID {cached_blizzard_id} for {battletag_input}, "
+                "skipping redirect"
+            )
+            # Re-parse search with cached Blizzard ID (handles multiple matches)
+            player_summary = parse_player_summary_json(
+                search_json, player_id, cached_blizzard_id
+            )
+            if player_summary:
+                logger.info("Successfully resolved player using cached Blizzard ID")
+                # No HTML since we skipped the redirect
+                return cached_blizzard_id, player_summary, None, battletag_input
+
+            logger.warning(
+                "Cached Blizzard ID found but couldn't resolve player in search results"
+            )
+
+        # Last resort: attempt Blizzard ID resolution via redirect
+        logger.info("No cached mapping found, attempting Blizzard ID resolution")
         # Step 1: Capture HTML from this call to avoid double-fetch
         html, blizzard_id = await fetch_player_html(client, player_id)
 

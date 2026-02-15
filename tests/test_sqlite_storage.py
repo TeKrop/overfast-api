@@ -169,6 +169,32 @@ class TestPlayerProfiles:
         assert updated_result["summary"]["lastUpdated"] == 2000000  # noqa: PLR2004
         assert updated_result["updated_at"] >= first_timestamp
 
+    @pytest.mark.asyncio
+    async def test_get_player_id_by_battletag(self, storage_db):
+        """Test BattleTag lookup optimization (Phase 3.5B)"""
+        player_id = "Player-1234"
+        battletag = "TestPlayer-5678"
+        html = "<html>Profile with BattleTag</html>"
+        summary = {"url": player_id, "lastUpdated": 1234567890}
+
+        # Store profile with BattleTag
+        await storage_db.set_player_profile(
+            player_id=player_id,
+            html=html,
+            summary=summary,
+            battletag=battletag,
+        )
+
+        # Lookup by BattleTag should return Blizzard ID
+        result = await storage_db.get_player_id_by_battletag(battletag)
+        assert result == player_id
+
+    @pytest.mark.asyncio
+    async def test_get_player_id_by_battletag_not_found(self, storage_db):
+        """Test BattleTag lookup returns None for unknown BattleTag"""
+        result = await storage_db.get_player_id_by_battletag("Unknown-9999")
+        assert result is None
+
 
 class TestPlayerStatus:
     """Test player status (unknown player) storage operations"""

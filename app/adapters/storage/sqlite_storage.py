@@ -228,6 +228,29 @@ class SQLiteStorage(metaclass=Singleton):
                 "schema_version": row[6],
             }
 
+    async def get_player_id_by_battletag(self, battletag: str) -> str | None:
+        """
+        Get Blizzard ID (player_id) for a given BattleTag.
+
+        This enables lookup optimization: when a user provides a BattleTag we've seen before,
+        we can skip the Blizzard redirect call and use the cached Blizzard ID directly.
+
+        Args:
+            battletag: BattleTag to lookup (e.g., "TeKrop-2217")
+
+        Returns:
+            Blizzard ID if found, None otherwise
+        """
+        async with (
+            self._get_connection() as db,
+            db.execute(
+                "SELECT player_id FROM player_profiles WHERE battletag = ?",
+                (battletag,),
+            ) as cursor,
+        ):
+            row = await cursor.fetchone()
+            return row[0] if row else None
+
     async def set_player_profile(
         self,
         player_id: str,

@@ -38,6 +38,18 @@ class StoragePort(Protocol):
         """
         ...
 
+    async def get_player_id_by_battletag(self, battletag: str) -> str | None:
+        """
+        Get Blizzard ID (player_id) for a given BattleTag.
+
+        Enables lookup optimization: when user provides a BattleTag we've seen before,
+        skip Blizzard redirect and use the cached Blizzard ID directly.
+
+        Returns:
+            Blizzard ID if found, None otherwise
+        """
+        ...
+
     async def set_player_profile(
         self,
         player_id: str,
