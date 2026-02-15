@@ -6,7 +6,10 @@ from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, status
 
-from app.adapters.blizzard.parsers.player_profile import fetch_player_html
+from app.adapters.blizzard.parsers.player_profile import (
+    extract_name_from_profile_html,
+    fetch_player_html,
+)
 from app.adapters.blizzard.parsers.player_summary import (
     fetch_player_summary_json,
     parse_player_summary_json,
@@ -251,21 +254,76 @@ class BasePlayerController(AbstractController):
             f"(check #{check_count}, retry in {retry_after}s, next check at {next_check_at})"
         )
 
+    async def _enrich_summary_from_blizzard_id(
+        self, client: BlizzardClientPort, blizzard_id: str
+    ) -> tuple[dict, str | None]:
+        """Reverse enrichment: fetch HTML, extract name, search for matching summary.
+
+        When user provides a Blizzard ID directly, we can still enrich the response
+        with player summary by extracting the name from HTML and searching.
+
+        Args:
+            client: Blizzard API client
+            blizzard_id: Blizzard ID to enrich
+
+        Returns:
+            Tuple of (player_summary, html):
+            - player_summary: Enriched summary dict if found, empty dict otherwise
+            - html: Profile HTML (always returned if fetch succeeds)
+        """
+        # Fetch HTML to extract player name
+        html, _ = await fetch_player_html(client, blizzard_id)
+
+        if not html:
+            logger.warning("Could not fetch HTML for Blizzard ID, no enrichment")
+            return {}, None
+
+        # Extract name from HTML (e.g., "TeKrop" from profile)
+        try:
+            player_name = extract_name_from_profile_html(html)
+
+            if player_name:
+                logger.info(
+                    f"Extracted name '{player_name}', searching for matching summary"
+                )
+                # Search with the name to find summary
+                search_json = await fetch_player_summary_json(client, player_name)
+                # Find the entry that matches our Blizzard ID
+                player_summary = parse_player_summary_json(
+                    search_json, player_name, blizzard_id
+                )
+
+                if player_summary:
+                    logger.info("Successfully enriched summary from name-based search")
+                    return player_summary, html
+
+                logger.warning(
+                    f"Name '{player_name}' found in HTML but no matching summary in search"
+                )
+            else:
+                logger.warning("Could not extract name from HTML for enrichment")
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Error during reverse enrichment: {e}")
+
+        # Enrichment failed but we have HTML - return what we have
+        return {}, html
+
     async def _resolve_player_identity(
         self, client: BlizzardClientPort, player_id: str
     ) -> tuple[str | None, dict, str | None, str | None]:
         """Resolve player identity via search and Blizzard ID redirect if needed.
 
         This method implements the identity resolution flow:
-        1. Skip search if player_id is already a Blizzard ID
-        2. Fetch and parse search results
-        3. If not found, check SQLite for cached BattleTag→Blizzard ID mapping
-        4. If still not found, attempt Blizzard ID resolution via redirect (returns HTML)
+        1. If Blizzard ID: Attempt reverse enrichment (fetch HTML → extract name → search)
+        2. If BattleTag: Fetch and parse search results
+        3. If not found in search: Check SQLite for cached BattleTag→Blizzard ID mapping
+        4. If still not found: Attempt Blizzard ID resolution via redirect (returns HTML)
         5. Re-parse search results with Blizzard ID if obtained
 
-        Phase 3.5B optimization: Check SQLite before redirect to avoid redundant Blizzard calls.
-        When a user provides a BattleTag we've seen before, we use the cached Blizzard ID
-        instead of hitting Blizzard's redirect endpoint again.
+        Phase 3.5B optimizations:
+        - SQLite lookup before redirect to avoid redundant Blizzard calls
+        - Reverse enrichment: When Blizzard ID provided, extract name and search for summary
+          This builds summary cache even when users provide direct Blizzard IDs
 
         Args:
             client: Blizzard API client
@@ -280,10 +338,15 @@ class BasePlayerController(AbstractController):
         """
         logger.info("Retrieving Player Summary...")
 
-        # Skip search if player_id is already a Blizzard ID
+        # Blizzard ID provided - attempt reverse enrichment
         if is_blizzard_id(player_id):
-            logger.info("Player ID is a Blizzard ID, skipping search")
-            return player_id, {}, None, None  # Blizzard ID input, no BattleTag
+            logger.info(
+                "Player ID is a Blizzard ID, attempting reverse enrichment from name"
+            )
+            player_summary, html = await self._enrich_summary_from_blizzard_id(
+                client, player_id
+            )
+            return player_id, player_summary, html, None
 
         # User provided BattleTag - track it for storage
         battletag_input = player_id
