@@ -10,7 +10,11 @@ from app.adapters.blizzard.parsers.player_career_stats import (
     parse_player_career_stats_from_html,
 )
 from app.adapters.blizzard.parsers.player_profile import fetch_player_html
-from app.adapters.blizzard.parsers.player_summary import parse_player_summary
+from app.adapters.blizzard.parsers.player_summary import (
+    fetch_player_summary_json,
+    parse_player_summary_json,
+)
+from app.adapters.blizzard.parsers.utils import is_blizzard_id
 from app.config import settings
 from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.helpers import overfast_internal_error
@@ -37,16 +41,22 @@ class GetPlayerCareerStatsController(BasePlayerController):
 
         client = BlizzardClient()
         player_summary: dict | None = None
+        blizzard_id: str | None = None
+        search_json: list[dict] | None = None
 
         try:
-            # Get player summary
+            # Get player summary (unless player_id is Blizzard ID)
             logger.info("Retrieving Player Summary...")
-            player_summary = await parse_player_summary(client, player_id)
 
-            # If player not found in search, fetch directly with player_id
+            # Skip search if player_id is a Blizzard ID
+            if not is_blizzard_id(player_id):
+                search_json = await fetch_player_summary_json(client, player_id)
+                player_summary = parse_player_summary_json(search_json, player_id)
+
+            # If player not found in search, fetch profile to resolve
             if not player_summary:
-                logger.info("Player not found in search, fetching directly")
-                data = await parse_player_career_stats(
+                logger.info("Player not found in search, fetching profile to resolve")
+                data, blizzard_id = await parse_player_career_stats(
                     client,
                     player_id,
                     None,
@@ -54,6 +64,27 @@ class GetPlayerCareerStatsController(BasePlayerController):
                     gamemode,
                     hero,
                 )
+
+                # If we got a Blizzard ID and have search results, retry parsing with it
+                if blizzard_id and search_json:
+                    logger.info(
+                        f"Got Blizzard ID from redirect: {blizzard_id}, re-parsing search results"
+                    )
+                    player_summary = parse_player_summary_json(
+                        search_json, player_id, blizzard_id
+                    )
+
+                    if player_summary:
+                        logger.info("Successfully resolved player via Blizzard ID")
+                        # Update cache with complete profile + summary
+                        html, _ = await fetch_player_html(client, blizzard_id)
+                        await self.update_player_profile_cache(
+                            player_id, player_summary, html
+                        )
+                    else:
+                        logger.warning(
+                            "Could not resolve player even with Blizzard ID from redirect"
+                        )
             else:
                 # Check Player Cache (SQLite storage)
                 logger.info("Checking Player Cache...")
@@ -79,7 +110,7 @@ class GetPlayerCareerStatsController(BasePlayerController):
                         "Player Cache not found or not up-to-date, calling Blizzard"
                     )
                     blizzard_id = player_summary["url"]
-                    html = await fetch_player_html(client, blizzard_id)
+                    html, _ = await fetch_player_html(client, blizzard_id)
                     data = parse_player_career_stats_from_html(
                         html,
                         player_summary,

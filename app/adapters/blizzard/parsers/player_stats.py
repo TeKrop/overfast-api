@@ -389,19 +389,21 @@ async def parse_player_stats_summary(
     player_summary: dict | None = None,
     gamemode: PlayerGamemode | None = None,
     platform: PlayerPlatform | None = None,
-) -> dict:
+) -> tuple[dict, str | None]:
     """
     High-level function to parse player stats summary
 
     Args:
         client: Blizzard HTTP client
-        player_id: Player ID (Blizzard ID format)
+        player_id: Player ID (Blizzard ID format or BattleTag)
         player_summary: Optional player summary from search endpoint
         gamemode: Optional gamemode filter
         platform: Optional platform filter
 
     Returns:
-        Dict with "general", "roles", and "heroes" stats
+        Tuple of (dict with "general", "roles", and "heroes" stats, Blizzard ID from redirect)
     """
-    profile_data = await parse_player_profile(client, player_id, player_summary)
-    return _process_player_stats_summary(profile_data, gamemode, platform)
+    profile_data, blizzard_id = await parse_player_profile(
+        client, player_id, player_summary
+    )
+    return _process_player_stats_summary(profile_data, gamemode, platform), blizzard_id

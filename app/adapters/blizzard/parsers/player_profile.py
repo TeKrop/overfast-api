@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 from fastapi import status
 
 from app.adapters.blizzard.parsers.utils import (
+    extract_blizzard_id_from_url,
     parse_html_root,
     validate_response_status,
 )
@@ -56,26 +57,37 @@ GAMEMODES_DIV_MAPPING = {
 }
 
 
-async def fetch_player_html(client: BlizzardClientPort, player_id: str) -> str:
+async def fetch_player_html(
+    client: BlizzardClientPort, player_id: str
+) -> tuple[str, str | None]:
     """
-    Fetch player profile HTML from Blizzard
+    Fetch player profile HTML from Blizzard and extract Blizzard ID from redirect.
+
+    Blizzard redirects BattleTag URLs to canonical Blizzard ID URLs:
+    - Input:  /career/Kindness-11556/
+    - Redirect: 302 → /career/df51a381fe20caf8baa7|0bf3b4c47cbebe84b8db9c676a4e9c1f/
+    - Returns: (HTML content, Blizzard ID)
 
     Args:
         client: Blizzard HTTP client
-        player_id: Player ID (Blizzard ID format)
+        player_id: Player ID (BattleTag or Blizzard ID format)
 
     Returns:
-        Raw HTML content
+        Tuple of (HTML content, Blizzard ID extracted from redirect URL)
 
     Raises:
         ParserBlizzardError: If player not found (404)
     """
+
     url = f"{settings.blizzard_host}{settings.career_path}/{player_id}/"
 
     response = await client.get(url)
     validate_response_status(response, valid_codes=[200, 404])
 
-    return response.text
+    # Extract Blizzard ID from final URL (after redirect)
+    blizzard_id = extract_blizzard_id_from_url(str(response.url))
+
+    return response.text, blizzard_id
 
 
 def parse_player_profile_html(
@@ -643,17 +655,17 @@ async def parse_player_profile(
     client: BlizzardClientPort,
     player_id: str,
     player_summary: dict | None = None,
-) -> dict:
+) -> tuple[dict, str | None]:
     """
     High-level function to fetch and parse player profile
 
     Args:
         client: Blizzard HTTP client
-        player_id: Player ID (Blizzard ID format)
+        player_id: Player ID (Blizzard ID format or BattleTag)
         player_summary: Optional player summary from search endpoint
 
     Returns:
-        Dict with "summary" and "stats" keys
+        Tuple of (dict with "summary" and "stats" keys, Blizzard ID from redirect)
     """
-    html = await fetch_player_html(client, player_id)
-    return parse_player_profile_html(html, player_summary)
+    html, blizzard_id = await fetch_player_html(client, player_id)
+    return parse_player_profile_html(html, player_summary), blizzard_id
