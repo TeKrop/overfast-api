@@ -69,7 +69,11 @@ class SQLiteStorage(metaclass=Singleton):
                 # Create and store the shared connection
                 db = await aiosqlite.connect(self.db_path)
                 await db.execute("PRAGMA journal_mode=WAL")
-                await db.execute("PRAGMA foreign_keys=ON")
+
+                # Use NORMAL synchronous mode for better write performance
+                await db.execute("PRAGMA synchronous=NORMAL")
+
+                # Note: PRAGMA foreign_keys=ON removed - schema has no foreign key constraints
                 self._shared_connection = db
             yield self._shared_connection
             return
@@ -78,8 +82,12 @@ class SQLiteStorage(metaclass=Singleton):
         async with aiosqlite.connect(self.db_path) as db:
             # Enable WAL mode for better concurrent read performance
             await db.execute("PRAGMA journal_mode=WAL")
-            # Enable foreign keys
-            await db.execute("PRAGMA foreign_keys=ON")
+
+            # Use NORMAL synchronous mode (safe with WAL mode, much faster writes)
+            # Trade-off: Survives app crash, slight risk if OS crashes simultaneously
+            # Acceptable for cache data that can be re-fetched from Blizzard
+            await db.execute("PRAGMA synchronous=NORMAL")
+
             yield db
 
     async def close(self) -> None:
@@ -379,3 +387,22 @@ class SQLiteStorage(metaclass=Singleton):
             await db.execute("DELETE FROM player_profiles")
             await db.execute("DELETE FROM player_status")
             await db.commit()
+
+    async def optimize(self) -> None:
+        """
+        Run SQLite query optimizer to update statistics for query planner.
+
+        This should be called:
+        - On application shutdown
+        - Periodically (e.g., hourly via background scheduler)
+        - After bulk data operations
+
+        The optimizer only analyzes tables that have changed significantly
+        since last optimization, making it very lightweight (typically milliseconds).
+
+        See: https://www.sqlite.org/pragma.html#pragma_optimize
+        """
+        async with self._get_connection() as db:
+            await db.execute("PRAGMA optimize")
+            await db.commit()
+            logger.info("SQLite query optimizer executed successfully")

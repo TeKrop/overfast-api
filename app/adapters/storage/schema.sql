@@ -38,7 +38,9 @@ CREATE TABLE IF NOT EXISTS player_status (
     retry_after INTEGER NOT NULL  -- Seconds to wait before next check
 );
 
--- Indexes for common queries
-CREATE INDEX IF NOT EXISTS idx_static_updated ON static_data(updated_at);
-CREATE INDEX IF NOT EXISTS idx_player_updated ON player_profiles(updated_at);
-CREATE INDEX IF NOT EXISTS idx_player_retry ON player_status(last_checked_at, retry_after);
+-- Note: Indexes removed as they were not used by any queries
+-- PRIMARY KEY indexes are sufficient for current query patterns
+-- If adding background cleanup tasks in future, consider adding:
+--   - CREATE INDEX idx_static_updated ON static_data(updated_at);
+--   - CREATE INDEX idx_player_updated ON player_profiles(updated_at);
+--   - CREATE INDEX idx_player_retry ON player_status(last_checked_at, retry_after);
