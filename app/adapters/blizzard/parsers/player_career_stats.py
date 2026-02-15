@@ -13,7 +13,7 @@ from app.adapters.blizzard.parsers.player_profile import (
 )
 
 if TYPE_CHECKING:
-    from app.adapters.blizzard.client import BlizzardClient
+    from app.domain.ports import BlizzardClientPort
     from app.players.enums import PlayerGamemode, PlayerPlatform
 
 
@@ -118,7 +118,7 @@ def parse_player_career_stats_from_html(
 
 
 async def parse_player_career_stats(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     player_id: str,
     player_summary: dict | None = None,
     platform: PlayerPlatform | str | None = None,

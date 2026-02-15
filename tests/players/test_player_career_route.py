@@ -133,7 +133,9 @@ def test_get_player_parser_init_error(client: TestClient, player_html_data: str 
         side_effect=[
             # Players search call first
             Mock(status_code=status.HTTP_200_OK, text="[]", json=list),
-            # Player profile page
+            # Player profile page (for Blizzard ID resolution in _resolve_player_identity)
+            Mock(status_code=status.HTTP_200_OK, text=player_html_data),
+            # Player profile page (for actual profile fetching in _fetch_profile_with_cache)
             Mock(status_code=status.HTTP_200_OK, text=player_html_data),
         ],
     ):

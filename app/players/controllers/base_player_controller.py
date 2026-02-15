@@ -2,13 +2,22 @@
 
 import time
 from functools import wraps
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from fastapi import HTTPException, status
 
+from app.adapters.blizzard.parsers.player_profile import fetch_player_html
+from app.adapters.blizzard.parsers.player_summary import (
+    fetch_player_summary_json,
+    parse_player_summary_json,
+)
+from app.adapters.blizzard.parsers.utils import is_blizzard_id
 from app.config import settings
 from app.controllers import AbstractController
 from app.overfast_logger import logger
+
+if TYPE_CHECKING:
+    from app.domain.ports import BlizzardClientPort
 
 
 def with_unknown_player_guard(func):
@@ -224,3 +233,58 @@ class BasePlayerController(AbstractController):
         except HTTPException as err:
             await self.mark_player_unknown_on_404(player_id, err)
             raise
+
+    async def _resolve_player_identity(
+        self, client: BlizzardClientPort, player_id: str
+    ) -> dict:
+        """Resolve player identity via search and Blizzard ID redirect if needed.
+
+        This method implements the identity resolution flow:
+        1. Skip search if player_id is already a Blizzard ID
+        2. Fetch and parse search results
+        3. If not found, attempt Blizzard ID resolution via redirect
+        4. Re-parse search results with Blizzard ID if obtained
+
+        Args:
+            client: Blizzard API client
+            player_id: Player identifier (BattleTag or Blizzard ID)
+
+        Returns:
+            Player summary dict (may be empty if not found in search or direct Blizzard ID)
+        """
+        logger.info("Retrieving Player Summary...")
+
+        # Skip search if player_id is already a Blizzard ID
+        if is_blizzard_id(player_id):
+            logger.info("Player ID is a Blizzard ID, skipping search")
+            return {}
+
+        # Fetch and parse search results
+        search_json = await fetch_player_summary_json(client, player_id)
+        player_summary = parse_player_summary_json(search_json, player_id)
+
+        if player_summary:
+            logger.info("Player Summary retrieved!")
+            return player_summary
+
+        # Player not found in search - try to resolve via Blizzard ID redirect
+        logger.info("Player not found in search, attempting Blizzard ID resolution")
+        _, blizzard_id = await fetch_player_html(client, player_id)
+
+        if blizzard_id and search_json:
+            logger.info(
+                f"Got Blizzard ID from redirect: {blizzard_id}, re-parsing search results"
+            )
+            player_summary = parse_player_summary_json(
+                search_json, player_id, blizzard_id
+            )
+
+            if player_summary:
+                logger.info("Successfully resolved player via Blizzard ID")
+                return player_summary
+
+            logger.warning(
+                "Could not resolve player even with Blizzard ID from redirect"
+            )
+
+        return {}

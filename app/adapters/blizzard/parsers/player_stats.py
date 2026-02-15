@@ -19,7 +19,7 @@ from app.players.helpers import get_hero_role, get_plural_stat_key
 from app.roles.enums import Role
 
 if TYPE_CHECKING:
-    from app.adapters.blizzard.client import BlizzardClient
+    from app.domain.ports import BlizzardClientPort
 
 # Stat names for aggregation
 GENERIC_STATS_NAMES = [
@@ -384,7 +384,7 @@ def parse_player_stats_summary_from_html(
 
 
 async def parse_player_stats_summary(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     player_id: str,
     player_summary: dict | None = None,
     gamemode: PlayerGamemode | None = None,
