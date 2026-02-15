@@ -121,8 +121,6 @@ class GetPlayerStatsSummaryController(BasePlayerController):
         # Update Player Cache (SQLite storage)
         await self.update_player_profile_cache(player_id, player_summary, html)
 
-        return data
-
         # Update API Cache
         await self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
         self.response.headers[settings.cache_ttl_header] = str(self.timeout)
