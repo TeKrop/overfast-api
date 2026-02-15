@@ -190,9 +190,12 @@ class BasePlayerController(AbstractController):
         Mark player as unknown if 404 exception is raised.
         Implements exponential backoff for retries.
 
+        Updates the exception detail to match PlayerNotFoundError format
+        with retry_after, next_check_at, and check_count fields.
+
         Args:
             player_id: Player ID to mark
-            exception: HTTPException to check for 404 status
+            exception: HTTPException to modify and check for 404 status
         """
         if not settings.unknown_players_cache_enabled:
             return
@@ -202,14 +205,24 @@ class BasePlayerController(AbstractController):
             player_status = await self.storage.get_player_status(player_id)
             check_count = player_status["check_count"] + 1 if player_status else 1
 
-            # Calculate exponential backoff
+            # Calculate exponential backoff and next check time
             retry_after = self._calculate_retry_after(check_count)
+            next_check_at = int(time.time()) + retry_after
 
             # Store updated status
             await self.storage.set_player_status(player_id, check_count, retry_after)
 
+            # Update exception detail to match PlayerNotFoundError model
+            exception.detail = {
+                "error": "Player not found",
+                "retry_after": retry_after,
+                "next_check_at": next_check_at,
+                "check_count": check_count,
+            }
+
             logger.info(
-                f"Marked player {player_id} as unknown (check #{check_count}, retry in {retry_after}s)"
+                f"Marked player {player_id} as unknown (check #{check_count}, "
+                f"retry in {retry_after}s, next check at {next_check_at})"
             )
 
     async def process_request(self, **kwargs) -> dict:
