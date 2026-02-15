@@ -2,7 +2,7 @@
 
 import time
 from functools import wraps
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, status
 
@@ -24,21 +24,20 @@ def with_unknown_player_guard(func):
     """
     Decorator to guard player endpoints against unknown players.
 
-    Checks if player is unknown before executing the handler, and marks
-    player as unknown on 404. Requires the method to accept player_id in kwargs.
+    Checks if player is unknown before executing the handler.
+    Requires the method to accept player_id in kwargs.
 
-    Phase 3.5B: After identity resolution, the handler can set self._resolved_blizzard_id
-    and self._resolved_battletag so the decorator can store both identifiers when
-    marking unknown.
+    Note: Marking unknown is now handled explicitly in controllers (no decorator magic).
 
     Example:
         @with_unknown_player_guard
         async def process_request(self, **kwargs) -> dict:
             player_id = kwargs["player_id"]
-            # Resolve identity and set tracking attributes
-            self._resolved_blizzard_id = blizzard_id
-            self._resolved_battletag = battletag
-            # ... handler logic
+            try:
+                # ... handler logic ...
+            except HTTPException as exception:
+                await self.mark_player_unknown_on_404(blizzard_id, exception, battletag)
+                raise
 
     Args:
         func: Async method to decorate (must accept **kwargs with player_id)
@@ -47,7 +46,7 @@ def with_unknown_player_guard(func):
         Decorated async method with unknown player protection
 
     Raises:
-        HTTPException: 404 if player is unknown or becomes unknown
+        HTTPException: 404 if player is unknown
         ValueError: If player_id is not in kwargs
     """
 
@@ -58,25 +57,11 @@ def with_unknown_player_guard(func):
             msg = "with_unknown_player_guard requires player_id in kwargs"
             raise ValueError(msg)
 
-        # Reset tracking attributes
-        self._resolved_blizzard_id = None
-        self._resolved_battletag = None
-
-        # Check if player is known to not exist
+        # Check if player is known to not exist (by Blizzard ID or BattleTag)
         await self.check_unknown_player(player_id)
 
-        # Execute handler with unknown player marking on 404
-        try:
-            return await func(self, *args, **kwargs)
-        except HTTPException as exception:
-            # Use resolved identifiers if handler set them
-            await self.mark_player_unknown_on_404(
-                player_id,
-                exception,
-                blizzard_id=self._resolved_blizzard_id,
-                battletag=self._resolved_battletag,
-            )
-            raise
+        # Execute handler (marking unknown is now explicit in handler)
+        return await func(self, *args, **kwargs)
 
     return wrapper
 
@@ -196,8 +181,8 @@ class BasePlayerController(AbstractController):
             )
 
             logger.warning(
-                f"Player {player_id} is unknown (retry in {retry_after_seconds}s, "
-                f"check #{player_status['check_count']})"
+                f"Player {player_id} (battletag : {player_status['battletag']}) is unknown "
+                f"(retry in {retry_after_seconds}s, check #{player_status['check_count']})"
             )
 
             # Return detailed 404 with retry information
@@ -214,26 +199,24 @@ class BasePlayerController(AbstractController):
 
     async def mark_player_unknown_on_404(
         self,
-        player_id: str,
+        blizzard_id: str,
         exception: HTTPException,
-        blizzard_id: str | None = None,
         battletag: str | None = None,
     ) -> None:
         """
         Mark player as unknown if 404 exception is raised.
         Implements exponential backoff for retries.
 
-        Phase 3.5B: Stores both Blizzard ID and BattleTag (if available) so future
-        requests with either identifier get caught early by the guard.
+        Phase 3.5B: Store by Blizzard ID (primary) and BattleTag (if available).
+        This enables early rejection of both Blizzard ID and BattleTag requests.
 
         Updates the exception detail to match PlayerNotFoundError format
         with retry_after, next_check_at, and check_count fields.
 
         Args:
-            player_id: Original player_id from request (BattleTag or Blizzard ID)
+            blizzard_id: Resolved Blizzard ID (always available after redirect)
             exception: HTTPException to modify and check for 404 status
-            blizzard_id: Resolved Blizzard ID (if available from identity resolution)
-            battletag: Resolved BattleTag (if available from identity resolution)
+            battletag: Optional BattleTag from user request (enables early check)
         """
         if not settings.unknown_players_cache_enabled:
             return
@@ -241,28 +224,18 @@ class BasePlayerController(AbstractController):
         if exception.status_code != status.HTTP_404_NOT_FOUND:
             return
 
-        # Determine which identifiers to store
-        # Priority: Use resolved identifiers if available, fallback to player_id
-        primary_id = blizzard_id or player_id
-
-        # Get existing status to increment check count (check primary ID first)
-        player_status = await self.storage.get_player_status(primary_id)
+        # Get existing status to increment check count
+        player_status = await self.storage.get_player_status(blizzard_id)
         check_count = player_status["check_count"] + 1 if player_status else 1
 
         # Calculate exponential backoff and next check time
         retry_after = self._calculate_retry_after(check_count)
         next_check_at = int(time.time()) + retry_after
 
-        # Store under Blizzard ID (primary)
-        await self.storage.set_player_status(primary_id, check_count, retry_after)
-
-        # Also store under BattleTag if different and available
-        # This ensures future requests with BattleTag get caught early
-        if battletag and battletag != primary_id:
-            logger.info(
-                f"Also marking BattleTag {battletag} as unknown (linked to {primary_id})"
-            )
-            await self.storage.set_player_status(battletag, check_count, retry_after)
+        # Store under Blizzard ID with optional BattleTag for early rejection
+        await self.storage.set_player_status(
+            blizzard_id, check_count, retry_after, battletag=battletag
+        )
 
         # Update exception detail to match PlayerNotFoundError model
         exception.detail = {
@@ -273,31 +246,10 @@ class BasePlayerController(AbstractController):
         }
 
         logger.info(
-            f"Marked player {primary_id} as unknown (check #{check_count}, "
-            f"retry in {retry_after}s, next check at {next_check_at})"
+            f"Marked player {blizzard_id} as unknown"
+            f"{f' (battletag: {battletag})' if battletag else ''} "
+            f"(check #{check_count}, retry in {retry_after}s, next check at {next_check_at})"
         )
-
-    async def process_request(self, **kwargs) -> dict:
-        """Process request as usual, but ensure to properly handle players
-        we already know aren't existing to prevent spamming Blizzard.
-        Uses exponential backoff for unknown players.
-        """
-
-        # Ensure unknown players caching system is enabled
-        if not settings.unknown_players_cache_enabled:
-            return cast("dict", await super().process_request(**kwargs))
-
-        # First check if player is known to not exist (with exponential backoff)
-        player_id = kwargs["player_id"]
-        await self.check_unknown_player(player_id)
-
-        # Then run process as usual, but intercept HTTP 404 to be able
-        # to store result in cache, to prevent calling Blizzard next time
-        try:
-            return cast("dict", await super().process_request(**kwargs))
-        except HTTPException as err:
-            await self.mark_player_unknown_on_404(player_id, err)
-            raise
 
     async def _resolve_player_identity(
         self, client: BlizzardClientPort, player_id: str

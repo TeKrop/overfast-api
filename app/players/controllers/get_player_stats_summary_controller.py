@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING, ClassVar, cast
 
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 
 from app.adapters.blizzard import BlizzardClient
 from app.adapters.blizzard.parsers.player_profile import (
@@ -40,6 +40,10 @@ class GetPlayerStatsSummaryController(BasePlayerController):
         platform = kwargs.get("platform")
         client = BlizzardClient()
 
+        # Initialize variables for exception handling
+        cache_key = player_id
+        battletag_input = None
+
         try:
             # Step 1: Resolve player identity (search + Blizzard ID resolution)
             # Returns 4-tuple: (blizzard_id, summary, html, battletag_input)
@@ -49,10 +53,6 @@ class GetPlayerStatsSummaryController(BasePlayerController):
                 cached_html,
                 battletag_input,
             ) = await self._resolve_player_identity(client, player_id)
-
-            # Track resolved identifiers for unknown player marking (used by decorator)
-            self._resolved_blizzard_id = blizzard_id
-            self._resolved_battletag = battletag_input
 
             # Use Blizzard ID as cache key (canonical identifier)
             cache_key = blizzard_id or player_id
@@ -70,18 +70,29 @@ class GetPlayerStatsSummaryController(BasePlayerController):
             )
 
         except ParserBlizzardError as error:
-            raise HTTPException(
+            exception = HTTPException(
                 status_code=error.status_code,
                 detail=error.message,
-            ) from error
+            )
+            # Mark unknown on 404 from Blizzard
+            if error.status_code == status.HTTP_404_NOT_FOUND:
+                await self.mark_player_unknown_on_404(
+                    cache_key, exception, battletag=battletag_input
+                )
+            raise exception from error
         except ParserParsingError as error:
             # Check if error message indicates player not found
             # This can happen when HTML structure is malformed or missing expected elements
             if "Could not find main content in HTML" in str(error):
-                raise HTTPException(
-                    status_code=404,
+                exception = HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
                     detail="Player not found",
-                ) from error
+                )
+                # Mark unknown with Blizzard ID (primary) and BattleTag (if available)
+                await self.mark_player_unknown_on_404(
+                    cache_key, exception, battletag=battletag_input
+                )
+                raise exception from error
 
             # Get Blizzard URL for error reporting
             blizzard_url = (
@@ -89,6 +100,13 @@ class GetPlayerStatsSummaryController(BasePlayerController):
                 f"{player_summary['url'] if player_summary else player_id}/"
             )
             raise overfast_internal_error(blizzard_url, error) from error
+        except HTTPException as exception:
+            # Mark unknown on any 404 (explicit HTTPException)
+            if exception.status_code == status.HTTP_404_NOT_FOUND:
+                await self.mark_player_unknown_on_404(
+                    cache_key, exception, battletag=battletag_input
+                )
+            raise
 
         # Update API Cache
         await self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)

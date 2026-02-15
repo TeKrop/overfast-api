@@ -191,13 +191,13 @@ class SQLiteStorage(metaclass=Singleton):
             player_id: Blizzard ID (canonical key)
 
         Returns:
-            Dict with 'html', 'blizzard_id', 'battletag', 'name', 'summary',
+            Dict with 'html', 'battletag', 'name', 'summary',
             'last_updated_blizzard', 'updated_at', 'schema_version' or None if not found
         """
         async with (
             self._get_connection() as db,
             db.execute(
-                """SELECT blizzard_id, battletag, name, html_compressed, summary_json,
+                """SELECT battletag, name, html_compressed, summary_json,
                           last_updated_blizzard, updated_at, schema_version
                    FROM player_profiles WHERE player_id = ?""",
                 (player_id,),
@@ -209,24 +209,23 @@ class SQLiteStorage(metaclass=Singleton):
 
             # Parse summary_json if present, otherwise construct minimal summary
             summary = None
-            if row[4]:  # summary_json column
-                summary = json.loads(row[4])
+            if row[3]:  # summary_json column
+                summary = json.loads(row[3])
             else:
                 # Legacy entries without summary_json - construct minimal summary
                 summary = {
-                    "url": row[0],  # blizzard_id
-                    "lastUpdated": row[5],  # last_updated_blizzard
+                    "url": player_id,  # Use player_id (which IS the Blizzard ID)
+                    "lastUpdated": row[4],  # last_updated_blizzard
                 }
 
             return {
-                "blizzard_id": row[0],
-                "battletag": row[1],
-                "name": row[2],
-                "html": self._decompress(row[3]),
+                "battletag": row[0],
+                "name": row[1],
+                "html": self._decompress(row[2]),
                 "summary": summary,
-                "last_updated_blizzard": row[5],
-                "updated_at": row[6],
-                "schema_version": row[7],
+                "last_updated_blizzard": row[4],
+                "updated_at": row[5],
+                "schema_version": row[6],
             }
 
     async def set_player_profile(
@@ -236,7 +235,6 @@ class SQLiteStorage(metaclass=Singleton):
         summary: dict | None = None,
         battletag: str | None = None,
         name: str | None = None,
-        blizzard_id: str | None = None,
         last_updated_blizzard: int | None = None,
         schema_version: int = 1,
     ) -> None:
@@ -249,16 +247,14 @@ class SQLiteStorage(metaclass=Singleton):
             summary: Full player summary from search endpoint (dict)
             battletag: Full BattleTag from user input (e.g., "TeKrop-2217"), optional
             name: Display name extracted from HTML or summary, optional
-            blizzard_id: Deprecated, use player_id
             last_updated_blizzard: Blizzard's lastUpdated (deprecated, use summary["lastUpdated"])
             schema_version: Schema version for parser format
         """
         now = int(time.time())
         compressed = self._compress(html)
 
-        # If summary provided, extract blizzard_id and lastUpdated from it
+        # If summary provided, extract lastUpdated and name from it
         if summary:
-            blizzard_id = summary.get("url", blizzard_id or player_id)
             last_updated_blizzard = summary.get("lastUpdated", last_updated_blizzard)
             # Extract name from summary if not provided
             if not name:
@@ -266,19 +262,17 @@ class SQLiteStorage(metaclass=Singleton):
             summary_json = json.dumps(summary)
         else:
             summary_json = None
-            blizzard_id = blizzard_id or player_id
 
         async with self._get_connection() as db:
             await db.execute(
                 """INSERT OR REPLACE INTO player_profiles
-                   (player_id, blizzard_id, battletag, name, html_compressed, summary_json,
+                   (player_id, battletag, name, html_compressed, summary_json,
                     last_updated_blizzard, created_at, updated_at, schema_version)
-                   VALUES (?, ?, ?, ?, ?, ?, ?,
+                   VALUES (?, ?, ?, ?, ?, ?,
                            COALESCE((SELECT created_at FROM player_profiles WHERE player_id = ?), ?),
                            ?, ?)""",
                 (
                     player_id,
-                    blizzard_id,
                     battletag,
                     name,
                     compressed,
@@ -296,17 +290,20 @@ class SQLiteStorage(metaclass=Singleton):
 
     async def get_player_status(self, player_id: str) -> dict | None:
         """
-        Get player status for unknown player tracking.
+        Get player status for unknown player tracking by player_id OR battletag.
+
+        Args:
+            player_id: Blizzard ID or BattleTag to lookup
 
         Returns:
-            Dict with 'check_count', 'last_checked_at', 'retry_after' or None if not found
+            Dict with 'check_count', 'last_checked_at', 'retry_after', 'battletag' or None if not found
         """
         async with (
             self._get_connection() as db,
             db.execute(
-                """SELECT check_count, last_checked_at, retry_after
-                   FROM player_status WHERE player_id = ?""",
-                (player_id,),
+                """SELECT check_count, last_checked_at, retry_after, battletag
+                   FROM player_status WHERE player_id = ? OR battletag = ?""",
+                (player_id, player_id),
             ) as cursor,
         ):
             row = await cursor.fetchone()
@@ -317,28 +314,50 @@ class SQLiteStorage(metaclass=Singleton):
                 "check_count": row[0],
                 "last_checked_at": row[1],
                 "retry_after": row[2],
+                "battletag": row[3],
             }
 
     async def set_player_status(
-        self, player_id: str, check_count: int, retry_after: int
+        self,
+        player_id: str,
+        check_count: int,
+        retry_after: int,
+        battletag: str | None = None,
     ) -> None:
         """
         Set player status for unknown player tracking with exponential backoff.
 
         Args:
-            player_id: Player identifier
-            check_count: Number of times we've checked and not found this player
-            retry_after: Seconds until next recheck is allowed
+            player_id: Blizzard ID (canonical key)
+            check_count: Number of failed checks
+            retry_after: Seconds to wait before next check
+            battletag: Optional BattleTag to enable early rejection of BattleTag requests
+                      If None, preserves existing battletag value
         """
         now = int(time.time())
 
         async with self._get_connection() as db:
-            await db.execute(
-                """INSERT OR REPLACE INTO player_status
-                   (player_id, check_count, last_checked_at, retry_after)
-                   VALUES (?, ?, ?, ?)""",
-                (player_id, check_count, now, retry_after),
-            )
+            if battletag:
+                # New battletag provided - store it
+                await db.execute(
+                    """INSERT OR REPLACE INTO player_status
+                       (player_id, battletag, check_count, last_checked_at, retry_after)
+                       VALUES (?, ?, ?, ?, ?)""",
+                    (player_id, battletag, check_count, now, retry_after),
+                )
+            else:
+                # No battletag provided - preserve existing value
+                await db.execute(
+                    """INSERT INTO player_status
+                       (player_id, battletag, check_count, last_checked_at, retry_after)
+                       VALUES (?, NULL, ?, ?, ?)
+                       ON CONFLICT(player_id) DO UPDATE SET
+                           battletag = COALESCE(?, battletag),
+                           check_count = excluded.check_count,
+                           last_checked_at = excluded.last_checked_at,
+                           retry_after = excluded.retry_after""",
+                    (player_id, check_count, now, retry_after, battletag),
+                )
             await db.commit()
 
     async def delete_player_status(self, player_id: str) -> None:

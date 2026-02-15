@@ -33,7 +33,7 @@ class StoragePort(Protocol):
         """
         Get player profile HTML and parsed summary.
 
-        Returns dict with 'html', 'summary', 'blizzard_id', 'battletag', 'name',
+        Returns dict with 'html', 'summary', 'battletag', 'name',
         'last_updated_blizzard', 'updated_at', 'schema_version' or None if not found
         """
         ...
@@ -45,7 +45,6 @@ class StoragePort(Protocol):
         summary: dict | None = None,
         battletag: str | None = None,
         name: str | None = None,
-        blizzard_id: str | None = None,
         last_updated_blizzard: int | None = None,
         schema_version: int = 1,
     ) -> None:
@@ -54,15 +53,19 @@ class StoragePort(Protocol):
 
     async def get_player_status(self, player_id: str) -> dict | None:
         """
-        Get player status for unknown player tracking.
+        Get player status for unknown player tracking by player_id OR battletag.
 
-        Returns dict with 'check_count', 'last_checked_at', 'retry_after'
+        Returns dict with 'check_count', 'last_checked_at', 'retry_after', 'battletag'
         or None if not found
         """
         ...
 
     async def set_player_status(
-        self, player_id: str, check_count: int, retry_after: int
+        self,
+        player_id: str,
+        check_count: int,
+        retry_after: int,
+        battletag: str | None = None,
     ) -> None:
         """Set player status for unknown player tracking with exponential backoff"""
         ...
