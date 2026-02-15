@@ -11,21 +11,16 @@ jobs:
     name: ruff, ty & pytest
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        python-version: ["3.14"]
-        uv-version: ["0.9.28"]
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v3
         with:
-          version: "${{ matrix.uv-version }}"
+          version: "0.9.28"
 
-      - name: Set up Python ${{ matrix.python-version }}
-        run: uv python install ${{ matrix.python-version }}
+      - name: Set up Python
+        run: uv python install 3.14
 
       - name: Install the project
         run: uv sync --frozen --no-cache
@@ -38,38 +33,4 @@ jobs:
 
       - name: Run tests suite
         run: |
-          PYTHONPATH=app/ uv run python -m pytest -v --cov-fail-under=80 --cov-report=html --cov=app/ tests/
-          PERCENT=$(cat htmlcov/index.html | grep "pc_cov" | awk -F '>' '{print $2}' | awk -F '%' '{print $1}')
-          echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
-
-      - name: Update test coverage badge
-        if: github.event_name == 'push' && secrets.GIST_SECRET != ''
-        continue-on-error: true
-        uses: schneegans/dynamic-badges-action@v1.7.0
-        with:
-          auth: ${{ secrets.GIST_SECRET }}
-          gistID: 1362ebafcd51d3f65dae7935b1d322eb
-          filename: pytest.json
-          label: coverage
-          message: ${{ env.COVERAGE }}%
-          minColorRange: 50
-          maxColorRange: 90
-          valColorRange: ${{ env.COVERAGE }}
-
-      - name: Update python version badge
-        if: github.event_name == 'push' && secrets.GIST_SECRET != ''
-        continue-on-error: true
-        uses: schneegans/dynamic-badges-action@v1.7.0
-        with:
-          auth: ${{ secrets.GIST_SECRET }}
-          gistID: 15a234815aa74059953a766a10e92688
-          filename: python-version.json
-          label: python
-          message: v${{ matrix.python-version }}
-          color: blue
-
-      - name: Skip badge updates if GIST_SECRET is missing
-        if: github.event_name == 'push' && secrets.GIST_SECRET == ''
-        run: |
-          echo "Skipping badge updates: GIST_SECRET is not set or empty."
-          echo "Create a repository secret named GIST_SECRET with a Personal Access Token (gists:write) to re-enable dynamic badges."
+          PYTHONPATH=app/ uv run python -m pytest -v --cov-fail-under=80 --cov-report=term-missing --cov=app/ tests/

@@ -53,14 +53,7 @@ jobs:
         id: sync
         run: |
           set -euo pipefail
-
-          # Determine upstream default branch dynamically (usually main).
-          # Fallback to "main" if detection fails for safety.
-          UPSTREAM_BRANCH="$(git symbolic-ref --short refs/remotes/upstream/HEAD | sed 's@^upstream/@@' || true)"
-          if [ -z "$UPSTREAM_BRANCH" ]; then
-            UPSTREAM_BRANCH="main"
-          fi
-          UPSTREAM_REF="upstream/${UPSTREAM_BRANCH}"
+          UPSTREAM_REF="upstream/main"
 
           # Get current and upstream commits
           CURRENT=$(git rev-parse HEAD)
@@ -79,30 +72,10 @@ jobs:
             # Merge upstream - .gitattributes merge drivers handle conflict resolution:
             # - CHANGELOG.md: accepts upstream version (accept-upstream driver)
             # - Fork-specific files (nginx, README, etc.): keeps fork version (keep-fork driver)
-            if ! git merge "$UPSTREAM_REF" -m "Merge upstream changes"; then
-              echo "Merge conflict detected, attempting automatic resolution..."
-
-              # List any remaining conflicted files not covered by .gitattributes
-              CONFLICTED=$(git diff --name-only --diff-filter=U)
-
-              if [ -n "$CONFLICTED" ]; then
-                echo "Conflicted files: $CONFLICTED"
-
-                for file in $CONFLICTED; do
-                  echo "Resolving $file with upstream version"
-                  git checkout --theirs "$file"
-                  git add "$file"
-                done
-
-                git commit -m "Merge upstream changes (auto-resolved conflicts)"
-              else
-                echo "All conflicts resolved by merge drivers"
-                git commit -m "Merge upstream changes"
-              fi
-            fi
+            git merge "$UPSTREAM_REF" -m "Merge upstream changes"
 
             # Push to origin
-            git push origin "HEAD:${UPSTREAM_BRANCH}"
+            git push origin main
 
             echo "has_updates=true" >> $GITHUB_OUTPUT
           else
