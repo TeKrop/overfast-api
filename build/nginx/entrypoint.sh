@@ -4,6 +4,15 @@
 set -eu
 set -o pipefail 2>/dev/null || true
 
+# Convert NGINX_WORKER_PROCESSES: 0 → "auto" (nginx auto-detect syntax)
+if [ "$NGINX_WORKER_PROCESSES" = "0" ]; then
+  NGINX_WORKER_PROCESSES_VALUE="auto"
+else
+  NGINX_WORKER_PROCESSES_VALUE="$NGINX_WORKER_PROCESSES"
+fi
+
+export NGINX_WORKER_PROCESSES_VALUE
+
 # Convert NGINX_MULTI_ACCEPT boolean to nginx syntax (on/off)
 if [ "$NGINX_MULTI_ACCEPT" = "true" ] || [ "$NGINX_MULTI_ACCEPT" = "True" ] || [ "$NGINX_MULTI_ACCEPT" = "1" ]; then
   NGINX_MULTI_ACCEPT_VALUE="on"
@@ -32,7 +41,7 @@ export PROMETHEUS_LOG_BY_LUA
 export PROMETHEUS_METRICS_SERVER
 
 # Generate main nginx.conf from template
-envsubst '${NGINX_WORKER_PROCESSES} ${NGINX_WORKER_CONNECTIONS} ${NGINX_MULTI_ACCEPT_VALUE}' < /etc/nginx/nginx.conf.template > /usr/local/openresty/nginx/conf/nginx.conf
+envsubst '${NGINX_WORKER_PROCESSES_VALUE} ${NGINX_WORKER_CONNECTIONS} ${NGINX_MULTI_ACCEPT_VALUE}' < /etc/nginx/nginx.conf.template > /usr/local/openresty/nginx/conf/nginx.conf
 
 # Replace placeholders and generate config and lua script from templates
 envsubst '${RATE_LIMIT_PER_SECOND_PER_IP} ${RATE_LIMIT_PER_IP_BURST} ${MAX_CONNECTIONS_PER_IP} ${RETRY_AFTER_HEADER} ${PROMETHEUS_LUA_SHARED_DICT} ${PROMETHEUS_INIT_WORKER} ${PROMETHEUS_LOG_BY_LUA} ${PROMETHEUS_METRICS_SERVER}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf

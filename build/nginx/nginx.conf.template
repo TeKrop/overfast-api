@@ -5,11 +5,7 @@
 pcre_jit on;
 
 # Number of worker processes (0 = auto-detect CPU cores)
-worker_processes ${NGINX_WORKER_PROCESSES};
-
-# Maximum number of open files per worker (should be >= worker_connections)
-# OpenResty default is sufficient, but we ensure it's at least 2x worker_connections
-worker_rlimit_nofile 4096;
+worker_processes ${NGINX_WORKER_PROCESSES_VALUE};
 
 events {
     # Maximum number of simultaneous connections per worker
