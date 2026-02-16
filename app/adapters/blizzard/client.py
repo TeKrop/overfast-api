@@ -50,7 +50,10 @@ class BlizzardClient(metaclass=Singleton):
     ) -> httpx.Response:
         """Make an HTTP GET request with custom headers and retrieve the result"""
 
-        # First, check if we're being rate limited
+        # Check if we're being rate limited
+        # Note: Nginx also checks this on cache miss, but this check remains for:
+        # - Race conditions (multiple requests in flight when rate limit is set)
+        # - Defense in depth
         await self._check_rate_limit()
 
         # Prepare kwargs
@@ -122,8 +125,14 @@ class BlizzardClient(metaclass=Singleton):
         await self.close()
 
     async def _check_rate_limit(self) -> None:
-        """Make sure we're not being rate limited by Blizzard before making
-        any API call. Else, return an HTTP 429 with Retry-After header.
+        """Check if we're being rate limited by Blizzard before making any API call.
+
+        Returns HTTP 429 with Retry-After header if rate limited.
+
+        Note: Nginx also performs this check on API cache miss for better performance,
+        but this method remains necessary for:
+        - Race conditions (concurrent requests when rate limit is first set)
+        - Defense in depth (if nginx check fails or is bypassed)
         """
         if await self.cache_manager.is_being_rate_limited():
             raise self._too_many_requests_response(
