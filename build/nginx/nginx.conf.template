@@ -1,0 +1,46 @@
+# Nginx main configuration with tunable parameters
+# This replaces /usr/local/openresty/nginx/conf/nginx.conf
+
+# Enables the use of JIT for regular expressions to speed-up their processing.
+pcre_jit on;
+
+# Number of worker processes (0 = auto-detect CPU cores)
+worker_processes ${NGINX_WORKER_PROCESSES};
+
+# Maximum number of open files per worker (should be >= worker_connections)
+# OpenResty default is sufficient, but we ensure it's at least 2x worker_connections
+worker_rlimit_nofile 4096;
+
+events {
+    # Maximum number of simultaneous connections per worker
+    worker_connections ${NGINX_WORKER_CONNECTIONS};
+
+    # Accept multiple connections at once (better for high load)
+    multi_accept ${NGINX_MULTI_ACCEPT_VALUE};
+
+    # Use epoll on Linux (most efficient event model)
+    use epoll;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    # See Move default writable paths to a dedicated directory (#119)
+    # https://github.com/openresty/docker-openresty/issues/119
+    client_body_temp_path /var/run/openresty/nginx-client-body;
+    proxy_temp_path       /var/run/openresty/nginx-proxy;
+    fastcgi_temp_path     /var/run/openresty/nginx-fastcgi;
+    uwsgi_temp_path       /var/run/openresty/nginx-uwsgi;
+    scgi_temp_path        /var/run/openresty/nginx-scgi;
+
+    # Performance optimizations
+    sendfile        on;
+    keepalive_timeout  65;
+
+    # Include config files from conf.d (our app config lives here)
+    include /etc/nginx/conf.d/*.conf;
+
+    # Don't reveal OpenResty version to clients.
+    server_tokens off;
+}

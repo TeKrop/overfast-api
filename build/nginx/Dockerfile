@@ -15,6 +15,9 @@ RUN apk add --no-cache gettext git zstd-dev
 RUN luarocks install lua-zstd && \
     luarocks install nginx-lua-prometheus
 
+# Copy main Nginx configuration template
+COPY nginx.conf.template /etc/nginx/nginx.conf.template
+
 # Copy Nginx configuration files
 COPY overfast-api.conf.template /etc/nginx/conf.d/default.conf.template
 # Copy Prometheus templates to a separate directory (not conf.d to avoid auto-loading)
