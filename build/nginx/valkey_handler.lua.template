@@ -39,9 +39,37 @@ local function handle_valkey_request()
     local compressed_value = results[1]
     local ttl = results[2]
 
-    -- Cache miss
+    -- Cache miss - check global rate limit before forwarding to app
     if not compressed_value or compressed_value == ngx.null then
         ngx.log(ngx.INFO, "Cache miss for key: ", key)
+
+        -- Check if Blizzard is currently rate limiting us
+        local rate_limit_key = "${BLIZZARD_RATE_LIMIT_KEY}"
+        local rate_limit_exists, rl_err = valk:exists(rate_limit_key)
+        if rl_err then
+            ngx.log(ngx.ERR, "Failed to check rate limit key: ", rl_err)
+            cleanup()
+            ngx.exec("@fallback")
+            return
+        end
+
+        -- If rate limited, get TTL and return 429 immediately
+        if rate_limit_exists == 1 then
+            local rate_limit_ttl, ttl_err = valk:ttl(rate_limit_key)
+            if ttl_err or not rate_limit_ttl or rate_limit_ttl < 0 then
+                -- If TTL check fails or returns invalid value, use default
+                ngx.log(ngx.WARN, "Failed to get rate limit TTL or invalid value: ", tostring(ttl_err or rate_limit_ttl))
+                rate_limit_ttl = ${BLIZZARD_RATE_LIMIT_RETRY_AFTER}
+            end
+
+            ngx.log(ngx.WARN, "Blizzard rate limit active, returning 429 from nginx")
+            ngx.header["${RETRY_AFTER_HEADER}"] = rate_limit_ttl
+            ngx.status = ngx.HTTP_TOO_MANY_REQUESTS
+            ngx.say('{"error":"API has been rate limited by Blizzard, please wait for ' .. rate_limit_ttl .. ' seconds before retrying"}')
+            cleanup()
+            return
+        end
+
         cleanup()
         ngx.exec("@fallback")
         return

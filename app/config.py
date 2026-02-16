@@ -59,6 +59,9 @@ class Settings(BaseSettings):
     # Use ":memory:" for in-memory database (testing/ephemeral deployments)
     storage_path: str = "data/overfast.db"
 
+    # SQLite memory-mapped I/O size in bytes (optional performance tuning)
+    sqlite_mmap_size: int = 0
+
     # Unknown player exponential backoff configuration
     unknown_player_initial_retry: int = 600  # 10 minutes (first check)
     unknown_player_retry_multiplier: int = 3  # retry_after *= 3 each check
