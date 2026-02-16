@@ -1,4 +1,4 @@
-local zlib = require "zlib"
+local zstd = require "zstd"
 local valkey = require "resty.redis"
 
 local function handle_valkey_request()
@@ -47,12 +47,12 @@ local function handle_valkey_request()
         return
     end
 
-    -- Decompress JSON data
+    -- Decompress JSON data (zstd)
     local status, value = pcall(function()
-        return zlib.inflate()(compressed_value)
+        return zstd.decompress(compressed_value)
     end)
-    if not value or value == ngx.null then
-        ngx.log(ngx.ERR, "Cache error for key: ", key)
+    if not status or not value or value == ngx.null then
+        ngx.log(ngx.ERR, "Cache decompression error for key: ", key, " - ", tostring(value))
         cleanup()
         ngx.exec("@fallback")
         return

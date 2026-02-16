@@ -133,13 +133,23 @@ def test_get_player_parser_init_error(client: TestClient, player_html_data: str 
         side_effect=[
             # Players search call first
             Mock(status_code=status.HTTP_200_OK, text="[]", json=list),
-            # Player profile page
+            # Player profile page (for Blizzard ID resolution in _resolve_player_identity)
+            # With Phase 3.5 Step 1 optimization, this HTML is reused and we don't make a second call
             Mock(status_code=status.HTTP_200_OK, text=player_html_data),
         ],
     ):
         response = client.get("/players/Unknown-1234")
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json() == {"error": "Player not found"}
+
+        # Verify detailed error response matches PlayerNotFoundError model
+        response_json = response.json()
+        # FastAPI wraps error in outer key based on response model field name
+        error_detail = response_json["error"]
+        assert error_detail["error"] == "Player not found"
+        # First check: 10 min = 600s (UNKNOWN_PLAYER_INITIAL_RETRY from config)
+        assert error_detail["retry_after"] == 600  # noqa: PLR2004
+        assert error_detail["check_count"] == 1
+        assert "next_check_at" in error_detail  # Unix timestamp
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)

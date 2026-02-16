@@ -1,4 +1,4 @@
-from time import sleep
+import asyncio
 from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
@@ -52,7 +52,8 @@ def test_get_cache_key_from_request(
         ("/heroes", [{"name": "Sojourn"}], 1, 1, None),
     ],
 )
-def test_update_and_get_api_cache(
+@pytest.mark.asyncio
+async def test_update_and_get_api_cache(
     cache_manager: CacheManager,
     cache_key: str,
     value: list,
@@ -61,31 +62,47 @@ def test_update_and_get_api_cache(
     expected: str | None,
 ):
     # Assert the value is not here before update
-    assert cache_manager.get_api_cache(cache_key) is None
+    assert await cache_manager.get_api_cache(cache_key) is None
 
     # Update the API Cache and sleep if needed
-    cache_manager.update_api_cache(cache_key, value, expire)
-    sleep(sleep_time + 1)
+    await cache_manager.update_api_cache(cache_key, value, expire)
+    await asyncio.sleep(sleep_time + 1)
 
     # Assert the value matches
-    assert cache_manager.get_api_cache(cache_key) == expected
-    assert cache_manager.get_api_cache("another_cache_key") is None
+    assert await cache_manager.get_api_cache(cache_key) == expected
+    assert await cache_manager.get_api_cache("another_cache_key") is None
 
 
-def test_valkey_connection_error(cache_manager: CacheManager):
+@pytest.mark.asyncio
+async def test_valkey_connection_error(cache_manager: CacheManager, locale):
+    """Test that cache operations handle Valkey connection errors gracefully"""
     valkey_connection_error = ValkeyError(
         "Error 111 connecting to 127.0.0.1:6379. Connection refused.",
     )
     heroes_cache_key = (
         f"HeroesParser-{settings.blizzard_host}/{locale}{settings.heroes_path}"
     )
-    with patch(
-        "app.adapters.cache.valkey_cache.valkey.Valkey.get",
-        side_effect=valkey_connection_error,
+
+    # Patch the async valkey server methods to raise errors
+    with (
+        patch.object(
+            cache_manager.valkey_server,
+            "set",
+            side_effect=valkey_connection_error,
+        ),
+        patch.object(
+            cache_manager.valkey_server,
+            "get",
+            side_effect=valkey_connection_error,
+        ),
     ):
-        cache_manager.update_api_cache(
+        # update_api_cache should handle error gracefully (log warning but not raise)
+        await cache_manager.update_api_cache(
             heroes_cache_key,
             [{"name": "Sojourn"}],
             settings.heroes_path_cache_timeout,
         )
-        assert cache_manager.get_api_cache(heroes_cache_key) is None
+
+        # get_api_cache should return None on error
+        result = await cache_manager.get_api_cache(heroes_cache_key)
+        assert result is None

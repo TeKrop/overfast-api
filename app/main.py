@@ -2,7 +2,7 @@
 
 import json
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import ResponseValidationError
@@ -10,10 +10,9 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from starlette.responses import Response
 
+from .adapters.storage import SQLiteStorage
 from .api import gamemodes, heroes, maps, players, roles
 from .config import settings
 from .docs import render_documentation
@@ -28,6 +27,10 @@ from .middlewares import (
 from .monitoring.middleware import register_prometheus_middleware
 from .overfast_client import OverFastClient
 from .overfast_logger import logger
+
+if TYPE_CHECKING:
+    from app.domain.ports import BlizzardClientPort, StoragePort
+
 
 if settings.sentry_dsn:
     import sentry_sdk
@@ -55,14 +58,18 @@ if settings.sentry_dsn:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):  # pragma: no cover
-    # Instanciate HTTPX Async Client
+    logger.info("Initializing SQLite storage...")
+    storage: StoragePort = SQLiteStorage()
+    await storage.initialize()
+
     logger.info("Instanciating HTTPX AsyncClient...")
-    overfast_client = OverFastClient()
+    overfast_client: BlizzardClientPort = OverFastClient()
 
     yield
 
-    # Properly close HTTPX Async Client
+    # Properly close HTTPX Async Client and SQLite storage
     await overfast_client.aclose()
+    await storage.close()
 
 
 description = f"""OverFast API provides comprehensive data on Overwatch heroes,
@@ -259,17 +266,12 @@ if settings.profiler:  # pragma: no cover
     app.add_middleware(supported_profilers[settings.profiler])  # type: ignore[arg-type]
 
 
-# Add Prometheus /metrics endpoint if enabled
+# Add Prometheus middleware and /metrics endpoint if enabled
 if settings.prometheus_enabled:
-    register_prometheus_middleware(app)
+    from app.monitoring import router as monitoring_router
 
-    @app.get("/metrics", include_in_schema=False)
-    async def metrics() -> Response:
-        """Prometheus metrics endpoint"""
-        return Response(
-            content=generate_latest(),
-            media_type=CONTENT_TYPE_LATEST,
-        )
+    register_prometheus_middleware(app)
+    app.include_router(monitoring_router.router)
 
 
 # Add application routers

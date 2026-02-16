@@ -9,10 +9,10 @@ from app.overfast_logger import logger
 from app.players.helpers import get_player_title
 
 if TYPE_CHECKING:
-    from app.adapters.blizzard.client import BlizzardClient
+    from app.domain.ports import BlizzardClientPort
 
 
-async def fetch_player_search_json(client: BlizzardClient, name: str) -> list[dict]:
+async def fetch_player_search_json(client: BlizzardClientPort, name: str) -> list[dict]:
     """
     Fetch player search results from Blizzard
 
@@ -160,7 +160,7 @@ def apply_pagination(players: list[dict], offset: int, limit: int) -> dict:
 
 
 async def parse_player_search(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     name: str,
     order_by: str = "name:asc",
     offset: int = 0,

@@ -33,17 +33,17 @@ start_testing:
 # run type checker
 check checker_args="":
     @echo {{ if checker_args != "" { "Running type checker on " + checker_args + "..." } else { "Running type checker..." } }}
-    {{ if checker_args != "" { "uvx ty check " + checker_args } else { "uvx ty check" } }}
+    {{ if checker_args != "" { "uv run ty check " + checker_args } else { "uv run ty check" } }}
 
 # run linter
 lint:
     @echo "Running linter..."
-    uvx ruff check --fix --exit-non-zero-on-fix
+    uv run ruff check --fix --exit-non-zero-on-fix
 
 # run formatter
 format:
     @echo "Running formatter..."
-    uvx ruff format
+    uv run ruff format
 
 # access an interactive shell inside the app container
 shell:
@@ -65,7 +65,7 @@ up profile="":
     @echo "Building OverFastAPI (production mode)..."
     {{ docker_compose }} build
     @echo "Stopping OverFastAPI and cleaning containers..."
-    {{ docker_compose }} down -v --remove-orphans
+    {{ docker_compose }} down --remove-orphans
     @echo "Launching OverFastAPI (production mode)..."
     {{ if profile != "" { docker_compose + " --profile " + profile + " up -d" } else { docker_compose + " up -d" } }}
 
@@ -73,13 +73,18 @@ up profile="":
 up_monitoring:
     just up monitoring
 
-# stop the app and remove containers
+# stop the app and remove containers (preserves data volumes)
 down:
     @echo "Stopping OverFastAPI and cleaning containers..."
+    {{ docker_compose }} --profile "*" down --remove-orphans
+
+# stop the app, remove containers and volumes (clean slate)
+down_clean:
+    @echo "Stopping OverFastAPI and cleaning containers and volumes..."
     {{ docker_compose }} --profile "*" down -v --remove-orphans
 
 # clean up Docker environment
-clean: down
+clean: down_clean
     @echo "Cleaning Docker environment..."
     docker image prune -af
     docker network prune -f

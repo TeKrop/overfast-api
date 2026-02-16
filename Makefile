@@ -41,19 +41,19 @@ start_testing: ## Run OverFastAPI application (testing mode)
 check: ## Run type checker, CHECKER_ARGS can be specified
 ifdef CHECKER_ARGS
 	@echo "Running type checker on $(CHECKER_ARGS)..."
-	uvx ty check $(CHECKER_ARGS)
+	uv run ty check $(CHECKER_ARGS)
 else
 	@echo "Running type checker..."
-	uvx ty check
+	uv run ty check
 endif
 
 lint: ## Run linter
 	@echo "Running linter..."
-	uvx ruff check --fix --exit-non-zero-on-fix
+	uv run ruff check --fix --exit-non-zero-on-fix
 
 format: ## Run formatter
 	@echo "Running formatter..."
-	uvx ruff format
+	uv run ruff format
 
 shell: ## Access an interactive shell inside the app container
 	@echo "Running shell on app container..."
@@ -76,7 +76,7 @@ up: ## Build & run OverFastAPI application (production mode)
 	@echo "Building OverFastAPI (production mode)..."
 	$(DOCKER_COMPOSE) build
 	@echo "Stopping OverFastAPI and cleaning containers..."
-	$(DOCKER_COMPOSE) down -v --remove-orphans
+	$(DOCKER_COMPOSE) down --remove-orphans
 	@echo "Launching OverFastAPI (production mode)..."
 	$(DOCKER_COMPOSE) up -d
 
@@ -84,15 +84,19 @@ up_monitoring: ## Build & run with monitoring (Prometheus + Grafana)
 	@echo "Building OverFastAPI with monitoring..."
 	$(DOCKER_COMPOSE) build
 	@echo "Stopping OverFastAPI and cleaning containers..."
-	$(DOCKER_COMPOSE) down -v --remove-orphans
+	$(DOCKER_COMPOSE) down --remove-orphans
 	@echo "Launching OverFastAPI with monitoring..."
 	$(DOCKER_COMPOSE) --profile monitoring up -d
 
-down: ## Stop the app and remove containers
+down: ## Stop the app and remove containers (preserves data volumes)
 	@echo "Stopping OverFastAPI and cleaning containers..."
-	$(DOCKER_COMPOSE) --profile "*" down  -v --remove-orphans
+	$(DOCKER_COMPOSE) --profile "*" down --remove-orphans
 
-clean: down ## Clean up Docker environment
+down_clean: ## Stop the app, remove containers and volumes (clean slate)
+	@echo "Stopping OverFastAPI and cleaning containers and volumes..."
+	$(DOCKER_COMPOSE) --profile "*" down -v --remove-orphans
+
+clean: down_clean ## Clean up Docker environment
 	@echo "Cleaning Docker environment..."
 	docker image prune -af
 	docker network prune -f
@@ -103,4 +107,4 @@ lock: ## Update lock file
 update_test_fixtures: ## Update test fixtures (heroes, players, etc.)
 	$(DOCKER RUN) uv run python -m tests.update_test_fixtures $(PARAMS)
 
-.PHONY: help build start lint format shell exec test up up_monitoring down clean lock update_test_fixtures
+.PHONY: help build start lint format shell exec test up up_monitoring down down_clean clean lock update_test_fixtures

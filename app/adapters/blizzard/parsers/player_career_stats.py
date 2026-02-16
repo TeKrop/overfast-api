@@ -13,7 +13,7 @@ from app.adapters.blizzard.parsers.player_profile import (
 )
 
 if TYPE_CHECKING:
-    from app.adapters.blizzard.client import BlizzardClient
+    from app.domain.ports import BlizzardClientPort
     from app.players.enums import PlayerGamemode, PlayerPlatform
 
 
@@ -118,26 +118,28 @@ def parse_player_career_stats_from_html(
 
 
 async def parse_player_career_stats(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     player_id: str,
     player_summary: dict | None = None,
     platform: PlayerPlatform | str | None = None,
     gamemode: PlayerGamemode | str | None = None,
     hero: str | None = None,
-) -> dict:
+) -> tuple[dict, str | None]:
     """
     Fetch and parse player career stats
 
     Args:
         client: Blizzard HTTP client
-        player_id: Player ID (Blizzard ID format)
+        player_id: Player ID (Blizzard ID format or BattleTag)
         player_summary: Optional player summary from search endpoint
         platform: Optional platform filter
         gamemode: Optional gamemode filter
         hero: Optional hero filter
 
     Returns:
-        Career stats dict, filtered by query parameters
+        Tuple of (career stats dict filtered by query parameters, Blizzard ID from redirect)
     """
-    profile_data = await parse_player_profile(client, player_id, player_summary)
-    return _process_career_stats(profile_data, platform, gamemode, hero)
+    profile_data, blizzard_id = await parse_player_profile(
+        client, player_id, player_summary
+    )
+    return _process_career_stats(profile_data, platform, gamemode, hero), blizzard_id

@@ -9,6 +9,7 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "aiosqlite==0.20.*",
     "fastapi[standard-no-fastapi-cloud-cli]==0.128.*",
     "httpx[http2]==0.28.*",
     "loguru==0.7.*",
@@ -139,12 +140,6 @@ allowed-confusables = ["（", "）", "："]
 [tool.ruff.lint.isort]
 # Consider app as first-party for imports in tests
 known-first-party = ["app"]
-
-[tool.pytest.ini_options]
-# fakeredis is still using get_connection with deprecated usage
-filterwarnings = [
-    "ignore:Call to 'get_connection' function with deprecated usage:DeprecationWarning:valkey.client",
-]
 
 [tool.semantic_release]
 commit_parser = "conventional"

@@ -40,8 +40,20 @@ class GetHeroStatsSummaryController(AbstractController):
                 detail=error.message,
             ) from error
 
-        # Update API Cache
-        self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
+        # Dual-write to API Cache (Valkey) and Storage (SQLite)
+        storage_key = self._build_storage_key(**kwargs)
+        await self.update_static_cache(data, storage_key, data_type="json")
+
         self.response.headers[settings.cache_ttl_header] = str(self.timeout)
 
         return data
+
+    @staticmethod
+    def _build_storage_key(**kwargs) -> str:
+        """Build parameterized storage key for hero stats"""
+        platform = kwargs["platform"].value
+        gamemode = kwargs["gamemode"].value
+        region = kwargs["region"].value
+        map_filter = kwargs.get("map", "all-maps")
+        tier = kwargs.get("competitive_division", "null")
+        return f"hero_stats:{platform}:{gamemode}:{region}:{map_filter}:{tier}"
