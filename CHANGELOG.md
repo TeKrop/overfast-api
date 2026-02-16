@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.39.0 (2026-02-16)
+
+### Features
+
+- **storage**: Implement SQLite persistent storage with complete Port/Adapter pattern
+  ([#361](https://github.com/TeKrop/overfast-api/pull/361),
+  [`b198b2c`](https://github.com/TeKrop/overfast-api/commit/b198b2c9cf59aa714e434951cc60b097e5664670))
+
+
 ## v3.38.2 (2026-02-13)
 
 ### Bug Fixes
