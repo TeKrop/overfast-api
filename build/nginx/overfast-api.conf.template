@@ -13,8 +13,6 @@ upstream appbackend {
 # Use Docker's internal DNS resolver for Lua script
 resolver 127.0.0.11 valid=30s;
 
-server_tokens off;
-
 # Prometheus metrics initialization (conditional on PROMETHEUS_ENABLED)
 ${PROMETHEUS_LUA_SHARED_DICT}
 ${PROMETHEUS_INIT_WORKER}
