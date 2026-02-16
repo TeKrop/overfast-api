@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.40.0 (2026-02-16)
+
+### Features
+
+- **nginx**: Added nginx configuration settings for performances tuning
+  ([#362](https://github.com/TeKrop/overfast-api/pull/362),
+  [`b94b6dc`](https://github.com/TeKrop/overfast-api/commit/b94b6dca773b577651a8a62b167b02e7f710d3b4))
+
+
 ## v3.39.0 (2026-02-16)
 
 ### Features
