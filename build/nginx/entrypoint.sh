@@ -4,6 +4,11 @@
 set -eu
 set -o pipefail 2>/dev/null || true
 
+# Set defaults for nginx tuning variables if not provided
+: "${NGINX_WORKER_PROCESSES:=0}"
+: "${NGINX_WORKER_CONNECTIONS:=1024}"
+: "${NGINX_MULTI_ACCEPT:=true}"
+
 # Convert NGINX_WORKER_PROCESSES: 0 → "auto" (nginx auto-detect syntax)
 if [ "$NGINX_WORKER_PROCESSES" = "0" ]; then
   NGINX_WORKER_PROCESSES_VALUE="auto"
