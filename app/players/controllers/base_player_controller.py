@@ -19,6 +19,12 @@ from app.config import settings
 from app.controllers import AbstractController
 from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.helpers import overfast_internal_error
+from app.monitoring.metrics import (
+    sqlite_battletag_lookup_total,
+    sqlite_cache_hit_total,
+    sqlite_unknown_player_rejections_total,
+    storage_hits_total,
+)
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
@@ -96,7 +102,18 @@ class BasePlayerController(AbstractController):
         """
         profile = await self.storage.get_player_profile(player_id)
         if not profile:
+            # Track cache miss
+            if settings.prometheus_enabled:
+                sqlite_cache_hit_total.labels(
+                    table="player_profiles", result="miss"
+                ).inc()
+                storage_hits_total.labels(result="miss").inc()
             return None
+
+        # Track cache hit
+        if settings.prometheus_enabled:
+            sqlite_cache_hit_total.labels(table="player_profiles", result="hit").inc()
+            storage_hits_total.labels(result="hit").inc()
 
         # Storage now returns full summary from summary_json column
         return {
@@ -184,6 +201,10 @@ class BasePlayerController(AbstractController):
             next_check_at = (
                 player_status["last_checked_at"] + player_status["retry_after"]
             )
+
+            # Track early rejection
+            if settings.prometheus_enabled:
+                sqlite_unknown_player_rejections_total.inc()
 
             logger.warning(
                 f"Player {player_id} (battletag : {player_status['battletag']}) is unknown "
@@ -371,6 +392,10 @@ class BasePlayerController(AbstractController):
         )
 
         if cached_blizzard_id:
+            # Track BattleTag lookup hit
+            if settings.prometheus_enabled:
+                sqlite_battletag_lookup_total.labels(result="hit").inc()
+
             logger.info(
                 f"Found cached Blizzard ID {cached_blizzard_id} for {battletag_input}, "
                 "skipping redirect"
@@ -387,6 +412,9 @@ class BasePlayerController(AbstractController):
             logger.warning(
                 "Cached Blizzard ID found but couldn't resolve player in search results"
             )
+        # Track BattleTag lookup miss
+        elif settings.prometheus_enabled:
+            sqlite_battletag_lookup_total.labels(result="miss").inc()
 
         # Last resort: attempt Blizzard ID resolution via redirect
         logger.info("No cached mapping found, attempting Blizzard ID resolution")

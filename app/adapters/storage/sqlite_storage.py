@@ -11,7 +11,10 @@ import aiosqlite
 
 from app.config import settings
 from app.metaclasses import Singleton
-from app.monitoring.metrics import track_sqlite_operation
+from app.monitoring.metrics import (
+    sqlite_connection_errors_total,
+    track_sqlite_operation,
+)
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
@@ -64,32 +67,39 @@ class SQLiteStorage(metaclass=Singleton):
         Get a database connection with proper configuration.
         For :memory: databases, reuses a single connection to persist schema across operations.
         """
-        # For in-memory databases, use a shared connection
-        if self.db_path == MEMORY_DB:
-            if self._shared_connection is None:
-                # Create and store the shared connection
-                db = await aiosqlite.connect(self.db_path)
+        try:
+            # For in-memory databases, use a shared connection
+            if self.db_path == MEMORY_DB:
+                if self._shared_connection is None:
+                    # Create and store the shared connection
+                    db = await aiosqlite.connect(self.db_path)
+                    await db.execute("PRAGMA journal_mode=WAL")
+
+                    # Use NORMAL synchronous mode for better write performance
+                    await db.execute("PRAGMA synchronous=NORMAL")
+
+                    # Note: PRAGMA foreign_keys=ON removed - schema has no foreign key constraints
+                    self._shared_connection = db
+                yield self._shared_connection
+                return
+
+            # For file-based databases, create a new connection per operation
+            async with aiosqlite.connect(self.db_path) as db:
+                # Enable WAL mode for better concurrent read performance
                 await db.execute("PRAGMA journal_mode=WAL")
 
-                # Use NORMAL synchronous mode for better write performance
+                # Use NORMAL synchronous mode (safe with WAL mode, much faster writes)
+                # Trade-off: Survives app crash, slight risk if OS crashes simultaneously
+                # Acceptable for cache data that can be re-fetched from Blizzard
                 await db.execute("PRAGMA synchronous=NORMAL")
 
-                # Note: PRAGMA foreign_keys=ON removed - schema has no foreign key constraints
-                self._shared_connection = db
-            yield self._shared_connection
-            return
-
-        # For file-based databases, create a new connection per operation
-        async with aiosqlite.connect(self.db_path) as db:
-            # Enable WAL mode for better concurrent read performance
-            await db.execute("PRAGMA journal_mode=WAL")
-
-            # Use NORMAL synchronous mode (safe with WAL mode, much faster writes)
-            # Trade-off: Survives app crash, slight risk if OS crashes simultaneously
-            # Acceptable for cache data that can be re-fetched from Blizzard
-            await db.execute("PRAGMA synchronous=NORMAL")
-
-            yield db
+                yield db
+        except Exception as e:
+            # Track connection errors
+            if settings.prometheus_enabled:
+                error_type = type(e).__name__
+                sqlite_connection_errors_total.labels(error_type=error_type).inc()
+            raise
 
     async def close(self) -> None:
         """Close the shared connection if it exists"""

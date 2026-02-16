@@ -238,6 +238,10 @@ sqlite_lock_wait_duration_seconds = Histogram(
 SLOW_QUERY_THRESHOLD_1S = 1.0
 SLOW_QUERY_THRESHOLD_100MS = 0.1
 
+# Lock wait threshold (seconds) - operations taking >50ms might indicate lock contention
+# SQLite with WAL mode has minimal lock contention, but this catches anomalies
+LOCK_WAIT_THRESHOLD = 0.05
+
 
 def _record_metrics(table: str, operation: str, duration: float, status: str):
     """Helper to record SQLite metrics (extracted to reduce complexity)"""
@@ -256,6 +260,10 @@ def _record_metrics(table: str, operation: str, duration: float, status: str):
         sqlite_slow_queries_total.labels(
             table=table, operation=operation, threshold="100ms"
         ).inc()
+
+    # Track potential lock waits
+    if operation in ("set", "delete", "update") and duration > LOCK_WAIT_THRESHOLD:
+        sqlite_lock_wait_duration_seconds.labels(table=table).observe(duration)
 
 
 def track_sqlite_operation(table: str, operation: str):
