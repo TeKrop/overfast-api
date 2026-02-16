@@ -93,6 +93,12 @@ class SQLiteStorage(metaclass=Singleton):
                 # Acceptable for cache data that can be re-fetched from Blizzard
                 await db.execute("PRAGMA synchronous=NORMAL")
 
+                # Configure memory-mapped I/O if enabled
+                # This can significantly improve read performance by mapping database
+                # pages directly into memory
+                if settings.sqlite_mmap_size > 0:
+                    await db.execute(f"PRAGMA mmap_size={settings.sqlite_mmap_size}")
+
                 yield db
         except Exception as e:
             # Track connection errors
