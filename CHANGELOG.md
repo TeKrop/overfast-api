@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.41.0 (2026-02-16)
+
+### Features
+
+- Improved global 429 management with nginx and improved SQLite usage with mmap
+  ([#363](https://github.com/TeKrop/overfast-api/pull/363),
+  [`7a81f67`](https://github.com/TeKrop/overfast-api/commit/7a81f67cab899bc6bc6116b2f0d6d73f8a388402))
+
+
 ## v3.40.0 (2026-02-16)
 
 ### Features
