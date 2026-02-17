@@ -2,44 +2,31 @@
 
 <!-- version list -->
 
-## v3.39.2 (2026-02-17)
+## v3.41.0 (2026-02-16)
 
-### Bug Fixes
+### Features
 
-- **ci**: Use fresh checkout in commit-to-main job
-  ([`66a330f`](https://github.com/danielsogl/overfast-api/commit/66a330f1e07f19c69f9787e6710ff5c6f274255d))
-
-
-## v3.39.1 (2026-02-17)
-
-### Bug Fixes
-
-- **nginx**: Sync conf template with upstream, keep server_name
-  ([`02baad0`](https://github.com/danielsogl/overfast-api/commit/02baad01d6b05ec15997978db87115c68f3b73c7))
+- Improved global 429 management with nginx and improved SQLite usage with mmap
+  ([#363](https://github.com/TeKrop/overfast-api/pull/363),
+  [`7a81f67`](https://github.com/TeKrop/overfast-api/commit/7a81f67cab899bc6bc6116b2f0d6d73f8a388402))
 
 
-## v3.39.0 (2026-02-17)
+## v3.40.0 (2026-02-16)
 
-### Bug Fixes
+### Features
 
-- Make upstream sync workflow resilient to branch and permission issues
-  ([`b75fbb1`](https://github.com/danielsogl/overfast-api/commit/b75fbb1a9c87f929433189accd2ac2732b64a5bc))
+- **nginx**: Added nginx configuration settings for performances tuning
+  ([#362](https://github.com/TeKrop/overfast-api/pull/362),
+  [`b94b6dc`](https://github.com/TeKrop/overfast-api/commit/b94b6dca773b577651a8a62b167b02e7f710d3b4))
 
-- **ci**: Make badge updates resilient when gist token is unavailable
-  ([`53b18cf`](https://github.com/danielsogl/overfast-api/commit/53b18cf676953c4a2a695c520a309541cfe20566))
 
-### Chores
+## v3.39.0 (2026-02-16)
 
-- Disable automatic upstream sync schedule
-  ([`c7e4580`](https://github.com/danielsogl/overfast-api/commit/c7e4580cb3c688caa62a39a08b6aeb578966a8de))
+### Features
 
-### Continuous Integration
-
-- Simplify workflows for direct sync and build pipeline
-  ([`7fe3b3c`](https://github.com/danielsogl/overfast-api/commit/7fe3b3ccb3bfac9095b931535cd4aba21c989482))
-
-- **sync**: Add validation pipeline before pushing upstream merges
-  ([`759d2bb`](https://github.com/danielsogl/overfast-api/commit/759d2bb11f0513cc41caea44456f4a4659ff50d0))
+- **storage**: Implement SQLite persistent storage with complete Port/Adapter pattern
+  ([#361](https://github.com/TeKrop/overfast-api/pull/361),
+  [`b198b2c`](https://github.com/TeKrop/overfast-api/commit/b198b2c9cf59aa714e434951cc60b097e5664670))
 
 
 ## v3.38.2 (2026-02-13)

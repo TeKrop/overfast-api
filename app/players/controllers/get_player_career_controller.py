@@ -1,26 +1,23 @@
 """Player Career Controller module"""
 
-from typing import TYPE_CHECKING, ClassVar
-
-from fastapi import HTTPException
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from app.adapters.blizzard import BlizzardClient
 from app.adapters.blizzard.parsers.player_profile import (
+    extract_name_from_profile_html,
     fetch_player_html,
     filter_all_stats_data,
     filter_stats_by_query,
     parse_player_profile_html,
 )
-from app.adapters.blizzard.parsers.player_summary import parse_player_summary
 from app.config import settings
-from app.exceptions import ParserBlizzardError, ParserParsingError
-from app.helpers import overfast_internal_error
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
+    from app.domain.ports import BlizzardClientPort
     from app.players.enums import PlayerGamemode, PlayerPlatform
 
-from .base_player_controller import BasePlayerController
+from .base_player_controller import BasePlayerController, with_unknown_player_guard
 
 
 class GetPlayerCareerController(BasePlayerController):
@@ -31,100 +28,144 @@ class GetPlayerCareerController(BasePlayerController):
     parser_classes: ClassVar[list] = []
     timeout = settings.career_path_cache_timeout
 
+    @with_unknown_player_guard
     async def process_request(self, **kwargs) -> dict:
         """Process request with Player Cache support and unknown player guard"""
         player_id = kwargs["player_id"]
+        client = BlizzardClient()
 
-        async def _handler() -> dict:
-            client = BlizzardClient()
-            player_summary: dict | None = None
+        # Initialize variables for exception handling (must be in scope for except block)
+        cache_key = player_id
+        battletag_input = None
+        player_summary = {}
 
-            # Filters from query
-            summary_filter = bool(kwargs.get("summary"))
-            stats_filter = bool(kwargs.get("stats"))
-            platform_filter = kwargs.get("platform")
-            gamemode_filter = kwargs.get("gamemode")
-            hero_filter = kwargs.get("hero")
+        try:
+            # Step 1: Resolve player identity (search + Blizzard ID resolution)
+            # Phase 3.5B: Returns (blizzard_id, summary, cached_html, battletag_input)
+            (
+                blizzard_id,
+                player_summary,
+                cached_html,
+                battletag_input,
+            ) = await self._resolve_player_identity(client, player_id)
 
-            try:
-                # Get player summary from search endpoint
-                player_summary = await parse_player_summary(client, player_id)
-                logger.info("Player Summary retrieved !")
+            # Use Blizzard ID as canonical key (fallback to player_id if not resolved yet)
+            cache_key = blizzard_id or player_id
 
-                # If player not found in search, fetch directly with player_id
-                if not player_summary:
-                    logger.info("Player not found in search, fetching directly")
-                    html = await self._fetch_player_html(client, player_id)
-                    profile_data = parse_player_profile_html(html, None)
-                else:
-                    # Check Player Cache
-                    logger.info("Checking Player Cache...")
-                    player_cache = self.cache_manager.get_player_cache(player_id)
+            # Step 2: Fetch profile with cache optimization
+            # Pass cached_html to avoid redundant Blizzard call
+            _html, profile_data = await self._fetch_profile_with_cache(
+                client,
+                cache_key,
+                player_summary,
+                battletag_input,
+                cached_html=cached_html,
+            )
 
-                    if (
-                        player_cache is not None
-                        and player_cache["summary"]["lastUpdated"]  # ty: ignore[invalid-argument-type]
-                        == player_summary["lastUpdated"]
-                    ):
-                        logger.info("Player Cache found and up-to-date, using it")
-                        html = player_cache["profile"]  # ty: ignore[invalid-argument-type]
-                        profile_data = parse_player_profile_html(html, player_summary)
-                    else:
-                        # Fetch from Blizzard with Blizzard ID
-                        logger.info(
-                            "Player Cache not found or not up-to-date, calling Blizzard"
-                        )
-                        blizzard_id = player_summary["url"]
-                        html = await self._fetch_player_html(client, blizzard_id)
-                        profile_data = parse_player_profile_html(html, player_summary)
+            # Step 3: Apply filters
+            data = self._filter_profile_data(
+                profile_data,
+                bool(kwargs.get("summary")),
+                bool(kwargs.get("stats")),
+                kwargs.get("platform"),
+                kwargs.get("gamemode"),
+                kwargs.get("hero"),
+            )
 
-                        # Update Player Cache
-                        self.cache_manager.update_player_cache(
-                            player_id,
-                            {"summary": player_summary, "profile": html},
-                        )
+        except Exception as error:  # noqa: BLE001
+            # Use shared exception handler (always raises)
+            await self.handle_player_request_exceptions(
+                error, cache_key, battletag_input, player_summary
+            )
 
-                # Apply filters
-                data = self._filter_profile_data(
-                    profile_data,
-                    summary_filter,
-                    stats_filter,
-                    platform_filter,
-                    gamemode_filter,
-                    hero_filter,
+        # Update API Cache
+        await self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
+        self.response.headers[settings.cache_ttl_header] = str(self.timeout)
+
+        return data
+
+    async def _fetch_profile_with_cache(
+        self,
+        client: BlizzardClientPort,
+        blizzard_id: str,
+        player_summary: dict,
+        battletag_input: str | None,
+        cached_html: str | None = None,
+    ) -> tuple[str, dict]:
+        """Fetch player profile HTML with cache optimization.
+
+        Phase 3.5B: Uses Blizzard ID as cache key, extracts name from HTML,
+        stores battletag as optional metadata.
+
+        Args:
+            client: Blizzard API client
+            blizzard_id: Blizzard ID (canonical cache key)
+            player_summary: Player summary from search (may be empty for direct Blizzard ID requests)
+            battletag_input: BattleTag from user input (None if user provided Blizzard ID)
+            cached_html: HTML already fetched during identity resolution (Step 1 optimization)
+
+        Returns:
+            Tuple of (html, profile_data)
+        """
+        # Step 1 optimization: Use cached HTML from _resolve_player_identity
+        if cached_html:
+            logger.info(
+                "Using cached HTML from identity resolution (avoiding double-fetch)"
+            )
+            profile_data = parse_player_profile_html(cached_html, player_summary)
+
+            # Extract name and store profile
+            name = extract_name_from_profile_html(cached_html) or player_summary.get(
+                "name"
+            )
+            await self.update_player_profile_cache(
+                blizzard_id, player_summary, cached_html, battletag_input, name
+            )
+
+            return cached_html, profile_data
+
+        # Check Player Cache (SQLite storage) using Blizzard ID as key
+        logger.info("Checking Player Cache...")
+        player_cache = await self.get_player_profile_cache(blizzard_id)
+
+        if (
+            player_cache is not None
+            and player_summary  # Have summary to compare
+            and player_cache["summary"]["lastUpdated"]  # ty: ignore[invalid-argument-type, not-subscriptable]
+            == player_summary["lastUpdated"]
+        ):
+            logger.info("Player Cache found and up-to-date, using it")
+            html = cast("str", player_cache["profile"])
+            profile_data = parse_player_profile_html(html, player_summary)
+
+            # Update battletag if provided (progressive enhancement)
+            if battletag_input and not player_cache.get("battletag"):
+                logger.info(f"Enriching cache with BattleTag: {battletag_input}")
+                cached_name = player_cache.get("name")
+                name_str = cached_name if isinstance(cached_name, str) else None
+                await self.update_player_profile_cache(
+                    blizzard_id, player_summary, html, battletag_input, name_str
                 )
 
-            except ParserBlizzardError as error:
-                raise HTTPException(
-                    status_code=error.status_code,
-                    detail=error.message,
-                ) from error
-            except ParserParsingError as error:
-                # Check if error message indicates player not found
-                # This can happen when HTML structure is malformed or missing expected elements
-                if "Could not find main content in HTML" in str(error):
-                    raise HTTPException(
-                        status_code=404,
-                        detail="Player not found",
-                    ) from error
+            return html, profile_data
 
-                # Get Blizzard URL for error reporting
-                blizzard_url = (
-                    f"{settings.blizzard_host}{settings.career_path}/"
-                    f"{player_summary.get('url', player_id) if player_summary else player_id}/"
-                )
-                raise overfast_internal_error(blizzard_url, error) from error
+        # Fetch from Blizzard with Blizzard ID
+        logger.info("Player Cache not found or not up-to-date, calling Blizzard")
+        html, _ = await fetch_player_html(client, blizzard_id)
+        profile_data = parse_player_profile_html(html, player_summary)
 
-            # Update API Cache
-            self.cache_manager.update_api_cache(self.cache_key, data, self.timeout)
-            self.response.headers[settings.cache_ttl_header] = str(self.timeout)
+        # Extract name and Update Player Cache (SQLite storage)
+        name = extract_name_from_profile_html(html) or player_summary.get("name")
+        await self.update_player_profile_cache(
+            blizzard_id, player_summary, html, battletag_input, name
+        )
 
-            return data
+        return html, profile_data
 
-        return await self.with_unknown_player_guard(player_id, _handler)
-
-    async def _fetch_player_html(self, client: BlizzardClient, player_id: str) -> str:
-        """Fetch player HTML from Blizzard"""
+    async def _fetch_player_html(
+        self, client: BlizzardClientPort, player_id: str
+    ) -> tuple[str, str | None]:
+        """Fetch player HTML from Blizzard and extract Blizzard ID from redirect"""
         return await fetch_player_html(client, player_id)
 
     def _filter_profile_data(

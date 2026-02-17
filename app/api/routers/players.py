@@ -25,7 +25,7 @@ from app.players.models import (
     CareerStats,
     Player,
     PlayerCareerStats,
-    PlayerParserErrorMessage,
+    PlayerNotFoundError,
     PlayerSearchResult,
     PlayerStatsSummary,
     PlayerSummary,
@@ -34,7 +34,7 @@ from app.players.models import (
 # Custom route responses for player careers
 career_routes_responses = {
     status.HTTP_404_NOT_FOUND: {
-        "model": PlayerParserErrorMessage,
+        "model": PlayerNotFoundError,
         "description": "Player Not Found",
     },
     **common_routes_responses,

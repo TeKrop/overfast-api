@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 from fastapi import status
 
 from app.adapters.blizzard.parsers.utils import (
+    extract_blizzard_id_from_url,
     parse_html_root,
     validate_response_status,
 )
@@ -19,7 +20,10 @@ from app.config import settings
 from app.exceptions import ParserBlizzardError, ParserParsingError
 
 if TYPE_CHECKING:
-    from app.adapters.blizzard.client import BlizzardClient
+    from selectolax.lexbor import LexborNode
+
+    from app.domain.ports import BlizzardClientPort
+
 from app.overfast_logger import logger
 from app.players.enums import (
     CareerHeroesComparisonsCategory,
@@ -42,9 +46,6 @@ from app.players.helpers import (
     string_to_snakecase,
 )
 
-if TYPE_CHECKING:
-    from selectolax.lexbor import LexborNode
-
 # Platform/gamemode CSS class mappings
 PLATFORMS_DIV_MAPPING = {
     PlayerPlatform.PC: "mouseKeyboard-view",
@@ -56,26 +57,62 @@ GAMEMODES_DIV_MAPPING = {
 }
 
 
-async def fetch_player_html(client: BlizzardClient, player_id: str) -> str:
+async def fetch_player_html(
+    client: BlizzardClientPort, player_id: str
+) -> tuple[str, str | None]:
     """
-    Fetch player profile HTML from Blizzard
+    Fetch player profile HTML from Blizzard and extract Blizzard ID from redirect.
+
+    Blizzard redirects BattleTag URLs to canonical Blizzard ID URLs:
+    - Input:  /career/Kindness-11556/
+    - Redirect: 302 → /career/df51a381fe20caf8baa7|0bf3b4c47cbebe84b8db9c676a4e9c1f/
+    - Returns: (HTML content, Blizzard ID)
 
     Args:
         client: Blizzard HTTP client
-        player_id: Player ID (Blizzard ID format)
+        player_id: Player ID (BattleTag or Blizzard ID format)
 
     Returns:
-        Raw HTML content
+        Tuple of (HTML content, Blizzard ID extracted from redirect URL)
 
     Raises:
         ParserBlizzardError: If player not found (404)
     """
+
     url = f"{settings.blizzard_host}{settings.career_path}/{player_id}/"
 
     response = await client.get(url)
     validate_response_status(response, valid_codes=[200, 404])
 
-    return response.text
+    # Extract Blizzard ID from final URL (after redirect)
+    blizzard_id = extract_blizzard_id_from_url(str(response.url))
+
+    return response.text, blizzard_id
+
+
+def extract_name_from_profile_html(html: str) -> str | None:
+    """
+    Extract player display name from profile HTML.
+
+    The name is found in the <h1 class="Profile-player--name"> tag.
+    Note: This is ONLY the display name (e.g., "TeKrop"), NOT the full
+    BattleTag with discriminator (e.g., "TeKrop-2217").
+
+    Args:
+        html: Raw HTML from player profile page
+
+    Returns:
+        Player display name if found, None otherwise
+
+    Example:
+        >>> html = '<h1 class="Profile-player--name">TeKrop</h1>'
+        >>> extract_name_from_profile_html(html)
+        'TeKrop'
+    """
+    root_tag = parse_html_root(html)
+    name_tag = root_tag.css_first("h1.Profile-player--name")
+
+    return name_tag.text().strip() if name_tag and name_tag.text() else None
 
 
 def parse_player_profile_html(
@@ -640,20 +677,20 @@ def filter_all_stats_data(
 
 
 async def parse_player_profile(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     player_id: str,
     player_summary: dict | None = None,
-) -> dict:
+) -> tuple[dict, str | None]:
     """
     High-level function to fetch and parse player profile
 
     Args:
         client: Blizzard HTTP client
-        player_id: Player ID (Blizzard ID format)
+        player_id: Player ID (Blizzard ID format or BattleTag)
         player_summary: Optional player summary from search endpoint
 
     Returns:
-        Dict with "summary" and "stats" keys
+        Tuple of (dict with "summary" and "stats" keys, Blizzard ID from redirect)
     """
-    html = await fetch_player_html(client, player_id)
-    return parse_player_profile_html(html, player_summary)
+    html, blizzard_id = await fetch_player_html(client, player_id)
+    return parse_player_profile_html(html, player_summary), blizzard_id

@@ -9,11 +9,14 @@ ARG OPENRESTY_VERSION
 ENV OPENRESTY_VERSION=${OPENRESTY_VERSION}
 
 # For envsubst command in entrypoint
-RUN apk add --no-cache gettext git zlib-dev
+RUN apk add --no-cache gettext git zstd-dev
 
-# Install zlib and lua-resty-prometheus
-RUN luarocks install lua-zlib && \
+# Install lua-zstd and lua-resty-prometheus
+RUN luarocks install lua-zstd && \
     luarocks install nginx-lua-prometheus
+
+# Copy main Nginx configuration template
+COPY nginx.conf.template /etc/nginx/nginx.conf.template
 
 # Copy Nginx configuration files
 COPY overfast-api.conf.template /etc/nginx/conf.d/default.conf.template

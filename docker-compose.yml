@@ -8,6 +8,7 @@ services:
     volumes:
       - static_volume:/code/static
       - ${APP_VOLUME_PATH:-/tmp}/app-logs:/code/logs
+      - storage_volume:/code/data
     depends_on:
       valkey:
         condition: service_healthy
@@ -24,6 +25,7 @@ services:
     env_file: ${APP_VOLUME_PATH:-.}/.env
     volumes:
       - ${APP_VOLUME_PATH:-/tmp}/worker-logs:/code/logs
+      - storage_volume:/code/data
     depends_on:
       valkey:
         condition: service_healthy
@@ -155,5 +157,6 @@ services:
 
 volumes:
   static_volume:
+  storage_volume:
   prometheus-data:
   grafana-data:

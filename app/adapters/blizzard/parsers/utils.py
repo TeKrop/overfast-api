@@ -78,3 +78,92 @@ def safe_get_attribute(
     if not node or not node.attributes:
         return default
     return node.attributes.get(attribute, default)
+
+
+def extract_blizzard_id_from_url(url: str) -> str | None:
+    """
+    Extract Blizzard ID from career profile URL (keeps URL-encoded format).
+
+    Blizzard redirects BattleTag URLs to Blizzard ID URLs. The ID is kept
+    in URL-encoded format to match the format used in search results.
+
+    Examples:
+        - Input: /career/df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f/
+        - Output: df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f
+
+    Args:
+        url: Full URL or path from Blizzard profile redirect
+
+    Returns:
+        Blizzard ID string (URL-encoded), or None if not found
+    """
+    # Extract the path segment between /career/ and trailing /
+    # Handle both full URLs and paths
+    if "/career/" not in url:
+        return None
+
+    try:
+        # Extract segment: /career/{ID}/ → {ID}
+        career_segment = url.split("/career/")[1]
+        blizzard_id = career_segment.rstrip("/").split("/")[0]
+
+        # Return None if empty (malformed URL like "/career/")
+        if not blizzard_id:
+            return None
+    except (IndexError, ValueError):
+        logger.warning(f"Failed to extract Blizzard ID from URL: {url}")
+        return None
+
+    # Return as-is (URL-encoded) to match search results format
+    return blizzard_id
+
+
+def is_blizzard_id(player_id: str) -> bool:
+    """
+    Check if a player_id is a Blizzard ID (not a BattleTag).
+
+    Blizzard IDs contain pipe character (| or %7C) and don't have hyphens.
+    BattleTags have format: Name-12345
+
+    Args:
+        player_id: Player identifier to check
+
+    Returns:
+        True if player_id is a Blizzard ID, False if BattleTag
+
+    Examples:
+        >>> is_blizzard_id("TeKrop-2217")
+        False
+        >>> is_blizzard_id("df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f")
+        True
+        >>> is_blizzard_id("df51a381fe20caf8baa7|0bf3b4c47cbebe84b8db9c676a4e9c1f")
+        True
+    """
+    # Blizzard IDs contain pipe (| or %7C), BattleTags have format Name-12345
+    return ("%7C" in player_id or "|" in player_id) and "-" not in player_id
+
+
+def match_player_by_blizzard_id(
+    search_results: list[dict], blizzard_id: str
+) -> dict | None:
+    """
+    Match a player from search results by Blizzard ID.
+
+    Used to resolve ambiguous BattleTags when multiple players share the same name.
+
+    Args:
+        search_results: List of player dicts from Blizzard search endpoint
+        blizzard_id: Blizzard ID extracted from profile redirect
+
+    Returns:
+        Matching player dict, or None if not found
+    """
+    for player in search_results:
+        # Search results use "url" field for Blizzard ID
+        if player.get("url") == blizzard_id:
+            return player
+
+    logger.warning(
+        f"No player found in search results matching Blizzard ID: {blizzard_id}"
+    )
+    return None
