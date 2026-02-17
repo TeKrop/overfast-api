@@ -2,6 +2,30 @@
 
 <!-- version list -->
 
+## v3.39.0 (2026-02-17)
+
+### Bug Fixes
+
+- Make upstream sync workflow resilient to branch and permission issues
+  ([`b75fbb1`](https://github.com/danielsogl/overfast-api/commit/b75fbb1a9c87f929433189accd2ac2732b64a5bc))
+
+- **ci**: Make badge updates resilient when gist token is unavailable
+  ([`53b18cf`](https://github.com/danielsogl/overfast-api/commit/53b18cf676953c4a2a695c520a309541cfe20566))
+
+### Chores
+
+- Disable automatic upstream sync schedule
+  ([`c7e4580`](https://github.com/danielsogl/overfast-api/commit/c7e4580cb3c688caa62a39a08b6aeb578966a8de))
+
+### Continuous Integration
+
+- Simplify workflows for direct sync and build pipeline
+  ([`7fe3b3c`](https://github.com/danielsogl/overfast-api/commit/7fe3b3ccb3bfac9095b931535cd4aba21c989482))
+
+- **sync**: Add validation pipeline before pushing upstream merges
+  ([`759d2bb`](https://github.com/danielsogl/overfast-api/commit/759d2bb11f0513cc41caea44456f4a4659ff50d0))
+
+
 ## v3.38.2 (2026-02-13)
 
 ### Bug Fixes
