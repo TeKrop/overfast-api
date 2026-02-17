@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.42.0 (2026-02-17)
+
+### Features
+
+- **ci**: Add manual deploy approval gate via production environment
+  ([`b7bf983`](https://github.com/danielsogl/overfast-api/commit/b7bf98367e2b46e2e8c18b7a0c273711806d19ad))
+
+
 ## v3.41.0 (2026-02-16)
 
 ### Features
