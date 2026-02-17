@@ -249,6 +249,8 @@ jobs:
         run: |
           git remote add upstream https://github.com/TeKrop/overfast-api.git || true
           git fetch upstream
+          git fetch origin
+          git reset --hard origin/main
           git merge upstream/main -m "Merge upstream changes"
           git push origin main
           echo "Merge commit pushed to main successfully"
