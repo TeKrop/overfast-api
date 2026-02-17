@@ -179,42 +179,105 @@ jobs:
           docker compose logs
           exit 1
 
-      - name: Smoke test endpoints
+      - name: Validate API endpoints
         run: |
           set -euo pipefail
           BASE_URL="http://localhost:8080"
+          ERRORS=0
 
-          check_endpoint() {
-            local path="$1"
-            local check_body="${2:-false}"
-
-            RESPONSE=$(curl -s -w "\n%{http_code}" "$BASE_URL$path")
-            STATUS=$(echo "$RESPONSE" | tail -1)
-            BODY=$(echo "$RESPONSE" | sed '$d')
-
-            if [ "$STATUS" -ne 200 ]; then
-              echo "FAIL: GET $path → HTTP $STATUS"
-              return 1
-            fi
-
-            if [ "$check_body" = "true" ]; then
-              if ! echo "$BODY" | jq -e 'length > 0' > /dev/null 2>&1; then
-                echo "FAIL: GET $path → 200 but empty response"
-                return 1
-              fi
-              echo "OK: GET $path → 200 (non-empty JSON)"
-            else
-              echo "OK: GET $path → 200"
-            fi
+          fetch() {
+            curl -sf "$BASE_URL$1"
           }
 
-          check_endpoint "/"
-          check_endpoint "/openapi.json"
-          check_endpoint "/gamemodes" true
-          check_endpoint "/maps" true
+          fail() {
+            echo "  FAIL: $1"
+            ERRORS=$((ERRORS + 1))
+          }
 
+          # ── GET / → HTML docs page ──
+          echo "=== GET / ==="
+          BODY=$(fetch "/") || { fail "/ not reachable"; ERRORS=$((ERRORS+1)); }
+          echo "$BODY" | grep -q "redoc" || fail "/ does not contain redoc HTML"
+          echo "  OK"
+
+          # ── GET /openapi.json → valid OpenAPI spec ──
+          echo "=== GET /openapi.json ==="
+          BODY=$(fetch "/openapi.json") || { fail "/openapi.json not reachable"; ERRORS=$((ERRORS+1)); }
+          echo "$BODY" | jq -e '.openapi' > /dev/null || fail "missing openapi version field"
+          echo "$BODY" | jq -e '.paths | keys | length > 5' > /dev/null || fail "too few paths in spec"
+          echo "  OK"
+
+          # ── GET /roles → exactly 3 roles with required fields ──
+          echo "=== GET /roles ==="
+          BODY=$(fetch "/roles") || { fail "/roles not reachable"; ERRORS=$((ERRORS+1)); }
+          COUNT=$(echo "$BODY" | jq 'length')
+          [ "$COUNT" -eq 3 ] || fail "expected 3 roles, got $COUNT"
+          KEYS=$(echo "$BODY" | jq -r '.[].key' | sort | tr '\n' ',')
+          [ "$KEYS" = "damage,support,tank," ] || fail "role keys mismatch: $KEYS"
+          echo "$BODY" | jq -e 'all(has("key","name","icon","description"))' > /dev/null \
+            || fail "roles missing required fields"
+          echo "$BODY" | jq -e 'all(.icon | startswith("http"))' > /dev/null \
+            || fail "role icons are not valid URLs"
+          echo "  OK: $COUNT roles (damage, support, tank)"
+
+          # ── GET /gamemodes → 10+ gamemodes with data ──
+          echo "=== GET /gamemodes ==="
+          BODY=$(fetch "/gamemodes") || { fail "/gamemodes not reachable"; ERRORS=$((ERRORS+1)); }
+          COUNT=$(echo "$BODY" | jq 'length')
+          [ "$COUNT" -ge 10 ] || fail "expected ≥10 gamemodes, got $COUNT"
+          echo "$BODY" | jq -e 'all(has("key","name","icon","description","screenshot"))' > /dev/null \
+            || fail "gamemodes missing required fields"
+          echo "$BODY" | jq -e 'all(.description | length > 10)' > /dev/null \
+            || fail "gamemode descriptions too short or empty"
+          # Spot-check known gamemodes
+          echo "$BODY" | jq -e 'map(.key) | contains(["control","escort","push"])' > /dev/null \
+            || fail "known gamemodes (control, escort, push) not found"
+          echo "  OK: $COUNT gamemodes"
+
+          # ── GET /maps → 40+ maps with structure ──
+          echo "=== GET /maps ==="
+          BODY=$(fetch "/maps") || { fail "/maps not reachable"; ERRORS=$((ERRORS+1)); }
+          COUNT=$(echo "$BODY" | jq 'length')
+          [ "$COUNT" -ge 40 ] || fail "expected ≥40 maps, got $COUNT"
+          echo "$BODY" | jq -e 'all(has("key","name","screenshot","gamemodes","location"))' > /dev/null \
+            || fail "maps missing required fields"
+          echo "$BODY" | jq -e 'all(.gamemodes | length >= 1)' > /dev/null \
+            || fail "some maps have no gamemodes"
+          echo "$BODY" | jq -e 'all(.screenshot | startswith("http"))' > /dev/null \
+            || fail "map screenshots are not valid URLs"
+          # Spot-check known maps
+          echo "$BODY" | jq -e 'map(.key) | contains(["ilios","dorado","kings-row"])' > /dev/null \
+            || fail "known maps (ilios, dorado, kings-row) not found"
+          echo "  OK: $COUNT maps"
+
+          # ── GET /heroes → 40+ heroes with structure ──
+          echo "=== GET /heroes ==="
+          BODY=$(fetch "/heroes") || { fail "/heroes not reachable"; ERRORS=$((ERRORS+1)); }
+          COUNT=$(echo "$BODY" | jq 'length')
+          [ "$COUNT" -ge 40 ] || fail "expected ≥40 heroes, got $COUNT"
+          echo "$BODY" | jq -e 'all(has("key","name","portrait","role"))' > /dev/null \
+            || fail "heroes missing required fields"
+          echo "$BODY" | jq -e 'all(.role | IN("damage","support","tank"))' > /dev/null \
+            || fail "heroes have invalid roles"
+          echo "$BODY" | jq -e 'all(.portrait | startswith("http"))' > /dev/null \
+            || fail "hero portraits are not valid URLs"
+          # Spot-check known heroes
+          echo "$BODY" | jq -e 'map(.key) | contains(["ana","tracer","reinhardt"])' > /dev/null \
+            || fail "known heroes (ana, tracer, reinhardt) not found"
+          # Verify role distribution (should have heroes in each role)
+          for ROLE in damage support tank; do
+            ROLE_COUNT=$(echo "$BODY" | jq "[.[] | select(.role == \"$ROLE\")] | length")
+            [ "$ROLE_COUNT" -ge 5 ] || fail "only $ROLE_COUNT $ROLE heroes (expected ≥5)"
+          done
+          echo "  OK: $COUNT heroes"
+
+          # ── Summary ──
           echo ""
-          echo "All smoke tests passed!"
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "FAILED: $ERRORS validation error(s)"
+            exit 1
+          fi
+          echo "All endpoint validations passed!"
 
       - name: Dump logs on failure
         if: failure()
