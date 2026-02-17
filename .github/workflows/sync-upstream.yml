@@ -227,21 +227,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download merged repo
-        uses: actions/download-artifact@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          name: merged-repo
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract archive
-        run: tar xzf merged-repo.tar.gz && rm merged-repo.tar.gz
-
-      - name: Configure git and push
+      - name: Configure git
         run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
-          git push origin HEAD:main
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Configure merge drivers
+        run: |
+          git config merge.accept-upstream.name "Accept upstream version"
+          git config merge.accept-upstream.driver "cp '%B' '%A'"
+          git config merge.keep-fork.name "Keep fork version"
+          git config merge.keep-fork.driver true
+
+      - name: Merge upstream and push
+        run: |
+          git remote add upstream https://github.com/TeKrop/overfast-api.git || true
+          git fetch upstream
+          git merge upstream/main -m "Merge upstream changes"
+          git push origin main
           echo "Merge commit pushed to main successfully"
 
   # ──────────────────────────────────────────────────────────────
