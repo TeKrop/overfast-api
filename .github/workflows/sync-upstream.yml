@@ -87,17 +87,23 @@ jobs:
   ci-checks:
     name: CI checks (ruff, ty, pytest)
     needs: merge-staging
-    if: needs.merge-staging.outputs.has_updates == 'true'
+    if: needs.merge-staging.outputs.has_updates == 'true' || github.event.inputs.force_deploy == 'true'
     runs-on: ubuntu-latest
 
     steps:
       - name: Download merged repo
+        if: needs.merge-staging.outputs.has_updates == 'true'
         uses: actions/download-artifact@v4
         with:
           name: merged-repo
 
       - name: Extract archive
+        if: needs.merge-staging.outputs.has_updates == 'true'
         run: tar xzf merged-repo.tar.gz && rm merged-repo.tar.gz
+
+      - name: Checkout current main
+        if: needs.merge-staging.outputs.has_updates != 'true'
+        uses: actions/checkout@v4
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v3
@@ -124,17 +130,23 @@ jobs:
   smoke-test:
     name: Smoke test (Docker)
     needs: merge-staging
-    if: needs.merge-staging.outputs.has_updates == 'true'
+    if: needs.merge-staging.outputs.has_updates == 'true' || github.event.inputs.force_deploy == 'true'
     runs-on: ubuntu-latest
 
     steps:
       - name: Download merged repo
+        if: needs.merge-staging.outputs.has_updates == 'true'
         uses: actions/download-artifact@v4
         with:
           name: merged-repo
 
       - name: Extract archive
+        if: needs.merge-staging.outputs.has_updates == 'true'
         run: tar xzf merged-repo.tar.gz && rm merged-repo.tar.gz
+
+      - name: Checkout current main
+        if: needs.merge-staging.outputs.has_updates != 'true'
+        uses: actions/checkout@v4
 
       - name: Create .env from defaults
         run: |
@@ -186,7 +198,7 @@ jobs:
           ERRORS=0
 
           fetch() {
-            curl -sf "$BASE_URL$1"
+            curl -sf --compressed "$BASE_URL$1"
           }
 
           fail() {
@@ -286,7 +298,8 @@ jobs:
   # ── Stage 3: Push validated merge to main ──────────────────────
   commit-to-main:
     name: Push to main
-    needs: [ci-checks, smoke-test]
+    needs: [merge-staging, ci-checks, smoke-test]
+    if: needs.merge-staging.outputs.has_updates == 'true'
     runs-on: ubuntu-latest
 
     steps:
