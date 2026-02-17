@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.39.2 (2026-02-17)
+
+### Bug Fixes
+
+- **ci**: Use fresh checkout in commit-to-main job
+  ([`66a330f`](https://github.com/danielsogl/overfast-api/commit/66a330f1e07f19c69f9787e6710ff5c6f274255d))
+
+
 ## v3.39.1 (2026-02-17)
 
 ### Bug Fixes
