@@ -331,45 +331,42 @@ jobs:
           git push origin main
           echo "Merge commit pushed to main successfully"
 
-  # ──────────────────────────────────────────────────────────────
-  # Deploy and notify are disabled until the validation pipeline
-  # is proven stable. Re-enable by uncommenting below.
-  # ──────────────────────────────────────────────────────────────
+  # ── Stage 4: Deploy (requires manual approval) ─────────────────
+  deploy:
+    name: Deploy to VPS
+    needs: [merge-staging, ci-checks, smoke-test, commit-to-main]
+    if: always() && (needs.commit-to-main.result == 'success' || (github.event.inputs.force_deploy == 'true' && needs.smoke-test.result == 'success'))
+    runs-on: ubuntu-latest
+    environment: production
 
-  # deploy:
-  #   name: Deploy to VPS
-  #   needs: commit-to-main
-  #   runs-on: ubuntu-latest
-  #   if: always() && (needs.commit-to-main.result == 'success' || github.event.inputs.force_deploy == 'true')
-  #
-  #   steps:
-  #     - name: Deploy via SSH
-  #       uses: appleboy/ssh-action@v1
-  #       with:
-  #         host: ${{ secrets.VPS_HOST }}
-  #         port: ${{ secrets.VPS_PORT }}
-  #         username: ${{ secrets.VPS_USER }}
-  #         key: ${{ secrets.VPS_SSH_KEY }}
-  #         script: |
-  #           /opt/deploy-overfast.sh
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            /opt/deploy-overfast.sh
 
-  # notify:
-  #   name: Send notification
-  #   needs: [commit-to-main, deploy]
-  #   runs-on: ubuntu-latest
-  #   if: always() && needs.commit-to-main.result == 'success'
-  #
-  #   steps:
-  #     - name: Notify app repo of API update
-  #       if: needs.deploy.result == 'success'
-  #       env:
-  #         GH_TOKEN: ${{ secrets.APP_REPO_PAT }}
-  #       run: |
-  #         gh api \
-  #           repos/danielsogl/overwatch_app/dispatches \
-  #           -f event_type=api-updated
-  #
-  #     - name: Notify on failure
-  #       if: needs.deploy.result == 'failure'
-  #       run: |
-  #         echo "Deployment failed!"
+  # ── Stage 5: Notify ───────────────────────────────────────────
+  notify:
+    name: Send notification
+    needs: [commit-to-main, deploy]
+    runs-on: ubuntu-latest
+    if: always() && needs.deploy.result == 'success'
+
+    steps:
+      - name: Notify app repo of API update
+        env:
+          GH_TOKEN: ${{ secrets.APP_REPO_PAT }}
+        run: |
+          gh api \
+            repos/danielsogl/overwatch_app/dispatches \
+            -f event_type=api-updated
+
+      - name: Notify on failure
+        if: needs.deploy.result == 'failure'
+        run: |
+          echo "Deployment failed!"
