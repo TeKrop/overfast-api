@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.39.1 (2026-02-17)
+
+### Bug Fixes
+
+- **nginx**: Sync conf template with upstream, keep server_name
+  ([`02baad0`](https://github.com/danielsogl/overfast-api/commit/02baad01d6b05ec15997978db87115c68f3b73c7))
+
+
 ## v3.39.0 (2026-02-17)
 
 ### Bug Fixes
