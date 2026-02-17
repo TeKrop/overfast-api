@@ -16,11 +16,12 @@ on:
         type: boolean
 
 jobs:
-  sync:
-    name: Sync with upstream
+  # ── Stage 1: Merge upstream locally (do NOT push) ──────────────
+  merge-staging:
+    name: Merge upstream (staging)
     runs-on: ubuntu-latest
     outputs:
-      has_updates: ${{ steps.sync.outputs.has_updates }}
+      has_updates: ${{ steps.check.outputs.has_updates }}
 
     steps:
       - name: Checkout repository
@@ -44,80 +45,244 @@ jobs:
           git config merge.keep-fork.name "Keep fork version"
           git config merge.keep-fork.driver true
 
-      - name: Add upstream remote
+      - name: Add upstream remote and fetch
         run: |
           git remote add upstream https://github.com/TeKrop/overfast-api.git || true
           git fetch upstream
 
-      - name: Check for updates and sync
-        id: sync
+      - name: Check for upstream updates
+        id: check
         run: |
           set -euo pipefail
-          UPSTREAM_REF="upstream/main"
-
-          # Get current and upstream commits
-          CURRENT=$(git rev-parse HEAD)
-          UPSTREAM=$(git rev-parse "$UPSTREAM_REF")
-
-          echo "Current: $CURRENT"
-          echo "Upstream: $UPSTREAM"
-
-          # Check if there are new commits
-          NEW_COMMITS=$(git log HEAD.."$UPSTREAM_REF" --oneline)
+          NEW_COMMITS=$(git log HEAD..upstream/main --oneline)
 
           if [ -n "$NEW_COMMITS" ]; then
-            echo "New commits found:"
+            echo "New upstream commits found:"
             echo "$NEW_COMMITS"
-
-            # Merge upstream - .gitattributes merge drivers handle conflict resolution:
-            # - CHANGELOG.md: accepts upstream version (accept-upstream driver)
-            # - Fork-specific files (nginx, README, etc.): keeps fork version (keep-fork driver)
-            git merge "$UPSTREAM_REF" -m "Merge upstream changes"
-
-            # Push to origin
-            git push origin main
-
             echo "has_updates=true" >> $GITHUB_OUTPUT
           else
             echo "No new commits from upstream"
             echo "has_updates=false" >> $GITHUB_OUTPUT
           fi
 
-  deploy:
-    name: Deploy to VPS
-    needs: sync
-    runs-on: ubuntu-latest
-    if: needs.sync.outputs.has_updates == 'true' || github.event.inputs.force_deploy == 'true'
+      - name: Merge upstream locally
+        if: steps.check.outputs.has_updates == 'true'
+        run: |
+          git merge upstream/main -m "Merge upstream changes"
+          echo "Merge successful — commit not pushed yet"
 
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
+      - name: Archive merged repository
+        if: steps.check.outputs.has_updates == 'true'
+        run: tar czf /tmp/merged-repo.tar.gz .
+
+      - name: Upload merged repo artifact
+        if: steps.check.outputs.has_updates == 'true'
+        uses: actions/upload-artifact@v4
         with:
-          host: ${{ secrets.VPS_HOST }}
-          port: ${{ secrets.VPS_PORT }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            /opt/deploy-overfast.sh
+          name: merged-repo
+          path: /tmp/merged-repo.tar.gz
+          retention-days: 1
 
-  notify:
-    name: Send notification
-    needs: [sync, deploy]
+  # ── Stage 2a: Lint & test (parallel with smoke-test) ───────────
+  ci-checks:
+    name: CI checks (ruff, ty, pytest)
+    needs: merge-staging
+    if: needs.merge-staging.outputs.has_updates == 'true'
     runs-on: ubuntu-latest
-    if: always() && needs.sync.outputs.has_updates == 'true'
 
     steps:
-      - name: Notify app repo of API update
-        if: needs.deploy.result == 'success'
-        env:
-          GH_TOKEN: ${{ secrets.APP_REPO_PAT }}
-        run: |
-          gh api \
-            repos/danielsogl/overwatch_app/dispatches \
-            -f event_type=api-updated
+      - name: Download merged repo
+        uses: actions/download-artifact@v4
+        with:
+          name: merged-repo
 
-      - name: Notify on failure
-        if: needs.deploy.result == 'failure'
+      - name: Extract archive
+        run: tar xzf merged-repo.tar.gz && rm merged-repo.tar.gz
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.9.28"
+
+      - name: Set up Python
+        run: uv python install 3.14
+
+      - name: Install the project
+        run: uv sync --frozen --no-cache
+
+      - name: Run ruff code analysis
+        run: uv run ruff check .
+
+      - name: Run ty code analysis
+        run: uv run ty check .
+
+      - name: Run test suite
         run: |
-          echo "Deployment failed!"
-          # Add notification logic here
+          PYTHONPATH=app/ uv run python -m pytest -v --cov-fail-under=80 --cov-report=term-missing --cov=app/ tests/
+
+  # ── Stage 2b: Docker smoke test (parallel with ci-checks) ─────
+  smoke-test:
+    name: Smoke test (Docker)
+    needs: merge-staging
+    if: needs.merge-staging.outputs.has_updates == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download merged repo
+        uses: actions/download-artifact@v4
+        with:
+          name: merged-repo
+
+      - name: Extract archive
+        run: tar xzf merged-repo.tar.gz && rm merged-repo.tar.gz
+
+      - name: Create .env from defaults
+        run: |
+          cp .env.dist .env
+          sed -i 's/^APP_PORT=.*/APP_PORT=8080/' .env
+
+      - name: Build and start services
+        run: |
+          docker compose build
+          docker compose up -d
+
+      - name: Wait for services to be healthy
+        run: |
+          echo "Waiting for core services (app, nginx, valkey) to become healthy..."
+          SERVICES="app nginx valkey"
+          TIMEOUT=150
+          INTERVAL=5
+
+          for i in $(seq 1 $((TIMEOUT / INTERVAL))); do
+            HEALTHY=0
+            for SERVICE in $SERVICES; do
+              STATUS=$(docker compose ps --format json | jq -rs \
+                "[.[] | select(.Service == \"$SERVICE\")] | .[0].Health // \"starting\"")
+              if [ "$STATUS" = "healthy" ]; then
+                HEALTHY=$((HEALTHY + 1))
+              fi
+            done
+
+            ELAPSED=$((i * INTERVAL))
+            echo "[$ELAPSED/${TIMEOUT}s] $HEALTHY/3 services healthy"
+
+            if [ "$HEALTHY" -eq 3 ]; then
+              echo "All core services are healthy!"
+              exit 0
+            fi
+
+            sleep $INTERVAL
+          done
+
+          echo "ERROR: Timed out waiting for services to become healthy"
+          docker compose ps
+          docker compose logs
+          exit 1
+
+      - name: Smoke test endpoints
+        run: |
+          set -euo pipefail
+          BASE_URL="http://localhost:8080"
+
+          check_endpoint() {
+            local path="$1"
+            local check_body="${2:-false}"
+
+            RESPONSE=$(curl -s -w "\n%{http_code}" "$BASE_URL$path")
+            STATUS=$(echo "$RESPONSE" | tail -1)
+            BODY=$(echo "$RESPONSE" | sed '$d')
+
+            if [ "$STATUS" -ne 200 ]; then
+              echo "FAIL: GET $path → HTTP $STATUS"
+              return 1
+            fi
+
+            if [ "$check_body" = "true" ]; then
+              if ! echo "$BODY" | jq -e 'length > 0' > /dev/null 2>&1; then
+                echo "FAIL: GET $path → 200 but empty response"
+                return 1
+              fi
+              echo "OK: GET $path → 200 (non-empty JSON)"
+            else
+              echo "OK: GET $path → 200"
+            fi
+          }
+
+          check_endpoint "/"
+          check_endpoint "/openapi.json"
+          check_endpoint "/gamemodes" true
+          check_endpoint "/maps" true
+
+          echo ""
+          echo "All smoke tests passed!"
+
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose logs --tail=200
+
+  # ── Stage 3: Push validated merge to main ──────────────────────
+  commit-to-main:
+    name: Push to main
+    needs: [ci-checks, smoke-test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download merged repo
+        uses: actions/download-artifact@v4
+        with:
+          name: merged-repo
+
+      - name: Extract archive
+        run: tar xzf merged-repo.tar.gz && rm merged-repo.tar.gz
+
+      - name: Configure git and push
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git push origin HEAD:main
+          echo "Merge commit pushed to main successfully"
+
+  # ──────────────────────────────────────────────────────────────
+  # Deploy and notify are disabled until the validation pipeline
+  # is proven stable. Re-enable by uncommenting below.
+  # ──────────────────────────────────────────────────────────────
+
+  # deploy:
+  #   name: Deploy to VPS
+  #   needs: commit-to-main
+  #   runs-on: ubuntu-latest
+  #   if: always() && (needs.commit-to-main.result == 'success' || github.event.inputs.force_deploy == 'true')
+  #
+  #   steps:
+  #     - name: Deploy via SSH
+  #       uses: appleboy/ssh-action@v1
+  #       with:
+  #         host: ${{ secrets.VPS_HOST }}
+  #         port: ${{ secrets.VPS_PORT }}
+  #         username: ${{ secrets.VPS_USER }}
+  #         key: ${{ secrets.VPS_SSH_KEY }}
+  #         script: |
+  #           /opt/deploy-overfast.sh
+
+  # notify:
+  #   name: Send notification
+  #   needs: [commit-to-main, deploy]
+  #   runs-on: ubuntu-latest
+  #   if: always() && needs.commit-to-main.result == 'success'
+  #
+  #   steps:
+  #     - name: Notify app repo of API update
+  #       if: needs.deploy.result == 'success'
+  #       env:
+  #         GH_TOKEN: ${{ secrets.APP_REPO_PAT }}
+  #       run: |
+  #         gh api \
+  #           repos/danielsogl/overwatch_app/dispatches \
+  #           -f event_type=api-updated
+  #
+  #     - name: Notify on failure
+  #       if: needs.deploy.result == 'failure'
+  #       run: |
+  #         echo "Deployment failed!"
