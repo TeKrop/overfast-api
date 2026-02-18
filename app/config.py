@@ -59,6 +59,11 @@ class Settings(BaseSettings):
     # Use ":memory:" for in-memory database (testing/ephemeral deployments)
     storage_path: str = "data/overfast.db"
 
+    # SQLite connection pool size — each connection runs in its own thread,
+    # enabling parallel reads under WAL mode. Writes still serialize at the
+    # SQLite level. Use 1 for :memory: (shared only within one connection).
+    sqlite_pool_size: int = 5
+
     # SQLite memory-mapped I/O size in bytes (optional performance tuning)
     sqlite_mmap_size: int = 0
 
