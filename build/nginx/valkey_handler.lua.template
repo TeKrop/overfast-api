@@ -43,6 +43,13 @@ local function handle_valkey_request()
     if not compressed_value or compressed_value == ngx.null then
         ngx.log(ngx.INFO, "Cache miss for key: ", key)
 
+        -- Root path never has API cache (serves docs), always forward to app
+        if ngx.var.uri == "/" then
+            cleanup()
+            ngx.exec("@fallback")
+            return
+        end
+
         -- Check if Blizzard is currently rate limiting us
         local rate_limit_key = "${BLIZZARD_RATE_LIMIT_KEY}"
         local rate_limit_exists, rl_err = valk:exists(rate_limit_key)
