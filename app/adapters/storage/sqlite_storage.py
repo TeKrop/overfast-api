@@ -1,5 +1,6 @@
 """SQLite storage adapter with zstd compression"""
 
+import asyncio
 import json
 import time
 from compression import zstd
@@ -36,7 +37,7 @@ class SQLiteStorage(metaclass=Singleton):
     All data is compressed with zstd (Python 3.14+ built-in) before storage.
 
     Uses Singleton pattern to ensure single instance across application.
-    Uses a single persistent connection to avoid per-operation PRAGMA overhead.
+    Uses a connection pool to allow parallel reads under WAL mode.
     """
 
     def __init__(self, db_path: str | None = None):
@@ -51,7 +52,12 @@ class SQLiteStorage(metaclass=Singleton):
         """
         self.db_path = db_path or settings.storage_path
         self._initialized = False
-        self._shared_connection: aiosqlite.Connection | None = None
+        # In-memory DBs are per-connection in SQLite — pool size forced to 1
+        pool_size = 1 if self.db_path == MEMORY_DB else settings.sqlite_pool_size
+        self._pool: asyncio.Queue[aiosqlite.Connection] = asyncio.Queue(
+            maxsize=pool_size
+        )
+        self._pool_size = pool_size
 
     @classmethod
     def _reset_singleton(cls):
@@ -60,31 +66,43 @@ class SQLiteStorage(metaclass=Singleton):
         if cls in instances:
             del instances[cls]
 
+    async def _create_connection(self) -> aiosqlite.Connection:
+        """Open a new connection and configure it with the required PRAGMAs."""
+        db = await aiosqlite.connect(self.db_path)
+        await db.execute("PRAGMA journal_mode=WAL")
+        await db.execute("PRAGMA synchronous=NORMAL")
+        if settings.sqlite_mmap_size > 0:
+            await db.execute(f"PRAGMA mmap_size={settings.sqlite_mmap_size}")
+        return db
+
     @asynccontextmanager
     async def _get_connection(self) -> AsyncIterator[aiosqlite.Connection]:
         """
-        Get the persistent shared database connection.
-        PRAGMAs are set once during initialize(), not on every operation.
+        Acquire a connection from the pool, yield it, then return it.
+        Callers block if all connections are in use (natural backpressure).
         """
-        if self._shared_connection is None:
+        if self._pool.empty() and not self._initialized:
             msg = "SQLite connection not initialized. Call initialize() first."
             raise RuntimeError(msg)
+        db = await self._pool.get()
         try:
-            yield self._shared_connection
+            yield db
         except Exception as e:
             if settings.prometheus_enabled:
                 error_type = type(e).__name__
                 sqlite_connection_errors_total.labels(error_type=error_type).inc()
             raise
+        finally:
+            await self._pool.put(db)
 
     async def close(self) -> None:
-        """Close the shared connection if it exists"""
-        if self._shared_connection is not None:
-            await self._shared_connection.close()
-            self._shared_connection = None
+        """Drain the pool and close all connections."""
+        while not self._pool.empty():
+            db = self._pool.get_nowait()
+            await db.close()
 
     async def initialize(self) -> None:
-        """Open the persistent connection, configure PRAGMAs, and apply schema."""
+        """Open the connection pool, configure PRAGMAs, and apply schema."""
         if self._initialized:
             return
 
@@ -92,29 +110,20 @@ class SQLiteStorage(metaclass=Singleton):
         if self.db_path != MEMORY_DB:
             Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
 
-        # Open the single persistent connection
-        db = await aiosqlite.connect(self.db_path)
-
-        # Enable WAL mode (persists in DB file; safe to set every startup)
-        await db.execute("PRAGMA journal_mode=WAL")
-
-        # NORMAL synchronous mode: survives app crash, acceptable risk for cache data
-        await db.execute("PRAGMA synchronous=NORMAL")
-
-        # Memory-mapped I/O (optional, connection-level)
-        if settings.sqlite_mmap_size > 0:
-            await db.execute(f"PRAGMA mmap_size={settings.sqlite_mmap_size}")
-
-        self._shared_connection = db
-
-        # Load and apply schema
-        schema_path = Path(__file__).parent / "schema.sql"
-        schema_sql = schema_path.read_text()
-        await db.executescript(schema_sql)
-        await db.commit()
+        # Create all pool connections; apply schema on the first one
+        for i in range(self._pool_size):
+            db = await self._create_connection()
+            if i == 0:
+                schema_path = Path(__file__).parent / "schema.sql"
+                await db.executescript(schema_path.read_text())
+                await db.commit()
+            await self._pool.put(db)
 
         self._initialized = True
-        logger.info(f"SQLite storage initialized at {self.db_path}")
+        logger.info(
+            f"SQLite storage initialized at {self.db_path} "
+            f"(pool_size={self._pool_size})"
+        )
 
     def _compress(self, data: str) -> bytes:
         """Compress string data using zstd (module-level function for performance)"""
