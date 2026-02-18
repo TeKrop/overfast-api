@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.41.1 (2026-02-18)
+
+### Bug Fixes
+
+- Ensure root documentation page can be consulted even if API is being rate limited
+  ([#364](https://github.com/TeKrop/overfast-api/pull/364),
+  [`d2c0d65`](https://github.com/TeKrop/overfast-api/commit/d2c0d652d1b079ddf546553071684b36dcffd37e))
+
+
 ## v3.41.0 (2026-02-16)
 
 ### Features
