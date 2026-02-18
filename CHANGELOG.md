@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.41.3 (2026-02-18)
+
+### Bug Fixes
+
+- **sqlite**: Using single connection and optimizing player_status query
+  ([#366](https://github.com/TeKrop/overfast-api/pull/366),
+  [`73b3ac1`](https://github.com/TeKrop/overfast-api/commit/73b3ac1edecf2188e29e655a63f50fd4699492d1))
+
+
 ## v3.41.2 (2026-02-18)
 
 ### Bug Fixes
