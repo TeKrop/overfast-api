@@ -2,9 +2,10 @@
 
 import asyncio
 import json
+import sqlite3
 import time
 from compression import zstd
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -52,6 +53,9 @@ class SQLiteStorage(metaclass=Singleton):
         """
         self.db_path = db_path or settings.storage_path
         self._initialized = False
+        self._closed = False
+        self._init_lock = asyncio.Lock()
+
         # In-memory DBs are per-connection in SQLite — pool size forced to 1
         pool_size = 1 if self.db_path == MEMORY_DB else settings.sqlite_pool_size
         self._pool: asyncio.Queue[aiosqlite.Connection] = asyncio.Queue(
@@ -69,61 +73,118 @@ class SQLiteStorage(metaclass=Singleton):
     async def _create_connection(self) -> aiosqlite.Connection:
         """Open a new connection and configure it with the required PRAGMAs."""
         db = await aiosqlite.connect(self.db_path)
+
         await db.execute("PRAGMA journal_mode=WAL")
         await db.execute("PRAGMA synchronous=NORMAL")
+
         if settings.sqlite_mmap_size > 0:
             await db.execute(f"PRAGMA mmap_size={settings.sqlite_mmap_size}")
+
         return db
+
+    async def _acquire_connection(self) -> aiosqlite.Connection:
+        """Acquire a live connection from the pool, healing tombstone None slots."""
+        db = await self._pool.get()
+
+        while db is None:
+            logger.warning("Skipping dead pool slot, attempting to replace")
+            try:
+                db = await self._create_connection()
+            except (OSError, sqlite3.Error):
+                await self._pool.put(None)
+                db = await self._pool.get()
+
+        return db
+
+    async def _release_connection(
+        self, db: aiosqlite.Connection, *, broken: bool
+    ) -> None:
+        """Return a connection to the pool, replacing it if broken or closing if shut down."""
+        if self._closed:
+            with suppress(Exception):
+                await db.close()
+            return
+
+        if broken:
+            with suppress(Exception):
+                await db.close()
+
+            try:
+                replacement = await self._create_connection()
+                await self._pool.put(replacement)
+            except (OSError, sqlite3.Error):
+                # Replacement failed — tombstone keeps the slot so the queue
+                # never blocks permanently; _acquire_connection will retry.
+                logger.warning("Failed to create replacement SQLite connection")
+                await self._pool.put(None)  # type: ignore[arg-type]
+        else:
+            await self._pool.put(db)
 
     @asynccontextmanager
     async def _get_connection(self) -> AsyncIterator[aiosqlite.Connection]:
         """
         Acquire a connection from the pool, yield it, then return it.
         Callers block if all connections are in use (natural backpressure).
+        Broken connections are replaced to keep the pool at capacity.
         """
-        if self._pool.empty() and not self._initialized:
+        if self._closed:
+            msg = "SQLite storage is closed."
+            raise RuntimeError(msg)
+        if not self._initialized:
             msg = "SQLite connection not initialized. Call initialize() first."
             raise RuntimeError(msg)
-        db = await self._pool.get()
+        db = await self._acquire_connection()
+        broken = False
         try:
             yield db
         except Exception as e:
             if settings.prometheus_enabled:
                 error_type = type(e).__name__
                 sqlite_connection_errors_total.labels(error_type=error_type).inc()
+            if isinstance(e, sqlite3.OperationalError):
+                broken = True
             raise
         finally:
-            await self._pool.put(db)
+            await self._release_connection(db, broken=broken)
 
     async def close(self) -> None:
-        """Drain the pool and close all connections."""
+        """
+        Mark the pool as closed and drain all idle connections.
+        Checked-out connections will be closed when returned via _get_connection's finally block.
+        """
+        self._closed = True
+        self._initialized = False
         while not self._pool.empty():
             db = self._pool.get_nowait()
-            await db.close()
+            with suppress(Exception):
+                if db is not None:
+                    await db.close()
 
     async def initialize(self) -> None:
         """Open the connection pool, configure PRAGMAs, and apply schema."""
-        if self._initialized:
-            return
+        async with self._init_lock:
+            if self._initialized:
+                return
 
-        # Ensure directory exists (skip for in-memory database)
-        if self.db_path != MEMORY_DB:
-            Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
+            # Ensure directory exists (skip for in-memory database)
+            if self.db_path != MEMORY_DB:
+                Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
 
-        # Create all pool connections; apply schema on the first one
-        for i in range(self._pool_size):
-            db = await self._create_connection()
-            if i == 0:
-                schema_path = Path(__file__).parent / "schema.sql"
-                await db.executescript(schema_path.read_text())
-                await db.commit()
-            await self._pool.put(db)
+            # Create all pool connections; apply schema on the first one
+            for i in range(self._pool_size):
+                db = await self._create_connection()
+                if i == 0:
+                    schema_path = Path(__file__).parent / "schema.sql"
+                    await db.executescript(schema_path.read_text())
+                    await db.commit()
+                await self._pool.put(db)
 
-        self._initialized = True
-        logger.info(
-            f"SQLite storage initialized at {self.db_path} "
-            f"(pool_size={self._pool_size})"
-        )
+            self._initialized = True
+            self._closed = False
+            logger.info(
+                f"SQLite storage initialized at {self.db_path} "
+                f"(pool_size={self._pool_size})"
+            )
 
     def _compress(self, data: str) -> bytes:
         """Compress string data using zstd (module-level function for performance)"""
