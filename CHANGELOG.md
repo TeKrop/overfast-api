@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.41.2 (2026-02-18)
+
+### Bug Fixes
+
+- Fixed issue where swagger and redoc were not displaying properly if API is rate limited
+  ([#365](https://github.com/TeKrop/overfast-api/pull/365),
+  [`c36c6ee`](https://github.com/TeKrop/overfast-api/commit/c36c6ee797aa09104ca9d1d884966f52f2ab2c17))
+
+
 ## v3.41.1 (2026-02-18)
 
 ### Bug Fixes
