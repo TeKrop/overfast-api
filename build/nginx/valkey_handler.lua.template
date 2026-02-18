@@ -2,8 +2,9 @@ local zstd = require "zstd"
 local valkey = require "resty.redis"
 
 local function handle_valkey_request()
-    -- Root path never has API cache (serves docs), always forward to app
-    if ngx.var.uri == "/" then
+    -- These paths never have API cache, always forward to app
+    local cache_excluded_paths = { ["/"] = true, ["/docs"] = true, ["/openapi.json"] = true }
+    if cache_excluded_paths[ngx.var.uri] then
         ngx.exec("@fallback")
         return
     end
