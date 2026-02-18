@@ -66,13 +66,11 @@ class SQLiteStorage(metaclass=Singleton):
         Get the persistent shared database connection.
         PRAGMAs are set once during initialize(), not on every operation.
         """
+        if self._shared_connection is None:
+            msg = "SQLite connection not initialized. Call initialize() first."
+            raise RuntimeError(msg)
         try:
-            if self._shared_connection is None:
-                msg = "SQLite connection not initialized. Call initialize() first."
-                raise RuntimeError(msg)
             yield self._shared_connection
-        except RuntimeError:
-            raise
         except Exception as e:
             if settings.prometheus_enabled:
                 error_type = type(e).__name__
