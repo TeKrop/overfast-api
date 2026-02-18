@@ -36,6 +36,7 @@ class SQLiteStorage(metaclass=Singleton):
     All data is compressed with zstd (Python 3.14+ built-in) before storage.
 
     Uses Singleton pattern to ensure single instance across application.
+    Uses a single persistent connection to avoid per-operation PRAGMA overhead.
     """
 
     def __init__(self, db_path: str | None = None):
@@ -50,9 +51,7 @@ class SQLiteStorage(metaclass=Singleton):
         """
         self.db_path = db_path or settings.storage_path
         self._initialized = False
-        self._shared_connection: aiosqlite.Connection | None = (
-            None  # For :memory: databases
-        )
+        self._shared_connection: aiosqlite.Connection | None = None
 
     @classmethod
     def _reset_singleton(cls):
@@ -64,44 +63,17 @@ class SQLiteStorage(metaclass=Singleton):
     @asynccontextmanager
     async def _get_connection(self) -> AsyncIterator[aiosqlite.Connection]:
         """
-        Get a database connection with proper configuration.
-        For :memory: databases, reuses a single connection to persist schema across operations.
+        Get the persistent shared database connection.
+        PRAGMAs are set once during initialize(), not on every operation.
         """
         try:
-            # For in-memory databases, use a shared connection
-            if self.db_path == MEMORY_DB:
-                if self._shared_connection is None:
-                    # Create and store the shared connection
-                    db = await aiosqlite.connect(self.db_path)
-                    await db.execute("PRAGMA journal_mode=WAL")
-
-                    # Use NORMAL synchronous mode for better write performance
-                    await db.execute("PRAGMA synchronous=NORMAL")
-
-                    # Note: PRAGMA foreign_keys=ON removed - schema has no foreign key constraints
-                    self._shared_connection = db
-                yield self._shared_connection
-                return
-
-            # For file-based databases, create a new connection per operation
-            async with aiosqlite.connect(self.db_path) as db:
-                # Enable WAL mode for better concurrent read performance
-                await db.execute("PRAGMA journal_mode=WAL")
-
-                # Use NORMAL synchronous mode (safe with WAL mode, much faster writes)
-                # Trade-off: Survives app crash, slight risk if OS crashes simultaneously
-                # Acceptable for cache data that can be re-fetched from Blizzard
-                await db.execute("PRAGMA synchronous=NORMAL")
-
-                # Configure memory-mapped I/O if enabled
-                # This can significantly improve read performance by mapping database
-                # pages directly into memory
-                if settings.sqlite_mmap_size > 0:
-                    await db.execute(f"PRAGMA mmap_size={settings.sqlite_mmap_size}")
-
-                yield db
+            if self._shared_connection is None:
+                msg = "SQLite connection not initialized. Call initialize() first."
+                raise RuntimeError(msg)
+            yield self._shared_connection
+        except RuntimeError:
+            raise
         except Exception as e:
-            # Track connection errors
             if settings.prometheus_enabled:
                 error_type = type(e).__name__
                 sqlite_connection_errors_total.labels(error_type=error_type).inc()
@@ -114,7 +86,7 @@ class SQLiteStorage(metaclass=Singleton):
             self._shared_connection = None
 
     async def initialize(self) -> None:
-        """Initialize database schema from schema.sql file"""
+        """Open the persistent connection, configure PRAGMAs, and apply schema."""
         if self._initialized:
             return
 
@@ -122,14 +94,26 @@ class SQLiteStorage(metaclass=Singleton):
         if self.db_path != MEMORY_DB:
             Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
 
-        # Load schema from SQL file
+        # Open the single persistent connection
+        db = await aiosqlite.connect(self.db_path)
+
+        # Enable WAL mode (persists in DB file; safe to set every startup)
+        await db.execute("PRAGMA journal_mode=WAL")
+
+        # NORMAL synchronous mode: survives app crash, acceptable risk for cache data
+        await db.execute("PRAGMA synchronous=NORMAL")
+
+        # Memory-mapped I/O (optional, connection-level)
+        if settings.sqlite_mmap_size > 0:
+            await db.execute(f"PRAGMA mmap_size={settings.sqlite_mmap_size}")
+
+        self._shared_connection = db
+
+        # Load and apply schema
         schema_path = Path(__file__).parent / "schema.sql"
         schema_sql = schema_path.read_text()
-
-        async with self._get_connection() as db:
-            # Execute schema (supports multiple statements)
-            await db.executescript(schema_sql)
-            await db.commit()
+        await db.executescript(schema_sql)
+        await db.commit()
 
         self._initialized = True
         logger.info(f"SQLite storage initialized at {self.db_path}")
@@ -347,21 +331,34 @@ class SQLiteStorage(metaclass=Singleton):
         async with (
             self._get_connection() as db,
             db.execute(
-                """SELECT check_count, last_checked_at, retry_after, battletag
-                   FROM player_status WHERE player_id = ? OR battletag = ?""",
-                (player_id, player_id),
+                "SELECT check_count, last_checked_at, retry_after, battletag"
+                " FROM player_status WHERE battletag = ?",
+                (player_id,),
             ) as cursor,
         ):
             row = await cursor.fetchone()
-            if not row:
-                return None
 
-            return {
-                "check_count": row[0],
-                "last_checked_at": row[1],
-                "retry_after": row[2],
-                "battletag": row[3],
-            }
+        if not row:
+            # Fallback: player_id might be a Blizzard ID
+            async with (
+                self._get_connection() as db,
+                db.execute(
+                    "SELECT check_count, last_checked_at, retry_after, battletag"
+                    " FROM player_status WHERE player_id = ?",
+                    (player_id,),
+                ) as cursor,
+            ):
+                row = await cursor.fetchone()
+
+        if not row:
+            return None
+
+        return {
+            "check_count": row[0],
+            "last_checked_at": row[1],
+            "retry_after": row[2],
+            "battletag": row[3],
+        }
 
     @track_sqlite_operation("player_status", "set")
     async def set_player_status(
