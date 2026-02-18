@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.41.4 (2026-02-18)
+
+### Bug Fixes
+
+- **storage**: Add SQLite connection pool and config
+  ([#367](https://github.com/TeKrop/overfast-api/pull/367),
+  [`d95527a`](https://github.com/TeKrop/overfast-api/commit/d95527ade4874861533632364b9b2e23f7b08c46))
+
+
 ## v3.41.3 (2026-02-18)
 
 ### Bug Fixes
