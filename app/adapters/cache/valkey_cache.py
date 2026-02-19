@@ -233,7 +233,9 @@ class ValkeyCache(metaclass=Singleton):
         status_value = json.dumps({"check_count": check_count, "battletag": battletag})
 
         async with self.valkey_server.pipeline(transaction=False) as pipe:
-            pipe.set(f"{settings.unknown_player_status_key_prefix}:{player_id}", status_value)
+            pipe.set(
+                f"{settings.unknown_player_status_key_prefix}:{player_id}", status_value
+            )
             pipe.set(
                 f"{settings.unknown_player_cooldown_key_prefix}:{player_id}",
                 check_count,
@@ -275,7 +277,9 @@ class ValkeyCache(metaclass=Singleton):
             settings.unknown_player_status_key_prefix,
         )
         keys_to_delete = []
-        async for key in self.valkey_server.scan_iter(match="*", count=_evict_batch_size):
+        async for key in self.valkey_server.scan_iter(
+            match="*", count=_evict_batch_size
+        ):
             key_str = key.decode("utf-8") if isinstance(key, bytes) else key
             if not key_str.startswith(prefixes_to_keep):
                 keys_to_delete.append(key)

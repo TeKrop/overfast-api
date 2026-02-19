@@ -112,7 +112,9 @@ class TestPlayerStatus:
     """Tests for Valkey-based unknown player two-key pattern"""
 
     @pytest.mark.asyncio
-    async def test_set_and_get_player_status_in_cooldown(self, cache_manager: CacheManager):
+    async def test_set_and_get_player_status_in_cooldown(
+        self, cache_manager: CacheManager
+    ):
         """Cooldown key is set with TTL; get returns remaining retry_after and check_count"""
         blizzard_id = "abc123"
         check_count = 2

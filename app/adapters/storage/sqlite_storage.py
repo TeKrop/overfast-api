@@ -434,9 +434,8 @@ class SQLiteStorage(metaclass=Singleton):
 
         # File sizes
         if self.db_path == MEMORY_DB:
-            stats["size_bytes"] = (
-                (stats["static_data_count"] * 1024)
-                + (stats["player_profiles_count"] * 10240)
+            stats["size_bytes"] = (stats["static_data_count"] * 1024) + (
+                stats["player_profiles_count"] * 10240
             )
             stats["wal_size_bytes"] = 0
         else:
