@@ -147,14 +147,17 @@ class GetPlayerCareerStatsController(BasePlayerController):
             # Case 2: No summary available (e.g. Blizzard rate-limited) — use
             # cached data as fallback so we can still serve a response instead
             # of hitting Blizzard again (which would also fail).
-            if not player_summary and cached_summary:
+            if (
+                not player_summary
+                and isinstance(cached_summary, dict)
+                and cached_summary
+            ):
                 logger.info(
                     "No player summary available, using Player Cache as fallback"
                 )
                 html = cast("str", player_cache["profile"])
-                fallback_summary = cached_summary if isinstance(cached_summary, dict) else {}
                 return parse_player_career_stats_from_html(
-                    html, fallback_summary, platform, gamemode, hero
+                    html, cached_summary, platform, gamemode, hero
                 )
 
         # Fetch from Blizzard using Blizzard ID
