@@ -63,6 +63,19 @@ class StoragePort(Protocol):
         """Store player profile HTML and parsed summary with optional metadata"""
         ...
 
+    async def delete_old_player_profiles(self, max_age_seconds: int) -> int:
+        """
+        Delete player profiles not updated within max_age_seconds.
+
+        Returns:
+            Number of deleted rows
+        """
+        ...
+
+    async def vacuum(self) -> None:
+        """Reclaim disk space by running VACUUM on the database"""
+        ...
+
     async def clear_all_data(self) -> None:
         """Clear all data including static data (for testing)"""
         ...

@@ -473,6 +473,47 @@ class SQLiteStorage(metaclass=Singleton):
             await db.execute("DELETE FROM player_profiles")
             await db.commit()
 
+    async def delete_old_player_profiles(self, max_age_seconds: int) -> int:
+        """
+        Delete player profiles not updated within max_age_seconds.
+
+        Uses the idx_player_profiles_updated index for an efficient range scan.
+
+        Args:
+            max_age_seconds: Profiles with updated_at older than this threshold
+                             are deleted. Pass 0 to skip cleanup.
+
+        Returns:
+            Number of deleted rows
+        """
+        if max_age_seconds <= 0:
+            return 0
+
+        cutoff = int(time.time()) - max_age_seconds
+        async with self._get_connection() as db:
+            cursor = await db.execute(
+                "DELETE FROM player_profiles WHERE updated_at < ?",
+                (cutoff,),
+            )
+            deleted = cursor.rowcount
+            await db.commit()
+
+        if deleted:
+            logger.info(
+                "Deleted %d stale player profiles (older than %ds)",
+                deleted,
+                max_age_seconds,
+            )
+
+        return deleted
+
+    async def vacuum(self) -> None:
+        """Reclaim disk space after bulk deletions by running VACUUM."""
+        async with self._get_connection() as db:
+            await db.execute("VACUUM")
+            await db.commit()
+        logger.info("SQLite VACUUM completed")
+
     async def optimize(self) -> None:
         """
         Run SQLite query optimizer to update statistics for query planner.

@@ -75,6 +75,11 @@ class Settings(BaseSettings):
     # 500 pages = ~2 MB WAL; smaller WAL reduces read scan overhead
     sqlite_wal_autocheckpoint: int = 500
 
+    # Maximum age of player profiles in seconds before they are considered stale.
+    # Profiles with updated_at older than this threshold are removed by the periodic
+    # background cleanup task to keep the database size bounded. Set to 0 to disable cleanup.
+    player_profile_max_age: int = 259200  # 3 days
+
     # Unknown player exponential backoff configuration
     unknown_player_initial_retry: int = 600  # 10 minutes (first check)
     unknown_player_retry_multiplier: int = 3  # retry_after *= 3 each check
