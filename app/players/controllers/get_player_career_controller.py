@@ -128,26 +128,41 @@ class GetPlayerCareerController(BasePlayerController):
         logger.info("Checking Player Cache...")
         player_cache = await self.get_player_profile_cache(blizzard_id)
 
-        if (
-            player_cache is not None
-            and player_summary  # Have summary to compare
-            and player_cache["summary"]["lastUpdated"]  # ty: ignore[invalid-argument-type, not-subscriptable]
-            == player_summary["lastUpdated"]
-        ):
-            logger.info("Player Cache found and up-to-date, using it")
-            html = cast("str", player_cache["profile"])
-            profile_data = parse_player_profile_html(html, player_summary)
+        if player_cache is not None:
+            cached_summary = player_cache["summary"]  # ty: ignore[invalid-argument-type]
 
-            # Update battletag if provided (progressive enhancement)
-            if battletag_input and not player_cache.get("battletag"):
-                logger.info(f"Enriching cache with BattleTag: {battletag_input}")
-                cached_name = player_cache.get("name")
-                name_str = cached_name if isinstance(cached_name, str) else None
-                await self.update_player_profile_cache(
-                    blizzard_id, player_summary, html, battletag_input, name_str
+            # Case 1: Have fresh summary to compare — validate cache freshness
+            if (
+                player_summary
+                and cached_summary["lastUpdated"]  # ty: ignore[not-subscriptable]
+                == player_summary["lastUpdated"]
+            ):
+                logger.info("Player Cache found and up-to-date, using it")
+                html = cast("str", player_cache["profile"])
+                profile_data = parse_player_profile_html(html, player_summary)
+
+                # Update battletag if provided (progressive enhancement)
+                if battletag_input and not player_cache.get("battletag"):
+                    logger.info(f"Enriching cache with BattleTag: {battletag_input}")
+                    cached_name = player_cache.get("name")
+                    name_str = cached_name if isinstance(cached_name, str) else None
+                    await self.update_player_profile_cache(
+                        blizzard_id, player_summary, html, battletag_input, name_str
+                    )
+
+                return html, profile_data
+
+            # Case 2: No summary available (e.g. Blizzard rate-limited) — use
+            # cached data as fallback so we can still serve a response instead
+            # of hitting Blizzard again (which would also fail).
+            if not player_summary and cached_summary:
+                logger.info(
+                    "No player summary available, using Player Cache as fallback"
                 )
-
-            return html, profile_data
+                html = cast("str", player_cache["profile"])
+                fallback_summary = cached_summary if isinstance(cached_summary, dict) else {}
+                profile_data = parse_player_profile_html(html, fallback_summary)
+                return html, profile_data
 
         # Fetch from Blizzard with Blizzard ID
         logger.info("Player Cache not found or not up-to-date, calling Blizzard")

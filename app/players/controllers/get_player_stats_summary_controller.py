@@ -125,17 +125,33 @@ class GetPlayerStatsSummaryController(BasePlayerController):
         logger.info(f"Checking Player Cache for Blizzard ID: {blizzard_id}")
         player_cache = await self.get_player_profile_cache(blizzard_id)
 
-        if (
-            player_cache is not None
-            and player_summary
-            and player_cache["summary"]["lastUpdated"]  # ty: ignore[invalid-argument-type, not-subscriptable]
-            == player_summary["lastUpdated"]
-        ):
-            logger.info("Player Cache found and up-to-date, using it")
-            html = cast("str", player_cache["profile"])
-            return parse_player_stats_summary_from_html(
-                html, player_summary, gamemode, platform
-            )
+        if player_cache is not None:
+            cached_summary = player_cache["summary"]  # ty: ignore[invalid-argument-type]
+
+            # Case 1: Have fresh summary to compare — validate cache freshness
+            if (
+                player_summary
+                and cached_summary["lastUpdated"]  # ty: ignore[not-subscriptable]
+                == player_summary["lastUpdated"]
+            ):
+                logger.info("Player Cache found and up-to-date, using it")
+                html = cast("str", player_cache["profile"])
+                return parse_player_stats_summary_from_html(
+                    html, player_summary, gamemode, platform
+                )
+
+            # Case 2: No summary available (e.g. Blizzard rate-limited) — use
+            # cached data as fallback so we can still serve a response instead
+            # of hitting Blizzard again (which would also fail).
+            if not player_summary and cached_summary:
+                logger.info(
+                    "No player summary available, using Player Cache as fallback"
+                )
+                html = cast("str", player_cache["profile"])
+                fallback_summary = cached_summary if isinstance(cached_summary, dict) else {}
+                return parse_player_stats_summary_from_html(
+                    html, fallback_summary, gamemode, platform
+                )
 
         # Fetch from Blizzard using Blizzard ID
         logger.info(
