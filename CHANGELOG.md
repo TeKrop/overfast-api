@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.42.1 (2026-02-19)
+
+### Bug Fixes
+
+- **storage**: Added max age for players profile storage with temporary cleanup background task
+  ([#375](https://github.com/TeKrop/overfast-api/pull/375),
+  [`afc6548`](https://github.com/TeKrop/overfast-api/commit/afc65487fdbe2b6be09133bd2ea41bc1810045d7))
+
+
 ## v3.42.0 (2026-02-19)
 
 ### Features
