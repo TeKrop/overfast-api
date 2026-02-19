@@ -278,6 +278,9 @@ def _get_last_season_played(root_tag: LexborNode, platform_class: str) -> int | 
         return None
 
     statistics_section = profile_section.css_first("blz-section.stats.competitive-view")
+    if not statistics_section:
+        return None
+
     last_season_played = statistics_section.attributes.get(
         "data-latestherostatrankseasonow2"
     )
@@ -338,7 +341,7 @@ def _parse_gamemode_stats(
     )
 
     # Check if we have a select element (indicates data exists)
-    if not top_heroes_section.css_first("select"):
+    if not top_heroes_section or not top_heroes_section.css_first("select"):
         return None
 
     career_stats_section = statistics_section.css_first(

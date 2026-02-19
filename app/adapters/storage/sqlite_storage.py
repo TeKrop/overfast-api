@@ -85,15 +85,32 @@ class SQLiteStorage(metaclass=Singleton):
 
         return db
 
+    _MAX_ACQUIRE_RETRIES = 3
+
     async def _acquire_connection(self) -> aiosqlite.Connection:
         """Acquire a live connection from the pool, healing tombstone None slots."""
         db = await self._pool.get()
 
+        retries = 0
+        last_error: Exception | None = None
         while db is None:
+            if retries >= self._MAX_ACQUIRE_RETRIES:
+                logger.error(
+                    "Failed to acquire a SQLite connection after %d retries: %s",
+                    retries,
+                    last_error,
+                )
+                await self._pool.put(None)
+                msg = f"Could not acquire a SQLite connection after {retries} retries"
+                raise OSError(msg) from last_error
+
             logger.warning("Skipping dead pool slot, attempting to replace")
             try:
                 db = await self._create_connection()
-            except (OSError, sqlite3.Error):
+            except (OSError, sqlite3.Error) as exc:
+                last_error = exc
+                retries += 1
+                await asyncio.sleep(0.1 * retries)
                 await self._pool.put(None)
                 db = await self._pool.get()
 
