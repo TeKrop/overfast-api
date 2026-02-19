@@ -1,6 +1,6 @@
 [project]
 name = "overfast-api"
-version = "3.42.0"
+version = "3.41.5"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = {file = "LICENSE"}
 authors = [

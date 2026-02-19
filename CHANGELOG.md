@@ -2,12 +2,49 @@
 
 <!-- version list -->
 
-## v3.42.0 (2026-02-17)
+## v3.41.5 (2026-02-19)
 
-### Features
+### Bug Fixes
 
-- **ci**: Add manual deploy approval gate via production environment
-  ([`b7bf983`](https://github.com/danielsogl/overfast-api/commit/b7bf98367e2b46e2e8c18b7a0c273711806d19ad))
+- **storage**: Added some sqlite optimization settings
+  ([#368](https://github.com/TeKrop/overfast-api/pull/368),
+  [`15d88b7`](https://github.com/TeKrop/overfast-api/commit/15d88b7a44a1867bba34b718161681f4fe873cac))
+
+
+## v3.41.4 (2026-02-18)
+
+### Bug Fixes
+
+- **storage**: Add SQLite connection pool and config
+  ([#367](https://github.com/TeKrop/overfast-api/pull/367),
+  [`d95527a`](https://github.com/TeKrop/overfast-api/commit/d95527ade4874861533632364b9b2e23f7b08c46))
+
+
+## v3.41.3 (2026-02-18)
+
+### Bug Fixes
+
+- **sqlite**: Using single connection and optimizing player_status query
+  ([#366](https://github.com/TeKrop/overfast-api/pull/366),
+  [`73b3ac1`](https://github.com/TeKrop/overfast-api/commit/73b3ac1edecf2188e29e655a63f50fd4699492d1))
+
+
+## v3.41.2 (2026-02-18)
+
+### Bug Fixes
+
+- Fixed issue where swagger and redoc were not displaying properly if API is rate limited
+  ([#365](https://github.com/TeKrop/overfast-api/pull/365),
+  [`c36c6ee`](https://github.com/TeKrop/overfast-api/commit/c36c6ee797aa09104ca9d1d884966f52f2ab2c17))
+
+
+## v3.41.1 (2026-02-18)
+
+### Bug Fixes
+
+- Ensure root documentation page can be consulted even if API is being rate limited
+  ([#364](https://github.com/TeKrop/overfast-api/pull/364),
+  [`d2c0d65`](https://github.com/TeKrop/overfast-api/commit/d2c0d652d1b079ddf546553071684b36dcffd37e))
 
 
 ## v3.41.0 (2026-02-16)

@@ -2,6 +2,13 @@ local zstd = require "zstd"
 local valkey = require "resty.redis"
 
 local function handle_valkey_request()
+    -- These paths never have API cache, always forward to app
+    local cache_excluded_paths = { ["/"] = true, ["/docs"] = true, ["/openapi.json"] = true }
+    if cache_excluded_paths[ngx.var.uri] then
+        ngx.exec("@fallback")
+        return
+    end
+
     -- Initialize Valkey client
     local valk = valkey:new()
     valk:set_timeout(1000) -- 1 second timeout
