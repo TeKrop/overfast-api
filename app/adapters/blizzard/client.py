@@ -144,8 +144,12 @@ class BlizzardClient(metaclass=Singleton):
             raise self._too_many_requests_response(retry_after=int(remaining) or 1)
 
         if await self.cache_manager.is_being_rate_limited():
+            remaining_ttl = await self.cache_manager.get_global_rate_limit_remaining_time()
+            # Sync in-memory fallback with Valkey TTL so it can protect
+            # if Valkey becomes unavailable mid-rate-limit window
+            self._rate_limited_until = time.monotonic() + float(remaining_ttl)
             raise self._too_many_requests_response(
-                retry_after=await self.cache_manager.get_global_rate_limit_remaining_time()
+                retry_after=int(remaining_ttl) or 1
             )
 
     def blizzard_response_error_from_response(
