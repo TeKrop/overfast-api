@@ -201,6 +201,22 @@ class TestPlayerStatus:
         assert await cache_manager.get_player_status(battletag) is None
 
     @pytest.mark.asyncio
+    async def test_delete_player_status_is_idempotent_when_not_tracked(
+        self, cache_manager: CacheManager
+    ):
+        """Deleting player status for a non-existent player is safe and idempotent"""
+        blizzard_id = "never-stored-1234"
+
+        # Precondition: no status exists for this player
+        assert await cache_manager.get_player_status(blizzard_id) is None
+
+        # Deleting when no keys exist should not error
+        await cache_manager.delete_player_status(blizzard_id)
+
+        # Postcondition: status is still None
+        assert await cache_manager.get_player_status(blizzard_id) is None
+
+    @pytest.mark.asyncio
     async def test_evict_volatile_data_keeps_unknown_player_keys(
         self, cache_manager: CacheManager
     ):
