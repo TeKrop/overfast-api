@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.41.7 (2026-02-19)
+
+### Bug Fixes
+
+- **parsers**: Add null checks for optional HTML sections in player profile
+  ([#370](https://github.com/TeKrop/overfast-api/pull/370),
+  [`7bb49c0`](https://github.com/TeKrop/overfast-api/commit/7bb49c0b79f2992fcec041af9e7a0b3fb87ab745))
+
+
 ## v3.41.6 (2026-02-19)
 
 ### Bug Fixes
