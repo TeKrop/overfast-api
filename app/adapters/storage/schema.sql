@@ -34,12 +34,9 @@ CREATE TABLE IF NOT EXISTS player_profiles (
 -- Used by get_player_id_by_battletag() for redirect optimization (Phase 3.5B)
 CREATE INDEX IF NOT EXISTS idx_player_profiles_battletag ON player_profiles(battletag);
 
--- Index on updated_at for data freshness queries (metrics)
--- Used by get_stats() to efficiently calculate p50/p90/p99 age distribution
+-- Index on updated_at for data freshness queries (metrics) and stale profile cleanup
+-- Used by get_stats() (p50/p90/p99 age distribution) and delete_old_player_profiles()
 CREATE INDEX IF NOT EXISTS idx_player_profiles_updated ON player_profiles(updated_at);
 
 -- Note: Indexes removed as they were not used by any queries
 -- PRIMARY KEY indexes are sufficient for current query patterns
--- If adding background cleanup tasks in future, consider adding:
---   - CREATE INDEX idx_static_updated ON static_data(updated_at);
---   - CREATE INDEX idx_player_updated ON player_profiles(updated_at);
