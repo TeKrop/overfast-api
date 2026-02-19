@@ -28,6 +28,7 @@ class BlizzardClient(metaclass=Singleton):
 
     def __init__(self):
         self.cache_manager = CacheManager()
+        self._rate_limited_until: float = 0
         self.client = httpx.AsyncClient(
             headers={
                 "User-Agent": (
@@ -129,11 +130,19 @@ class BlizzardClient(metaclass=Singleton):
 
         Returns HTTP 429 with Retry-After header if rate limited.
 
+        Checks both Valkey (shared across workers) and an in-memory timestamp
+        (fallback when Valkey is unavailable).
+
         Note: Nginx also performs this check on API cache miss for better performance,
         but this method remains necessary for:
         - Race conditions (concurrent requests when rate limit is first set)
         - Defense in depth (if nginx check fails or is bypassed)
         """
+        # Check in-memory fallback first (works even when Valkey is down)
+        remaining = self._rate_limited_until - time.monotonic()
+        if remaining > 0:
+            raise self._too_many_requests_response(retry_after=int(remaining) or 1)
+
         if await self.cache_manager.is_being_rate_limited():
             raise self._too_many_requests_response(
                 retry_after=await self.cache_manager.get_global_rate_limit_remaining_time()
@@ -164,7 +173,10 @@ class BlizzardClient(metaclass=Singleton):
         Also prevent further calls to Blizzard for a given amount of time.
         """
 
-        # We have to block future requests to Blizzard, cache the information on Valkey
+        # Block future requests: store in Valkey (shared) and in-memory (fallback)
+        self._rate_limited_until = (
+            time.monotonic() + settings.blizzard_rate_limit_retry_after
+        )
         await self.cache_manager.set_global_rate_limit()
 
         # Track rate limit event
