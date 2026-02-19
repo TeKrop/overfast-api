@@ -87,11 +87,48 @@ class CachePort(Protocol):
         """Set Blizzard rate limit flag with configured TTL"""
         ...
 
-    # Unknown player tracking methods
-    async def is_player_unknown(self, player_id: str) -> bool:
-        """Check if player is marked as unknown"""
+    # Unknown player tracking methods (two-key pattern: cooldown key with TTL + status key permanent)
+    async def get_player_status(self, player_id: str) -> dict | None:
+        """
+        Get unknown player status.
+
+        Checks cooldown:{player_id} key first (active rejection window),
+        then falls back to status:{player_id} key (persistent check count).
+
+        Returns dict with 'check_count' and 'retry_after' (remaining seconds, 0 if
+        cooldown expired but status persists), or None if player is not tracked.
+        """
         ...
 
-    async def set_player_as_unknown(self, player_id: str) -> None:
-        """Mark player as unknown with configured TTL"""
+    async def set_player_status(
+        self,
+        player_id: str,
+        check_count: int,
+        retry_after: int,
+        battletag: str | None = None,
+    ) -> None:
+        """
+        Set persistent status key and cooldown keys for an unknown player.
+
+        player_id should be the Blizzard ID (canonical key for status).
+        If battletag is provided, an additional cooldown key is set by battletag
+        to enable early rejection before identity resolution.
+        """
+        ...
+
+    async def delete_player_status(self, player_id: str) -> None:
+        """Delete status and all associated cooldown keys for player (by Blizzard ID)."""
+        ...
+
+    async def evict_volatile_data(self) -> None:
+        """
+        Delete all Valkey keys except unknown-player status and cooldown keys.
+
+        Called on app shutdown before triggering RDB save so that the snapshot
+        contains only persistent unknown-player data.
+        """
+        ...
+
+    async def bgsave(self) -> None:
+        """Trigger a background RDB save (best-effort, errors are logged not raised)."""
         ...

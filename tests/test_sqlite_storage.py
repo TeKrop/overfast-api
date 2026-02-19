@@ -196,76 +196,6 @@ class TestPlayerProfiles:
         assert result is None
 
 
-class TestPlayerStatus:
-    """Test player status (unknown player) storage operations"""
-
-    @pytest.mark.asyncio
-    async def test_set_and_get_player_status(self, storage_db):
-        """Test storing and retrieving player status for exponential backoff"""
-        player_id = "Unknown-7777"
-        check_count = 2
-        retry_after = 1800  # 30 minutes
-
-        # Store status
-        await storage_db.set_player_status(
-            player_id=player_id,
-            check_count=check_count,
-            retry_after=retry_after,
-        )
-
-        # Retrieve status
-        result = await storage_db.get_player_status(player_id)
-
-        # Verify
-        assert result is not None
-        # Player ID not returned - we query by it == player_id
-        assert result["check_count"] == check_count
-        assert result["retry_after"] == retry_after
-        assert result["last_checked_at"] > 0
-
-    @pytest.mark.asyncio
-    async def test_get_nonexistent_player_status(self, storage_db):
-        """Test getting non-existent player status returns None"""
-        result = await storage_db.get_player_status("NeverChecked-8888")
-        assert result is None
-
-    @pytest.mark.asyncio
-    async def test_update_player_status_increments_check_count(self, storage_db):
-        """Test that updating status preserves exponential backoff progression"""
-        player_id = "Failing-5555"
-
-        # First failure
-        await storage_db.set_player_status(player_id, check_count=1, retry_after=600)
-
-        result1 = await storage_db.get_player_status(player_id)
-        assert result1["check_count"] == 1
-        assert result1["retry_after"] == 600  # noqa: PLR2004
-
-        # Second failure (exponential backoff)
-        await storage_db.set_player_status(player_id, check_count=2, retry_after=1800)
-
-        result2 = await storage_db.get_player_status(player_id)
-        assert result2["check_count"] == 2  # noqa: PLR2004
-        assert result2["retry_after"] == 1800  # noqa: PLR2004
-
-    @pytest.mark.asyncio
-    async def test_delete_player_status(self, storage_db):
-        """Test deleting player status (when promoting to profile)"""
-        player_id = "NowFound-3333"
-
-        # Store status
-        await storage_db.set_player_status(player_id, check_count=3, retry_after=7200)
-
-        # Verify it exists
-        assert await storage_db.get_player_status(player_id) is not None
-
-        # Delete status
-        await storage_db.delete_player_status(player_id)
-
-        # Verify it's gone
-        assert await storage_db.get_player_status(player_id) is None
-
-
 class TestStorageStats:
     """Test storage statistics and metrics"""
 
@@ -284,11 +214,6 @@ class TestStorageStats:
             html="<html>Profile</html>",
             summary={"name": "Stats"},
         )
-        await storage_db.set_player_status(
-            player_id="Unknown-4567",
-            check_count=1,
-            retry_after=600,
-        )
 
         # Get stats
         stats = await storage_db.get_stats()
@@ -297,12 +222,10 @@ class TestStorageStats:
         assert "size_bytes" in stats
         assert "static_data_count" in stats
         assert "player_profiles_count" in stats
-        assert "player_status_count" in stats
 
         # Verify counts
         assert stats["static_data_count"] == 1
         assert stats["player_profiles_count"] == 1
-        assert stats["player_status_count"] == 1
 
         # Size should be estimated for in-memory DB
         assert stats["size_bytes"] > 0
@@ -314,7 +237,6 @@ class TestStorageStats:
 
         assert stats["static_data_count"] == 0
         assert stats["player_profiles_count"] == 0
-        assert stats["player_status_count"] == 0
         # Size can be > 0 due to schema overhead
         assert stats["size_bytes"] >= 0
 
