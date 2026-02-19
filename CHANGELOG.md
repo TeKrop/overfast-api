@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.41.8 (2026-02-19)
+
+### Bug Fixes
+
+- **storage**: Add retry limit to _acquire_connection to prevent infinite loop
+  ([#371](https://github.com/TeKrop/overfast-api/pull/371),
+  [`477ea45`](https://github.com/TeKrop/overfast-api/commit/477ea457d4edd2a297edac9d9bd2db92a7bfe2a7))
+
+
 ## v3.41.7 (2026-02-19)
 
 ### Bug Fixes
