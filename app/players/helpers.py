@@ -158,12 +158,15 @@ def remove_accents(input_str: str) -> str:
 
 
 @cache
-def get_hero_role(hero_key: HeroKey) -> Role:  # ty: ignore[invalid-type-form]
+def get_hero_role(hero_key: HeroKey) -> Role | None:  # ty: ignore[invalid-type-form]
     """Get the role of a given hero based on the CSV file"""
     heroes_data = read_csv_data_file("heroes")
     role_key = next(
-        hero_data["role"] for hero_data in heroes_data if hero_data["key"] == hero_key
+        (hero_data["role"] for hero_data in heroes_data if hero_data["key"] == hero_key),
+        None,
     )
+    if role_key is None:
+        return None
     return Role(role_key)
 
 
