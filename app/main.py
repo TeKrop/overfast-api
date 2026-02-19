@@ -66,16 +66,20 @@ async def lifespan(_: FastAPI):  # pragma: no cover
     logger.info("Instanciating HTTPX AsyncClient...")
     overfast_client: BlizzardClientPort = OverFastClient()
 
+    # Evict stale api-cache data on startup (handles crash/deploy scenarios)
+    cache: CachePort = CacheManager()
+    await cache.evict_volatile_data()
+
     yield
 
     # Properly close HTTPX Async Client and SQLite storage
     await overfast_client.aclose()
 
     # Evict volatile Valkey data (api-cache, rate-limit, etc.) before RDB snapshot
-    cache: CachePort = CacheManager()
     await cache.evict_volatile_data()
     await cache.bgsave()
 
+    # Optimize SQLite before closing
     await storage.optimize()
     await storage.close()
 
