@@ -2,12 +2,31 @@
 
 <!-- version list -->
 
-## v3.42.1 (2026-02-19)
+## v3.41.8 (2026-02-19)
 
 ### Bug Fixes
 
-- **dependabot**: Update package ecosystem to github-actions and remove beta ecosystems
-  ([`758c983`](https://github.com/danielsogl/overfast-api/commit/758c9836504c2b2cd1d5d7baf36cbf89291c61d0))
+- **storage**: Add retry limit to _acquire_connection to prevent infinite loop
+  ([#371](https://github.com/TeKrop/overfast-api/pull/371),
+  [`477ea45`](https://github.com/TeKrop/overfast-api/commit/477ea457d4edd2a297edac9d9bd2db92a7bfe2a7))
+
+
+## v3.41.7 (2026-02-19)
+
+### Bug Fixes
+
+- **parsers**: Add null checks for optional HTML sections in player profile
+  ([#370](https://github.com/TeKrop/overfast-api/pull/370),
+  [`7bb49c0`](https://github.com/TeKrop/overfast-api/commit/7bb49c0b79f2992fcec041af9e7a0b3fb87ab745))
+
+
+## v3.41.6 (2026-02-19)
+
+### Bug Fixes
+
+- **stats**: Handle unknown heroes gracefully in stats computation
+  ([#373](https://github.com/TeKrop/overfast-api/pull/373),
+  [`cbe0444`](https://github.com/TeKrop/overfast-api/commit/cbe04442a967413e485bda763d806ecacf4b55da))
 
 
 ## v3.41.5 (2026-02-19)

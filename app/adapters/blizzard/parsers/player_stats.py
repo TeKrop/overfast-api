@@ -14,6 +14,7 @@ from app.adapters.blizzard.parsers.player_profile import (
     parse_player_profile,
     parse_player_profile_html,
 )
+from app.overfast_logger import logger
 from app.players.enums import HeroKey, PlayerGamemode, PlayerPlatform
 from app.players.helpers import get_hero_role, get_plural_stat_key
 from app.roles.enums import Role
@@ -102,6 +103,15 @@ def _compute_heroes_stats(raw_heroes_stats: dict) -> dict:
             }
 
             for hero_key, hero_stats in career_stats.items():
+                if hero_key not in heroes_stats:
+                    logger.info(
+                        "Unknown hero '%s' in career stats, skipping"
+                        " (platform=%s, gamemode=%s)",
+                        hero_key,
+                        platform,
+                        gamemode,
+                    )
+                    continue
                 heroes_stats[hero_key][platform][gamemode] = _compute_hero_stats(
                     hero_stats
                 )
@@ -248,6 +258,8 @@ def compute_roles_stats(heroes_stats: dict) -> dict:
     # Retrieve raw data from heroes
     for hero_key, hero_stats in heroes_stats.items():
         hero_role = get_hero_role(hero_key)
+        if hero_role is None:
+            continue
         for stat_name in GENERIC_STATS_NAMES:
             roles_stats[hero_role][stat_name] += hero_stats[stat_name]
         for stat_name in TOTAL_STATS_NAMES:
