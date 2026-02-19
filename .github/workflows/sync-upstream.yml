@@ -350,23 +350,3 @@ jobs:
           script: |
             /opt/deploy-overfast.sh
 
-  # ── Stage 5: Notify ───────────────────────────────────────────
-  notify:
-    name: Send notification
-    needs: [commit-to-main, deploy]
-    runs-on: ubuntu-latest
-    if: always() && needs.deploy.result == 'success'
-
-    steps:
-      - name: Notify app repo of API update
-        env:
-          GH_TOKEN: ${{ secrets.APP_REPO_PAT }}
-        run: |
-          gh api \
-            repos/danielsogl/overwatch_app/dispatches \
-            -f event_type=api-updated
-
-      - name: Notify on failure
-        if: needs.deploy.result == 'failure'
-        run: |
-          echo "Deployment failed!"
