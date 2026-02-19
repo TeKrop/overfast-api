@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.42.0 (2026-02-19)
+
+### Features
+
+- **cache**: Moved unknown players tracking to Valkey cache
+  ([#374](https://github.com/TeKrop/overfast-api/pull/374),
+  [`ca56f5e`](https://github.com/TeKrop/overfast-api/commit/ca56f5ee3a65b2a50c8f835e3b4d2f651e481eb2))
+
+
 ## v3.41.8 (2026-02-19)
 
 ### Bug Fixes
