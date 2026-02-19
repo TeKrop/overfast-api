@@ -76,6 +76,10 @@ class SQLiteStorage(metaclass=Singleton):
 
         await db.execute("PRAGMA journal_mode=WAL")
         await db.execute("PRAGMA synchronous=NORMAL")
+        await db.execute(f"PRAGMA cache_size={settings.sqlite_cache_size}")
+        await db.execute(
+            f"PRAGMA wal_autocheckpoint={settings.sqlite_wal_autocheckpoint}"
+        )
 
         if settings.sqlite_mmap_size > 0:
             await db.execute(f"PRAGMA mmap_size={settings.sqlite_mmap_size}")
@@ -130,11 +134,14 @@ class SQLiteStorage(metaclass=Singleton):
         if self._closed:
             msg = "SQLite storage is closed."
             raise RuntimeError(msg)
+
         if not self._initialized:
             msg = "SQLite connection not initialized. Call initialize() first."
             raise RuntimeError(msg)
+
         db = await self._acquire_connection()
         broken = False
+
         try:
             yield db
         except Exception as e:
