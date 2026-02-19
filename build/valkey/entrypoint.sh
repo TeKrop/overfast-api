@@ -24,4 +24,5 @@ valkey-server \
     --io-threads $THREADS \
     --maxmemory ${VALKEY_MEMORY_LIMIT} \
     --maxmemory-policy volatile-lru \
+    --dir /data \
     --save "3600 1"

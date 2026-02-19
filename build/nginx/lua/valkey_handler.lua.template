@@ -3,6 +3,7 @@ local valkey = require "resty.redis"
 
 local EXCLUDED_PATHS = { ["/"] = true, ["/docs"] = true, ["/openapi.json"] = true }
 local COOLDOWN_KEY_PREFIX = "${UNKNOWN_PLAYER_COOLDOWN_KEY_PREFIX}"
+local UNKNOWN_PLAYERS_CACHE_ENABLED = "${UNKNOWN_PLAYERS_CACHE_ENABLED}" == "true"
 
 local function release(valk)
     local ok, err = valk:set_keepalive(10000, 100)
@@ -87,7 +88,7 @@ local function handle_valkey_request()
     local compressed_value, cache_ttl = res[1], res[2]
 
     if not compressed_value or compressed_value == ngx.null then
-        if check_unknown_player(valk, ngx.var.uri) or check_rate_limit(valk) then
+        if (UNKNOWN_PLAYERS_CACHE_ENABLED and check_unknown_player(valk, ngx.var.uri)) or check_rate_limit(valk) then
             release(valk)
             return
         end
