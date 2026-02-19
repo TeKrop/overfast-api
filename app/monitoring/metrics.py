@@ -192,10 +192,6 @@ sqlite_battletag_lookup_total = Counter(
     ["result"],  # result: "hit", "miss"
 )
 
-unknown_player_rejections_total = Counter(
-    "unknown_player_rejections_total",
-    "Early rejections via unknown player cache",
-)
 
 # Data freshness metrics
 sqlite_player_profile_age_seconds = Histogram(
