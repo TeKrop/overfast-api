@@ -67,9 +67,16 @@ async def _player_profile_cleanup_loop(
     """Background task: delete stale player profiles every hour."""
     while True:
         await asyncio.sleep(_CLEANUP_INTERVAL)
-        deleted = await storage.delete_old_player_profiles(max_age_seconds)
-        if deleted:
-            await storage.vacuum()
+        try:
+            deleted = await storage.delete_old_player_profiles(max_age_seconds)
+            if deleted:
+                await storage.vacuum()
+        except asyncio.CancelledError:
+            # Let task cancellation propagate so shutdown behaves correctly.
+            raise
+        except Exception:  # noqa: BLE001
+            # Log unexpected errors but keep the cleanup loop running.
+            logger.exception("Player profile cleanup task failed")
 
 
 @asynccontextmanager
