@@ -18,8 +18,10 @@ THREADS=$((CORES > 1 ? CORES - 1 : 1))
 echo ">>> Detected $CORES cores, using $THREADS IO threads for Valkey"
 
 # Start valkey server by letting one CPU core available
+# volatile-lru: only evict keys with TTL set (protects permanent unknown-player:status keys)
+# RDB persistence: save snapshot if at least 1 key changed in the last hour
 valkey-server \
     --io-threads $THREADS \
     --maxmemory ${VALKEY_MEMORY_LIMIT} \
-    --maxmemory-policy allkeys-lru \
-    --save ""
+    --maxmemory-policy volatile-lru \
+    --save "3600 1"

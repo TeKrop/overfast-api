@@ -68,7 +68,7 @@ class Settings(BaseSettings):
     sqlite_mmap_size: int = 0
 
     # SQLite page cache size per connection in kibibytes (negative = KiB, positive = pages)
-    # -4000 = 4 MB/connection; keeps player_status table and indexes hot in every connection
+    # -4000 = 4 MB/connection
     sqlite_cache_size: int = -4000
 
     # SQLite WAL auto-checkpoint threshold in pages (4 KB/page by default)
@@ -161,11 +161,11 @@ class Settings(BaseSettings):
     # Indicate if unknown players cache is enabled or not
     unknown_players_cache_enabled: bool = True
 
-    # Cache key for unknown players cache in Redis.
-    unknown_players_cache_key_prefix: str = "unknown-players-cache"
+    # Prefix for Valkey keys tracking active cooldown windows (has TTL = retry_after)
+    unknown_player_cooldown_key_prefix: str = "unknown-player:cooldown"
 
-    # Cache TTL for not unknown players (seconds)
-    unknown_players_cache_timeout: int = 3600
+    # Prefix for Valkey keys storing persistent check count (no TTL, survives cooldown expiry)
+    unknown_player_status_key_prefix: str = "unknown-player:status"
 
     ############
     # BLIZZARD

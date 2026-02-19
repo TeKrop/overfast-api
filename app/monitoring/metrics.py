@@ -192,8 +192,8 @@ sqlite_battletag_lookup_total = Counter(
     ["result"],  # result: "hit", "miss"
 )
 
-sqlite_unknown_player_rejections_total = Counter(
-    "sqlite_unknown_player_rejections_total",
+unknown_player_rejections_total = Counter(
+    "unknown_player_rejections_total",
     "Early rejections via unknown player cache",
 )
 

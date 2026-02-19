@@ -11,12 +11,12 @@ api-cache:/heroes?role=damage => "[{...}]"
 
 ----
 
-Player Cache data will not expire. It's JSON containing data from
-players search page and HTML data from Blizzard profile page.
+Unknown Player Cache uses a two-key pattern per player:
+- unknown-player:cooldown:{id}  TTL=retry_after, value=check_count  (fast rejection gate)
+- unknown-player:status:{id}    no TTL, value=JSON{check_count,battletag}  (persistent backoff state)
 
-Examples :
-player-cache:TeKrop-2217
-=> {"summary": {"...": "...""}, "profile": "<html>....</html>"}
+The cooldown key drives rejection; the status key preserves check_count across
+cooldown expirations so exponential backoff keeps growing.
 """
 
 import json
@@ -191,22 +191,106 @@ class ValkeyCache(metaclass=Singleton):
             ex=settings.blizzard_rate_limit_retry_after,
         )
 
-    @handle_valkey_error(default_return=False)
-    async def is_player_unknown(self, player_id: str) -> bool:
-        """Check if player is marked as unknown"""
-        result = await self.valkey_server.exists(
-            f"{settings.unknown_players_cache_key_prefix}:{player_id}"
-        )
-        return bool(result)
+    @handle_valkey_error(default_return=None)
+    async def get_player_status(self, player_id: str) -> dict | None:
+        """
+        Get unknown player status by battletag or Blizzard ID.
+
+        Checks cooldown:{player_id} first (TTL-based active window), then falls back
+        to status:{player_id} (permanent record). Returns None if not tracked.
+        """
+        cooldown_key = f"{settings.unknown_player_cooldown_key_prefix}:{player_id}"
+        status_key = f"{settings.unknown_player_status_key_prefix}:{player_id}"
+
+        async with self.valkey_server.pipeline(transaction=False) as pipe:
+            pipe.get(cooldown_key)
+            pipe.ttl(cooldown_key)
+            pipe.get(status_key)
+            check_count_bytes, remaining_ttl, status_bytes = await pipe.execute()
+
+        if check_count_bytes is not None and remaining_ttl > 0:
+            return {"check_count": int(check_count_bytes), "retry_after": remaining_ttl}
+
+        if status_bytes is not None:
+            status = json.loads(status_bytes)
+            return {
+                "check_count": status["check_count"],
+                "retry_after": 0,
+                "battletag": status.get("battletag"),
+            }
+
+        return None
 
     @handle_valkey_error(default_return=None)
-    async def set_player_as_unknown(self, player_id: str) -> None:
-        """Mark player as unknown"""
-        await self.valkey_server.set(
-            f"{settings.unknown_players_cache_key_prefix}:{player_id}",
-            value=0,
-            ex=settings.unknown_players_cache_timeout,
+    async def set_player_status(
+        self,
+        player_id: str,
+        check_count: int,
+        retry_after: int,
+        battletag: str | None = None,
+    ) -> None:
+        """Set persistent status key and TTL-based cooldown keys for an unknown player."""
+        status_value = json.dumps({"check_count": check_count, "battletag": battletag})
+
+        async with self.valkey_server.pipeline(transaction=False) as pipe:
+            pipe.set(f"{settings.unknown_player_status_key_prefix}:{player_id}", status_value)
+            pipe.set(
+                f"{settings.unknown_player_cooldown_key_prefix}:{player_id}",
+                check_count,
+                ex=retry_after,
+            )
+            if battletag:
+                pipe.set(
+                    f"{settings.unknown_player_cooldown_key_prefix}:{battletag}",
+                    check_count,
+                    ex=retry_after,
+                )
+            await pipe.execute()
+
+    @handle_valkey_error(default_return=None)
+    async def delete_player_status(self, player_id: str) -> None:
+        """Delete status and all associated cooldown keys for a player (by Blizzard ID)."""
+        status_key = f"{settings.unknown_player_status_key_prefix}:{player_id}"
+
+        # Read battletag from status to also delete the battletag-based cooldown key
+        status_bytes = await self.valkey_server.get(status_key)
+        battletag = json.loads(status_bytes).get("battletag") if status_bytes else None
+
+        keys_to_delete = [
+            status_key,
+            f"{settings.unknown_player_cooldown_key_prefix}:{player_id}",
+        ]
+        if battletag:
+            keys_to_delete.append(
+                f"{settings.unknown_player_cooldown_key_prefix}:{battletag}"
+            )
+        await self.valkey_server.delete(*keys_to_delete)
+
+    @handle_valkey_error(default_return=None)
+    async def evict_volatile_data(self) -> None:
+        """Delete all Valkey keys except unknown-player status and cooldown keys."""
+        _evict_batch_size = 1000
+        prefixes_to_keep = (
+            settings.unknown_player_cooldown_key_prefix,
+            settings.unknown_player_status_key_prefix,
         )
+        keys_to_delete = []
+        async for key in self.valkey_server.scan_iter(match="*", count=_evict_batch_size):
+            key_str = key.decode("utf-8") if isinstance(key, bytes) else key
+            if not key_str.startswith(prefixes_to_keep):
+                keys_to_delete.append(key)
+                if len(keys_to_delete) >= _evict_batch_size:
+                    await self.valkey_server.delete(*keys_to_delete)
+                    keys_to_delete.clear()
+        if keys_to_delete:
+            await self.valkey_server.delete(*keys_to_delete)
+        logger.info("Evicted volatile Valkey keys before shutdown")
+
+    @handle_valkey_error(default_return=None)
+    async def bgsave(self) -> None:
+        """Trigger a background RDB save."""
+        await self.valkey_server.bgsave()
+        logger.info("Valkey BGSAVE triggered")
 
 
 # Backward compatibility alias

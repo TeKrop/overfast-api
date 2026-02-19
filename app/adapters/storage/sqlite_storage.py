@@ -33,7 +33,6 @@ class SQLiteStorage(metaclass=Singleton):
     Provides persistent storage for:
     - Static data (heroes, maps, gamemodes, roles, hero_stats)
     - Player profiles (replaces Player Cache)
-    - Player status tracking (replaces Unknown Players Cache with exponential backoff)
 
     All data is compressed with zstd (Python 3.14+ built-in) before storage.
 
@@ -390,120 +389,11 @@ class SQLiteStorage(metaclass=Singleton):
             )
             await db.commit()
 
-    # Player Status Methods (Unknown Players with Exponential Backoff)
-
-    @track_sqlite_operation("player_status", "get")
-    async def get_player_status(self, player_id: str) -> dict | None:
-        """
-        Get player status for unknown player tracking by player_id OR battletag.
-
-        Args:
-            player_id: Blizzard ID or BattleTag to lookup
-
-        Returns:
-            Dict with 'check_count', 'last_checked_at', 'retry_after', 'battletag' or None if not found
-        """
-        async with (
-            self._get_connection() as db,
-            db.execute(
-                "SELECT check_count, last_checked_at, retry_after, battletag"
-                " FROM player_status WHERE battletag = ?",
-                (player_id,),
-            ) as cursor,
-        ):
-            row = await cursor.fetchone()
-
-        if not row:
-            # Fallback: player_id might be a Blizzard ID
-            async with (
-                self._get_connection() as db,
-                db.execute(
-                    "SELECT check_count, last_checked_at, retry_after, battletag"
-                    " FROM player_status WHERE player_id = ?",
-                    (player_id,),
-                ) as cursor,
-            ):
-                row = await cursor.fetchone()
-
-        if not row:
-            return None
-
-        return {
-            "check_count": row[0],
-            "last_checked_at": row[1],
-            "retry_after": row[2],
-            "battletag": row[3],
-        }
-
-    @track_sqlite_operation("player_status", "set")
-    async def set_player_status(
-        self,
-        player_id: str,
-        check_count: int,
-        retry_after: int,
-        battletag: str | None = None,
-    ) -> None:
-        """
-        Set player status for unknown player tracking with exponential backoff.
-
-        Args:
-            player_id: Blizzard ID (canonical key)
-            check_count: Number of failed checks
-            retry_after: Seconds to wait before next check
-            battletag: Optional BattleTag to enable early rejection of BattleTag requests
-                      If None, preserves existing battletag value
-        """
-        now = int(time.time())
-
-        async with self._get_connection() as db:
-            if battletag:
-                # New battletag provided - store it
-                await db.execute(
-                    """INSERT OR REPLACE INTO player_status
-                       (player_id, battletag, check_count, last_checked_at, retry_after)
-                       VALUES (?, ?, ?, ?, ?)""",
-                    (player_id, battletag, check_count, now, retry_after),
-                )
-            else:
-                # No battletag provided - preserve existing value
-                await db.execute(
-                    """INSERT INTO player_status
-                       (player_id, battletag, check_count, last_checked_at, retry_after)
-                       VALUES (?, NULL, ?, ?, ?)
-                       ON CONFLICT(player_id) DO UPDATE SET
-                           battletag = COALESCE(?, battletag),
-                           check_count = excluded.check_count,
-                           last_checked_at = excluded.last_checked_at,
-                           retry_after = excluded.retry_after""",
-                    (player_id, check_count, now, retry_after, battletag),
-                )
-            await db.commit()
-
-    async def delete_player_status(self, player_id: str) -> None:
-        """
-        Delete player status entry (used when promoting unknown player to profile).
-
-        Args:
-            player_id: Player identifier
-        """
-        async with self._get_connection() as db:
-            await db.execute(
-                "DELETE FROM player_status WHERE player_id = ?", (player_id,)
-            )
-            await db.commit()
-
     # Maintenance & Metrics Methods
 
     async def get_stats(self) -> dict:
         """
         Get comprehensive storage statistics for Prometheus metrics.
-
-        Phase 3.5B: Enhanced with detailed metrics including:
-        - Row counts per table
-        - Database and WAL file sizes
-        - Compression ratios
-        - Data freshness statistics
-        - Per-table storage breakdown
 
         Returns:
             Dict with comprehensive storage metrics
@@ -519,10 +409,6 @@ class SQLiteStorage(metaclass=Singleton):
             async with db.execute("SELECT COUNT(*) FROM player_profiles") as cursor:
                 row = await cursor.fetchone()
                 stats["player_profiles_count"] = row[0] if row else 0
-
-            async with db.execute("SELECT COUNT(*) FROM player_status") as cursor:
-                row = await cursor.fetchone()
-                stats["player_status_count"] = row[0] if row else 0
 
             # Data freshness (player profiles age distribution)
             current_time = int(time.time())
@@ -548,11 +434,9 @@ class SQLiteStorage(metaclass=Singleton):
 
         # File sizes
         if self.db_path == MEMORY_DB:
-            # Estimate size for in-memory database
             stats["size_bytes"] = (
                 (stats["static_data_count"] * 1024)
                 + (stats["player_profiles_count"] * 10240)
-                + (stats["player_status_count"] * 100)
             )
             stats["wal_size_bytes"] = 0
         else:
@@ -571,7 +455,6 @@ class SQLiteStorage(metaclass=Singleton):
         async with self._get_connection() as db:
             await db.execute("DELETE FROM static_data")
             await db.execute("DELETE FROM player_profiles")
-            await db.execute("DELETE FROM player_status")
             await db.commit()
 
     async def optimize(self) -> None:

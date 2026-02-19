@@ -45,9 +45,6 @@ async def metrics() -> Response:
         storage_entries_total.labels(table="player_profiles").set(
             stats["player_profiles_count"],
         )
-        storage_entries_total.labels(table="player_status").set(
-            stats["player_status_count"],
-        )
 
         # Phase 3.5B: Enhanced metrics
         sqlite_wal_size_bytes.set(stats.get("wal_size_bytes", 0))

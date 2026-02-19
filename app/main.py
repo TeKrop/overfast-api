@@ -12,6 +12,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from .adapters.cache import CacheManager
 from .adapters.storage import SQLiteStorage
 from .api import gamemodes, heroes, maps, players, roles
 from .config import settings
@@ -29,7 +30,7 @@ from .overfast_client import OverFastClient
 from .overfast_logger import logger
 
 if TYPE_CHECKING:
-    from app.domain.ports import BlizzardClientPort, StoragePort
+    from app.domain.ports import BlizzardClientPort, CachePort, StoragePort
 
 
 if settings.sentry_dsn:
@@ -69,6 +70,12 @@ async def lifespan(_: FastAPI):  # pragma: no cover
 
     # Properly close HTTPX Async Client and SQLite storage
     await overfast_client.aclose()
+
+    # Evict volatile Valkey data (api-cache, rate-limit, etc.) before RDB snapshot
+    cache: CachePort = CacheManager()
+    await cache.evict_volatile_data()
+    await cache.bgsave()
+
     await storage.optimize()
     await storage.close()
 
