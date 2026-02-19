@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.41.5 (2026-02-19)
+
+### Bug Fixes
+
+- **storage**: Added some sqlite optimization settings
+  ([#368](https://github.com/TeKrop/overfast-api/pull/368),
+  [`15d88b7`](https://github.com/TeKrop/overfast-api/commit/15d88b7a44a1867bba34b718161681f4fe873cac))
+
+
 ## v3.41.4 (2026-02-18)
 
 ### Bug Fixes
