@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.42.1 (2026-02-19)
+
+### Bug Fixes
+
+- **dependabot**: Update package ecosystem to github-actions and remove beta ecosystems
+  ([`758c983`](https://github.com/danielsogl/overfast-api/commit/758c9836504c2b2cd1d5d7baf36cbf89291c61d0))
+
+
 ## v3.41.5 (2026-02-19)
 
 ### Bug Fixes
