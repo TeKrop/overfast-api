@@ -68,7 +68,7 @@ jobs:
       - name: Merge upstream locally
         if: steps.check.outputs.has_updates == 'true'
         run: |
-          git merge upstream/main -m "Merge upstream changes"
+          git merge upstream/main -m "chore: merge upstream changes"
           echo "Merge successful — commit not pushed yet"
 
       - name: Archive merged repository
@@ -327,7 +327,7 @@ jobs:
           git fetch upstream
           git fetch origin
           git reset --hard origin/main
-          git merge upstream/main -m "Merge upstream changes"
+          git merge upstream/main -m "chore: merge upstream changes"
           git push origin main
           echo "Merge commit pushed to main successfully"
 

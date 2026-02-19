@@ -8,6 +8,7 @@ on:
 jobs:
   release:
     name: Release with Python Semantic Release
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-release-${{ github.ref_name }}

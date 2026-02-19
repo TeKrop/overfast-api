@@ -16,3 +16,4 @@ CLAUDE.md merge=keep-fork
 AGENTS.md merge=keep-fork
 .mcp.json merge=keep-fork
 .github/dependabot.yml merge=keep-fork
+.github/workflows/build.yml merge=keep-fork
