@@ -67,6 +67,14 @@ class Settings(BaseSettings):
     # SQLite memory-mapped I/O size in bytes (optional performance tuning)
     sqlite_mmap_size: int = 0
 
+    # SQLite page cache size per connection in kibibytes (negative = KiB, positive = pages)
+    # -4000 = 4 MB/connection; keeps player_status table and indexes hot in every connection
+    sqlite_cache_size: int = -4000
+
+    # SQLite WAL auto-checkpoint threshold in pages (4 KB/page by default)
+    # 500 pages = ~2 MB WAL; smaller WAL reduces read scan overhead
+    sqlite_wal_autocheckpoint: int = 500
+
     # Unknown player exponential backoff configuration
     unknown_player_initial_retry: int = 600  # 10 minutes (first check)
     unknown_player_retry_multiplier: int = 3  # retry_after *= 3 each check

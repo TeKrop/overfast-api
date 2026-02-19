@@ -69,6 +69,7 @@ async def lifespan(_: FastAPI):  # pragma: no cover
 
     # Properly close HTTPX Async Client and SQLite storage
     await overfast_client.aclose()
+    await storage.optimize()
     await storage.close()
 
 
