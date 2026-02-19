@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.41.6 (2026-02-19)
+
+### Bug Fixes
+
+- **stats**: Handle unknown heroes gracefully in stats computation
+  ([#373](https://github.com/TeKrop/overfast-api/pull/373),
+  [`cbe0444`](https://github.com/TeKrop/overfast-api/commit/cbe04442a967413e485bda763d806ecacf4b55da))
+
+
 ## v3.41.5 (2026-02-19)
 
 ### Bug Fixes
