@@ -104,9 +104,12 @@ def _compute_heroes_stats(raw_heroes_stats: dict) -> dict:
 
             for hero_key, hero_stats in career_stats.items():
                 if hero_key not in heroes_stats:
-                    logger.warning(
-                        "Unknown hero '%s' found in career stats, skipping",
+                    logger.info(
+                        "Unknown hero '%s' in career stats, skipping"
+                        " (platform=%s, gamemode=%s)",
                         hero_key,
+                        platform,
+                        gamemode,
                     )
                     continue
                 heroes_stats[hero_key][platform][gamemode] = _compute_hero_stats(
