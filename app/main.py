@@ -58,11 +58,11 @@ if settings.sentry_dsn:
     )
 
 
-_CLEANUP_INTERVAL = 3600  # seconds between each player profile cleanup run
+_CLEANUP_INTERVAL = 86400  # seconds between each player profile cleanup run
 
 
 async def _player_profile_cleanup_loop(
-    storage: "StoragePort", max_age_seconds: int
+    storage: StoragePort, max_age_seconds: int
 ) -> None:
     """Background task: delete stale player profiles every hour."""
     while True:
