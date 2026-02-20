@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v3.42.1 (2026-02-19)
+
+### Bug Fixes
+
+- **storage**: Added max age for players profile storage with temporary cleanup background task
+  ([#375](https://github.com/TeKrop/overfast-api/pull/375),
+  [`afc6548`](https://github.com/TeKrop/overfast-api/commit/afc65487fdbe2b6be09133bd2ea41bc1810045d7))
+
+
+## v3.42.0 (2026-02-19)
+
+### Features
+
+- **cache**: Moved unknown players tracking to Valkey cache
+  ([#374](https://github.com/TeKrop/overfast-api/pull/374),
+  [`ca56f5e`](https://github.com/TeKrop/overfast-api/commit/ca56f5ee3a65b2a50c8f835e3b4d2f651e481eb2))
+
+
 ## v3.41.8 (2026-02-19)
 
 ### Bug Fixes

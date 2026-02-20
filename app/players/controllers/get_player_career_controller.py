@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from app.domain.ports import BlizzardClientPort
     from app.players.enums import PlayerGamemode, PlayerPlatform
 
-from .base_player_controller import BasePlayerController, with_unknown_player_guard
+from .base_player_controller import BasePlayerController
 
 
 class GetPlayerCareerController(BasePlayerController):
@@ -28,7 +28,6 @@ class GetPlayerCareerController(BasePlayerController):
     parser_classes: ClassVar[list] = []
     timeout = settings.career_path_cache_timeout
 
-    @with_unknown_player_guard
     async def process_request(self, **kwargs) -> dict:
         """Process request with Player Cache support and unknown player guard"""
         player_id = kwargs["player_id"]

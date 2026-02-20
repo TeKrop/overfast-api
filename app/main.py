@@ -1,7 +1,8 @@
 """Project main file containing FastAPI app and routes definitions"""
 
+import asyncio
 import json
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI, Request
@@ -12,6 +13,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from .adapters.cache import CacheManager
 from .adapters.storage import SQLiteStorage
 from .api import gamemodes, heroes, maps, players, roles
 from .config import settings
@@ -29,7 +31,7 @@ from .overfast_client import OverFastClient
 from .overfast_logger import logger
 
 if TYPE_CHECKING:
-    from app.domain.ports import BlizzardClientPort, StoragePort
+    from app.domain.ports import BlizzardClientPort, CachePort, StoragePort
 
 
 if settings.sentry_dsn:
@@ -56,6 +58,27 @@ if settings.sentry_dsn:
     )
 
 
+_CLEANUP_INTERVAL = 86400  # seconds between each player profile cleanup run
+
+
+async def _player_profile_cleanup_loop(
+    storage: StoragePort, max_age_seconds: int
+) -> None:
+    """Background task: delete stale player profiles every hour."""
+    while True:
+        await asyncio.sleep(_CLEANUP_INTERVAL)
+        try:
+            deleted = await storage.delete_old_player_profiles(max_age_seconds)
+            if deleted:
+                await storage.vacuum()
+        except asyncio.CancelledError:
+            # Let task cancellation propagate so shutdown behaves correctly.
+            raise
+        except Exception:  # noqa: BLE001
+            # Log unexpected errors but keep the cleanup loop running.
+            logger.exception("Player profile cleanup task failed")
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):  # pragma: no cover
     logger.info("Initializing SQLite storage...")
@@ -65,10 +88,31 @@ async def lifespan(_: FastAPI):  # pragma: no cover
     logger.info("Instanciating HTTPX AsyncClient...")
     overfast_client: BlizzardClientPort = OverFastClient()
 
+    # Evict stale api-cache data on startup (handles crash/deploy scenarios)
+    cache: CachePort = CacheManager()
+    await cache.evict_volatile_data()
+
+    cleanup_task: asyncio.Task | None = None
+    if settings.player_profile_max_age > 0:
+        cleanup_task = asyncio.create_task(
+            _player_profile_cleanup_loop(storage, settings.player_profile_max_age)
+        )
+
     yield
+
+    if cleanup_task is not None:
+        cleanup_task.cancel()
+        with suppress(asyncio.CancelledError):
+            await cleanup_task
 
     # Properly close HTTPX Async Client and SQLite storage
     await overfast_client.aclose()
+
+    # Evict volatile Valkey data (api-cache, rate-limit, etc.) before RDB snapshot
+    await cache.evict_volatile_data()
+    await cache.bgsave()
+
+    # Optimize SQLite before closing
     await storage.optimize()
     await storage.close()
 

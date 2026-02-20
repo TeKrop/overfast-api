@@ -1,7 +1,6 @@
 """Base Player Controller module"""
 
 import time
-from functools import wraps
 from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, status
@@ -22,59 +21,12 @@ from app.helpers import overfast_internal_error
 from app.monitoring.metrics import (
     sqlite_battletag_lookup_total,
     sqlite_cache_hit_total,
-    sqlite_unknown_player_rejections_total,
     storage_hits_total,
 )
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
     from app.domain.ports import BlizzardClientPort
-
-
-def with_unknown_player_guard(func):
-    """
-    Decorator to guard player endpoints against unknown players.
-
-    Checks if player is unknown before executing the handler.
-    Requires the method to accept player_id in kwargs.
-
-    Note: Marking unknown is now handled explicitly in controllers (no decorator magic).
-
-    Example:
-        @with_unknown_player_guard
-        async def process_request(self, **kwargs) -> dict:
-            player_id = kwargs["player_id"]
-            try:
-                # ... handler logic ...
-            except HTTPException as exception:
-                await self.mark_player_unknown_on_404(blizzard_id, exception, battletag)
-                raise
-
-    Args:
-        func: Async method to decorate (must accept **kwargs with player_id)
-
-    Returns:
-        Decorated async method with unknown player protection
-
-    Raises:
-        HTTPException: 404 if player is unknown
-        ValueError: If player_id is not in kwargs
-    """
-
-    @wraps(func)
-    async def wrapper(self, *args, **kwargs) -> dict:
-        player_id = kwargs.get("player_id")
-        if not player_id:
-            msg = "with_unknown_player_guard requires player_id in kwargs"
-            raise ValueError(msg)
-
-        # Check if player is known to not exist (by Blizzard ID or BattleTag)
-        await self.check_unknown_player(player_id)
-
-        # Execute handler (marking unknown is now explicit in handler)
-        return await func(self, *args, **kwargs)
-
-    return wrapper
 
 
 class BasePlayerController(AbstractController):
@@ -151,7 +103,10 @@ class BasePlayerController(AbstractController):
             name=name,
         )
 
-    # Unknown Player Tracking Methods (SQLite-based with exponential backoff)
+    # Unknown Player Tracking Methods (Valkey-based with exponential backoff)
+    # Early rejection is handled at the nginx/Lua layer via the cooldown key.
+    # Python only handles the write path: marking players as unknown on 404
+    # and deleting their status when they become known.
 
     def _calculate_retry_after(self, check_count: int) -> int:
         """
@@ -173,56 +128,6 @@ class BasePlayerController(AbstractController):
         retry_after = base * (multiplier ** (check_count - 1))
         return min(int(retry_after), max_retry)
 
-    async def check_unknown_player(self, player_id: str) -> None:
-        """
-        Check if player is known to not exist and raise 404 if so.
-        Uses exponential backoff to reduce checks over time.
-
-        Args:
-            player_id: Player ID to check
-
-        Raises:
-            HTTPException: 404 if player is still in retry window
-        """
-        if not settings.unknown_players_cache_enabled:
-            return
-
-        player_status = await self.storage.get_player_status(player_id)
-        if not player_status:
-            return  # Player not marked as unknown
-
-        # Check if retry window has passed
-        now = int(time.time())
-        time_since_check = now - player_status["last_checked_at"]
-
-        if time_since_check < player_status["retry_after"]:
-            # Still in retry window - return detailed 404 response
-            retry_after_seconds = player_status["retry_after"] - time_since_check
-            next_check_at = (
-                player_status["last_checked_at"] + player_status["retry_after"]
-            )
-
-            # Track early rejection
-            if settings.prometheus_enabled:
-                sqlite_unknown_player_rejections_total.inc()
-
-            logger.warning(
-                f"Player {player_id} (battletag : {player_status['battletag']}) is unknown "
-                f"(retry in {retry_after_seconds}s, check #{player_status['check_count']})"
-            )
-
-            # Return detailed 404 with retry information
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "error": "Player not found",
-                    "retry_after": retry_after_seconds,
-                    "next_check_at": next_check_at,
-                    "check_count": player_status["check_count"],
-                },
-            )
-        # Retry window passed - allow recheck by falling through
-
     async def mark_player_unknown_on_404(
         self,
         blizzard_id: str,
@@ -233,8 +138,8 @@ class BasePlayerController(AbstractController):
         Mark player as unknown if 404 exception is raised.
         Implements exponential backoff for retries.
 
-        Phase 3.5B: Store by Blizzard ID (primary) and BattleTag (if available).
-        This enables early rejection of both Blizzard ID and BattleTag requests.
+        Stores by Blizzard ID (primary) with optional BattleTag cooldown key
+        for early rejection before identity resolution.
 
         Updates the exception detail to match PlayerNotFoundError format
         with retry_after, next_check_at, and check_count fields.
@@ -250,16 +155,15 @@ class BasePlayerController(AbstractController):
         if exception.status_code != status.HTTP_404_NOT_FOUND:
             return
 
-        # Get existing status to increment check count
-        player_status = await self.storage.get_player_status(blizzard_id)
+        # Get existing status to increment check count (works even if cooldown expired)
+        player_status = await self.cache_manager.get_player_status(blizzard_id)
         check_count = player_status["check_count"] + 1 if player_status else 1
 
         # Calculate exponential backoff and next check time
         retry_after = self._calculate_retry_after(check_count)
         next_check_at = int(time.time()) + retry_after
 
-        # Store under Blizzard ID with optional BattleTag for early rejection
-        await self.storage.set_player_status(
+        await self.cache_manager.set_player_status(
             blizzard_id, check_count, retry_after, battletag=battletag
         )
 

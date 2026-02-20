@@ -63,27 +63,17 @@ class StoragePort(Protocol):
         """Store player profile HTML and parsed summary with optional metadata"""
         ...
 
-    async def get_player_status(self, player_id: str) -> dict | None:
+    async def delete_old_player_profiles(self, max_age_seconds: int) -> int:
         """
-        Get player status for unknown player tracking by player_id OR battletag.
+        Delete player profiles not updated within max_age_seconds.
 
-        Returns dict with 'check_count', 'last_checked_at', 'retry_after', 'battletag'
-        or None if not found
+        Returns:
+            Number of deleted rows
         """
         ...
 
-    async def set_player_status(
-        self,
-        player_id: str,
-        check_count: int,
-        retry_after: int,
-        battletag: str | None = None,
-    ) -> None:
-        """Set player status for unknown player tracking with exponential backoff"""
-        ...
-
-    async def delete_player_status(self, player_id: str) -> None:
-        """Delete player status entry"""
+    async def vacuum(self) -> None:
+        """Reclaim disk space by running VACUUM on the database"""
         ...
 
     async def clear_all_data(self) -> None:
@@ -94,8 +84,8 @@ class StoragePort(Protocol):
         """
         Get storage statistics for monitoring.
 
-        Returns dict with size_bytes, static_data_count, player_profiles_count,
-        player_status_count
+        Returns dict with size_bytes, wal_size_bytes, static_data_count,
+        player_profiles_count, player_profile_age_p50/p90/p99
         """
         ...
 

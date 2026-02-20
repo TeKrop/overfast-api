@@ -1576,12 +1576,12 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(sqlite_unknown_player_rejections_total[5m])",
+          "expr": "rate(unknown_player_rejections_total[5m])",
           "legendFormat": "Rejections/sec",
           "refId": "A"
         }
       ],
-      "title": "Unknown Player Early Rejections",
+      "title": "Unknown Player Early Rejections (Valkey)",
       "type": "gauge"
     },
     {
