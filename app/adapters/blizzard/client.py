@@ -1,5 +1,6 @@
 """Blizzard HTTP client adapter implementing BlizzardClientPort"""
 
+import math
 import time
 
 import httpx
@@ -141,7 +142,7 @@ class BlizzardClient(metaclass=Singleton):
         # Check in-memory fallback first (works even when Valkey is down)
         remaining = self._rate_limited_until - time.monotonic()
         if remaining > 0:
-            raise self._too_many_requests_response(retry_after=int(remaining) or 1)
+            raise self._too_many_requests_response(retry_after=math.ceil(remaining))
 
         if await self.cache_manager.is_being_rate_limited():
             remaining_ttl = await self.cache_manager.get_global_rate_limit_remaining_time()
@@ -149,7 +150,7 @@ class BlizzardClient(metaclass=Singleton):
             # if Valkey becomes unavailable mid-rate-limit window
             self._rate_limited_until = time.monotonic() + float(remaining_ttl)
             raise self._too_many_requests_response(
-                retry_after=int(remaining_ttl) or 1
+                retry_after=math.ceil(float(remaining_ttl))
             )
 
     def blizzard_response_error_from_response(

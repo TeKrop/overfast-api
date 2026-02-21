@@ -9,6 +9,7 @@ import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 
+from app.adapters.blizzard import BlizzardClient
 from app.adapters.storage import SQLiteStorage
 from app.main import app
 
@@ -44,6 +45,9 @@ async def _patch_before_every_test(
     # Flush Valkey and clear all SQLite data before every test
     await valkey_server.flushdb()
     await storage_db.clear_all_data()
+
+    # Reset in-memory rate limit state on the singleton
+    BlizzardClient()._rate_limited_until = 0
 
     with (
         patch("app.helpers.settings.discord_webhook_enabled", False),
