@@ -13,7 +13,7 @@ from app.adapters.blizzard.parsers.heroes import (
 )
 from app.adapters.blizzard.parsers.heroes_hitpoints import parse_heroes_hitpoints
 from app.config import settings
-from app.domain.services.base_service import BaseService
+from app.domain.services.static_data_service import StaticDataService
 from app.enums import Locale
 from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.helpers import overfast_internal_error
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from app.roles.enums import Role
 
 
-class HeroService(BaseService):
+class HeroService(StaticDataService):
     """Domain service for hero data: list, detail, and usage statistics."""
 
     # ------------------------------------------------------------------

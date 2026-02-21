@@ -2,13 +2,13 @@
 
 from app.adapters.blizzard.parsers.roles import fetch_roles_html, parse_roles_html
 from app.config import settings
-from app.domain.services.base_service import BaseService
+from app.domain.services.static_data_service import StaticDataService
 from app.enums import Locale
 from app.exceptions import ParserParsingError
 from app.helpers import overfast_internal_error
 
 
-class RoleService(BaseService):
+class RoleService(StaticDataService):
     """Domain service for role data."""
 
     async def list_roles(

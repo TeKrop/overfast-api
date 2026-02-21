@@ -2,10 +2,10 @@
 
 from app.adapters.blizzard.parsers.gamemodes import parse_gamemodes_csv
 from app.config import settings
-from app.domain.services.base_service import BaseService
+from app.domain.services.static_data_service import StaticDataService
 
 
-class GamemodeService(BaseService):
+class GamemodeService(StaticDataService):
     """Domain service for gamemode data."""
 
     async def list_gamemodes(

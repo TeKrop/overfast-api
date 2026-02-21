@@ -2,10 +2,10 @@
 
 from app.adapters.blizzard.parsers.maps import parse_maps_csv
 from app.config import settings
-from app.domain.services.base_service import BaseService
+from app.domain.services.base_service import StaticDataService
 
 
-class MapService(BaseService):
+class MapService(StaticDataService):
     """Domain service for maps data."""
 
     async def list_maps(
