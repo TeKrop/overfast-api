@@ -11,7 +11,7 @@ class GamemodeService(StaticDataService):
     async def list_gamemodes(
         self,
         cache_key: str,
-    ) -> tuple[list[dict], bool]:
+    ) -> tuple[list[dict], bool, int]:
         """Return the gamemodes list."""
 
         async def _fetch() -> list[dict]:

@@ -93,7 +93,7 @@ class PlayerService(BaseService):
         self,
         player_id: str,
         cache_key: str,
-    ) -> tuple[dict, bool]:
+    ) -> tuple[dict, bool, int]:
         """Return player summary (name, avatar, competitive ranks, …)."""
 
         def extract(html: str, player_summary: dict) -> dict:
@@ -111,7 +111,7 @@ class PlayerService(BaseService):
         gamemode: PlayerGamemode | None,
         platform: PlayerPlatform | None,
         cache_key: str,
-    ) -> tuple[dict, bool]:
+    ) -> tuple[dict, bool, int]:
         """Return full player data: summary + stats."""
 
         def extract(html: str, player_summary: dict) -> dict:
@@ -136,7 +136,7 @@ class PlayerService(BaseService):
         platform: PlayerPlatform | None,
         hero: HeroKeyCareerFilter | None,  # ty: ignore[invalid-type-form]
         cache_key: str,
-    ) -> tuple[dict, bool]:
+    ) -> tuple[dict, bool, int]:
         """Return player stats with category labels."""
 
         def extract(html: str, player_summary: dict) -> dict:
@@ -157,7 +157,7 @@ class PlayerService(BaseService):
         gamemode: PlayerGamemode | None,
         platform: PlayerPlatform | None,
         cache_key: str,
-    ) -> tuple[dict, bool]:
+    ) -> tuple[dict, bool, int]:
         """Return player statistics summary (winrate, kda, …)."""
 
         def extract(html: str, player_summary: dict) -> dict:
@@ -178,7 +178,7 @@ class PlayerService(BaseService):
         platform: PlayerPlatform | None,
         hero: HeroKeyCareerFilter | None,  # ty: ignore[invalid-type-form]
         cache_key: str,
-    ) -> tuple[dict, bool]:
+    ) -> tuple[dict, bool, int]:
         """Return player career stats (no labels)."""
 
         def extract(html: str, player_summary: dict) -> dict:
@@ -197,7 +197,7 @@ class PlayerService(BaseService):
         player_id: str,
         cache_key: str,
         data_factory: Callable[[str, dict], dict],
-    ) -> tuple[dict, bool]:
+    ) -> tuple[dict, bool, int]:
         """Resolve identity → get HTML → compute data → update cache → return.
 
         Args:
@@ -233,7 +233,7 @@ class PlayerService(BaseService):
         await self._update_api_cache(
             cache_key, data, settings.career_path_cache_timeout
         )
-        return data, is_stale
+        return data, is_stale, 0
 
     # ------------------------------------------------------------------
     # Profile caching helpers

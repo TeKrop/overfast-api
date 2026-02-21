@@ -37,7 +37,7 @@ class StaticDataService(BaseService):
         entity_type: str,
         parser: Callable[[Any], Any] | None = None,
         result_filter: Callable[[Any], Any] | None = None,
-    ) -> tuple[Any, bool]:
+    ) -> tuple[Any, bool, int]:
         """SWR orchestration for static data.
 
         Args:
@@ -54,7 +54,9 @@ class StaticDataService(BaseService):
                     returning.  Not persisted — re-applied on every request.
 
         Returns:
-            ``(data, is_stale)`` tuple.
+            ``(data, is_stale, age_seconds)`` tuple.  ``age_seconds`` is the
+            number of seconds since the data was last stored in SQLite (0 on
+            a cold-start fetch).
         """
         stored = await self._load_from_storage(storage_key)
 
@@ -77,18 +79,22 @@ class StaticDataService(BaseService):
                 )
                 stale_responses_total.inc()
                 background_refresh_triggered_total.labels(entity_type=entity_type).inc()
+                # Do NOT write stale data to Valkey: all requests during the
+                # stale window must reach FastAPI so they get correct headers.
+                # The background refresh updates SQLite; the next FastAPI request
+                # will see fresh data and repopulate Valkey naturally.
             else:
                 logger.info(
                     f"[SWR] {entity_type} fresh (age={age}s) — serving from SQLite"
                 )
+                await self._update_api_cache(cache_key, data if result_filter is None else result_filter(data), cache_ttl)
 
             storage_hits_total.labels(result="hit").inc()
 
             if result_filter is not None:
                 data = result_filter(data)
 
-            await self._update_api_cache(cache_key, data, cache_ttl)
-            return data, is_stale
+            return data, is_stale, age
 
         # Cold start — fetch synchronously
         logger.info(f"[SWR] {entity_type} not in SQLite — fetching from source")
@@ -100,7 +106,7 @@ class StaticDataService(BaseService):
 
         filtered = result_filter(data) if result_filter is not None else data
         await self._update_api_cache(cache_key, filtered, cache_ttl)
-        return filtered, False
+        return filtered, False, 0
 
     async def _refresh_static(
         self,

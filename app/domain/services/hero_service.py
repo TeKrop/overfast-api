@@ -44,7 +44,7 @@ class HeroService(StaticDataService):
         role: Role | None,
         gamemode: HeroGamemode | None,
         cache_key: str,
-    ) -> tuple[list[dict], bool]:
+    ) -> tuple[list[dict], bool, int]:
         """Return the heroes list (with optional role/gamemode filters).
 
         Stores the *full* (unfiltered) heroes list per locale in SQLite so
@@ -77,7 +77,7 @@ class HeroService(StaticDataService):
         hero_key: str,
         locale: Locale,
         cache_key: str,
-    ) -> tuple[dict, bool]:
+    ) -> tuple[dict, bool, int]:
         """Return full hero details merged with portrait and hitpoints.
 
         Single-hero data is not stored persistently; the Valkey API cache is
@@ -100,7 +100,7 @@ class HeroService(StaticDataService):
             raise overfast_internal_error(blizzard_url, exc) from exc
 
         await self._update_api_cache(cache_key, data, settings.hero_path_cache_timeout)
-        return data, False
+        return data, False, 0
 
     # ------------------------------------------------------------------
     # Hero stats summary  (GET /heroes/stats)
@@ -116,7 +116,7 @@ class HeroService(StaticDataService):
         competitive_division: CompetitiveDivisionFilter | None,  # ty: ignore[invalid-type-form]
         order_by: str,
         cache_key: str,
-    ) -> tuple[list[dict], bool]:
+    ) -> tuple[list[dict], bool, int]:
         """Return hero usage statistics with SWR."""
         storage_key = _build_hero_stats_storage_key(
             platform, gamemode, region, map_filter, competitive_division

@@ -38,8 +38,8 @@ async def list_maps(
         ),
     ] = None,
 ) -> Any:
-    data, is_stale = await service.list_maps(
+    data, is_stale, age = await service.list_maps(
         gamemode=gamemode, cache_key=build_cache_key(request)
     )
-    apply_swr_headers(response, settings.csv_cache_timeout, is_stale)
+    apply_swr_headers(response, settings.csv_cache_timeout, is_stale, age)
     return data

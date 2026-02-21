@@ -42,8 +42,8 @@ async def test_parse_hero_stats_summary(
         else:
             result = await parse_hero_stats_summary(
                 client,
-                **base_kwargs,
-                **extra_kwargs,  # ty: ignore[invalid-argument-type]
+                **base_kwargs,  # ty: ignore[invalid-argument-type]
+                **extra_kwargs,
             )
             assert isinstance(result, list)
             assert len(result) > 0

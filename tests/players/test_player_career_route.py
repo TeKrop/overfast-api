@@ -98,7 +98,7 @@ def test_get_player_career_blizzard_remote_protocol_error(client: TestClient):
 def test_get_player_career_internal_error(client: TestClient):
     with patch(
         "app.domain.services.player_service.PlayerService.get_player_career",
-        return_value=({"invalid_key": "invalid_value"}, False),
+        return_value=({"invalid_key": "invalid_value"}, False, 0),
     ):
         response = client.get("/players/TeKrop-2217")
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR

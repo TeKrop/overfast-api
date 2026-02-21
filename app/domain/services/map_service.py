@@ -12,7 +12,7 @@ class MapService(StaticDataService):
         self,
         gamemode: str | None,
         cache_key: str,
-    ) -> tuple[list[dict], bool]:
+    ) -> tuple[list[dict], bool, int]:
         """Return the maps list (with optional gamemode filter).
 
         Stores the full (unfiltered) maps list in SQLite.

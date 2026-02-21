@@ -33,8 +33,8 @@ async def list_roles(
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
 ) -> Any:
-    data, is_stale = await service.list_roles(
+    data, is_stale, age = await service.list_roles(
         locale=locale, cache_key=build_cache_key(request)
     )
-    apply_swr_headers(response, settings.heroes_path_cache_timeout, is_stale)
+    apply_swr_headers(response, settings.heroes_path_cache_timeout, is_stale, age)
     return data

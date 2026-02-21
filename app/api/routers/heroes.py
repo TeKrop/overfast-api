@@ -50,10 +50,10 @@ async def list_heroes(
     ] = Locale.ENGLISH_US,
     gamemode: Annotated[HeroGamemode | None, Query(title="Gamemode filter")] = None,
 ) -> Any:
-    data, is_stale = await service.list_heroes(
+    data, is_stale, age = await service.list_heroes(
         locale=locale, role=role, gamemode=gamemode, cache_key=build_cache_key(request)
     )
-    apply_swr_headers(response, settings.heroes_path_cache_timeout, is_stale)
+    apply_swr_headers(response, settings.heroes_path_cache_timeout, is_stale, age)
     return data
 
 
@@ -120,7 +120,7 @@ async def get_hero_stats(
         ),
     ] = "hero:asc",
 ) -> Any:
-    data, is_stale = await service.get_hero_stats(
+    data, is_stale, age = await service.get_hero_stats(
         platform=platform,
         gamemode=gamemode,
         region=region,
@@ -130,7 +130,7 @@ async def get_hero_stats(
         order_by=order_by,
         cache_key=build_cache_key(request),
     )
-    apply_swr_headers(response, settings.hero_stats_cache_timeout, is_stale)
+    apply_swr_headers(response, settings.hero_stats_cache_timeout, is_stale, age)
     return data
 
 
@@ -161,8 +161,8 @@ async def get_hero(
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
 ) -> Any:
-    data, is_stale = await service.get_hero(
+    data, is_stale, age = await service.get_hero(
         hero_key=str(hero_key), locale=locale, cache_key=build_cache_key(request)
     )
-    apply_swr_headers(response, settings.hero_path_cache_timeout, is_stale)
+    apply_swr_headers(response, settings.hero_path_cache_timeout, is_stale, age)
     return data

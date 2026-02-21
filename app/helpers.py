@@ -230,17 +230,21 @@ def apply_swr_headers(
     response: Response,
     cache_ttl: int,
     is_stale: bool,
+    age_seconds: int = 0,
 ) -> None:
     """Add standard SWR and cache metadata headers to the response.
 
-    Always sets ``X-Cache-TTL``.
+    Always sets ``X-Cache-TTL`` and ``Age`` (when known).
     When ``is_stale`` is True, additionally sets RFC-5861 ``Cache-Control``
-    and ``X-Cache-Status`` so downstream proxies (nginx/Lua) can handle stale
-    content correctly. The ``Age`` header is intentionally left to nginx, which
-    knows the actual time the response has been in its cache.
+    and ``X-Cache-Status``.
+
+    Note: nginx/Lua only sets ``X-Cache-TTL`` (remaining Valkey TTL) for
+    Valkey-served responses; all other headers are FastAPI-only and reflect
+    the actual SQLite data age.
     """
     response.headers[settings.cache_ttl_header] = str(cache_ttl)
-
+    if age_seconds > 0:
+        response.headers["Age"] = str(age_seconds)
     if is_stale:
         response.headers["Cache-Control"] = (
             f"max-age={cache_ttl}, stale-while-revalidate={cache_ttl * 2}"
