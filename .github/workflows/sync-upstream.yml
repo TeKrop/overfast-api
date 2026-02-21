@@ -350,3 +350,13 @@ jobs:
           script: |
             /opt/deploy-overfast.sh
 
+      - name: Notify overwatch_app to sync API models
+        if: success()
+        run: |
+          curl -sf -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.APP_REPO_PAT }}" \
+            https://api.github.com/repos/smart-app-solution/overwatch_app/dispatches \
+            -d '{"event_type":"api-updated"}'
+          echo "Dispatched api-updated event to overwatch_app"
+
