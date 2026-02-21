@@ -64,9 +64,7 @@ class AsyncioTaskQueue:
                 )
             finally:
                 elapsed = time.monotonic() - start
-                background_tasks_total.labels(
-                    task_type=task_name, status=status
-                ).inc()
+                background_tasks_total.labels(task_type=task_name, status=status).inc()
                 background_tasks_duration_seconds.labels(task_type=task_name).observe(
                     elapsed
                 )

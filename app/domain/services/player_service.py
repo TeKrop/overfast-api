@@ -36,6 +36,8 @@ from app.monitoring.metrics import (
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from app.players.enums import (
         HeroKeyCareerFilter,
         PlayerGamemode,
@@ -92,17 +94,12 @@ class PlayerService(BaseService):
         player_id: str,
         cache_key: str,
     ) -> tuple[dict, bool]:
-        """Return player summary (name, avatar, competitive ranks, …).
+        """Return player summary (name, avatar, competitive ranks, …)."""
 
-        Returns:
-            (data, is_stale, age_seconds)
-        """
-        return await self._execute_player_request(
-            player_id=player_id,
-            cache_key=cache_key,
-            summary=True,
-            stats=False,
-        )
+        def extract(html: str, player_summary: dict) -> dict:
+            return parse_player_profile_html(html, player_summary).get("summary") or {}
+
+        return await self._execute_player_request(player_id, cache_key, extract)
 
     # ------------------------------------------------------------------
     # Player career  (GET /players/{player_id})
@@ -115,19 +112,18 @@ class PlayerService(BaseService):
         platform: PlayerPlatform | None,
         cache_key: str,
     ) -> tuple[dict, bool]:
-        """Return full player data: summary + stats.
+        """Return full player data: summary + stats."""
 
-        Returns:
-            (data, is_stale, age_seconds)
-        """
-        return await self._execute_player_request(
-            player_id=player_id,
-            cache_key=cache_key,
-            summary=False,
-            stats=False,
-            gamemode=gamemode,
-            platform=platform,
-        )
+        def extract(html: str, player_summary: dict) -> dict:
+            profile = parse_player_profile_html(html, player_summary)
+            return {
+                "summary": profile.get("summary") or {},
+                "stats": filter_all_stats_data(
+                    profile.get("stats") or {}, platform, gamemode
+                ),
+            }
+
+        return await self._execute_player_request(player_id, cache_key, extract)
 
     # ------------------------------------------------------------------
     # Player stats  (GET /players/{player_id}/stats)
@@ -141,20 +137,15 @@ class PlayerService(BaseService):
         hero: HeroKeyCareerFilter | None,  # ty: ignore[invalid-type-form]
         cache_key: str,
     ) -> tuple[dict, bool]:
-        """Return player stats with category labels.
+        """Return player stats with category labels."""
 
-        Returns:
-            (data, is_stale, age_seconds)
-        """
-        return await self._execute_player_request(
-            player_id=player_id,
-            cache_key=cache_key,
-            summary=False,
-            stats=True,
-            gamemode=gamemode,
-            platform=platform,
-            hero=hero,
-        )
+        def extract(html: str, player_summary: dict) -> dict:
+            profile = parse_player_profile_html(html, player_summary)
+            return filter_stats_by_query(
+                profile.get("stats") or {}, platform, gamemode, hero
+            )
+
+        return await self._execute_player_request(player_id, cache_key, extract)
 
     # ------------------------------------------------------------------
     # Player stats summary  (GET /players/{player_id}/stats/summary)
@@ -167,42 +158,14 @@ class PlayerService(BaseService):
         platform: PlayerPlatform | None,
         cache_key: str,
     ) -> tuple[dict, bool]:
-        """Return player statistics summary (winrate, kda, …).
+        """Return player statistics summary (winrate, kda, …)."""
 
-        Returns:
-            (data, is_stale, age_seconds)
-        """
-        cache_key_player = player_id
-        battletag_input: str | None = None
-        player_summary: dict = {}
-
-        try:
-            (
-                blizzard_id,
-                player_summary,
-                cached_html,
-                battletag_input,
-            ) = await self._resolve_player_identity(player_id)
-            cache_key_player = blizzard_id or player_id
-
-            data = await self._fetch_stats_summary_with_cache(
-                blizzard_id=cache_key_player,
-                player_summary=player_summary,
-                gamemode=gamemode,
-                platform=platform,
-                battletag_input=battletag_input,
-                cached_html=cached_html,
-            )
-        except Exception as exc:  # noqa: BLE001
-            await self._handle_player_exceptions(
-                exc, cache_key_player, battletag_input, player_summary
+        def extract(html: str, player_summary: dict) -> dict:
+            return parse_player_stats_summary_from_html(
+                html, player_summary, gamemode, platform
             )
 
-        is_stale = self._check_player_staleness(cache_key_player)
-        await self._update_api_cache(
-            cache_key, data, settings.career_path_cache_timeout
-        )
-        return data, is_stale
+        return await self._execute_player_request(player_id, cache_key, extract)
 
     # ------------------------------------------------------------------
     # Player career stats  (GET /players/{player_id}/stats/career)
@@ -216,62 +179,37 @@ class PlayerService(BaseService):
         hero: HeroKeyCareerFilter | None,  # ty: ignore[invalid-type-form]
         cache_key: str,
     ) -> tuple[dict, bool]:
-        """Return player career stats (no labels).
+        """Return player career stats (no labels)."""
 
-        Returns:
-            (data, is_stale, age_seconds)
-        """
-        cache_key_player = player_id
-        battletag_input: str | None = None
-        player_summary: dict = {}
-
-        try:
-            (
-                blizzard_id,
-                player_summary,
-                cached_html,
-                battletag_input,
-            ) = await self._resolve_player_identity(player_id)
-            cache_key_player = blizzard_id or player_id
-
-            data = await self._fetch_career_stats_with_cache(
-                blizzard_id=cache_key_player,
-                player_summary=player_summary,
-                platform=platform,
-                gamemode=gamemode,
-                hero=hero,
-                battletag_input=battletag_input,
-                cached_html=cached_html,
-            )
-        except Exception as exc:  # noqa: BLE001
-            await self._handle_player_exceptions(
-                exc, cache_key_player, battletag_input, player_summary
+        def extract(html: str, player_summary: dict) -> dict:
+            return parse_player_career_stats_from_html(
+                html, player_summary, platform, gamemode, hero
             )
 
-        is_stale = self._check_player_staleness(cache_key_player)
-        await self._update_api_cache(
-            cache_key, data, settings.career_path_cache_timeout
-        )
-        return data, is_stale
+        return await self._execute_player_request(player_id, cache_key, extract)
 
     # ------------------------------------------------------------------
-    # Core request execution (career + summary)
+    # Core request execution — universal scaffold
     # ------------------------------------------------------------------
 
     async def _execute_player_request(
         self,
         player_id: str,
         cache_key: str,
-        summary: bool,
-        stats: bool,
-        gamemode: PlayerGamemode | None = None,
-        platform: PlayerPlatform | None = None,
-        hero: HeroKeyCareerFilter | None = None,  # ty: ignore[invalid-type-form]
+        data_factory: Callable[[str, dict], dict],
     ) -> tuple[dict, bool]:
-        """Shared execution path for summary, career, and stats endpoints."""
+        """Resolve identity → get HTML → compute data → update cache → return.
+
+        Args:
+            player_id: BattleTag or Blizzard ID.
+            cache_key: Valkey API-cache key to write after serving.
+            data_factory: Pure function ``(html, player_summary) → dict`` that
+                          extracts the endpoint-specific payload from the raw HTML.
+        """
         cache_key_player = player_id
         battletag_input: str | None = None
         player_summary: dict = {}
+        data: dict = {}
 
         try:
             (
@@ -282,21 +220,10 @@ class PlayerService(BaseService):
             ) = await self._resolve_player_identity(player_id)
             cache_key_player = blizzard_id or player_id
 
-            _html, profile_data = await self._fetch_profile_with_cache(
-                blizzard_id=cache_key_player,
-                player_summary=player_summary,
-                battletag_input=battletag_input,
-                cached_html=cached_html,
+            html = await self._get_player_html(
+                cache_key_player, player_summary, cached_html, battletag_input
             )
-
-            data = self._filter_profile_data(
-                profile_data,
-                summary_filter=summary,
-                stats_filter=stats,
-                platform_filter=platform,
-                gamemode_filter=gamemode,
-                hero_filter=hero,
-            )
+            data = data_factory(html, player_summary)
         except Exception as exc:  # noqa: BLE001
             await self._handle_player_exceptions(
                 exc, cache_key_player, battletag_input, player_summary
@@ -360,165 +287,54 @@ class PlayerService(BaseService):
         """
         return False
 
-    async def _fetch_profile_with_cache(
+    async def _get_player_html(
         self,
         blizzard_id: str,
         player_summary: dict,
+        cached_html: str | None,
         battletag_input: str | None,
-        cached_html: str | None = None,
-    ) -> tuple[str, dict]:
-        """Fetch player profile with SQLite cache."""
+    ) -> str:
+        """Return player HTML, always storing fresh HTML in SQLite.
+
+        Priority order:
+        1. ``cached_html`` — fetched during identity resolution; store and return.
+        2. SQLite hit with matching ``lastUpdated`` — return cached HTML, backfilling
+           battletag if it was missing.
+        3. Fetch from Blizzard, store, return.
+        """
         if cached_html:
-            logger.info("Using cached HTML from identity resolution")
-            profile_data = parse_player_profile_html(cached_html, player_summary)
             name = extract_name_from_profile_html(cached_html) or player_summary.get(
                 "name"
             )
             await self.update_player_profile_cache(
                 blizzard_id, player_summary, cached_html, battletag_input, name
             )
-            return cached_html, profile_data
+            return cached_html
 
         player_cache = await self.get_player_profile_cache(blizzard_id)
-
         if (
             player_cache is not None
             and player_summary
-            and player_cache["summary"]["lastUpdated"] == player_summary["lastUpdated"]
+            and player_cache["summary"].get("lastUpdated")
+            == player_summary.get("lastUpdated")
         ):
-            logger.info("Player profile cache found and up-to-date")
             html = cast("str", player_cache["profile"])
-            profile_data = parse_player_profile_html(html, player_summary)
-
             if battletag_input and not player_cache.get("battletag"):
-                cached_name = player_cache.get("name")
                 await self.update_player_profile_cache(
                     blizzard_id,
                     player_summary,
                     html,
                     battletag_input,
-                    cached_name if isinstance(cached_name, str) else None,
+                    player_cache.get("name"),
                 )
-            return html, profile_data
+            return html
 
-        logger.info("Player profile cache miss — fetching from Blizzard")
         html, _ = await fetch_player_html(self.blizzard_client, blizzard_id)
-        profile_data = parse_player_profile_html(html, player_summary)
         name = extract_name_from_profile_html(html) or player_summary.get("name")
         await self.update_player_profile_cache(
             blizzard_id, player_summary, html, battletag_input, name
         )
-        return html, profile_data
-
-    async def _fetch_stats_summary_with_cache(
-        self,
-        blizzard_id: str,
-        player_summary: dict,
-        gamemode: PlayerGamemode | None,
-        platform: PlayerPlatform | None,
-        battletag_input: str | None = None,
-        cached_html: str | None = None,
-    ) -> dict:
-        """Fetch player stats summary with SQLite cache."""
-        if cached_html:
-            return parse_player_stats_summary_from_html(
-                cached_html, player_summary, gamemode, platform
-            )
-
-        if not blizzard_id:
-            msg = "Unable to resolve player identity"
-            raise ParserParsingError(msg)
-
-        player_cache = await self.get_player_profile_cache(blizzard_id)
-
-        if (
-            player_cache is not None
-            and player_summary
-            and player_cache["summary"]["lastUpdated"] == player_summary["lastUpdated"]
-        ):
-            html = cast("str", player_cache["profile"])
-            return parse_player_stats_summary_from_html(
-                html, player_summary, gamemode, platform
-            )
-
-        html, _ = await fetch_player_html(self.blizzard_client, blizzard_id)
-        name = extract_name_from_profile_html(html)
-        data = parse_player_stats_summary_from_html(
-            html, player_summary, gamemode, platform
-        )
-        await self.update_player_profile_cache(
-            blizzard_id, player_summary, html, battletag_input, name
-        )
-        return data
-
-    async def _fetch_career_stats_with_cache(
-        self,
-        blizzard_id: str,
-        player_summary: dict,
-        platform: PlayerPlatform | None,
-        gamemode: PlayerGamemode | None,
-        hero: HeroKeyCareerFilter | None,  # ty: ignore[invalid-type-form]
-        battletag_input: str | None = None,
-        cached_html: str | None = None,
-    ) -> dict:
-        """Fetch player career stats with SQLite cache."""
-        if cached_html:
-            return parse_player_career_stats_from_html(
-                cached_html, player_summary, platform, gamemode, hero
-            )
-
-        if not blizzard_id:
-            msg = "Unable to resolve player identity"
-            raise ParserParsingError(msg)
-
-        player_cache = await self.get_player_profile_cache(blizzard_id)
-
-        if (
-            player_cache is not None
-            and player_summary
-            and player_cache["summary"]["lastUpdated"] == player_summary["lastUpdated"]
-        ):
-            html = cast("str", player_cache["profile"])
-            return parse_player_career_stats_from_html(
-                html, player_summary, platform, gamemode, hero
-            )
-
-        html, _ = await fetch_player_html(self.blizzard_client, blizzard_id)
-        name = extract_name_from_profile_html(html)
-        data = parse_player_career_stats_from_html(
-            html, player_summary, platform, gamemode, hero
-        )
-        await self.update_player_profile_cache(
-            blizzard_id, player_summary, html, battletag_input, name
-        )
-        return data
-
-    @staticmethod
-    def _filter_profile_data(
-        profile_data: dict,
-        summary_filter: bool,
-        stats_filter: bool,
-        platform_filter: PlayerPlatform | None,
-        gamemode_filter: PlayerGamemode | None,
-        hero_filter: HeroKeyCareerFilter | None,  # ty: ignore[invalid-type-form]
-    ) -> dict:
-        if summary_filter:
-            return profile_data.get("summary") or {}
-        if stats_filter:
-            return filter_stats_by_query(
-                profile_data.get("stats") or {},
-                platform_filter,
-                gamemode_filter,
-                hero_filter,
-            )
-        return {
-            "summary": profile_data.get("summary") or {},
-            "stats": filter_all_stats_data(
-                profile_data.get("stats") or {},
-                platform_filter,
-                gamemode_filter,
-            ),
-        }
+        return html
 
     # ------------------------------------------------------------------
     # Identity resolution
