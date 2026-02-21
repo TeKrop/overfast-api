@@ -133,14 +133,6 @@ class Settings(BaseSettings):
     # Used by nginx as main API cache.
     api_cache_key_prefix: str = "api-cache"
 
-    # Prefix for keys in Player Cache (Valkey). Used by player classes
-    # in order to avoid parsing data which has already been parsed.
-    player_cache_key_prefix: str = "player-cache"
-
-    # Cache TTL for Player Cache. Whenever a key is accessed, its TTL is reset.
-    # It will only expires if not accessed during TTL time.
-    player_cache_timeout: int = 259200
-
     # Cache TTL for heroes list data (seconds)
     heroes_path_cache_timeout: int = 86400
 
@@ -158,6 +150,21 @@ class Settings(BaseSettings):
 
     # Cache TTL for hero stats data (seconds)
     hero_stats_cache_timeout: int = 3600
+
+    ############
+    # SWR STALENESS THRESHOLDS
+    ############
+
+    # Age (seconds) after which static data is considered stale and triggers
+    # a background refresh while still serving the cached response.
+    heroes_staleness_threshold: int = 86400  # 24 hours
+    maps_staleness_threshold: int = 86400
+    gamemodes_staleness_threshold: int = 86400
+    roles_staleness_threshold: int = 86400
+    hero_stats_staleness_threshold: int = 3600  # 1 hour (same as cache TTL)
+
+    # Age (seconds) after which a player profile is considered stale.
+    player_staleness_threshold: int = 1800  # 30 min
 
     ############
     # UNKNOWN PLAYERS SYSTEM

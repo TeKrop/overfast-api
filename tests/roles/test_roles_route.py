@@ -36,8 +36,8 @@ def test_get_roles_blizzard_error(client: TestClient):
 
 def test_get_roles_internal_error(client: TestClient):
     with patch(
-        "app.roles.controllers.list_roles_controller.ListRolesController.process_request",
-        return_value=[{"invalid_key": "invalid_value"}],
+        "app.domain.services.role_service.RoleService.list_roles",
+        return_value=([{"invalid_key": "invalid_value"}], False, 0),
     ):
         response = client.get("/roles")
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR

@@ -161,7 +161,7 @@ def test_search_players_ordering(
 
 def test_search_players_internal_error(client: TestClient):
     with patch(
-        "app.players.controllers.search_players_controller.SearchPlayersController.process_request",
+        "app.domain.services.player_service.PlayerService.search_players",
         return_value={"invalid_key": "invalid_value"},
     ):
         response = client.get("/players", params={"name": "Test"})

@@ -4,13 +4,10 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Path, Query, Request, Response, status
 
+from app.api.dependencies import HeroServiceDep
+from app.config import settings
 from app.enums import Locale, RouteTag
-from app.helpers import routes_responses
-from app.heroes.controllers.get_hero_controller import GetHeroController
-from app.heroes.controllers.get_hero_stats_summary_controller import (
-    GetHeroStatsSummaryController,
-)
-from app.heroes.controllers.list_heroes_controller import ListHeroesController
+from app.helpers import apply_swr_headers, routes_responses
 from app.heroes.enums import HeroGamemode, HeroKey
 from app.heroes.models import (
     BadRequestErrorMessage,
@@ -38,7 +35,7 @@ router = APIRouter()
     summary="Get a list of heroes",
     description=(
         "Get a list of Overwatch heroes, which can be filtered using roles or gamemodes. "
-        f"<br />**Cache TTL : {ListHeroesController.get_human_readable_timeout()}.**"
+        f"<br />**Cache TTL : {settings.heroes_path_cache_timeout} seconds.**"
     ),
     operation_id="list_heroes",
     response_model=list[HeroShort],
@@ -46,17 +43,21 @@ router = APIRouter()
 async def list_heroes(
     request: Request,
     response: Response,
+    service: HeroServiceDep,
     role: Annotated[Role | None, Query(title="Role filter")] = None,
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
     gamemode: Annotated[HeroGamemode | None, Query(title="Gamemode filter")] = None,
 ) -> Any:
-    return await ListHeroesController(request, response).process_request(
-        role=role,
-        locale=locale,
-        gamemode=gamemode,
+    cache_key = request.url.path + (
+        f"?{request.query_params}" if request.query_params else ""
     )
+    data, is_stale, age = await service.list_heroes(
+        locale=locale, role=role, gamemode=gamemode, cache_key=cache_key
+    )
+    apply_swr_headers(response, settings.heroes_path_cache_timeout, is_stale, age)
+    return data
 
 
 @router.get(
@@ -73,7 +74,7 @@ async def list_heroes(
     description=(
         "Get hero statistics usage, filtered by platform, region, role, etc."
         "Only Role Queue gamemodes are concerned."
-        f"<br />**Cache TTL : {GetHeroStatsSummaryController.get_human_readable_timeout()}.**"
+        f"<br />**Cache TTL : {settings.hero_stats_cache_timeout} seconds.**"
     ),
     operation_id="get_hero_stats",
     response_model=list[HeroStatsSummary],
@@ -81,6 +82,7 @@ async def list_heroes(
 async def get_hero_stats(
     request: Request,
     response: Response,
+    service: HeroServiceDep,
     platform: Annotated[
         PlayerPlatform, Query(title="Player platform filter", examples=["pc"])
     ],
@@ -88,7 +90,7 @@ async def get_hero_stats(
         PlayerGamemode,
         Query(
             title="Gamemode",
-            description=("Filter on a specific gamemode."),
+            description="Filter on a specific gamemode.",
             examples=["competitive"],
         ),
     ],
@@ -96,7 +98,7 @@ async def get_hero_stats(
         PlayerRegion,
         Query(
             title="Region",
-            description=("Filter on a specific player region."),
+            description="Filter on a specific player region.",
             examples=["europe"],
         ),
     ],
@@ -121,15 +123,21 @@ async def get_hero_stats(
         ),
     ] = "hero:asc",
 ) -> Any:
-    return await GetHeroStatsSummaryController(request, response).process_request(
+    cache_key = request.url.path + (
+        f"?{request.query_params}" if request.query_params else ""
+    )
+    data, is_stale, age = await service.get_hero_stats(
         platform=platform,
         gamemode=gamemode,
         region=region,
         role=role,
-        map=map_,
+        map_filter=map_,
         competitive_division=competitive_division,
         order_by=order_by,
+        cache_key=cache_key,
     )
+    apply_swr_headers(response, settings.hero_stats_cache_timeout, is_stale, age)
+    return data
 
 
 @router.get(
@@ -145,7 +153,7 @@ async def get_hero_stats(
     summary="Get hero data",
     description=(
         "Get data about an Overwatch hero : description, abilities, stadium powers, story, etc. "
-        f"<br />**Cache TTL : {GetHeroController.get_human_readable_timeout()}.**"
+        f"<br />**Cache TTL : {settings.hero_path_cache_timeout} seconds.**"
     ),
     operation_id="get_hero",
     response_model=Hero,
@@ -153,12 +161,17 @@ async def get_hero_stats(
 async def get_hero(
     request: Request,
     response: Response,
+    service: HeroServiceDep,
     hero_key: Annotated[HeroKey, Path(title="Key name of the hero")],  # ty: ignore[invalid-type-form]
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
 ) -> Any:
-    return await GetHeroController(request, response).process_request(
-        hero_key=hero_key,
-        locale=locale,
+    cache_key = request.url.path + (
+        f"?{request.query_params}" if request.query_params else ""
     )
+    data, is_stale, age = await service.get_hero(
+        hero_key=str(hero_key), locale=locale, cache_key=cache_key
+    )
+    apply_swr_headers(response, settings.hero_path_cache_timeout, is_stale, age)
+    return data

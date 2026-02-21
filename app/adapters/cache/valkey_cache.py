@@ -147,27 +147,6 @@ class ValkeyCache(metaclass=Singleton):
             ex=expire,
         )
 
-    @handle_valkey_error(default_return=None)
-    async def get_player_cache(self, player_id: str) -> dict | list | None:
-        """Get the Player Cache value associated with a given cache key"""
-        player_key = f"{settings.player_cache_key_prefix}:{player_id}"
-        player_cache = await self.valkey_server.get(player_key)
-        if not player_cache or not isinstance(player_cache, bytes):
-            return None
-        # Reset the TTL before returning the value
-        await self.valkey_server.expire(player_key, settings.player_cache_timeout)
-        return self._decompress_json_value(player_cache)
-
-    @handle_valkey_error(default_return=None)
-    async def update_player_cache(self, player_id: str, value: dict) -> None:
-        """Update or set a Player Cache value"""
-        compressed_value = self._compress_json_value(value)
-        await self.valkey_server.set(
-            f"{settings.player_cache_key_prefix}:{player_id}",
-            value=compressed_value,
-            ex=settings.player_cache_timeout,
-        )
-
     @handle_valkey_error(default_return=False)
     async def is_being_rate_limited(self) -> bool:
         """Check if Blizzard rate limit is currently active"""

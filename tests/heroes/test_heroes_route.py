@@ -69,8 +69,8 @@ def test_get_heroes_blizzard_error(client: TestClient):
 
 def test_get_heroes_internal_error(client: TestClient):
     with patch(
-        "app.heroes.controllers.list_heroes_controller.ListHeroesController.process_request",
-        return_value=[{"invalid_key": "invalid_value"}],
+        "app.domain.services.hero_service.HeroService.list_heroes",
+        return_value=([{"invalid_key": "invalid_value"}], False, 0),
     ):
         response = client.get("/heroes")
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR

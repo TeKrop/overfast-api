@@ -4,18 +4,11 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Path, Query, Request, Response, status
 
+from app.api.dependencies import PlayerServiceDep
+from app.config import settings
 from app.enums import RouteTag
+from app.helpers import apply_swr_headers
 from app.helpers import routes_responses as common_routes_responses
-from app.players.controllers.get_player_career_controller import (
-    GetPlayerCareerController,
-)
-from app.players.controllers.get_player_career_stats_controller import (
-    GetPlayerCareerStatsController,
-)
-from app.players.controllers.get_player_stats_summary_controller import (
-    GetPlayerStatsSummaryController,
-)
-from app.players.controllers.search_players_controller import SearchPlayersController
 from app.players.enums import (
     HeroKeyCareerFilter,
     PlayerGamemode,
@@ -106,7 +99,7 @@ router = APIRouter()
     description=(
         "Search for a given player by using its username or BattleTag (with # replaced by -). "
         "<br />You should be able to find the associated player_id to use in order to request career data."
-        f"<br />**Cache TTL : {SearchPlayersController.get_human_readable_timeout()}.**"
+        f"<br />**Cache TTL : {settings.search_account_path_cache_timeout} seconds.**"
     ),
     operation_id="search_players",
     response_model=PlayerSearchResult,
@@ -114,6 +107,7 @@ router = APIRouter()
 async def search_players(
     request: Request,
     response: Response,
+    service: PlayerServiceDep,
     name: Annotated[
         str,
         Query(
@@ -131,12 +125,20 @@ async def search_players(
     offset: Annotated[int, Query(title="Offset of the results", ge=0)] = 0,
     limit: Annotated[int, Query(title="Limit of results per page", gt=0)] = 20,
 ) -> Any:
-    return await SearchPlayersController(request, response).process_request(
+    cache_key = request.url.path + (
+        f"?{request.query_params}" if request.query_params else ""
+    )
+    data = await service.search_players(
         name=name,
         order_by=order_by,
         offset=offset,
         limit=limit,
+        cache_key=cache_key,
     )
+    response.headers[settings.cache_ttl_header] = str(
+        settings.search_account_path_cache_timeout
+    )
+    return data
 
 
 @router.get(
@@ -146,7 +148,7 @@ async def search_players(
     summary="Get player summary",
     description=(
         "Get player summary : name, avatar, competitive ranks, etc. "
-        f"<br />**Cache TTL : {GetPlayerCareerController.get_human_readable_timeout()}.**"
+        f"<br />**Cache TTL : {settings.career_path_cache_timeout} seconds.**"
     ),
     operation_id="get_player_summary",
     response_model=PlayerSummary,
@@ -154,12 +156,18 @@ async def search_players(
 async def get_player_summary(
     request: Request,
     response: Response,
+    service: PlayerServiceDep,
     commons: CommonsPlayerDep,
 ) -> Any:
-    return await GetPlayerCareerController(request, response).process_request(
-        summary=True,
-        player_id=commons.get("player_id"),
+    cache_key = request.url.path + (
+        f"?{request.query_params}" if request.query_params else ""
     )
+    data, is_stale, age = await service.get_player_summary(
+        player_id=commons["player_id"],
+        cache_key=cache_key,
+    )
+    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale, age)
+    return data
 
 
 @router.get(
@@ -176,7 +184,7 @@ async def get_player_summary(
         "<br /> Depending on filters, data from both competitive and quickplay, "
         "and/or pc and console will be merged."
         "<br />Default behaviour : all gamemodes and platforms are taken in account."
-        f"<br />**Cache TTL : {GetPlayerStatsSummaryController.get_human_readable_timeout()}.**"
+        f"<br />**Cache TTL : {settings.career_path_cache_timeout} seconds.**"
     ),
     operation_id="get_player_stats_summary",
     response_model=PlayerStatsSummary,
@@ -184,6 +192,7 @@ async def get_player_summary(
 async def get_player_stats_summary(
     request: Request,
     response: Response,
+    service: PlayerServiceDep,
     commons: CommonsPlayerDep,
     gamemode: Annotated[
         PlayerGamemode | None,
@@ -208,11 +217,17 @@ async def get_player_stats_summary(
         ),
     ] = None,
 ) -> Any:
-    return await GetPlayerStatsSummaryController(request, response).process_request(
-        player_id=commons.get("player_id"),
-        platform=platform,
-        gamemode=gamemode,
+    cache_key = request.url.path + (
+        f"?{request.query_params}" if request.query_params else ""
     )
+    data, is_stale, age = await service.get_player_stats_summary(
+        player_id=commons["player_id"],
+        gamemode=gamemode,
+        platform=platform,
+        cache_key=cache_key,
+    )
+    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale, age)
+    return data
 
 
 @router.get(
@@ -226,7 +241,7 @@ async def get_player_stats_summary(
         "(combat, game, best, hero specific, average, etc.). Filter them on "
         "specific platform and gamemode (mandatory). You can even retrieve "
         "data about a specific hero of your choice."
-        f"<br />**Cache TTL : {GetPlayerCareerStatsController.get_human_readable_timeout()}.**"
+        f"<br />**Cache TTL : {settings.career_path_cache_timeout} seconds.**"
     ),
     operation_id="get_player_career_stats",
     response_model=PlayerCareerStats,
@@ -234,12 +249,21 @@ async def get_player_stats_summary(
 async def get_player_career_stats(
     request: Request,
     response: Response,
+    service: PlayerServiceDep,
     commons: CommonsPlayerCareerDep,
 ) -> Any:
-    return await GetPlayerCareerStatsController(request, response).process_request(
-        stats=True,
-        **commons,
+    cache_key = request.url.path + (
+        f"?{request.query_params}" if request.query_params else ""
     )
+    data, is_stale, age = await service.get_player_career_stats(
+        player_id=commons["player_id"],
+        gamemode=commons.get("gamemode"),
+        platform=commons.get("platform"),
+        hero=commons.get("hero"),
+        cache_key=cache_key,
+    )
+    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale, age)
+    return data
 
 
 @router.get(
@@ -251,7 +275,7 @@ async def get_player_career_stats(
     description=(
         "This endpoint exposes the same data as the previous one, except it also "
         "exposes labels of the categories and statistics."
-        f"<br />**Cache TTL : {GetPlayerCareerController.get_human_readable_timeout()}.**"
+        f"<br />**Cache TTL : {settings.career_path_cache_timeout} seconds.**"
     ),
     operation_id="get_player_stats",
     response_model=CareerStats,
@@ -259,12 +283,21 @@ async def get_player_career_stats(
 async def get_player_stats(
     request: Request,
     response: Response,
+    service: PlayerServiceDep,
     commons: CommonsPlayerCareerDep,
 ) -> Any:
-    return await GetPlayerCareerController(request, response).process_request(
-        stats=True,
-        **commons,
+    cache_key = request.url.path + (
+        f"?{request.query_params}" if request.query_params else ""
     )
+    data, is_stale, age = await service.get_player_stats(
+        player_id=commons["player_id"],
+        gamemode=commons.get("gamemode"),
+        platform=commons.get("platform"),
+        hero=commons.get("hero"),
+        cache_key=cache_key,
+    )
+    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale, age)
+    return data
 
 
 @router.get(
@@ -274,7 +307,7 @@ async def get_player_stats(
     summary="Get all player data",
     description=(
         "Get all player data : summary and statistics with labels."
-        f"<br />**Cache TTL : {GetPlayerCareerController.get_human_readable_timeout()}.**"
+        f"<br />**Cache TTL : {settings.career_path_cache_timeout} seconds.**"
     ),
     operation_id="get_player_career",
     response_model=Player,
@@ -282,6 +315,7 @@ async def get_player_stats(
 async def get_player_career(
     request: Request,
     response: Response,
+    service: PlayerServiceDep,
     commons: CommonsPlayerDep,
     gamemode: Annotated[
         PlayerGamemode | None,
@@ -300,8 +334,14 @@ async def get_player_career(
         ),
     ] = None,
 ) -> Any:
-    return await GetPlayerCareerController(request, response).process_request(
-        player_id=commons.get("player_id"),
+    cache_key = request.url.path + (
+        f"?{request.query_params}" if request.query_params else ""
+    )
+    data, is_stale, age = await service.get_player_career(
+        player_id=commons["player_id"],
         gamemode=gamemode,
         platform=platform,
+        cache_key=cache_key,
     )
+    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale, age)
+    return data

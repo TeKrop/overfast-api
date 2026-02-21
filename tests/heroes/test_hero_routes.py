@@ -72,8 +72,8 @@ def test_get_hero_blizzard_error(client: TestClient):
 
 def test_get_hero_internal_error(client: TestClient):
     with patch(
-        "app.heroes.controllers.get_hero_controller.GetHeroController.process_request",
-        return_value={"invalid_key": "invalid_value"},
+        "app.domain.services.hero_service.HeroService.get_hero",
+        return_value=({"invalid_key": "invalid_value"}, False, 0),
     ):
         response = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -119,7 +119,7 @@ def test_get_hero_no_portrait(
             ],
         ),
         patch(
-            "app.adapters.blizzard.parsers.heroes.filter_heroes",
+            "app.domain.services.hero_service.parse_heroes_html",
             return_value=[],
         ),
     ):

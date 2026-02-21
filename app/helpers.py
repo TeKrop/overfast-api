@@ -5,6 +5,7 @@ import traceback
 from datetime import UTC, datetime
 from functools import cache
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import httpx
 from fastapi import HTTPException, status
@@ -17,6 +18,9 @@ from .models import (
     RateLimitErrorMessage,
 )
 from .overfast_logger import logger
+
+if TYPE_CHECKING:
+    from fastapi import Response
 
 # Typical routes responses to return
 success_responses = {
@@ -225,3 +229,26 @@ def get_human_readable_duration(duration: int) -> str:
         duration_parts.append(f"{minutes} minute{'s' if minutes > 1 else ''}")
 
     return ", ".join(duration_parts)
+
+
+def apply_swr_headers(
+    response: Response,
+    cache_ttl: int,
+    is_stale: bool,
+    age_seconds: int,
+) -> None:
+    """Add standard SWR and cache metadata headers to the response.
+
+    Always sets ``X-Cache-TTL``.
+    When ``is_stale`` is True, additionally sets RFC-5861 ``Cache-Control``,
+    ``Age``, and ``X-Cache-Status`` so downstream proxies and clients can
+    handle stale content correctly.
+    """
+    response.headers[settings.cache_ttl_header] = str(cache_ttl)
+
+    if is_stale:
+        response.headers["Cache-Control"] = (
+            f"max-age={cache_ttl}, stale-while-revalidate={cache_ttl * 2}"
+        )
+        response.headers["Age"] = str(age_seconds)
+        response.headers["X-Cache-Status"] = "stale"

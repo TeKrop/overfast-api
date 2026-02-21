@@ -56,24 +56,6 @@ class CachePort(Protocol):
         """
         ...
 
-    async def get_player_cache(self, player_id: str) -> dict | list | None:
-        """
-        Get the Player Cache value associated with a given player ID.
-
-        Returns decompressed JSON data or None if not found.
-        Resets the TTL on successful retrieval.
-        """
-        ...
-
-    async def update_player_cache(self, player_id: str, value: dict) -> None:
-        """
-        Update or set a Player Cache value.
-
-        Value is JSON-serialized and compressed before storage.
-        Uses configured player cache TTL.
-        """
-        ...
-
     # Rate limiting methods
     async def is_being_rate_limited(self) -> bool:
         """Check if Blizzard rate limit is currently active"""
