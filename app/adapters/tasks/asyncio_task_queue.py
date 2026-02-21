@@ -1,8 +1,14 @@
 """AsyncIO task queue adapter — Phase 4 in-process background tasks with deduplication"""
 
 import asyncio
+import time
 from typing import TYPE_CHECKING, Any, ClassVar
 
+from app.monitoring.metrics import (
+    background_tasks_duration_seconds,
+    background_tasks_queue_size,
+    background_tasks_total,
+)
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
@@ -40,8 +46,11 @@ class AsyncioTaskQueue:
             return effective_id
 
         self._pending_jobs.add(effective_id)
+        background_tasks_queue_size.labels(task_type=task_name).inc()
 
         async def _run() -> None:
+            start = time.monotonic()
+            status = "success"
             try:
                 logger.info(
                     f"[TaskQueue] Running task '{task_name}' (job_id={effective_id})"
@@ -49,10 +58,19 @@ class AsyncioTaskQueue:
                 if coro is not None:
                     await coro
             except Exception as exc:  # noqa: BLE001
+                status = "failure"
                 logger.warning(
                     f"[TaskQueue] Task '{task_name}' (job_id={effective_id}) failed: {exc}"
                 )
             finally:
+                elapsed = time.monotonic() - start
+                background_tasks_total.labels(
+                    task_type=task_name, status=status
+                ).inc()
+                background_tasks_duration_seconds.labels(task_type=task_name).observe(
+                    elapsed
+                )
+                background_tasks_queue_size.labels(task_type=task_name).dec()
                 self._pending_jobs.discard(effective_id)
 
         task = asyncio.create_task(_run(), name=effective_id)
