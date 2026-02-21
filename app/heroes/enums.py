@@ -3,6 +3,17 @@ from enum import StrEnum
 from app.helpers import read_csv_data_file
 
 
+class BackgroundImageSize(StrEnum):
+    """Responsive breakpoint sizes for hero background images"""
+
+    MIN = "min"
+    XS = "xs"
+    SM = "sm"
+    MD = "md"
+    LG = "lg"
+    XL_PLUS = "xl+"
+
+
 class MediaType(StrEnum):
     """Media types for heroes pages"""
 
