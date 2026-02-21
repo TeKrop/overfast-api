@@ -4,7 +4,22 @@ from pydantic import BaseModel, Field, HttpUrl
 
 from app.roles.enums import Role
 
-from .enums import HeroGamemode, HeroKey, MediaType
+from .enums import BackgroundImageSize, HeroGamemode, HeroKey, MediaType
+
+
+class HeroBackground(BaseModel):
+    url: HttpUrl = Field(
+        ...,
+        description="URL of the background image",
+        examples=[
+            "https://blz-contentstack-images.akamaized.net/v3/assets/blt2477dcaf4ebd440c/blt242e79efb1e27251/631a8b791566e20e82f30288/1600_Cassidy.jpg",
+        ],
+    )
+    sizes: list[BackgroundImageSize] = Field(
+        ...,
+        description="Responsive breakpoint sizes for which this image is used",
+        examples=[["md", "lg"]],
+    )
 
 
 class HitPoints(BaseModel):
@@ -165,6 +180,26 @@ class Hero(BaseModel):
         ),
         examples=[
             "https://d15f34w2p8l1cc.cloudfront.net/overwatch/6cfb48b5597b657c2eafb1277dc5eef4a07eae90c265fcd37ed798189619f0a5.png",
+        ],
+    )
+    backgrounds: list[HeroBackground] = Field(
+        ...,
+        description="List of background images for the hero, one per responsive breakpoint group.",
+        examples=[
+            [
+                {
+                    "url": "https://blz-contentstack-images.akamaized.net/v3/assets/blt2477dcaf4ebd440c/bltadb0bb2e726bee08/631a8b79be2fcf0db5eea4c8/960_Cassidy.jpg",
+                    "sizes": ["min", "xs", "sm"],
+                },
+                {
+                    "url": "https://blz-contentstack-images.akamaized.net/v3/assets/blt2477dcaf4ebd440c/blt242e79efb1e27251/631a8b791566e20e82f30288/1600_Cassidy.jpg",
+                    "sizes": ["md", "lg"],
+                },
+                {
+                    "url": "https://blz-contentstack-images.akamaized.net/v3/assets/blt2477dcaf4ebd440c/blt4bb4c31f6849c25b/631a8b781613910e6926bfd4/2600_Cassidy.jpg",
+                    "sizes": ["xl+"],
+                },
+            ],
         ],
     )
     role: Role = Field(

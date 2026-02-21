@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.43.0 (2026-02-21)
+
+### Features
+
+- **heroes**: Add hero background images support
+  ([#377](https://github.com/TeKrop/overfast-api/pull/377),
+  [`9d0c147`](https://github.com/TeKrop/overfast-api/commit/9d0c147c9dd781bf893ea8bf5c545fc995e4cb2f))
+
+
 ## v3.42.1 (2026-02-19)
 
 ### Bug Fixes
