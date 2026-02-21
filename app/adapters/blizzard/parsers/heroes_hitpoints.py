@@ -15,10 +15,7 @@ def parse_heroes_hitpoints() -> dict[str, dict]:
     csv_reader = CSVReader()
     csv_data = csv_reader.read_csv_file("heroes")
 
-    return {
-        row["key"]: {"hitpoints": _get_hitpoints(row)}
-        for row in csv_data
-    }
+    return {row["key"]: {"hitpoints": _get_hitpoints(row)} for row in csv_data}
 
 
 def _get_hitpoints(row: dict) -> dict:

@@ -2,7 +2,7 @@
 
 from app.adapters.blizzard.parsers.maps import parse_maps_csv
 from app.config import settings
-from app.domain.services.base_service import StaticDataService
+from app.domain.services.static_data_service import StaticDataService
 
 
 class MapService(StaticDataService):
@@ -17,6 +17,7 @@ class MapService(StaticDataService):
 
         Stores the full (unfiltered) maps list in SQLite.
         """
+
         async def _fetch() -> list[dict]:
             return parse_maps_csv()
 
