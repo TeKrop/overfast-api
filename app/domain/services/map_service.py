@@ -29,7 +29,7 @@ class MapService(BaseService):
         return await self.get_or_fetch(
             storage_key="maps:all",
             fetcher=_fetch,
-            filter=_filter,
+            result_filter=_filter,
             cache_key=cache_key,
             cache_ttl=settings.csv_cache_timeout,
             staleness_threshold=settings.maps_staleness_threshold,

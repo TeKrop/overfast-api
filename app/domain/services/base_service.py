@@ -77,7 +77,7 @@ class BaseService:
         entity_type: str,
         table: StorageTable = StorageTable.STATIC_DATA,
         parser: Callable[[Any], Any] | None = None,
-        filter: Callable[[Any], Any] | None = None,  # noqa: A002
+        result_filter: Callable[[Any], Any] | None = None,
     ) -> tuple[Any, bool]:
         """SWR orchestration for data backed by SQLite.
 
@@ -92,7 +92,7 @@ class BaseService:
             table: SQLite table to read/write (default: static_data).
             parser: Optional callable that converts raw fetcher output into the
                     stored/returned format. Defaults to identity (raw data as-is).
-            filter: Optional callable applied to parsed data before returning.
+            result_filter: Optional callable applied to parsed data before returning.
                     Not stored — re-applied on each request when serving stale data.
 
         Returns:
@@ -120,8 +120,8 @@ class BaseService:
 
             storage_hits_total.labels(result="hit").inc()
 
-            if filter is not None:
-                data = filter(data)
+            if result_filter is not None:
+                data = result_filter(data)
 
             await self._update_api_cache(cache_key, data, cache_ttl)
             return data, is_stale
@@ -134,7 +134,7 @@ class BaseService:
         data = parser(raw) if parser is not None else raw
         await self._store_in_storage(storage_key, data, table)
 
-        filtered = filter(data) if filter is not None else data
+        filtered = result_filter(data) if result_filter is not None else data
         await self._update_api_cache(cache_key, filtered, cache_ttl)
         return filtered, False
 

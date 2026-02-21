@@ -11,7 +11,7 @@ from app.adapters.blizzard.parsers.heroes import (
     filter_heroes,
     parse_heroes_html,
 )
-from app.adapters.blizzard.parsers.heroes_stats import parse_heroes_stats
+from app.adapters.blizzard.parsers.heroes_hitpoints import parse_heroes_hitpoints
 from app.config import settings
 from app.domain.services.base_service import BaseService
 from app.enums import Locale
@@ -61,7 +61,7 @@ class HeroService(BaseService):
         return await self.get_or_fetch(
             storage_key=f"heroes:{locale}",
             fetcher=_fetch,
-            filter=_filter,
+            result_filter=_filter,
             cache_key=cache_key,
             cache_ttl=settings.heroes_path_cache_timeout,
             staleness_threshold=settings.heroes_staleness_threshold,
@@ -87,8 +87,8 @@ class HeroService(BaseService):
             hero_data = await parse_hero(self.blizzard_client, hero_key, locale)
             heroes_html = await fetch_heroes_html(self.blizzard_client, locale)
             heroes_list = parse_heroes_html(heroes_html)
-            heroes_stats = parse_heroes_stats()
-            data = _merge_hero_data(hero_data, heroes_list, heroes_stats, hero_key)
+            heroes_hitpoints = parse_heroes_hitpoints()
+            data = _merge_hero_data(hero_data, heroes_list, heroes_hitpoints, hero_key)
         except ParserBlizzardError as exc:
             raise HTTPException(
                 status_code=exc.status_code, detail=exc.message
@@ -125,7 +125,7 @@ class HeroService(BaseService):
         async def _fetch() -> list[dict]:
             try:
                 return await parse_hero_stats_summary(
-                    self.blizzard_client,  # ty: ignore[invalid-argument-type]
+                    self.blizzard_client,
                     platform=platform,
                     gamemode=gamemode,
                     region=region,
@@ -145,7 +145,7 @@ class HeroService(BaseService):
         return await self.get_or_fetch(
             storage_key=storage_key,
             fetcher=_fetch,
-            filter=_filter,
+            result_filter=_filter,
             cache_key=cache_key,
             cache_ttl=settings.hero_stats_cache_timeout,
             staleness_threshold=settings.hero_stats_staleness_threshold,
@@ -161,10 +161,10 @@ class HeroService(BaseService):
 def _merge_hero_data(
     hero_data: dict,
     heroes_list: list[dict],
-    heroes_stats: dict,
+    heroes_hitpoints: dict,
     hero_key: str,
 ) -> dict:
-    """Merge data from hero details, heroes list, and heroes stats."""
+    """Merge data from hero details, heroes list, and heroes hitpoints."""
     try:
         portrait_value = next(
             hero["portrait"] for hero in heroes_list if hero["key"] == hero_key
@@ -177,7 +177,7 @@ def _merge_hero_data(
         )
 
     try:
-        hitpoints = heroes_stats[hero_key]["hitpoints"]
+        hitpoints = heroes_hitpoints[hero_key]["hitpoints"]
     except KeyError:
         hitpoints = None
     else:

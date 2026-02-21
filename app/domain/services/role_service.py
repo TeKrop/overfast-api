@@ -20,7 +20,7 @@ class RoleService(BaseService):
 
         async def _fetch() -> list[dict]:
             try:
-                html = await fetch_roles_html(self.blizzard_client, locale)  # ty: ignore[invalid-argument-type]
+                html = await fetch_roles_html(self.blizzard_client, locale)
                 return parse_roles_html(html)
             except ParserParsingError as exc:
                 blizzard_url = f"{settings.blizzard_host}/{locale}{settings.home_path}"
