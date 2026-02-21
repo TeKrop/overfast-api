@@ -1,26 +1,55 @@
-from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import status
 
-from app.exceptions import OverfastError
-from app.heroes.enums import HeroKey
+from app.adapters.blizzard.parsers.heroes import (
+    fetch_heroes_html,
+    filter_heroes,
+    parse_heroes_html,
+)
+from app.heroes.enums import HeroGamemode, HeroKey
+from app.overfast_client import OverFastClient
+from app.roles.enums import Role
 
-if TYPE_CHECKING:
-    from app.heroes.parsers.heroes_parser import HeroesParser
+
+def test_parse_heroes_html_returns_all_heroes(heroes_html_data: str):
+    result = parse_heroes_html(heroes_html_data)
+    assert isinstance(result, list)
+    assert all(hero["key"] in iter(HeroKey) for hero in result)
+
+
+def test_parse_heroes_html_entry_format(heroes_html_data: str):
+    result = parse_heroes_html(heroes_html_data)
+    first = result[0]
+    assert set(first.keys()) == {"key", "name", "portrait", "role", "gamemodes"}
+
+
+def test_filter_heroes_by_role(heroes_html_data: str):
+    heroes = parse_heroes_html(heroes_html_data)
+    filtered = filter_heroes(heroes, role=Role.TANK, gamemode=None)
+    assert all(h["role"] == Role.TANK for h in filtered)
+    assert len(filtered) < len(heroes)
+
+
+def test_filter_heroes_by_gamemode(heroes_html_data: str):
+    heroes = parse_heroes_html(heroes_html_data)
+    filtered = filter_heroes(heroes, role=None, gamemode=HeroGamemode.STADIUM)
+    assert len(filtered) <= len(heroes)
+
+
+def test_filter_heroes_no_filter(heroes_html_data: str):
+    heroes = parse_heroes_html(heroes_html_data)
+    assert filter_heroes(heroes, role=None, gamemode=None) == heroes
 
 
 @pytest.mark.asyncio
-async def test_heroes_page_parsing(heroes_parser: HeroesParser, heroes_html_data: str):
+async def test_fetch_heroes_html_calls_blizzard(heroes_html_data: str):
     with patch(
         "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
     ):
-        try:
-            await heroes_parser.parse()
-        except OverfastError:
-            pytest.fail("Heroes list parsing failed")
+        client = OverFastClient()
+        html = await fetch_heroes_html(client)
 
-    assert isinstance(heroes_parser.data, list)
-    assert all(hero["key"] in iter(HeroKey) for hero in heroes_parser.data)
+    assert html == heroes_html_data

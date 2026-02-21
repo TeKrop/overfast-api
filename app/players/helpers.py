@@ -2,7 +2,7 @@ import re
 import unicodedata
 from functools import cache
 
-from app.helpers import read_csv_data_file
+from app.adapters.csv import CSVReader
 from app.roles.enums import Role
 
 from .enums import CareerStatCategory, CompetitiveDivision, CompetitiveRole, HeroKey
@@ -16,7 +16,7 @@ FLOAT_PATTERN = re.compile(r"^-?\d+(,\d+)*\.\d+$")
 @cache
 def get_hero_name(hero_key: HeroKey) -> str:  # ty: ignore[invalid-type-form]
     """Get a hero name based on the CSV file"""
-    heroes_data = read_csv_data_file("heroes")
+    heroes_data = CSVReader.read_csv_file("heroes")
     return next(
         (
             hero_data["name"]
@@ -160,7 +160,7 @@ def remove_accents(input_str: str) -> str:
 @cache
 def get_hero_role(hero_key: HeroKey) -> Role | None:  # ty: ignore[invalid-type-form]
     """Get the role of a given hero based on the CSV file"""
-    heroes_data = read_csv_data_file("heroes")
+    heroes_data = CSVReader.read_csv_file("heroes")
     role_key = next(
         (
             hero_data["role"]

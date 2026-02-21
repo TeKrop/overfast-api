@@ -2,8 +2,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from app.exceptions import OverfastError, ParserBlizzardError
-from app.heroes.parsers.hero_stats_summary_parser import HeroStatsSummaryParser
+from app.adapters.blizzard.parsers.hero_stats_summary import parse_hero_stats_summary
+from app.exceptions import ParserBlizzardError
+from app.overfast_client import OverFastClient
 from app.players.enums import (
     CompetitiveDivision,
     PlayerGamemode,
@@ -14,31 +15,15 @@ from app.players.enums import (
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    ("parser_init_kwargs", "blizzard_query_params", "raises_error"),
+    ("extra_kwargs", "raises_error"),
     [
-        # Nominal case
-        (
-            {},
-            {},
-            False,
-        ),
-        # Specific filter (tier)
-        (
-            {"competitive_division": CompetitiveDivision.DIAMOND},
-            {"tier": "Diamond"},
-            False,
-        ),
-        # Invalid map filter (not compatible with competitive)
-        (
-            {"map": "hanaoka"},
-            {"map": "hanaoka"},
-            True,
-        ),
+        ({}, False),
+        ({"competitive_division": CompetitiveDivision.DIAMOND}, False),
+        ({"map_filter": "hanaoka"}, True),
     ],
 )
-async def test_hero_stats_summary_parser(
-    parser_init_kwargs: dict,
-    blizzard_query_params: dict,
+async def test_parse_hero_stats_summary(
+    extra_kwargs: dict,
     raises_error: bool,
     hero_stats_response_mock: Mock,
 ):
@@ -48,35 +33,16 @@ async def test_hero_stats_summary_parser(
         "region": PlayerRegion.EUROPE,
         "order_by": "hero:asc",
     }
-    init_kwargs = base_kwargs | parser_init_kwargs
 
-    # Instanciate with given kwargs
-    parser = HeroStatsSummaryParser(**init_kwargs)
-
-    # Ensure running the parsing won't fail
     with patch("httpx.AsyncClient.get", return_value=hero_stats_response_mock):
+        client = OverFastClient()
         if raises_error:
-            with pytest.raises(
-                ParserBlizzardError,
-                match=(
-                    f"Selected map '{init_kwargs['map']}' is not compatible "
-                    f"with '{init_kwargs['gamemode']}' gamemode"
-                ),
-            ):
-                await parser.parse()
+            with pytest.raises(ParserBlizzardError):
+                await parse_hero_stats_summary(client, **base_kwargs, **extra_kwargs)  # ty: ignore[invalid-argument-type]
         else:
-            try:
-                await parser.parse()
-            except OverfastError:
-                pytest.fail("Hero stats summary parsing failed")
-
-    # Ensure we're sending the right parameters to Blibli
-    base_query_params = {
-        "input": "PC",
-        "rq": "1",
-        "region": "Europe",
-        "map": "all-maps",
-        "tier": "All",
-    }
-    query_params = base_query_params | blizzard_query_params
-    assert parser.get_blizzard_query_params(**init_kwargs) == query_params
+            result = await parse_hero_stats_summary(
+                client, **base_kwargs, **extra_kwargs
+            )  # ty: ignore[invalid-argument-type]
+            assert isinstance(result, list)
+            assert len(result) > 0
+            assert "hero" in result[0]

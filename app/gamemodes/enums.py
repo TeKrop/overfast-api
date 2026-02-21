@@ -1,9 +1,9 @@
 from enum import StrEnum
 
-from app.helpers import read_csv_data_file
+from app.adapters.csv import CSVReader
 
 # Dynamically create the MapGamemode enum by using the CSV File
-gamemodes_data = read_csv_data_file("gamemodes")
+gamemodes_data = CSVReader.read_csv_file("gamemodes")
 MapGamemode = StrEnum(
     "MapGamemode",
     {

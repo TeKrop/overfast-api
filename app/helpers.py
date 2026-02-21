@@ -1,10 +1,8 @@
 """Parser Helpers module"""
 
-import csv
 import traceback
 from datetime import UTC, datetime
 from functools import cache
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import httpx
@@ -201,15 +199,6 @@ def send_discord_webhook_message(
     return httpx.post(  # pragma: no cover
         settings.discord_webhook_url, json=payload, timeout=10
     )
-
-
-@cache
-def read_csv_data_file(filename: str) -> list[dict[str, str]]:
-    """Helper method for obtaining CSV DictReader from a path"""
-    with Path(f"{Path.cwd()}/app/{filename}/data/{filename}.csv").open(
-        encoding="utf-8"
-    ) as csv_file:
-        return list(csv.DictReader(csv_file, delimiter=","))
 
 
 @cache

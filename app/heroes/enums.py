@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from app.helpers import read_csv_data_file
+from app.adapters.csv import CSVReader
 
 
 class MediaType(StrEnum):
@@ -12,7 +12,7 @@ class MediaType(StrEnum):
 
 
 # Dynamically create the HeroKey enum by using the CSV File
-heroes_data = read_csv_data_file("heroes")
+heroes_data = CSVReader.read_csv_file("heroes")
 HeroKey = StrEnum(
     "HeroKey",
     {
