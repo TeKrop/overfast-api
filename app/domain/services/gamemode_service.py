@@ -11,19 +11,14 @@ class GamemodeService(BaseService):
     async def list_gamemodes(
         self,
         cache_key: str,
-    ) -> tuple[list[dict], bool, int]:
-        """Return the gamemodes list.
-
-        Returns:
-            (data, is_stale, age_seconds)
-        """
-        storage_key = "gamemodes:all"
+    ) -> tuple[list[dict], bool]:
+        """Return the gamemodes list."""
 
         async def _fetch() -> list[dict]:
             return parse_gamemodes_csv()
 
-        return await self._get_or_fetch_static(
-            storage_key=storage_key,
+        return await self.get_or_fetch(
+            storage_key="gamemodes:all",
             fetcher=_fetch,
             cache_key=cache_key,
             cache_ttl=settings.csv_cache_timeout,

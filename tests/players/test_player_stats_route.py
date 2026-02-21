@@ -218,7 +218,6 @@ def test_get_player_stats_internal_error(
                 "ana": [{"category": "invalid_value", "stats": [{"key": "test"}]}],
             },
             False,
-            0,
         ),
     ):
         response = client.get(

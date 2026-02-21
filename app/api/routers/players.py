@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Path, Query, Request, Response, status
 from app.api.dependencies import PlayerServiceDep
 from app.config import settings
 from app.enums import RouteTag
-from app.helpers import apply_swr_headers
+from app.helpers import apply_swr_headers, build_cache_key
 from app.helpers import routes_responses as common_routes_responses
 from app.players.enums import (
     HeroKeyCareerFilter,
@@ -125,9 +125,7 @@ async def search_players(
     offset: Annotated[int, Query(title="Offset of the results", ge=0)] = 0,
     limit: Annotated[int, Query(title="Limit of results per page", gt=0)] = 20,
 ) -> Any:
-    cache_key = request.url.path + (
-        f"?{request.query_params}" if request.query_params else ""
-    )
+    cache_key = build_cache_key(request)
     data = await service.search_players(
         name=name,
         order_by=order_by,
@@ -159,14 +157,12 @@ async def get_player_summary(
     service: PlayerServiceDep,
     commons: CommonsPlayerDep,
 ) -> Any:
-    cache_key = request.url.path + (
-        f"?{request.query_params}" if request.query_params else ""
-    )
-    data, is_stale, age = await service.get_player_summary(
+    cache_key = build_cache_key(request)
+    data, is_stale = await service.get_player_summary(
         player_id=commons["player_id"],
         cache_key=cache_key,
     )
-    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale, age)
+    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale)
     return data
 
 
@@ -217,16 +213,14 @@ async def get_player_stats_summary(
         ),
     ] = None,
 ) -> Any:
-    cache_key = request.url.path + (
-        f"?{request.query_params}" if request.query_params else ""
-    )
-    data, is_stale, age = await service.get_player_stats_summary(
+    cache_key = build_cache_key(request)
+    data, is_stale = await service.get_player_stats_summary(
         player_id=commons["player_id"],
         gamemode=gamemode,
         platform=platform,
         cache_key=cache_key,
     )
-    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale, age)
+    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale)
     return data
 
 
@@ -252,17 +246,15 @@ async def get_player_career_stats(
     service: PlayerServiceDep,
     commons: CommonsPlayerCareerDep,
 ) -> Any:
-    cache_key = request.url.path + (
-        f"?{request.query_params}" if request.query_params else ""
-    )
-    data, is_stale, age = await service.get_player_career_stats(
+    cache_key = build_cache_key(request)
+    data, is_stale = await service.get_player_career_stats(
         player_id=commons["player_id"],
         gamemode=commons.get("gamemode"),
         platform=commons.get("platform"),
         hero=commons.get("hero"),
         cache_key=cache_key,
     )
-    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale, age)
+    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale)
     return data
 
 
@@ -286,17 +278,15 @@ async def get_player_stats(
     service: PlayerServiceDep,
     commons: CommonsPlayerCareerDep,
 ) -> Any:
-    cache_key = request.url.path + (
-        f"?{request.query_params}" if request.query_params else ""
-    )
-    data, is_stale, age = await service.get_player_stats(
+    cache_key = build_cache_key(request)
+    data, is_stale = await service.get_player_stats(
         player_id=commons["player_id"],
         gamemode=commons.get("gamemode"),
         platform=commons.get("platform"),
         hero=commons.get("hero"),
         cache_key=cache_key,
     )
-    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale, age)
+    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale)
     return data
 
 
@@ -334,14 +324,12 @@ async def get_player_career(
         ),
     ] = None,
 ) -> Any:
-    cache_key = request.url.path + (
-        f"?{request.query_params}" if request.query_params else ""
-    )
-    data, is_stale, age = await service.get_player_career(
+    cache_key = build_cache_key(request)
+    data, is_stale = await service.get_player_career(
         player_id=commons["player_id"],
         gamemode=gamemode,
         platform=platform,
         cache_key=cache_key,
     )
-    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale, age)
+    apply_swr_headers(response, settings.career_path_cache_timeout, is_stale)
     return data

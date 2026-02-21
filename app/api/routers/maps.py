@@ -8,7 +8,7 @@ from app.api.dependencies import MapServiceDep
 from app.config import settings
 from app.enums import RouteTag
 from app.gamemodes.enums import MapGamemode
-from app.helpers import apply_swr_headers, success_responses
+from app.helpers import apply_swr_headers, build_cache_key, success_responses
 from app.maps.models import Map
 
 router = APIRouter()
@@ -38,11 +38,8 @@ async def list_maps(
         ),
     ] = None,
 ) -> Any:
-    cache_key = request.url.path + (
-        f"?{request.query_params}" if request.query_params else ""
+    data, is_stale = await service.list_maps(
+        gamemode=gamemode, cache_key=build_cache_key(request)
     )
-    data, is_stale, age = await service.list_maps(
-        gamemode=gamemode, cache_key=cache_key
-    )
-    apply_swr_headers(response, settings.csv_cache_timeout, is_stale, age)
+    apply_swr_headers(response, settings.csv_cache_timeout, is_stale)
     return data

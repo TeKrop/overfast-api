@@ -75,7 +75,7 @@ def test_get_player_summary_blizzard_timeout(client: TestClient):
 def test_get_player_summary_internal_error(client: TestClient):
     with patch(
         "app.domain.services.player_service.PlayerService.get_player_summary",
-        return_value=({"invalid_key": "invalid_value"}, False, 0),
+        return_value=({"invalid_key": "invalid_value"}, False),
     ):
         response = client.get("/players/TeKrop-2217/summary")
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR

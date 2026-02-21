@@ -20,7 +20,7 @@ from .models import (
 from .overfast_logger import logger
 
 if TYPE_CHECKING:
-    from fastapi import Response
+    from fastapi import Request, Response
 
 # Typical routes responses to return
 success_responses = {
@@ -231,18 +231,24 @@ def get_human_readable_duration(duration: int) -> str:
     return ", ".join(duration_parts)
 
 
+def build_cache_key(request: Request) -> str:
+    """Build a canonical cache key from the request URL path + query string."""
+    qs = str(request.query_params)
+    return f"{request.url.path}?{qs}" if qs else request.url.path
+
+
 def apply_swr_headers(
     response: Response,
     cache_ttl: int,
     is_stale: bool,
-    age_seconds: int,
 ) -> None:
     """Add standard SWR and cache metadata headers to the response.
 
     Always sets ``X-Cache-TTL``.
-    When ``is_stale`` is True, additionally sets RFC-5861 ``Cache-Control``,
-    ``Age``, and ``X-Cache-Status`` so downstream proxies and clients can
-    handle stale content correctly.
+    When ``is_stale`` is True, additionally sets RFC-5861 ``Cache-Control``
+    and ``X-Cache-Status`` so downstream proxies (nginx/Lua) can handle stale
+    content correctly. The ``Age`` header is intentionally left to nginx, which
+    knows the actual time the response has been in its cache.
     """
     response.headers[settings.cache_ttl_header] = str(cache_ttl)
 
@@ -250,5 +256,4 @@ def apply_swr_headers(
         response.headers["Cache-Control"] = (
             f"max-age={cache_ttl}, stale-while-revalidate={cache_ttl * 2}"
         )
-        response.headers["Age"] = str(age_seconds)
         response.headers["X-Cache-Status"] = "stale"

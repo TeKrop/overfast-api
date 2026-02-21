@@ -136,7 +136,6 @@ def test_get_player_stats_summary_internal_error(client: TestClient):
                 "general": [{"category": "invalid_value", "stats": [{"key": "test"}]}],
             },
             False,
-            0,
         ),
     ):
         response = client.get(

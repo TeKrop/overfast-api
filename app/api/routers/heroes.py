@@ -7,7 +7,7 @@ from fastapi import APIRouter, Path, Query, Request, Response, status
 from app.api.dependencies import HeroServiceDep
 from app.config import settings
 from app.enums import Locale, RouteTag
-from app.helpers import apply_swr_headers, routes_responses
+from app.helpers import apply_swr_headers, build_cache_key, routes_responses
 from app.heroes.enums import HeroGamemode, HeroKey
 from app.heroes.models import (
     BadRequestErrorMessage,
@@ -50,13 +50,10 @@ async def list_heroes(
     ] = Locale.ENGLISH_US,
     gamemode: Annotated[HeroGamemode | None, Query(title="Gamemode filter")] = None,
 ) -> Any:
-    cache_key = request.url.path + (
-        f"?{request.query_params}" if request.query_params else ""
+    data, is_stale = await service.list_heroes(
+        locale=locale, role=role, gamemode=gamemode, cache_key=build_cache_key(request)
     )
-    data, is_stale, age = await service.list_heroes(
-        locale=locale, role=role, gamemode=gamemode, cache_key=cache_key
-    )
-    apply_swr_headers(response, settings.heroes_path_cache_timeout, is_stale, age)
+    apply_swr_headers(response, settings.heroes_path_cache_timeout, is_stale)
     return data
 
 
@@ -123,10 +120,7 @@ async def get_hero_stats(
         ),
     ] = "hero:asc",
 ) -> Any:
-    cache_key = request.url.path + (
-        f"?{request.query_params}" if request.query_params else ""
-    )
-    data, is_stale, age = await service.get_hero_stats(
+    data, is_stale = await service.get_hero_stats(
         platform=platform,
         gamemode=gamemode,
         region=region,
@@ -134,9 +128,9 @@ async def get_hero_stats(
         map_filter=map_,
         competitive_division=competitive_division,
         order_by=order_by,
-        cache_key=cache_key,
+        cache_key=build_cache_key(request),
     )
-    apply_swr_headers(response, settings.hero_stats_cache_timeout, is_stale, age)
+    apply_swr_headers(response, settings.hero_stats_cache_timeout, is_stale)
     return data
 
 
@@ -167,11 +161,8 @@ async def get_hero(
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
 ) -> Any:
-    cache_key = request.url.path + (
-        f"?{request.query_params}" if request.query_params else ""
+    data, is_stale = await service.get_hero(
+        hero_key=str(hero_key), locale=locale, cache_key=build_cache_key(request)
     )
-    data, is_stale, age = await service.get_hero(
-        hero_key=str(hero_key), locale=locale, cache_key=cache_key
-    )
-    apply_swr_headers(response, settings.hero_path_cache_timeout, is_stale, age)
+    apply_swr_headers(response, settings.hero_path_cache_timeout, is_stale)
     return data

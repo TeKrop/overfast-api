@@ -7,7 +7,7 @@ from fastapi import APIRouter, Query, Request, Response
 from app.api.dependencies import RoleServiceDep
 from app.config import settings
 from app.enums import Locale, RouteTag
-from app.helpers import apply_swr_headers, routes_responses
+from app.helpers import apply_swr_headers, build_cache_key, routes_responses
 from app.roles.models import RoleDetail
 
 router = APIRouter()
@@ -33,9 +33,8 @@ async def list_roles(
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
 ) -> Any:
-    cache_key = request.url.path + (
-        f"?{request.query_params}" if request.query_params else ""
+    data, is_stale = await service.list_roles(
+        locale=locale, cache_key=build_cache_key(request)
     )
-    data, is_stale, age = await service.list_roles(locale=locale, cache_key=cache_key)
-    apply_swr_headers(response, settings.heroes_path_cache_timeout, is_stale, age)
+    apply_swr_headers(response, settings.heroes_path_cache_timeout, is_stale)
     return data

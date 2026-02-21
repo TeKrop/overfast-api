@@ -44,32 +44,29 @@ class HeroService(BaseService):
         role: Role | None,
         gamemode: HeroGamemode | None,
         cache_key: str,
-    ) -> tuple[list[dict], bool, int]:
+    ) -> tuple[list[dict], bool]:
         """Return the heroes list (with optional role/gamemode filters).
 
-        SWR: stores the *full* (unfiltered) heroes list per locale in SQLite;
-        filters are applied after retrieval so all filter combinations benefit
-        from the same cache entry.
-
-        Returns:
-            (data, is_stale, age_seconds)
+        Stores the *full* (unfiltered) heroes list per locale in SQLite so
+        that all filter combinations benefit from the same cache entry.
         """
-        storage_key = f"heroes:{locale}"
 
         async def _fetch() -> list[dict]:
-            html = await fetch_heroes_html(self.blizzard_client, locale)  # ty: ignore[invalid-argument-type]
+            html = await fetch_heroes_html(self.blizzard_client, locale)
             return parse_heroes_html(html)
 
-        data, is_stale, age = await self._get_or_fetch_static(
-            storage_key=storage_key,
+        def _filter(data: list[dict]) -> list[dict]:
+            return filter_heroes(data, role, gamemode)
+
+        return await self.get_or_fetch(
+            storage_key=f"heroes:{locale}",
             fetcher=_fetch,
+            filter=_filter,
             cache_key=cache_key,
             cache_ttl=settings.heroes_path_cache_timeout,
             staleness_threshold=settings.heroes_staleness_threshold,
             entity_type="heroes",
         )
-
-        return filter_heroes(data, role, gamemode), is_stale, age
 
     # ------------------------------------------------------------------
     # Single hero  (GET /heroes/{hero_key})
@@ -80,19 +77,15 @@ class HeroService(BaseService):
         hero_key: str,
         locale: Locale,
         cache_key: str,
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict, bool]:
         """Return full hero details merged with portrait and hitpoints.
 
-        Single-hero data is not stored persistently (it is derived from three
-        sources that each have their own caching); the Valkey API cache is still
-        updated after each fetch.
-
-        Returns:
-            (data, is_stale, age_seconds)
+        Single-hero data is not stored persistently; the Valkey API cache is
+        still updated on every fetch.
         """
         try:
-            hero_data = await parse_hero(self.blizzard_client, hero_key, locale)  # ty: ignore[invalid-argument-type]
-            heroes_html = await fetch_heroes_html(self.blizzard_client, locale)  # ty: ignore[invalid-argument-type]
+            hero_data = await parse_hero(self.blizzard_client, hero_key, locale)
+            heroes_html = await fetch_heroes_html(self.blizzard_client, locale)
             heroes_list = parse_heroes_html(heroes_html)
             heroes_stats = parse_heroes_stats()
             data = _merge_hero_data(hero_data, heroes_list, heroes_stats, hero_key)
@@ -107,7 +100,7 @@ class HeroService(BaseService):
             raise overfast_internal_error(blizzard_url, exc) from exc
 
         await self._update_api_cache(cache_key, data, settings.hero_path_cache_timeout)
-        return data, False, 0
+        return data, False
 
     # ------------------------------------------------------------------
     # Hero stats summary  (GET /heroes/stats)
@@ -123,12 +116,8 @@ class HeroService(BaseService):
         competitive_division: CompetitiveDivisionFilter | None,  # ty: ignore[invalid-type-form]
         order_by: str,
         cache_key: str,
-    ) -> tuple[list[dict], bool, int]:
-        """Return hero usage statistics with SWR.
-
-        Returns:
-            (data, is_stale, age_seconds)
-        """
+    ) -> tuple[list[dict], bool]:
+        """Return hero usage statistics with SWR."""
         storage_key = _build_hero_stats_storage_key(
             platform, gamemode, region, map_filter, competitive_division
         )
@@ -150,20 +139,18 @@ class HeroService(BaseService):
                     status_code=exc.status_code, detail=exc.message
                 ) from exc
 
-        data, is_stale, age = await self._get_or_fetch_static(
+        def _filter(data: list[dict]) -> list[dict]:
+            return _filter_hero_stats(data, role, order_by)
+
+        return await self.get_or_fetch(
             storage_key=storage_key,
             fetcher=_fetch,
+            filter=_filter,
             cache_key=cache_key,
             cache_ttl=settings.hero_stats_cache_timeout,
             staleness_threshold=settings.hero_stats_staleness_threshold,
             entity_type="hero_stats",
         )
-
-        # Apply post-fetch filters (role, order_by) on stale data from SQLite
-        if is_stale and age > 0:
-            data = _filter_hero_stats(data, role, order_by)
-
-        return data, is_stale, age
 
 
 # ---------------------------------------------------------------------------
@@ -178,7 +165,6 @@ def _merge_hero_data(
     hero_key: str,
 ) -> dict:
     """Merge data from hero details, heroes list, and heroes stats."""
-    # Portrait from heroes list
     try:
         portrait_value = next(
             hero["portrait"] for hero in heroes_list if hero["key"] == hero_key
@@ -190,7 +176,6 @@ def _merge_hero_data(
             hero_data, "role", "portrait", portrait_value
         )
 
-    # Hitpoints from stats CSV
     try:
         hitpoints = heroes_stats[hero_key]["hitpoints"]
     except KeyError:
@@ -238,11 +223,9 @@ def _filter_hero_stats(
     role: Any,
     order_by: str,
 ) -> list[dict]:
-    """Re-apply role filter and ordering when serving stale data from SQLite."""
-    logger.debug("[SWR] Re-applying hero_stats filters on stale data")
+    """Re-apply role filter and ordering (used both on stale data and cold-start)."""
+    logger.debug("[SWR] Applying hero_stats filters")
     if role:
         data = [h for h in data if h.get("role") == role.value]
-
-    # Re-sort according to order_by
     field, direction = order_by.split(":")
     return sorted(data, key=lambda h: h.get(field, ""), reverse=(direction == "desc"))

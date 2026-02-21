@@ -8,7 +8,7 @@ from app.api.dependencies import GamemodeServiceDep
 from app.config import settings
 from app.enums import RouteTag
 from app.gamemodes.models import GamemodeDetails
-from app.helpers import apply_swr_headers, success_responses
+from app.helpers import apply_swr_headers, build_cache_key, success_responses
 
 router = APIRouter()
 
@@ -30,9 +30,6 @@ async def list_map_gamemodes(
     response: Response,
     service: GamemodeServiceDep,
 ) -> Any:
-    cache_key = request.url.path + (
-        f"?{request.query_params}" if request.query_params else ""
-    )
-    data, is_stale, age = await service.list_gamemodes(cache_key=cache_key)
-    apply_swr_headers(response, settings.csv_cache_timeout, is_stale, age)
+    data, is_stale = await service.list_gamemodes(cache_key=build_cache_key(request))
+    apply_swr_headers(response, settings.csv_cache_timeout, is_stale)
     return data

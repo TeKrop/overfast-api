@@ -91,7 +91,7 @@ class PlayerService(BaseService):
         self,
         player_id: str,
         cache_key: str,
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict, bool]:
         """Return player summary (name, avatar, competitive ranks, …).
 
         Returns:
@@ -114,7 +114,7 @@ class PlayerService(BaseService):
         gamemode: PlayerGamemode | None,
         platform: PlayerPlatform | None,
         cache_key: str,
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict, bool]:
         """Return full player data: summary + stats.
 
         Returns:
@@ -140,7 +140,7 @@ class PlayerService(BaseService):
         platform: PlayerPlatform | None,
         hero: HeroKeyCareerFilter | None,  # ty: ignore[invalid-type-form]
         cache_key: str,
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict, bool]:
         """Return player stats with category labels.
 
         Returns:
@@ -166,7 +166,7 @@ class PlayerService(BaseService):
         gamemode: PlayerGamemode | None,
         platform: PlayerPlatform | None,
         cache_key: str,
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict, bool]:
         """Return player statistics summary (winrate, kda, …).
 
         Returns:
@@ -198,11 +198,11 @@ class PlayerService(BaseService):
                 exc, cache_key_player, battletag_input, player_summary
             )
 
-        is_stale, age = self._check_player_staleness(cache_key_player)
+        is_stale = self._check_player_staleness(cache_key_player)
         await self._update_api_cache(
             cache_key, data, settings.career_path_cache_timeout
         )
-        return data, is_stale, age
+        return data, is_stale
 
     # ------------------------------------------------------------------
     # Player career stats  (GET /players/{player_id}/stats/career)
@@ -215,7 +215,7 @@ class PlayerService(BaseService):
         platform: PlayerPlatform | None,
         hero: HeroKeyCareerFilter | None,  # ty: ignore[invalid-type-form]
         cache_key: str,
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict, bool]:
         """Return player career stats (no labels).
 
         Returns:
@@ -248,11 +248,11 @@ class PlayerService(BaseService):
                 exc, cache_key_player, battletag_input, player_summary
             )
 
-        is_stale, age = self._check_player_staleness(cache_key_player)
+        is_stale = self._check_player_staleness(cache_key_player)
         await self._update_api_cache(
             cache_key, data, settings.career_path_cache_timeout
         )
-        return data, is_stale, age
+        return data, is_stale
 
     # ------------------------------------------------------------------
     # Core request execution (career + summary)
@@ -267,7 +267,7 @@ class PlayerService(BaseService):
         gamemode: PlayerGamemode | None = None,
         platform: PlayerPlatform | None = None,
         hero: HeroKeyCareerFilter | None = None,  # ty: ignore[invalid-type-form]
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict, bool]:
         """Shared execution path for summary, career, and stats endpoints."""
         cache_key_player = player_id
         battletag_input: str | None = None
@@ -302,11 +302,11 @@ class PlayerService(BaseService):
                 exc, cache_key_player, battletag_input, player_summary
             )
 
-        is_stale, age = self._check_player_staleness(cache_key_player)
+        is_stale = self._check_player_staleness(cache_key_player)
         await self._update_api_cache(
             cache_key, data, settings.career_path_cache_timeout
         )
-        return data, is_stale, age
+        return data, is_stale
 
     # ------------------------------------------------------------------
     # Profile caching helpers
@@ -352,13 +352,13 @@ class PlayerService(BaseService):
             name=name,
         )
 
-    def _check_player_staleness(self, _player_id: str) -> tuple[bool, int]:
-        """Return (is_stale, age_seconds) based purely on time — best effort."""
-        # This is a lightweight check; the actual updated_at would require
-        # another async storage lookup. We return (False, 0) here and let the
-        # background refresh (Phase 5) handle true staleness.
-        # Phase 5 will update this to return proper staleness info.
-        return False, 0
+    def _check_player_staleness(self, _player_id: str) -> bool:
+        """Return is_stale based purely on time — best effort.
+
+        Phase 5 will perform an actual async storage lookup; for now always
+        returns False (fresh) and lets the background refresh handle real staleness.
+        """
+        return False
 
     async def _fetch_profile_with_cache(
         self,

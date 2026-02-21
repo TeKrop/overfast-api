@@ -2,13 +2,18 @@
 
 import json
 import time
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
-from app.config import settings
+from app.monitoring.metrics import (
+    background_refresh_triggered_total,
+    stale_responses_total,
+    storage_hits_total,
+)
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
+    from collections.abc import Callable
 
     from app.domain.ports import (
         BlizzardClientPort,
@@ -18,17 +23,31 @@ if TYPE_CHECKING:
     )
 
 
+class StorageTable(StrEnum):
+    """Persistent storage table identifiers used across services."""
+
+    STATIC_DATA = "static_data"
+    PLAYER_PROFILES = "player_profiles"
+
+
 class BaseService:
     """Base service providing Stale-While-Revalidate (SWR) orchestration.
 
-    All domain services inherit from this class to get SWR behaviour:
-    1. Check SQLite persistent storage (cache key).
-    2. If found and fresh (age < staleness_threshold) → return data, update Valkey.
-    3. If found but stale → return data, update Valkey, trigger background refresh.
-    4. If not found (cold start) → fetch from Blizzard, store in both, return data.
+    The generic ``get_or_fetch`` method implements the SWR flow for data backed
+    by SQLite persistent storage:
 
-    Note: Valkey API-cache check happens at the Nginx/Lua level before FastAPI is reached,
-    so this class only handles the SQLite → Blizzard fallback path.
+    1. Hit SQLite. If found and *fresh* → return + update Valkey.
+    2. If found but *stale* → return + update Valkey + trigger background refresh.
+    3. On cold start (miss) → fetch synchronously from Blizzard, store, return.
+
+    Concrete services call ``get_or_fetch`` with domain-specific ``fetcher``,
+    ``parser``, and optional ``filter`` callables.
+
+    Note: Valkey API-cache reads happen at the Nginx/Lua layer *before* FastAPI
+    is reached; services only ever *write* to the API cache.
+
+    Player data uses a different staleness strategy (``lastUpdated`` field from
+    Blizzard) so ``PlayerService`` manages its own request flow independently.
     """
 
     def __init__(
@@ -44,82 +63,115 @@ class BaseService:
         self.task_queue = task_queue
 
     # ------------------------------------------------------------------
-    # SWR core — used by static-data services (heroes, maps, …)
+    # Generic SWR orchestration
     # ------------------------------------------------------------------
 
-    async def _get_or_fetch_static(
+    async def get_or_fetch(
         self,
         *,
         storage_key: str,
-        fetcher: Callable[[], Awaitable[Any]],
+        fetcher: Callable[[], Any],
         cache_key: str,
         cache_ttl: int,
         staleness_threshold: int,
         entity_type: str,
-    ) -> tuple[Any, bool, int]:
-        """SWR orchestration for static data backed by SQLite.
+        table: StorageTable = StorageTable.STATIC_DATA,
+        parser: Callable[[Any], Any] | None = None,
+        filter: Callable[[Any], Any] | None = None,  # noqa: A002
+    ) -> tuple[Any, bool]:
+        """SWR orchestration for data backed by SQLite.
 
         Args:
-            storage_key: Key in the ``static_data`` SQLite table.
-            fetcher: Async callable that fetches and parses fresh data from Blizzard.
-                     Must return the final *list* or *dict* to store as JSON.
+            storage_key: Key in the SQLite table.
+            fetcher: Async callable that retrieves raw data (HTML, JSON, or
+                     any form) from the upstream source (Blizzard or local CSV).
             cache_key: Valkey API-cache key to update after serving data.
             cache_ttl: TTL in seconds for the Valkey API-cache entry.
             staleness_threshold: Seconds after which stored data is considered stale.
             entity_type: Human-readable label used in metrics / logs.
+            table: SQLite table to read/write (default: static_data).
+            parser: Optional callable that converts raw fetcher output into the
+                    stored/returned format. Defaults to identity (raw data as-is).
+            filter: Optional callable applied to parsed data before returning.
+                    Not stored — re-applied on each request when serving stale data.
 
         Returns:
-            ``(data, is_stale, age_seconds)`` tuple.
-            ``age_seconds`` is 0 on a cold-start fetch.
+            ``(data, is_stale)`` tuple.
         """
-        stored = await self.storage.get_static_data(storage_key)
+        stored = await self._load_from_storage(storage_key, table)
 
-        if stored:
-            data = json.loads(stored["data"])
+        if stored is not None:
+            data = stored["data"]
             age = int(time.time()) - stored["updated_at"]
             is_stale = age >= staleness_threshold
 
             if is_stale:
                 logger.info(
-                    f"[SWR] {entity_type} data is stale (age={age}s, "
-                    f"threshold={staleness_threshold}s) — serving stale + triggering refresh"
+                    f"[SWR] {entity_type} stale (age={age}s, "
+                    f"threshold={staleness_threshold}s) — serving + triggering refresh"
                 )
                 await self._enqueue_refresh(entity_type, storage_key)
-                self._track_stale_response(entity_type)
+                stale_responses_total.inc()
+                background_refresh_triggered_total.labels(entity_type=entity_type).inc()
             else:
                 logger.info(
-                    f"[SWR] {entity_type} data is fresh (age={age}s) — serving from SQLite"
+                    f"[SWR] {entity_type} fresh (age={age}s) — serving from SQLite"
                 )
 
-            self._track_storage_hit("hit")
+            storage_hits_total.labels(result="hit").inc()
+
+            if filter is not None:
+                data = filter(data)
+
             await self._update_api_cache(cache_key, data, cache_ttl)
-            return data, is_stale, age
+            return data, is_stale
 
-        # Cold start — fetch synchronously from Blizzard
-        logger.info(f"[SWR] {entity_type} not in SQLite — fetching from Blizzard")
-        self._track_storage_hit("miss")
-        data = await fetcher()
-        await self._persist_static(storage_key, data, cache_key, cache_ttl)
-        return data, False, 0
+        # Cold start — fetch synchronously
+        logger.info(f"[SWR] {entity_type} not in SQLite — fetching from source")
+        storage_hits_total.labels(result="miss").inc()
+
+        raw = await fetcher()
+        data = parser(raw) if parser is not None else raw
+        await self._store_in_storage(storage_key, data, table)
+
+        filtered = filter(data) if filter is not None else data
+        await self._update_api_cache(cache_key, filtered, cache_ttl)
+        return filtered, False
 
     # ------------------------------------------------------------------
-    # Helpers
+    # Storage helpers — overridable by concrete services
     # ------------------------------------------------------------------
 
-    async def _persist_static(
-        self, storage_key: str, data: Any, cache_key: str, cache_ttl: int
+    async def _load_from_storage(
+        self, storage_key: str, table: StorageTable
+    ) -> dict[str, Any] | None:
+        """Load data from the given SQLite table. Returns ``None`` on miss."""
+        if table == StorageTable.STATIC_DATA:
+            result = await self.storage.get_static_data(storage_key)
+            if result:
+                return {
+                    "data": json.loads(result["data"]),
+                    "updated_at": result["updated_at"],
+                }
+        return None
+
+    async def _store_in_storage(
+        self, storage_key: str, data: Any, table: StorageTable
     ) -> None:
-        """Write static data to both SQLite and Valkey API cache."""
-        try:
-            await self.storage.set_static_data(
-                key=storage_key,
-                data=json.dumps(data, separators=(",", ":")),
-                data_type="json",
-            )
-        except Exception as exc:  # noqa: BLE001
-            logger.warning(f"[SWR] SQLite write failed for {storage_key}: {exc}")
+        """Persist data to the given SQLite table (default: static_data JSON)."""
+        if table == StorageTable.STATIC_DATA:
+            try:
+                await self.storage.set_static_data(
+                    key=storage_key,
+                    data=json.dumps(data, separators=(",", ":")),
+                    data_type="json",
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.warning(f"[SWR] SQLite write failed for {storage_key}: {exc}")
 
-        await self._update_api_cache(cache_key, data, cache_ttl)
+    # ------------------------------------------------------------------
+    # Shared low-level helpers
+    # ------------------------------------------------------------------
 
     async def _update_api_cache(
         self, cache_key: str, data: Any, cache_ttl: int
@@ -131,7 +183,7 @@ class BaseService:
             logger.warning(f"[SWR] Valkey write failed for {cache_key}: {exc}")
 
     async def _enqueue_refresh(self, entity_type: str, entity_id: str) -> None:
-        """Enqueue a background refresh task (deduplication via job_id)."""
+        """Enqueue a background refresh, deduplicating via job_id."""
         job_id = f"refresh:{entity_type}:{entity_id}"
         try:
             already_running = await self.task_queue.is_job_pending_or_running(job_id)
@@ -141,31 +193,7 @@ class BaseService:
                     entity_id,
                     job_id=job_id,
                 )
-                if settings.prometheus_enabled:
-                    from app.monitoring.metrics import (
-                        background_refresh_triggered_total,
-                    )
-
-                    background_refresh_triggered_total.labels(
-                        entity_type=entity_type
-                    ).inc()
         except Exception as exc:  # noqa: BLE001
             logger.warning(
                 f"[SWR] Failed to enqueue refresh for {entity_type}/{entity_id}: {exc}"
             )
-
-    @staticmethod
-    def _track_storage_hit(result: str) -> None:
-        if settings.prometheus_enabled:
-            from app.monitoring.metrics import storage_hits_total
-
-            storage_hits_total.labels(result=result).inc()
-
-    @staticmethod
-    def _track_stale_response(entity_type: str) -> None:
-        if settings.prometheus_enabled:
-            from app.monitoring.metrics import stale_responses_total
-
-            stale_responses_total.inc()
-            # entity_type tracked via background_refresh_triggered_total
-            _ = entity_type

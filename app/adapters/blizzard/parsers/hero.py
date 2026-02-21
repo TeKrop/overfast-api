@@ -16,7 +16,7 @@ from app.config import settings
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode
 
-    from app.adapters.blizzard.client import BlizzardClient
+    from app.domain.ports import BlizzardClientPort
 
 from app.enums import Locale
 from app.exceptions import ParserBlizzardError, ParserParsingError
@@ -26,7 +26,7 @@ from app.roles.helpers import get_role_from_icon_url
 
 
 async def fetch_hero_html(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     hero_key: str,
     locale: Locale = Locale.ENGLISH_US,
 ) -> str:
@@ -278,7 +278,7 @@ def _parse_hero_stadium_powers(stadium_wrapper: LexborNode) -> list[dict]:
 
 
 async def parse_hero(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     hero_key: str,
     locale: Locale = Locale.ENGLISH_US,
 ) -> dict:

@@ -15,13 +15,8 @@ class RoleService(BaseService):
         self,
         locale: Locale,
         cache_key: str,
-    ) -> tuple[list[dict], bool, int]:
-        """Return the roles list.
-
-        Returns:
-            (data, is_stale, age_seconds)
-        """
-        storage_key = f"roles:{locale}"
+    ) -> tuple[list[dict], bool]:
+        """Return the roles list."""
 
         async def _fetch() -> list[dict]:
             try:
@@ -31,8 +26,8 @@ class RoleService(BaseService):
                 blizzard_url = f"{settings.blizzard_host}/{locale}{settings.home_path}"
                 raise overfast_internal_error(blizzard_url, exc) from exc
 
-        return await self._get_or_fetch_static(
-            storage_key=storage_key,
+        return await self.get_or_fetch(
+            storage_key=f"roles:{locale}",
             fetcher=_fetch,
             cache_key=cache_key,
             cache_ttl=settings.heroes_path_cache_timeout,
