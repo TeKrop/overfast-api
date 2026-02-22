@@ -9,6 +9,7 @@ import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 
+from app.adapters.blizzard import BlizzardClient
 from app.adapters.storage import SQLiteStorage
 from app.api.dependencies import get_storage
 from app.main import app
@@ -46,6 +47,8 @@ async def _patch_before_every_test(
     await valkey_server.flushdb()
     await storage_db.clear_all_data()
 
+    # Reset in-memory rate limit state on the singleton
+    BlizzardClient()._rate_limited_until = 0
     app.dependency_overrides[get_storage] = lambda: storage_db
 
     with (
