@@ -7,7 +7,12 @@ from fastapi import APIRouter, Query, Request, Response
 from app.api.dependencies import RoleServiceDep
 from app.config import settings
 from app.enums import Locale, RouteTag
-from app.helpers import apply_swr_headers, build_cache_key, routes_responses
+from app.helpers import (
+    apply_swr_headers,
+    build_cache_key,
+    get_human_readable_duration,
+    routes_responses,
+)
 from app.roles.models import RoleDetail
 
 router = APIRouter()
@@ -20,7 +25,7 @@ router = APIRouter()
     summary="Get a list of roles",
     description=(
         "Get a list of available Overwatch roles."
-        f"<br />**Cache TTL : {settings.heroes_path_cache_timeout} seconds.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.heroes_path_cache_timeout)}.**"
     ),
     operation_id="list_roles",
     response_model=list[RoleDetail],

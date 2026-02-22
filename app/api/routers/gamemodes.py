@@ -8,7 +8,12 @@ from app.api.dependencies import GamemodeServiceDep
 from app.config import settings
 from app.enums import RouteTag
 from app.gamemodes.models import GamemodeDetails
-from app.helpers import apply_swr_headers, build_cache_key, success_responses
+from app.helpers import (
+    apply_swr_headers,
+    build_cache_key,
+    get_human_readable_duration,
+    success_responses,
+)
 
 router = APIRouter()
 
@@ -20,7 +25,7 @@ router = APIRouter()
     summary="Get a list of gamemodes",
     description=(
         "Get a list of Overwatch gamemodes : Assault, Escort, Flashpoint, Hybrid, etc."
-        f"<br />**Cache TTL : {settings.csv_cache_timeout} seconds.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.csv_cache_timeout)}.**"
     ),
     operation_id="list_map_gamemodes",
     response_model=list[GamemodeDetails],

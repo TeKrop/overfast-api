@@ -8,7 +8,12 @@ from app.api.dependencies import MapServiceDep
 from app.config import settings
 from app.enums import RouteTag
 from app.gamemodes.enums import MapGamemode
-from app.helpers import apply_swr_headers, build_cache_key, success_responses
+from app.helpers import (
+    apply_swr_headers,
+    build_cache_key,
+    get_human_readable_duration,
+    success_responses,
+)
 from app.maps.models import Map
 
 router = APIRouter()
@@ -21,7 +26,7 @@ router = APIRouter()
     summary="Get a list of maps",
     description=(
         "Get a list of Overwatch maps : Hanamura, King's Row, Dorado, etc."
-        f"<br />**Cache TTL : {settings.csv_cache_timeout} seconds.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.csv_cache_timeout)}.**"
     ),
     operation_id="list_maps",
     response_model=list[Map],

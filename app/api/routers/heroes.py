@@ -7,7 +7,12 @@ from fastapi import APIRouter, Path, Query, Request, Response, status
 from app.api.dependencies import HeroServiceDep
 from app.config import settings
 from app.enums import Locale, RouteTag
-from app.helpers import apply_swr_headers, build_cache_key, routes_responses
+from app.helpers import (
+    apply_swr_headers,
+    build_cache_key,
+    get_human_readable_duration,
+    routes_responses,
+)
 from app.heroes.enums import HeroGamemode, HeroKey
 from app.heroes.models import (
     BadRequestErrorMessage,
@@ -35,7 +40,7 @@ router = APIRouter()
     summary="Get a list of heroes",
     description=(
         "Get a list of Overwatch heroes, which can be filtered using roles or gamemodes. "
-        f"<br />**Cache TTL : {settings.heroes_path_cache_timeout} seconds.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.heroes_path_cache_timeout)}.**"
     ),
     operation_id="list_heroes",
     response_model=list[HeroShort],
@@ -77,7 +82,7 @@ async def list_heroes(
     description=(
         "Get hero statistics usage, filtered by platform, region, role, etc."
         "Only Role Queue gamemodes are concerned."
-        f"<br />**Cache TTL : {settings.hero_stats_cache_timeout} seconds.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.hero_stats_cache_timeout)}.**"
     ),
     operation_id="get_hero_stats",
     response_model=list[HeroStatsSummary],
@@ -158,7 +163,7 @@ async def get_hero_stats(
     summary="Get hero data",
     description=(
         "Get data about an Overwatch hero : description, abilities, stadium powers, story, etc. "
-        f"<br />**Cache TTL : {settings.hero_path_cache_timeout} seconds.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.hero_path_cache_timeout)}.**"
     ),
     operation_id="get_hero",
     response_model=Hero,

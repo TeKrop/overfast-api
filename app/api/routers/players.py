@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Path, Query, Request, Response, status
 from app.api.dependencies import PlayerServiceDep
 from app.config import settings
 from app.enums import RouteTag
-from app.helpers import apply_swr_headers, build_cache_key
+from app.helpers import apply_swr_headers, build_cache_key, get_human_readable_duration
 from app.helpers import routes_responses as common_routes_responses
 from app.players.enums import (
     HeroKeyCareerFilter,
@@ -99,7 +99,7 @@ router = APIRouter()
     description=(
         "Search for a given player by using its username or BattleTag (with # replaced by -). "
         "<br />You should be able to find the associated player_id to use in order to request career data."
-        f"<br />**Cache TTL : {settings.search_account_path_cache_timeout} seconds.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.search_account_path_cache_timeout)}.**"
     ),
     operation_id="search_players",
     response_model=PlayerSearchResult,
@@ -144,7 +144,7 @@ async def search_players(
     summary="Get player summary",
     description=(
         "Get player summary : name, avatar, competitive ranks, etc. "
-        f"<br />**Cache TTL : {settings.career_path_cache_timeout} seconds.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.career_path_cache_timeout)}.**"
     ),
     operation_id="get_player_summary",
     response_model=PlayerSummary,
@@ -178,7 +178,7 @@ async def get_player_summary(
         "<br /> Depending on filters, data from both competitive and quickplay, "
         "and/or pc and console will be merged."
         "<br />Default behaviour : all gamemodes and platforms are taken in account."
-        f"<br />**Cache TTL : {settings.career_path_cache_timeout} seconds.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.career_path_cache_timeout)}.**"
     ),
     operation_id="get_player_stats_summary",
     response_model=PlayerStatsSummary,
@@ -233,7 +233,7 @@ async def get_player_stats_summary(
         "(combat, game, best, hero specific, average, etc.). Filter them on "
         "specific platform and gamemode (mandatory). You can even retrieve "
         "data about a specific hero of your choice."
-        f"<br />**Cache TTL : {settings.career_path_cache_timeout} seconds.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.career_path_cache_timeout)}.**"
     ),
     operation_id="get_player_career_stats",
     response_model=PlayerCareerStats,
@@ -265,7 +265,7 @@ async def get_player_career_stats(
     description=(
         "This endpoint exposes the same data as the previous one, except it also "
         "exposes labels of the categories and statistics."
-        f"<br />**Cache TTL : {settings.career_path_cache_timeout} seconds.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.career_path_cache_timeout)}.**"
     ),
     operation_id="get_player_stats",
     response_model=CareerStats,
@@ -295,7 +295,7 @@ async def get_player_stats(
     summary="Get all player data",
     description=(
         "Get all player data : summary and statistics with labels."
-        f"<br />**Cache TTL : {settings.career_path_cache_timeout} seconds.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.career_path_cache_timeout)}.**"
     ),
     operation_id="get_player_career",
     response_model=Player,
