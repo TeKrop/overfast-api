@@ -4,6 +4,7 @@ import asyncio
 import time
 from typing import TYPE_CHECKING, Any, ClassVar
 
+from app.metaclasses import Singleton
 from app.monitoring.metrics import (
     background_tasks_duration_seconds,
     background_tasks_queue_size,
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable, Coroutine
 
 
-class AsyncioTaskQueue:
+class AsyncioTaskQueue(metaclass=Singleton):
     """In-process task queue backed by asyncio.create_task().
 
     Uses a class-level set for deduplication so concurrent requests don't

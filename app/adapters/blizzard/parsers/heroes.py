@@ -9,7 +9,6 @@ from app.adapters.blizzard.parsers.utils import (
     validate_response_status,
 )
 from app.config import settings
-from app.domain.ports import BlizzardClientPort
 from app.enums import Locale
 from app.exceptions import ParserParsingError
 from app.heroes.enums import HeroGamemode

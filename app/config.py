@@ -163,7 +163,7 @@ class Settings(BaseSettings):
     roles_staleness_threshold: int = 86400
 
     # Age (seconds) after which a player profile is considered stale.
-    player_staleness_threshold: int = 1800  # 30 min
+    player_staleness_threshold: int = 3600  # 1 hour
 
     # TTL (seconds) for stale responses written to Valkey API cache.
     # Short enough that background refresh (typically seconds) will overwrite it
