@@ -17,7 +17,6 @@ from app.domain.services.static_data_service import StaticDataService, StaticFet
 from app.enums import Locale
 from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.helpers import overfast_internal_error
-from app.overfast_logger import logger
 
 if TYPE_CHECKING:
     from app.heroes.enums import HeroGamemode
@@ -82,27 +81,37 @@ class HeroService(StaticDataService):
     ) -> tuple[dict, bool, int]:
         """Return full hero details merged with portrait and hitpoints.
 
-        Single-hero data is not stored persistently; the Valkey API cache is
-        still updated on every fetch.
+        Stores the merged hero data per ``hero_key:locale`` in SQLite so that
+        subsequent requests benefit from the SWR cache and background refresh.
         """
-        try:
-            hero_data = await parse_hero(self.blizzard_client, hero_key, locale)
-            heroes_html = await fetch_heroes_html(self.blizzard_client, locale)
-            heroes_list = parse_heroes_html(heroes_html)
-            heroes_hitpoints = parse_heroes_hitpoints()
-            data = _merge_hero_data(hero_data, heroes_list, heroes_hitpoints, hero_key)
-        except ParserBlizzardError as exc:
-            raise HTTPException(
-                status_code=exc.status_code, detail=exc.message
-            ) from exc
-        except ParserParsingError as exc:
-            blizzard_url = (
-                f"{settings.blizzard_host}/{locale}{settings.heroes_path}{hero_key}/"
-            )
-            raise overfast_internal_error(blizzard_url, exc) from exc
 
-        await self._update_api_cache(cache_key, data, settings.hero_path_cache_timeout)
-        return data, False, 0
+        async def _fetch() -> dict:
+            try:
+                hero_data = await parse_hero(self.blizzard_client, hero_key, locale)
+                heroes_html = await fetch_heroes_html(self.blizzard_client, locale)
+                heroes_list = parse_heroes_html(heroes_html)
+                heroes_hitpoints = parse_heroes_hitpoints()
+                return _merge_hero_data(
+                    hero_data, heroes_list, heroes_hitpoints, hero_key
+                )
+            except ParserBlizzardError as exc:
+                raise HTTPException(
+                    status_code=exc.status_code, detail=exc.message
+                ) from exc
+            except ParserParsingError as exc:
+                blizzard_url = f"{settings.blizzard_host}/{locale}{settings.heroes_path}{hero_key}/"
+                raise overfast_internal_error(blizzard_url, exc) from exc
+
+        return await self.get_or_fetch(
+            StaticFetchConfig(
+                storage_key=f"hero:{hero_key}:{locale}",
+                fetcher=_fetch,
+                cache_key=cache_key,
+                cache_ttl=settings.hero_path_cache_timeout,
+                staleness_threshold=settings.heroes_staleness_threshold,
+                entity_type="hero",
+            )
+        )
 
     # ------------------------------------------------------------------
     # Hero stats summary  (GET /heroes/stats)
@@ -119,42 +128,35 @@ class HeroService(StaticDataService):
         order_by: str,
         cache_key: str,
     ) -> tuple[list[dict], bool, int]:
-        """Return hero usage statistics with SWR."""
-        storage_key = _build_hero_stats_storage_key(
-            platform, gamemode, region, map_filter, competitive_division
-        )
+        """Return hero usage statistics — Valkey-only cache, no persistent storage.
 
-        async def _fetch() -> list[dict]:
-            try:
-                return await parse_hero_stats_summary(
-                    self.blizzard_client,
-                    platform=platform,
-                    gamemode=gamemode,
-                    region=region,
-                    role=role,
-                    map_filter=map_filter,
-                    competitive_division=competitive_division,
-                    order_by=order_by,
-                )
-            except ParserBlizzardError as exc:
-                raise HTTPException(
-                    status_code=exc.status_code, detail=exc.message
-                ) from exc
-
-        def _filter(data: list[dict]) -> list[dict]:
-            return _filter_hero_stats(data, role, order_by)
-
-        return await self.get_or_fetch(
-            StaticFetchConfig(
-                storage_key=storage_key,
-                fetcher=_fetch,
-                result_filter=_filter,
-                cache_key=cache_key,
-                cache_ttl=settings.hero_stats_cache_timeout,
-                staleness_threshold=settings.hero_stats_staleness_threshold,
-                entity_type="hero_stats",
+        Stats change frequently and have too many parameter combinations to
+        store in SQLite. The Valkey API cache (populated here, served by nginx)
+        is sufficient.
+        """
+        try:
+            data = await parse_hero_stats_summary(
+                self.blizzard_client,
+                platform=platform,
+                gamemode=gamemode,
+                region=region,
+                role=role,
+                map_filter=map_filter,
+                competitive_division=competitive_division,
+                order_by=order_by,
             )
+        except ParserBlizzardError as exc:
+            raise HTTPException(
+                status_code=exc.status_code, detail=exc.message
+            ) from exc
+
+        await self._update_api_cache(
+            cache_key,
+            data,
+            settings.hero_stats_cache_timeout,
+            staleness_threshold=settings.hero_stats_staleness_threshold,
         )
+        return data, False, 0
 
 
 # ---------------------------------------------------------------------------
@@ -205,31 +207,3 @@ def dict_insert_value_before_key(
     items = list(data.items())
     items.insert(pos, (new_key, new_value))
     return dict(items)
-
-
-def _build_hero_stats_storage_key(
-    platform: Any,
-    gamemode: Any,
-    region: Any,
-    map_filter: Any,
-    competitive_division: Any,
-) -> str:
-    map_val = map_filter.value if map_filter else "all-maps"
-    tier_val = competitive_division.value if competitive_division else "null"
-    return (
-        f"hero_stats:{platform.value}:{gamemode.value}:{region.value}"
-        f":{map_val}:{tier_val}"
-    )
-
-
-def _filter_hero_stats(
-    data: list[dict],
-    role: Any,
-    order_by: str,
-) -> list[dict]:
-    """Re-apply role filter and ordering (used both on stale data and cold-start)."""
-    logger.debug("[SWR] Applying hero_stats filters")
-    if role:
-        data = [h for h in data if h.get("role") == role.value]
-    field, direction = order_by.split(":")
-    return sorted(data, key=lambda h: h.get(field, ""), reverse=(direction == "desc"))

@@ -154,7 +154,9 @@ class ValkeyCache(metaclass=Singleton):
         envelope: dict = {
             "data": value,
             "stored_at": stored_at if stored_at is not None else int(time.time()),
-            "staleness_threshold": staleness_threshold if staleness_threshold is not None else expire,
+            "staleness_threshold": (
+                staleness_threshold if staleness_threshold is not None else expire
+            ),
             "stale_while_revalidate": stale_while_revalidate,
         }
         bytes_value = self._compress_json_value(envelope)
