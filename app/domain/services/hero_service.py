@@ -154,7 +154,6 @@ class HeroService(StaticDataService):
             cache_key,
             data,
             settings.hero_stats_cache_timeout,
-            staleness_threshold=settings.hero_stats_staleness_threshold,
         )
         return data, False, 0
 

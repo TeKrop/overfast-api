@@ -161,7 +161,6 @@ class Settings(BaseSettings):
     maps_staleness_threshold: int = 86400
     gamemodes_staleness_threshold: int = 86400
     roles_staleness_threshold: int = 86400
-    hero_stats_staleness_threshold: int = 3600  # 1 hour (same as cache TTL)
 
     # Age (seconds) after which a player profile is considered stale.
     player_staleness_threshold: int = 1800  # 30 min

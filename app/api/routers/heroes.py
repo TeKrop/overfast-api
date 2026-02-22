@@ -141,7 +141,6 @@ async def get_hero_stats(
         settings.hero_stats_cache_timeout,
         is_stale,
         age,
-        staleness_threshold=settings.hero_stats_staleness_threshold,
     )
     return data
 
