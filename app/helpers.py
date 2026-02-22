@@ -257,8 +257,13 @@ def get_human_readable_duration(duration: int) -> str:
 
 
 def build_cache_key(request: Request) -> str:
-    """Build a canonical cache key from the request URL path + query string."""
-    qs = str(request.query_params)
+    """Build a canonical cache key from the request URL path + query string.
+
+    Uses the raw query string (``request.url.query``) to preserve the original
+    percent-encoding, so the key matches what nginx stores in
+    ``api-cache:<request_uri>`` exactly.
+    """
+    qs = request.url.query
     return f"{request.url.path}?{qs}" if qs else request.url.path
 
 

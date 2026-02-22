@@ -133,9 +133,7 @@ async def search_players(
         limit=limit,
         cache_key=cache_key,
     )
-    response.headers[settings.cache_ttl_header] = str(
-        settings.search_account_path_cache_timeout
-    )
+    apply_swr_headers(response, settings.search_account_path_cache_timeout, False, 0)
     return data
 
 
