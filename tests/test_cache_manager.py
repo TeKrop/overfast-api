@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 from valkey.exceptions import ValkeyError
 
-from app.cache_manager import CacheManager
+from app.adapters.cache import CacheManager
 from app.config import settings
 from app.enums import Locale
 

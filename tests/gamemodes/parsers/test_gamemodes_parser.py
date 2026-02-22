@@ -1,26 +1,16 @@
-from typing import TYPE_CHECKING
-
-import pytest
-
-from app.exceptions import OverfastError
-
-if TYPE_CHECKING:
-    from app.gamemodes.parsers.gamemodes_parser import GamemodesParser
+from app.adapters.blizzard.parsers.gamemodes import parse_gamemodes_csv
+from app.gamemodes.enums import MapGamemode
 
 
-@pytest.mark.asyncio
-async def test_gamemodes_page_parsing(gamemodes_parser: GamemodesParser):
-    try:
-        await gamemodes_parser.parse()
-    except OverfastError:
-        pytest.fail("Game modes list parsing failed")
+def test_parse_gamemodes_csv_returns_all_gamemodes():
+    result = parse_gamemodes_csv()
+    assert isinstance(result, list)
+    assert len(result) > 0
+    assert {g["key"] for g in result} == {str(g) for g in MapGamemode}
 
-    # Just check the format of the first gamemode in the list
-    assert isinstance(gamemodes_parser.data, list)
-    assert gamemodes_parser.data[0] == {
-        "key": "assault",
-        "name": "Assault",
-        "icon": "https://overfast-api.tekrop.fr/static/gamemodes/assault-icon.svg",
-        "description": "Teams fight to capture or defend two successive points against the enemy team. It's an inactive Overwatch 1 gamemode, also called 2CP.",
-        "screenshot": "https://overfast-api.tekrop.fr/static/gamemodes/assault.avif",
-    }
+
+def test_parse_gamemodes_csv_entry_format():
+    result = parse_gamemodes_csv()
+    first = result[0]
+    assert set(first.keys()) == {"key", "name", "icon", "description", "screenshot"}
+    assert first["key"] == "assault"

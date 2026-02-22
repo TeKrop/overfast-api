@@ -1,4 +1,5 @@
 local zstd = require "zstd"
+local cjson = require "cjson"
 local valkey = require "resty.redis"
 
 local EXCLUDED_PATHS = { ["/"] = true, ["/docs"] = true, ["/openapi.json"] = true }
@@ -96,15 +97,41 @@ local function handle_valkey_request()
         return ngx.exec("@fallback")
     end
 
-    local ok_decomp, value = pcall(zstd.decompress, compressed_value)
-    if not ok_decomp or not value or value == ngx.null then
+    local ok_decomp, decompressed = pcall(zstd.decompress, compressed_value)
+    if not ok_decomp or not decompressed or decompressed == ngx.null then
         ngx.log(ngx.ERR, "Cache decompression error for key: ", cache_key)
         release(valk)
         return ngx.exec("@fallback")
     end
 
+    -- Parse metadata envelope: {"data_json":"...", "stored_at":N, "staleness_threshold":N, "stale_while_revalidate":N}
+    local ok_parse, envelope = pcall(cjson.decode, decompressed)
+    if not ok_parse or type(envelope) ~= "table" or envelope.data_json == nil then
+        ngx.log(ngx.ERR, "Cache envelope parse error for key: ", cache_key)
+        release(valk)
+        return ngx.exec("@fallback")
+    end
+
+    -- Age (RFC 7234 §5.1): seconds since the payload was generated
+    local stored_at = tonumber(envelope.stored_at) or 0
+    local age = math.max(0, ngx.time() - stored_at)
+    ngx.header["Age"] = age
+
+    -- Cache-Control with SWR directives (RFC 5861)
+    local max_age = tonumber(envelope.staleness_threshold) or cache_ttl
+    local swr = tonumber(envelope.stale_while_revalidate) or 0
+    if swr > 0 then
+        ngx.header["Cache-Control"] = "public, max-age=" .. max_age .. ", stale-while-revalidate=" .. swr
+        ngx.header["X-Cache-Status"] = "stale"
+    else
+        ngx.header["Cache-Control"] = "public, max-age=" .. max_age
+        ngx.header["X-Cache-Status"] = "hit"
+    end
+
+    -- X-Cache-TTL: remaining Valkey TTL (non-standard, kept for backward compat)
     ngx.header["${CACHE_TTL_HEADER}"] = cache_ttl
-    ngx.print(value)
+
+    ngx.print(envelope.data_json)
     release(valk)
 end
 

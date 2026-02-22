@@ -130,10 +130,14 @@ def test_get_player_stats_summary_blizzard_timeout(client: TestClient):
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 def test_get_player_stats_summary_internal_error(client: TestClient):
     with patch(
-        "app.players.controllers.get_player_stats_summary_controller.GetPlayerStatsSummaryController.process_request",
-        return_value={
-            "general": [{"category": "invalid_value", "stats": [{"key": "test"}]}],
-        },
+        "app.domain.services.player_service.PlayerService.get_player_stats_summary",
+        return_value=(
+            {
+                "general": [{"category": "invalid_value", "stats": [{"key": "test"}]}],
+            },
+            False,
+            0,
+        ),
     ):
         response = client.get(
             "/players/TeKrop-2217/stats/summary",

@@ -66,6 +66,25 @@ stale_responses_total = Counter(
     "Stale responses served from persistent storage (SWR)",
 )
 
+# Background refresh tasks triggered (Phase 4 onwards)
+background_refresh_triggered_total = Counter(
+    "background_refresh_triggered_total",
+    "Background refresh tasks triggered by SWR staleness detection",
+    ["entity_type"],  # "heroes", "maps", "gamemodes", "roles", "player", "hero_stats"
+)
+
+background_refresh_completed_total = Counter(
+    "background_refresh_completed_total",
+    "Background refresh tasks that completed successfully",
+    ["entity_type"],
+)
+
+background_refresh_failed_total = Counter(
+    "background_refresh_failed_total",
+    "Background refresh tasks that raised an exception",
+    ["entity_type"],
+)
+
 ########################
 # Background Task Metrics (Phase 5)
 ########################
