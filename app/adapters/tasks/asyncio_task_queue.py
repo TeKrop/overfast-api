@@ -29,7 +29,7 @@ class AsyncioTaskQueue:
 
     _pending_jobs: ClassVar[set[str]] = set()
 
-    async def enqueue(
+    async def enqueue(  # NOSONAR
         self,
         task_name: str,
         *_args: Any,
@@ -81,6 +81,6 @@ class AsyncioTaskQueue:
         task.add_done_callback(lambda _: None)
         return effective_id
 
-    async def is_job_pending_or_running(self, job_id: str) -> bool:
+    async def is_job_pending_or_running(self, job_id: str) -> bool:  # NOSONAR
         """Return True if a job with this ID is already in-flight."""
         return job_id in self._pending_jobs

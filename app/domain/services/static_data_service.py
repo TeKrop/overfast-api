@@ -1,3 +1,4 @@
+import inspect
 import json
 import time
 from dataclasses import dataclass, field
@@ -137,7 +138,10 @@ class StaticDataService(BaseService):
 
     async def _fetch_and_store(self, config: StaticFetchConfig) -> Any:
         """Fetch from source, persist to SQLite, update Valkey, return filtered data."""
-        raw = await config.fetcher()
+        if inspect.iscoroutinefunction(config.fetcher):
+            raw = await config.fetcher()
+        else:
+            raw = config.fetcher()
 
         data = config.parser(raw) if config.parser is not None else raw
         await self._store_in_storage(config.storage_key, data)

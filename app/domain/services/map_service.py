@@ -18,7 +18,7 @@ class MapService(StaticDataService):
         Stores the full (unfiltered) maps list in SQLite.
         """
 
-        async def _fetch() -> list[dict]:
+        def _fetch() -> list[dict]:
             return parse_maps_csv()
 
         def _filter(data: list[dict]) -> list[dict]:

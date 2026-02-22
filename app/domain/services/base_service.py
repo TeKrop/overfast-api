@@ -96,13 +96,13 @@ class BaseService:
         """
         job_id = f"refresh:{entity_type}:{entity_id}"
 
-        async def _on_complete(_job_id: str) -> None:
+        async def _on_complete(_job_id: str) -> None:  # NOSONAR
             logger.info(
                 f"[SWR] Background refresh complete for {entity_type}/{entity_id}"
             )
             background_refresh_completed_total.labels(entity_type=entity_type).inc()
 
-        async def _on_failure(_job_id: str, exc: Exception) -> None:
+        async def _on_failure(_job_id: str, exc: Exception) -> None:  # NOSONAR
             logger.warning(f"[SWR] Refresh failed for {entity_type}/{entity_id}: {exc}")
             background_refresh_failed_total.labels(entity_type=entity_type).inc()
 

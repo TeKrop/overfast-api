@@ -14,7 +14,7 @@ class GamemodeService(StaticDataService):
     ) -> tuple[list[dict], bool, int]:
         """Return the gamemodes list."""
 
-        async def _fetch() -> list[dict]:
+        def _fetch() -> list[dict]:
             return parse_gamemodes_csv()
 
         return await self.get_or_fetch(
