@@ -99,9 +99,19 @@ def _parse_hero_summary(overview_section: LexborNode, locale: Locale) -> dict:
     icon_element = extra_list_items[0].css_first("blz-icon")
     icon_url = safe_get_attribute(icon_element, "src")
 
+    backgrounds = [
+        {
+            "url": img.attributes["src"],
+            "sizes": (img.attributes.get("bp") or "").split(),
+        }
+        for img in overview_section.css("blz-image[slot=background]")
+        if img.attributes.get("src")
+    ]
+
     return {
         "name": safe_get_text(header_section.css_first("h2")),
         "description": safe_get_text(header_section.css_first("p")),
+        "backgrounds": backgrounds,
         "role": get_role_from_icon_url(icon_url or ""),
         "location": safe_get_text(extra_list_items[1]),
         "birthday": birthday,
