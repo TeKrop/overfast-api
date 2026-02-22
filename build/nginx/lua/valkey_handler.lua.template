@@ -44,24 +44,6 @@ local function check_unknown_player(valk, uri)
     return true
 end
 
-local function check_rate_limit(valk)
-    local exists, err = valk:exists("${BLIZZARD_RATE_LIMIT_KEY}")
-    if err then
-        ngx.log(ngx.ERR, "Failed to check rate limit key: ", err)
-        return false
-    end
-    if exists ~= 1 then return false end
-
-    local ttl = valk:ttl("${BLIZZARD_RATE_LIMIT_KEY}")
-    if not ttl or ttl < 0 then ttl = ${BLIZZARD_RATE_LIMIT_RETRY_AFTER} end
-
-    ngx.log(ngx.WARN, "Blizzard rate limit active, returning 429 from nginx")
-    ngx.header["${RETRY_AFTER_HEADER}"] = ttl
-    ngx.status = ngx.HTTP_TOO_MANY_REQUESTS
-    ngx.say('{"error":"API has been rate limited by Blizzard, please wait for ' .. ttl .. ' seconds before retrying"}')
-    return true
-end
-
 local function handle_valkey_request()
     if EXCLUDED_PATHS[ngx.var.uri] then
         return ngx.exec("@fallback")
@@ -89,7 +71,7 @@ local function handle_valkey_request()
     local compressed_value, cache_ttl = res[1], res[2]
 
     if not compressed_value or compressed_value == ngx.null then
-        if (UNKNOWN_PLAYERS_CACHE_ENABLED and check_unknown_player(valk, ngx.var.uri)) or check_rate_limit(valk) then
+        if UNKNOWN_PLAYERS_CACHE_ENABLED and check_unknown_player(valk, ngx.var.uri) then
             release(valk)
             return
         end
