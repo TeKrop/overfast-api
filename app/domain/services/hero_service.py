@@ -13,7 +13,7 @@ from app.adapters.blizzard.parsers.heroes import (
 )
 from app.adapters.blizzard.parsers.heroes_hitpoints import parse_heroes_hitpoints
 from app.config import settings
-from app.domain.services.static_data_service import StaticDataService
+from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
 from app.enums import Locale
 from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.helpers import overfast_internal_error
@@ -59,13 +59,15 @@ class HeroService(StaticDataService):
             return filter_heroes(data, role, gamemode)
 
         return await self.get_or_fetch(
-            storage_key=f"heroes:{locale}",
-            fetcher=_fetch,
-            result_filter=_filter,
-            cache_key=cache_key,
-            cache_ttl=settings.heroes_path_cache_timeout,
-            staleness_threshold=settings.heroes_staleness_threshold,
-            entity_type="heroes",
+            StaticFetchConfig(
+                storage_key=f"heroes:{locale}",
+                fetcher=_fetch,
+                result_filter=_filter,
+                cache_key=cache_key,
+                cache_ttl=settings.heroes_path_cache_timeout,
+                staleness_threshold=settings.heroes_staleness_threshold,
+                entity_type="heroes",
+            )
         )
 
     # ------------------------------------------------------------------
@@ -143,13 +145,15 @@ class HeroService(StaticDataService):
             return _filter_hero_stats(data, role, order_by)
 
         return await self.get_or_fetch(
-            storage_key=storage_key,
-            fetcher=_fetch,
-            result_filter=_filter,
-            cache_key=cache_key,
-            cache_ttl=settings.hero_stats_cache_timeout,
-            staleness_threshold=settings.hero_stats_staleness_threshold,
-            entity_type="hero_stats",
+            StaticFetchConfig(
+                storage_key=storage_key,
+                fetcher=_fetch,
+                result_filter=_filter,
+                cache_key=cache_key,
+                cache_ttl=settings.hero_stats_cache_timeout,
+                staleness_threshold=settings.hero_stats_staleness_threshold,
+                entity_type="hero_stats",
+            )
         )
 
 

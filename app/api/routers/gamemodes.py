@@ -30,6 +30,8 @@ async def list_map_gamemodes(
     response: Response,
     service: GamemodeServiceDep,
 ) -> Any:
-    data, is_stale, age = await service.list_gamemodes(cache_key=build_cache_key(request))
+    data, is_stale, age = await service.list_gamemodes(
+        cache_key=build_cache_key(request)
+    )
     apply_swr_headers(response, settings.csv_cache_timeout, is_stale, age)
     return data

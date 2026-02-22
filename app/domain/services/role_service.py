@@ -2,7 +2,7 @@
 
 from app.adapters.blizzard.parsers.roles import fetch_roles_html, parse_roles_html
 from app.config import settings
-from app.domain.services.static_data_service import StaticDataService
+from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
 from app.enums import Locale
 from app.exceptions import ParserParsingError
 from app.helpers import overfast_internal_error
@@ -27,10 +27,12 @@ class RoleService(StaticDataService):
                 raise overfast_internal_error(blizzard_url, exc) from exc
 
         return await self.get_or_fetch(
-            storage_key=f"roles:{locale}",
-            fetcher=_fetch,
-            cache_key=cache_key,
-            cache_ttl=settings.heroes_path_cache_timeout,
-            staleness_threshold=settings.roles_staleness_threshold,
-            entity_type="roles",
+            StaticFetchConfig(
+                storage_key=f"roles:{locale}",
+                fetcher=_fetch,
+                cache_key=cache_key,
+                cache_ttl=settings.heroes_path_cache_timeout,
+                staleness_threshold=settings.roles_staleness_threshold,
+                entity_type="roles",
+            )
         )

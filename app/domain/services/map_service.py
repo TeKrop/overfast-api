@@ -2,7 +2,7 @@
 
 from app.adapters.blizzard.parsers.maps import parse_maps_csv
 from app.config import settings
-from app.domain.services.static_data_service import StaticDataService
+from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
 
 
 class MapService(StaticDataService):
@@ -28,11 +28,13 @@ class MapService(StaticDataService):
             return [m for m in data if gamemode_val in m.get("gamemodes", [])]
 
         return await self.get_or_fetch(
-            storage_key="maps:all",
-            fetcher=_fetch,
-            result_filter=_filter,
-            cache_key=cache_key,
-            cache_ttl=settings.csv_cache_timeout,
-            staleness_threshold=settings.maps_staleness_threshold,
-            entity_type="maps",
+            StaticFetchConfig(
+                storage_key="maps:all",
+                fetcher=_fetch,
+                result_filter=_filter,
+                cache_key=cache_key,
+                cache_ttl=settings.csv_cache_timeout,
+                staleness_threshold=settings.maps_staleness_threshold,
+                entity_type="maps",
+            )
         )
