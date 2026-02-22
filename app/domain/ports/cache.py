@@ -58,8 +58,16 @@ class CachePort(Protocol):
     ) -> None:
         """Update or set an API Cache value with an expiration value (in seconds).
 
-        Value is wrapped in a metadata envelope before JSON-serialization and
-        compression.  The envelope allows nginx/Lua to set standard ``Age``
+        Value is wrapped in a metadata envelope before compression::
+
+            {"data_json": "<pre-serialized JSON string>",
+             "stored_at": <unix epoch>,
+             "staleness_threshold": <seconds>,
+             "stale_while_revalidate": <seconds>}
+
+        ``data_json`` is a pre-serialized JSON string so nginx/Lua can print it
+        verbatim without re-encoding through cjson, preserving key ordering.
+        The envelope allows nginx/Lua to set standard ``Age``
         and ``Cache-Control: stale-while-revalidate`` headers without calling
         FastAPI.
 

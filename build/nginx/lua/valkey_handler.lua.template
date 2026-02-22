@@ -104,9 +104,9 @@ local function handle_valkey_request()
         return ngx.exec("@fallback")
     end
 
-    -- Parse metadata envelope: {"data":..., "stored_at":N, "staleness_threshold":N, "stale_while_revalidate":N}
+    -- Parse metadata envelope: {"data_json":"...", "stored_at":N, "staleness_threshold":N, "stale_while_revalidate":N}
     local ok_parse, envelope = pcall(cjson.decode, decompressed)
-    if not ok_parse or type(envelope) ~= "table" or envelope.data == nil then
+    if not ok_parse or type(envelope) ~= "table" or envelope.data_json == nil then
         ngx.log(ngx.ERR, "Cache envelope parse error for key: ", cache_key)
         release(valk)
         return ngx.exec("@fallback")
@@ -131,7 +131,7 @@ local function handle_valkey_request()
     -- X-Cache-TTL: remaining Valkey TTL (non-standard, kept for backward compat)
     ngx.header["${CACHE_TTL_HEADER}"] = cache_ttl
 
-    ngx.print(cjson.encode(envelope.data))
+    ngx.print(envelope.data_json)
     release(valk)
 end
 

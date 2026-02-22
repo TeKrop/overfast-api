@@ -135,8 +135,8 @@ class ValkeyCache(metaclass=Singleton):
         if not api_cache or not isinstance(api_cache, bytes):
             return None
         envelope = self._decompress_json_value(api_cache)
-        if isinstance(envelope, dict) and "data" in envelope:
-            return envelope["data"]
+        if isinstance(envelope, dict) and "data_json" in envelope:
+            return json.loads(envelope["data_json"])
         return envelope
 
     @handle_valkey_error(default_return=None)
@@ -150,9 +150,14 @@ class ValkeyCache(metaclass=Singleton):
         staleness_threshold: int | None = None,
         stale_while_revalidate: int = 0,
     ) -> None:
-        """Wrap value in a metadata envelope, compress, and store with TTL."""
+        """Wrap value in a metadata envelope, compress, and store with TTL.
+
+        ``data_json`` is the pre-serialized JSON string (key order preserved by
+        Python's ``json.dumps``), so nginx/Lua can print it verbatim without
+        re-encoding through cjson (which does not guarantee key ordering).
+        """
         envelope: dict = {
-            "data": value,
+            "data_json": json.dumps(value, separators=(",", ":")),
             "stored_at": stored_at if stored_at is not None else int(time.time()),
             "staleness_threshold": (
                 staleness_threshold if staleness_threshold is not None else expire
