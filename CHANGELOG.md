@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.44.0 (2026-02-22)
+
+### Features
+
+- Phase 4 - Introduced Domain services with Stale-While-Revalidate caching
+  ([#378](https://github.com/TeKrop/overfast-api/pull/378),
+  [`d90c9af`](https://github.com/TeKrop/overfast-api/commit/d90c9af11a306837af640dc2723494da117c19b0))
+
+
 ## v3.43.0 (2026-02-21)
 
 ### Features
