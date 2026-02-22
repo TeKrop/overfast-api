@@ -36,5 +36,5 @@ async def list_roles(
     data, is_stale, age = await service.list_roles(
         locale=locale, cache_key=build_cache_key(request)
     )
-    apply_swr_headers(response, settings.heroes_path_cache_timeout, is_stale, age)
+    apply_swr_headers(response, settings.heroes_path_cache_timeout, is_stale, age, staleness_threshold=settings.roles_staleness_threshold)
     return data

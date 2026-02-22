@@ -47,12 +47,31 @@ class CachePort(Protocol):
         ...
 
     async def update_api_cache(
-        self, cache_key: str, value: dict | list, expire: int
+        self,
+        cache_key: str,
+        value: dict | list,
+        expire: int,
+        *,
+        stored_at: int | None = None,
+        staleness_threshold: int | None = None,
+        stale_while_revalidate: int = 0,
     ) -> None:
-        """
-        Update or set an API Cache value with an expiration value (in seconds).
+        """Update or set an API Cache value with an expiration value (in seconds).
 
-        Value is JSON-serialized and compressed before storage.
+        Value is wrapped in a metadata envelope before JSON-serialization and
+        compression.  The envelope allows nginx/Lua to set standard ``Age``
+        and ``Cache-Control: stale-while-revalidate`` headers without calling
+        FastAPI.
+
+        Args:
+            cache_key: Valkey key suffix (after ``api-cache:``).
+            value: Data payload to cache.
+            expire: Valkey key TTL in seconds.
+            stored_at: Unix timestamp when the data was generated.  Defaults to now.
+            staleness_threshold: Seconds after which the payload is considered stale.
+                Used for ``Cache-Control: max-age``.  Defaults to ``expire``.
+            stale_while_revalidate: Seconds nginx may serve stale while revalidating.
+                0 means no SWR window (omits the directive).
         """
         ...
 

@@ -62,11 +62,23 @@ class BaseService:
         self.task_queue = task_queue
 
     async def _update_api_cache(
-        self, cache_key: str, data: Any, cache_ttl: int
+        self,
+        cache_key: str,
+        data: Any,
+        cache_ttl: int,
+        *,
+        staleness_threshold: int | None = None,
+        stale_while_revalidate: int = 0,
     ) -> None:
         """Write data to Valkey API cache, swallowing errors."""
         try:
-            await self.cache.update_api_cache(cache_key, data, cache_ttl)
+            await self.cache.update_api_cache(
+                cache_key,
+                data,
+                cache_ttl,
+                staleness_threshold=staleness_threshold,
+                stale_while_revalidate=stale_while_revalidate,
+            )
         except Exception as exc:  # noqa: BLE001
             logger.warning(f"[SWR] Valkey write failed for {cache_key}: {exc}")
 

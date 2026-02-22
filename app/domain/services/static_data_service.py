@@ -99,13 +99,22 @@ class StaticDataService(BaseService):
             ).inc()
             # Short TTL absorbs burst traffic while the background refresh is in-flight.
             await self._update_api_cache(
-                config.cache_key, filtered, settings.stale_cache_timeout
+                config.cache_key,
+                filtered,
+                settings.stale_cache_timeout,
+                staleness_threshold=config.staleness_threshold,
+                stale_while_revalidate=settings.stale_cache_timeout,
             )
         else:
             logger.info(
                 f"[SWR] {config.entity_type} fresh (age={age}s) — serving from SQLite"
             )
-            await self._update_api_cache(config.cache_key, filtered, config.cache_ttl)
+            await self._update_api_cache(
+                config.cache_key,
+                filtered,
+                config.cache_ttl,
+                staleness_threshold=config.staleness_threshold,
+            )
 
         return filtered, is_stale, age
 
@@ -134,7 +143,12 @@ class StaticDataService(BaseService):
         await self._store_in_storage(config.storage_key, data)
 
         filtered = self._apply_filter(data, config.result_filter)
-        await self._update_api_cache(config.cache_key, filtered, config.cache_ttl)
+        await self._update_api_cache(
+            config.cache_key,
+            filtered,
+            config.cache_ttl,
+            staleness_threshold=config.staleness_threshold,
+        )
 
         return filtered
 

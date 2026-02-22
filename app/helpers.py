@@ -32,6 +32,42 @@ success_responses = {
                     "example": "600",
                 },
             },
+            "Age": {
+                "description": (
+                    "Number of seconds since the response payload was generated "
+                    "(RFC 7234 §5.1). Present on FastAPI-served responses; "
+                    "also set by nginx for Valkey cache hits."
+                ),
+                "schema": {
+                    "type": "string",
+                    "example": "42",
+                },
+            },
+            "Cache-Control": {
+                "description": (
+                    "Standard caching directives (RFC 7234 + RFC 5861). "
+                    "``max-age`` reflects the staleness threshold in seconds. "
+                    "``stale-while-revalidate`` is present when a background "
+                    "refresh is in-flight, indicating how long stale data may "
+                    "still be served."
+                ),
+                "schema": {
+                    "type": "string",
+                    "example": "public, max-age=86400, stale-while-revalidate=60",
+                },
+            },
+            "X-Cache-Status": {
+                "description": (
+                    "Indicates whether the response was served from a fresh "
+                    "cache entry (``hit``) or a stale one while a background "
+                    "refresh is in-flight (``stale``)."
+                ),
+                "schema": {
+                    "type": "string",
+                    "enum": ["hit", "stale"],
+                    "example": "hit",
+                },
+            },
         },
     },
 }
@@ -231,22 +267,29 @@ def apply_swr_headers(
     cache_ttl: int,
     is_stale: bool,
     age_seconds: int = 0,
+    *,
+    staleness_threshold: int | None = None,
 ) -> None:
     """Add standard SWR and cache metadata headers to the response.
 
-    Always sets ``X-Cache-TTL`` and ``Age`` (when known).
-    When ``is_stale`` is True, additionally sets RFC-5861 ``Cache-Control``
-    and ``X-Cache-Status``.
+    Sets ``Cache-Control`` (RFC 5861), ``Age`` (RFC 7234), ``X-Cache-Status``,
+    and the non-standard ``X-Cache-TTL`` on every FastAPI-served response.
 
-    Note: nginx/Lua only sets ``X-Cache-TTL`` (remaining Valkey TTL) for
-    Valkey-served responses; all other headers are FastAPI-only and reflect
-    the actual SQLite data age.
+    ``staleness_threshold`` is used for ``Cache-Control: max-age``; it defaults
+    to ``cache_ttl`` for endpoints that have no SWR (e.g. player, search).
+    ``stale-while-revalidate`` is included only on stale responses, using the
+    configured ``stale_cache_timeout`` as the revalidation window.
     """
+    max_age = staleness_threshold if staleness_threshold is not None else cache_ttl
     response.headers[settings.cache_ttl_header] = str(cache_ttl)
     if age_seconds > 0:
         response.headers["Age"] = str(age_seconds)
     if is_stale:
         response.headers["Cache-Control"] = (
-            f"max-age={cache_ttl}, stale-while-revalidate={cache_ttl * 2}"
+            f"public, max-age={max_age},"
+            f" stale-while-revalidate={settings.stale_cache_timeout}"
         )
         response.headers["X-Cache-Status"] = "stale"
+    else:
+        response.headers["Cache-Control"] = f"public, max-age={max_age}"
+        response.headers["X-Cache-Status"] = "hit"
