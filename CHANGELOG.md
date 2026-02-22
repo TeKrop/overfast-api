@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.44.1 (2026-02-22)
+
+### Bug Fixes
+
+- **client**: Add in-memory rate limit fallback when Valkey is unavailable
+  ([#372](https://github.com/TeKrop/overfast-api/pull/372),
+  [`566bc3c`](https://github.com/TeKrop/overfast-api/commit/566bc3cf0648a5d1a488c8a154a131a543e1f5e9))
+
+
 ## v3.44.0 (2026-02-22)
 
 ### Features
