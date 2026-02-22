@@ -3,13 +3,13 @@ from unittest.mock import Mock, patch
 import pytest
 from fastapi import status
 
+from app.adapters.blizzard import OverFastClient
 from app.adapters.blizzard.parsers.heroes import (
     fetch_heroes_html,
     filter_heroes,
     parse_heroes_html,
 )
 from app.heroes.enums import HeroGamemode, HeroKey
-from app.overfast_client import OverFastClient
 from app.roles.enums import Role
 
 

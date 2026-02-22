@@ -2,9 +2,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from app.adapters.blizzard import OverFastClient
 from app.adapters.blizzard.parsers.hero_stats_summary import parse_hero_stats_summary
 from app.exceptions import ParserBlizzardError
-from app.overfast_client import OverFastClient
 from app.players.enums import (
     CompetitiveDivision,
     PlayerGamemode,

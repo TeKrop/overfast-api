@@ -3,8 +3,8 @@ from unittest.mock import Mock, patch
 import pytest
 from fastapi import status
 
+from app.adapters.blizzard import OverFastClient
 from app.adapters.blizzard.parsers.roles import fetch_roles_html, parse_roles_html
-from app.overfast_client import OverFastClient
 from app.roles.enums import Role
 
 

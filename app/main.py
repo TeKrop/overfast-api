@@ -13,6 +13,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from .adapters.blizzard import OverFastClient
 from .adapters.cache import CacheManager
 from .adapters.storage import SQLiteStorage
 from .api import gamemodes, heroes, maps, players, roles
@@ -27,7 +28,6 @@ from .middlewares import (
     TraceMallocMiddleware,
 )
 from .monitoring.middleware import register_prometheus_middleware
-from .overfast_client import OverFastClient
 from .overfast_logger import logger
 
 if TYPE_CHECKING:

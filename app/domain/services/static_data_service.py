@@ -2,6 +2,7 @@ import json
 import time
 from typing import TYPE_CHECKING, Any
 
+from app.config import settings
 from app.domain.services import BaseService
 from app.monitoring.metrics import (
     background_refresh_triggered_total,
@@ -74,27 +75,33 @@ class StaticDataService(BaseService):
                     entity_type,
                     storage_key,
                     refresh_coro=self._refresh_static(
-                        storage_key, fetcher, parser, entity_type
+                        storage_key,
+                        fetcher,
+                        parser,
+                        entity_type,
+                        cache_key=cache_key,
+                        cache_ttl=cache_ttl,
+                        result_filter=result_filter,
                     ),
                 )
                 stale_responses_total.inc()
                 background_refresh_triggered_total.labels(entity_type=entity_type).inc()
-                # Do NOT write stale data to Valkey: all requests during the
-                # stale window must reach FastAPI so they get correct headers.
-                # The background refresh updates SQLite; the next FastAPI request
-                # will see fresh data and repopulate Valkey naturally.
+                # Write stale data to Valkey with a short TTL so nginx can absorb
+                # burst traffic while the background refresh is in-flight.
+                # The refresh will overwrite this entry with fresh data + full TTL.
+                filtered = result_filter(data) if result_filter is not None else data
+                await self._update_api_cache(
+                    cache_key, filtered, settings.stale_cache_timeout
+                )
             else:
                 logger.info(
                     f"[SWR] {entity_type} fresh (age={age}s) — serving from SQLite"
                 )
-                await self._update_api_cache(cache_key, data if result_filter is None else result_filter(data), cache_ttl)
+                filtered = result_filter(data) if result_filter is not None else data
+                await self._update_api_cache(cache_key, filtered, cache_ttl)
 
             storage_hits_total.labels(result="hit").inc()
-
-            if result_filter is not None:
-                data = result_filter(data)
-
-            return data, is_stale, age
+            return filtered, is_stale, age
 
         # Cold start — fetch synchronously
         logger.info(f"[SWR] {entity_type} not in SQLite — fetching from source")
@@ -114,13 +121,19 @@ class StaticDataService(BaseService):
         fetcher: Callable[[], Any],
         parser: Callable[[Any], Any] | None,
         entity_type: str,
+        *,
+        cache_key: str,
+        cache_ttl: int,
+        result_filter: Callable[[Any], Any] | None = None,
     ) -> None:
-        """Fetch fresh data and persist it — executed as a background task."""
+        """Fetch fresh data, persist to SQLite and update Valkey with full TTL."""
         logger.info(f"[SWR] Background refresh started for {entity_type}/{storage_key}")
         try:
             raw = await fetcher()
             data = parser(raw) if parser is not None else raw
             await self._store_in_storage(storage_key, data)
+            filtered = result_filter(data) if result_filter is not None else data
+            await self._update_api_cache(cache_key, filtered, cache_ttl)
             logger.info(
                 f"[SWR] Background refresh complete for {entity_type}/{storage_key}"
             )
