@@ -12,7 +12,7 @@ from app.monitoring.metrics import (
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
-    from collections.abc import Coroutine
+    from collections.abc import Awaitable, Callable, Coroutine
 
 
 class AsyncioTaskQueue:
@@ -35,6 +35,8 @@ class AsyncioTaskQueue:
         *_args: Any,
         job_id: str | None = None,
         coro: Coroutine[Any, Any, Any] | None = None,
+        on_complete: Callable[[str], Awaitable[None]] | None = None,
+        on_failure: Callable[[str, Exception], Awaitable[None]] | None = None,
         **_kwargs: Any,
     ) -> str:
         """Schedule a background task if not already pending."""
@@ -57,11 +59,15 @@ class AsyncioTaskQueue:
                 )
                 if coro is not None:
                     await coro
+                if on_complete is not None:
+                    await on_complete(effective_id)
             except Exception as exc:  # noqa: BLE001
                 status = "failure"
                 logger.warning(
                     f"[TaskQueue] Task '{task_name}' (job_id={effective_id}) failed: {exc}"
                 )
+                if on_failure is not None:
+                    await on_failure(effective_id, exc)
             finally:
                 elapsed = time.monotonic() - start
                 background_tasks_total.labels(task_type=task_name, status=status).inc()

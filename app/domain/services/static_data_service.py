@@ -115,22 +115,16 @@ class StaticDataService(BaseService):
         return result_filter(data) if result_filter is not None else data
 
     async def _refresh_static(self, config: StaticFetchConfig) -> None:
-        """Fetch fresh data, persist to SQLite and update Valkey with full TTL."""
+        """Fetch fresh data, persist to SQLite and update Valkey with full TTL.
+
+        Exceptions are intentionally not caught here — they propagate to the
+        task queue adapter which calls the ``on_failure`` callback for metrics.
+        """
         logger.info(
             f"[SWR] Background refresh started for"
             f" {config.entity_type}/{config.storage_key}"
         )
-        try:
-            await self._fetch_and_store(config)
-            logger.info(
-                f"[SWR] Background refresh complete for"
-                f" {config.entity_type}/{config.storage_key}"
-            )
-        except Exception as exc:  # noqa: BLE001
-            logger.warning(
-                f"[SWR] Background refresh failed for"
-                f" {config.entity_type}/{config.storage_key}: {exc}"
-            )
+        await self._fetch_and_store(config)
 
     async def _fetch_and_store(self, config: StaticFetchConfig) -> Any:
         """Fetch from source, persist to SQLite, update Valkey, return filtered data."""
