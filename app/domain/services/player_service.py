@@ -1,6 +1,7 @@
 """Player domain service — career, stats, summary, and search"""
 
 import time
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, cast
 
 from fastapi import HTTPException, status
@@ -43,6 +44,33 @@ if TYPE_CHECKING:
         PlayerGamemode,
         PlayerPlatform,
     )
+
+
+@dataclass
+class PlayerIdentity:
+    """Result of player identity resolution.
+
+    Groups the four fields that travel together after resolving a
+    BattleTag or Blizzard ID to a canonical identity.
+    """
+
+    blizzard_id: str | None = field(default=None)
+    player_summary: dict = field(default_factory=dict)
+    cached_html: str | None = field(default=None)
+    battletag_input: str | None = field(default=None)
+
+
+@dataclass
+class PlayerRequest:
+    """Parameter object for a player data request.
+
+    Pass a single ``PlayerRequest`` to ``PlayerService._execute_player_request``
+    instead of passing each field as a separate keyword argument.
+    """
+
+    player_id: str
+    cache_key: str
+    data_factory: Callable[[str, dict], dict]
 
 
 class PlayerService(BaseService):
@@ -99,7 +127,11 @@ class PlayerService(BaseService):
         def extract(html: str, player_summary: dict) -> dict:
             return parse_player_profile_html(html, player_summary).get("summary") or {}
 
-        return await self._execute_player_request(player_id, cache_key, extract)
+        return await self._execute_player_request(
+            PlayerRequest(
+                player_id=player_id, cache_key=cache_key, data_factory=extract
+            )
+        )
 
     # ------------------------------------------------------------------
     # Player career  (GET /players/{player_id})
@@ -123,7 +155,11 @@ class PlayerService(BaseService):
                 ),
             }
 
-        return await self._execute_player_request(player_id, cache_key, extract)
+        return await self._execute_player_request(
+            PlayerRequest(
+                player_id=player_id, cache_key=cache_key, data_factory=extract
+            )
+        )
 
     # ------------------------------------------------------------------
     # Player stats  (GET /players/{player_id}/stats)
@@ -145,7 +181,11 @@ class PlayerService(BaseService):
                 profile.get("stats") or {}, platform, gamemode, hero
             )
 
-        return await self._execute_player_request(player_id, cache_key, extract)
+        return await self._execute_player_request(
+            PlayerRequest(
+                player_id=player_id, cache_key=cache_key, data_factory=extract
+            )
+        )
 
     # ------------------------------------------------------------------
     # Player stats summary  (GET /players/{player_id}/stats/summary)
@@ -165,7 +205,11 @@ class PlayerService(BaseService):
                 html, player_summary, gamemode, platform
             )
 
-        return await self._execute_player_request(player_id, cache_key, extract)
+        return await self._execute_player_request(
+            PlayerRequest(
+                player_id=player_id, cache_key=cache_key, data_factory=extract
+            )
+        )
 
     # ------------------------------------------------------------------
     # Player career stats  (GET /players/{player_id}/stats/career)
@@ -186,52 +230,40 @@ class PlayerService(BaseService):
                 html, player_summary, platform, gamemode, hero
             )
 
-        return await self._execute_player_request(player_id, cache_key, extract)
+        return await self._execute_player_request(
+            PlayerRequest(
+                player_id=player_id, cache_key=cache_key, data_factory=extract
+            )
+        )
 
     # ------------------------------------------------------------------
     # Core request execution — universal scaffold
     # ------------------------------------------------------------------
 
     async def _execute_player_request(
-        self,
-        player_id: str,
-        cache_key: str,
-        data_factory: Callable[[str, dict], dict],
+        self, request: PlayerRequest
     ) -> tuple[dict, bool, int]:
         """Resolve identity → get HTML → compute data → update cache → return.
 
         Args:
-            player_id: BattleTag or Blizzard ID.
-            cache_key: Valkey API-cache key to write after serving.
-            data_factory: Pure function ``(html, player_summary) → dict`` that
-                          extracts the endpoint-specific payload from the raw HTML.
+            request: ``PlayerRequest`` holding ``player_id``, ``cache_key``,
+                     and the endpoint-specific ``data_factory``.
         """
-        cache_key_player = player_id
-        battletag_input: str | None = None
-        player_summary: dict = {}
+        identity = PlayerIdentity()
+        effective_id = request.player_id
         data: dict = {}
 
         try:
-            (
-                blizzard_id,
-                player_summary,
-                cached_html,
-                battletag_input,
-            ) = await self._resolve_player_identity(player_id)
-            cache_key_player = blizzard_id or player_id
-
-            html = await self._get_player_html(
-                cache_key_player, player_summary, cached_html, battletag_input
-            )
-            data = data_factory(html, player_summary)
+            identity = await self._resolve_player_identity(request.player_id)
+            effective_id = identity.blizzard_id or request.player_id
+            html = await self._get_player_html(effective_id, identity)
+            data = request.data_factory(html, identity.player_summary)
         except Exception as exc:  # noqa: BLE001
-            await self._handle_player_exceptions(
-                exc, cache_key_player, battletag_input, player_summary
-            )
+            await self._handle_player_exceptions(exc, request.player_id, identity)
 
-        is_stale = self._check_player_staleness(cache_key_player)
+        is_stale = self._check_player_staleness(effective_id)
         await self._update_api_cache(
-            cache_key, data, settings.career_path_cache_timeout
+            request.cache_key, data, settings.career_path_cache_timeout
         )
         return data, is_stale, 0
 
@@ -289,50 +321,58 @@ class PlayerService(BaseService):
 
     async def _get_player_html(
         self,
-        blizzard_id: str,
-        player_summary: dict,
-        cached_html: str | None,
-        battletag_input: str | None,
+        effective_id: str,
+        identity: PlayerIdentity,
     ) -> str:
         """Return player HTML, always storing fresh HTML in SQLite.
 
         Priority order:
-        1. ``cached_html`` — fetched during identity resolution; store and return.
+        1. ``identity.cached_html`` — fetched during identity resolution; store and return.
         2. SQLite hit with matching ``lastUpdated`` — return cached HTML, backfilling
            battletag if it was missing.
         3. Fetch from Blizzard, store, return.
         """
-        if cached_html:
-            name = extract_name_from_profile_html(cached_html) or player_summary.get(
-                "name"
-            )
+        if identity.cached_html:
+            name = extract_name_from_profile_html(
+                identity.cached_html
+            ) or identity.player_summary.get("name")
             await self.update_player_profile_cache(
-                blizzard_id, player_summary, cached_html, battletag_input, name
+                effective_id,
+                identity.player_summary,
+                identity.cached_html,
+                identity.battletag_input,
+                name,
             )
-            return cached_html
+            return identity.cached_html
 
-        player_cache = await self.get_player_profile_cache(blizzard_id)
+        player_cache = await self.get_player_profile_cache(effective_id)
         if (
             player_cache is not None
-            and player_summary
+            and identity.player_summary
             and player_cache["summary"].get("lastUpdated")
-            == player_summary.get("lastUpdated")
+            == identity.player_summary.get("lastUpdated")
         ):
             html = cast("str", player_cache["profile"])
-            if battletag_input and not player_cache.get("battletag"):
+            if identity.battletag_input and not player_cache.get("battletag"):
                 await self.update_player_profile_cache(
-                    blizzard_id,
-                    player_summary,
+                    effective_id,
+                    identity.player_summary,
                     html,
-                    battletag_input,
+                    identity.battletag_input,
                     player_cache.get("name"),
                 )
             return html
 
-        html, _ = await fetch_player_html(self.blizzard_client, blizzard_id)
-        name = extract_name_from_profile_html(html) or player_summary.get("name")
+        html, _ = await fetch_player_html(self.blizzard_client, effective_id)
+        name = extract_name_from_profile_html(html) or identity.player_summary.get(
+            "name"
+        )
         await self.update_player_profile_cache(
-            blizzard_id, player_summary, html, battletag_input, name
+            effective_id,
+            identity.player_summary,
+            html,
+            identity.battletag_input,
+            name,
         )
         return html
 
@@ -340,16 +380,18 @@ class PlayerService(BaseService):
     # Identity resolution
     # ------------------------------------------------------------------
 
-    async def _resolve_player_identity(
-        self, player_id: str
-    ) -> tuple[str | None, dict, str | None, str | None]:
-        """Resolve BattleTag or Blizzard ID to a canonical (blizzard_id, summary, html, battletag)."""
+    async def _resolve_player_identity(self, player_id: str) -> PlayerIdentity:
+        """Resolve BattleTag or Blizzard ID to a canonical ``PlayerIdentity``."""
         logger.info("Retrieving Player Summary...")
 
         if is_blizzard_id(player_id):
             logger.info("Player ID is a Blizzard ID — attempting reverse enrichment")
             player_summary, html = await self._enrich_from_blizzard_id(player_id)
-            return player_id, player_summary, html, None
+            return PlayerIdentity(
+                blizzard_id=player_id,
+                player_summary=player_summary,
+                cached_html=html,
+            )
 
         battletag_input = player_id
         search_json = await fetch_player_summary_json(self.blizzard_client, player_id)
@@ -357,8 +399,11 @@ class PlayerService(BaseService):
 
         if player_summary:
             logger.info("Player Summary retrieved!")
-            blizzard_id = player_summary.get("url")
-            return blizzard_id, player_summary, None, battletag_input
+            return PlayerIdentity(
+                blizzard_id=player_summary.get("url"),
+                player_summary=player_summary,
+                battletag_input=battletag_input,
+            )
 
         logger.info(
             "Player not found in search — checking SQLite for cached Blizzard ID"
@@ -374,7 +419,11 @@ class PlayerService(BaseService):
                 search_json, player_id, cached_blizzard_id
             )
             if player_summary:
-                return cached_blizzard_id, player_summary, None, battletag_input
+                return PlayerIdentity(
+                    blizzard_id=cached_blizzard_id,
+                    player_summary=player_summary,
+                    battletag_input=battletag_input,
+                )
         elif settings.prometheus_enabled:
             sqlite_battletag_lookup_total.labels(result="miss").inc()
 
@@ -386,9 +435,18 @@ class PlayerService(BaseService):
                 search_json, player_id, blizzard_id
             )
             if player_summary:
-                return blizzard_id, player_summary, html, battletag_input
+                return PlayerIdentity(
+                    blizzard_id=blizzard_id,
+                    player_summary=player_summary,
+                    cached_html=html,
+                    battletag_input=battletag_input,
+                )
 
-        return blizzard_id, {}, html, battletag_input
+        return PlayerIdentity(
+            blizzard_id=blizzard_id,
+            cached_html=html,
+            battletag_input=battletag_input,
+        )
 
     async def _enrich_from_blizzard_id(
         self, blizzard_id: str
@@ -460,16 +518,19 @@ class PlayerService(BaseService):
     async def _handle_player_exceptions(
         self,
         error: Exception,
-        cache_key: str,
-        battletag_input: str | None,
-        player_summary: dict,
+        player_id: str,
+        identity: PlayerIdentity,
     ) -> None:
         """Translate all player exceptions to HTTPException and always raise."""
+        effective_id = identity.blizzard_id or player_id
+        battletag_input = identity.battletag_input
+        player_summary = identity.player_summary
+
         if isinstance(error, ParserBlizzardError):
             exc = HTTPException(status_code=error.status_code, detail=error.message)
             if error.status_code == status.HTTP_404_NOT_FOUND:
                 await self._mark_player_unknown(
-                    cache_key, exc, battletag=battletag_input
+                    effective_id, exc, battletag=battletag_input
                 )
             raise exc from error
 
@@ -480,20 +541,20 @@ class PlayerService(BaseService):
                     detail="Player not found",
                 )
                 await self._mark_player_unknown(
-                    cache_key, exc, battletag=battletag_input
+                    effective_id, exc, battletag=battletag_input
                 )
                 raise exc from error
 
             blizzard_url = (
                 f"{settings.blizzard_host}{settings.career_path}/"
-                f"{player_summary.get('url', cache_key) if player_summary else cache_key}/"
+                f"{player_summary.get('url', effective_id) if player_summary else effective_id}/"
             )
             raise overfast_internal_error(blizzard_url, error) from error
 
         if isinstance(error, HTTPException):
             if error.status_code == status.HTTP_404_NOT_FOUND:
                 await self._mark_player_unknown(
-                    cache_key, error, battletag=battletag_input
+                    effective_id, error, battletag=battletag_input
                 )
             raise error
 
