@@ -261,7 +261,7 @@ class PlayerService(BaseService):
         except Exception as exc:  # noqa: BLE001
             await self._handle_player_exceptions(exc, request.player_id, identity)
 
-        is_stale = self._check_player_staleness(effective_id)
+        is_stale = self._check_player_staleness()
         await self._update_api_cache(
             request.cache_key, data, settings.career_path_cache_timeout
         )
@@ -311,11 +311,11 @@ class PlayerService(BaseService):
             name=name,
         )
 
-    def _check_player_staleness(self, _player_id: str) -> bool:
-        """Return is_stale based purely on time — best effort.
+    def _check_player_staleness(self) -> bool:
+        """Return is_stale — stub always returning False until Phase 5.
 
-        Phase 5 will perform an actual async storage lookup; for now always
-        returns False (fresh) and lets the background refresh handle real staleness.
+        Phase 5 will perform a real async storage lookup comparing
+        ``player_profiles.updated_at`` against ``player_staleness_threshold``.
         """
         return False
 

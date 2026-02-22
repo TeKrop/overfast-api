@@ -52,7 +52,7 @@ async def _patch_before_every_test(
         patch("app.helpers.settings.discord_webhook_enabled", False),
         patch("app.helpers.settings.profiler", None),
         patch(
-            "app.adapters.cache.valkey_cache.CacheManager.valkey_server",
+            "app.adapters.cache.valkey_cache.ValkeyCache.valkey_server",
             valkey_server,
         ),
     ):

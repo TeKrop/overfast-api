@@ -23,7 +23,7 @@ from app.domain.services import (
 
 
 def get_blizzard_client() -> BlizzardClientPort:
-    """Dependency for Blizzard HTTP client (Singleton)."""
+    """Dependency for Blizzard HTTP client."""
     return BlizzardClient()
 
 
