@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.44.2 (2026-02-22)
+
+### Bug Fixes
+
+- **caching**: Removed irrelevant nginx check on global rate limit after phase 4
+  ([#379](https://github.com/TeKrop/overfast-api/pull/379),
+  [`0f07a38`](https://github.com/TeKrop/overfast-api/commit/0f07a38e3ed82a8341a4f8786799fa2fee95a921))
+
+
 ## v3.44.1 (2026-02-22)
 
 ### Bug Fixes
