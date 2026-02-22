@@ -60,60 +60,125 @@ class StaticDataService(BaseService):
             a cold-start fetch).
         """
         stored = await self._load_from_storage(storage_key)
-
         if stored is not None:
-            data = stored["data"]
-            age = int(time.time()) - stored["updated_at"]
-            is_stale = age >= staleness_threshold
-
-            if is_stale:
-                logger.info(
-                    f"[SWR] {entity_type} stale (age={age}s, "
-                    f"threshold={staleness_threshold}s) — serving + triggering refresh"
-                )
-                await self._enqueue_refresh(
-                    entity_type,
-                    storage_key,
-                    refresh_coro=self._refresh_static(
-                        storage_key,
-                        fetcher,
-                        parser,
-                        entity_type,
-                        cache_key=cache_key,
-                        cache_ttl=cache_ttl,
-                        result_filter=result_filter,
-                    ),
-                )
-                stale_responses_total.inc()
-                background_refresh_triggered_total.labels(entity_type=entity_type).inc()
-                # Write stale data to Valkey with a short TTL so nginx can absorb
-                # burst traffic while the background refresh is in-flight.
-                # The refresh will overwrite this entry with fresh data + full TTL.
-                filtered = result_filter(data) if result_filter is not None else data
-                await self._update_api_cache(
-                    cache_key, filtered, settings.stale_cache_timeout
-                )
-            else:
-                logger.info(
-                    f"[SWR] {entity_type} fresh (age={age}s) — serving from SQLite"
-                )
-                filtered = result_filter(data) if result_filter is not None else data
-                await self._update_api_cache(cache_key, filtered, cache_ttl)
-
             storage_hits_total.labels(result="hit").inc()
-            return filtered, is_stale, age
+            return await self._serve_from_storage(
+                stored,
+                storage_key=storage_key,
+                fetcher=fetcher,
+                parser=parser,
+                cache_key=cache_key,
+                cache_ttl=cache_ttl,
+                staleness_threshold=staleness_threshold,
+                entity_type=entity_type,
+                result_filter=result_filter,
+            )
 
-        # Cold start — fetch synchronously
-        logger.info(f"[SWR] {entity_type} not in SQLite — fetching from source")
         storage_hits_total.labels(result="miss").inc()
+        return await self._cold_fetch(
+            storage_key=storage_key,
+            fetcher=fetcher,
+            parser=parser,
+            cache_key=cache_key,
+            cache_ttl=cache_ttl,
+            entity_type=entity_type,
+            result_filter=result_filter,
+        )
 
+    async def _serve_from_storage(
+        self,
+        stored: dict[str, Any],
+        *,
+        storage_key: str,
+        fetcher: Callable[[], Any],
+        parser: Callable[[Any], Any] | None,
+        cache_key: str,
+        cache_ttl: int,
+        staleness_threshold: int,
+        entity_type: str,
+        result_filter: Callable[[Any], Any] | None,
+    ) -> tuple[Any, bool, int]:
+        """Serve data from a SQLite hit, triggering a background refresh if stale."""
+        data = stored["data"]
+        age = int(time.time()) - stored["updated_at"]
+        is_stale = age >= staleness_threshold
+        filtered = self._apply_filter(data, result_filter)
+
+        if is_stale:
+            logger.info(
+                f"[SWR] {entity_type} stale (age={age}s, "
+                f"threshold={staleness_threshold}s) — serving + triggering refresh"
+            )
+            await self._enqueue_refresh(
+                entity_type,
+                storage_key,
+                refresh_coro=self._refresh_static(
+                    storage_key,
+                    fetcher,
+                    parser,
+                    entity_type,
+                    cache_key=cache_key,
+                    cache_ttl=cache_ttl,
+                    result_filter=result_filter,
+                ),
+            )
+            stale_responses_total.inc()
+            background_refresh_triggered_total.labels(entity_type=entity_type).inc()
+            # Short TTL absorbs burst traffic while the background refresh is in-flight.
+            await self._update_api_cache(
+                cache_key, filtered, settings.stale_cache_timeout
+            )
+        else:
+            logger.info(f"[SWR] {entity_type} fresh (age={age}s) — serving from SQLite")
+            await self._update_api_cache(cache_key, filtered, cache_ttl)
+
+        return filtered, is_stale, age
+
+    async def _cold_fetch(
+        self,
+        *,
+        storage_key: str,
+        fetcher: Callable[[], Any],
+        parser: Callable[[Any], Any] | None,
+        cache_key: str,
+        cache_ttl: int,
+        entity_type: str,
+        result_filter: Callable[[Any], Any] | None,
+    ) -> tuple[Any, bool, int]:
+        """Fetch from source on cold start, persist to SQLite and Valkey."""
+        logger.info(f"[SWR] {entity_type} not in SQLite — fetching from source")
+        filtered = await self._fetch_and_store(
+            storage_key=storage_key,
+            fetcher=fetcher,
+            parser=parser,
+            cache_key=cache_key,
+            cache_ttl=cache_ttl,
+            result_filter=result_filter,
+        )
+        return filtered, False, 0
+
+    async def _fetch_and_store(
+        self,
+        *,
+        storage_key: str,
+        fetcher: Callable[[], Any],
+        parser: Callable[[Any], Any] | None,
+        cache_key: str,
+        cache_ttl: int,
+        result_filter: Callable[[Any], Any] | None,
+    ) -> Any:
+        """Fetch from source, persist to SQLite, update Valkey, return filtered data."""
         raw = await fetcher()
         data = parser(raw) if parser is not None else raw
         await self._store_in_storage(storage_key, data)
-
-        filtered = result_filter(data) if result_filter is not None else data
+        filtered = self._apply_filter(data, result_filter)
         await self._update_api_cache(cache_key, filtered, cache_ttl)
-        return filtered, False, 0
+        return filtered
+
+    @staticmethod
+    def _apply_filter(data: Any, result_filter: Callable[[Any], Any] | None) -> Any:
+        """Apply ``result_filter`` to ``data`` if provided, otherwise return as-is."""
+        return result_filter(data) if result_filter is not None else data
 
     async def _refresh_static(
         self,
@@ -129,11 +194,14 @@ class StaticDataService(BaseService):
         """Fetch fresh data, persist to SQLite and update Valkey with full TTL."""
         logger.info(f"[SWR] Background refresh started for {entity_type}/{storage_key}")
         try:
-            raw = await fetcher()
-            data = parser(raw) if parser is not None else raw
-            await self._store_in_storage(storage_key, data)
-            filtered = result_filter(data) if result_filter is not None else data
-            await self._update_api_cache(cache_key, filtered, cache_ttl)
+            await self._fetch_and_store(
+                storage_key=storage_key,
+                fetcher=fetcher,
+                parser=parser,
+                cache_key=cache_key,
+                cache_ttl=cache_ttl,
+                result_filter=result_filter,
+            )
             logger.info(
                 f"[SWR] Background refresh complete for {entity_type}/{storage_key}"
             )
@@ -145,12 +213,14 @@ class StaticDataService(BaseService):
     async def _load_from_storage(self, storage_key: str) -> dict[str, Any] | None:
         """Load data from the ``static_data`` SQLite table. Returns ``None`` on miss."""
         result = await self.storage.get_static_data(storage_key)
-        if result:
-            return {
+        return (
+            {
                 "data": json.loads(result["data"]),
                 "updated_at": result["updated_at"],
             }
-        return None
+            if result
+            else None
+        )
 
     async def _store_in_storage(self, storage_key: str, data: Any) -> None:
         """Persist data to the ``static_data`` SQLite table as JSON."""
