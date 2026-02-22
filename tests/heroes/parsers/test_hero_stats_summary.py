@@ -63,7 +63,9 @@ async def test_parse_hero_stats_summary_query_params(hero_stats_response_mock: M
     division = CompetitiveDivision.DIAMOND
     map_key = "all-maps"
 
-    with patch("httpx.AsyncClient.get", return_value=hero_stats_response_mock) as mock_get:
+    with patch(
+        "httpx.AsyncClient.get", return_value=hero_stats_response_mock
+    ) as mock_get:
         client = OverFastClient()
         await parse_hero_stats_summary(
             client,
