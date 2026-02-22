@@ -1,27 +1,24 @@
-from typing import TYPE_CHECKING
-
-import pytest
-
-from app.exceptions import OverfastError
-
-if TYPE_CHECKING:
-    from app.maps.parsers.maps_parser import MapsParser
+from app.adapters.blizzard.parsers.maps import parse_maps_csv
+from app.maps.enums import MapKey
 
 
-@pytest.mark.asyncio
-async def test_maps_page_parsing(maps_parser: MapsParser):
-    try:
-        await maps_parser.parse()
-    except OverfastError:
-        pytest.fail("Maps list parsing failed")
+def test_parse_maps_csv_returns_all_maps():
+    result = parse_maps_csv()
+    assert isinstance(result, list)
+    assert len(result) > 0
+    assert {m["key"] for m in result} == {str(m) for m in MapKey}
 
-    # Just check the format of the first map in the list
-    assert isinstance(maps_parser.data, list)
-    assert maps_parser.data[0] == {
-        "key": "aatlis",
-        "name": "Aatlis",
-        "screenshot": "https://overfast-api.tekrop.fr/static/maps/aatlis.jpg",
-        "gamemodes": ["flashpoint"],
-        "location": "Morocco",
-        "country_code": "MA",
+
+def test_parse_maps_csv_entry_format():
+    result = parse_maps_csv()
+    first = result[0]
+    assert set(first.keys()) == {
+        "key",
+        "name",
+        "screenshot",
+        "gamemodes",
+        "location",
+        "country_code",
     }
+    assert first["key"] == "aatlis"
+    assert isinstance(first["gamemodes"], list)

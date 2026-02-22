@@ -68,12 +68,17 @@ class Settings(BaseSettings):
     sqlite_mmap_size: int = 0
 
     # SQLite page cache size per connection in kibibytes (negative = KiB, positive = pages)
-    # -4000 = 4 MB/connection; keeps player_status table and indexes hot in every connection
+    # -4000 = 4 MB/connection
     sqlite_cache_size: int = -4000
 
     # SQLite WAL auto-checkpoint threshold in pages (4 KB/page by default)
     # 500 pages = ~2 MB WAL; smaller WAL reduces read scan overhead
     sqlite_wal_autocheckpoint: int = 500
+
+    # Maximum age of player profiles in seconds before they are considered stale.
+    # Profiles with updated_at older than this threshold are removed by the periodic
+    # background cleanup task to keep the database size bounded. Set to 0 to disable cleanup.
+    player_profile_max_age: int = 259200  # 3 days
 
     # Unknown player exponential backoff configuration
     unknown_player_initial_retry: int = 600  # 10 minutes (first check)
@@ -128,14 +133,6 @@ class Settings(BaseSettings):
     # Used by nginx as main API cache.
     api_cache_key_prefix: str = "api-cache"
 
-    # Prefix for keys in Player Cache (Valkey). Used by player classes
-    # in order to avoid parsing data which has already been parsed.
-    player_cache_key_prefix: str = "player-cache"
-
-    # Cache TTL for Player Cache. Whenever a key is accessed, its TTL is reset.
-    # It will only expires if not accessed during TTL time.
-    player_cache_timeout: int = 259200
-
     # Cache TTL for heroes list data (seconds)
     heroes_path_cache_timeout: int = 86400
 
@@ -155,17 +152,37 @@ class Settings(BaseSettings):
     hero_stats_cache_timeout: int = 3600
 
     ############
+    # SWR STALENESS THRESHOLDS
+    ############
+
+    # Age (seconds) after which static data is considered stale and triggers
+    # a background refresh while still serving the cached response.
+    heroes_staleness_threshold: int = 86400  # 24 hours
+    maps_staleness_threshold: int = 86400
+    gamemodes_staleness_threshold: int = 86400
+    roles_staleness_threshold: int = 86400
+
+    # Age (seconds) after which a player profile is considered stale.
+    player_staleness_threshold: int = 3600  # 1 hour
+
+    # TTL (seconds) for stale responses written to Valkey API cache.
+    # Short enough that background refresh (typically seconds) will overwrite it
+    # with fresh data before it expires; long enough to absorb burst traffic
+    # while the refresh is in-flight.
+    stale_cache_timeout: int = 60
+
+    ############
     # UNKNOWN PLAYERS SYSTEM
     ############
 
     # Indicate if unknown players cache is enabled or not
     unknown_players_cache_enabled: bool = True
 
-    # Cache key for unknown players cache in Redis.
-    unknown_players_cache_key_prefix: str = "unknown-players-cache"
+    # Prefix for Valkey keys tracking active cooldown windows (has TTL = retry_after)
+    unknown_player_cooldown_key_prefix: str = "unknown-player:cooldown"
 
-    # Cache TTL for not unknown players (seconds)
-    unknown_players_cache_timeout: int = 3600
+    # Prefix for Valkey keys storing persistent check count (no TTL, survives cooldown expiry)
+    unknown_player_status_key_prefix: str = "unknown-player:status"
 
     ############
     # BLIZZARD

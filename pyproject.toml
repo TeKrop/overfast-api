@@ -1,6 +1,6 @@
 [project]
 name = "overfast-api"
-version = "3.41.5"
+version = "3.44.0"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = {file = "LICENSE"}
 authors = [
@@ -136,6 +136,8 @@ allowed-confusables = ["（", "）", "："]
 "tests/**" = ["SLF001"]  # Ignore private member access on tests
 "models.py" = ["TC001"]  # Ignore type-checking block (Pydantic models definition)
 "app/api/routers/**" = ["TC001"]  # Enums used in FastAPI path/query parameters need runtime import
+"app/api/dependencies.py" = ["TC001"]  # Port types needed at runtime for FastAPI Depends
+"app/domain/services/**" = ["TC001"]  # Locale/enums used in runtime method annotations
 
 [tool.ruff.lint.isort]
 # Consider app as first-party for imports in tests

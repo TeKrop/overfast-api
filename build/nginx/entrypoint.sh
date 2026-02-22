@@ -13,6 +13,8 @@ set -o pipefail 2>/dev/null || true
 : "${BLIZZARD_RATE_LIMIT_KEY:=blizzard-rate-limit}"
 : "${BLIZZARD_RATE_LIMIT_RETRY_AFTER:=5}"
 : "${RETRY_AFTER_HEADER:=Retry-After}"
+: "${UNKNOWN_PLAYER_COOLDOWN_KEY_PREFIX:=unknown-player:cooldown}"
+: "${UNKNOWN_PLAYERS_CACHE_ENABLED:=true}"
 
 # Convert NGINX_WORKER_PROCESSES: 0 → "auto" (nginx auto-detect syntax)
 if [ "$NGINX_WORKER_PROCESSES" = "0" ]; then
@@ -55,7 +57,7 @@ envsubst '${NGINX_WORKER_PROCESSES_VALUE} ${NGINX_WORKER_CONNECTIONS} ${NGINX_MU
 
 # Replace placeholders and generate config and lua script from templates
 envsubst '${RATE_LIMIT_PER_SECOND_PER_IP} ${RATE_LIMIT_PER_IP_BURST} ${MAX_CONNECTIONS_PER_IP} ${RETRY_AFTER_HEADER} ${PROMETHEUS_LUA_SHARED_DICT} ${PROMETHEUS_INIT_WORKER} ${PROMETHEUS_LOG_BY_LUA} ${PROMETHEUS_METRICS_SERVER}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf
-envsubst '${VALKEY_HOST} ${VALKEY_PORT} ${CACHE_TTL_HEADER} ${BLIZZARD_RATE_LIMIT_KEY} ${BLIZZARD_RATE_LIMIT_RETRY_AFTER} ${RETRY_AFTER_HEADER}' < /usr/local/openresty/lualib/valkey_handler.lua.template > /usr/local/openresty/lualib/valkey_handler.lua
+envsubst '${VALKEY_HOST} ${VALKEY_PORT} ${CACHE_TTL_HEADER} ${BLIZZARD_RATE_LIMIT_KEY} ${BLIZZARD_RATE_LIMIT_RETRY_AFTER} ${RETRY_AFTER_HEADER} ${UNKNOWN_PLAYER_COOLDOWN_KEY_PREFIX} ${UNKNOWN_PLAYERS_CACHE_ENABLED}' < /usr/local/openresty/lualib/valkey_handler.lua.template > /usr/local/openresty/lualib/valkey_handler.lua
 
 # Check OpenResty config before starting
 openresty -t

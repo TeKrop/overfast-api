@@ -10,7 +10,7 @@ from app.exceptions import ParserBlizzardError
 from app.players.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
 
 if TYPE_CHECKING:
-    from app.adapters.blizzard.client import BlizzardClient
+    from app.domain.ports import BlizzardClientPort
 
 # Mappings for query parameters
 PLATFORM_MAPPING: dict[PlayerPlatform, str] = {
@@ -25,7 +25,7 @@ GAMEMODE_MAPPING: dict[PlayerGamemode, str] = {
 
 
 async def fetch_hero_stats_json(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     platform: PlayerPlatform,
     gamemode: PlayerGamemode,
     region: PlayerRegion,
@@ -125,7 +125,7 @@ def _normalize_rate(rate: float) -> float:
 
 
 async def parse_hero_stats_summary(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     platform: PlayerPlatform,
     gamemode: PlayerGamemode,
     region: PlayerRegion,

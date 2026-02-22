@@ -1,9 +1,9 @@
 from enum import StrEnum
 
-from app.helpers import read_csv_data_file
+from app.adapters.csv import CSVReader
 
 # Dynamically create the MapKey enum by using the CSV File
-maps_data = read_csv_data_file("maps")
+maps_data = CSVReader.read_csv_file("maps")
 MapKey = StrEnum(
     "MapKey",
     {

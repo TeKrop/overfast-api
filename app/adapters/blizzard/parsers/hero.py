@@ -16,7 +16,7 @@ from app.config import settings
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode
 
-    from app.adapters.blizzard.client import BlizzardClient
+    from app.domain.ports import BlizzardClientPort
 
 from app.enums import Locale
 from app.exceptions import ParserBlizzardError, ParserParsingError
@@ -26,7 +26,7 @@ from app.roles.helpers import get_role_from_icon_url
 
 
 async def fetch_hero_html(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     hero_key: str,
     locale: Locale = Locale.ENGLISH_US,
 ) -> str:
@@ -99,9 +99,19 @@ def _parse_hero_summary(overview_section: LexborNode, locale: Locale) -> dict:
     icon_element = extra_list_items[0].css_first("blz-icon")
     icon_url = safe_get_attribute(icon_element, "src")
 
+    backgrounds = [
+        {
+            "url": img.attributes["src"],
+            "sizes": (img.attributes.get("bp") or "").split(),
+        }
+        for img in overview_section.css("blz-image[slot=background]")
+        if img.attributes.get("src")
+    ]
+
     return {
         "name": safe_get_text(header_section.css_first("h2")),
         "description": safe_get_text(header_section.css_first("p")),
+        "backgrounds": backgrounds,
         "role": get_role_from_icon_url(icon_url or ""),
         "location": safe_get_text(extra_list_items[1]),
         "birthday": birthday,
@@ -278,7 +288,7 @@ def _parse_hero_stadium_powers(stadium_wrapper: LexborNode) -> list[dict]:
 
 
 async def parse_hero(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     hero_key: str,
     locale: Locale = Locale.ENGLISH_US,
 ) -> dict:

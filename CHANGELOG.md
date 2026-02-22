@@ -2,6 +2,69 @@
 
 <!-- version list -->
 
+## v3.44.0 (2026-02-22)
+
+### Features
+
+- Phase 4 - Introduced Domain services with Stale-While-Revalidate caching
+  ([#378](https://github.com/TeKrop/overfast-api/pull/378),
+  [`d90c9af`](https://github.com/TeKrop/overfast-api/commit/d90c9af11a306837af640dc2723494da117c19b0))
+
+
+## v3.43.0 (2026-02-21)
+
+### Features
+
+- **heroes**: Add hero background images support
+  ([#377](https://github.com/TeKrop/overfast-api/pull/377),
+  [`9d0c147`](https://github.com/TeKrop/overfast-api/commit/9d0c147c9dd781bf893ea8bf5c545fc995e4cb2f))
+
+
+## v3.42.1 (2026-02-19)
+
+### Bug Fixes
+
+- **storage**: Added max age for players profile storage with temporary cleanup background task
+  ([#375](https://github.com/TeKrop/overfast-api/pull/375),
+  [`afc6548`](https://github.com/TeKrop/overfast-api/commit/afc65487fdbe2b6be09133bd2ea41bc1810045d7))
+
+
+## v3.42.0 (2026-02-19)
+
+### Features
+
+- **cache**: Moved unknown players tracking to Valkey cache
+  ([#374](https://github.com/TeKrop/overfast-api/pull/374),
+  [`ca56f5e`](https://github.com/TeKrop/overfast-api/commit/ca56f5ee3a65b2a50c8f835e3b4d2f651e481eb2))
+
+
+## v3.41.8 (2026-02-19)
+
+### Bug Fixes
+
+- **storage**: Add retry limit to _acquire_connection to prevent infinite loop
+  ([#371](https://github.com/TeKrop/overfast-api/pull/371),
+  [`477ea45`](https://github.com/TeKrop/overfast-api/commit/477ea457d4edd2a297edac9d9bd2db92a7bfe2a7))
+
+
+## v3.41.7 (2026-02-19)
+
+### Bug Fixes
+
+- **parsers**: Add null checks for optional HTML sections in player profile
+  ([#370](https://github.com/TeKrop/overfast-api/pull/370),
+  [`7bb49c0`](https://github.com/TeKrop/overfast-api/commit/7bb49c0b79f2992fcec041af9e7a0b3fb87ab745))
+
+
+## v3.41.6 (2026-02-19)
+
+### Bug Fixes
+
+- **stats**: Handle unknown heroes gracefully in stats computation
+  ([#373](https://github.com/TeKrop/overfast-api/pull/373),
+  [`cbe0444`](https://github.com/TeKrop/overfast-api/commit/cbe04442a967413e485bda763d806ecacf4b55da))
+
+
 ## v3.41.5 (2026-02-19)
 
 ### Bug Fixes

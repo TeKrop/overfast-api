@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 from valkey.exceptions import ValkeyError
 
-from app.cache_manager import CacheManager
+from app.adapters.cache import CacheManager
 from app.config import settings
 from app.enums import Locale
 
@@ -106,3 +106,130 @@ async def test_valkey_connection_error(cache_manager: CacheManager, locale):
         # get_api_cache should return None on error
         result = await cache_manager.get_api_cache(heroes_cache_key)
         assert result is None
+
+
+class TestPlayerStatus:
+    """Tests for Valkey-based unknown player two-key pattern"""
+
+    @pytest.mark.asyncio
+    async def test_set_and_get_player_status_in_cooldown(
+        self, cache_manager: CacheManager
+    ):
+        """Cooldown key is set with TTL; get returns remaining retry_after and check_count"""
+        blizzard_id = "abc123"
+        check_count = 2
+        retry_after = 1800
+
+        await cache_manager.set_player_status(blizzard_id, check_count, retry_after)
+
+        result = await cache_manager.get_player_status(blizzard_id)
+        assert result is not None
+        assert result["check_count"] == check_count
+        assert 0 < result["retry_after"] <= retry_after
+
+    @pytest.mark.asyncio
+    async def test_get_player_status_with_battletag_early_rejection(
+        self, cache_manager: CacheManager
+    ):
+        """Battletag-based cooldown key enables early rejection before identity resolution"""
+        blizzard_id = "abc123"
+        battletag = "TeKrop-2217"
+        check_count = 1
+        retry_after = 600
+
+        await cache_manager.set_player_status(
+            blizzard_id, check_count, retry_after, battletag=battletag
+        )
+
+        # Early rejection: lookup by battletag (before blizzard_id is resolved)
+        result = await cache_manager.get_player_status(battletag)
+        assert result is not None
+        assert result["check_count"] == check_count
+
+    @pytest.mark.asyncio
+    async def test_get_player_status_persists_after_cooldown_expiry(
+        self, cache_manager: CacheManager
+    ):
+        """Status key (no TTL) remains accessible after cooldown TTL expires"""
+        blizzard_id = "persistent123"
+        check_count = 3
+        retry_after = 1  # 1 second TTL for fast expiry in test
+
+        await cache_manager.set_player_status(blizzard_id, check_count, retry_after)
+        await asyncio.sleep(2)  # Wait for cooldown to expire
+
+        # Cooldown key expired but status key must still hold check_count
+        result = await cache_manager.get_player_status(blizzard_id)
+        assert result is not None
+        assert result["check_count"] == check_count
+        assert result["retry_after"] == 0  # No active cooldown
+
+    @pytest.mark.asyncio
+    async def test_exponential_backoff_increments_check_count(
+        self, cache_manager: CacheManager
+    ):
+        """Setting player status multiple times correctly increments check_count"""
+        blizzard_id = "backoff-player"
+
+        await cache_manager.set_player_status(blizzard_id, 1, 600)
+        await cache_manager.set_player_status(blizzard_id, 2, 1800)
+
+        result = await cache_manager.get_player_status(blizzard_id)
+        assert result is not None
+        assert result["check_count"] == 2  # noqa: PLR2004
+
+    @pytest.mark.asyncio
+    async def test_get_player_status_returns_none_when_not_tracked(
+        self, cache_manager: CacheManager
+    ):
+        """Returns None for a player that was never marked unknown"""
+        result = await cache_manager.get_player_status("NeverUnknown-9999")
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_delete_player_status_removes_all_keys(
+        self, cache_manager: CacheManager
+    ):
+        """Deleting player status removes both status and cooldown keys"""
+        blizzard_id = "todelete123"
+        battletag = "DeleteMe-0000"
+        await cache_manager.set_player_status(blizzard_id, 1, 600, battletag=battletag)
+
+        await cache_manager.delete_player_status(blizzard_id)
+
+        assert await cache_manager.get_player_status(blizzard_id) is None
+        assert await cache_manager.get_player_status(battletag) is None
+
+    @pytest.mark.asyncio
+    async def test_delete_player_status_is_idempotent_when_not_tracked(
+        self, cache_manager: CacheManager
+    ):
+        """Deleting player status for a non-existent player is safe and idempotent"""
+        blizzard_id = "never-stored-1234"
+
+        # Precondition: no status exists for this player
+        assert await cache_manager.get_player_status(blizzard_id) is None
+
+        # Deleting when no keys exist should not error
+        await cache_manager.delete_player_status(blizzard_id)
+
+        # Postcondition: status is still None
+        assert await cache_manager.get_player_status(blizzard_id) is None
+
+    @pytest.mark.asyncio
+    async def test_evict_volatile_data_keeps_unknown_player_keys(
+        self, cache_manager: CacheManager
+    ):
+        """evict_volatile_data removes api-cache keys but preserves unknown-player keys"""
+        blizzard_id = "keep-me"
+        await cache_manager.set_player_status(blizzard_id, 1, 3600)
+        await cache_manager.update_api_cache("/heroes", [{"name": "Ana"}], 3600)
+
+        await cache_manager.evict_volatile_data()
+
+        # api-cache key should be gone
+        assert await cache_manager.get_api_cache("/heroes") is None
+        # unknown-player status/cooldown should survive
+        result = await cache_manager.get_player_status(blizzard_id)
+        assert result is not None
+        assert result["check_count"] == 1

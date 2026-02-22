@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-from app.heroes.controllers.get_hero_controller import GetHeroController
+from app.domain.services.hero_service import dict_insert_value_before_key
 
 
 @pytest.mark.parametrize(
@@ -21,9 +21,7 @@ def test_dict_insert_value_before_key_with_key_error(
     new_value: Any,
 ):
     with pytest.raises(KeyError):
-        GetHeroController._dict_insert_value_before_key(
-            input_dict, key, new_key, new_value
-        )
+        dict_insert_value_before_key(input_dict, key, new_key, new_value)
 
 
 @pytest.mark.parametrize(
@@ -63,8 +61,5 @@ def test_dict_insert_value_before_key_valid(
     result_dict: dict,
 ):
     assert (
-        GetHeroController._dict_insert_value_before_key(
-            input_dict, key, new_key, new_value
-        )
-        == result_dict
+        dict_insert_value_before_key(input_dict, key, new_key, new_value) == result_dict
     )

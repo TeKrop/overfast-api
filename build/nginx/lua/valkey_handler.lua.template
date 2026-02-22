@@ -1,0 +1,138 @@
+local zstd = require "zstd"
+local cjson = require "cjson"
+local valkey = require "resty.redis"
+
+local EXCLUDED_PATHS = { ["/"] = true, ["/docs"] = true, ["/openapi.json"] = true }
+local COOLDOWN_KEY_PREFIX = "${UNKNOWN_PLAYER_COOLDOWN_KEY_PREFIX}"
+local UNKNOWN_PLAYERS_CACHE_ENABLED = "${UNKNOWN_PLAYERS_CACHE_ENABLED}" == "true"
+
+local function release(valk)
+    local ok, err = valk:set_keepalive(10000, 100)
+    if not ok then
+        ngx.log(ngx.ERR, "Failed to set Valkey keepalive: ", err)
+        valk:close()
+    end
+end
+
+local function check_unknown_player(valk, uri)
+    local player_id = string.match(uri, "^/players/([^/]+)")
+    if not player_id then return false end
+
+    local key = COOLDOWN_KEY_PREFIX .. ":" .. player_id
+    valk:init_pipeline()
+    valk:get(key)
+    valk:ttl(key)
+    local res, err = valk:commit_pipeline()
+    if not res then
+        ngx.log(ngx.WARN, "Valkey pipeline error checking unknown player: ", err)
+        return false
+    end
+
+    local check_count_bytes, ttl = res[1], res[2]
+    if not check_count_bytes or check_count_bytes == ngx.null or ttl <= 0 then
+        return false
+    end
+
+    if metric_unknown_player_rejections then
+        metric_unknown_player_rejections:inc(1)
+    end
+
+    ngx.status = ngx.HTTP_NOT_FOUND
+    ngx.say('{"error":"Player not found","retry_after":' .. ttl ..
+            ',"next_check_at":' .. (ngx.time() + ttl) ..
+            ',"check_count":' .. (tonumber(check_count_bytes) or 0) .. '}')
+    return true
+end
+
+local function check_rate_limit(valk)
+    local exists, err = valk:exists("${BLIZZARD_RATE_LIMIT_KEY}")
+    if err then
+        ngx.log(ngx.ERR, "Failed to check rate limit key: ", err)
+        return false
+    end
+    if exists ~= 1 then return false end
+
+    local ttl = valk:ttl("${BLIZZARD_RATE_LIMIT_KEY}")
+    if not ttl or ttl < 0 then ttl = ${BLIZZARD_RATE_LIMIT_RETRY_AFTER} end
+
+    ngx.log(ngx.WARN, "Blizzard rate limit active, returning 429 from nginx")
+    ngx.header["${RETRY_AFTER_HEADER}"] = ttl
+    ngx.status = ngx.HTTP_TOO_MANY_REQUESTS
+    ngx.say('{"error":"API has been rate limited by Blizzard, please wait for ' .. ttl .. ' seconds before retrying"}')
+    return true
+end
+
+local function handle_valkey_request()
+    if EXCLUDED_PATHS[ngx.var.uri] then
+        return ngx.exec("@fallback")
+    end
+
+    local valk = valkey:new()
+    valk:set_timeout(1000)
+    local ok, err = valk:connect("${VALKEY_HOST}", ${VALKEY_PORT})
+    if not ok then
+        ngx.log(ngx.ERR, "Failed to connect to Valkey: ", err)
+        return ngx.exit(502)
+    end
+
+    local cache_key = "api-cache:" .. ngx.var.request_uri
+    valk:init_pipeline()
+    valk:get(cache_key)
+    valk:ttl(cache_key)
+    local res, perr = valk:commit_pipeline()
+    if not res then
+        ngx.log(ngx.ERR, "Valkey pipeline error: ", perr)
+        release(valk)
+        return ngx.exit(502)
+    end
+
+    local compressed_value, cache_ttl = res[1], res[2]
+
+    if not compressed_value or compressed_value == ngx.null then
+        if (UNKNOWN_PLAYERS_CACHE_ENABLED and check_unknown_player(valk, ngx.var.uri)) or check_rate_limit(valk) then
+            release(valk)
+            return
+        end
+        release(valk)
+        return ngx.exec("@fallback")
+    end
+
+    local ok_decomp, decompressed = pcall(zstd.decompress, compressed_value)
+    if not ok_decomp or not decompressed or decompressed == ngx.null then
+        ngx.log(ngx.ERR, "Cache decompression error for key: ", cache_key)
+        release(valk)
+        return ngx.exec("@fallback")
+    end
+
+    -- Parse metadata envelope: {"data_json":"...", "stored_at":N, "staleness_threshold":N, "stale_while_revalidate":N}
+    local ok_parse, envelope = pcall(cjson.decode, decompressed)
+    if not ok_parse or type(envelope) ~= "table" or envelope.data_json == nil then
+        ngx.log(ngx.ERR, "Cache envelope parse error for key: ", cache_key)
+        release(valk)
+        return ngx.exec("@fallback")
+    end
+
+    -- Age (RFC 7234 §5.1): seconds since the payload was generated
+    local stored_at = tonumber(envelope.stored_at) or 0
+    local age = math.max(0, ngx.time() - stored_at)
+    ngx.header["Age"] = age
+
+    -- Cache-Control with SWR directives (RFC 5861)
+    local max_age = tonumber(envelope.staleness_threshold) or cache_ttl
+    local swr = tonumber(envelope.stale_while_revalidate) or 0
+    if swr > 0 then
+        ngx.header["Cache-Control"] = "public, max-age=" .. max_age .. ", stale-while-revalidate=" .. swr
+        ngx.header["X-Cache-Status"] = "stale"
+    else
+        ngx.header["Cache-Control"] = "public, max-age=" .. max_age
+        ngx.header["X-Cache-Status"] = "hit"
+    end
+
+    -- X-Cache-TTL: remaining Valkey TTL (non-standard, kept for backward compat)
+    ngx.header["${CACHE_TTL_HEADER}"] = cache_ttl
+
+    ngx.print(envelope.data_json)
+    release(valk)
+end
+
+return handle_valkey_request

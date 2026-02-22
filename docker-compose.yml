@@ -46,6 +46,8 @@ services:
       resources:
         limits:
           memory: ${VALKEY_MEMORY_LIMIT:-1gb}
+    volumes:
+      - valkey-data:/data
     healthcheck:
       test: ["CMD", "valkey-cli", "ping"]
       interval: 3s
@@ -158,5 +160,6 @@ services:
 volumes:
   static_volume:
   storage_volume:
+  valkey-data:
   prometheus-data:
   grafana-data:
