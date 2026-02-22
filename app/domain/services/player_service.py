@@ -2,7 +2,7 @@
 
 import time
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Never, cast
 
 from fastapi import HTTPException, status
 
@@ -520,7 +520,7 @@ class PlayerService(BaseService):
         error: Exception,
         player_id: str,
         identity: PlayerIdentity,
-    ) -> None:
+    ) -> Never:
         """Translate all player exceptions to HTTPException and always raise."""
         effective_id = identity.blizzard_id or player_id
         battletag_input = identity.battletag_input
