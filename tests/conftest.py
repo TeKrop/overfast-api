@@ -10,9 +10,9 @@ import pytest_asyncio
 from fastapi.testclient import TestClient
 
 from app.adapters.blizzard import BlizzardClient
-from app.adapters.storage import SQLiteStorage
 from app.api.dependencies import get_storage
 from app.main import app
+from tests.fake_storage import FakeStorage
 
 
 @pytest.fixture(scope="session")
@@ -27,12 +27,9 @@ async def valkey_server():
 
 
 @pytest_asyncio.fixture(scope="session")
-async def storage_db() -> AsyncIterator[SQLiteStorage]:
-    """Provide an in-memory SQLite storage for tests"""
-    # Reset singleton before session to ensure clean state
-    SQLiteStorage._reset_singleton()
-
-    storage = SQLiteStorage(db_path=":memory:")
+async def storage_db() -> AsyncIterator[FakeStorage]:
+    """Provide in-memory FakeStorage for tests"""
+    storage = FakeStorage()
     await storage.initialize()
     yield storage
     await storage.close()
@@ -40,10 +37,10 @@ async def storage_db() -> AsyncIterator[SQLiteStorage]:
 
 @pytest_asyncio.fixture(autouse=True)
 async def _patch_before_every_test(
-    valkey_server: fakeredis.FakeAsyncRedis,  # Async FakeValkey
-    storage_db: SQLiteStorage,
+    valkey_server: fakeredis.FakeAsyncRedis,
+    storage_db: FakeStorage,
 ):
-    # Flush Valkey and clear all SQLite data before every test
+    # Flush Valkey and clear all storage data before every test
     await valkey_server.flushdb()
     await storage_db.clear_all_data()
 

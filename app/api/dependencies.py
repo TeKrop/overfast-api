@@ -6,7 +6,7 @@ from fastapi import Depends
 
 from app.adapters.blizzard.client import BlizzardClient
 from app.adapters.cache.valkey_cache import ValkeyCache
-from app.adapters.storage.sqlite_storage import SQLiteStorage
+from app.adapters.storage.postgres_storage import PostgresStorage
 from app.adapters.tasks.asyncio_task_queue import AsyncioTaskQueue
 from app.domain.ports import BlizzardClientPort, CachePort, StoragePort, TaskQueuePort
 from app.domain.services import (
@@ -33,8 +33,8 @@ def get_cache() -> CachePort:
 
 
 def get_storage() -> StoragePort:
-    """Dependency for SQLite persistent storage (Singleton)."""
-    return SQLiteStorage()
+    """Dependency for PostgreSQL persistent storage (Singleton)."""
+    return PostgresStorage()
 
 
 def get_task_queue() -> TaskQueuePort:

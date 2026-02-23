@@ -9,7 +9,7 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "aiosqlite==0.20.*",
+    "asyncpg==0.31.*",
     "fastapi[standard-no-fastapi-cloud-cli]==0.128.*",
     "httpx[http2]==0.28.*",
     "loguru==0.7.*",
@@ -133,7 +133,7 @@ ignore = [
 allowed-confusables = ["（", "）", "："]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["SLF001"]  # Ignore private member access on tests
+"tests/**" = ["SLF001"]  # Ignore private member access in tests
 "models.py" = ["TC001"]  # Ignore type-checking block (Pydantic models definition)
 "app/api/routers/**" = ["TC001"]  # Enums used in FastAPI path/query parameters need runtime import
 "app/api/dependencies.py" = ["TC001"]  # Port types needed at runtime for FastAPI Depends

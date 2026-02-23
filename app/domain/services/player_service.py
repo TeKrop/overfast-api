@@ -30,8 +30,8 @@ from app.domain.services.base_service import BaseService
 from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.helpers import overfast_internal_error
 from app.monitoring.metrics import (
-    sqlite_battletag_lookup_total,
-    sqlite_cache_hit_total,
+    storage_battletag_lookup_total,
+    storage_cache_hit_total,
     storage_hits_total,
 )
 from app.overfast_logger import logger
@@ -276,14 +276,14 @@ class PlayerService(BaseService):
         profile = await self.storage.get_player_profile(player_id)
         if not profile:
             if settings.prometheus_enabled:
-                sqlite_cache_hit_total.labels(
+                storage_cache_hit_total.labels(
                     table="player_profiles", result="miss"
                 ).inc()
                 storage_hits_total.labels(result="miss").inc()
             return None
 
         if settings.prometheus_enabled:
-            sqlite_cache_hit_total.labels(table="player_profiles", result="hit").inc()
+            storage_cache_hit_total.labels(table="player_profiles", result="hit").inc()
             storage_hits_total.labels(result="hit").inc()
 
         return {
@@ -414,7 +414,7 @@ class PlayerService(BaseService):
 
         if cached_blizzard_id:
             if settings.prometheus_enabled:
-                sqlite_battletag_lookup_total.labels(result="hit").inc()
+                storage_battletag_lookup_total.labels(result="hit").inc()
             player_summary = parse_player_summary_json(
                 search_json, player_id, cached_blizzard_id
             )
@@ -425,7 +425,7 @@ class PlayerService(BaseService):
                     battletag_input=battletag_input,
                 )
         elif settings.prometheus_enabled:
-            sqlite_battletag_lookup_total.labels(result="miss").inc()
+            storage_battletag_lookup_total.labels(result="miss").inc()
 
         logger.info("No cached mapping — resolving via Blizzard redirect")
         html, blizzard_id = await fetch_player_html(self.blizzard_client, player_id)

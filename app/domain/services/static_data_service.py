@@ -1,10 +1,10 @@
 import inspect
-import json
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from app.config import settings
+from app.domain.ports.storage import StaticDataCategory
 from app.domain.services import BaseService
 from app.monitoring.metrics import (
     background_refresh_triggered_total,
@@ -64,11 +64,11 @@ class StaticDataService(BaseService):
         return await self._cold_fetch(config)
 
     async def _load_from_storage(self, storage_key: str) -> dict[str, Any] | None:
-        """Load data from the ``static_data`` SQLite table. Returns ``None`` on miss."""
+        """Load data from the ``static_data`` table. Returns ``None`` on miss."""
         result = await self.storage.get_static_data(storage_key)
         return (
             {
-                "data": json.loads(result["data"]),
+                "data": result["data"],
                 "updated_at": result["updated_at"],
             }
             if result
@@ -144,7 +144,7 @@ class StaticDataService(BaseService):
             raw = config.fetcher()
 
         data = config.parser(raw) if config.parser is not None else raw
-        await self._store_in_storage(config.storage_key, data)
+        await self._store_in_storage(config.storage_key, data, config.entity_type)
 
         filtered = self._apply_filter(data, config.result_filter)
         await self._update_api_cache(
@@ -157,18 +157,20 @@ class StaticDataService(BaseService):
         return filtered
 
     async def _cold_fetch(self, config: StaticFetchConfig) -> tuple[Any, bool, int]:
-        """Fetch from source on cold start, persist to SQLite and Valkey."""
-        logger.info(f"[SWR] {config.entity_type} not in SQLite — fetching from source")
+        """Fetch from source on cold start, persist to storage and Valkey."""
+        logger.info(f"[SWR] {config.entity_type} not in storage — fetching from source")
         filtered = await self._fetch_and_store(config)
         return filtered, False, 0
 
-    async def _store_in_storage(self, storage_key: str, data: Any) -> None:
-        """Persist data to the ``static_data`` SQLite table as JSON."""
+    async def _store_in_storage(
+        self, storage_key: str, data: Any, entity_type: str
+    ) -> None:
+        """Persist data to the ``static_data`` table as JSONB."""
         try:
             await self.storage.set_static_data(
                 key=storage_key,
-                data=json.dumps(data, separators=(",", ":")),
-                data_type="json",
+                data=data,
+                category=StaticDataCategory(entity_type),
             )
         except Exception as exc:  # noqa: BLE001
-            logger.warning(f"[SWR] SQLite write failed for {storage_key}: {exc}")
+            logger.warning(f"[SWR] Storage write failed for {storage_key}: {exc}")
