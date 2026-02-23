@@ -143,6 +143,27 @@ def is_blizzard_id(player_id: str) -> bool:
     return ("%7C" in player_id or "|" in player_id) and "-" not in player_id
 
 
+def is_battletag_id(player_id: str) -> bool:
+    """
+    Check if a player_id is a BattleTag with a discriminator (e.g. "Name-12345").
+
+    Args:
+        player_id: Player identifier to check
+
+    Returns:
+        True if player_id is in BattleTag format with a discriminator
+
+    Examples:
+        >>> is_battletag_id("TeKrop-2217")
+        True
+        >>> is_battletag_id("Player")
+        False
+        >>> is_battletag_id("df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f")
+        False
+    """
+    return "-" in player_id and not is_blizzard_id(player_id)
+
+
 def match_player_by_blizzard_id(
     search_results: list[dict], blizzard_id: str
 ) -> dict | None:

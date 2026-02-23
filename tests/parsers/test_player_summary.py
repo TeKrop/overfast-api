@@ -8,6 +8,7 @@ from app.exceptions import ParserParsingError
 # Shared fixtures
 PLAYER_BLIZZARD_ID = "abc123%7Cdef456"
 OTHER_BLIZZARD_ID = "xxx999%7Cyyy000"
+THIRD_BLIZZARD_ID = "zzz111%7Cwww222"
 
 SINGLE_PLAYER_BLIZZARD_URL = [
     {
@@ -172,6 +173,58 @@ class TestParsePlayerSummaryJsonDiscriminatorValidation:
             }
         ]
         result = parse_player_summary_json(json_data, "Progresso-2749")
+        assert result == {}
+
+    def test_multiple_players_non_matching_blizzard_id_returns_empty(self):
+        """Multiple name matches with blizzard_id that matches none → empty dict."""
+        json_data = [
+            {
+                "name": "Progresso",
+                "isPublic": True,
+                "lastUpdated": 1700000001,
+                "avatar": "https://example.com/a1.png",
+                "namecard": None,
+                "title": None,
+                "url": PLAYER_BLIZZARD_ID,
+            },
+            {
+                "name": "Progresso",
+                "isPublic": True,
+                "lastUpdated": 1700000000,
+                "avatar": "https://example.com/a2.png",
+                "namecard": None,
+                "title": None,
+                "url": THIRD_BLIZZARD_ID,
+            },
+        ]
+        result = parse_player_summary_json(
+            json_data, "Progresso-2749", blizzard_id=OTHER_BLIZZARD_ID
+        )
+        assert result == {}
+
+    def test_multiple_public_players_same_name_no_blizzard_id_returns_empty(self):
+        """Multiple public players with same name and no blizzard_id → empty dict."""
+        json_data = [
+            {
+                "name": "Progresso",
+                "isPublic": True,
+                "lastUpdated": 1700000000,
+                "avatar": "https://example.com/a1.png",
+                "namecard": None,
+                "title": None,
+                "url": PLAYER_BLIZZARD_ID,
+            },
+            {
+                "name": "Progresso",
+                "isPublic": True,
+                "lastUpdated": 1700000001,
+                "avatar": "https://example.com/a2.png",
+                "namecard": None,
+                "title": None,
+                "url": OTHER_BLIZZARD_ID,
+            },
+        ]
+        result = parse_player_summary_json(json_data, "Progresso")
         assert result == {}
 
     def test_invalid_payload_raises_parsing_error(self):

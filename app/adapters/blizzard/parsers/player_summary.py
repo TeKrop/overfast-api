@@ -3,6 +3,7 @@
 from typing import TYPE_CHECKING
 
 from app.adapters.blizzard.parsers.utils import (
+    is_battletag_id,
     is_blizzard_id,
     match_player_by_blizzard_id,
     validate_response_status,
@@ -90,14 +91,12 @@ def parse_player_summary_json(
             # (i.e. not a Blizzard ID). If the URL is a Blizzard ID we cannot confirm
             # the discriminator without the redirect, so we return {} and let the
             # caller fall through to redirect-based identity resolution.
-            if "-" in player_id:
+            if is_battletag_id(player_id):
                 player_url = player_data.get("url", "")
                 if is_blizzard_id(player_url) or player_url != player_id:
                     logger.warning(
-                        "Player {} not found or unverifiable: "
-                        "search returned player with URL {} instead",
-                        player_id,
-                        player_url,
+                        f"Player {player_id} not found or unverifiable: "
+                        f"search returned player with URL {player_url} instead"
                     )
                     return {}
         else:
