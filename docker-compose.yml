@@ -38,7 +38,6 @@ services:
 
   postgres:
     image: postgres:18
-    env_file: ${APP_VOLUME_PATH:-.}/.env
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-overfast}
       - POSTGRES_USER=${POSTGRES_USER:-overfast}
@@ -46,7 +45,7 @@ services:
     volumes:
       - pg-data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-overfast}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-overfast} -d ${POSTGRES_DB:-overfast}"]
       interval: 5s
       timeout: 3s
       retries: 5

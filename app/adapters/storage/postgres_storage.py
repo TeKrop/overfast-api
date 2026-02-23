@@ -45,25 +45,36 @@ class PostgresStorage(metaclass=Singleton):
     # Lifecycle
     # ------------------------------------------------------------------ #
 
+    _MAX_POOL_CREATION_ATTEMPTS = 3
+
     async def initialize(self) -> None:
         """Create the connection pool and ensure schema exists."""
         async with self._init_lock:
             if self._initialized:
                 return
 
-            try:
-                self._pool = await asyncpg.create_pool(
-                    dsn=settings.postgres_dsn,
-                    min_size=settings.postgres_pool_min_size,
-                    max_size=settings.postgres_pool_max_size,
-                )
-            except Exception as exc:
-                if settings.prometheus_enabled:
-                    storage_connection_errors_total.labels(
-                        error_type="pool_creation"
-                    ).inc()
-                logger.error(f"Failed to create PostgreSQL pool: {exc}")
-                raise
+            for attempt in range(1, self._MAX_POOL_CREATION_ATTEMPTS + 1):
+                try:
+                    logger.info(f"DSN : {settings.postgres_dsn}")
+                    self._pool = await asyncpg.create_pool(
+                        dsn=settings.postgres_dsn,
+                        min_size=settings.postgres_pool_min_size,
+                        max_size=settings.postgres_pool_max_size,
+                    )
+                    break
+                except Exception as exc:
+                    if attempt == self._MAX_POOL_CREATION_ATTEMPTS:
+                        if settings.prometheus_enabled:
+                            storage_connection_errors_total.labels(
+                                error_type="pool_creation"
+                            ).inc()
+                        logger.error(f"Failed to create PostgreSQL pool: {exc}")
+                        raise
+                    logger.warning(
+                        f"PostgreSQL pool creation attempt {attempt}/{self._MAX_POOL_CREATION_ATTEMPTS}"
+                        f" failed: {exc}. Retrying in 2s…"
+                    )
+                    await asyncio.sleep(2)
 
             await self._create_schema()
             self._initialized = True

@@ -1,7 +1,11 @@
 -- PostgreSQL schema for OverFast API persistent storage
 
-CREATE TYPE IF NOT EXISTS static_data_category
-    AS ENUM ('heroes', 'hero', 'gamemodes', 'maps', 'roles');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'static_data_category') THEN
+        CREATE TYPE static_data_category AS ENUM ('heroes', 'hero', 'gamemodes', 'maps', 'roles');
+    END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS static_data (
     key          VARCHAR(255)           PRIMARY KEY,
