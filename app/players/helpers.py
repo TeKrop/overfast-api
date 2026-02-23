@@ -87,14 +87,18 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
 
 
 def get_division_from_icon(rank_url: str) -> CompetitiveDivision:
-    division_name = rank_url.split("/")[-1].split("-")[0].split("_")[-1]
+    division_name = (
+        rank_url.rsplit("/", maxsplit=1)[-1]
+        .split("-", maxsplit=1)[0]
+        .rsplit("_", maxsplit=1)[-1]
+    )
     return CompetitiveDivision(division_name[:-4].lower())
 
 
 def get_endorsement_value_from_frame(frame_url: str) -> int:
     """Extracts the endorsement level from the frame URL. 0 if not found."""
     try:
-        return int(frame_url.split("/")[-1].split("-")[0])
+        return int(frame_url.rsplit("/", maxsplit=1)[-1].split("-", maxsplit=1)[0])
     except ValueError:
         return 0
 
@@ -110,7 +114,9 @@ def get_hero_keyname(input_str: str) -> str:
 
 def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:  # ty: ignore[invalid-type-form]
     """Extract role key from the role icon."""
-    icon_role_key = icon_url.split("/")[-1].split("-")[0].upper()
+    icon_role_key = (
+        icon_url.rsplit("/", maxsplit=1)[-1].split("-", maxsplit=1)[0].upper()
+    )
     return (
         CompetitiveRole.DAMAGE  # ty: ignore[unresolved-attribute]
         if icon_role_key == "OFFENSE"
@@ -137,7 +143,7 @@ def get_tier_from_icon(tier_url: str | None) -> int:
 
     try:
         return int(tier_url.split("/")[-1].split("-")[0].split("_")[-1])
-    except (IndexError, ValueError):
+    except IndexError, ValueError:
         return 0
 
 

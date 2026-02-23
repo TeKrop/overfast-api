@@ -132,7 +132,7 @@ class SQLiteStorage(metaclass=Singleton):
             try:
                 replacement = await self._create_connection()
                 await self._pool.put(replacement)
-            except (OSError, sqlite3.Error):
+            except OSError, sqlite3.Error:
                 # Replacement failed — tombstone keeps the slot so the queue
                 # never blocks permanently; _acquire_connection will retry.
                 logger.warning("Failed to create replacement SQLite connection")
