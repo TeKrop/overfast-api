@@ -143,7 +143,7 @@ def get_tier_from_icon(tier_url: str | None) -> int:
 
     try:
         return int(tier_url.split("/")[-1].split("-")[0].split("_")[-1])
-    except IndexError, ValueError:
+    except (IndexError, ValueError):
         return 0
 
 

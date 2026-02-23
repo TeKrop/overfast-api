@@ -110,7 +110,7 @@ def extract_blizzard_id_from_url(url: str) -> str | None:
         # Return None if empty (malformed URL like "/career/")
         if not blizzard_id:
             return None
-    except IndexError, ValueError:
+    except (IndexError, ValueError):
         logger.warning(f"Failed to extract Blizzard ID from URL: {url}")
         return None
 
