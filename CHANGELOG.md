@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.45.1 (2026-02-23)
+
+### Bug Fixes
+
+- **player**: Validate discriminator when matching player from search results
+  ([#385](https://github.com/TeKrop/overfast-api/pull/385),
+  [`1315ec5`](https://github.com/TeKrop/overfast-api/commit/1315ec5c53669f822bcdbb46516248455be621ee))
+
+
 ## v3.45.0 (2026-02-23)
 
 ### Features
