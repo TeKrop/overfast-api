@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import time
 from compression import zstd
 from pathlib import Path
@@ -55,7 +54,7 @@ class PostgresStorage(metaclass=Singleton):
 
             for attempt in range(1, self._MAX_POOL_CREATION_ATTEMPTS + 1):
                 try:
-                    logger.info(f"DSN : {settings.postgres_dsn}")
+                    logger.debug("DSN : %s", settings.postgres_dsn)
                     self._pool = await asyncpg.create_pool(
                         dsn=settings.postgres_dsn,
                         min_size=settings.postgres_pool_min_size,
@@ -146,7 +145,7 @@ class PostgresStorage(metaclass=Singleton):
                        data_version = EXCLUDED.data_version,
                        updated_at = NOW()""",
                 key,
-                json.dumps(data),
+                data,
                 category.value,
                 data_version,
             )
@@ -213,7 +212,6 @@ class PostgresStorage(metaclass=Singleton):
             last_updated_blizzard = summary.get("lastUpdated", last_updated_blizzard)
 
         compressed = self._compress(html)
-        summary_json = json.dumps(summary) if summary else None
 
         async with self._pool.acquire() as conn:  # type: ignore[union-attr]
             await conn.execute(
@@ -233,7 +231,7 @@ class PostgresStorage(metaclass=Singleton):
                 battletag,
                 name,
                 compressed,
-                summary_json,
+                summary,
                 last_updated_blizzard,
                 data_version,
             )
@@ -303,7 +301,7 @@ class PostgresStorage(metaclass=Singleton):
                        LIMIT 1000"""
                 )
                 if ages:
-                    age_list = sorted(r["age"] for r in ages)
+                    age_list = sorted(float(r["age"]) for r in ages)
                     n = len(age_list)
                     stats["player_profile_age_p50"] = age_list[n // 2]
                     stats["player_profile_age_p90"] = age_list[int(n * 0.9)]

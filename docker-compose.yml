@@ -37,7 +37,7 @@ services:
       timeout: 2s
 
   postgres:
-    image: postgres:18
+    image: postgres:18-alpine
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-overfast}
       - POSTGRES_USER=${POSTGRES_USER:-overfast}
@@ -45,7 +45,11 @@ services:
     volumes:
       - pg-data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-overfast} -d ${POSTGRES_DB:-overfast}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-overfast} -d ${POSTGRES_DB:-overfast}",
+        ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -125,6 +129,7 @@ services:
       - monitoring
       - prometheus
     image: prometheuscommunity/postgres-exporter:latest
+    command: ["--config.file="]
     environment:
       - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-overfast}:${POSTGRES_PASSWORD:-overfast}@postgres:5432/${POSTGRES_DB:-overfast}?sslmode=disable
     ports:
