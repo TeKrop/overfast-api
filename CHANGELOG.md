@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.45.0 (2026-02-23)
+
+### Features
+
+- Updated dependencies including FastAPI last performance improvement
+  ([#381](https://github.com/TeKrop/overfast-api/pull/381),
+  [`6f97f1b`](https://github.com/TeKrop/overfast-api/commit/6f97f1bb19881ccc50a1d2cef6f0df40cfcc1988))
+
+
 ## v3.44.2 (2026-02-22)
 
 ### Bug Fixes
