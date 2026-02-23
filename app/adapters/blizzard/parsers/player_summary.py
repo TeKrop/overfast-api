@@ -65,18 +65,42 @@ def parse_player_summary_json(
             if player["name"] == player_name and player["isPublic"] is True
         ]
 
-        # If Blizzard ID provided, use it to resolve ambiguity
-        if blizzard_id and len(matching_players) > 1:
-            logger.info(
-                f"Multiple players found for {player_id}, using Blizzard ID to resolve: {blizzard_id}"
-            )
+        if blizzard_id:
+            # Blizzard ID provided: always use it to verify the match, regardless
+            # of how many name-matching players were found. This prevents accepting
+            # a wrong player even when there is only one name match.
+            if len(matching_players) > 1:
+                logger.info(
+                    f"Multiple players found for {player_id}, using Blizzard ID to resolve: {blizzard_id}"
+                )
             player_data = match_player_by_blizzard_id(matching_players, blizzard_id)
             if not player_data:
                 logger.warning(
                     f"Blizzard ID {blizzard_id} not found in search results for {player_id}"
                 )
                 return {}
-        elif len(matching_players) != 1:
+        elif len(matching_players) == 1:
+            player_data = matching_players[0]
+            # When the player_id contains a discriminator (BattleTag format like
+            # "Progresso-2749"), validate that the search result actually corresponds
+            # to this specific player. Without this check, a different player sharing
+            # the same name (e.g. "Progresso-1234") could be silently returned.
+            #
+            # Validation is only possible when the result URL is in BattleTag format
+            # (i.e. not a Blizzard ID). If the URL is a Blizzard ID we cannot confirm
+            # the discriminator without the redirect, so we return {} and let the
+            # caller fall through to redirect-based identity resolution.
+            if "-" in player_id:
+                player_url = player_data.get("url", "")
+                if is_blizzard_id(player_url) or player_url != player_id:
+                    logger.warning(
+                        "Player {} not found or unverifiable: "
+                        "search returned player with URL {} instead",
+                        player_id,
+                        player_url,
+                    )
+                    return {}
+        else:
             # Player not found or multiple matches without Blizzard ID
             logger.warning(
                 "Player {} not found in search results ({} matching players)",
@@ -84,8 +108,6 @@ def parse_player_summary_json(
                 len(matching_players),
             )
             return {}
-        else:
-            player_data = matching_players[0]
 
         # Normalize optional fields for regional consistency
         # Some regions still use "portrait" instead of "avatar", "namecard", "title"
