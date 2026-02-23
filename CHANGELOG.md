@@ -2,6 +2,17 @@
 
 <!-- version list -->
 
+## v3.46.0 (2026-02-23)
+
+### Features
+
+- **deploy**: Zero-downtime deployment with rolling restart
+  ([`ac40ca8`](https://github.com/danielsogl/overfast-api/commit/ac40ca805c9139e81fd15250c740345d40f9d464))
+
+- **sync**: Notify overwatch_app to sync API models after successful deployment
+  ([`3a6809f`](https://github.com/danielsogl/overfast-api/commit/3a6809f13bc6a219153cb5481dc6a31f966db169))
+
+
 ## v3.45.0 (2026-02-23)
 
 ### Features
