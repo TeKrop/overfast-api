@@ -62,9 +62,16 @@ class TestPlayerProfiles:
     async def test_set_and_get_player_profile_with_summary(self, storage_db):
         player_id = "TeKrop-2217"
         html = "<html>Player profile data</html>"
-        summary = {"name": "TeKrop", "isPublic": True, "lastUpdated": 1678536999, "url": "abc123"}
+        summary = {
+            "name": "TeKrop",
+            "isPublic": True,
+            "lastUpdated": 1678536999,
+            "url": "abc123",
+        }
 
-        await storage_db.set_player_profile(player_id=player_id, html=html, summary=summary)
+        await storage_db.set_player_profile(
+            player_id=player_id, html=html, summary=summary
+        )
 
         result = await storage_db.get_player_profile(player_id)
         assert result is not None
@@ -76,7 +83,9 @@ class TestPlayerProfiles:
     async def test_set_and_get_player_profile_without_summary(self, storage_db):
         player_id = "Player-1234"
 
-        await storage_db.set_player_profile(player_id=player_id, html="<html/>", summary=None)
+        await storage_db.set_player_profile(
+            player_id=player_id, html="<html/>", summary=None
+        )
 
         result = await storage_db.get_player_profile(player_id)
         assert result is not None
@@ -94,12 +103,16 @@ class TestPlayerProfiles:
         player_id = "UpdateTest-1111"
 
         await storage_db.set_player_profile(
-            player_id=player_id, html="<html>v1</html>", summary={"lastUpdated": 1000000}
+            player_id=player_id,
+            html="<html>v1</html>",
+            summary={"lastUpdated": 1000000},
         )
         first = await storage_db.get_player_profile(player_id)
 
         await storage_db.set_player_profile(
-            player_id=player_id, html="<html>v2</html>", summary={"lastUpdated": 2000000}
+            player_id=player_id,
+            html="<html>v2</html>",
+            summary={"lastUpdated": 2000000},
         )
         updated = await storage_db.get_player_profile(player_id)
 
@@ -165,7 +178,11 @@ class TestDataIntegrity:
 
     @pytest.mark.asyncio
     async def test_unicode_data_integrity(self, storage_db):
-        test_data = {"name": "Lúcio", "emoji": "🎵🎶", "description": "Héros de soutien"}
+        test_data = {
+            "name": "Lúcio",
+            "emoji": "🎵🎶",
+            "description": "Héros de soutien",
+        }
         await storage_db.set_static_data(
             key="hero-lucio", data=test_data, category=StaticDataCategory.HERO
         )

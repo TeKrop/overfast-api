@@ -6,6 +6,7 @@ import asyncio
 import json
 import time
 from compression import zstd
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import asyncpg
@@ -21,44 +22,7 @@ from app.overfast_logger import logger
 if TYPE_CHECKING:
     from app.domain.ports.storage import StaticDataCategory
 
-# DDL executed once in initialize()
-# Note: enum type creation uses a DO block for idempotency (CREATE TYPE has no IF NOT EXISTS before PG18)
-_CREATE_ENUM = """
-DO $$ BEGIN
-    CREATE TYPE static_data_category AS ENUM ('heroes', 'hero', 'gamemodes', 'maps', 'roles');
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-"""
-
-_DDL = """
-CREATE TABLE IF NOT EXISTS static_data (
-    key          VARCHAR(255)           PRIMARY KEY,
-    data         JSONB                  NOT NULL,
-    category     static_data_category   NOT NULL,
-    data_version SMALLINT               NOT NULL DEFAULT 1,
-    created_at   TIMESTAMPTZ            NOT NULL DEFAULT NOW(),
-    updated_at   TIMESTAMPTZ            NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS player_profiles (
-    player_id               TEXT        PRIMARY KEY,
-    battletag               TEXT,
-    name                    TEXT,
-    html_compressed         BYTEA       NOT NULL,
-    summary                 JSONB,
-    last_updated_blizzard   BIGINT,
-    data_version            SMALLINT    NOT NULL DEFAULT 1,
-    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_player_profiles_updated_at
-    ON player_profiles (updated_at);
-
-CREATE INDEX IF NOT EXISTS idx_player_profiles_battletag
-    ON player_profiles (battletag)
-    WHERE battletag IS NOT NULL;
-"""
+_SCHEMA_SQL = (Path(__file__).parent / "schema.sql").read_text()
 
 
 class PostgresStorage(metaclass=Singleton):
@@ -76,13 +40,6 @@ class PostgresStorage(metaclass=Singleton):
         self._pool: asyncpg.Pool | None = None
         self._initialized = False
         self._init_lock = asyncio.Lock()
-
-    @classmethod
-    def _reset_singleton(cls) -> None:
-        """Reset singleton instance (for testing only)."""
-        instances = Singleton._instances  # noqa: SLF001
-        if cls in instances:
-            del instances[cls]
 
     # ------------------------------------------------------------------ #
     # Lifecycle
@@ -113,10 +70,9 @@ class PostgresStorage(metaclass=Singleton):
             logger.info("PostgreSQL storage initialized")
 
     async def _create_schema(self) -> None:
-        """Create PG enum type and tables if they don't exist."""
+        """Create enum type and tables if they don't exist."""
         async with self._pool.acquire() as conn:  # type: ignore[union-attr]
-            await conn.execute(_CREATE_ENUM)
-            await conn.execute(_DDL)
+            await conn.execute(_SCHEMA_SQL)
 
     async def close(self) -> None:
         """Close the connection pool."""
@@ -154,7 +110,7 @@ class PostgresStorage(metaclass=Singleton):
         if row is None:
             return None
         return {
-            "data": dict(row["data"]),
+            "data": row["data"],
             "category": row["category"],
             "updated_at": int(row["updated_at"].timestamp()),
             "data_version": row["data_version"],
@@ -206,12 +162,12 @@ class PostgresStorage(metaclass=Singleton):
         if row is None:
             return None
 
-        summary = dict(row["summary"]) if row["summary"] is not None else {}
+        summary = row["summary"] if row["summary"] is not None else {}
         if not summary:
             summary = {"url": player_id, "lastUpdated": row["last_updated_blizzard"]}
 
         return {
-            "html": self._decompress(bytes(row["html_compressed"])),
+            "html": self._decompress(row["html_compressed"]),
             "battletag": row["battletag"],
             "name": row["name"],
             "summary": summary,

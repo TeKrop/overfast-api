@@ -63,7 +63,10 @@ class FakeStorage:
             return None
         summary = profile.get("summary") or {}
         if not summary:
-            summary = {"url": player_id, "lastUpdated": profile.get("last_updated_blizzard")}
+            summary = {
+                "url": player_id,
+                "lastUpdated": profile.get("last_updated_blizzard"),
+            }
         return {**profile, "summary": summary}
 
     async def get_player_id_by_battletag(self, battletag: str) -> str | None:
@@ -101,9 +104,7 @@ class FakeStorage:
     async def delete_old_player_profiles(self, max_age_seconds: int) -> int:
         cutoff = time.time() - max_age_seconds
         to_delete = [
-            pid
-            for pid, p in self._profiles.items()
-            if p["updated_at"] < cutoff
+            pid for pid, p in self._profiles.items() if p["updated_at"] < cutoff
         ]
         for pid in to_delete:
             bt = self._profiles[pid].get("battletag")
