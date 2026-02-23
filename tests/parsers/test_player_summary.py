@@ -143,6 +143,23 @@ class TestParsePlayerSummaryJsonDiscriminatorValidation:
         result = parse_player_summary_json(json_data, "Player")
         assert result != {}
 
+    def test_no_discriminator_single_battletag_url_accepted(self):
+        """Player_id without discriminator, single BattleTag URL result → accepted."""
+        json_data = [
+            {
+                "name": "Player",
+                "isPublic": True,
+                "lastUpdated": 1700000000,
+                "avatar": "https://example.com/avatar.png",
+                "namecard": None,
+                "title": None,
+                "url": "Player-1234",
+            }
+        ]
+        # "Player" has no discriminator so validation is skipped entirely
+        result = parse_player_summary_json(json_data, "Player")
+        assert result != {}
+
     def test_no_matching_players_returns_empty(self):
         """No public player with matching name → empty dict."""
         json_data = [

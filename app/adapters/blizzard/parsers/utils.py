@@ -1,5 +1,6 @@
 """Common utilities for Blizzard HTML/JSON parsing"""
 
+import re
 from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, status
@@ -161,7 +162,7 @@ def is_battletag_id(player_id: str) -> bool:
         >>> is_battletag_id("df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f")
         False
     """
-    return "-" in player_id and not is_blizzard_id(player_id)
+    return bool(re.fullmatch(r".+-\d+", player_id))
 
 
 def match_player_by_blizzard_id(
