@@ -76,7 +76,7 @@ def parse_player_summary_json(
                 )
             player_data = match_player_by_blizzard_id(matching_players, blizzard_id)
             if not player_data:
-                logger.info(
+                logger.warning(
                     f"Blizzard ID {blizzard_id} not found in search results for {player_id}"
                 )
                 return {}

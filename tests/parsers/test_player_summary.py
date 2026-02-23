@@ -262,6 +262,24 @@ class TestParsePlayerSummaryJsonDiscriminatorValidation:
         result = parse_player_summary_json(json_data, "Progresso")
         assert result == {}
 
+    def test_no_name_match_with_blizzard_id_returns_empty(self):
+        """No public player matches the name despite blizzard_id being provided → empty dict."""
+        json_data = [
+            {
+                "name": "SomeoneElse",
+                "isPublic": True,
+                "lastUpdated": 1700000000,
+                "avatar": "https://example.com/avatar.png",
+                "namecard": None,
+                "title": None,
+                "url": PLAYER_BLIZZARD_ID,
+            }
+        ]
+        result = parse_player_summary_json(
+            json_data, "Progresso-2749", blizzard_id=PLAYER_BLIZZARD_ID
+        )
+        assert result == {}
+
     def test_invalid_payload_raises_parsing_error(self):
         """Malformed payload raises ParserParsingError."""
         with pytest.raises(ParserParsingError):

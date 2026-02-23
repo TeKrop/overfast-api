@@ -162,7 +162,7 @@ def is_battletag_id(player_id: str) -> bool:
         >>> is_battletag_id("df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f")
         False
     """
-    return bool(re.fullmatch(r".+-\d+", player_id))
+    return bool(re.fullmatch(r".+-\d{4,5}", player_id))
 
 
 def match_player_by_blizzard_id(
