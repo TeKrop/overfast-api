@@ -8,6 +8,7 @@ limit_req_status 429;
 
 upstream appbackend {
   server app:8080;
+  keepalive 16;
 }
 
 # Use Docker's internal DNS resolver for Lua script
@@ -19,7 +20,6 @@ ${PROMETHEUS_INIT_WORKER}
 
 server {
   listen 80;
-  server_name localhost api.mercy-stats.app;
 
   # Use nginx to serve static content
   location /static {
@@ -94,6 +94,10 @@ server {
     # Main proxy method
     proxy_pass http://appbackend;
 
+    # Enable keepalive reuse with upstream
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+
     # Ensure headers are forwarded
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -103,6 +107,16 @@ server {
 
     # Ensure HEAD requests are passed as GET
     proxy_method GET;
+
+    # Retry on connection errors during app rolling restart
+    proxy_next_upstream error timeout http_502 http_503;
+    proxy_next_upstream_tries 2;
+    proxy_next_upstream_timeout 10s;
+
+    # Reasonable timeouts
+    proxy_connect_timeout 5s;
+    proxy_read_timeout 30s;
+    proxy_send_timeout 10s;
   }
 
   # nginx rate limit reached
