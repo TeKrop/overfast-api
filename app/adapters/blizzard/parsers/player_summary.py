@@ -76,7 +76,7 @@ def parse_player_summary_json(
                 )
             player_data = match_player_by_blizzard_id(matching_players, blizzard_id)
             if not player_data:
-                logger.warning(
+                logger.info(
                     f"Blizzard ID {blizzard_id} not found in search results for {player_id}"
                 )
                 return {}
@@ -94,7 +94,7 @@ def parse_player_summary_json(
             if is_battletag_id(player_id):
                 player_url = player_data.get("url", "")
                 if is_blizzard_id(player_url) or player_url != player_id:
-                    logger.warning(
+                    logger.info(
                         f"Player {player_id} not found or unverifiable: "
                         f"search returned player with URL {player_url} instead"
                     )

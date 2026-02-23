@@ -89,6 +89,24 @@ class TestParsePlayerSummaryJsonDiscriminatorValidation:
         )
         assert result == {}
 
+    def test_battletag_url_with_wrong_blizzard_id_returns_empty(self):
+        """Single result with BattleTag URL + non-matching blizzard_id → empty dict."""
+        json_data = [
+            {
+                "name": "Progresso",
+                "isPublic": True,
+                "lastUpdated": 1700000000,
+                "avatar": "https://example.com/a1.png",
+                "namecard": None,
+                "title": None,
+                "url": "Progresso-2749",
+            }
+        ]
+        result = parse_player_summary_json(
+            json_data, "Progresso-2749", blizzard_id=OTHER_BLIZZARD_ID
+        )
+        assert result == {}
+
     def test_multiple_players_resolved_by_blizzard_id(self):
         """Multiple name matches with blizzard_id provided → correct one returned."""
         json_data = [
