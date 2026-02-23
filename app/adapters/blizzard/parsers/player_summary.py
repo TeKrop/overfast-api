@@ -3,7 +3,6 @@
 from typing import TYPE_CHECKING
 
 from app.adapters.blizzard.parsers.utils import (
-    is_battletag_id,
     is_blizzard_id,
     match_player_by_blizzard_id,
     validate_response_status,
@@ -80,27 +79,10 @@ def parse_player_summary_json(
                     f"Blizzard ID {blizzard_id} not found in search results for {player_id}"
                 )
                 return {}
-        elif len(matching_players) == 1:
-            player_data = matching_players[0]
-            # When the player_id contains a discriminator (BattleTag format like
-            # "Progresso-2749"), validate that the search result actually corresponds
-            # to this specific player. Without this check, a different player sharing
-            # the same name (e.g. "Progresso-1234") could be silently returned.
-            #
-            # Validation is only possible when the result URL is in BattleTag format
-            # (i.e. not a Blizzard ID). If the URL is a Blizzard ID we cannot confirm
-            # the discriminator without the redirect, so we return {} and let the
-            # caller fall through to redirect-based identity resolution.
-            if is_battletag_id(player_id):
-                player_url = player_data.get("url", "")
-                if is_blizzard_id(player_url) or player_url != player_id:
-                    logger.info(
-                        f"Player {player_id} not found or unverifiable: "
-                        f"search returned player with URL {player_url} instead"
-                    )
-                    return {}
         else:
-            # Player not found or multiple matches without Blizzard ID
+            # Without a Blizzard ID we cannot safely identify the player:
+            # Blizzard always returns a Blizzard ID in the URL field, so the
+            # discriminator cannot be verified from search results alone.
             logger.warning(
                 "Player {} not found in search results ({} matching players)",
                 player_id,

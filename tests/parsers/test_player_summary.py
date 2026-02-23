@@ -22,56 +22,38 @@ SINGLE_PLAYER_BLIZZARD_URL = [
     }
 ]
 
-SINGLE_PLAYER_BATTLETAG_URL = [
-    {
-        "name": "Progresso",
-        "isPublic": True,
-        "lastUpdated": 1700000000,
-        "avatar": "https://example.com/avatar.png",
-        "namecard": None,
-        "title": None,
-        "url": "Progresso-2749",
-    }
-]
-
-WRONG_PLAYER_BATTLETAG_URL = [
-    {
-        "name": "Progresso",
-        "isPublic": True,
-        "lastUpdated": 1700000000,
-        "avatar": "https://example.com/avatar.png",
-        "namecard": None,
-        "title": None,
-        "url": "Progresso-1234",  # different discriminator
-    }
-]
-
 
 class TestParsePlayerSummaryJsonDiscriminatorValidation:
     """Tests for the discriminator validation fix (issue #382).
 
-    When a BattleTag like "Progresso-2749" is requested and search returns a
-    different player with the same name, the wrong player must NOT be returned.
+    Without a Blizzard ID, we can never safely identify the player from search
+    results: Blizzard always returns a Blizzard ID in the URL field, so the
+    discriminator cannot be verified. A blizzard_id param is required to match.
     """
 
-    def test_correct_battletag_match_returned(self):
-        """Single result whose BattleTag URL matches the request → returned."""
-        result = parse_player_summary_json(SINGLE_PLAYER_BATTLETAG_URL, "Progresso-2749")
-        assert result != {}
-        assert result["url"] == "Progresso-2749"
+    def test_single_match_without_blizzard_id_returns_empty(self):
+        """Single result with no blizzard_id param → empty dict.
 
-    def test_wrong_battletag_returns_empty(self):
-        """Single result whose BattleTag URL has a DIFFERENT discriminator → empty dict."""
-        result = parse_player_summary_json(WRONG_PLAYER_BATTLETAG_URL, "Progresso-2749")
-        assert result == {}
-
-    def test_blizzard_id_url_without_blizzard_id_returns_empty(self):
-        """Single result with Blizzard ID URL and no blizzard_id param → empty dict.
-
-        We cannot verify whether this Blizzard ID corresponds to the requested
-        discriminator, so we fall through to redirect-based resolution.
+        Without a Blizzard ID we cannot verify the player identity, regardless
+        of how many name matches were found.
         """
         result = parse_player_summary_json(SINGLE_PLAYER_BLIZZARD_URL, "Progresso-2749")
+        assert result == {}
+
+    def test_single_match_no_discriminator_without_blizzard_id_returns_empty(self):
+        """Single result, player_id without discriminator, no blizzard_id → empty dict."""
+        json_data = [
+            {
+                "name": "Player",
+                "isPublic": True,
+                "lastUpdated": 1700000000,
+                "avatar": "https://example.com/avatar.png",
+                "namecard": None,
+                "title": None,
+                "url": PLAYER_BLIZZARD_ID,
+            }
+        ]
+        result = parse_player_summary_json(json_data, "Player")
         assert result == {}
 
     def test_blizzard_id_url_with_matching_blizzard_id_returned(self):
@@ -86,24 +68,6 @@ class TestParsePlayerSummaryJsonDiscriminatorValidation:
         """Single result with Blizzard ID URL + non-matching blizzard_id → empty dict."""
         result = parse_player_summary_json(
             SINGLE_PLAYER_BLIZZARD_URL, "Progresso-2749", blizzard_id=OTHER_BLIZZARD_ID
-        )
-        assert result == {}
-
-    def test_battletag_url_with_wrong_blizzard_id_returns_empty(self):
-        """Single result with BattleTag URL + non-matching blizzard_id → empty dict."""
-        json_data = [
-            {
-                "name": "Progresso",
-                "isPublic": True,
-                "lastUpdated": 1700000000,
-                "avatar": "https://example.com/a1.png",
-                "namecard": None,
-                "title": None,
-                "url": "Progresso-2749",
-            }
-        ]
-        result = parse_player_summary_json(
-            json_data, "Progresso-2749", blizzard_id=OTHER_BLIZZARD_ID
         )
         assert result == {}
 
@@ -129,7 +93,9 @@ class TestParsePlayerSummaryJsonDiscriminatorValidation:
                 "url": PLAYER_BLIZZARD_ID,
             },
         ]
-        result = parse_player_summary_json(json_data, "Progresso-2749", blizzard_id=PLAYER_BLIZZARD_ID)
+        result = parse_player_summary_json(
+            json_data, "Progresso-2749", blizzard_id=PLAYER_BLIZZARD_ID
+        )
         assert result != {}
         assert result["url"] == PLAYER_BLIZZARD_ID
 
@@ -142,40 +108,6 @@ class TestParsePlayerSummaryJsonDiscriminatorValidation:
         result = parse_player_summary_json(
             SINGLE_PLAYER_BLIZZARD_URL, "Progresso-2749", blizzard_id=PLAYER_BLIZZARD_ID
         )
-        assert result != {}
-
-    def test_no_discriminator_single_match_accepted(self):
-        """Player_id without discriminator and single match → accepted (no change)."""
-        json_data = [
-            {
-                "name": "Player",
-                "isPublic": True,
-                "lastUpdated": 1700000000,
-                "avatar": "https://example.com/avatar.png",
-                "namecard": None,
-                "title": None,
-                "url": PLAYER_BLIZZARD_ID,
-            }
-        ]
-        # "Player" has no "-" so discriminator validation is skipped
-        result = parse_player_summary_json(json_data, "Player")
-        assert result != {}
-
-    def test_no_discriminator_single_battletag_url_accepted(self):
-        """Player_id without discriminator, single BattleTag URL result → accepted."""
-        json_data = [
-            {
-                "name": "Player",
-                "isPublic": True,
-                "lastUpdated": 1700000000,
-                "avatar": "https://example.com/avatar.png",
-                "namecard": None,
-                "title": None,
-                "url": "Player-1234",
-            }
-        ]
-        # "Player" has no discriminator so validation is skipped entirely
-        result = parse_player_summary_json(json_data, "Player")
         assert result != {}
 
     def test_no_matching_players_returns_empty(self):
@@ -204,7 +136,7 @@ class TestParsePlayerSummaryJsonDiscriminatorValidation:
                 "avatar": "https://example.com/avatar.png",
                 "namecard": None,
                 "title": None,
-                "url": "Progresso-2749",
+                "url": PLAYER_BLIZZARD_ID,
             }
         ]
         result = parse_player_summary_json(json_data, "Progresso-2749")

@@ -1,6 +1,5 @@
 """Common utilities for Blizzard HTML/JSON parsing"""
 
-import re
 from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, status
@@ -142,27 +141,6 @@ def is_blizzard_id(player_id: str) -> bool:
     """
     # Blizzard IDs contain pipe (| or %7C), BattleTags have format Name-12345
     return ("%7C" in player_id or "|" in player_id) and "-" not in player_id
-
-
-def is_battletag_id(player_id: str) -> bool:
-    """
-    Check if a player_id is a BattleTag with a discriminator (e.g. "Name-12345").
-
-    Args:
-        player_id: Player identifier to check
-
-    Returns:
-        True if player_id is in BattleTag format with a discriminator
-
-    Examples:
-        >>> is_battletag_id("TeKrop-2217")
-        True
-        >>> is_battletag_id("Player")
-        False
-        >>> is_battletag_id("df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f")
-        False
-    """
-    return bool(re.fullmatch(r".+-\d{4,5}", player_id))
 
 
 def match_player_by_blizzard_id(
