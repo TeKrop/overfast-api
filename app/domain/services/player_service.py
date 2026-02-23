@@ -306,7 +306,7 @@ class PlayerService(BaseService):
         await self.storage.set_player_profile(
             player_id=player_id,
             html=html,
-            summary=player_summary if player_summary else None,
+            summary=player_summary or None,
             battletag=battletag,
             name=name,
         )
