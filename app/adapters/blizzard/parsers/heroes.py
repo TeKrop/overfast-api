@@ -14,11 +14,11 @@ from app.exceptions import ParserParsingError
 from app.heroes.enums import HeroGamemode
 
 if TYPE_CHECKING:
-    from app.adapters.blizzard.client import BlizzardClient
+    from app.domain.ports import BlizzardClientPort
 
 
 async def fetch_heroes_html(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     locale: Locale = Locale.ENGLISH_US,
 ) -> str:
     """
@@ -95,7 +95,7 @@ def filter_heroes(
 
 
 async def parse_heroes(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     locale: Locale = Locale.ENGLISH_US,
     role: str | None = None,
     gamemode: HeroGamemode | None = None,

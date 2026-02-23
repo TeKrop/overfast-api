@@ -14,11 +14,11 @@ from app.exceptions import ParserParsingError
 from app.roles.helpers import get_role_from_icon_url
 
 if TYPE_CHECKING:
-    from app.adapters.blizzard.client import BlizzardClient
+    from app.domain.ports import BlizzardClientPort
 
 
 async def fetch_roles_html(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     locale: Locale = Locale.ENGLISH_US,
 ) -> str:
     """Fetch roles HTML from Blizzard homepage"""
@@ -71,7 +71,7 @@ def parse_roles_html(html: str) -> list[dict]:
 
             roles.append(
                 {
-                    "key": get_role_from_icon_url(roles_icons[role_index]),
+                    "key": get_role_from_icon_url(roles_icons[role_index] or ""),
                     "name": safe_get_text(header.css_first("h3")).capitalize(),
                     "icon": roles_icons[role_index],
                     "description": safe_get_text(header.css_first("div")),
@@ -86,7 +86,7 @@ def parse_roles_html(html: str) -> list[dict]:
 
 
 async def parse_roles(
-    client: BlizzardClient,
+    client: BlizzardClientPort,
     locale: Locale = Locale.ENGLISH_US,
 ) -> list[dict]:
     """

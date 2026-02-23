@@ -2,6 +2,42 @@
 
 <!-- version list -->
 
+## v3.45.0 (2026-02-23)
+
+### Features
+
+- Updated dependencies including FastAPI last performance improvement
+  ([#381](https://github.com/TeKrop/overfast-api/pull/381),
+  [`6f97f1b`](https://github.com/TeKrop/overfast-api/commit/6f97f1bb19881ccc50a1d2cef6f0df40cfcc1988))
+
+
+## v3.44.2 (2026-02-22)
+
+### Bug Fixes
+
+- **caching**: Removed irrelevant nginx check on global rate limit after phase 4
+  ([#379](https://github.com/TeKrop/overfast-api/pull/379),
+  [`0f07a38`](https://github.com/TeKrop/overfast-api/commit/0f07a38e3ed82a8341a4f8786799fa2fee95a921))
+
+
+## v3.44.1 (2026-02-22)
+
+### Bug Fixes
+
+- **client**: Add in-memory rate limit fallback when Valkey is unavailable
+  ([#372](https://github.com/TeKrop/overfast-api/pull/372),
+  [`566bc3c`](https://github.com/TeKrop/overfast-api/commit/566bc3cf0648a5d1a488c8a154a131a543e1f5e9))
+
+
+## v3.44.0 (2026-02-22)
+
+### Features
+
+- Phase 4 - Introduced Domain services with Stale-While-Revalidate caching
+  ([#378](https://github.com/TeKrop/overfast-api/pull/378),
+  [`d90c9af`](https://github.com/TeKrop/overfast-api/commit/d90c9af11a306837af640dc2723494da117c19b0))
+
+
 ## v3.43.0 (2026-02-21)
 
 ### Features

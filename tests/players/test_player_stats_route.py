@@ -200,11 +200,11 @@ def test_get_player_stats_blizzard_forbidden_error(client: TestClient, uri: str)
     [
         (
             "/stats",
-            "app.players.controllers.get_player_career_controller.GetPlayerCareerController.process_request",
+            "app.domain.services.player_service.PlayerService.get_player_stats",
         ),
         (
             "/stats/career",
-            "app.players.controllers.get_player_career_stats_controller.GetPlayerCareerStatsController.process_request",
+            "app.domain.services.player_service.PlayerService.get_player_career_stats",
         ),
     ],
 )
@@ -213,9 +213,13 @@ def test_get_player_stats_internal_error(
 ):
     with patch(
         patch_target,
-        return_value={
-            "ana": [{"category": "invalid_value", "stats": [{"key": "test"}]}],
-        },
+        return_value=(
+            {
+                "ana": [{"category": "invalid_value", "stats": [{"key": "test"}]}],
+            },
+            False,
+            0,
+        ),
     ):
         response = client.get(
             f"/players/TeKrop-2217{uri}",

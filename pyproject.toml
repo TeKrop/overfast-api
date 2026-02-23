@@ -1,6 +1,6 @@
 [project]
 name = "overfast-api"
-version = "3.43.0"
+version = "3.45.0"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = {file = "LICENSE"}
 authors = [
@@ -9,15 +9,15 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "aiosqlite==0.20.*",
-    "fastapi[standard-no-fastapi-cloud-cli]==0.128.*",
+    "aiosqlite==0.22.*",
+    "fastapi[standard-no-fastapi-cloud-cli]==0.131.*",
     "httpx[http2]==0.28.*",
     "loguru==0.7.*",
-    "prometheus-client==0.22.*",
+    "prometheus-client==0.24.*",
     "pydantic==2.12.*",
-    "pydantic-settings==2.12.*",
+    "pydantic-settings==2.13.*",
     "selectolax==0.4.*",
-    "sentry-sdk[fastapi]==2.51.*",
+    "sentry-sdk[fastapi]==2.53.*",
     "valkey[libvalkey]==6.1.*",
 ]
 
@@ -29,7 +29,7 @@ Issues = "https://github.com/TeKrop/overfast-api/issues"
 
 [dependency-groups]
 dev = [
-    "fakeredis[valkey]==2.33.*",
+    "fakeredis[valkey]==2.34.*",
     "ipdb==0.13.*",
     "pytest==9.0.*",
     "pytest-asyncio==1.3.*",
@@ -136,6 +136,8 @@ allowed-confusables = ["（", "）", "："]
 "tests/**" = ["SLF001"]  # Ignore private member access on tests
 "models.py" = ["TC001"]  # Ignore type-checking block (Pydantic models definition)
 "app/api/routers/**" = ["TC001"]  # Enums used in FastAPI path/query parameters need runtime import
+"app/api/dependencies.py" = ["TC001"]  # Port types needed at runtime for FastAPI Depends
+"app/domain/services/**" = ["TC001"]  # Locale/enums used in runtime method annotations
 
 [tool.ruff.lint.isort]
 # Consider app as first-party for imports in tests

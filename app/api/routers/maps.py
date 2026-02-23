@@ -4,10 +4,16 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Query, Request, Response
 
+from app.api.dependencies import MapServiceDep
+from app.config import settings
 from app.enums import RouteTag
 from app.gamemodes.enums import MapGamemode
-from app.helpers import success_responses
-from app.maps.controllers.list_maps_controller import ListMapsController
+from app.helpers import (
+    apply_swr_headers,
+    build_cache_key,
+    get_human_readable_duration,
+    success_responses,
+)
 from app.maps.models import Map
 
 router = APIRouter()
@@ -20,7 +26,7 @@ router = APIRouter()
     summary="Get a list of maps",
     description=(
         "Get a list of Overwatch maps : Hanamura, King's Row, Dorado, etc."
-        f"<br />**Cache TTL : {ListMapsController.get_human_readable_timeout()}.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.csv_cache_timeout)}.**"
     ),
     operation_id="list_maps",
     response_model=list[Map],
@@ -28,6 +34,7 @@ router = APIRouter()
 async def list_maps(
     request: Request,
     response: Response,
+    service: MapServiceDep,
     gamemode: Annotated[
         MapGamemode | None,  # ty: ignore[invalid-type-form]
         Query(
@@ -36,6 +43,14 @@ async def list_maps(
         ),
     ] = None,
 ) -> Any:
-    return await ListMapsController(request, response).process_request(
-        gamemode=gamemode
+    data, is_stale, age = await service.list_maps(
+        gamemode=gamemode, cache_key=build_cache_key(request)
     )
+    apply_swr_headers(
+        response,
+        settings.csv_cache_timeout,
+        is_stale,
+        age,
+        staleness_threshold=settings.maps_staleness_threshold,
+    )
+    return data

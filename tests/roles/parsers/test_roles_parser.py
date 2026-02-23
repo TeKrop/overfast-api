@@ -1,26 +1,32 @@
-from typing import TYPE_CHECKING
 from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import status
 
-from app.exceptions import OverfastError
+from app.adapters.blizzard import OverFastClient
+from app.adapters.blizzard.parsers.roles import fetch_roles_html, parse_roles_html
 from app.roles.enums import Role
 
-if TYPE_CHECKING:
-    from app.roles.parsers.roles_parser import RolesParser
+
+def test_parse_roles_html_returns_all_roles(home_html_data: str):
+    result = parse_roles_html(home_html_data)
+    assert isinstance(result, list)
+    assert {role["key"] for role in result} == {r.value for r in Role}
+
+
+def test_parse_roles_html_entry_format(home_html_data: str):
+    result = parse_roles_html(home_html_data)
+    first = result[0]
+    assert set(first.keys()) == {"key", "name", "icon", "description"}
 
 
 @pytest.mark.asyncio
-async def test_roles_page_parsing(roles_parser: RolesParser, home_html_data: str):
+async def test_fetch_roles_html_calls_blizzard(home_html_data: str):
     with patch(
         "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=home_html_data),
     ):
-        try:
-            await roles_parser.parse()
-        except OverfastError:
-            pytest.fail("Roles list parsing failed")
+        client = OverFastClient()
+        html = await fetch_roles_html(client)
 
-    assert isinstance(roles_parser.data, list)
-    assert {role["key"] for role in roles_parser.data} == {r.value for r in Role}
+    assert html == home_html_data

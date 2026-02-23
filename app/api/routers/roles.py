@@ -4,9 +4,15 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Query, Request, Response
 
+from app.api.dependencies import RoleServiceDep
+from app.config import settings
 from app.enums import Locale, RouteTag
-from app.helpers import routes_responses
-from app.roles.controllers.list_roles_controller import ListRolesController
+from app.helpers import (
+    apply_swr_headers,
+    build_cache_key,
+    get_human_readable_duration,
+    routes_responses,
+)
 from app.roles.models import RoleDetail
 
 router = APIRouter()
@@ -19,7 +25,7 @@ router = APIRouter()
     summary="Get a list of roles",
     description=(
         "Get a list of available Overwatch roles."
-        f"<br />**Cache TTL : {ListRolesController.get_human_readable_timeout()}.**"
+        f"<br />**Cache TTL : {get_human_readable_duration(settings.heroes_path_cache_timeout)}.**"
     ),
     operation_id="list_roles",
     response_model=list[RoleDetail],
@@ -27,8 +33,19 @@ router = APIRouter()
 async def list_roles(
     request: Request,
     response: Response,
+    service: RoleServiceDep,
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
 ) -> Any:
-    return await ListRolesController(request, response).process_request(locale=locale)
+    data, is_stale, age = await service.list_roles(
+        locale=locale, cache_key=build_cache_key(request)
+    )
+    apply_swr_headers(
+        response,
+        settings.heroes_path_cache_timeout,
+        is_stale,
+        age,
+        staleness_threshold=settings.roles_staleness_threshold,
+    )
+    return data

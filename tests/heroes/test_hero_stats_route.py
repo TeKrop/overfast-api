@@ -96,8 +96,8 @@ def test_get_hero_stats_blizzard_error(client: TestClient):
 
 def test_get_heroes_internal_error(client: TestClient):
     with patch(
-        "app.heroes.controllers.get_hero_stats_summary_controller.GetHeroStatsSummaryController.process_request",
-        return_value=[{"invalid_key": "invalid_value"}],
+        "app.domain.services.hero_service.HeroService.get_hero_stats",
+        return_value=([{"invalid_key": "invalid_value"}], False, 0),
     ):
         response = client.get(
             "/heroes/stats",

@@ -47,30 +47,39 @@ class CachePort(Protocol):
         ...
 
     async def update_api_cache(
-        self, cache_key: str, value: dict | list, expire: int
+        self,
+        cache_key: str,
+        value: dict | list,
+        expire: int,
+        *,
+        stored_at: int | None = None,
+        staleness_threshold: int | None = None,
+        stale_while_revalidate: int = 0,
     ) -> None:
-        """
-        Update or set an API Cache value with an expiration value (in seconds).
+        """Update or set an API Cache value with an expiration value (in seconds).
 
-        Value is JSON-serialized and compressed before storage.
-        """
-        ...
+        Value is wrapped in a metadata envelope before compression::
 
-    async def get_player_cache(self, player_id: str) -> dict | list | None:
-        """
-        Get the Player Cache value associated with a given player ID.
+            {"data_json": "<pre-serialized JSON string>",
+             "stored_at": <unix epoch>,
+             "staleness_threshold": <seconds>,
+             "stale_while_revalidate": <seconds>}
 
-        Returns decompressed JSON data or None if not found.
-        Resets the TTL on successful retrieval.
-        """
-        ...
+        ``data_json`` is a pre-serialized JSON string so nginx/Lua can print it
+        verbatim without re-encoding through cjson, preserving key ordering.
+        The envelope allows nginx/Lua to set standard ``Age``
+        and ``Cache-Control: stale-while-revalidate`` headers without calling
+        FastAPI.
 
-    async def update_player_cache(self, player_id: str, value: dict) -> None:
-        """
-        Update or set a Player Cache value.
-
-        Value is JSON-serialized and compressed before storage.
-        Uses configured player cache TTL.
+        Args:
+            cache_key: Valkey key suffix (after ``api-cache:``).
+            value: Data payload to cache.
+            expire: Valkey key TTL in seconds.
+            stored_at: Unix timestamp when the data was generated.  Defaults to now.
+            staleness_threshold: Seconds after which the payload is considered stale.
+                Used for ``Cache-Control: max-age``.  Defaults to ``expire``.
+            stale_while_revalidate: Seconds nginx may serve stale while revalidating.
+                0 means no SWR window (omits the directive).
         """
         ...
 

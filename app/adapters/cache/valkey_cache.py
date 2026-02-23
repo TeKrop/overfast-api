@@ -20,6 +20,7 @@ cooldown expirations so exponential backoff keeps growing.
 """
 
 import json
+import time
 from compression import zstd
 from functools import wraps
 from typing import TYPE_CHECKING, Any
@@ -128,44 +129,46 @@ class ValkeyCache(metaclass=Singleton):
     # Application-specific cache methods
     @handle_valkey_error(default_return=None)
     async def get_api_cache(self, cache_key: str) -> dict | list | None:
-        """Get the API Cache value associated with a given cache key"""
+        """Get the API Cache value associated with a given cache key."""
         api_cache_key = f"{settings.api_cache_key_prefix}:{cache_key}"
         api_cache = await self.valkey_server.get(api_cache_key)
         if not api_cache or not isinstance(api_cache, bytes):
             return None
-        return self._decompress_json_value(api_cache)
+        envelope = self._decompress_json_value(api_cache)
+        if isinstance(envelope, dict) and "data_json" in envelope:
+            return json.loads(envelope["data_json"])
+        return envelope
 
     @handle_valkey_error(default_return=None)
     async def update_api_cache(
-        self, cache_key: str, value: dict | list, expire: int
+        self,
+        cache_key: str,
+        value: dict | list,
+        expire: int,
+        *,
+        stored_at: int | None = None,
+        staleness_threshold: int | None = None,
+        stale_while_revalidate: int = 0,
     ) -> None:
-        """Update or set an API Cache value with an expiration value (in seconds)"""
-        bytes_value = self._compress_json_value(value)
+        """Wrap value in a metadata envelope, compress, and store with TTL.
+
+        ``data_json`` is the pre-serialized JSON string (key order preserved by
+        Python's ``json.dumps``), so nginx/Lua can print it verbatim without
+        re-encoding through cjson (which does not guarantee key ordering).
+        """
+        envelope: dict = {
+            "data_json": json.dumps(value, separators=(",", ":")),
+            "stored_at": stored_at if stored_at is not None else int(time.time()),
+            "staleness_threshold": (
+                staleness_threshold if staleness_threshold is not None else expire
+            ),
+            "stale_while_revalidate": stale_while_revalidate,
+        }
+        bytes_value = self._compress_json_value(envelope)
         await self.valkey_server.set(
             f"{settings.api_cache_key_prefix}:{cache_key}",
             bytes_value,
             ex=expire,
-        )
-
-    @handle_valkey_error(default_return=None)
-    async def get_player_cache(self, player_id: str) -> dict | list | None:
-        """Get the Player Cache value associated with a given cache key"""
-        player_key = f"{settings.player_cache_key_prefix}:{player_id}"
-        player_cache = await self.valkey_server.get(player_key)
-        if not player_cache or not isinstance(player_cache, bytes):
-            return None
-        # Reset the TTL before returning the value
-        await self.valkey_server.expire(player_key, settings.player_cache_timeout)
-        return self._decompress_json_value(player_cache)
-
-    @handle_valkey_error(default_return=None)
-    async def update_player_cache(self, player_id: str, value: dict) -> None:
-        """Update or set a Player Cache value"""
-        compressed_value = self._compress_json_value(value)
-        await self.valkey_server.set(
-            f"{settings.player_cache_key_prefix}:{player_id}",
-            value=compressed_value,
-            ex=settings.player_cache_timeout,
         )
 
     @handle_valkey_error(default_return=False)

@@ -1,0 +1,174 @@
+import inspect
+import json
+import time
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
+
+from app.config import settings
+from app.domain.services import BaseService
+from app.monitoring.metrics import (
+    background_refresh_triggered_total,
+    stale_responses_total,
+    storage_hits_total,
+)
+from app.overfast_logger import logger
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+
+@dataclass
+class StaticFetchConfig:
+    """Parameter object grouping all inputs needed for a static SWR fetch.
+
+    Pass a single ``StaticFetchConfig`` to ``StaticDataService.get_or_fetch``
+    instead of passing each field as a separate keyword argument.
+    """
+
+    storage_key: str
+    fetcher: Callable[[], Any]
+    cache_key: str
+    cache_ttl: int
+    staleness_threshold: int
+    entity_type: str
+    parser: Callable[[Any], Any] | None = field(default=None)
+    result_filter: Callable[[Any], Any] | None = field(default=None)
+
+
+class StaticDataService(BaseService):
+    """SWR orchestration for static content backed by the ``static_data`` SQLite table.
+
+    Staleness is determined by a configurable time threshold.  Concrete static
+    services (heroes, maps, gamemodes, roles) call ``get_or_fetch`` with a
+    ``StaticFetchConfig`` — no subclass-level overrides are needed for the
+    storage layer.
+
+    Note: Valkey API-cache *reads* happen at the Nginx/Lua layer before FastAPI
+    is reached; this service only ever *writes* to the API cache.
+    """
+
+    async def get_or_fetch(self, config: StaticFetchConfig) -> tuple[Any, bool, int]:
+        """SWR orchestration for static data.
+
+        Returns:
+            ``(data, is_stale, age_seconds)`` tuple.  ``age_seconds`` is the
+            number of seconds since the data was last stored in SQLite (0 on
+            a cold-start fetch).
+        """
+        stored = await self._load_from_storage(config.storage_key)
+        if stored is not None:
+            storage_hits_total.labels(result="hit").inc()
+            return await self._serve_from_storage(stored, config)
+
+        storage_hits_total.labels(result="miss").inc()
+        return await self._cold_fetch(config)
+
+    async def _load_from_storage(self, storage_key: str) -> dict[str, Any] | None:
+        """Load data from the ``static_data`` SQLite table. Returns ``None`` on miss."""
+        result = await self.storage.get_static_data(storage_key)
+        return (
+            {
+                "data": json.loads(result["data"]),
+                "updated_at": result["updated_at"],
+            }
+            if result
+            else None
+        )
+
+    async def _serve_from_storage(
+        self, stored: dict[str, Any], config: StaticFetchConfig
+    ) -> tuple[Any, bool, int]:
+        """Serve data from a SQLite hit, triggering a background refresh if stale."""
+        data = stored["data"]
+        age = int(time.time()) - stored["updated_at"]
+        is_stale = age >= config.staleness_threshold
+        filtered = self._apply_filter(data, config.result_filter)
+
+        if is_stale:
+            logger.info(
+                f"[SWR] {config.entity_type} stale (age={age}s, "
+                f"threshold={config.staleness_threshold}s) — serving + triggering refresh"
+            )
+            await self._enqueue_refresh(
+                config.entity_type,
+                config.storage_key,
+                refresh_coro=self._refresh_static(config),
+            )
+            stale_responses_total.inc()
+            background_refresh_triggered_total.labels(
+                entity_type=config.entity_type
+            ).inc()
+            # Short TTL absorbs burst traffic while the background refresh is in-flight.
+            await self._update_api_cache(
+                config.cache_key,
+                filtered,
+                settings.stale_cache_timeout,
+                staleness_threshold=config.staleness_threshold,
+                stale_while_revalidate=settings.stale_cache_timeout,
+            )
+        else:
+            logger.info(
+                f"[SWR] {config.entity_type} fresh (age={age}s) — serving from SQLite"
+            )
+            await self._update_api_cache(
+                config.cache_key,
+                filtered,
+                config.cache_ttl,
+                staleness_threshold=config.staleness_threshold,
+            )
+
+        return filtered, is_stale, age
+
+    @staticmethod
+    def _apply_filter(data: Any, result_filter: Callable[[Any], Any] | None) -> Any:
+        """Apply ``result_filter`` to ``data`` if provided, otherwise return as-is."""
+        return result_filter(data) if result_filter is not None else data
+
+    async def _refresh_static(self, config: StaticFetchConfig) -> None:
+        """Fetch fresh data, persist to SQLite and update Valkey with full TTL.
+
+        Exceptions are intentionally not caught here — they propagate to the
+        task queue adapter which calls the ``on_failure`` callback for metrics.
+        """
+        logger.info(
+            f"[SWR] Background refresh started for"
+            f" {config.entity_type}/{config.storage_key}"
+        )
+        await self._fetch_and_store(config)
+
+    async def _fetch_and_store(self, config: StaticFetchConfig) -> Any:
+        """Fetch from source, persist to SQLite, update Valkey, return filtered data."""
+        if inspect.iscoroutinefunction(config.fetcher):
+            raw = await config.fetcher()
+        else:
+            raw = config.fetcher()
+
+        data = config.parser(raw) if config.parser is not None else raw
+        await self._store_in_storage(config.storage_key, data)
+
+        filtered = self._apply_filter(data, config.result_filter)
+        await self._update_api_cache(
+            config.cache_key,
+            filtered,
+            config.cache_ttl,
+            staleness_threshold=config.staleness_threshold,
+        )
+
+        return filtered
+
+    async def _cold_fetch(self, config: StaticFetchConfig) -> tuple[Any, bool, int]:
+        """Fetch from source on cold start, persist to SQLite and Valkey."""
+        logger.info(f"[SWR] {config.entity_type} not in SQLite — fetching from source")
+        filtered = await self._fetch_and_store(config)
+        return filtered, False, 0
+
+    async def _store_in_storage(self, storage_key: str, data: Any) -> None:
+        """Persist data to the ``static_data`` SQLite table as JSON."""
+        try:
+            await self.storage.set_static_data(
+                key=storage_key,
+                data=json.dumps(data, separators=(",", ":")),
+                data_type="json",
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(f"[SWR] SQLite write failed for {storage_key}: {exc}")

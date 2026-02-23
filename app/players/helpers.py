@@ -2,7 +2,7 @@ import re
 import unicodedata
 from functools import cache
 
-from app.helpers import read_csv_data_file
+from app.adapters.csv import CSVReader
 from app.roles.enums import Role
 
 from .enums import CareerStatCategory, CompetitiveDivision, CompetitiveRole, HeroKey
@@ -16,7 +16,7 @@ FLOAT_PATTERN = re.compile(r"^-?\d+(,\d+)*\.\d+$")
 @cache
 def get_hero_name(hero_key: HeroKey) -> str:  # ty: ignore[invalid-type-form]
     """Get a hero name based on the CSV file"""
-    heroes_data = read_csv_data_file("heroes")
+    heroes_data = CSVReader.read_csv_file("heroes")
     return next(
         (
             hero_data["name"]
@@ -87,14 +87,18 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
 
 
 def get_division_from_icon(rank_url: str) -> CompetitiveDivision:
-    division_name = rank_url.split("/")[-1].split("-")[0].split("_")[-1]
+    division_name = (
+        rank_url.rsplit("/", maxsplit=1)[-1]
+        .split("-", maxsplit=1)[0]
+        .rsplit("_", maxsplit=1)[-1]
+    )
     return CompetitiveDivision(division_name[:-4].lower())
 
 
 def get_endorsement_value_from_frame(frame_url: str) -> int:
     """Extracts the endorsement level from the frame URL. 0 if not found."""
     try:
-        return int(frame_url.split("/")[-1].split("-")[0])
+        return int(frame_url.rsplit("/", maxsplit=1)[-1].split("-", maxsplit=1)[0])
     except ValueError:
         return 0
 
@@ -110,7 +114,9 @@ def get_hero_keyname(input_str: str) -> str:
 
 def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:  # ty: ignore[invalid-type-form]
     """Extract role key from the role icon."""
-    icon_role_key = icon_url.split("/")[-1].split("-")[0].upper()
+    icon_role_key = (
+        icon_url.rsplit("/", maxsplit=1)[-1].split("-", maxsplit=1)[0].upper()
+    )
     return (
         CompetitiveRole.DAMAGE  # ty: ignore[unresolved-attribute]
         if icon_role_key == "OFFENSE"
@@ -160,7 +166,7 @@ def remove_accents(input_str: str) -> str:
 @cache
 def get_hero_role(hero_key: HeroKey) -> Role | None:  # ty: ignore[invalid-type-form]
     """Get the role of a given hero based on the CSV file"""
-    heroes_data = read_csv_data_file("heroes")
+    heroes_data = CSVReader.read_csv_file("heroes")
     role_key = next(
         (
             hero_data["role"]

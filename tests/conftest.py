@@ -9,7 +9,9 @@ import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 
+from app.adapters.blizzard import BlizzardClient
 from app.adapters.storage import SQLiteStorage
+from app.api.dependencies import get_storage
 from app.main import app
 
 
@@ -45,19 +47,21 @@ async def _patch_before_every_test(
     await valkey_server.flushdb()
     await storage_db.clear_all_data()
 
+    # Reset in-memory rate limit state on the singleton
+    BlizzardClient()._rate_limited_until = 0
+    app.dependency_overrides[get_storage] = lambda: storage_db
+
     with (
         patch("app.helpers.settings.discord_webhook_enabled", False),
         patch("app.helpers.settings.profiler", None),
         patch(
-            "app.cache_manager.CacheManager.valkey_server",
+            "app.adapters.cache.valkey_cache.ValkeyCache.valkey_server",
             valkey_server,
-        ),
-        patch(
-            "app.controllers.AbstractController.storage",
-            storage_db,
         ),
     ):
         yield
+
+    app.dependency_overrides.pop(get_storage, None)
 
     await valkey_server.flushdb()
     await storage_db.clear_all_data()

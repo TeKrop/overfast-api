@@ -31,7 +31,7 @@ class InterceptHandler(logging.Handler):
             level = self.loglevel_mapping[record.levelno]
 
         frame, depth = logging.currentframe(), 2
-        while frame.f_code.co_filename == logging.__file__:
+        while frame is not None and frame.f_code.co_filename == logging.__file__:
             frame = frame.f_back
             depth += 1
 
