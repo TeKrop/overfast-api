@@ -71,7 +71,7 @@ def parse_roles_html(html: str) -> list[dict]:
 
             roles.append(
                 {
-                    "key": get_role_from_icon_url(roles_icons[role_index]),
+                    "key": get_role_from_icon_url(roles_icons[role_index] or ""),
                     "name": safe_get_text(header.css_first("h3")).capitalize(),
                     "icon": roles_icons[role_index],
                     "description": safe_get_text(header.css_first("div")),
