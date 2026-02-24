@@ -405,28 +405,29 @@ class PlayerService(BaseService):
                 battletag_input=battletag_input,
             )
 
-        logger.info(
-            "Player not found in search — checking persistent storage for cached Blizzard ID"
-        )
-        cached_blizzard_id = await self.storage.get_player_id_by_battletag(
-            battletag_input
-        )
-
-        if cached_blizzard_id:
-            logger.info("Blizzard ID found — retrying to find in search")
-            if settings.prometheus_enabled:
-                storage_battletag_lookup_total.labels(result="hit").inc()
-            player_summary = parse_player_summary_json(
-                search_json, player_id, cached_blizzard_id
+        if search_json:
+            logger.info(
+                "Player not found in search — checking persistent storage for cached Blizzard ID"
             )
-            if player_summary:
-                return PlayerIdentity(
-                    blizzard_id=cached_blizzard_id,
-                    player_summary=player_summary,
-                    battletag_input=battletag_input,
+            cached_blizzard_id = await self.storage.get_player_id_by_battletag(
+                battletag_input
+            )
+
+            if cached_blizzard_id:
+                logger.info("Blizzard ID found — retrying to find in search")
+                if settings.prometheus_enabled:
+                    storage_battletag_lookup_total.labels(result="hit").inc()
+                player_summary = parse_player_summary_json(
+                    search_json, player_id, cached_blizzard_id
                 )
-        elif settings.prometheus_enabled:
-            storage_battletag_lookup_total.labels(result="miss").inc()
+                if player_summary:
+                    return PlayerIdentity(
+                        blizzard_id=cached_blizzard_id,
+                        player_summary=player_summary,
+                        battletag_input=battletag_input,
+                    )
+            elif settings.prometheus_enabled:
+                storage_battletag_lookup_total.labels(result="miss").inc()
 
         logger.info("No cached mapping — resolving via Blizzard redirect")
         html, blizzard_id = await fetch_player_html(self.blizzard_client, player_id)
