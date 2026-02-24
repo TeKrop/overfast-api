@@ -1845,7 +1845,7 @@
       },
       "targets": [
         {
-          "expr": "pg_stat_database_blks_hit_total{job=\"postgres\",datname=\"overfast\"} / (pg_stat_database_blks_hit_total{job=\"postgres\",datname=\"overfast\"} + pg_stat_database_blks_read_total{job=\"postgres\",datname=\"overfast\"}) * 100",
+          "expr": "pg_stat_database_blks_hit{job=\"postgres\",datname=\"overfast\"} / (pg_stat_database_blks_hit{job=\"postgres\",datname=\"overfast\"} + pg_stat_database_blks_read{job=\"postgres\",datname=\"overfast\"}) * 100",
           "refId": "A"
         }
       ],
@@ -1899,7 +1899,7 @@
       },
       "targets": [
         {
-          "expr": "rate(pg_stat_database_xact_commit_total{job=\"postgres\",datname=\"overfast\"}[5m])",
+          "expr": "rate(pg_stat_database_xact_commit{job=\"postgres\",datname=\"overfast\"}[5m])",
           "refId": "A"
         }
       ],
@@ -2027,12 +2027,12 @@
       },
       "targets": [
         {
-          "expr": "rate(pg_stat_database_xact_commit_total{job=\"postgres\",datname=\"overfast\"}[5m])",
+          "expr": "rate(pg_stat_database_xact_commit{job=\"postgres\",datname=\"overfast\"}[5m])",
           "legendFormat": "commits/s",
           "refId": "A"
         },
         {
-          "expr": "rate(pg_stat_database_xact_rollback_total{job=\"postgres\",datname=\"overfast\"}[5m])",
+          "expr": "rate(pg_stat_database_xact_rollback{job=\"postgres\",datname=\"overfast\"}[5m])",
           "legendFormat": "rollbacks/s",
           "refId": "B"
         }
@@ -2073,7 +2073,7 @@
       },
       "targets": [
         {
-          "expr": "pg_stat_database_blks_hit_total{job=\"postgres\",datname=\"overfast\"} / (pg_stat_database_blks_hit_total{job=\"postgres\",datname=\"overfast\"} + pg_stat_database_blks_read_total{job=\"postgres\",datname=\"overfast\"}) * 100",
+          "expr": "pg_stat_database_blks_hit{job=\"postgres\",datname=\"overfast\"} / (pg_stat_database_blks_hit{job=\"postgres\",datname=\"overfast\"} + pg_stat_database_blks_read{job=\"postgres\",datname=\"overfast\"}) * 100",
           "legendFormat": "hit %",
           "refId": "A"
         }
@@ -2114,17 +2114,17 @@
       },
       "targets": [
         {
-          "expr": "rate(pg_stat_user_tables_n_tup_ins_total{job=\"postgres\"}[5m])",
+          "expr": "rate(pg_stat_user_tables_n_tup_ins{job=\"postgres\"}[5m])",
           "legendFormat": "{{relname}} inserts",
           "refId": "A"
         },
         {
-          "expr": "rate(pg_stat_user_tables_n_tup_upd_total{job=\"postgres\"}[5m])",
+          "expr": "rate(pg_stat_user_tables_n_tup_upd{job=\"postgres\"}[5m])",
           "legendFormat": "{{relname}} updates",
           "refId": "B"
         },
         {
-          "expr": "rate(pg_stat_user_tables_n_tup_del_total{job=\"postgres\"}[5m])",
+          "expr": "rate(pg_stat_user_tables_n_tup_del{job=\"postgres\"}[5m])",
           "legendFormat": "{{relname}} deletes",
           "refId": "C"
         }
@@ -2206,12 +2206,12 @@
       },
       "targets": [
         {
-          "expr": "rate(pg_stat_user_tables_idx_scan_total{job=\"postgres\"}[5m])",
+          "expr": "rate(pg_stat_user_tables_idx_scan{job=\"postgres\"}[5m])",
           "legendFormat": "{{relname}} idx",
           "refId": "A"
         },
         {
-          "expr": "rate(pg_stat_user_tables_seq_scan_total{job=\"postgres\"}[5m])",
+          "expr": "rate(pg_stat_user_tables_seq_scan{job=\"postgres\"}[5m])",
           "legendFormat": "{{relname}} seq",
           "refId": "B"
         }
