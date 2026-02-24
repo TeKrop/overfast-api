@@ -1737,7 +1737,7 @@
       },
       "targets": [
         {
-          "expr": "pg_database_size_bytes{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"}",
+          "expr": "pg_database_size_bytes{job=\"postgres\",datname=\"overfast\"}",
           "refId": "A"
         }
       ],
@@ -1791,7 +1791,7 @@
       },
       "targets": [
         {
-          "expr": "pg_stat_database_numbackends{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"}",
+          "expr": "pg_stat_database_numbackends{job=\"postgres\",datname=\"overfast\"}",
           "refId": "A"
         }
       ],
@@ -1845,7 +1845,7 @@
       },
       "targets": [
         {
-          "expr": "pg_stat_database_blks_hit_total{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"} / (pg_stat_database_blks_hit_total{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"} + pg_stat_database_blks_read_total{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"}) * 100",
+          "expr": "pg_stat_database_blks_hit_total{job=\"postgres\",datname=\"overfast\"} / (pg_stat_database_blks_hit_total{job=\"postgres\",datname=\"overfast\"} + pg_stat_database_blks_read_total{job=\"postgres\",datname=\"overfast\"}) * 100",
           "refId": "A"
         }
       ],
@@ -1899,7 +1899,7 @@
       },
       "targets": [
         {
-          "expr": "rate(pg_stat_database_xact_commit_total{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"}[5m])",
+          "expr": "rate(pg_stat_database_xact_commit_total{job=\"postgres\",datname=\"overfast\"}[5m])",
           "refId": "A"
         }
       ],
@@ -1945,7 +1945,7 @@
       },
       "targets": [
         {
-          "expr": "pg_database_size_bytes{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"}",
+          "expr": "pg_database_size_bytes{job=\"postgres\",datname=\"overfast\"}",
           "legendFormat": "DB size",
           "refId": "A"
         }
@@ -1986,7 +1986,7 @@
       },
       "targets": [
         {
-          "expr": "pg_stat_database_numbackends{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"}",
+          "expr": "pg_stat_database_numbackends{job=\"postgres\",datname=\"overfast\"}",
           "legendFormat": "connections",
           "refId": "A"
         }
@@ -2027,12 +2027,12 @@
       },
       "targets": [
         {
-          "expr": "rate(pg_stat_database_xact_commit_total{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"}[5m])",
+          "expr": "rate(pg_stat_database_xact_commit_total{job=\"postgres\",datname=\"overfast\"}[5m])",
           "legendFormat": "commits/s",
           "refId": "A"
         },
         {
-          "expr": "rate(pg_stat_database_xact_rollback_total{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"}[5m])",
+          "expr": "rate(pg_stat_database_xact_rollback_total{job=\"postgres\",datname=\"overfast\"}[5m])",
           "legendFormat": "rollbacks/s",
           "refId": "B"
         }
@@ -2073,7 +2073,7 @@
       },
       "targets": [
         {
-          "expr": "pg_stat_database_blks_hit_total{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"} / (pg_stat_database_blks_hit_total{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"} + pg_stat_database_blks_read_total{job=\"postgres\",datname=\"${POSTGRES_DB:-overfast}\"}) * 100",
+          "expr": "pg_stat_database_blks_hit_total{job=\"postgres\",datname=\"overfast\"} / (pg_stat_database_blks_hit_total{job=\"postgres\",datname=\"overfast\"} + pg_stat_database_blks_read_total{job=\"postgres\",datname=\"overfast\"}) * 100",
           "legendFormat": "hit %",
           "refId": "A"
         }
