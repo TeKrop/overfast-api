@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v3.45.1 (2026-02-23)
+
+### Bug Fixes
+
+- **player**: Validate discriminator when matching player from search results
+  ([#385](https://github.com/TeKrop/overfast-api/pull/385),
+  [`1315ec5`](https://github.com/TeKrop/overfast-api/commit/1315ec5c53669f822bcdbb46516248455be621ee))
+
+
+## v3.45.0 (2026-02-23)
+
+### Features
+
+- Updated dependencies including FastAPI last performance improvement
+  ([#381](https://github.com/TeKrop/overfast-api/pull/381),
+  [`6f97f1b`](https://github.com/TeKrop/overfast-api/commit/6f97f1bb19881ccc50a1d2cef6f0df40cfcc1988))
+
+
 ## v3.44.2 (2026-02-22)
 
 ### Bug Fixes

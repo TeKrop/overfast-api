@@ -1,6 +1,6 @@
 [project]
 name = "overfast-api"
-version = "3.44.2"
+version = "3.45.1"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = {file = "LICENSE"}
 authors = [
@@ -10,14 +10,14 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "asyncpg==0.31.*",
-    "fastapi[standard-no-fastapi-cloud-cli]==0.128.*",
+    "fastapi[standard-no-fastapi-cloud-cli]==0.131.*",
     "httpx[http2]==0.28.*",
     "loguru==0.7.*",
-    "prometheus-client==0.22.*",
+    "prometheus-client==0.24.*",
     "pydantic==2.12.*",
-    "pydantic-settings==2.12.*",
+    "pydantic-settings==2.13.*",
     "selectolax==0.4.*",
-    "sentry-sdk[fastapi]==2.51.*",
+    "sentry-sdk[fastapi]==2.53.*",
     "valkey[libvalkey]==6.1.*",
 ]
 
@@ -29,7 +29,7 @@ Issues = "https://github.com/TeKrop/overfast-api/issues"
 
 [dependency-groups]
 dev = [
-    "fakeredis[valkey]==2.33.*",
+    "fakeredis[valkey]==2.34.*",
     "ipdb==0.13.*",
     "pytest==9.0.*",
     "pytest-asyncio==1.3.*",

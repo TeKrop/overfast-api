@@ -65,27 +65,30 @@ def parse_player_summary_json(
             if player["name"] == player_name and player["isPublic"] is True
         ]
 
-        # If Blizzard ID provided, use it to resolve ambiguity
-        if blizzard_id and len(matching_players) > 1:
-            logger.info(
-                f"Multiple players found for {player_id}, using Blizzard ID to resolve: {blizzard_id}"
-            )
+        if blizzard_id:
+            # Blizzard ID provided: always use it to verify the match, regardless
+            # of how many name-matching players were found. This prevents accepting
+            # a wrong player even when there is only one name match.
+            if len(matching_players) > 1:
+                logger.info(
+                    f"Multiple players found for {player_id}, using Blizzard ID to resolve: {blizzard_id}"
+                )
             player_data = match_player_by_blizzard_id(matching_players, blizzard_id)
             if not player_data:
                 logger.warning(
                     f"Blizzard ID {blizzard_id} not found in search results for {player_id}"
                 )
                 return {}
-        elif len(matching_players) != 1:
-            # Player not found or multiple matches without Blizzard ID
+        else:
+            # Without a Blizzard ID we cannot safely identify the player:
+            # Blizzard always returns a Blizzard ID in the URL field, so the
+            # discriminator cannot be verified from search results alone.
             logger.warning(
                 "Player {} not found in search results ({} matching players)",
                 player_id,
                 len(matching_players),
             )
             return {}
-        else:
-            player_data = matching_players[0]
 
         # Normalize optional fields for regional consistency
         # Some regions still use "portrait" instead of "avatar", "namecard", "title"
