@@ -76,12 +76,12 @@ class PlayerRequest:
 class PlayerService(BaseService):
     """Domain service for all player-related endpoints.
 
-    Wraps identity resolution, SQLite profile caching, and SWR staleness logic
+    Wraps identity resolution, persistent storage profile caching, and SWR staleness logic
     that was previously scattered across multiple controllers.
     """
 
     # ------------------------------------------------------------------
-    # Search  (Valkey-only, no SQLite, no SWR)
+    # Search  (Valkey-only, no persistent storage, no SWR)
     # ------------------------------------------------------------------
 
     async def search_players(
@@ -272,7 +272,7 @@ class PlayerService(BaseService):
     # ------------------------------------------------------------------
 
     async def get_player_profile_cache(self, player_id: str) -> dict | None:
-        """Get player profile from SQLite storage."""
+        """Get player profile from persistent storage storage."""
         profile = await self.storage.get_player_profile(player_id)
         if not profile:
             if settings.prometheus_enabled:
@@ -302,7 +302,7 @@ class PlayerService(BaseService):
         battletag: str | None = None,
         name: str | None = None,
     ) -> None:
-        """Store player profile in SQLite."""
+        """Store player profile in persistent storage."""
         await self.storage.set_player_profile(
             player_id=player_id,
             html=html,
@@ -324,11 +324,11 @@ class PlayerService(BaseService):
         effective_id: str,
         identity: PlayerIdentity,
     ) -> str:
-        """Return player HTML, always storing fresh HTML in SQLite.
+        """Return player HTML, always storing fresh HTML in persistent storage.
 
         Priority order:
         1. ``identity.cached_html`` — fetched during identity resolution; store and return.
-        2. SQLite hit with matching ``lastUpdated`` — return cached HTML, backfilling
+        2. persistent storage hit with matching ``lastUpdated`` — return cached HTML, backfilling
            battletag if it was missing.
         3. Fetch from Blizzard, store, return.
         """
@@ -406,13 +406,14 @@ class PlayerService(BaseService):
             )
 
         logger.info(
-            "Player not found in search — checking SQLite for cached Blizzard ID"
+            "Player not found in search — checking persistent storage for cached Blizzard ID"
         )
         cached_blizzard_id = await self.storage.get_player_id_by_battletag(
             battletag_input
         )
 
         if cached_blizzard_id:
+            logger.info("Blizzard ID found — retrying to find in search")
             if settings.prometheus_enabled:
                 storage_battletag_lookup_total.labels(result="hit").inc()
             player_summary = parse_player_summary_json(

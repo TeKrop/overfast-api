@@ -9,7 +9,7 @@
 ![Mockup OverFast API](https://files.tekrop.fr/overfast_api_logo_full_1000.png)
 
 > [!WARNING]
-> **WIP**: OverFast API is currently undergoing a major refactoring to **version 4.0**. This refactoring introduces **Domain-Driven Design**, **persistent storage with SQLite**, **Stale-While-Revalidate caching**, **background refresh with arq workers**, **AIMD congestion control** for Blizzard requests, and **comprehensive monitoring with Prometheus + Grafana**. The refactoring is being done incrementally in phases.
+> **WIP**: OverFast API is currently undergoing a major refactoring to **version 4.0**. This refactoring introduces **Domain-Driven Design**, **persistent storage with PostgreSQL**, **Stale-While-Revalidate caching**, **background refresh with arq workers**, **AIMD congestion control** for Blizzard requests, and **comprehensive monitoring with Prometheus + Grafana**. The refactoring is being done incrementally in phases.
 
 > OverFast API provides comprehensive data on Overwatch heroes, game modes, maps, and player statistics by scraping Blizzard pages. Developed with the efficiency of **FastAPI** and **Selectolax**, it leverages **nginx (OpenResty)** as a reverse proxy and **Valkey** for caching. Its tailored caching mechanism significantly reduces calls to Blizzard pages, ensuring swift and precise data delivery to users.
 
@@ -63,7 +63,7 @@ Should you wish to customize according to your specific requirements, here is a 
 - `APP_VOLUME_PATH`: Folder for shared app data like logs, Valkey save file and dotenv file (app settings)
 - `APP_PORT`: Port for the app container (default is `80`).
 - `APP_BASE_URL` : Base URL for exposed links in endpoints like player search and maps listing.
-- `STORAGE_PATH`: Path to SQLite database file for persistent storage. Use `:memory:` for in-memory database (useful for testing or ephemeral deployments where data persistence is not required).
+- `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`: PostgreSQL connection settings for persistent storage.
 
 You likely won't need to modify other generic settings, but if you're curious about their functionality, consult the docstrings within the `app/config.py` file for further details.
 

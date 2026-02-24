@@ -36,7 +36,7 @@ class StaticFetchConfig:
 
 
 class StaticDataService(BaseService):
-    """SWR orchestration for static content backed by the ``static_data`` SQLite table.
+    """SWR orchestration for static content backed by the ``static_data`` persistent storage table.
 
     Staleness is determined by a configurable time threshold.  Concrete static
     services (heroes, maps, gamemodes, roles) call ``get_or_fetch`` with a
@@ -52,7 +52,7 @@ class StaticDataService(BaseService):
 
         Returns:
             ``(data, is_stale, age_seconds)`` tuple.  ``age_seconds`` is the
-            number of seconds since the data was last stored in SQLite (0 on
+            number of seconds since the data was last stored in persistent storage (0 on
             a cold-start fetch).
         """
         stored = await self._load_from_storage(config.storage_key)
@@ -78,7 +78,7 @@ class StaticDataService(BaseService):
     async def _serve_from_storage(
         self, stored: dict[str, Any], config: StaticFetchConfig
     ) -> tuple[Any, bool, int]:
-        """Serve data from a SQLite hit, triggering a background refresh if stale."""
+        """Serve data from a persistent storage hit, triggering a background refresh if stale."""
         data = stored["data"]
         age = int(time.time()) - stored["updated_at"]
         is_stale = age >= config.staleness_threshold
@@ -108,7 +108,7 @@ class StaticDataService(BaseService):
             )
         else:
             logger.info(
-                f"[SWR] {config.entity_type} fresh (age={age}s) — serving from SQLite"
+                f"[SWR] {config.entity_type} fresh (age={age}s) — serving from persistent storage"
             )
             await self._update_api_cache(
                 config.cache_key,
@@ -125,7 +125,7 @@ class StaticDataService(BaseService):
         return result_filter(data) if result_filter is not None else data
 
     async def _refresh_static(self, config: StaticFetchConfig) -> None:
-        """Fetch fresh data, persist to SQLite and update Valkey with full TTL.
+        """Fetch fresh data, persist to persistent storage and update Valkey with full TTL.
 
         Exceptions are intentionally not caught here — they propagate to the
         task queue adapter which calls the ``on_failure`` callback for metrics.
@@ -137,7 +137,7 @@ class StaticDataService(BaseService):
         await self._fetch_and_store(config)
 
     async def _fetch_and_store(self, config: StaticFetchConfig) -> Any:
-        """Fetch from source, persist to SQLite, update Valkey, return filtered data."""
+        """Fetch from source, persist to persistent storage, update Valkey, return filtered data."""
         if inspect.iscoroutinefunction(config.fetcher):
             raw = await config.fetcher()
         else:

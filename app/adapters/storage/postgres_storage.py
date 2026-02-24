@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 from compression import zstd
 from pathlib import Path
@@ -40,6 +41,16 @@ class PostgresStorage(metaclass=Singleton):
         self._initialized = False
         self._init_lock = asyncio.Lock()
 
+    @staticmethod
+    async def _init_connection(conn: asyncpg.Connection) -> None:
+        """Register JSON codec so JSONB columns accept/return Python dicts/lists."""
+        await conn.set_type_codec(
+            "jsonb",
+            encoder=json.dumps,
+            decoder=json.loads,
+            schema="pg_catalog",
+        )
+
     # ------------------------------------------------------------------ #
     # Lifecycle
     # ------------------------------------------------------------------ #
@@ -54,11 +65,11 @@ class PostgresStorage(metaclass=Singleton):
 
             for attempt in range(1, self._MAX_POOL_CREATION_ATTEMPTS + 1):
                 try:
-                    logger.debug("DSN : %s", settings.postgres_dsn)
                     self._pool = await asyncpg.create_pool(
                         dsn=settings.postgres_dsn,
                         min_size=settings.postgres_pool_min_size,
                         max_size=settings.postgres_pool_max_size,
+                        init=self._init_connection,
                     )
                     break
                 except Exception as exc:

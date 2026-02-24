@@ -46,7 +46,7 @@ class HeroService(StaticDataService):
     ) -> tuple[list[dict], bool, int]:
         """Return the heroes list (with optional role/gamemode filters).
 
-        Stores the *full* (unfiltered) heroes list per locale in SQLite so
+        Stores the *full* (unfiltered) heroes list per locale in persistent storage so
         that all filter combinations benefit from the same cache entry.
         """
 
@@ -81,7 +81,7 @@ class HeroService(StaticDataService):
     ) -> tuple[dict, bool, int]:
         """Return full hero details merged with portrait and hitpoints.
 
-        Stores the merged hero data per ``hero_key:locale`` in SQLite so that
+        Stores the merged hero data per ``hero_key:locale`` in persistent storage so that
         subsequent requests benefit from the SWR cache and background refresh.
         """
 
@@ -131,7 +131,7 @@ class HeroService(StaticDataService):
         """Return hero usage statistics — Valkey-only cache, no persistent storage.
 
         Stats change frequently and have too many parameter combinations to
-        store in SQLite. The Valkey API cache (populated here, served by nginx)
+        store in persistent storage. The Valkey API cache (populated here, served by nginx)
         is sufficient.
         """
         try:

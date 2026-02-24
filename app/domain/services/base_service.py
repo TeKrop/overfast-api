@@ -4,7 +4,7 @@
 *all* services (static + player).
 
 ``StaticDataService`` extends it with the generic Stale-While-Revalidate flow
-for data that is stored as JSON in the ``static_data`` SQLite table and where
+for data that is stored as JSON in the ``static_data`` table and where
 staleness is determined by a configurable time threshold.  All static-content
 services (heroes, maps, gamemodes, roles) inherit from this class.
 

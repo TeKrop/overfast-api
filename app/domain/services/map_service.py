@@ -15,7 +15,7 @@ class MapService(StaticDataService):
     ) -> tuple[list[dict], bool, int]:
         """Return the maps list (with optional gamemode filter).
 
-        Stores the full (unfiltered) maps list in SQLite.
+        Stores the full (unfiltered) maps list in persistent storage.
         """
 
         def _fetch() -> list[dict]:

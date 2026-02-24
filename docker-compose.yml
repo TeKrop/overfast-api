@@ -122,6 +122,11 @@ services:
     depends_on:
       valkey:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9121/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
   postgres-exporter:
@@ -137,6 +142,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
   prometheus:
