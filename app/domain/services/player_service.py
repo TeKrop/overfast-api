@@ -245,6 +245,10 @@ class PlayerService(BaseService):
     ) -> tuple[dict, bool, int]:
         """Resolve identity → get HTML → compute data → update cache → return.
 
+        Fast path: if persistent storage has a profile fresher than
+        ``player_staleness_threshold``, all Blizzard calls are skipped and
+        the cached HTML + summary are used directly.
+
         Args:
             request: ``PlayerRequest`` holding ``player_id``, ``cache_key``,
                      and the endpoint-specific ``data_factory``.
@@ -254,10 +258,19 @@ class PlayerService(BaseService):
         data: dict = {}
 
         try:
-            identity = await self._resolve_player_identity(request.player_id)
-            effective_id = identity.blizzard_id or request.player_id
-            html = await self._get_player_html(effective_id, identity)
-            data = request.data_factory(html, identity.player_summary)
+            fresh_profile = await self._get_fresh_stored_profile(request.player_id)
+            if fresh_profile is not None:
+                logger.info(
+                    "Serving player data from persistent storage (within staleness threshold)"
+                )
+                data = request.data_factory(
+                    fresh_profile["profile"], fresh_profile["summary"]
+                )
+            else:
+                identity = await self._resolve_player_identity(request.player_id)
+                effective_id = identity.blizzard_id or request.player_id
+                html = await self._get_player_html(effective_id, identity)
+                data = request.data_factory(html, identity.player_summary)
         except Exception as exc:  # noqa: BLE001
             await self._handle_player_exceptions(exc, request.player_id, identity)
 
@@ -318,6 +331,36 @@ class PlayerService(BaseService):
         ``player_profiles.updated_at`` against ``player_staleness_threshold``.
         """
         return False
+
+    async def _get_fresh_stored_profile(self, player_id: str) -> dict | None:
+        """Return the stored profile if it was updated within ``player_staleness_threshold``.
+
+        For BattleTag inputs, resolves to a Blizzard ID via the stored mapping
+        before fetching the profile.  Returns ``None`` if no mapping exists, the
+        profile is absent, or the profile is older than the threshold.
+        """
+        if is_blizzard_id(player_id):
+            blizzard_id = player_id
+        else:
+            blizzard_id = await self.storage.get_player_id_by_battletag(player_id)
+            if not blizzard_id:
+                return None
+
+        profile = await self.get_player_profile_cache(blizzard_id)
+        if not profile:
+            return None
+
+        age = int(time.time()) - profile["updated_at"]
+        if age < settings.player_staleness_threshold:
+            logger.info(
+                "Stored profile for {} is {:.0f}s old (threshold {}s) — skipping Blizzard",
+                player_id,
+                age,
+                settings.player_staleness_threshold,
+            )
+            return profile
+
+        return None
 
     async def _get_player_html(
         self,
