@@ -256,16 +256,16 @@ class PlayerService(BaseService):
         identity = PlayerIdentity()
         effective_id = request.player_id
         data: dict = {}
+        age = 0
 
         try:
-            fresh_profile = await self._get_fresh_stored_profile(request.player_id)
-            if fresh_profile is not None:
+            fresh = await self._get_fresh_stored_profile(request.player_id)
+            if fresh is not None:
+                profile, age = fresh
                 logger.info(
                     "Serving player data from persistent storage (within staleness threshold)"
                 )
-                data = request.data_factory(
-                    fresh_profile["profile"], fresh_profile["summary"]
-                )
+                data = request.data_factory(profile["profile"], profile["summary"])
             else:
                 identity = await self._resolve_player_identity(request.player_id)
                 effective_id = identity.blizzard_id or request.player_id
@@ -278,7 +278,7 @@ class PlayerService(BaseService):
         await self._update_api_cache(
             request.cache_key, data, settings.career_path_cache_timeout
         )
-        return data, is_stale, 0
+        return data, is_stale, age
 
     # ------------------------------------------------------------------
     # Profile caching helpers
@@ -332,8 +332,11 @@ class PlayerService(BaseService):
         """
         return False
 
-    async def _get_fresh_stored_profile(self, player_id: str) -> dict | None:
-        """Return the stored profile if it was updated within ``player_staleness_threshold``.
+    async def _get_fresh_stored_profile(
+        self, player_id: str
+    ) -> tuple[dict, int] | None:
+        """Return ``(profile, age_seconds)`` if the stored profile was updated within
+        ``player_staleness_threshold``, else ``None``.
 
         For BattleTag inputs, resolves to a Blizzard ID via the stored mapping
         before fetching the profile.  Returns ``None`` if no mapping exists, the
@@ -358,7 +361,7 @@ class PlayerService(BaseService):
                 age,
                 settings.player_staleness_threshold,
             )
-            return profile
+            return profile, age
 
         return None
 
