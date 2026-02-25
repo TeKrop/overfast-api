@@ -8,9 +8,10 @@ services:
     volumes:
       - static_volume:/code/static
       - ${APP_VOLUME_PATH:-/tmp}/app-logs:/code/logs
-      - storage_volume:/code/data
     depends_on:
       valkey:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget --spider --quiet http://0.0.0.0:8080 || exit 1"]
@@ -25,14 +26,33 @@ services:
     env_file: ${APP_VOLUME_PATH:-.}/.env
     volumes:
       - ${APP_VOLUME_PATH:-/tmp}/worker-logs:/code/logs
-      - storage_volume:/code/data
     depends_on:
       valkey:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "ps aux | grep -i crond | grep -wv grep || exit 1"]
       interval: 5s
       timeout: 2s
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-overfast}
+      - POSTGRES_USER=${POSTGRES_USER:-overfast}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-overfast}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-overfast} -d ${POSTGRES_DB:-overfast}",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   valkey:
     build:
@@ -94,7 +114,7 @@ services:
     profiles:
       - monitoring
       - prometheus
-    image: oliver006/redis_exporter:latest
+    image: oliver006/redis_exporter:alpine
     environment:
       - REDIS_ADDR=valkey:6379
     ports:
@@ -102,6 +122,39 @@ services:
     depends_on:
       valkey:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "http://localhost:9121/metrics",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  postgres-exporter:
+    profiles:
+      - monitoring
+      - prometheus
+    image: prometheuscommunity/postgres-exporter:latest
+    command: ["--config.file="]
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-overfast}:${POSTGRES_PASSWORD:-overfast}@postgres:5432/${POSTGRES_DB:-overfast}?sslmode=disable
+    ports:
+      - "${POSTGRES_EXPORTER_PORT:-9187}:9187"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
   prometheus:
@@ -159,7 +212,7 @@ services:
 
 volumes:
   static_volume:
-  storage_volume:
   valkey-data:
+  pg-data:
   prometheus-data:
   grafana-data:

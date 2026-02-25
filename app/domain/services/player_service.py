@@ -30,8 +30,8 @@ from app.domain.services.base_service import BaseService
 from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.helpers import overfast_internal_error
 from app.monitoring.metrics import (
-    sqlite_battletag_lookup_total,
-    sqlite_cache_hit_total,
+    storage_battletag_lookup_total,
+    storage_cache_hit_total,
     storage_hits_total,
 )
 from app.overfast_logger import logger
@@ -76,12 +76,12 @@ class PlayerRequest:
 class PlayerService(BaseService):
     """Domain service for all player-related endpoints.
 
-    Wraps identity resolution, SQLite profile caching, and SWR staleness logic
+    Wraps identity resolution, persistent storage profile caching, and SWR staleness logic
     that was previously scattered across multiple controllers.
     """
 
     # ------------------------------------------------------------------
-    # Search  (Valkey-only, no SQLite, no SWR)
+    # Search  (Valkey-only, no persistent storage, no SWR)
     # ------------------------------------------------------------------
 
     async def search_players(
@@ -245,6 +245,10 @@ class PlayerService(BaseService):
     ) -> tuple[dict, bool, int]:
         """Resolve identity → get HTML → compute data → update cache → return.
 
+        Fast path: if persistent storage has a profile fresher than
+        ``player_staleness_threshold``, all Blizzard calls are skipped and
+        the cached HTML + summary are used directly.
+
         Args:
             request: ``PlayerRequest`` holding ``player_id``, ``cache_key``,
                      and the endpoint-specific ``data_factory``.
@@ -252,12 +256,21 @@ class PlayerService(BaseService):
         identity = PlayerIdentity()
         effective_id = request.player_id
         data: dict = {}
+        age = 0
 
         try:
-            identity = await self._resolve_player_identity(request.player_id)
-            effective_id = identity.blizzard_id or request.player_id
-            html = await self._get_player_html(effective_id, identity)
-            data = request.data_factory(html, identity.player_summary)
+            fresh = await self._get_fresh_stored_profile(request.player_id)
+            if fresh is not None:
+                profile, age = fresh
+                logger.info(
+                    "Serving player data from persistent storage (within staleness threshold)"
+                )
+                data = request.data_factory(profile["profile"], profile["summary"])
+            else:
+                identity = await self._resolve_player_identity(request.player_id)
+                effective_id = identity.blizzard_id or request.player_id
+                html = await self._get_player_html(effective_id, identity)
+                data = request.data_factory(html, identity.player_summary)
         except Exception as exc:  # noqa: BLE001
             await self._handle_player_exceptions(exc, request.player_id, identity)
 
@@ -265,25 +278,25 @@ class PlayerService(BaseService):
         await self._update_api_cache(
             request.cache_key, data, settings.career_path_cache_timeout
         )
-        return data, is_stale, 0
+        return data, is_stale, age
 
     # ------------------------------------------------------------------
     # Profile caching helpers
     # ------------------------------------------------------------------
 
     async def get_player_profile_cache(self, player_id: str) -> dict | None:
-        """Get player profile from SQLite storage."""
+        """Get player profile from persistent storage."""
         profile = await self.storage.get_player_profile(player_id)
         if not profile:
             if settings.prometheus_enabled:
-                sqlite_cache_hit_total.labels(
+                storage_cache_hit_total.labels(
                     table="player_profiles", result="miss"
                 ).inc()
                 storage_hits_total.labels(result="miss").inc()
             return None
 
         if settings.prometheus_enabled:
-            sqlite_cache_hit_total.labels(table="player_profiles", result="hit").inc()
+            storage_cache_hit_total.labels(table="player_profiles", result="hit").inc()
             storage_hits_total.labels(result="hit").inc()
 
         return {
@@ -302,7 +315,7 @@ class PlayerService(BaseService):
         battletag: str | None = None,
         name: str | None = None,
     ) -> None:
-        """Store player profile in SQLite."""
+        """Store player profile in persistent storage."""
         await self.storage.set_player_profile(
             player_id=player_id,
             html=html,
@@ -319,16 +332,49 @@ class PlayerService(BaseService):
         """
         return False
 
+    async def _get_fresh_stored_profile(
+        self, player_id: str
+    ) -> tuple[dict, int] | None:
+        """Return ``(profile, age_seconds)`` if the stored profile was updated within
+        ``player_staleness_threshold``, else ``None``.
+
+        For BattleTag inputs, resolves to a Blizzard ID via the stored mapping
+        before fetching the profile.  Returns ``None`` if no mapping exists, the
+        profile is absent, or the profile is older than the threshold.
+        """
+        if is_blizzard_id(player_id):
+            blizzard_id = player_id
+        else:
+            blizzard_id = await self.storage.get_player_id_by_battletag(player_id)
+            if not blizzard_id:
+                return None
+
+        profile = await self.get_player_profile_cache(blizzard_id)
+        if not profile:
+            return None
+
+        age = int(time.time()) - profile["updated_at"]
+        if age < settings.player_staleness_threshold:
+            logger.info(
+                "Stored profile for {} is {:.0f}s old (threshold {}s) — skipping Blizzard",
+                player_id,
+                age,
+                settings.player_staleness_threshold,
+            )
+            return profile, age
+
+        return None
+
     async def _get_player_html(
         self,
         effective_id: str,
         identity: PlayerIdentity,
     ) -> str:
-        """Return player HTML, always storing fresh HTML in SQLite.
+        """Return player HTML, always storing fresh HTML in persistent storage.
 
         Priority order:
         1. ``identity.cached_html`` — fetched during identity resolution; store and return.
-        2. SQLite hit with matching ``lastUpdated`` — return cached HTML, backfilling
+        2. persistent storage hit with matching ``lastUpdated`` — return cached HTML, backfilling
            battletag if it was missing.
         3. Fetch from Blizzard, store, return.
         """
@@ -383,16 +429,22 @@ class PlayerService(BaseService):
     async def _resolve_player_identity(self, player_id: str) -> PlayerIdentity:
         """Resolve BattleTag or Blizzard ID to a canonical ``PlayerIdentity``."""
         logger.info("Retrieving Player Summary...")
-
         if is_blizzard_id(player_id):
-            logger.info("Player ID is a Blizzard ID — attempting reverse enrichment")
-            player_summary, html = await self._enrich_from_blizzard_id(player_id)
-            return PlayerIdentity(
-                blizzard_id=player_id,
-                player_summary=player_summary,
-                cached_html=html,
-            )
+            return await self._resolve_blizzard_id_identity(player_id)
+        return await self._resolve_battletag_identity(player_id)
 
+    async def _resolve_blizzard_id_identity(self, player_id: str) -> PlayerIdentity:
+        """Resolve a raw Blizzard ID via reverse enrichment."""
+        logger.info("Player ID is a Blizzard ID — attempting reverse enrichment")
+        player_summary, html = await self._enrich_from_blizzard_id(player_id)
+        return PlayerIdentity(
+            blizzard_id=player_id,
+            player_summary=player_summary,
+            cached_html=html,
+        )
+
+    async def _resolve_battletag_identity(self, player_id: str) -> PlayerIdentity:
+        """Resolve a BattleTag to a ``PlayerIdentity`` using search + fallbacks."""
         battletag_input = player_id
         search_json = await fetch_player_summary_json(self.blizzard_client, player_id)
         player_summary = parse_player_summary_json(search_json, player_id)
@@ -405,28 +457,49 @@ class PlayerService(BaseService):
                 battletag_input=battletag_input,
             )
 
+        if search_json:
+            identity = await self._try_cached_blizzard_id(
+                battletag_input, player_id, search_json
+            )
+            if identity:
+                return identity
+
+        return await self._resolve_via_redirect(player_id, battletag_input, search_json)
+
+    async def _try_cached_blizzard_id(
+        self, battletag_input: str, player_id: str, search_json: list
+    ) -> PlayerIdentity | None:
+        """Check storage for a cached Blizzard ID and retry the search with it."""
         logger.info(
-            "Player not found in search — checking SQLite for cached Blizzard ID"
+            "Player not found in search — checking persistent storage for cached Blizzard ID"
         )
         cached_blizzard_id = await self.storage.get_player_id_by_battletag(
             battletag_input
         )
 
-        if cached_blizzard_id:
+        if not cached_blizzard_id:
             if settings.prometheus_enabled:
-                sqlite_battletag_lookup_total.labels(result="hit").inc()
-            player_summary = parse_player_summary_json(
-                search_json, player_id, cached_blizzard_id
-            )
-            if player_summary:
-                return PlayerIdentity(
-                    blizzard_id=cached_blizzard_id,
-                    player_summary=player_summary,
-                    battletag_input=battletag_input,
-                )
-        elif settings.prometheus_enabled:
-            sqlite_battletag_lookup_total.labels(result="miss").inc()
+                storage_battletag_lookup_total.labels(result="miss").inc()
+            return None
 
+        logger.info("Blizzard ID found — retrying to find in search")
+        if settings.prometheus_enabled:
+            storage_battletag_lookup_total.labels(result="hit").inc()
+        player_summary = parse_player_summary_json(
+            search_json, player_id, cached_blizzard_id
+        )
+        if player_summary:
+            return PlayerIdentity(
+                blizzard_id=cached_blizzard_id,
+                player_summary=player_summary,
+                battletag_input=battletag_input,
+            )
+        return None
+
+    async def _resolve_via_redirect(
+        self, player_id: str, battletag_input: str, search_json: list
+    ) -> PlayerIdentity:
+        """Resolve identity as a last resort via Blizzard redirect HTML fetch."""
         logger.info("No cached mapping — resolving via Blizzard redirect")
         html, blizzard_id = await fetch_player_html(self.blizzard_client, player_id)
 

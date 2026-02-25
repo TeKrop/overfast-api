@@ -52,33 +52,29 @@ class Settings(BaseSettings):
     prometheus_enabled: bool = False
 
     ############
-    # PERSISTENT STORAGE CONFIGURATION
+    # PERSISTENT STORAGE CONFIGURATION (PostgreSQL)
     ############
 
-    # SQLite database path for persistent storage
-    # Use ":memory:" for in-memory database (testing/ephemeral deployments)
-    storage_path: str = "data/overfast.db"
+    postgres_host: str = "postgres"
+    postgres_port: int = 5432
+    postgres_db: str = "overfast"
+    postgres_user: str = "overfast"
+    postgres_password: str = "overfast"  # noqa: S105
+    postgres_pool_min_size: int = 2
+    postgres_pool_max_size: int = 10
 
-    # SQLite connection pool size — each connection runs in its own thread,
-    # enabling parallel reads under WAL mode. Writes still serialize at the
-    # SQLite level. Use 1 for :memory: (shared only within one connection).
-    sqlite_pool_size: int = 5
-
-    # SQLite memory-mapped I/O size in bytes (optional performance tuning)
-    sqlite_mmap_size: int = 0
-
-    # SQLite page cache size per connection in kibibytes (negative = KiB, positive = pages)
-    # -4000 = 4 MB/connection
-    sqlite_cache_size: int = -4000
-
-    # SQLite WAL auto-checkpoint threshold in pages (4 KB/page by default)
-    # 500 pages = ~2 MB WAL; smaller WAL reduces read scan overhead
-    sqlite_wal_autocheckpoint: int = 500
+    @property
+    def postgres_dsn(self) -> str:
+        """Build asyncpg-compatible DSN from individual connection settings."""
+        return (
+            f"postgresql://{self.postgres_user}:{self.postgres_password}"
+            f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+        )
 
     # Maximum age of player profiles in seconds before they are considered stale.
     # Profiles with updated_at older than this threshold are removed by the periodic
     # background cleanup task to keep the database size bounded. Set to 0 to disable cleanup.
-    player_profile_max_age: int = 259200  # 3 days
+    player_profile_max_age: int = 604800  # 7 days
 
     # Unknown player exponential backoff configuration
     unknown_player_initial_retry: int = 600  # 10 minutes (first check)

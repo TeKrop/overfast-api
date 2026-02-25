@@ -1,14 +1,24 @@
 """Storage port protocol for persistent data storage"""
 
+from enum import StrEnum
 from typing import Protocol
 
 
+class StaticDataCategory(StrEnum):
+    """Category of static data stored in persistent storage."""
+
+    HEROES = "heroes"
+    HERO = "hero"
+    GAMEMODES = "gamemodes"
+    MAPS = "maps"
+    ROLES = "roles"
+
+
 class StoragePort(Protocol):
-    """
-    Protocol for persistent storage operations (SQLite in v4).
+    """Protocol for persistent storage operations.
 
     Defines the contract for storage adapters to implement persistent
-    caching of static data, player profiles, and unknown player tracking.
+    caching of static data and player profiles.
     """
 
     async def initialize(self) -> None:
@@ -16,25 +26,30 @@ class StoragePort(Protocol):
         ...
 
     async def get_static_data(self, key: str) -> dict | None:
-        """Get static data (heroes, maps, gamemodes, roles, hero_stats) by key"""
+        """Get static data (heroes, maps, gamemodes, roles) by key.
+
+        Returns dict with 'data' (str — raw HTML or JSON), 'category' (str),
+        'updated_at' (int Unix ts), 'data_version' (int) or None if not found.
+        """
         ...
 
     async def set_static_data(
         self,
         key: str,
-        data: str,  # JSON string, not dict (matches implementation)
-        data_type: str,
-        schema_version: int = 1,
+        data: str,
+        category: StaticDataCategory,
+        data_version: int = 1,
     ) -> None:
-        """Store static data with metadata"""
+        """Store static data. ``data`` is a raw string (HTML or JSON)."""
         ...
 
     async def get_player_profile(self, player_id: str) -> dict | None:
         """
         Get player profile HTML and parsed summary.
 
-        Returns dict with 'html', 'summary', 'battletag', 'name',
-        'last_updated_blizzard', 'updated_at', 'schema_version' or None if not found
+        Returns dict with 'html', 'summary' (dict), 'battletag', 'name',
+        'last_updated_blizzard', 'updated_at' (int Unix ts), 'data_version'
+        or None if not found.
         """
         ...
 
@@ -58,7 +73,7 @@ class StoragePort(Protocol):
         battletag: str | None = None,
         name: str | None = None,
         last_updated_blizzard: int | None = None,
-        schema_version: int = 1,
+        data_version: int = 1,
     ) -> None:
         """Store player profile HTML and parsed summary with optional metadata"""
         ...
@@ -72,10 +87,6 @@ class StoragePort(Protocol):
         """
         ...
 
-    async def vacuum(self) -> None:
-        """Reclaim disk space by running VACUUM on the database"""
-        ...
-
     async def clear_all_data(self) -> None:
         """Clear all data including static data (for testing)"""
         ...
@@ -84,8 +95,8 @@ class StoragePort(Protocol):
         """
         Get storage statistics for monitoring.
 
-        Returns dict with size_bytes, wal_size_bytes, static_data_count,
-        player_profiles_count, player_profile_age_p50/p90/p99
+        Returns dict with size_bytes, static_data_count,
+        player_profiles_count, player_profile_age_p50/p90/p99.
         """
         ...
 

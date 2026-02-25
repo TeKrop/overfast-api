@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from app.config import settings
+from app.domain.ports.storage import StaticDataCategory
 from app.domain.services import BaseService
 from app.monitoring.metrics import (
     background_refresh_triggered_total,
@@ -36,7 +37,7 @@ class StaticFetchConfig:
 
 
 class StaticDataService(BaseService):
-    """SWR orchestration for static content backed by the ``static_data`` SQLite table.
+    """SWR orchestration for static content backed by the ``static_data`` persistent storage table.
 
     Staleness is determined by a configurable time threshold.  Concrete static
     services (heroes, maps, gamemodes, roles) call ``get_or_fetch`` with a
@@ -52,7 +53,7 @@ class StaticDataService(BaseService):
 
         Returns:
             ``(data, is_stale, age_seconds)`` tuple.  ``age_seconds`` is the
-            number of seconds since the data was last stored in SQLite (0 on
+            number of seconds since the data was last stored in persistent storage (0 on
             a cold-start fetch).
         """
         stored = await self._load_from_storage(config.storage_key)
@@ -64,11 +65,11 @@ class StaticDataService(BaseService):
         return await self._cold_fetch(config)
 
     async def _load_from_storage(self, storage_key: str) -> dict[str, Any] | None:
-        """Load data from the ``static_data`` SQLite table. Returns ``None`` on miss."""
+        """Load raw source from the ``static_data`` table. Returns ``None`` on miss."""
         result = await self.storage.get_static_data(storage_key)
         return (
             {
-                "data": json.loads(result["data"]),
+                "raw": result["data"],
                 "updated_at": result["updated_at"],
             }
             if result
@@ -78,8 +79,14 @@ class StaticDataService(BaseService):
     async def _serve_from_storage(
         self, stored: dict[str, Any], config: StaticFetchConfig
     ) -> tuple[Any, bool, int]:
-        """Serve data from a SQLite hit, triggering a background refresh if stale."""
-        data = stored["data"]
+        """Serve data from a persistent storage hit, triggering a background refresh if stale.
+
+        The stored ``raw`` value is always re-parsed with the current parser (for
+        Blizzard HTML sources) or re-fetched from the local source (for CSV sources) so
+        that code-only changes (e.g. new fields added to the parser) take effect
+        immediately on restart without waiting for the staleness threshold.
+        """
+        data = await self._parse_stored(stored["raw"], config)
         age = int(time.time()) - stored["updated_at"]
         is_stale = age >= config.staleness_threshold
         filtered = self._apply_filter(data, config.result_filter)
@@ -108,7 +115,7 @@ class StaticDataService(BaseService):
             )
         else:
             logger.info(
-                f"[SWR] {config.entity_type} fresh (age={age}s) — serving from SQLite"
+                f"[SWR] {config.entity_type} fresh (age={age}s) — serving from persistent storage"
             )
             await self._update_api_cache(
                 config.cache_key,
@@ -119,13 +126,29 @@ class StaticDataService(BaseService):
 
         return filtered, is_stale, age
 
+    async def _parse_stored(self, raw: str, config: StaticFetchConfig) -> Any:
+        """Produce structured data from ``raw`` stored source.
+
+        - If ``config.parser`` is set: the stored ``raw`` is HTML (or a JSON-encoded
+          multi-source dict); apply the parser directly.
+        - If ``config.parser`` is not set: the source is a CSV file; re-call
+          ``fetcher()`` to get always-current data (fast local I/O).
+        """
+        if config.parser is not None:
+            return config.parser(raw)
+
+        # CSV sources: re-read from file rather than using the stored JSON.
+        if inspect.iscoroutinefunction(config.fetcher):
+            return await config.fetcher()
+        return config.fetcher()
+
     @staticmethod
     def _apply_filter(data: Any, result_filter: Callable[[Any], Any] | None) -> Any:
         """Apply ``result_filter`` to ``data`` if provided, otherwise return as-is."""
         return result_filter(data) if result_filter is not None else data
 
     async def _refresh_static(self, config: StaticFetchConfig) -> None:
-        """Fetch fresh data, persist to SQLite and update Valkey with full TTL.
+        """Fetch fresh data, persist to persistent storage and update Valkey with full TTL.
 
         Exceptions are intentionally not caught here — they propagate to the
         task queue adapter which calls the ``on_failure`` callback for metrics.
@@ -137,14 +160,23 @@ class StaticDataService(BaseService):
         await self._fetch_and_store(config)
 
     async def _fetch_and_store(self, config: StaticFetchConfig) -> Any:
-        """Fetch from source, persist to SQLite, update Valkey, return filtered data."""
+        """Fetch from source, persist raw source to persistent storage, update Valkey, return filtered data."""
         if inspect.iscoroutinefunction(config.fetcher):
             raw = await config.fetcher()
         else:
             raw = config.fetcher()
 
         data = config.parser(raw) if config.parser is not None else raw
-        await self._store_in_storage(config.storage_key, data)
+
+        # Store the raw source so re-parses on storage hits always use current parser code.
+        # For HTML sources (parser set): raw is the HTML string.
+        # For CSV sources (no parser): raw is already the parsed data; serialise as JSON.
+        raw_to_store = (
+            raw if config.parser is not None else json.dumps(raw, separators=(",", ":"))
+        )
+        await self._store_in_storage(
+            config.storage_key, raw_to_store, config.entity_type
+        )
 
         filtered = self._apply_filter(data, config.result_filter)
         await self._update_api_cache(
@@ -157,18 +189,20 @@ class StaticDataService(BaseService):
         return filtered
 
     async def _cold_fetch(self, config: StaticFetchConfig) -> tuple[Any, bool, int]:
-        """Fetch from source on cold start, persist to SQLite and Valkey."""
-        logger.info(f"[SWR] {config.entity_type} not in SQLite — fetching from source")
+        """Fetch from source on cold start, persist to storage and Valkey."""
+        logger.info(f"[SWR] {config.entity_type} not in storage — fetching from source")
         filtered = await self._fetch_and_store(config)
         return filtered, False, 0
 
-    async def _store_in_storage(self, storage_key: str, data: Any) -> None:
-        """Persist data to the ``static_data`` SQLite table as JSON."""
+    async def _store_in_storage(
+        self, storage_key: str, raw: str, entity_type: str
+    ) -> None:
+        """Persist raw source string to the ``static_data`` table (zstd-compressed BYTEA)."""
         try:
             await self.storage.set_static_data(
                 key=storage_key,
-                data=json.dumps(data, separators=(",", ":")),
-                data_type="json",
+                data=raw,
+                category=StaticDataCategory(entity_type),
             )
         except Exception as exc:  # noqa: BLE001
-            logger.warning(f"[SWR] SQLite write failed for {storage_key}: {exc}")
+            logger.warning(f"[SWR] Storage write failed for {storage_key}: {exc}")

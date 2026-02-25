@@ -55,6 +55,9 @@ def parse_player_summary_json(
         ParserParsingError: If unexpected payload structure
     """
 
+    if not json_data:
+        return {}
+
     try:
         player_name = player_id.split("-", 1)[0]
 

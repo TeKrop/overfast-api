@@ -27,3 +27,10 @@ scrape_configs:
       - targets: ['valkey-exporter:9121']
     scrape_interval: 10s
     metrics_path: /metrics
+
+  # PostgreSQL metrics (postgres_exporter)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 15s
+    metrics_path: /metrics

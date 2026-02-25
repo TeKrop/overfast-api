@@ -851,7 +851,7 @@
       },
       "id": 1,
       "panels": [],
-      "title": "\ud83d\udcbe Persistent Storage (SQLite)",
+      "title": "\ud83d\udcbe Persistent Storage",
       "type": "row"
     },
     {
@@ -863,7 +863,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
+        "w": 8,
         "x": 0,
         "y": 56
       },
@@ -918,68 +918,6 @@
     },
     {
       "type": "stat",
-      "title": "WAL Size",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 6,
-        "y": 56
-      },
-      "targets": [
-        {
-          "expr": "sqlite_wal_size_bytes",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1048576
-              },
-              {
-                "color": "red",
-                "value": 10485760
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      }
-    },
-    {
-      "type": "stat",
       "title": "Total Entries",
       "datasource": {
         "type": "prometheus",
@@ -987,8 +925,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 12,
+        "w": 8,
+        "x": 8,
         "y": 56
       },
       "targets": [
@@ -1042,20 +980,20 @@
     },
     {
       "type": "gauge",
-      "title": "SQLite Cache Hit Rate",
+      "title": "Storage Cache Hit Rate",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 18,
+        "w": 8,
+        "x": 16,
         "y": 56
       },
       "targets": [
         {
-          "expr": "sum(rate(sqlite_cache_hit_total{status=\"hit\"}[5m])) / sum(rate(sqlite_cache_hit_total[5m])) * 100",
+          "expr": "sum(rate(storage_cache_hit_total{status=\"hit\"}[5m])) / sum(rate(storage_cache_hit_total[5m])) * 100",
           "refId": "A"
         }
       ],
@@ -1101,7 +1039,7 @@
     },
     {
       "type": "heatmap",
-      "title": "SQLite Query Duration Distribution",
+      "title": "Storage Query Duration Distribution",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -1114,7 +1052,7 @@
       },
       "targets": [
         {
-          "expr": "rate(sqlite_operation_duration_seconds_bucket[5m])",
+          "expr": "rate(storage_operation_duration_seconds_bucket[5m])",
           "legendFormat": "{{table}}-{{operation}}",
           "refId": "A",
           "format": "heatmap"
@@ -1183,12 +1121,12 @@
       },
       "targets": [
         {
-          "expr": "rate(sqlite_slow_queries_total{threshold=\"100ms\"}[1m])",
+          "expr": "rate(storage_slow_queries_total{threshold=\"100ms\"}[1m])",
           "legendFormat": "{{table}}-{{operation}} >100ms",
           "refId": "A"
         },
         {
-          "expr": "rate(sqlite_slow_queries_total{threshold=\"1s\"}[1m])",
+          "expr": "rate(storage_slow_queries_total{threshold=\"1s\"}[1m])",
           "legendFormat": "{{table}}-{{operation}} >1s",
           "refId": "B"
         }
@@ -1229,7 +1167,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 24,
         "x": 0,
         "y": 70
       },
@@ -1271,60 +1209,6 @@
     },
     {
       "type": "timeseries",
-      "title": "Database & WAL Size Over Time",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 70
-      },
-      "targets": [
-        {
-          "expr": "storage_size_bytes",
-          "legendFormat": "DB File",
-          "refId": "A"
-        },
-        {
-          "expr": "sqlite_wal_size_bytes",
-          "legendFormat": "WAL File",
-          "refId": "B"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "custom": {
-            "lineWidth": 2,
-            "fillOpacity": 10,
-            "showPoints": "never",
-            "axisPlacement": "auto",
-            "axisBorderShow": false
-          },
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "tooltip": {
-          "mode": "multi"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": [
-            "lastNotNull"
-          ]
-        }
-      }
-    },
-    {
-      "type": "timeseries",
       "title": "Player Profile Age (p50, p90, p99)",
       "datasource": {
         "type": "prometheus",
@@ -1338,17 +1222,17 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(sqlite_player_profile_age_seconds_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.50, sum(rate(storage_player_profile_age_seconds_bucket[5m])) by (le))",
           "legendFormat": "p50",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.90, sum(rate(sqlite_player_profile_age_seconds_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.90, sum(rate(storage_player_profile_age_seconds_bucket[5m])) by (le))",
           "legendFormat": "p90",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(sqlite_player_profile_age_seconds_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(storage_player_profile_age_seconds_bucket[5m])) by (le))",
           "legendFormat": "p99",
           "refId": "C"
         }
@@ -1382,7 +1266,7 @@
     },
     {
       "type": "timeseries",
-      "title": "SQLite Operations/sec",
+      "title": "Storage Operations/sec",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -1395,7 +1279,7 @@
       },
       "targets": [
         {
-          "expr": "rate(sqlite_operations_total[1m])",
+          "expr": "rate(storage_operations_total[1m])",
           "legendFormat": "{{table}}-{{operation}} ({{status}})",
           "refId": "A"
         }
@@ -1511,7 +1395,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(sqlite_battletag_lookup_total{result=\"hit\"}[5m]) / (rate(sqlite_battletag_lookup_total{result=\"hit\"}[5m]) + rate(sqlite_battletag_lookup_total{result=\"miss\"}[5m]))",
+          "expr": "rate(storage_battletag_lookup_total{result=\"hit\"}[5m]) / (rate(storage_battletag_lookup_total{result=\"hit\"}[5m]) + rate(storage_battletag_lookup_total{result=\"miss\"}[5m]))",
           "legendFormat": "Hit Rate",
           "refId": "A"
         }
@@ -1730,7 +1614,7 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 12,
+        "w": 24,
         "x": 0,
         "y": 93
       },
@@ -1752,46 +1636,114 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "increase(sqlite_connection_errors_total[5m])",
+          "expr": "increase(storage_connection_errors_total[5m])",
           "legendFormat": "{{error_type}}",
           "refId": "A"
         }
       ],
-      "title": "SQLite Connection Errors (5min window)",
+      "title": "Storage Connection Errors (5min window)",
       "type": "timeseries"
     },
     {
+      "type": "row",
+      "title": "\ud83d\udc18 PostgreSQL",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 100
+      },
+      "collapsed": false
+    },
+    {
+      "type": "stat",
+      "title": "PG Up",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 101
+      },
+      "targets": [
+        {
+          "expr": "pg_up{job=\"postgres\"}",
+          "refId": "A"
+        }
+      ],
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
           },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "fillOpacity": 80,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineWidth": 1,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "No",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Yes",
+                  "color": "green",
+                  "index": 1
+                }
+              }
             }
-          },
-          "mappings": [],
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "value"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "DB Size",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 4,
+        "y": 101
+      },
+      "targets": [
+        {
+          "expr": "pg_database_size_bytes{job=\"postgres\",datname=\"overfast\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1801,55 +1753,489 @@
               },
               {
                 "color": "yellow",
-                "value": 0.05
+                "value": 536870912
               },
               {
                 "color": "red",
-                "value": 0.1
+                "value": 2147483648
               }
             ]
-          },
-          "unit": "s"
+          }
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 93
-      },
       "options": {
-        "bucketOffset": 0,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        }
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Active Connections",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 9,
+        "y": 101
       },
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "histogram_quantile(0.50, rate(sqlite_lock_wait_duration_seconds_bucket[5m]))",
-          "legendFormat": "p50 - {{table}}",
+          "expr": "pg_stat_database_numbackends{job=\"postgres\",datname=\"overfast\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Buffer Cache Hit %",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 14,
+        "y": 101
+      },
+      "targets": [
+        {
+          "expr": "pg_stat_database_blks_hit{job=\"postgres\",datname=\"overfast\"} / (pg_stat_database_blks_hit{job=\"postgres\",datname=\"overfast\"} + pg_stat_database_blks_read{job=\"postgres\",datname=\"overfast\"}) * 100",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 90
+              },
+              {
+                "color": "green",
+                "value": 99
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Transaction Rate (commits/s)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 19,
+        "y": 101
+      },
+      "targets": [
+        {
+          "expr": "rate(pg_stat_database_xact_commit{job=\"postgres\",datname=\"overfast\"}[5m])",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "DB Size Over Time",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 105
+      },
+      "targets": [
+        {
+          "expr": "pg_database_size_bytes{job=\"postgres\",datname=\"overfast\"}",
+          "legendFormat": "DB size",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Active Connections Over Time",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 105
+      },
+      "targets": [
+        {
+          "expr": "pg_stat_database_numbackends{job=\"postgres\",datname=\"overfast\"}",
+          "legendFormat": "connections",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Transaction Rate Over Time",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 113
+      },
+      "targets": [
+        {
+          "expr": "rate(pg_stat_database_xact_commit{job=\"postgres\",datname=\"overfast\"}[5m])",
+          "legendFormat": "commits/s",
           "refId": "A"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "histogram_quantile(0.95, rate(sqlite_lock_wait_duration_seconds_bucket[5m]))",
-          "legendFormat": "p95 - {{table}}",
+          "expr": "rate(pg_stat_database_xact_rollback{job=\"postgres\",datname=\"overfast\"}[5m])",
+          "legendFormat": "rollbacks/s",
           "refId": "B"
         }
       ],
-      "title": "SQLite Lock/Write Wait Duration",
-      "type": "histogram"
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Buffer Cache Hit Rate Over Time",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 113
+      },
+      "targets": [
+        {
+          "expr": "pg_stat_database_blks_hit{job=\"postgres\",datname=\"overfast\"} / (pg_stat_database_blks_hit{job=\"postgres\",datname=\"overfast\"} + pg_stat_database_blks_read{job=\"postgres\",datname=\"overfast\"}) * 100",
+          "legendFormat": "hit %",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Row Operations by Table",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 121
+      },
+      "targets": [
+        {
+          "expr": "rate(pg_stat_user_tables_n_tup_ins{job=\"postgres\"}[5m])",
+          "legendFormat": "{{relname}} inserts",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(pg_stat_user_tables_n_tup_upd{job=\"postgres\"}[5m])",
+          "legendFormat": "{{relname}} updates",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(pg_stat_user_tables_n_tup_del{job=\"postgres\"}[5m])",
+          "legendFormat": "{{relname}} deletes",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Dead Rows by Table (Autovacuum Health)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 121
+      },
+      "targets": [
+        {
+          "expr": "pg_stat_user_tables_n_dead_tup{job=\"postgres\"}",
+          "legendFormat": "{{relname}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Index Scan Efficiency by Table",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 129
+      },
+      "targets": [
+        {
+          "expr": "rate(pg_stat_user_tables_idx_scan{job=\"postgres\"}[5m])",
+          "legendFormat": "{{relname}} idx",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(pg_stat_user_tables_seq_scan{job=\"postgres\"}[5m])",
+          "legendFormat": "{{relname}} seq",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
     }
   ]
 }

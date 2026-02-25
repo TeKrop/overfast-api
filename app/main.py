@@ -15,7 +15,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .adapters.blizzard import OverFastClient
 from .adapters.cache import CacheManager
-from .adapters.storage import SQLiteStorage
+from .adapters.storage import PostgresStorage
 from .api import gamemodes, heroes, maps, players, roles
 from .config import settings
 from .docs import render_documentation
@@ -68,9 +68,7 @@ async def _player_profile_cleanup_loop(
     while True:
         await asyncio.sleep(_CLEANUP_INTERVAL)
         try:
-            deleted = await storage.delete_old_player_profiles(max_age_seconds)
-            if deleted:
-                await storage.vacuum()
+            await storage.delete_old_player_profiles(max_age_seconds)
         except asyncio.CancelledError:
             # Let task cancellation propagate so shutdown behaves correctly.
             raise
@@ -81,8 +79,8 @@ async def _player_profile_cleanup_loop(
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):  # pragma: no cover
-    logger.info("Initializing SQLite storage...")
-    storage: StoragePort = SQLiteStorage()
+    logger.info("Initializing PostgreSQL storage...")
+    storage: StoragePort = PostgresStorage()
     await storage.initialize()
 
     logger.info("Instanciating HTTPX AsyncClient...")
@@ -105,15 +103,13 @@ async def lifespan(_: FastAPI):  # pragma: no cover
         with suppress(asyncio.CancelledError):
             await cleanup_task
 
-    # Properly close HTTPX Async Client and SQLite storage
+    # Properly close HTTPX Async Client and PostgreSQL storage
     await overfast_client.aclose()
 
     # Evict volatile Valkey data (api-cache, rate-limit, etc.) before RDB snapshot
     await cache.evict_volatile_data()
     await cache.bgsave()
 
-    # Optimize SQLite before closing
-    await storage.optimize()
     await storage.close()
 
 

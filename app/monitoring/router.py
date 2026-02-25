@@ -5,11 +5,10 @@ from typing import TYPE_CHECKING
 from fastapi import APIRouter, Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
-from app.adapters.storage import SQLiteStorage
+from app.adapters.storage import PostgresStorage
 from app.monitoring.metrics import (
-    sqlite_player_profile_age_seconds,
-    sqlite_wal_size_bytes,
     storage_entries_total,
+    storage_player_profile_age_seconds,
     storage_size_bytes,
 )
 from app.overfast_logger import logger
@@ -25,16 +24,13 @@ async def metrics() -> Response:
     """
     Prometheus metrics endpoint.
 
-    Collects current SQLite storage statistics before generating metrics.
+    Collects current storage statistics before generating metrics.
     All other metrics (API requests, Blizzard calls, etc.) are updated
     in real-time via middleware and adapters.
-
-    Phase 3.5B: Enhanced with comprehensive SQLite metrics including
-    data freshness, WAL size, etc.
     """
-    # Collect SQLite storage metrics
+    # Collect storage metrics
     try:
-        storage: StoragePort = SQLiteStorage()
+        storage: StoragePort = PostgresStorage()
         stats = await storage.get_stats()
 
         # Core storage metrics
@@ -46,20 +42,15 @@ async def metrics() -> Response:
             stats["player_profiles_count"],
         )
 
-        # Phase 3.5B: Enhanced metrics
-        sqlite_wal_size_bytes.set(stats.get("wal_size_bytes", 0))
-
         # Data freshness (player profile ages)
-        # Set gauges rather than observe to show current state
         if stats.get("player_profile_age_p50", 0) > 0:
-            # Use histogram to track distribution
-            sqlite_player_profile_age_seconds.observe(
+            storage_player_profile_age_seconds.observe(
                 stats.get("player_profile_age_p50", 0)
             )
-            sqlite_player_profile_age_seconds.observe(
+            storage_player_profile_age_seconds.observe(
                 stats.get("player_profile_age_p90", 0)
             )
-            sqlite_player_profile_age_seconds.observe(
+            storage_player_profile_age_seconds.observe(
                 stats.get("player_profile_age_p99", 0)
             )
 
