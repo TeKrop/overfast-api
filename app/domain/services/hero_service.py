@@ -1,10 +1,11 @@
 """Hero domain service — heroes list, hero detail, hero stats"""
 
+import json
 from typing import TYPE_CHECKING, Any
 
 from fastapi import HTTPException
 
-from app.adapters.blizzard.parsers.hero import parse_hero
+from app.adapters.blizzard.parsers.hero import fetch_hero_html, parse_hero_html
 from app.adapters.blizzard.parsers.hero_stats_summary import parse_hero_stats_summary
 from app.adapters.blizzard.parsers.heroes import (
     fetch_heroes_html,
@@ -46,13 +47,12 @@ class HeroService(StaticDataService):
     ) -> tuple[list[dict], bool, int]:
         """Return the heroes list (with optional role/gamemode filters).
 
-        Stores the *full* (unfiltered) heroes list per locale in persistent storage so
-        that all filter combinations benefit from the same cache entry.
+        Stores raw Blizzard HTML per locale in persistent storage so that
+        code changes to the parser take effect on the next request after restart.
         """
 
-        async def _fetch() -> list[dict]:
-            html = await fetch_heroes_html(self.blizzard_client, locale)
-            return parse_heroes_html(html)
+        async def _fetch() -> str:
+            return await fetch_heroes_html(self.blizzard_client, locale)
 
         def _filter(data: list[dict]) -> list[dict]:
             return filter_heroes(data, role, gamemode)
@@ -61,6 +61,7 @@ class HeroService(StaticDataService):
             StaticFetchConfig(
                 storage_key=f"heroes:{locale}",
                 fetcher=_fetch,
+                parser=parse_heroes_html,
                 result_filter=_filter,
                 cache_key=cache_key,
                 cache_ttl=settings.heroes_path_cache_timeout,
@@ -81,23 +82,34 @@ class HeroService(StaticDataService):
     ) -> tuple[dict, bool, int]:
         """Return full hero details merged with portrait and hitpoints.
 
-        Stores the merged hero data per ``hero_key:locale`` in persistent storage so that
-        subsequent requests benefit from the SWR cache and background refresh.
+        Stores a JSON-encoded dict of raw HTML sources per ``hero_key:locale``
+        in persistent storage so that code changes to the parser take effect
+        on the next request after restart.
         """
 
-        async def _fetch() -> dict:
+        async def _fetch() -> str:
             try:
-                hero_data = await parse_hero(self.blizzard_client, hero_key, locale)
+                hero_html = await fetch_hero_html(self.blizzard_client, hero_key, locale)
+                # Validate hero exists before making the second Blizzard request.
+                # parse_hero_html raises ParserBlizzardError (404) for unknown heroes.
+                parse_hero_html(hero_html, locale)
                 heroes_html = await fetch_heroes_html(self.blizzard_client, locale)
-                heroes_list = parse_heroes_html(heroes_html)
-                heroes_hitpoints = parse_heroes_hitpoints()
-                return _merge_hero_data(
-                    hero_data, heroes_list, heroes_hitpoints, hero_key
-                )
             except ParserBlizzardError as exc:
                 raise HTTPException(
                     status_code=exc.status_code, detail=exc.message
                 ) from exc
+            return json.dumps(
+                {"hero_html": hero_html, "heroes_html": heroes_html},
+                separators=(",", ":"),
+            )
+
+        def _parse(raw: str) -> dict:
+            sources = json.loads(raw)
+            try:
+                hero_data = parse_hero_html(sources["hero_html"], locale)
+                heroes_list = parse_heroes_html(sources["heroes_html"])
+                heroes_hitpoints = parse_heroes_hitpoints()
+                return _merge_hero_data(hero_data, heroes_list, heroes_hitpoints, hero_key)
             except ParserParsingError as exc:
                 blizzard_url = f"{settings.blizzard_host}/{locale}{settings.heroes_path}{hero_key}/"
                 raise overfast_internal_error(blizzard_url, exc) from exc
@@ -106,6 +118,7 @@ class HeroService(StaticDataService):
             StaticFetchConfig(
                 storage_key=f"hero:{hero_key}:{locale}",
                 fetcher=_fetch,
+                parser=_parse,
                 cache_key=cache_key,
                 cache_ttl=settings.hero_path_cache_timeout,
                 staleness_threshold=settings.heroes_staleness_threshold,

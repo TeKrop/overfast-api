@@ -285,7 +285,7 @@ class PlayerService(BaseService):
     # ------------------------------------------------------------------
 
     async def get_player_profile_cache(self, player_id: str) -> dict | None:
-        """Get player profile from persistent storage storage."""
+        """Get player profile from persistent storage."""
         profile = await self.storage.get_player_profile(player_id)
         if not profile:
             if settings.prometheus_enabled:

@@ -39,7 +39,7 @@ class FakeStorage:
     async def set_static_data(
         self,
         key: str,
-        data: dict,
+        data: str,
         category: StaticDataCategory,
         data_version: int = 1,
     ) -> None:
@@ -131,6 +131,6 @@ class FakeStorage:
             "static_data_count": len(self._static),
             "player_profiles_count": n,
             "player_profile_age_p50": ages[n // 2] if ages else 0,
-            "player_profile_age_p90": ages[int(n * 0.9)] if ages else 0,
-            "player_profile_age_p99": ages[int(n * 0.99)] if ages else 0,
+            "player_profile_age_p90": ages[min(int(n * 0.9), n - 1)] if ages else 0,
+            "player_profile_age_p99": ages[min(int(n * 0.99), n - 1)] if ages else 0,
         }

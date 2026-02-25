@@ -28,19 +28,19 @@ class StoragePort(Protocol):
     async def get_static_data(self, key: str) -> dict | None:
         """Get static data (heroes, maps, gamemodes, roles) by key.
 
-        Returns dict with 'data' (dict), 'category' (str), 'updated_at' (int Unix ts),
-        'data_version' (int) or None if not found.
+        Returns dict with 'data' (str — raw HTML or JSON), 'category' (str),
+        'updated_at' (int Unix ts), 'data_version' (int) or None if not found.
         """
         ...
 
     async def set_static_data(
         self,
         key: str,
-        data: dict,
+        data: str,
         category: StaticDataCategory,
         data_version: int = 1,
     ) -> None:
-        """Store static data with metadata"""
+        """Store static data. ``data`` is a raw string (HTML or JSON)."""
         ...
 
     async def get_player_profile(self, player_id: str) -> dict | None:

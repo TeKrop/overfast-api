@@ -16,11 +16,17 @@ class RoleService(StaticDataService):
         locale: Locale,
         cache_key: str,
     ) -> tuple[list[dict], bool, int]:
-        """Return the roles list."""
+        """Return the roles list.
 
-        async def _fetch() -> list[dict]:
+        Stores raw Blizzard HTML per locale so that parser changes take effect
+        on the next request after restart.
+        """
+
+        async def _fetch() -> str:
+            return await fetch_roles_html(self.blizzard_client, locale)
+
+        def _parse(html: str) -> list[dict]:
             try:
-                html = await fetch_roles_html(self.blizzard_client, locale)
                 return parse_roles_html(html)
             except ParserParsingError as exc:
                 blizzard_url = f"{settings.blizzard_host}/{locale}{settings.home_path}"
@@ -30,6 +36,7 @@ class RoleService(StaticDataService):
             StaticFetchConfig(
                 storage_key=f"roles:{locale}",
                 fetcher=_fetch,
+                parser=_parse,
                 cache_key=cache_key,
                 cache_ttl=settings.heroes_path_cache_timeout,
                 staleness_threshold=settings.roles_staleness_threshold,

@@ -43,7 +43,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-overfast}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-overfast}
     volumes:
-      - pg-data:/var/lib/postgresql
+      - pg-data:/var/lib/postgresql/data
     healthcheck:
       test:
         [
@@ -123,7 +123,15 @@ services:
       valkey:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:9121/metrics"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "http://localhost:9121/metrics",
+        ]
       interval: 15s
       timeout: 5s
       retries: 3

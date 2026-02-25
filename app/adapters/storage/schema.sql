@@ -9,7 +9,7 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS static_data (
     key          VARCHAR(255)           PRIMARY KEY,
-    data         JSONB                  NOT NULL,
+    data         BYTEA                  NOT NULL,
     category     static_data_category   NOT NULL,
     data_version SMALLINT               NOT NULL DEFAULT 1,
     created_at   TIMESTAMPTZ            NOT NULL DEFAULT NOW(),

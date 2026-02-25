@@ -120,8 +120,8 @@ class PostgresStorage(metaclass=Singleton):
 
     @track_storage_operation("static_data", "get")
     async def get_static_data(self, key: str) -> dict | None:
-        """Get static data by key. Returns dict with 'data', 'category',
-        'updated_at' (Unix int), 'data_version' or None."""
+        """Get static data by key. Returns dict with 'data' (decompressed str),
+        'category', 'updated_at' (Unix int), 'data_version' or None."""
         async with self._pool.acquire() as conn:  # type: ignore[union-attr]
             row = await conn.fetchrow(
                 """SELECT data, category, updated_at, data_version
@@ -130,8 +130,10 @@ class PostgresStorage(metaclass=Singleton):
             )
         if row is None:
             return None
+
+        decompressed_data = zstd.decompress(bytes(row["data"])).decode("utf-8")
         return {
-            "data": row["data"],
+            "data": decompressed_data,
             "category": row["category"],
             "updated_at": int(row["updated_at"].timestamp()),
             "data_version": row["data_version"],
@@ -141,22 +143,23 @@ class PostgresStorage(metaclass=Singleton):
     async def set_static_data(
         self,
         key: str,
-        data: dict,
+        data: str,
         category: StaticDataCategory,
         data_version: int = 1,
     ) -> None:
-        """Upsert static data. ``data`` is stored as JSONB."""
+        """Upsert static data. ``data`` is a raw string (HTML or JSON) compressed with zstd."""
+        compressed = zstd.compress(data.encode("utf-8"))
         async with self._pool.acquire() as conn:  # type: ignore[union-attr]
             await conn.execute(
                 """INSERT INTO static_data (key, data, category, data_version, updated_at)
-                   VALUES ($1, $2::jsonb, $3::static_data_category, $4, NOW())
+                   VALUES ($1, $2, $3::static_data_category, $4, NOW())
                    ON CONFLICT (key) DO UPDATE
                    SET data = EXCLUDED.data,
                        category = EXCLUDED.category,
                        data_version = EXCLUDED.data_version,
                        updated_at = NOW()""",
                 key,
-                data,
+                compressed,
                 category.value,
                 data_version,
             )
@@ -220,7 +223,7 @@ class PostgresStorage(metaclass=Singleton):
     ) -> None:
         """Upsert player profile. HTML is zstd-compressed before storage."""
         if summary and last_updated_blizzard is None:
-            last_updated_blizzard = summary.get("lastUpdated", last_updated_blizzard)
+            last_updated_blizzard = summary.get("lastUpdated")
 
         compressed = self._compress(html)
 
@@ -315,8 +318,10 @@ class PostgresStorage(metaclass=Singleton):
                     age_list = sorted(float(r["age"]) for r in ages)
                     n = len(age_list)
                     stats["player_profile_age_p50"] = age_list[n // 2]
-                    stats["player_profile_age_p90"] = age_list[int(n * 0.9)]
-                    stats["player_profile_age_p99"] = age_list[int(n * 0.99)]
+                    p90_index = min(int(n * 0.9), n - 1)
+                    stats["player_profile_age_p90"] = age_list[p90_index]
+                    p99_index = min(int(n * 0.99), n - 1)
+                    stats["player_profile_age_p99"] = age_list[p99_index]
         except Exception as exc:  # noqa: BLE001
             logger.warning(f"Failed to collect storage stats: {exc}")
 
