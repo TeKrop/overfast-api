@@ -429,16 +429,22 @@ class PlayerService(BaseService):
     async def _resolve_player_identity(self, player_id: str) -> PlayerIdentity:
         """Resolve BattleTag or Blizzard ID to a canonical ``PlayerIdentity``."""
         logger.info("Retrieving Player Summary...")
-
         if is_blizzard_id(player_id):
-            logger.info("Player ID is a Blizzard ID — attempting reverse enrichment")
-            player_summary, html = await self._enrich_from_blizzard_id(player_id)
-            return PlayerIdentity(
-                blizzard_id=player_id,
-                player_summary=player_summary,
-                cached_html=html,
-            )
+            return await self._resolve_blizzard_id_identity(player_id)
+        return await self._resolve_battletag_identity(player_id)
 
+    async def _resolve_blizzard_id_identity(self, player_id: str) -> PlayerIdentity:
+        """Resolve a raw Blizzard ID via reverse enrichment."""
+        logger.info("Player ID is a Blizzard ID — attempting reverse enrichment")
+        player_summary, html = await self._enrich_from_blizzard_id(player_id)
+        return PlayerIdentity(
+            blizzard_id=player_id,
+            player_summary=player_summary,
+            cached_html=html,
+        )
+
+    async def _resolve_battletag_identity(self, player_id: str) -> PlayerIdentity:
+        """Resolve a BattleTag to a ``PlayerIdentity`` using search + fallbacks."""
         battletag_input = player_id
         search_json = await fetch_player_summary_json(self.blizzard_client, player_id)
         player_summary = parse_player_summary_json(search_json, player_id)
@@ -452,29 +458,48 @@ class PlayerService(BaseService):
             )
 
         if search_json:
-            logger.info(
-                "Player not found in search — checking persistent storage for cached Blizzard ID"
+            identity = await self._try_cached_blizzard_id(
+                battletag_input, player_id, search_json
             )
-            cached_blizzard_id = await self.storage.get_player_id_by_battletag(
-                battletag_input
-            )
+            if identity:
+                return identity
 
-            if cached_blizzard_id:
-                logger.info("Blizzard ID found — retrying to find in search")
-                if settings.prometheus_enabled:
-                    storage_battletag_lookup_total.labels(result="hit").inc()
-                player_summary = parse_player_summary_json(
-                    search_json, player_id, cached_blizzard_id
-                )
-                if player_summary:
-                    return PlayerIdentity(
-                        blizzard_id=cached_blizzard_id,
-                        player_summary=player_summary,
-                        battletag_input=battletag_input,
-                    )
-            elif settings.prometheus_enabled:
+        return await self._resolve_via_redirect(player_id, battletag_input, search_json)
+
+    async def _try_cached_blizzard_id(
+        self, battletag_input: str, player_id: str, search_json: list
+    ) -> PlayerIdentity | None:
+        """Check storage for a cached Blizzard ID and retry the search with it."""
+        logger.info(
+            "Player not found in search — checking persistent storage for cached Blizzard ID"
+        )
+        cached_blizzard_id = await self.storage.get_player_id_by_battletag(
+            battletag_input
+        )
+
+        if not cached_blizzard_id:
+            if settings.prometheus_enabled:
                 storage_battletag_lookup_total.labels(result="miss").inc()
+            return None
 
+        logger.info("Blizzard ID found — retrying to find in search")
+        if settings.prometheus_enabled:
+            storage_battletag_lookup_total.labels(result="hit").inc()
+        player_summary = parse_player_summary_json(
+            search_json, player_id, cached_blizzard_id
+        )
+        if player_summary:
+            return PlayerIdentity(
+                blizzard_id=cached_blizzard_id,
+                player_summary=player_summary,
+                battletag_input=battletag_input,
+            )
+        return None
+
+    async def _resolve_via_redirect(
+        self, player_id: str, battletag_input: str, search_json: list
+    ) -> PlayerIdentity:
+        """Resolve identity as a last resort via Blizzard redirect HTML fetch."""
         logger.info("No cached mapping — resolving via Blizzard redirect")
         html, blizzard_id = await fetch_player_html(self.blizzard_client, player_id)
 

@@ -131,7 +131,7 @@ class PostgresStorage(metaclass=Singleton):
         if row is None:
             return None
 
-        decompressed_data = zstd.decompress(bytes(row["data"])).decode("utf-8")
+        decompressed_data = zstd.decompress(row["data"]).decode("utf-8")
         return {
             "data": decompressed_data,
             "category": row["category"],
