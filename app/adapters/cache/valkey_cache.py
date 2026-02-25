@@ -73,10 +73,11 @@ class ValkeyCache(metaclass=Singleton):
     Protocol compliance is verified by type checkers at injection points.
     """
 
-    # Valkey server global variable (async client)
-    valkey_server = valkey.Valkey(
-        host=settings.valkey_host, port=settings.valkey_port, protocol=3
-    )
+    def __init__(self) -> None:
+        # Create the Valkey client lazily so it binds to the running event loop
+        self.valkey_server = valkey.Valkey(
+            host=settings.valkey_host, port=settings.valkey_port, protocol=3
+        )
 
     @staticmethod
     def get_cache_key_from_request(request: Request) -> str:
@@ -169,29 +170,6 @@ class ValkeyCache(metaclass=Singleton):
             f"{settings.api_cache_key_prefix}:{cache_key}",
             bytes_value,
             ex=expire,
-        )
-
-    @handle_valkey_error(default_return=False)
-    async def is_being_rate_limited(self) -> bool:
-        """Check if Blizzard rate limit is currently active"""
-        result = await self.valkey_server.exists(settings.blizzard_rate_limit_key)
-        return bool(result)
-
-    @handle_valkey_error(default_return=0)
-    async def get_global_rate_limit_remaining_time(self) -> int:
-        """Get remaining time in seconds for Blizzard rate limit"""
-        blizzard_rate_limit = await self.valkey_server.ttl(
-            settings.blizzard_rate_limit_key
-        )
-        return blizzard_rate_limit if isinstance(blizzard_rate_limit, int) else 0
-
-    @handle_valkey_error(default_return=None)
-    async def set_global_rate_limit(self) -> None:
-        """Set Blizzard rate limit flag"""
-        await self.valkey_server.set(
-            settings.blizzard_rate_limit_key,
-            value=0,
-            ex=settings.blizzard_rate_limit_retry_after,
         )
 
     @handle_valkey_error(default_return=None)

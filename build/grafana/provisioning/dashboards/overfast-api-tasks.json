@@ -691,7 +691,7 @@
     },
     {
       "type": "stat",
-      "title": "AIMD Current Rate",
+      "title": "Throttle Delay (s)",
       "gridPos": {
         "h": 4,
         "w": 8,
@@ -704,7 +704,7 @@
       },
       "targets": [
         {
-          "expr": "aimd_current_rate{job=\"fastapi\"}",
+          "expr": "throttle_current_delay_seconds{job=\"fastapi\"}",
           "refId": "A"
         }
       ],
@@ -741,7 +741,7 @@
     },
     {
       "type": "stat",
-      "title": "Rate Limit Events (24h)",
+      "title": "403 Penalty Events (24h)",
       "gridPos": {
         "h": 4,
         "w": 8,
@@ -754,7 +754,7 @@
       },
       "targets": [
         {
-          "expr": "round(increase(blizzard_rate_limited_total{job=\"fastapi\"}[1d]))",
+          "expr": "round(increase(throttle_403_total{job=\"fastapi\"}[1d]))",
           "refId": "A"
         }
       ],
@@ -858,7 +858,7 @@
     },
     {
       "type": "timeseries",
-      "title": "AIMD Rate Over Time",
+      "title": "Throttle Delay Over Time",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -871,7 +871,7 @@
       },
       "targets": [
         {
-          "expr": "aimd_current_rate{job=\"fastapi\"}",
+          "expr": "throttle_current_delay_seconds{job=\"fastapi\"}",
           "legendFormat": "Allowed rate",
           "refId": "A"
         }
@@ -899,7 +899,7 @@
     },
     {
       "type": "timeseries",
-      "title": "Rate Limit Events Over Time",
+      "title": "403 Penalty Events Over Time",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -912,7 +912,7 @@
       },
       "targets": [
         {
-          "expr": "rate(blizzard_rate_limited_total{job=\"fastapi\"}[5m])",
+          "expr": "rate(throttle_403_total{job=\"fastapi\"}[5m])",
           "legendFormat": "Rate limit events/s",
           "refId": "A"
         }

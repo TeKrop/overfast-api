@@ -91,7 +91,7 @@ class BaseService:
         """Enqueue a background refresh, deduplicating via job_id.
 
         ``refresh_coro``, when provided, is passed to the task queue and
-        executed as the actual refresh work (Phase 4: asyncio, Phase 5: arq).
+        executed as the actual refresh work.
         Completion and failure are reported via domain-level metrics.
         """
         job_id = f"refresh:{entity_type}:{entity_id}"

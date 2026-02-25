@@ -7,7 +7,7 @@ from fastapi import Depends
 from app.adapters.blizzard.client import BlizzardClient
 from app.adapters.cache.valkey_cache import ValkeyCache
 from app.adapters.storage.postgres_storage import PostgresStorage
-from app.adapters.tasks.asyncio_task_queue import AsyncioTaskQueue
+from app.adapters.tasks.valkey_task_queue import ValkeyTaskQueue
 from app.domain.ports import BlizzardClientPort, CachePort, StoragePort, TaskQueuePort
 from app.domain.services import (
     GamemodeService,
@@ -38,8 +38,8 @@ def get_storage() -> StoragePort:
 
 
 def get_task_queue() -> TaskQueuePort:
-    """Dependency for background task queue (Stub until Phase 5)."""
-    return AsyncioTaskQueue()
+    """Dependency for Valkey background task queue."""
+    return ValkeyTaskQueue()
 
 
 # ---------------------------------------------------------------------------

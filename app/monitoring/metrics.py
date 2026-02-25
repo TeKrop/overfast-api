@@ -112,12 +112,23 @@ background_tasks_duration_seconds = Histogram(
 )
 
 ########################
-# AIMD / Blizzard Metrics (Phase 5)
+# Throttle / Blizzard Metrics (Phase 5)
 ########################
 
-aimd_current_rate = Gauge(
-    "aimd_current_rate",
-    "Current allowed Blizzard request rate (requests per second)",
+throttle_current_delay_seconds = Gauge(
+    "throttle_current_delay_seconds",
+    "Current adaptive throttle delay between Blizzard requests (seconds)",
+)
+
+throttle_403_total = Counter(
+    "throttle_403_total",
+    "Blizzard 403 rate-limit events that triggered a throttle penalty",
+)
+
+throttle_wait_seconds = Histogram(
+    "throttle_wait_seconds",
+    "Time spent waiting before Blizzard requests due to throttle delay",
+    buckets=(0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0),
 )
 
 blizzard_requests_total = Counter(

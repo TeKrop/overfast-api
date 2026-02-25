@@ -89,12 +89,6 @@ class Settings(BaseSettings):
     # the number of seconds before retrying if being rate limited
     retry_after_header: str = "Retry-After"
 
-    # Valkey key for Blizzard rate limit storage
-    blizzard_rate_limit_key: str = "blizzard-rate-limit"
-
-    # Number of seconds before the user is authorized to make calls to Blizzard again
-    blizzard_rate_limit_retry_after: int = 5
-
     # Global rate limit of requests per second per ip to apply on the API
     rate_limit_per_second_per_ip: int = 30
 
@@ -103,6 +97,31 @@ class Settings(BaseSettings):
 
     # Global maximum number of connection/simultaneous requests per ip
     max_connections_per_ip: int = 10
+
+    ############
+    # ADAPTIVE THROTTLING (AutoThrottle + AIMD)
+    ############
+
+    # Enable adaptive throttling for Blizzard requests
+    throttle_enabled: bool = True
+
+    # Initial delay between Blizzard requests (seconds)
+    throttle_start_delay: float = 2.0
+
+    # Minimum delay (floor)
+    throttle_min_delay: float = 1.0
+
+    # Maximum delay (cap)
+    throttle_max_delay: float = 30.0
+
+    # Target concurrency: 0.5 means 1 request every ~2s at steady state
+    throttle_target_concurrency: float = 0.5
+
+    # Minimum delay enforced immediately after a Blizzard 403
+    throttle_penalty_delay: float = 10.0
+
+    # Seconds after a 403 during which delay cannot decrease (recovery blocked)
+    throttle_penalty_duration: int = 60
 
     ############
     # VALKEY CONFIGURATION
@@ -179,6 +198,16 @@ class Settings(BaseSettings):
 
     # Prefix for Valkey keys storing persistent check count (no TTL, survives cooldown expiry)
     unknown_player_status_key_prefix: str = "unknown-player:status"
+
+    ############
+    # BACKGROUND WORKER
+    ############
+
+    # Maximum number of concurrent worker jobs
+    worker_max_concurrent_jobs: int = 10
+
+    # Job timeout in seconds
+    worker_job_timeout: int = 300
 
     ############
     # BLIZZARD

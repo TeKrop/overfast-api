@@ -90,6 +90,9 @@ async def lifespan(_: FastAPI):  # pragma: no cover
     cache: CachePort = CacheManager()
     await cache.evict_volatile_data()
 
+    # ValkeyTaskQueue uses ValkeyCache's connection — no separate initialization needed.
+    logger.info("Valkey task queue ready (worker process handles job execution).")
+
     cleanup_task: asyncio.Task | None = None
     if settings.player_profile_max_age > 0:
         cleanup_task = asyncio.create_task(
@@ -123,7 +126,8 @@ This live instance is configured with the following restrictions:
 - Rate Limit per IP: **{settings.rate_limit_per_second_per_ip} requests/second** (burst capacity :
 **{settings.rate_limit_per_ip_burst}**)
 - Maximum connections/simultaneous requests per IP: **{settings.max_connections_per_ip}**
-- Retry delay after Blizzard rate limiting: **{settings.blizzard_rate_limit_retry_after} seconds**
+- Adaptive Blizzard throttle: **{settings.throttle_start_delay}s** initial delay
+  (auto-adjusts based on Blizzard response latency; 503 returned when rate-limited)
 
 This limit may be adjusted as needed. If you require higher throughput, consider
 hosting your own instance on a server 👍

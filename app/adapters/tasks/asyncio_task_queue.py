@@ -23,7 +23,7 @@ class AsyncioTaskQueue(metaclass=Singleton):
     trigger duplicate refreshes for the same entity.
 
     When a ``coro`` is provided to ``enqueue``, it is executed as a real
-    background task.  Phase 5 will replace this adapter with an arq-backed
+    background task.  Phase 5 will replace this adapter with a Valkey-backed
     one that dispatches to a worker process instead, but the interface stays
     the same.
     """

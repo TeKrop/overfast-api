@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 
 class TaskQueuePort(Protocol):
-    """Protocol for background task queue operations (arq in Phase 5)"""
+    """Protocol for background task queue operations"""
 
     async def enqueue(
         self,
@@ -22,8 +22,8 @@ class TaskQueuePort(Protocol):
         """Enqueue a background task.
 
         ``coro``, when provided, is executed immediately (Phase 4 asyncio) or
-        dispatched to a worker process (Phase 5 arq).  ``task_name`` is kept for
-        arq compatibility and logging.
+        dispatched to a worker process.  ``task_name`` is kept for
+        compatibility and logging.
 
         ``on_complete(job_id)`` is awaited when the task finishes successfully.
         ``on_failure(job_id, exc)`` is awaited when the task raises an exception.

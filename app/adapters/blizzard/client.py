@@ -1,18 +1,16 @@
 """Blizzard HTTP client adapter implementing BlizzardClientPort"""
 
-import math
 import time
 
 import httpx
 from fastapi import HTTPException, status
 
-from app.adapters.cache import CacheManager
+from app.adapters.blizzard.throttle import BlizzardThrottle
 from app.config import settings
-from app.helpers import send_discord_webhook_message
+from app.exceptions import RateLimitedError
 from app.metaclasses import Singleton
 from app.monitoring.helpers import normalize_blizzard_url
 from app.monitoring.metrics import (
-    blizzard_rate_limited_total,
     blizzard_request_duration_seconds,
     blizzard_requests_total,
 )
@@ -21,15 +19,14 @@ from app.overfast_logger import logger
 
 class BlizzardClient(metaclass=Singleton):
     """
-    HTTP client for Blizzard API/web requests with rate limiting.
+    HTTP client for Blizzard API/web requests with adaptive throttling.
 
     Implements BlizzardClientPort protocol via structural typing (duck typing).
     Protocol compliance is verified by type checkers at injection points.
     """
 
     def __init__(self):
-        self.cache_manager = CacheManager()
-        self._rate_limited_until: float = 0
+        self.throttle = BlizzardThrottle() if settings.throttle_enabled else None
         self.client = httpx.AsyncClient(
             headers={
                 "User-Agent": (
@@ -50,72 +47,84 @@ class BlizzardClient(metaclass=Singleton):
         headers: dict[str, str] | None = None,
         params: dict[str, str] | None = None,
     ) -> httpx.Response:
-        """Make an HTTP GET request with custom headers and retrieve the result"""
+        """Make an HTTP GET request, respecting the adaptive throttle."""
+        if self.throttle:
+            await self._throttle_wait()
 
-        # Check if we're being rate limited
-        # Note: Nginx also checks this on cache miss, but this check remains for:
-        # - Race conditions (multiple requests in flight when rate limit is set)
-        # - Defense in depth
-        await self._check_rate_limit()
-
-        # Prepare kwargs
-        kwargs = {}
+        kwargs: dict = {}
         if headers:
             kwargs["headers"] = headers
         if params:
             kwargs["params"] = params
 
-        # Normalize URL for metrics labels
         normalized_endpoint = normalize_blizzard_url(url)
+        response, duration = await self._execute_request(
+            url, normalized_endpoint, kwargs
+        )
 
-        # Make the API call
+        if self.throttle:
+            await self.throttle.adjust_delay(duration, response.status_code)
+
+        logger.debug("OverFast request done!")
+
+        if response.status_code == status.HTTP_403_FORBIDDEN:
+            raise self._blizzard_rate_limited_error()
+
+        return response
+
+    async def _throttle_wait(self) -> None:
+        """Check throttle before request; raise 503 if in penalty period."""
+        if not self.throttle:
+            return
+
+        try:
+            await self.throttle.wait_before_request()
+        except RateLimitedError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=(
+                    "Blizzard is temporarily rate limiting this API. "
+                    f"Please retry after {exc.retry_after} seconds."
+                ),
+                headers={settings.retry_after_header: str(exc.retry_after)},
+            ) from exc
+
+    async def _execute_request(
+        self,
+        url: str,
+        normalized_endpoint: str,
+        kwargs: dict,
+    ) -> tuple[httpx.Response, float]:
+        """Execute the HTTP GET and record metrics. Returns (response, duration)."""
         start_time = time.perf_counter()
         try:
             response = await self.client.get(url, **kwargs)
         except httpx.TimeoutException as error:
             duration = time.perf_counter() - start_time
-            if settings.prometheus_enabled:
-                blizzard_requests_total.labels(
-                    endpoint=normalized_endpoint, status="timeout"
-                ).inc()
-                blizzard_request_duration_seconds.labels(
-                    endpoint=normalized_endpoint
-                ).observe(duration)
+            self._record_metrics(normalized_endpoint, "timeout", duration)
             raise self._blizzard_response_error(
                 status_code=0,
                 error="Blizzard took more than 10 seconds to respond, resulting in a timeout",
             ) from error
         except httpx.RemoteProtocolError as error:
             duration = time.perf_counter() - start_time
-            if settings.prometheus_enabled:
-                blizzard_requests_total.labels(
-                    endpoint=normalized_endpoint, status="error"
-                ).inc()
-                blizzard_request_duration_seconds.labels(
-                    endpoint=normalized_endpoint
-                ).observe(duration)
+            self._record_metrics(normalized_endpoint, "error", duration)
             raise self._blizzard_response_error(
                 status_code=0,
                 error="Blizzard closed the connection, no data could be retrieved",
             ) from error
 
         duration = time.perf_counter() - start_time
+        self._record_metrics(normalized_endpoint, str(response.status_code), duration)
+        return response, duration
+
+    @staticmethod
+    def _record_metrics(endpoint: str, status_label: str, duration: float) -> None:
         if settings.prometheus_enabled:
-            blizzard_requests_total.labels(
-                endpoint=normalized_endpoint, status=str(response.status_code)
-            ).inc()
-            blizzard_request_duration_seconds.labels(
-                endpoint=normalized_endpoint
-            ).observe(duration)
-
-        logger.debug("OverFast request done !")
-
-        # Make sure we catch HTTP 403 from Blizzard when it happens,
-        # so we don't make any more call before some amount of time
-        if response.status_code == status.HTTP_403_FORBIDDEN:
-            raise await self._blizzard_forbidden_error()
-
-        return response
+            blizzard_requests_total.labels(endpoint=endpoint, status=status_label).inc()
+            blizzard_request_duration_seconds.labels(endpoint=endpoint).observe(
+                duration
+            )
 
     async def close(self) -> None:
         """Properly close HTTPX Async Client"""
@@ -125,35 +134,6 @@ class BlizzardClient(metaclass=Singleton):
     async def aclose(self) -> None:
         """Alias for close() - deprecated, use close() instead"""
         await self.close()
-
-    async def _check_rate_limit(self) -> None:
-        """Check if we're being rate limited by Blizzard before making any API call.
-
-        Returns HTTP 429 with Retry-After header if rate limited.
-
-        Checks both Valkey (shared across workers) and an in-memory timestamp
-        (fallback when Valkey is unavailable).
-
-        Note: Nginx also performs this check on API cache miss for better performance,
-        but this method remains necessary for:
-        - Race conditions (concurrent requests when rate limit is first set)
-        - Defense in depth (if nginx check fails or is bypassed)
-        """
-        # Check in-memory fallback first (works even when Valkey is down)
-        remaining = self._rate_limited_until - time.monotonic()
-        if remaining > 0:
-            raise self._too_many_requests_response(retry_after=math.ceil(remaining))
-
-        if await self.cache_manager.is_being_rate_limited():
-            remaining_ttl = (
-                await self.cache_manager.get_global_rate_limit_remaining_time()
-            )
-            # Sync in-memory fallback with Valkey TTL so it can protect
-            # if Valkey becomes unavailable mid-rate-limit window
-            self._rate_limited_until = time.monotonic() + float(remaining_ttl)
-            raise self._too_many_requests_response(
-                retry_after=math.ceil(float(remaining_ttl))
-            )
 
     def blizzard_response_error_from_response(
         self, response: httpx.Response
@@ -169,55 +149,26 @@ class BlizzardClient(metaclass=Singleton):
             status_code,
             error,
         )
-
         return HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
             detail=f"Couldn't get Blizzard page (HTTP {status_code} error) : {error}",
         )
 
-    async def _blizzard_forbidden_error(self) -> HTTPException:
-        """Retrieve a generic error response when Blizzard returns forbidden error.
-        Also prevent further calls to Blizzard for a given amount of time.
-        """
-
-        # Block future requests: store in Valkey (shared) and in-memory (fallback)
-        self._rate_limited_until = (
-            time.monotonic() + settings.blizzard_rate_limit_retry_after
-        )
-        await self.cache_manager.set_global_rate_limit()
-
-        # Track rate limit event
-        if settings.prometheus_enabled:
-            blizzard_rate_limited_total.inc()
-
-        # If Discord Webhook configuration is enabled, send a message to the
-        # given channel using Discord Webhook URL
-        if settings.discord_message_on_rate_limit:
-            send_discord_webhook_message(
-                title="⚠️ Blizzard Rate Limit Reached",
-                description="Blocking further calls to Blizzard API.",
-                fields=[
-                    {
-                        "name": "Retry After",
-                        "value": f"{settings.blizzard_rate_limit_retry_after} seconds",
-                        "inline": True,
-                    },
-                ],
-                color=0xF39C12,  # Orange/Warning color
-            )
-
-        return self._too_many_requests_response(
-            retry_after=settings.blizzard_rate_limit_retry_after
-        )
-
     @staticmethod
-    def _too_many_requests_response(retry_after: int) -> HTTPException:
-        """Generic method to return an HTTP 429 response with Retry-After header"""
+    def _blizzard_rate_limited_error() -> HTTPException:
+        """Return 503 when Blizzard is rate limiting us (HTTP 403 received).
+
+        The throttle has already recorded the penalty and adjusted the delay.
+        """
+        retry_after = settings.throttle_penalty_duration
+        logger.warning(
+            "[BlizzardClient] Rate limited by Blizzard (403) — returning 503 to client"
+        )
         return HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=(
-                "API has been rate limited by Blizzard, please wait for "
-                f"{retry_after} seconds before retrying"
+                "Blizzard is temporarily rate limiting this API. "
+                f"Please retry after {retry_after} seconds."
             ),
             headers={settings.retry_after_header: str(retry_after)},
         )

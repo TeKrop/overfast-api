@@ -22,7 +22,7 @@ services:
     build:
       context: .
       target: ${BUILD_TARGET:-main}
-    command: crond -f
+    command: /code/.venv/bin/python -m app.adapters.tasks.valkey_worker
     env_file: ${APP_VOLUME_PATH:-.}/.env
     volumes:
       - ${APP_VOLUME_PATH:-/tmp}/worker-logs:/code/logs
@@ -32,9 +32,9 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "ps aux | grep -i crond | grep -wv grep || exit 1"]
-      interval: 5s
-      timeout: 2s
+      test: ["CMD-SHELL", "pgrep -f valkey_worker || exit 1"]
+      interval: 10s
+      timeout: 5s
 
   postgres:
     image: postgres:18-alpine

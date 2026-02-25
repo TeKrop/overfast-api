@@ -185,11 +185,10 @@ def test_get_player_stats_blizzard_forbidden_error(client: TestClient, uri: str)
             params={"gamemode": PlayerGamemode.QUICKPLAY},
         )
 
-    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
     assert response.json() == {
         "error": (
-            "API has been rate limited by Blizzard, please wait for "
-            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
+            "Blizzard is temporarily rate limiting this API. Please retry after 60 seconds."
         )
     }
 

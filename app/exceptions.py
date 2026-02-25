@@ -3,6 +3,21 @@
 from fastapi import status
 
 
+class RateLimitedError(Exception):
+    """Raised when Blizzard is actively rate-limiting us (throttle penalty period).
+
+    ``retry_after`` is the number of seconds until the penalty expires.
+    """
+
+    def __init__(self, retry_after: int = 0):
+        super().__init__()
+        self.retry_after = retry_after
+        self.message = f"Blizzard rate limited — retry after {retry_after}s"
+
+    def __str__(self) -> str:
+        return self.message
+
+
 class OverfastError(Exception):
     """Generic OverFast API Exception"""
 
