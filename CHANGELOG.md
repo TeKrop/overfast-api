@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.46.0 (2026-02-25)
+
+### Features
+
+- **storage**: Replace SQLite with PostgreSQL
+  ([#386](https://github.com/TeKrop/overfast-api/pull/386),
+  [`3668f63`](https://github.com/TeKrop/overfast-api/commit/3668f633ed012a1a346c96b3bdd21717beb79e2c))
+
+
 ## v3.45.1 (2026-02-23)
 
 ### Bug Fixes
