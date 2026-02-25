@@ -131,7 +131,7 @@ class PostgresStorage(metaclass=Singleton):
         if row is None:
             return None
 
-        decompressed_data = zstd.decompress(row["data"]).decode("utf-8")
+        decompressed_data = self._decompress(row["data"])
         return {
             "data": decompressed_data,
             "category": row["category"],
@@ -148,7 +148,7 @@ class PostgresStorage(metaclass=Singleton):
         data_version: int = 1,
     ) -> None:
         """Upsert static data. ``data`` is a raw string (HTML or JSON) compressed with zstd."""
-        compressed = zstd.compress(data.encode("utf-8"))
+        compressed = self._compress(data)
         async with self._pool.acquire() as conn:  # type: ignore[union-attr]
             await conn.execute(
                 """INSERT INTO static_data (key, data, category, data_version, updated_at)
