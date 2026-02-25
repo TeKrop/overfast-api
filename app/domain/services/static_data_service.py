@@ -171,8 +171,12 @@ class StaticDataService(BaseService):
         # Store the raw source so re-parses on storage hits always use current parser code.
         # For HTML sources (parser set): raw is the HTML string.
         # For CSV sources (no parser): raw is already the parsed data; serialise as JSON.
-        raw_to_store = raw if config.parser is not None else json.dumps(raw, separators=(",", ":"))
-        await self._store_in_storage(config.storage_key, raw_to_store, config.entity_type)
+        raw_to_store = (
+            raw if config.parser is not None else json.dumps(raw, separators=(",", ":"))
+        )
+        await self._store_in_storage(
+            config.storage_key, raw_to_store, config.entity_type
+        )
 
         filtered = self._apply_filter(data, config.result_filter)
         await self._update_api_cache(

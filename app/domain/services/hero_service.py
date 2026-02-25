@@ -89,7 +89,9 @@ class HeroService(StaticDataService):
 
         async def _fetch() -> str:
             try:
-                hero_html = await fetch_hero_html(self.blizzard_client, hero_key, locale)
+                hero_html = await fetch_hero_html(
+                    self.blizzard_client, hero_key, locale
+                )
                 # Validate hero exists before making the second Blizzard request.
                 # parse_hero_html raises ParserBlizzardError (404) for unknown heroes.
                 parse_hero_html(hero_html, locale)
@@ -109,7 +111,9 @@ class HeroService(StaticDataService):
                 hero_data = parse_hero_html(sources["hero_html"], locale)
                 heroes_list = parse_heroes_html(sources["heroes_html"])
                 heroes_hitpoints = parse_heroes_hitpoints()
-                return _merge_hero_data(hero_data, heroes_list, heroes_hitpoints, hero_key)
+                return _merge_hero_data(
+                    hero_data, heroes_list, heroes_hitpoints, hero_key
+                )
             except ParserParsingError as exc:
                 blizzard_url = f"{settings.blizzard_host}/{locale}{settings.heroes_path}{hero_key}/"
                 raise overfast_internal_error(blizzard_url, exc) from exc
