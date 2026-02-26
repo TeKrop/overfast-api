@@ -16,6 +16,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from .adapters.blizzard import OverFastClient
 from .adapters.cache import CacheManager
 from .adapters.storage import PostgresStorage
+from .adapters.tasks.worker import broker
 from .api import gamemodes, heroes, maps, players, roles
 from .config import settings
 from .docs import render_documentation
@@ -90,8 +91,10 @@ async def lifespan(_: FastAPI):  # pragma: no cover
     cache: CachePort = CacheManager()
     await cache.evict_volatile_data()
 
-    # ValkeyTaskQueue uses ValkeyCache's connection — no separate initialization needed.
-    logger.info("Valkey task queue ready (worker process handles job execution).")
+    # Start broker for task dispatch (skipped in worker mode — taskiq handles it).
+    if not broker.is_worker_process:
+        logger.info("Starting Valkey task broker...")
+        await broker.startup()
 
     cleanup_task: asyncio.Task | None = None
     if settings.player_profile_max_age > 0:
@@ -114,6 +117,9 @@ async def lifespan(_: FastAPI):  # pragma: no cover
     await cache.bgsave()
 
     await storage.close()
+
+    if not broker.is_worker_process:
+        await broker.shutdown()
 
 
 description = f"""OverFast API provides comprehensive data on Overwatch heroes,

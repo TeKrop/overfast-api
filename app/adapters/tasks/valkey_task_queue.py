@@ -1,56 +1,44 @@
-"""Valkey-backed task queue — enqueues background jobs using Valkey Lists."""
+"""Valkey-backed task queue — enqueues background jobs via taskiq.
 
-import json
-from typing import TYPE_CHECKING, Any
+Deduplication is handled here with ``SET NX`` before dispatching to the
+:class:`~app.adapters.tasks.valkey_broker.ValkeyListBroker`.  The taskiq
+worker executes the tasks using FastAPI's DI container.
+"""
+
+from typing import Any
 
 from app.overfast_logger import logger
 
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable, Coroutine
-
-# Shared Valkey key names (must match valkey_worker.py)
-QUEUE_KEY = "worker:queue"
 JOB_KEY_PREFIX = "worker:job:"
-JOB_TTL = 3600  # 1 hour — auto-expire stale job-state keys
+JOB_TTL = 3600  # 1 hour — auto-expire stale dedup keys
 
 
 class ValkeyTaskQueue:
-    """Task queue that stores jobs in a Valkey List.
+    """Task queue that dispatches jobs to the taskiq worker via Valkey.
 
     Enqueue uses ``SET NX`` for deduplication: if a job-state key already
-    exists the job is silently skipped.  The worker pops jobs from the list
-    and deletes the job key when it finishes.
-
-    ``coro``, ``on_complete``, and ``on_failure`` are accepted for interface
-    compatibility with :class:`AsyncioTaskQueue` but are intentionally ignored
-    — lifecycle is managed entirely by the worker process.
+    exists the job is silently skipped.
     """
 
     @property
-    def _valkey(self):  # type: ignore[return]
+    def _valkey(self):
         from app.adapters.cache.valkey_cache import ValkeyCache  # noqa: PLC0415
 
         return ValkeyCache().valkey_server
 
-    async def enqueue(  # NOSONAR
+    async def enqueue(
         self,
         task_name: str,
         *args: Any,
         job_id: str | None = None,
-        coro: Coroutine[Any, Any, Any] | None = None,
-        on_complete: Callable[[str], Awaitable[None]] | None = None,
-        on_failure: Callable[[str, Exception], Awaitable[None]] | None = None,
         **kwargs: Any,
     ) -> str:
-        """Push a job onto the Valkey queue, skipping duplicates.
+        """Dispatch a job to the taskiq worker, skipping duplicates.
 
-        Uses ``SET NX`` to atomically claim the job slot before pushing.
-        If the slot is already taken the job is a no-op.
+        Uses ``SET NX`` to atomically claim the dedup slot before calling
+        ``task_fn.kiq()``.  If the slot is already taken the call is a no-op.
         """
-        del on_complete, on_failure  # intentionally unused in worker adapter
-        if coro is not None:
-            coro.close()  # avoid "coroutine was never awaited" warning
-
+        del kwargs  # intentionally unused
         effective_id = job_id or task_name
 
         try:
@@ -58,22 +46,27 @@ class ValkeyTaskQueue:
                 f"{JOB_KEY_PREFIX}{effective_id}", "pending", nx=True, ex=JOB_TTL
             )
             if not claimed:
-                logger.debug(f"[ValkeyTaskQueue] Already queued: {effective_id}")
+                logger.debug("[ValkeyTaskQueue] Already queued: %s", effective_id)
                 return effective_id
 
-            payload = json.dumps(
-                {"task": task_name, "args": list(args), "kwargs": kwargs, "job_id": effective_id},
-                separators=(",", ":"),
-            )
-            await self._valkey.lpush(QUEUE_KEY, payload)
-            logger.debug(f"[ValkeyTaskQueue] Enqueued {task_name} (job_id={effective_id})")
+            # Lazy import breaks the circular dependency:
+            # worker.py → dependencies.py → ValkeyTaskQueue → worker.py
+            from app.adapters.tasks.worker import TASK_MAP  # noqa: PLC0415
+
+            task_fn = TASK_MAP.get(task_name)
+            if task_fn is None:
+                logger.warning("[ValkeyTaskQueue] Unknown task: %r", task_name)
+                return effective_id
+
+            await task_fn.kiq(*args)
+            logger.debug("[ValkeyTaskQueue] Enqueued %s (job_id=%s)", task_name, effective_id)
         except Exception as exc:  # noqa: BLE001
-            logger.warning(f"[ValkeyTaskQueue] Failed to enqueue {task_name}: {exc}")
+            logger.warning("[ValkeyTaskQueue] Failed to enqueue %s: %s", task_name, exc)
 
         return effective_id
 
     async def is_job_pending_or_running(self, job_id: str) -> bool:
-        """Return True if a job with this ID is already in queue or running."""
+        """Return True if a job with this ID is already pending or running."""
         try:
             return (await self._valkey.exists(f"{JOB_KEY_PREFIX}{job_id}")) > 0
         except Exception:  # noqa: BLE001

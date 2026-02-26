@@ -18,6 +18,8 @@ dependencies = [
     "pydantic-settings==2.13.*",
     "selectolax==0.4.*",
     "sentry-sdk[fastapi]==2.53.*",
+    "taskiq==0.12.*",
+    "taskiq-fastapi==0.4.*",
     "valkey[libvalkey]==6.1.*",
 ]
 

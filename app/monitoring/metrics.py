@@ -73,44 +73,6 @@ background_refresh_triggered_total = Counter(
     ["entity_type"],  # "heroes", "maps", "gamemodes", "roles", "player", "hero_stats"
 )
 
-background_refresh_completed_total = Counter(
-    "background_refresh_completed_total",
-    "Background refresh tasks that completed successfully",
-    ["entity_type"],
-)
-
-background_refresh_failed_total = Counter(
-    "background_refresh_failed_total",
-    "Background refresh tasks that raised an exception",
-    ["entity_type"],
-)
-
-########################
-# Background Task Metrics (Phase 5)
-########################
-
-background_tasks_total = Counter(
-    "background_tasks_total",
-    "Background refresh tasks",
-    [
-        "task_type",
-        "status",
-    ],  # task_type: "player", "hero", etc. | status: "success", "failure"
-)
-
-background_tasks_queue_size = Gauge(
-    "background_tasks_queue_size",
-    "Current number of tasks waiting in queue",
-    ["task_type"],
-)
-
-background_tasks_duration_seconds = Histogram(
-    "background_tasks_duration_seconds",
-    "Background task execution duration in seconds",
-    ["task_type"],
-    buckets=(0.1, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0),
-)
-
 ########################
 # Throttle / Blizzard Metrics (Phase 5)
 ########################

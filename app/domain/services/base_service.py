@@ -16,15 +16,9 @@ staleness strategy (Blizzard ``lastUpdated`` comparison) and storage logic
 from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
-from app.monitoring.metrics import (
-    background_refresh_completed_total,
-    background_refresh_failed_total,
-)
 from app.overfast_logger import logger
 
 if TYPE_CHECKING:
-    from collections.abc import Coroutine
-
     from app.domain.ports import (
         BlizzardClientPort,
         CachePort,
@@ -86,35 +80,15 @@ class BaseService:
         self,
         entity_type: str,
         entity_id: str,
-        refresh_coro: Coroutine[Any, Any, Any] | None = None,
     ) -> None:
-        """Enqueue a background refresh, deduplicating via job_id.
-
-        ``refresh_coro``, when provided, is passed to the task queue and
-        executed as the actual refresh work.
-        Completion and failure are reported via domain-level metrics.
-        """
+        """Enqueue a background refresh, deduplicating via job_id."""
         job_id = f"refresh:{entity_type}:{entity_id}"
-
-        async def _on_complete(_job_id: str) -> None:  # NOSONAR
-            logger.info(
-                f"[SWR] Background refresh complete for {entity_type}/{entity_id}"
-            )
-            background_refresh_completed_total.labels(entity_type=entity_type).inc()
-
-        async def _on_failure(_job_id: str, exc: Exception) -> None:  # NOSONAR
-            logger.warning(f"[SWR] Refresh failed for {entity_type}/{entity_id}: {exc}")
-            background_refresh_failed_total.labels(entity_type=entity_type).inc()
-
         try:
             if not await self.task_queue.is_job_pending_or_running(job_id):
                 await self.task_queue.enqueue(
                     f"refresh_{entity_type}",
                     entity_id,
                     job_id=job_id,
-                    coro=refresh_coro,
-                    on_complete=_on_complete,
-                    on_failure=_on_failure,
                 )
         except Exception as exc:  # noqa: BLE001
             logger.warning(

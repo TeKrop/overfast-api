@@ -1,9 +1,6 @@
 """Task queue port protocol for background job processing"""
 
-from typing import TYPE_CHECKING, Any, Protocol
-
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable, Coroutine
+from typing import Any, Protocol
 
 
 class TaskQueuePort(Protocol):
@@ -14,22 +11,12 @@ class TaskQueuePort(Protocol):
         task_name: str,
         *args: Any,
         job_id: str | None = None,
-        coro: Coroutine[Any, Any, Any] | None = None,
-        on_complete: Callable[[str], Awaitable[None]] | None = None,
-        on_failure: Callable[[str, Exception], Awaitable[None]] | None = None,
         **kwargs: Any,
     ) -> str:
-        """Enqueue a background task.
+        """Enqueue a background task by name, returning the effective job ID.
 
-        ``coro``, when provided, is executed immediately (Phase 4 asyncio) or
-        dispatched to a worker process.  ``task_name`` is kept for
-        compatibility and logging.
-
-        ``on_complete(job_id)`` is awaited when the task finishes successfully.
-        ``on_failure(job_id, exc)`` is awaited when the task raises an exception.
-        Both callbacks are optional and intended for domain-level monitoring.
-
-        Returns the effective job ID.
+        Implementations must silently skip the enqueue when the job is already
+        pending or running (deduplication by ``job_id``).
         """
         ...
 

@@ -22,7 +22,7 @@ services:
     build:
       context: .
       target: ${BUILD_TARGET:-main}
-    command: /code/.venv/bin/python -m app.adapters.tasks.valkey_worker
+    command: /code/.venv/bin/taskiq worker app.adapters.tasks.worker:broker
     env_file: ${APP_VOLUME_PATH:-.}/.env
     volumes:
       - ${APP_VOLUME_PATH:-/tmp}/worker-logs:/code/logs
@@ -32,7 +32,25 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "pgrep -f valkey_worker || exit 1"]
+      test: ["CMD-SHELL", "pgrep -f 'taskiq worker' || exit 1"]
+      interval: 10s
+      timeout: 5s
+
+  scheduler:
+    build:
+      context: .
+      target: ${BUILD_TARGET:-main}
+    command: /code/.venv/bin/taskiq scheduler app.adapters.tasks.worker:scheduler
+    env_file: ${APP_VOLUME_PATH:-.}/.env
+    volumes:
+      - ${APP_VOLUME_PATH:-/tmp}/worker-logs:/code/logs
+    depends_on:
+      valkey:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'taskiq scheduler' || exit 1"]
       interval: 10s
       timeout: 5s
 

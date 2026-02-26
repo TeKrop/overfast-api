@@ -99,7 +99,6 @@ class StaticDataService(BaseService):
             await self._enqueue_refresh(
                 config.entity_type,
                 config.storage_key,
-                refresh_coro=self._refresh_static(config),
             )
             stale_responses_total.inc()
             background_refresh_triggered_total.labels(
