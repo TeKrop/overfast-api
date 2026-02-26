@@ -73,6 +73,27 @@ background_refresh_triggered_total = Counter(
     ["entity_type"],  # "heroes", "maps", "gamemodes", "roles", "player", "hero_stats"
 )
 
+# Worker execution outcomes — requires PROMETHEUS_MULTIPROC_DIR to be scraped
+# from the worker process alongside the API process.
+background_refresh_completed_total = Counter(
+    "background_refresh_completed_total",
+    "Background refresh tasks completed successfully by the worker",
+    ["entity_type"],
+)
+
+background_refresh_failed_total = Counter(
+    "background_refresh_failed_total",
+    "Background refresh tasks that raised an exception in the worker",
+    ["entity_type"],
+)
+
+background_tasks_duration_seconds = Histogram(
+    "background_tasks_duration_seconds",
+    "Worker task execution duration in seconds",
+    ["entity_type"],
+    buckets=(0.1, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0),
+)
+
 ########################
 # Throttle / Blizzard Metrics (Phase 5)
 ########################

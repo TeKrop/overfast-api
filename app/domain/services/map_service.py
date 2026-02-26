@@ -38,3 +38,23 @@ class MapService(StaticDataService):
                 entity_type="maps",
             )
         )
+
+    async def refresh_list(self) -> None:
+        """Fetch fresh maps list, persist to storage and update API cache.
+
+        Called by the background worker — bypasses the SWR layer.
+        """
+
+        def _fetch() -> list[dict]:
+            return parse_maps_csv()
+
+        await self._fetch_and_store(
+            StaticFetchConfig(
+                storage_key="maps:all",
+                fetcher=_fetch,
+                cache_key="/maps",
+                cache_ttl=settings.csv_cache_timeout,
+                staleness_threshold=settings.maps_staleness_threshold,
+                entity_type="maps",
+            )
+        )
