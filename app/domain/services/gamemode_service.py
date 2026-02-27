@@ -8,42 +8,31 @@ from app.domain.services.static_data_service import StaticDataService, StaticFet
 class GamemodeService(StaticDataService):
     """Domain service for gamemode data."""
 
+    def _gamemodes_config(self, cache_key: str) -> StaticFetchConfig:
+        """Build a StaticFetchConfig for the gamemodes list."""
+
+        def _fetch() -> list[dict]:
+            return parse_gamemodes_csv()
+
+        return StaticFetchConfig(
+            storage_key="gamemodes:all",
+            fetcher=_fetch,
+            cache_key=cache_key,
+            cache_ttl=settings.csv_cache_timeout,
+            staleness_threshold=settings.gamemodes_staleness_threshold,
+            entity_type="gamemodes",
+        )
+
     async def list_gamemodes(
         self,
         cache_key: str,
     ) -> tuple[list[dict], bool, int]:
         """Return the gamemodes list."""
-
-        def _fetch() -> list[dict]:
-            return parse_gamemodes_csv()
-
-        return await self.get_or_fetch(
-            StaticFetchConfig(
-                storage_key="gamemodes:all",
-                fetcher=_fetch,
-                cache_key=cache_key,
-                cache_ttl=settings.csv_cache_timeout,
-                staleness_threshold=settings.gamemodes_staleness_threshold,
-                entity_type="gamemodes",
-            )
-        )
+        return await self.get_or_fetch(self._gamemodes_config(cache_key))
 
     async def refresh_list(self) -> None:
         """Fetch fresh gamemodes list, persist to storage and update API cache.
 
         Called by the background worker — bypasses the SWR layer.
         """
-
-        def _fetch() -> list[dict]:
-            return parse_gamemodes_csv()
-
-        await self._fetch_and_store(
-            StaticFetchConfig(
-                storage_key="gamemodes:all",
-                fetcher=_fetch,
-                cache_key="/gamemodes",
-                cache_ttl=settings.csv_cache_timeout,
-                staleness_threshold=settings.gamemodes_staleness_threshold,
-                entity_type="gamemodes",
-            )
-        )
+        await self._fetch_and_store(self._gamemodes_config("/gamemodes"))

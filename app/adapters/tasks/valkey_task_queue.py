@@ -7,6 +7,7 @@ worker executes the tasks using FastAPI's DI container.
 
 from typing import Any
 
+from app.adapters.tasks.worker import TASK_MAP
 from app.overfast_logger import logger
 
 JOB_KEY_PREFIX = "worker:job:"
@@ -48,10 +49,6 @@ class ValkeyTaskQueue:
             if not claimed:
                 logger.debug("[ValkeyTaskQueue] Already queued: %s", effective_id)
                 return effective_id
-
-            # Lazy import breaks the circular dependency:
-            # worker.py → dependencies.py → ValkeyTaskQueue → worker.py
-            from app.adapters.tasks.worker import TASK_MAP  # noqa: PLC0415
 
             task_fn = TASK_MAP.get(task_name)
             if task_fn is None:

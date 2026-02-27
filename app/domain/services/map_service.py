@@ -8,15 +8,10 @@ from app.domain.services.static_data_service import StaticDataService, StaticFet
 class MapService(StaticDataService):
     """Domain service for maps data."""
 
-    async def list_maps(
-        self,
-        gamemode: str | None,
-        cache_key: str,
-    ) -> tuple[list[dict], bool, int]:
-        """Return the maps list (with optional gamemode filter).
-
-        Stores the full (unfiltered) maps list in persistent storage.
-        """
+    def _maps_config(
+        self, cache_key: str, gamemode: str | None = None
+    ) -> StaticFetchConfig:
+        """Build a StaticFetchConfig for the maps list."""
 
         def _fetch() -> list[dict]:
             return parse_maps_csv()
@@ -27,34 +22,30 @@ class MapService(StaticDataService):
             gamemode_val = gamemode.value if hasattr(gamemode, "value") else gamemode
             return [m for m in data if gamemode_val in m.get("gamemodes", [])]
 
-        return await self.get_or_fetch(
-            StaticFetchConfig(
-                storage_key="maps:all",
-                fetcher=_fetch,
-                result_filter=_filter,
-                cache_key=cache_key,
-                cache_ttl=settings.csv_cache_timeout,
-                staleness_threshold=settings.maps_staleness_threshold,
-                entity_type="maps",
-            )
+        return StaticFetchConfig(
+            storage_key="maps:all",
+            fetcher=_fetch,
+            result_filter=_filter if gamemode else None,
+            cache_key=cache_key,
+            cache_ttl=settings.csv_cache_timeout,
+            staleness_threshold=settings.maps_staleness_threshold,
+            entity_type="maps",
         )
+
+    async def list_maps(
+        self,
+        gamemode: str | None,
+        cache_key: str,
+    ) -> tuple[list[dict], bool, int]:
+        """Return the maps list (with optional gamemode filter).
+
+        Stores the full (unfiltered) maps list in persistent storage.
+        """
+        return await self.get_or_fetch(self._maps_config(cache_key, gamemode))
 
     async def refresh_list(self) -> None:
         """Fetch fresh maps list, persist to storage and update API cache.
 
         Called by the background worker — bypasses the SWR layer.
         """
-
-        def _fetch() -> list[dict]:
-            return parse_maps_csv()
-
-        await self._fetch_and_store(
-            StaticFetchConfig(
-                storage_key="maps:all",
-                fetcher=_fetch,
-                cache_key="/maps",
-                cache_ttl=settings.csv_cache_timeout,
-                staleness_threshold=settings.maps_staleness_threshold,
-                entity_type="maps",
-            )
-        )
+        await self._fetch_and_store(self._maps_config("/maps"))
