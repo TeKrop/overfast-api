@@ -5,9 +5,11 @@ Deduplication is handled here with ``SET NX`` before dispatching to the
 worker executes the tasks using FastAPI's DI container.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
-from app.adapters.tasks.worker import TASK_MAP
+from app.adapters.tasks.task_registry import TASK_MAP
 from app.overfast_logger import logger
 
 JOB_KEY_PREFIX = "worker:job:"
@@ -21,11 +23,8 @@ class ValkeyTaskQueue:
     exists the job is silently skipped.
     """
 
-    @property
-    def _valkey(self):
-        from app.adapters.cache.valkey_cache import ValkeyCache  # noqa: PLC0415
-
-        return ValkeyCache().valkey_server
+    def __init__(self, valkey_server: Any) -> None:
+        self._valkey = valkey_server
 
     async def enqueue(
         self,
@@ -56,7 +55,9 @@ class ValkeyTaskQueue:
                 return effective_id
 
             await task_fn.kiq(*args)
-            logger.debug("[ValkeyTaskQueue] Enqueued %s (job_id=%s)", task_name, effective_id)
+            logger.debug(
+                "[ValkeyTaskQueue] Enqueued %s (job_id=%s)", task_name, effective_id
+            )
         except Exception as exc:  # noqa: BLE001
             logger.warning("[ValkeyTaskQueue] Failed to enqueue %s: %s", task_name, exc)
 

@@ -266,7 +266,7 @@ class HeroShort(BaseModel):
         ...,
         description="List of gamemodes in which the hero is available",
         min_length=1,
-        examples=["stadium"],
+        examples=[["stadium"]],
     )
 
 

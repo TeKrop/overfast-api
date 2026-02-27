@@ -28,6 +28,7 @@ from taskiq.scheduler.scheduler import TaskiqScheduler
 from taskiq_fastapi import init as taskiq_init
 
 from app.adapters.blizzard.parsers.heroes import fetch_heroes_html, parse_heroes_html
+from app.adapters.tasks.task_registry import TASK_MAP
 from app.adapters.tasks.valkey_broker import ValkeyListBroker
 from app.api.dependencies import (
     get_blizzard_client,
@@ -210,12 +211,13 @@ async def check_new_hero(client: BlizzardClientDep) -> None:
 
 # ─── Task registry (used by ValkeyTaskQueue for dispatch) ────────────────────
 
-TASK_MAP = {
-    "refresh_heroes": refresh_heroes,
-    "refresh_hero": refresh_hero,
-    "refresh_roles": refresh_roles,
-    "refresh_maps": refresh_maps,
-    "refresh_gamemodes": refresh_gamemodes,
-    "refresh_player_profile": refresh_player_profile,
-}
-
+TASK_MAP.update(
+    {
+        "refresh_heroes": refresh_heroes,
+        "refresh_hero": refresh_hero,
+        "refresh_roles": refresh_roles,
+        "refresh_maps": refresh_maps,
+        "refresh_gamemodes": refresh_gamemodes,
+        "refresh_player_profile": refresh_player_profile,
+    }
+)

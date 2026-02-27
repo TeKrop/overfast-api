@@ -12,8 +12,8 @@ from fastapi.testclient import TestClient
 from app.adapters.blizzard.client import BlizzardClient
 from app.adapters.blizzard.throttle import BlizzardThrottle
 from app.adapters.cache.valkey_cache import ValkeyCache
-from app.adapters.tasks.asyncio_task_queue import AsyncioTaskQueue
-from app.api.dependencies import get_storage, get_task_queue
+from app.adapters.tasks.task_registry import TASK_MAP
+from app.api.dependencies import get_storage
 from app.main import app
 from app.metaclasses import Singleton
 from tests.fake_storage import FakeStorage
@@ -57,13 +57,8 @@ async def _patch_before_every_test(
     Singleton._instances.pop(BlizzardClient, None)
     # Reset ValkeyCache singleton so each test gets a fresh redis client in the current event loop
     Singleton._instances.pop(ValkeyCache, None)
-    # Reset asyncio task queue (used in tests instead of arq)
-    Singleton._instances.pop(AsyncioTaskQueue, None)
-    AsyncioTaskQueue._pending_jobs.clear()
 
     app.dependency_overrides[get_storage] = lambda: storage_db
-    # Use in-process asyncio task queue in tests (avoids arq/redis event loop conflicts)
-    app.dependency_overrides[get_task_queue] = lambda: AsyncioTaskQueue()
 
     with (
         patch("app.helpers.settings.discord_webhook_enabled", False),
@@ -72,10 +67,12 @@ async def _patch_before_every_test(
             "app.adapters.cache.valkey_cache.valkey.Valkey",
             return_value=valkey_server,
         ),
+        # Prevent ValkeyTaskQueue from dispatching to the broker (not running in tests).
+        # Deduplication via SET NX/EXISTS still works through the patched fake redis.
+        patch.dict(TASK_MAP, {}, clear=True),
     ):
         yield
 
     app.dependency_overrides.pop(get_storage, None)
-    app.dependency_overrides.pop(get_task_queue, None)
 
     await storage_db.clear_all_data()
