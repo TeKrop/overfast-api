@@ -11,18 +11,18 @@ from pydantic import (
     create_model,
 )
 
-from app.domain.enums import (
-    CareerStatCategory,
-    CompetitiveDivision,
-    HeroKey,
-)
-from app.players.api_examples import (
+from app.adapters.blizzard.parsers.player_helpers import get_hero_name, key_to_label
+from app.api.models.players_examples import (
     CareerStatsExample,
     HeroesComparisonsExample,
     PlayerCareerStatsExample,
     PlayerStatsSummaryExample,
 )
-from app.players.helpers import get_hero_name, key_to_label
+from app.domain.enums import (
+    CareerStatCategory,
+    CompetitiveDivision,
+    HeroKey,
+)
 
 
 # Player search

@@ -1,4 +1,4 @@
-"""Parser Helpers module"""
+"""API Helpers module"""
 
 import traceback
 from datetime import UTC, datetime
@@ -13,10 +13,9 @@ from app.api.models.errors import (
     InternalServerErrorMessage,
     RateLimitErrorMessage,
 )
-
-from .config import settings
-from .decorators import rate_limited
-from .overfast_logger import logger
+from app.config import settings
+from app.infrastructure.decorators import rate_limited
+from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
     from fastapi import Request, Response

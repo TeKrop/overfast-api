@@ -17,21 +17,14 @@ from app.adapters.blizzard.parsers.utils import (
     validate_response_status,
 )
 from app.config import settings
-from app.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.exceptions import ParserBlizzardError, ParserParsingError
 
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode
 
     from app.domain.ports import BlizzardClientPort
 
-from app.domain.enums import (
-    CareerHeroesComparisonsCategory,
-    CompetitiveRole,
-    PlayerGamemode,
-    PlayerPlatform,
-)
-from app.overfast_logger import logger
-from app.players.helpers import (
+from app.adapters.blizzard.parsers.player_helpers import (
     get_computed_stat_value,
     get_division_from_icon,
     get_endorsement_value_from_frame,
@@ -45,6 +38,13 @@ from app.players.helpers import (
     normalize_career_stat_category_name,
     string_to_snakecase,
 )
+from app.domain.enums import (
+    CareerHeroesComparisonsCategory,
+    CompetitiveRole,
+    PlayerGamemode,
+    PlayerPlatform,
+)
+from app.infrastructure.logger import logger
 
 # Platform/gamemode CSS class mappings
 PLATFORMS_DIV_MAPPING = {

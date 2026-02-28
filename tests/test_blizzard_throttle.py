@@ -8,16 +8,16 @@ import pytest
 
 from app.adapters.blizzard.throttle import BlizzardThrottle
 from app.config import settings
-from app.exceptions import RateLimitedError
+from app.domain.exceptions import RateLimitedError
 from app.metaclasses import Singleton
 
 
 @pytest.fixture(autouse=True)
 def reset_singleton():
     """Reset the BlizzardThrottle Singleton between tests."""
-    Singleton._instances.pop(BlizzardThrottle, None)
+    Singleton.clear_all()
     yield
-    Singleton._instances.pop(BlizzardThrottle, None)
+    Singleton.clear_all()
 
 
 @pytest.fixture

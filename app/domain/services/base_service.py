@@ -16,7 +16,7 @@ staleness strategy (Blizzard ``lastUpdated`` comparison) and storage logic
 from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
-from app.overfast_logger import logger
+from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
     from app.domain.ports import (

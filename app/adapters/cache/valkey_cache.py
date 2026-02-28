@@ -28,8 +28,8 @@ from typing import TYPE_CHECKING, Any
 import valkey.asyncio as valkey
 
 from app.config import settings
+from app.infrastructure.logger import logger
 from app.metaclasses import Singleton
-from app.overfast_logger import logger
 
 if TYPE_CHECKING:
     from collections.abc import Callable

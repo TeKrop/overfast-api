@@ -10,7 +10,7 @@ from app.adapters.blizzard.parsers.utils import (
 )
 from app.config import settings
 from app.domain.enums import HeroGamemode, Locale
-from app.exceptions import ParserParsingError
+from app.domain.exceptions import ParserParsingError
 
 if TYPE_CHECKING:
     from app.domain.ports import BlizzardClientPort

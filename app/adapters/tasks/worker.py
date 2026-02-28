@@ -38,6 +38,7 @@ from app.api.dependencies import (
     get_player_service,
     get_role_service,
 )
+from app.api.helpers import send_discord_webhook_message
 from app.config import settings
 from app.domain.enums import HeroKey, Locale
 from app.domain.ports import BlizzardClientPort
@@ -48,13 +49,12 @@ from app.domain.services import (
     PlayerService,
     RoleService,
 )
-from app.helpers import send_discord_webhook_message
+from app.infrastructure.logger import logger
 from app.monitoring.metrics import (
     background_refresh_completed_total,
     background_refresh_failed_total,
     background_tasks_duration_seconds,
 )
-from app.overfast_logger import logger
 
 # ─── Broker ───────────────────────────────────────────────────────────────────
 

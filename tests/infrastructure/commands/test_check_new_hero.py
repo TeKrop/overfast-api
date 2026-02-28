@@ -5,13 +5,13 @@ import pytest
 from fastapi import status
 
 from app.domain.enums import HeroKey
-from app.heroes.commands.check_new_hero import main as check_new_hero_main
+from app.infrastructure.commands.check_new_hero import main as check_new_hero_main
 
 
 @pytest.fixture(scope="module", autouse=True)
 def _setup_check_new_hero_test():
     with patch(
-        "app.heroes.commands.check_new_hero.settings",
+        "app.infrastructure.commands.check_new_hero.settings",
         return_value=Mock(discord_webhook_enabled=True),
     ):
         yield
@@ -24,7 +24,7 @@ def test_check_no_new_hero(heroes_html_data: str):
             "httpx.AsyncClient.get",
             return_value=Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
         ),
-        patch("app.overfast_logger.logger.info", logger_info_mock),
+        patch("app.infrastructure.logger.logger.info", logger_info_mock),
     ):
         asyncio.run(check_new_hero_main())
 
@@ -35,10 +35,10 @@ def test_check_discord_webhook_disabled():
     logger_info_mock = Mock()
     with (
         patch(
-            "app.heroes.commands.check_new_hero.settings.discord_webhook_enabled",
+            "app.infrastructure.commands.check_new_hero.settings.discord_webhook_enabled",
             False,
         ),
-        patch("app.overfast_logger.logger.info", logger_info_mock),
+        patch("app.infrastructure.logger.logger.info", logger_info_mock),
         pytest.raises(
             SystemExit,
         ),
@@ -60,10 +60,10 @@ def test_check_new_heroes(distant_heroes: set[str], expected: set[str]):
     logger_info_mock = Mock()
     with (
         patch(
-            "app.heroes.commands.check_new_hero.get_distant_hero_keys",
+            "app.infrastructure.commands.check_new_hero.get_distant_hero_keys",
             return_value={*HeroKey, *distant_heroes},
         ),
-        patch("app.overfast_logger.logger.info", logger_info_mock),
+        patch("app.infrastructure.logger.logger.info", logger_info_mock),
     ):
         asyncio.run(check_new_hero_main())
 
@@ -80,7 +80,7 @@ def test_check_error_from_blizzard():
                 text="Internal Server Error",
             ),
         ),
-        patch("app.overfast_logger.logger.error", logger_error_mock),
+        patch("app.infrastructure.logger.logger.error", logger_error_mock),
         pytest.raises(
             SystemExit,
         ),

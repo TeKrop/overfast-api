@@ -1,6 +1,6 @@
 import pytest
 
-from app import helpers
+from app.api import helpers
 
 
 @pytest.mark.parametrize(

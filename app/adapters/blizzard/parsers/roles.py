@@ -10,11 +10,15 @@ from app.adapters.blizzard.parsers.utils import (
 )
 from app.config import settings
 from app.domain.enums import Locale
-from app.exceptions import ParserParsingError
-from app.roles.helpers import get_role_from_icon_url
+from app.domain.exceptions import ParserParsingError
 
 if TYPE_CHECKING:
     from app.domain.ports import BlizzardClientPort
+
+
+def get_role_from_icon_url(url: str) -> str:
+    """Extracts the role key name from the associated icon URL"""
+    return url.rsplit("/", maxsplit=1)[-1].split(".", maxsplit=1)[0].lower()
 
 
 async def fetch_roles_html(

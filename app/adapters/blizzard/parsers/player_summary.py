@@ -8,8 +8,8 @@ from app.adapters.blizzard.parsers.utils import (
     validate_response_status,
 )
 from app.config import settings
-from app.exceptions import ParserParsingError
-from app.overfast_logger import logger
+from app.domain.exceptions import ParserParsingError
+from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
     from app.domain.ports import BlizzardClientPort

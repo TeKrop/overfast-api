@@ -18,10 +18,10 @@ if TYPE_CHECKING:
 
     from app.domain.ports import BlizzardClientPort
 
+from app.adapters.blizzard.parsers.roles import get_role_from_icon_url
 from app.domain.enums import Locale, MediaType
-from app.exceptions import ParserBlizzardError, ParserParsingError
-from app.overfast_logger import logger
-from app.roles.helpers import get_role_from_icon_url
+from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.infrastructure.logger import logger
 
 
 async def fetch_hero_html(

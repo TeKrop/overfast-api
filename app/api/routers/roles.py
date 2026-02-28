@@ -6,15 +6,15 @@ from fastapi import APIRouter, Query, Request, Response
 
 from app.api.dependencies import RoleServiceDep
 from app.api.enums import RouteTag
-from app.api.models.roles import RoleDetail
-from app.config import settings
-from app.domain.enums import Locale
-from app.helpers import (
+from app.api.helpers import (
     apply_swr_headers,
     build_cache_key,
     get_human_readable_duration,
     routes_responses,
 )
+from app.api.models.roles import RoleDetail
+from app.config import settings
+from app.domain.enums import Locale
 
 router = APIRouter()
 

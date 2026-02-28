@@ -12,12 +12,12 @@ from typing import TYPE_CHECKING
 import asyncpg
 
 from app.config import settings
+from app.infrastructure.logger import logger
 from app.metaclasses import Singleton
 from app.monitoring.metrics import (
     storage_connection_errors_total,
     track_storage_operation,
 )
-from app.overfast_logger import logger
 
 if TYPE_CHECKING:
     from app.domain.ports.storage import StaticDataCategory
