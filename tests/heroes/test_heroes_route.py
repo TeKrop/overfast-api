@@ -5,8 +5,7 @@ import pytest
 from fastapi import status
 
 from app.config import settings
-from app.heroes.enums import HeroGamemode
-from app.roles.enums import Role
+from app.domain.enums import HeroGamemode, Role
 
 if TYPE_CHECKING:
     from fastapi.testclient import TestClient

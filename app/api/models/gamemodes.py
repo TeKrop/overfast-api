@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, Field, HttpUrl
 
-from .enums import MapGamemode
+from app.domain.enums import MapGamemode
 
 
 class GamemodeDetails(BaseModel):

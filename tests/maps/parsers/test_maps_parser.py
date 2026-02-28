@@ -1,5 +1,5 @@
 from app.adapters.blizzard.parsers.maps import parse_maps_csv
-from app.maps.enums import MapKey
+from app.domain.enums import MapKey
 
 
 def test_parse_maps_csv_returns_all_maps():

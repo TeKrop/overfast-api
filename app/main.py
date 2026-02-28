@@ -17,10 +17,14 @@ from .adapters.blizzard import OverFastClient
 from .adapters.cache import CacheManager
 from .adapters.storage import PostgresStorage
 from .adapters.tasks.worker import broker
-from .api import gamemodes, heroes, maps, players, roles
+from .api.enums import Profiler, RouteTag
+from .api.routers.gamemodes import router as gamemodes
+from .api.routers.heroes import router as heroes
+from .api.routers.maps import router as maps
+from .api.routers.players import router as players
+from .api.routers.roles import router as roles
 from .config import settings
 from .docs import render_documentation
-from .enums import Profiler, RouteTag
 from .helpers import overfast_internal_error
 from .middlewares import (
     MemrayInMemoryMiddleware,

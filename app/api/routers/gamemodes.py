@@ -5,9 +5,9 @@ from typing import Any
 from fastapi import APIRouter, Request, Response
 
 from app.api.dependencies import GamemodeServiceDep
+from app.api.enums import RouteTag
+from app.api.models.gamemodes import GamemodeDetails
 from app.config import settings
-from app.enums import RouteTag
-from app.gamemodes.models import GamemodeDetails
 from app.helpers import (
     apply_swr_headers,
     build_cache_key,

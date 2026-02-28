@@ -6,7 +6,7 @@ from fastapi import status
 from httpx import TimeoutException
 
 from app.config import settings
-from app.players.enums import HeroKeyCareerFilter, PlayerGamemode, PlayerPlatform
+from app.domain.enums import HeroKeyCareerFilter, PlayerGamemode, PlayerPlatform
 
 if TYPE_CHECKING:
     from fastapi.testclient import TestClient

@@ -13,8 +13,8 @@ from app.adapters.blizzard.parsers.player_profile import (
 )
 
 if TYPE_CHECKING:
+    from app.domain.enums import PlayerGamemode, PlayerPlatform
     from app.domain.ports import BlizzardClientPort
-    from app.players.enums import PlayerGamemode, PlayerPlatform
 
 
 def extract_career_stats_from_profile(profile_data: dict) -> dict:

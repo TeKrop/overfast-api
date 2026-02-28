@@ -8,13 +8,14 @@ from typing import TYPE_CHECKING
 import httpx
 from fastapi import HTTPException, status
 
-from .config import settings
-from .decorators import rate_limited
-from .models import (
+from app.api.models.errors import (
     BlizzardErrorMessage,
     InternalServerErrorMessage,
     RateLimitErrorMessage,
 )
+
+from .config import settings
+from .decorators import rate_limited
 from .overfast_logger import logger
 
 if TYPE_CHECKING:

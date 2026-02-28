@@ -5,30 +5,32 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Path, Query, Request, Response, status
 
 from app.api.dependencies import HeroServiceDep
-from app.config import settings
-from app.enums import Locale, RouteTag
-from app.helpers import (
-    apply_swr_headers,
-    build_cache_key,
-    get_human_readable_duration,
-    routes_responses,
-)
-from app.heroes.enums import HeroGamemode, HeroKey
-from app.heroes.models import (
+from app.api.enums import RouteTag
+from app.api.models.heroes import (
     BadRequestErrorMessage,
     Hero,
     HeroParserErrorMessage,
     HeroShort,
     HeroStatsSummary,
 )
-from app.maps.enums import MapKey
-from app.players.enums import (
+from app.config import settings
+from app.domain.enums import (
     CompetitiveDivisionFilter,
+    HeroGamemode,
+    HeroKey,
+    Locale,
+    MapKey,
     PlayerGamemode,
     PlayerPlatform,
     PlayerRegion,
+    Role,
 )
-from app.roles.enums import Role
+from app.helpers import (
+    apply_swr_headers,
+    build_cache_key,
+    get_human_readable_duration,
+    routes_responses,
+)
 
 router = APIRouter()
 

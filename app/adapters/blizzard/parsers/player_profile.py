@@ -24,13 +24,13 @@ if TYPE_CHECKING:
 
     from app.domain.ports import BlizzardClientPort
 
-from app.overfast_logger import logger
-from app.players.enums import (
+from app.domain.enums import (
     CareerHeroesComparisonsCategory,
     CompetitiveRole,
     PlayerGamemode,
     PlayerPlatform,
 )
+from app.overfast_logger import logger
 from app.players.helpers import (
     get_computed_stat_value,
     get_division_from_icon,

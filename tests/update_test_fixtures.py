@@ -11,9 +11,8 @@ import httpx
 from fastapi import status
 
 from app.config import settings
-from app.enums import Locale
+from app.domain.enums import HeroKey, Locale
 from app.overfast_logger import logger
-from app.players.enums import HeroKey
 from tests.helpers import players_ids, unknown_player_id
 
 

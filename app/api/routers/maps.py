@@ -5,16 +5,16 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Query, Request, Response
 
 from app.api.dependencies import MapServiceDep
+from app.api.enums import RouteTag
+from app.api.models.maps import Map
 from app.config import settings
-from app.enums import RouteTag
-from app.gamemodes.enums import MapGamemode
+from app.domain.enums import MapGamemode
 from app.helpers import (
     apply_swr_headers,
     build_cache_key,
     get_human_readable_duration,
     success_responses,
 )
-from app.maps.models import Map
 
 router = APIRouter()
 

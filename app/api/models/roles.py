@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, HttpUrl
 
-from .enums import Role
+from app.domain.enums import Role
 
 
 class RoleDetail(BaseModel):

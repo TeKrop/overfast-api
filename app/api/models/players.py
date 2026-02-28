@@ -11,18 +11,18 @@ from pydantic import (
     create_model,
 )
 
-from .api_examples import (
+from app.domain.enums import (
+    CareerStatCategory,
+    CompetitiveDivision,
+    HeroKey,
+)
+from app.players.api_examples import (
     CareerStatsExample,
     HeroesComparisonsExample,
     PlayerCareerStatsExample,
     PlayerStatsSummaryExample,
 )
-from .enums import (
-    CareerStatCategory,
-    CompetitiveDivision,
-    HeroKey,
-)
-from .helpers import get_hero_name, key_to_label
+from app.players.helpers import get_hero_name, key_to_label
 
 
 # Player search

@@ -5,7 +5,7 @@ from fastapi import status
 
 from app.adapters.blizzard import OverFastClient
 from app.adapters.blizzard.parsers.roles import fetch_roles_html, parse_roles_html
-from app.roles.enums import Role
+from app.domain.enums import Role
 
 
 def test_parse_roles_html_returns_all_roles(home_html_data: str):

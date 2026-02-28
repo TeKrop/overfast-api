@@ -9,7 +9,7 @@ from app.adapters.blizzard.parsers.utils import (
     validate_response_status,
 )
 from app.config import settings
-from app.enums import Locale
+from app.domain.enums import Locale
 from app.exceptions import ParserParsingError
 from app.roles.helpers import get_role_from_icon_url
 

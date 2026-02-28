@@ -8,13 +8,13 @@ from app.adapters.blizzard.parsers.hero_stats_summary import (
     PLATFORM_MAPPING,
     parse_hero_stats_summary,
 )
-from app.exceptions import ParserBlizzardError
-from app.players.enums import (
+from app.domain.enums import (
     CompetitiveDivision,
     PlayerGamemode,
     PlayerPlatform,
     PlayerRegion,
 )
+from app.exceptions import ParserBlizzardError
 
 
 @pytest.mark.asyncio

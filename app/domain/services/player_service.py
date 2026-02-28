@@ -39,7 +39,7 @@ from app.overfast_logger import logger
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from app.players.enums import (
+    from app.domain.enums import (
         HeroKeyCareerFilter,
         PlayerGamemode,
         PlayerPlatform,
@@ -274,7 +274,7 @@ class PlayerService(BaseService):
         except Exception as exc:  # noqa: BLE001
             await self._handle_player_exceptions(exc, request.player_id, identity)
 
-        is_stale = self._check_player_staleness()
+        is_stale = self._check_player_staleness(age)
         await self._update_api_cache(
             request.cache_key, data, settings.career_path_cache_timeout
         )
@@ -324,13 +324,20 @@ class PlayerService(BaseService):
             name=name,
         )
 
-    def _check_player_staleness(self) -> bool:
-        """Return is_stale — stub always returning False until Phase 5.
+    def _check_player_staleness(self, age: int) -> bool:
+        """Return True when the stored profile is old enough to warrant a background pre-refresh.
 
-        Phase 5 will perform a real async storage lookup comparing
-        ``player_profiles.updated_at`` against ``player_staleness_threshold``.
+        Applies SWR semantics: if the profile was served from persistent storage
+        (``age > 0``) and has consumed at least half its staleness window, the response
+        is marked stale so the caller enqueues a background refresh.  This keeps profiles
+        pre-warmed and avoids a synchronous Blizzard call on the next request.
+
+        ``age == 0`` means we just fetched fresh data from Blizzard — never stale.
         """
-        return False
+        if age == 0:
+            return False
+        swr_threshold = settings.player_staleness_threshold // 2
+        return age >= swr_threshold
 
     async def _get_fresh_stored_profile(
         self, player_id: str

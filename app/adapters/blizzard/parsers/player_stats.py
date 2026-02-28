@@ -14,10 +14,9 @@ from app.adapters.blizzard.parsers.player_profile import (
     parse_player_profile,
     parse_player_profile_html,
 )
+from app.domain.enums import HeroKey, PlayerGamemode, PlayerPlatform, Role
 from app.overfast_logger import logger
-from app.players.enums import HeroKey, PlayerGamemode, PlayerPlatform
 from app.players.helpers import get_hero_role, get_plural_stat_key
-from app.roles.enums import Role
 
 if TYPE_CHECKING:
     from app.domain.ports import BlizzardClientPort

@@ -1,7 +1,96 @@
+"""Consolidated domain enums for OverFast API"""
+
 from enum import StrEnum
 
-from app.heroes.enums import HeroKey
-from app.roles.enums import Role
+from app.adapters.csv import CSVReader
+
+
+class Locale(StrEnum):
+    """Locales supported by Blizzard"""
+
+    GERMAN = "de-de"
+    ENGLISH_EU = "en-gb"
+    ENGLISH_US = "en-us"
+    SPANISH_EU = "es-es"
+    SPANISH_LATIN = "es-mx"
+    FRENCH = "fr-fr"
+    ITALIANO = "it-it"
+    JAPANESE = "ja-jp"
+    KOREAN = "ko-kr"
+    POLISH = "pl-pl"
+    PORTUGUESE_BRAZIL = "pt-br"
+    RUSSIAN = "ru-ru"
+    CHINESE_TAIWAN = "zh-tw"
+
+
+class Role(StrEnum):
+    """Overwatch heroes roles"""
+
+    DAMAGE = "damage"
+    SUPPORT = "support"
+    TANK = "tank"
+
+
+class BackgroundImageSize(StrEnum):
+    """Responsive breakpoint sizes for hero background images"""
+
+    MIN = "min"
+    XS = "xs"
+    SM = "sm"
+    MD = "md"
+    LG = "lg"
+    XL_PLUS = "xl+"
+
+
+class MediaType(StrEnum):
+    """Media types for heroes pages"""
+
+    COMIC = "comic"
+    SHORT_STORY = "short-story"
+    VIDEO = "video"
+
+
+# Dynamically create the HeroKey enum by using the CSV File
+heroes_data = CSVReader.read_csv_file("heroes")
+HeroKey = StrEnum(
+    "HeroKey",
+    {
+        hero_data["key"].upper().replace("-", "_"): hero_data["key"]
+        for hero_data in heroes_data
+    },
+)
+HeroKey.__doc__ = "Hero keys used to identify Overwatch heroes in general"
+
+
+class HeroGamemode(StrEnum):
+    """Available gamemodes for heroes"""
+
+    QUICKPLAY = "quickplay"
+    STADIUM = "stadium"
+
+
+# Dynamically create the MapKey enum by using the CSV File
+maps_data = CSVReader.read_csv_file("maps")
+MapKey = StrEnum(
+    "MapKey",
+    {
+        map_data["key"].upper().replace("-", "_"): map_data["key"]
+        for map_data in maps_data
+    },
+)
+MapKey.__doc__ = "Map keys used to identify Overwatch maps in general"
+
+
+# Dynamically create the MapGamemode enum by using the CSV File
+gamemodes_data = CSVReader.read_csv_file("gamemodes")
+MapGamemode = StrEnum(
+    "MapGamemode",
+    {
+        gamemode["key"].upper().replace("-", "_"): gamemode["key"]
+        for gamemode in gamemodes_data
+    },
+)
+MapGamemode.__doc__ = "Maps gamemodes keys"
 
 
 class CareerStatCategory(StrEnum):

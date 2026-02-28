@@ -39,6 +39,7 @@ from app.api.dependencies import (
     get_role_service,
 )
 from app.config import settings
+from app.domain.enums import HeroKey, Locale
 from app.domain.ports import BlizzardClientPort
 from app.domain.services import (
     GamemodeService,
@@ -47,9 +48,7 @@ from app.domain.services import (
     PlayerService,
     RoleService,
 )
-from app.enums import Locale
 from app.helpers import send_discord_webhook_message
-from app.heroes.enums import HeroKey
 from app.monitoring.metrics import (
     background_refresh_completed_total,
     background_refresh_failed_total,

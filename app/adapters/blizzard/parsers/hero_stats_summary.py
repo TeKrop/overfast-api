@@ -6,8 +6,8 @@ from fastapi import status
 
 from app.adapters.blizzard.parsers.utils import validate_response_status
 from app.config import settings
+from app.domain.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
 from app.exceptions import ParserBlizzardError
-from app.players.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
 
 if TYPE_CHECKING:
     from app.domain.ports import BlizzardClientPort

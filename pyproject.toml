@@ -136,7 +136,7 @@ allowed-confusables = ["（", "）", "："]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["SLF001"]  # Ignore private member access in tests
-"models.py" = ["TC001"]  # Ignore type-checking block (Pydantic models definition)
+"app/api/models/**" = ["TC001"]  # Ignore type-checking block (Pydantic models definition)
 "app/api/routers/**" = ["TC001"]  # Enums used in FastAPI path/query parameters need runtime import
 "app/api/dependencies.py" = ["TC001"]  # Port types needed at runtime for FastAPI Depends
 "app/domain/services/**" = ["TC001"]  # Locale/enums used in runtime method annotations

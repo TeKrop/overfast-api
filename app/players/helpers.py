@@ -3,9 +3,13 @@ import unicodedata
 from functools import cache
 
 from app.adapters.csv import CSVReader
-from app.roles.enums import Role
-
-from .enums import CareerStatCategory, CompetitiveDivision, CompetitiveRole, HeroKey
+from app.domain.enums import (
+    CareerStatCategory,
+    CompetitiveDivision,
+    CompetitiveRole,
+    HeroKey,
+    Role,
+)
 
 DURATION_HOURS_PATTERN = re.compile(r"^(-?\d+,?\d*?):(\d+):(\d+)$")
 DURATION_MINUTES_PATTERN = re.compile(r"^(-?\d+):(\d+)$")

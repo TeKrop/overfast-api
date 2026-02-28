@@ -2,9 +2,7 @@
 
 from pydantic import BaseModel, Field, HttpUrl
 
-from app.gamemodes.enums import MapGamemode
-
-from .enums import MapKey
+from app.domain.enums import MapGamemode, MapKey
 
 
 class Map(BaseModel):

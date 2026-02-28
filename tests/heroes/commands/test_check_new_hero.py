@@ -4,8 +4,8 @@ from unittest.mock import Mock, patch
 import pytest
 from fastapi import status
 
+from app.domain.enums import HeroKey
 from app.heroes.commands.check_new_hero import main as check_new_hero_main
-from app.heroes.enums import HeroKey
 
 
 @pytest.fixture(scope="module", autouse=True)

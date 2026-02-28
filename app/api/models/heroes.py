@@ -2,9 +2,7 @@
 
 from pydantic import BaseModel, Field, HttpUrl
 
-from app.roles.enums import Role
-
-from .enums import BackgroundImageSize, HeroGamemode, HeroKey, MediaType
+from app.domain.enums import BackgroundImageSize, HeroGamemode, HeroKey, MediaType, Role
 
 
 class HeroBackground(BaseModel):

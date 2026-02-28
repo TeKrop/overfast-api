@@ -5,7 +5,7 @@ import pytest
 from fastapi import status
 
 from app.config import settings
-from app.players.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
+from app.domain.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
 
 if TYPE_CHECKING:
     from fastapi.testclient import TestClient

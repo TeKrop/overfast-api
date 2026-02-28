@@ -14,21 +14,21 @@ from app.adapters.blizzard.parsers.heroes import (
 )
 from app.adapters.blizzard.parsers.heroes_hitpoints import parse_heroes_hitpoints
 from app.config import settings
+from app.domain.enums import Locale
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
-from app.enums import Locale
 from app.exceptions import ParserBlizzardError, ParserParsingError
 from app.helpers import overfast_internal_error
 
 if TYPE_CHECKING:
-    from app.heroes.enums import HeroGamemode
-    from app.maps.enums import MapKey
-    from app.players.enums import (
+    from app.domain.enums import (
         CompetitiveDivisionFilter,
+        HeroGamemode,
+        MapKey,
         PlayerGamemode,
         PlayerPlatform,
         PlayerRegion,
+        Role,
     )
-    from app.roles.enums import Role
 
 
 class HeroService(StaticDataService):

@@ -5,7 +5,7 @@ import pytest
 from fastapi import status
 
 from app.config import settings
-from app.gamemodes.enums import MapGamemode
+from app.domain.enums import MapGamemode
 
 if TYPE_CHECKING:
     from fastapi.testclient import TestClient

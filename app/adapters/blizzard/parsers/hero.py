@@ -18,9 +18,8 @@ if TYPE_CHECKING:
 
     from app.domain.ports import BlizzardClientPort
 
-from app.enums import Locale
+from app.domain.enums import Locale, MediaType
 from app.exceptions import ParserBlizzardError, ParserParsingError
-from app.heroes.enums import MediaType
 from app.overfast_logger import logger
 from app.roles.helpers import get_role_from_icon_url
 

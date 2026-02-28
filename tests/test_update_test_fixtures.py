@@ -6,7 +6,7 @@ from fastapi import status
 from httpx import AsyncClient
 
 from app.config import settings
-from app.heroes.enums import HeroKey
+from app.domain.enums import HeroKey
 from tests.helpers import players_ids
 from tests.update_test_fixtures import (  # sourcery skip: dont-import-test-modules
     main as update_test_fixtures_main,

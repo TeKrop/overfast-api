@@ -5,7 +5,7 @@ import pytest
 from fastapi import status
 
 from app.config import settings
-from app.heroes.enums import HeroKey
+from app.domain.enums import HeroKey
 
 if TYPE_CHECKING:
     from fastapi.testclient import TestClient

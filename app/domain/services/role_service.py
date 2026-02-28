@@ -2,8 +2,8 @@
 
 from app.adapters.blizzard.parsers.roles import fetch_roles_html, parse_roles_html
 from app.config import settings
+from app.domain.enums import Locale
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
-from app.enums import Locale
 from app.exceptions import ParserParsingError
 from app.helpers import overfast_internal_error
 

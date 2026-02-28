@@ -9,8 +9,7 @@ from app.adapters.blizzard.parsers.heroes import (
     filter_heroes,
     parse_heroes_html,
 )
-from app.heroes.enums import HeroGamemode, HeroKey
-from app.roles.enums import Role
+from app.domain.enums import HeroGamemode, HeroKey, Role
 
 
 def test_parse_heroes_html_returns_all_heroes(heroes_html_data: str):

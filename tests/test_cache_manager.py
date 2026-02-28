@@ -7,7 +7,7 @@ from valkey.exceptions import ValkeyError
 
 from app.adapters.cache import CacheManager
 from app.config import settings
-from app.enums import Locale
+from app.domain.enums import Locale
 
 if TYPE_CHECKING:
     from fastapi import Request
