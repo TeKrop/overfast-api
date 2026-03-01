@@ -29,13 +29,14 @@ class ValkeyTaskQueue:
     async def enqueue(
         self,
         task_name: str,
-        *args: str,
+        *,
         job_id: str | None = None,
     ) -> str:
         """Dispatch a job to the taskiq worker, skipping duplicates.
 
         Uses ``SET NX`` to atomically claim the dedup slot before calling
         ``task_fn.kiq()``.  If the slot is already taken the call is a no-op.
+        The ``job_id`` is passed to the task as its first positional argument.
         """
         effective_id = job_id or task_name
 
@@ -52,7 +53,7 @@ class ValkeyTaskQueue:
                 logger.warning("[ValkeyTaskQueue] Unknown task: %r", task_name)
                 return effective_id
 
-            await task_fn.kiq(*args)
+            await task_fn.kiq(effective_id)
             logger.debug(
                 "[ValkeyTaskQueue] Enqueued %s (job_id=%s)", task_name, effective_id
             )

@@ -81,13 +81,16 @@ class BaseService:
         entity_type: str,
         entity_id: str,
     ) -> None:
-        """Enqueue a background refresh, deduplicating via job_id."""
-        job_id = f"refresh:{entity_type}:{entity_id}"
+        """Enqueue a background refresh, deduplicating via job_id.
+
+        ``job_id`` is set to ``entity_id`` so the task receives it directly
+        as its first positional argument — no separate args needed.
+        """
+        job_id = entity_id
         try:
             if not await self.task_queue.is_job_pending_or_running(job_id):
                 await self.task_queue.enqueue(
                     f"refresh_{entity_type}",
-                    entity_id,
                     job_id=job_id,
                 )
         except Exception as exc:  # noqa: BLE001

@@ -9,13 +9,14 @@ class TaskQueuePort(Protocol):
     async def enqueue(
         self,
         task_name: str,
-        *args: str,
+        *,
         job_id: str | None = None,
     ) -> str:
         """Enqueue a background task by name, returning the effective job ID.
 
         Implementations must silently skip the enqueue when the job is already
         pending or running (deduplication by ``job_id``).
+        The ``job_id`` is also passed to the task as its first positional argument.
         """
         ...
 

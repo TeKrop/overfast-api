@@ -139,29 +139,32 @@ sequenceDiagram
     participant Worker
     participant Blizzard
 
-    User->>+Nginx: Make an API request
+    User->>Nginx: Make an API request
     Nginx->>Valkey: Check API cache (SWR envelope)
 
-    alt Fresh cache hit
-        Valkey-->>Nginx: Return fresh data
-        Nginx-->>User: Return cached data
-    else Stale hit (within SWR window)
-        Valkey-->>Nginx: Return stale data + metadata
-        Nginx-->>User: Return stale data (with Age header)
-        Nginx->>App: Enqueue background refresh (async)
-        App->>Worker: Push refresh task to Valkey queue
-        Worker->>+Blizzard: Fetch updated data
-        Blizzard-->>-Worker: Return data
-        Worker->>Valkey: Store new SWR envelope
+    alt Cache hit (fresh or stale SWR window)
+        Valkey-->>Nginx: Return cached data (with Age header)
+        Nginx-->>User: 200 OK — Cache-Control: stale-while-revalidate set by Nginx
     else Cache miss
         Valkey-->>Nginx: No result
         Nginx->>+App: Forward request
-        App->>+Blizzard: Fetch data
-        Blizzard-->>-App: Return data
-        App->>App: Parse response
-        App->>Valkey: Store SWR envelope
+        alt Fresh data in storage
+            App->>Valkey: Store fresh SWR envelope
+        else Stale data in storage
+            App->>Worker: Enqueue background refresh
+            App->>Valkey: Store stale SWR envelope (short TTL)
+            Note over Worker,Blizzard: Async background refresh
+            Worker->>+Blizzard: Fetch updated data
+            Blizzard-->>-Worker: Return data
+            Worker->>Valkey: Overwrite with fresh SWR envelope
+        else No data yet — first request
+            App->>+Blizzard: Fetch data
+            Blizzard-->>-App: Return data
+            App->>App: Parse response
+            App->>Valkey: Store fresh SWR envelope
+        end
         App-->>-Nginx: Return data
-        Nginx-->>-User: Return data
+        Nginx-->>User: 200 OK
     end
 ```
 
@@ -180,40 +183,43 @@ sequenceDiagram
     participant PostgreSQL
     participant Blizzard
 
-    User->>+Nginx: Make player profile request
+    User->>Nginx: Make player profile request
     Nginx->>Valkey: Check API cache (SWR envelope)
 
-    alt Fresh cache hit
-        Valkey-->>Nginx: Return fresh data
-        Nginx-->>User: Return cached data
-    else Stale hit (within SWR window)
-        Valkey-->>Nginx: Return stale data
-        Nginx-->>User: Return stale data (with Age header)
-        Nginx->>App: Enqueue refresh_player_profile task
-        App->>Worker: Push task to Valkey queue
-        Worker->>+Blizzard: Fetch search data (lastUpdated)
-        Blizzard-->>-Worker: Return search data
-        Worker->>+PostgreSQL: Load stored profile
-        PostgreSQL-->>-Worker: Return stored profile
-        alt lastUpdated unchanged
-            Worker->>Valkey: Refresh SWR envelope (no re-parse)
-        else Profile changed
-            Worker->>+Blizzard: Fetch player HTML
-            Blizzard-->>-Worker: Return HTML
-            Worker->>Worker: Parse HTML
-            Worker->>PostgreSQL: Upsert player profile
-            Worker->>Valkey: Store new SWR envelope
-        end
+    alt Cache hit (fresh or stale SWR window)
+        Valkey-->>Nginx: Return cached data (with Age header)
+        Nginx-->>User: 200 OK — Cache-Control: stale-while-revalidate set by Nginx
     else Cache miss
         Valkey-->>Nginx: No result
         Nginx->>+App: Forward request
-        App->>+Blizzard: Fetch search + player HTML
-        Blizzard-->>-App: Return data
-        App->>App: Parse HTML
-        App->>PostgreSQL: Upsert player profile
-        App->>Valkey: Store SWR envelope
+        alt Fresh profile in PostgreSQL
+            App->>Valkey: Store fresh SWR envelope
+        else Stale profile in PostgreSQL
+            App->>Worker: Enqueue refresh_player_profile
+            App->>Valkey: Store stale SWR envelope (short TTL)
+            Note over Worker,Blizzard: Async background refresh
+            Worker->>+Blizzard: Fetch search data (lastUpdated)
+            Blizzard-->>-Worker: Return search data
+            Worker->>+PostgreSQL: Load stored profile
+            PostgreSQL-->>-Worker: Return stored profile
+            alt lastUpdated unchanged
+                Worker->>Valkey: Refresh SWR envelope (no re-parse)
+            else Profile changed
+                Worker->>+Blizzard: Fetch player HTML
+                Blizzard-->>-Worker: Return HTML
+                Worker->>Worker: Parse HTML
+                Worker->>PostgreSQL: Upsert player profile
+                Worker->>Valkey: Store fresh SWR envelope
+            end
+        else No profile yet — first request
+            App->>+Blizzard: Fetch search + player HTML
+            Blizzard-->>-App: Return data
+            App->>App: Parse HTML
+            App->>PostgreSQL: Upsert player profile
+            App->>Valkey: Store fresh SWR envelope
+        end
         App-->>-Nginx: Return data
-        Nginx-->>-User: Return data
+        Nginx-->>User: 200 OK
     end
 ```
 
