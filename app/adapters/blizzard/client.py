@@ -64,12 +64,12 @@ class BlizzardClient(metaclass=Singleton):
             kwargs["params"] = params
 
         normalized_endpoint = normalize_blizzard_url(url)
-        response, duration = await self._execute_request(
+        response = await self._execute_request(
             url, normalized_endpoint, kwargs
         )
 
         if self.throttle:
-            await self.throttle.adjust_delay(duration, response.status_code)
+            await self.throttle.adjust_delay(response.status_code)
 
         logger.debug("OverFast request done!")
 
@@ -100,8 +100,8 @@ class BlizzardClient(metaclass=Singleton):
         url: str,
         normalized_endpoint: str,
         kwargs: dict,
-    ) -> tuple[httpx.Response, float]:
-        """Execute the HTTP GET and record metrics. Returns (response, duration)."""
+    ) -> httpx.Response:
+        """Execute the HTTP GET and record metrics."""
         start_time = time.perf_counter()
         try:
             response = await self.client.get(url, **kwargs)
@@ -122,7 +122,7 @@ class BlizzardClient(metaclass=Singleton):
 
         duration = time.perf_counter() - start_time
         self._record_metrics(normalized_endpoint, str(response.status_code), duration)
-        return response, duration
+        return response
 
     @staticmethod
     def _record_metrics(endpoint: str, status_label: str, duration: float) -> None:

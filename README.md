@@ -8,8 +8,7 @@
 [![License: MIT](https://img.shields.io/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)
 ![Mockup OverFast API](https://files.tekrop.fr/overfast_api_logo_full_1000.png)
 
-> [!WARNING]
-> **WIP**: OverFast API is currently undergoing a major refactoring to **version 4.0**. This refactoring introduces **Domain-Driven Design**, **persistent storage with PostgreSQL**, **Stale-While-Revalidate caching**, **background refresh with arq workers**, **AIMD congestion control** for Blizzard requests, and **comprehensive monitoring with Prometheus + Grafana**. The refactoring is being done incrementally in phases.
+> **v4.0** — OverFast API now runs on a redesigned architecture introducing **Domain-Driven Design**, **persistent storage with PostgreSQL**, **Stale-While-Revalidate caching**, **taskiq background workers**, and **TCP Slow Start + AIMD throttling** for Blizzard requests.
 
 > OverFast API provides comprehensive data on Overwatch heroes, game modes, maps, and player statistics by scraping Blizzard pages. Developed with the efficiency of **FastAPI** and **Selectolax**, it leverages **nginx (OpenResty)** as a reverse proxy and **Valkey** for caching. Its tailored caching mechanism significantly reduces calls to Blizzard pages, ensuring swift and precise data delivery to users.
 
@@ -109,10 +108,9 @@ In player career statistics, various conversions are applied for ease of use:
 
 ### Valkey caching
 
-OverFast API integrates a **Valkey**-based cache system, divided into three main components:
-- **API Cache**: This high-level cache associates URIs (cache keys) with raw JSON data. Upon the initial request, if a cache entry exists, the **nginx** server returns the JSON data directly. Cached values are stored with varying TTL (Time-To-Live) parameters depending on the requested route.
-- **Player Cache**: Specifically designed for the API's players data endpoints, this cache stores both HTML Blizzard pages (`profile`) and search results (`summary`) for a given player. Its purpose is to minimize calls to Blizzard servers whenever an associated API Cache is expired, and player's career hasn't changed since last call, by using `lastUpdated` value from `summary`. This cache will only expire if not accessed for a given TTL (default is 3 days).
-- **Search Data Cache**: Cache the player search endpoint to store mappings between `avatar`, `namecard`, and `title` URLs and their corresponding IDs. On profile pages, only the ID values are accessible, so we initialize this "Search Data" cache when the app launches.
+OverFast API integrates a **Valkey**-based cache system with two main components:
+- **API Cache**: This high-level cache associates URIs (cache keys) with a **SWR envelope** — a JSON object containing the response payload alongside metadata (`stored_at`, `staleness_threshold`, `stale_while_revalidate`). Nginx reads this envelope directly to serve `Age` and `Cache-Control: stale-while-revalidate` headers without calling FastAPI when data is stale but within the SWR window.
+- **Player Cache**: Stores persistent player profiles. This is backed by **PostgreSQL**, with Valkey used for short-lived negative caching (unknown players).
 
 Below is the current list of TTL values configured for the API cache. The latest values are available on the API homepage.
 * Heroes list : 1 day
@@ -125,13 +123,13 @@ Below is the current list of TTL values configured for the API cache. The latest
 
 ## 🐍 Architecture
 
-### Default case
+### Request flow (Stale-While-Revalidate)
 
-The default case is pretty straightforward. When a `User` makes an API request, `Nginx` first checks `Valkey` for cached data :
-* If available, `Valkey` returns the data directly to `Nginx`, which forwards it to the `User` (cache hit).
-* If the cache is empty (cache miss), `Nginx` sends the request to the `App` server, which retrieves and parses data from `Blizzard`.
+Every cached response is stored in Valkey as an **SWR envelope** containing the payload and three timestamps: `stored_at`, `staleness_threshold`, and `stale_while_revalidate`. Nginx/OpenResty inspects the envelope on every request:
 
-The `App` then stores this data in `Valkey` and returns it to `Nginx`, which sends the response to the `User`. This approach minimizes external requests and speeds up response times by prioritizing cached data.
+- **Fresh** (age < `staleness_threshold`): Nginx returns cached data immediately, no App involved.
+- **Stale** (age ≥ `staleness_threshold` but < `stale_while_revalidate`): Nginx returns the stale data immediately *and* fires an async enqueue to the background worker to refresh it.
+- **Expired / missing**: Nginx forwards to the App, which fetches from Blizzard, stores a new envelope, and returns the response.
 
 ```mermaid
 sequenceDiagram
@@ -140,35 +138,38 @@ sequenceDiagram
     participant Nginx
     participant Valkey
     participant App
+    participant Worker
     participant Blizzard
+
     User->>+Nginx: Make an API request
-    Nginx->>+Valkey: Make an API Cache request
-    alt API Cache is available
-        Valkey-->>Nginx: Return API Cache data
-        Nginx-->>User: Return API Cache data
-    else
-        Valkey-->>-Nginx: Return no result
-        Nginx->>+App: Transmit the request to App server
-        App->>+Blizzard: Retrieve data
+    Nginx->>+Valkey: Check API cache (SWR envelope)
+
+    alt Fresh cache hit
+        Valkey-->>Nginx: Return fresh data
+        Nginx-->>User: Return cached data
+    else Stale hit (within SWR window)
+        Valkey-->>-Nginx: Return stale data + metadata
+        Nginx-->>User: Return stale data (with Age header)
+        Nginx->>App: Enqueue background refresh (async)
+        App->>Worker: Push refresh task to Valkey queue
+        Worker->>+Blizzard: Fetch updated data
+        Blizzard-->>-Worker: Return data
+        Worker->>Valkey: Store new SWR envelope
+    else Cache miss
+        Valkey-->>-Nginx: No result
+        Nginx->>+App: Forward request
+        App->>+Blizzard: Fetch data
         Blizzard-->>-App: Return data
-        App->>App: Parse HTML page
-        App->>Valkey: Store data into API Cache
-        App-->>-Nginx: Return API data
-        Nginx-->>-User: Return API data
+        App->>App: Parse response
+        App->>Valkey: Store SWR envelope
+        App-->>-Nginx: Return data
+        Nginx-->>-User: Return data
     end
 ```
 
-### Player profile case
+### Player profile flow
 
-The player profile request flow is similar to the previous setup, but with an extra layer of caching for player-specific data, including HTML data (profile page) and player search data (JSON data).
-
-When a `User` makes an API request, `Nginx` checks `Valkey` for cached API data. If found, it’s returned directly. If not, `Nginx` forwards the request to the `App` server.
-
-It then retrieves Search data from `Blizzard` and checks a Player Cache in `Valkey` :
-* If the player data is cached and up-to-date (`lastUpdated` from Search data has not changed), `App` parses it
-* If not, `App` retrieves and parses the data from `Blizzard`, then stores it in both the Player Cache and API Cache.
-
-This additional Player Cache layer reduces external calls for player-specific data, especially when player career hasn't changed, improving performance and response times.
+Player profiles follow the same SWR logic, with the addition that parsed profile data is persisted in **PostgreSQL**. The worker compares the current `lastUpdated` value from the Blizzard search endpoint before deciding whether to re-parse the HTML.
 
 ```mermaid
 sequenceDiagram
@@ -177,33 +178,106 @@ sequenceDiagram
     participant Nginx
     participant Valkey
     participant App
+    participant Worker
+    participant PostgreSQL
     participant Blizzard
-    User->>+Nginx: Make an API request
-    Nginx->>+Valkey: Make an API Cache request
-    alt API Cache is available
-        Valkey-->>Nginx: Return API Cache data
-        Nginx-->>User: Return API Cache data
-    else
-        Valkey-->>-Nginx: Return no result
-        Nginx->>+App: Transmit the request to App server
-        App->>+Blizzard: Make a Player Search request
-        Blizzard-->>-App: Return Player Search data
-        App->>+Valkey: Make Player Cache request
-        alt Player Cache is available and up-to-date
-            Valkey-->>App: Return Player Cache
-            App->>App: Parse HTML page
-        else
-            Valkey-->>-App: Return no result
-            App->>+Blizzard: Retrieve Player data (HTML)
-            Blizzard-->>-App: Return Player data
-            App->>App: Parse HTML page
-            App->>Valkey: Store data into Player Cache
-        end
-        App->>Valkey: Store data into API Cache
-        App-->>-Nginx: Return API data
-        Nginx-->>-User: Return API data
-    end
 
+    User->>+Nginx: Make player profile request
+    Nginx->>+Valkey: Check API cache (SWR envelope)
+
+    alt Fresh cache hit
+        Valkey-->>Nginx: Return fresh data
+        Nginx-->>User: Return cached data
+    else Stale hit (within SWR window)
+        Valkey-->>-Nginx: Return stale data
+        Nginx-->>User: Return stale data (with Age header)
+        Nginx->>App: Enqueue refresh_player_profile task
+        App->>Worker: Push task to Valkey queue
+        Worker->>+Blizzard: Fetch search data (lastUpdated)
+        Blizzard-->>-Worker: Return search data
+        Worker->>+PostgreSQL: Load stored profile
+        PostgreSQL-->>-Worker: Return stored profile
+        alt lastUpdated unchanged
+            Worker->>Valkey: Refresh SWR envelope (no re-parse)
+        else Profile changed
+            Worker->>+Blizzard: Fetch player HTML
+            Blizzard-->>-Worker: Return HTML
+            Worker->>Worker: Parse HTML
+            Worker->>PostgreSQL: Upsert player profile
+            Worker->>Valkey: Store new SWR envelope
+        end
+    else Cache miss
+        Valkey-->>-Nginx: No result
+        Nginx->>+App: Forward request
+        App->>+Blizzard: Fetch search + player HTML
+        Blizzard-->>-App: Return data
+        App->>App: Parse HTML
+        App->>PostgreSQL: Upsert player profile
+        App->>Valkey: Store SWR envelope
+        App-->>-Nginx: Return data
+        Nginx-->>-User: Return data
+    end
+```
+
+### Background worker
+
+OverFast API runs a separate **taskiq** worker process alongside the FastAPI app:
+
+```shell
+# Worker
+taskiq worker app.adapters.tasks.worker:broker
+# Scheduler
+taskiq scheduler app.adapters.tasks.worker:scheduler
+```
+
+**On-demand tasks** (enqueued via SWR stale hits):
+- `refresh_heroes`, `refresh_hero`, `refresh_roles`, `refresh_maps`, `refresh_gamemodes`
+- `refresh_player_profile`
+
+**Scheduled cron tasks**:
+- `cleanup_stale_players` — daily at 03:00 UTC (removes expired profiles from PostgreSQL)
+- `check_new_hero` — daily at 02:00 UTC (detects newly released heroes)
+
+The broker is a custom `ValkeyListBroker` backed by Valkey lists. Deduplication is handled by `ValkeyTaskQueue`, which uses `SET NX` so the same entity (e.g. a player battletag) is never enqueued twice for the same task type.
+
+```mermaid
+flowchart LR
+    Nginx -->|stale hit| App
+    App -->|LPUSH task| ValkeyQueue
+    ValkeyQueue -->|BRPOP| Worker
+    Worker -->|fetch| Blizzard
+    Worker -->|upsert| PostgreSQL
+    Worker -->|store envelope| Valkey
+```
+
+### Blizzard throttle (TCP Slow Start + AIMD)
+
+The `BlizzardThrottle` component manages a self-adjusting inter-request delay that maximises throughput without triggering Blizzard 403s. **Only the HTTP status code is used as a signal** — response latency is intentionally ignored because player profiles are inherently slow and do not indicate rate limiting.
+
+Throttle state (`throttle:delay`, `throttle:ssthresh`, `throttle:streak`, `throttle:last_403`, `throttle:last_request`) is persisted in Valkey so it survives restarts and is shared between the API and worker processes.
+
+**Two phases:**
+
+| Phase | Condition | Behaviour |
+|---|---|---|
+| **Slow Start** | `delay > ssthresh` | Halve delay every N consecutive 200s — fast exponential convergence |
+| **AIMD** | `delay ≤ ssthresh` | Subtract `delta` (50 ms) every M consecutive 200s — cautious linear probe |
+| **Penalty** | Any 403 | Double delay (min `penalty_delay`), set `ssthresh = delay × 2`, reset streak, block recovery for `penalty_duration` s |
+
+```mermaid
+stateDiagram-v2
+    [*] --> SlowStart : startup / post-penalty
+    SlowStart --> SlowStart : 200 (streak < N) — increment streak
+    SlowStart --> SlowStart : 200 (streak = N) — halve delay, reset streak
+    SlowStart --> AIMD : delay ≤ ssthresh
+    AIMD --> AIMD : 200 (streak < M) — increment streak
+    AIMD --> AIMD : 200 (streak = M) — delay −= delta, reset streak
+    AIMD --> AIMD : delay = min_delay — stay at floor
+    SlowStart --> Penalty : 403
+    AIMD --> Penalty : 403
+    Penalty --> SlowStart : penalty_duration elapsed
+    SlowStart --> SlowStart : non-200 — reset streak
+    AIMD --> AIMD : non-200 — reset streak
 ```
 
 ## 🤝 Contributing

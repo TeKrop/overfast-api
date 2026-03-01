@@ -99,7 +99,7 @@ class Settings(BaseSettings):
     max_connections_per_ip: int = 10
 
     ############
-    # ADAPTIVE THROTTLING (AutoThrottle + AIMD)
+    # ADAPTIVE THROTTLING (TCP Slow Start + AIMD)
     ############
 
     # Enable adaptive throttling for Blizzard requests
@@ -108,14 +108,20 @@ class Settings(BaseSettings):
     # Initial delay between Blizzard requests (seconds)
     throttle_start_delay: float = 2.0
 
-    # Minimum delay (floor)
-    throttle_min_delay: float = 1.0
+    # Minimum delay / floor (seconds); 0.1 = max 10 req/s
+    throttle_min_delay: float = 0.1
 
     # Maximum delay (cap)
     throttle_max_delay: float = 30.0
 
-    # Target concurrency: 0.5 means 1 request every ~2s at steady state
-    throttle_target_concurrency: float = 0.5
+    # Number of consecutive 200s required to halve the delay during Slow Start
+    throttle_slow_start_n_successes: int = 10
+
+    # Number of consecutive 200s required to decrease delay by delta during AIMD
+    throttle_aimd_n_successes: int = 20
+
+    # How much to decrease delay (seconds) per AIMD step
+    throttle_aimd_delta: float = 0.05
 
     # Minimum delay enforced immediately after a Blizzard 403
     throttle_penalty_delay: float = 10.0

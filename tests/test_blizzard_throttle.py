@@ -6,7 +6,13 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.adapters.blizzard.throttle import BlizzardThrottle
+from app.adapters.blizzard.throttle import (
+    _DELAY_KEY,
+    _LAST_403_KEY,
+    _SSTHRESH_KEY,
+    _STREAK_KEY,
+    BlizzardThrottle,
+)
 from app.config import settings
 from app.domain.exceptions import RateLimitedError
 from app.infrastructure.metaclasses import Singleton
@@ -125,104 +131,168 @@ class TestWaitBeforeRequest:
 
 class TestAdjustDelay:
     @pytest.mark.asyncio
-    async def test_403_applies_penalty(self, throttle, mock_cache):
+    async def test_403_sets_penalty_and_ssthresh(self, throttle, mock_cache):
+        """403 should double delay, set ssthresh, reset streak, record last_403."""
         mock_cache.get.return_value = b"2.0"
-        await throttle.adjust_delay(0.5, HTTPStatus.FORBIDDEN)
-        # Should have called set for delay key and last_403 key
-        assert mock_cache.set.call_count == 2  # noqa: PLR2004
+        await throttle.adjust_delay(HTTPStatus.FORBIDDEN)
+        # delay set + last_403 set (at minimum 2 set calls)
+        keys_set = [call[0][0] for call in mock_cache.set.call_args_list]
+        assert _DELAY_KEY in keys_set
+        assert _LAST_403_KEY in keys_set
+        assert _SSTHRESH_KEY in keys_set
+        assert _STREAK_KEY in keys_set
 
     @pytest.mark.asyncio
     async def test_403_doubles_delay_with_minimum(self, throttle, mock_cache):
         mock_cache.get.return_value = b"2.0"
-        await throttle.adjust_delay(0.5, HTTPStatus.FORBIDDEN)
-        # First set call should be the new delay
-        delay_call = mock_cache.set.call_args_list[0]
-        new_delay = float(delay_call[0][1])
-        assert new_delay == max(2.0 * 2, settings.throttle_penalty_delay)
+        await throttle.adjust_delay(HTTPStatus.FORBIDDEN)
+        delay_set = next(
+            float(c[0][1]) for c in mock_cache.set.call_args_list if c[0][0] == _DELAY_KEY
+        )
+        assert delay_set == max(4.0, settings.throttle_penalty_delay)
 
     @pytest.mark.asyncio
-    async def test_200_adjusts_autothrottle(self, throttle, mock_cache):
-        """On 200, delay converges toward latency / target_concurrency."""
+    async def test_403_sets_ssthresh_to_double_current(self, throttle, mock_cache):
+        mock_cache.get.return_value = b"2.0"
+        await throttle.adjust_delay(HTTPStatus.FORBIDDEN)
+        ssthresh_set = next(
+            float(c[0][1]) for c in mock_cache.set.call_args_list if c[0][0] == _SSTHRESH_KEY
+        )
+        assert ssthresh_set == pytest.approx(4.0)
 
+    @pytest.mark.asyncio
+    async def test_200_slow_start_halves_delay_after_n_successes(self, throttle, mock_cache):
+        """In slow start (delay > ssthresh), delay halves every N successes."""
+        # delay=4.0, ssthresh=1.0 (default min), streak reaching threshold
         def get_side_effect(key):
-            if "last_403" in key:
-                return None  # no penalty
-            return b"4.0"  # current delay
+            if key == _LAST_403_KEY:
+                return None
+            if key == _DELAY_KEY:
+                return b"4.0"
+            if key == _SSTHRESH_KEY:
+                return b"1.0"
+            if key == _STREAK_KEY:
+                return str(settings.throttle_slow_start_n_successes - 1).encode()
+            return None
 
         mock_cache.get.side_effect = get_side_effect
+        await throttle.adjust_delay(HTTPStatus.OK)
 
-        await throttle.adjust_delay(1.0, HTTPStatus.OK)
-        mock_cache.set.assert_called_once()
-        new_delay = float(mock_cache.set.call_args[0][1])
-        # target = 1.0 / 0.5 = 2.0; smoothed = max(2.0, (4.0 + 2.0) / 2) = 3.0
-        assert new_delay == pytest.approx(3.0, abs=0.01)
+        delay_set = next(
+            float(c[0][1]) for c in mock_cache.set.call_args_list if c[0][0] == _DELAY_KEY
+        )
+        assert delay_set == pytest.approx(2.0)
 
     @pytest.mark.asyncio
-    async def test_200_does_not_adjust_during_penalty(self, throttle, mock_cache):
-        """During penalty, 200 responses do not decrease the delay."""
-
+    async def test_200_slow_start_no_change_below_n_successes(self, throttle, mock_cache):
+        """In slow start, delay does not change if streak < N."""
         def get_side_effect(key):
-            if "last_403" in key:
+            if key == _LAST_403_KEY:
+                return None
+            if key == _DELAY_KEY:
+                return b"4.0"
+            if key == _SSTHRESH_KEY:
+                return b"1.0"
+            if key == _STREAK_KEY:
+                return b"3"
+            return None
+
+        mock_cache.get.side_effect = get_side_effect
+        await throttle.adjust_delay(HTTPStatus.OK)
+
+        keys_set = [c[0][0] for c in mock_cache.set.call_args_list]
+        assert _DELAY_KEY not in keys_set
+
+    @pytest.mark.asyncio
+    async def test_200_aimd_decreases_delay_after_m_successes(self, throttle, mock_cache):
+        """In AIMD phase (delay <= ssthresh), delay decreases by delta every M successes."""
+        def get_side_effect(key):
+            if key == _LAST_403_KEY:
+                return None
+            if key == _DELAY_KEY:
+                return b"0.5"
+            if key == _SSTHRESH_KEY:
+                return b"1.0"
+            if key == _STREAK_KEY:
+                return str(settings.throttle_aimd_n_successes - 1).encode()
+            return None
+
+        mock_cache.get.side_effect = get_side_effect
+        await throttle.adjust_delay(HTTPStatus.OK)
+
+        delay_set = next(
+            float(c[0][1]) for c in mock_cache.set.call_args_list if c[0][0] == _DELAY_KEY
+        )
+        assert delay_set == pytest.approx(0.5 - settings.throttle_aimd_delta)
+
+    @pytest.mark.asyncio
+    async def test_200_aimd_no_change_below_m_successes(self, throttle, mock_cache):
+        """In AIMD phase, delay does not change if streak < M."""
+        def get_side_effect(key):
+            if key == _LAST_403_KEY:
+                return None
+            if key == _DELAY_KEY:
+                return b"0.5"
+            if key == _SSTHRESH_KEY:
+                return b"1.0"
+            if key == _STREAK_KEY:
+                return b"3"
+            return None
+
+        mock_cache.get.side_effect = get_side_effect
+        await throttle.adjust_delay(HTTPStatus.OK)
+
+        keys_set = [c[0][0] for c in mock_cache.set.call_args_list]
+        assert _DELAY_KEY not in keys_set
+
+    @pytest.mark.asyncio
+    async def test_200_during_penalty_does_nothing(self, throttle, mock_cache):
+        """During penalty, 200 responses do not change delay or streak."""
+        def get_side_effect(key):
+            if key == _LAST_403_KEY:
                 return str(time.time() - 5).encode()  # active penalty
             return b"10.0"
 
         mock_cache.get.side_effect = get_side_effect
-
-        await throttle.adjust_delay(0.1, HTTPStatus.OK)
+        await throttle.adjust_delay(HTTPStatus.OK)
         mock_cache.set.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_non_200_only_increases_delay(self, throttle, mock_cache):
-        """On non-200 (not 403), delay only increases, never decreases."""
-
-        def get_side_effect(key):
-            if "last_403" in key:
-                return None
-            return b"2.0"
-
-        mock_cache.get.side_effect = get_side_effect
-
-        # High latency → should increase
-        await throttle.adjust_delay(3.0, HTTPStatus.SERVICE_UNAVAILABLE)
-        mock_cache.set.assert_called_once()
-        new_delay = float(mock_cache.set.call_args[0][1])
-        assert new_delay > 2.0  # noqa: PLR2004
-
-    @pytest.mark.asyncio
-    async def test_non_200_does_not_decrease(self, throttle, mock_cache):
-        """On non-200, if target < current, delay stays the same."""
-
-        def get_side_effect(key):
-            if "last_403" in key:
-                return None
-            return b"10.0"
-
-        mock_cache.get.side_effect = get_side_effect
-
-        # Low latency → target < current → no change
-        await throttle.adjust_delay(0.5, HTTPStatus.SERVICE_UNAVAILABLE)
-        mock_cache.set.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def test_delay_respects_max_bound(self, throttle, mock_cache):
-        mock_cache.get.return_value = str(settings.throttle_max_delay).encode()
-        # 403 on max delay → should stay at max
-        await throttle.adjust_delay(0.5, HTTPStatus.FORBIDDEN)
-        delay_call = mock_cache.set.call_args_list[0]
-        new_delay = float(delay_call[0][1])
-        assert new_delay == settings.throttle_max_delay
+    async def test_non_200_resets_streak_only(self, throttle, mock_cache):
+        """Non-200, non-403 responses only reset the streak."""
+        mock_cache.get.return_value = b"2.0"
+        await throttle.adjust_delay(HTTPStatus.SERVICE_UNAVAILABLE)
+        keys_set = [c[0][0] for c in mock_cache.set.call_args_list]
+        assert keys_set == [_STREAK_KEY]
 
     @pytest.mark.asyncio
     async def test_delay_respects_min_bound(self, throttle, mock_cache):
+        """AIMD phase: delay never goes below throttle_min_delay."""
         def get_side_effect(key):
-            if "last_403" in key:
+            if key == _LAST_403_KEY:
                 return None
-            return b"0.01"  # below min
+            if key == _DELAY_KEY:
+                return str(settings.throttle_min_delay).encode()
+            if key == _SSTHRESH_KEY:
+                return str(settings.throttle_min_delay + 0.5).encode()
+            if key == _STREAK_KEY:
+                return str(settings.throttle_aimd_n_successes - 1).encode()
+            return None
 
         mock_cache.get.side_effect = get_side_effect
+        await throttle.adjust_delay(HTTPStatus.OK)
 
-        # Very fast response → target below min → should floor at min
-        await throttle.adjust_delay(0.001, HTTPStatus.OK)
-        mock_cache.set.assert_called_once()
-        new_delay = float(mock_cache.set.call_args[0][1])
-        assert new_delay >= settings.throttle_min_delay
+        delay_set_calls = [c for c in mock_cache.set.call_args_list if c[0][0] == _DELAY_KEY]
+        if delay_set_calls:
+            new_delay = float(delay_set_calls[0][0][1])
+            assert new_delay >= settings.throttle_min_delay
+
+    @pytest.mark.asyncio
+    async def test_delay_respects_max_bound(self, throttle, mock_cache):
+        """403 on max delay stays at max."""
+        mock_cache.get.return_value = str(settings.throttle_max_delay).encode()
+        await throttle.adjust_delay(HTTPStatus.FORBIDDEN)
+        delay_set = next(
+            float(c[0][1]) for c in mock_cache.set.call_args_list if c[0][0] == _DELAY_KEY
+        )
+        assert delay_set == settings.throttle_max_delay

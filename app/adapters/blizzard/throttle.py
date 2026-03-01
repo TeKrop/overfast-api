@@ -1,14 +1,17 @@
 """Adaptive throttle controller for Blizzard HTTP requests.
 
-Implements a hybrid AutoThrottle + AIMD strategy:
+Implements a TCP Slow Start + AIMD strategy:
 
-* **AutoThrottle** (primary): adjusts inter-request delay based on observed
-  response latency so that we never saturate Blizzard's rate limiter.
-  ``target_delay = latency / target_concurrency``
+* **Slow Start**: while the inter-request delay is above the slow-start
+  threshold (``ssthresh``), halve the delay every
+  ``throttle_slow_start_n_successes`` consecutive 200 responses.
 
-* **AIMD penalty** (secondary): when Blizzard returns 403, the delay is
-  immediately doubled (minimum ``throttle_penalty_delay``) and recovery is
-  blocked for ``throttle_penalty_duration`` seconds.
+* **AIMD** (Additive Increase / Multiplicative Decrease): once the delay
+  reaches or drops below ``ssthresh``, reduce the delay by
+  ``throttle_aimd_delta`` every ``throttle_aimd_n_successes`` consecutive
+  200 responses.  On a 403, immediately double the delay (minimum
+  ``throttle_penalty_delay``), update ``ssthresh``, and block recovery for
+  ``throttle_penalty_duration`` seconds.
 
 State is stored in Valkey so the API process and the worker process share
 the same throttle state.
@@ -35,6 +38,8 @@ if TYPE_CHECKING:
     from app.domain.ports.cache import CachePort
 
 _DELAY_KEY = "throttle:delay"
+_SSTHRESH_KEY = "throttle:ssthresh"
+_STREAK_KEY = "throttle:streak"
 _LAST_403_KEY = "throttle:last_403"
 _LAST_REQUEST_KEY = "throttle:last_request"
 
@@ -42,10 +47,9 @@ _LAST_REQUEST_KEY = "throttle:last_request"
 class BlizzardThrottle(metaclass=Singleton):
     """Shared-state adaptive throttle for Blizzard requests.
 
-    Uses Valkey to share ``throttle:delay``, ``throttle:last_403``, and
-    ``throttle:last_request`` between the FastAPI process and the worker.
-    An in-process ``_penalty_start`` attribute provides fast, I/O-free penalty
-    detection within the same process instance.
+    Uses Valkey to share throttle state between the FastAPI process and the
+    worker.  An in-process ``_penalty_start`` attribute provides fast,
+    I/O-free penalty detection within the same process instance.
     """
 
     def __init__(self) -> None:
@@ -103,41 +107,47 @@ class BlizzardThrottle(metaclass=Singleton):
 
         await self._cache.set(_LAST_REQUEST_KEY, str(time.time()).encode())
 
-    async def adjust_delay(self, latency: float, status_code: int) -> None:
+    async def adjust_delay(self, status_code: int) -> None:
         """Update the throttle delay based on the observed response.
 
-        * **200**: AutoThrottle — converge toward ``latency / target_concurrency``.
-        * **403**: AIMD penalty — double delay (min ``penalty_delay``), block recovery.
-        * **other non-200**: conservative — only allow delay to increase.
+        * **200**: TCP Slow Start / AIMD — gradually reduce delay on success.
+        * **403**: Multiplicative increase — double delay, set ssthresh.
+        * **other non-200**: reset streak only (not a rate-limit signal).
 
         Args:
-            latency: Elapsed seconds from request start to response received.
+            latency: Kept for interface compatibility; not used in this implementation.
             status_code: HTTP status code of the Blizzard response.
         """
-        current = await self.get_current_delay()
-
         if status_code == HTTPStatus.FORBIDDEN:
-            await self._apply_403_penalty(current)
+            await self._apply_403_penalty()
             return
-
-        in_penalty = (await self.is_rate_limited()) > 0
-
-        if status_code == HTTPStatus.OK and not in_penalty:
-            await self._autothrottle_adjust(latency, current)
-        elif status_code != HTTPStatus.OK:
-            await self._conservative_increase(latency, current)
+        if status_code == HTTPStatus.OK:
+            in_penalty = (await self.is_rate_limited()) > 0
+            if not in_penalty:
+                await self._on_success()
+            return
+        # non-200, non-403: reset streak only
+        await self._cache.set(_STREAK_KEY, b"0")
 
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
 
-    async def _apply_403_penalty(self, current_delay: float) -> None:
+    async def _get_ssthresh(self) -> float:
+        raw = await self._cache.get(_SSTHRESH_KEY)
+        return float(raw) if raw else settings.throttle_min_delay
+
+    async def _apply_403_penalty(self) -> None:
+        current_delay = await self.get_current_delay()
+        new_ssthresh = min(current_delay * 2, settings.throttle_max_delay)
         new_delay = min(
             max(current_delay * 2, settings.throttle_penalty_delay),
             settings.throttle_max_delay,
         )
         await self._cache.set(_DELAY_KEY, str(new_delay).encode())
+        await self._cache.set(_SSTHRESH_KEY, str(new_ssthresh).encode())
         await self._cache.set(_LAST_403_KEY, str(time.time()).encode())
+        await self._cache.set(_STREAK_KEY, b"0")
         self._penalty_start = time.monotonic()
 
         if settings.prometheus_enabled:
@@ -164,35 +174,39 @@ class BlizzardThrottle(metaclass=Singleton):
                 color=0xF39C12,
             )
 
-    async def _autothrottle_adjust(self, latency: float, current_delay: float) -> None:
-        target = latency / settings.throttle_target_concurrency
-        # Smooth toward target but bias upward (conservative)
-        new_delay = max(target, (current_delay + target) / 2.0)
-        new_delay = max(
-            settings.throttle_min_delay, min(new_delay, settings.throttle_max_delay)
-        )
-        await self._cache.set(_DELAY_KEY, str(new_delay).encode())
+    async def _on_success(self) -> None:
+        raw_streak = await self._cache.get(_STREAK_KEY)
+        streak = int(raw_streak) if raw_streak else 0
+        streak += 1
 
-        if settings.prometheus_enabled:
-            throttle_current_delay_seconds.set(new_delay)
+        current_delay = await self.get_current_delay()
+        ssthresh = await self._get_ssthresh()
 
-        logger.debug(
-            f"[Throttle] AutoThrottle: {current_delay:.2f}s → {new_delay:.2f}s "
-            f"(latency={latency:.2f}s)"
-        )
+        new_delay: float | None = None
 
-    async def _conservative_increase(
-        self, latency: float, current_delay: float
-    ) -> None:
-        target = latency / settings.throttle_target_concurrency
-        if target > current_delay:
-            new_delay = min(target, settings.throttle_max_delay)
+        if current_delay > ssthresh:
+            # Slow Start phase: halve delay every N successes
+            if streak >= settings.throttle_slow_start_n_successes:
+                new_delay = current_delay / 2
+                streak = 0
+        # AIMD phase: decrease delay by delta every M successes
+        elif streak >= settings.throttle_aimd_n_successes:
+            new_delay = current_delay - settings.throttle_aimd_delta
+            streak = 0
+
+        await self._cache.set(_STREAK_KEY, str(streak).encode())
+
+        if new_delay is not None:
+            new_delay = max(
+                settings.throttle_min_delay,
+                min(new_delay, settings.throttle_max_delay),
+            )
             await self._cache.set(_DELAY_KEY, str(new_delay).encode())
 
             if settings.prometheus_enabled:
                 throttle_current_delay_seconds.set(new_delay)
 
-            logger.warning(
-                f"[Throttle] Non-200 conservative increase: "
-                f"{current_delay:.2f}s → {new_delay:.2f}s"
+            logger.debug(
+                f"[Throttle] {'Slow Start' if current_delay > ssthresh else 'AIMD'}: "
+                f"{current_delay:.3f}s → {new_delay:.3f}s (streak reset)"
             )

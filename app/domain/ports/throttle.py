@@ -10,8 +10,8 @@ class ThrottlePort(Protocol):
         """Sleep for the current throttle delay, or raise RateLimitedError if in penalty."""
         ...
 
-    async def adjust_delay(self, latency: float, status_code: int) -> None:
-        """Update the throttle delay based on the observed response."""
+    async def adjust_delay(self, status_code: int) -> None:
+        """Update the throttle delay based on the observed response status."""
         ...
 
     async def is_rate_limited(self) -> int:
