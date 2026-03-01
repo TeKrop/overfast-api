@@ -15,33 +15,13 @@ from app.api.routers.heroes import router as heroes
 from app.api.routers.maps import router as maps
 from app.api.routers.players import router as players
 from app.api.routers.roles import router as roles
+from app.api.sentry import setup_sentry
 from app.config import settings
 from app.infrastructure.logger import logger
 from app.monitoring import router as monitoring_router
 from app.monitoring.middleware import register_prometheus_middleware
 
-if settings.sentry_dsn:
-    import sentry_sdk
-
-    sentry_sdk.init(
-        dsn=settings.sentry_dsn,
-        # Add data like request headers and IP for users,
-        # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
-        send_default_pii=True,
-        # Enable sending logs to Sentry
-        enable_logs=True,
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for tracing.
-        traces_sample_rate=1.0,
-        # Set profile_session_sample_rate to 1.0 to profile 100%
-        # of profile sessions.
-        profile_session_sample_rate=1.0,
-        # Set profile_lifecycle to "trace" to automatically
-        # run the profiler on when there is an active transaction
-        profile_lifecycle="trace",
-        # Set a human-readable release identifier.
-        release=settings.app_version,
-    )
+setup_sentry()
 
 
 description = f"""OverFast API provides comprehensive data on Overwatch heroes,
