@@ -24,7 +24,7 @@ from app.api.helpers import send_discord_webhook_message
 from app.config import settings
 from app.domain.exceptions import RateLimitedError
 from app.infrastructure.logger import logger
-from app.metaclasses import Singleton
+from app.infrastructure.metaclasses import Singleton
 from app.monitoring.metrics import (
     throttle_403_total,
     throttle_current_delay_seconds,

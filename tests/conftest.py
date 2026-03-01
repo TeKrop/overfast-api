@@ -11,8 +11,8 @@ from fastapi.testclient import TestClient
 
 from app.adapters.tasks.task_registry import TASK_MAP
 from app.api.dependencies import get_storage
+from app.infrastructure.metaclasses import Singleton
 from app.main import app
-from app.metaclasses import Singleton
 from tests.fake_storage import FakeStorage
 
 

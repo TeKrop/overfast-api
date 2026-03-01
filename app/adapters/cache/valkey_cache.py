@@ -29,7 +29,7 @@ import valkey.asyncio as valkey
 
 from app.config import settings
 from app.infrastructure.logger import logger
-from app.metaclasses import Singleton
+from app.infrastructure.metaclasses import Singleton
 
 if TYPE_CHECKING:
     from collections.abc import Callable

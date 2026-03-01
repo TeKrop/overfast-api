@@ -9,7 +9,7 @@ from app.adapters.blizzard.throttle import BlizzardThrottle
 from app.config import settings
 from app.domain.exceptions import RateLimitedError
 from app.infrastructure.logger import logger
-from app.metaclasses import Singleton
+from app.infrastructure.metaclasses import Singleton
 from app.monitoring.helpers import normalize_blizzard_url
 from app.monitoring.metrics import (
     blizzard_request_duration_seconds,
