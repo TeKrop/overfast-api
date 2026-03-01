@@ -28,10 +28,11 @@ def register_profiler(app: FastAPI, profiler: str) -> None:  # pragma: no cover
     """Add the requested profiler middleware to the app, or exit if unsupported."""
     if profiler not in _SUPPORTED_PROFILERS:
         logger.error(
-            f"{profiler} is not a supported profiler, please use one of the "
-            f"following : {', '.join(Profiler)}"
+            "%s is not a supported profiler, please use one of the following : %s",
+            profiler,
+            ", ".join(Profiler),
         )
         raise SystemExit
 
-    logger.info(f"Profiling is enabled with {profiler}")
+    logger.info("Profiling is enabled with %s", profiler)
     app.add_middleware(_SUPPORTED_PROFILERS[profiler])  # type: ignore[arg-type]

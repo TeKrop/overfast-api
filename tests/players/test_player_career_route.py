@@ -133,7 +133,6 @@ def test_get_player_parser_init_error(client: TestClient, player_html_data: str 
             # Players search call first
             Mock(status_code=status.HTTP_200_OK, text="[]", json=list),
             # Player profile page (for Blizzard ID resolution in _resolve_player_identity)
-            # With Phase 3.5 Step 1 optimization, this HTML is reused and we don't make a second call
             Mock(status_code=status.HTTP_200_OK, text=player_html_data),
         ],
     ):

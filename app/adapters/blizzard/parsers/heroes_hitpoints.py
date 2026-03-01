@@ -1,6 +1,6 @@
 """Stateless parser functions for heroes hitpoints data (HP, armor, shields) from CSV"""
 
-from app.adapters.csv import CSVReader
+from app.domain.utils.csv_reader import CSVReader
 
 HITPOINTS_KEYS = {"health", "armor", "shields"}
 

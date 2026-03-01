@@ -249,6 +249,8 @@ class PlayerService(BaseService):
         await self._update_api_cache(
             request.cache_key, data, settings.career_path_cache_timeout
         )
+        if is_stale:
+            await self._enqueue_refresh("player_profile", request.player_id)
         return data, is_stale, age
 
     # ------------------------------------------------------------------
@@ -519,7 +521,7 @@ class PlayerService(BaseService):
                 if player_summary:
                     return player_summary, html
         except Exception as exc:  # noqa: BLE001
-            logger.warning(f"Reverse enrichment failed: {exc}")
+            logger.warning("Reverse enrichment failed: %s", exc)
 
         return {}, html
 

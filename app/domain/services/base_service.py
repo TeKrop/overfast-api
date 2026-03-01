@@ -74,7 +74,7 @@ class BaseService:
                 stale_while_revalidate=stale_while_revalidate,
             )
         except Exception as exc:  # noqa: BLE001
-            logger.warning(f"[SWR] Valkey write failed for {cache_key}: {exc}")
+            logger.warning("[SWR] Valkey write failed for %s: %s", cache_key, exc)
 
     async def _enqueue_refresh(
         self,

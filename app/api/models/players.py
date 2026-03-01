@@ -11,7 +11,6 @@ from pydantic import (
     create_model,
 )
 
-from app.adapters.blizzard.parsers.player_helpers import get_hero_name, key_to_label
 from app.api.models.players_examples import (
     CareerStatsExample,
     HeroesComparisonsExample,
@@ -23,6 +22,7 @@ from app.domain.enums import (
     CompetitiveDivision,
     HeroKey,
 )
+from app.domain.utils.helpers import get_hero_name, key_to_label
 
 
 # Player search

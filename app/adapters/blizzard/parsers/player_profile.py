@@ -412,7 +412,7 @@ def _parse_heroes_comparisons(top_heroes_section: LexborNode) -> dict:
 def _parse_stat_row(stat_row: LexborNode) -> dict | None:
     """Parse a single stat row and return stat dict or None if invalid."""
     if not stat_row.first_child or not stat_row.last_child:
-        logger.warning(f"Missing stat name or value in {stat_row}")
+        logger.warning("Missing stat name or value in %s", stat_row)
         return None
 
     stat_name = stat_row.first_child.text()
@@ -471,7 +471,7 @@ def _parse_career_stats(career_stats_section: LexborNode) -> dict:
                 or not content_div.first_child
                 or not content_div.first_child.first_child
             ):
-                logger.warning(f"Missing content div for hero {hero_key}")
+                logger.warning("Missing content div for hero %s", hero_key)
                 continue
 
             # Label should be the first div within content ("header" class)
@@ -479,7 +479,7 @@ def _parse_career_stats(career_stats_section: LexborNode) -> dict:
 
             # Skip empty category labels (malformed HTML)
             if not category_label or not category_label.strip():
-                logger.warning(f"Empty category label for hero {hero_key}, skipping")
+                logger.warning("Empty category label for hero %s, skipping", hero_key)
                 continue
 
             # Normalize localized category names to English

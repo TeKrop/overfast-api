@@ -2,7 +2,6 @@ import re
 import unicodedata
 from functools import cache
 
-from app.adapters.csv import CSVReader
 from app.domain.enums import (
     CareerStatCategory,
     CompetitiveDivision,
@@ -10,31 +9,13 @@ from app.domain.enums import (
     HeroKey,
     Role,
 )
+from app.domain.utils.csv_reader import CSVReader
+from app.domain.utils.helpers import key_to_label
 
 DURATION_HOURS_PATTERN = re.compile(r"^(-?\d+,?\d*?):(\d+):(\d+)$")
 DURATION_MINUTES_PATTERN = re.compile(r"^(-?\d+):(\d+)$")
 INT_PATTERN = re.compile(r"^-?\d+(,\d+)*%?$")
 FLOAT_PATTERN = re.compile(r"^-?\d+(,\d+)*\.\d+$")
-
-
-@cache
-def get_hero_name(hero_key: HeroKey) -> str:  # ty: ignore[invalid-type-form]
-    """Get a hero name based on the CSV file"""
-    heroes_data = CSVReader.read_csv_file("heroes")
-    return next(
-        (
-            hero_data["name"]
-            for hero_data in heroes_data
-            if hero_data["key"] == hero_key
-        ),
-        hero_key,
-    )
-
-
-@cache
-def key_to_label(key: str) -> str:
-    """Transform a given key in lowercase format into a human format"""
-    return " ".join(s.capitalize() for s in key.split("_"))
 
 
 def get_player_title(title: dict | str | None) -> str | None:

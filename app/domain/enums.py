@@ -2,7 +2,7 @@
 
 from enum import StrEnum
 
-from app.adapters.csv import CSVReader
+from app.domain.utils.csv_reader import CSVReader
 
 
 class Locale(StrEnum):

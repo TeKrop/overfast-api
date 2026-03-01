@@ -1,11 +1,11 @@
-"""CSV reader adapter for reading static data from CSV files"""
+"""CSV reader for domain static data files"""
 
 import csv
 from pathlib import Path
 
 
 class CSVReader:
-    """Adapter for reading CSV data files from app/adapters/csv/data/"""
+    """Reads CSV data files bundled with the application."""
 
     @staticmethod
     def read_csv_file(filename: str) -> list[dict[str, str]]:

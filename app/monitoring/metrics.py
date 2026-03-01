@@ -53,20 +53,20 @@ api_requests_in_progress = Gauge(
 # Cache & SWR Metrics
 ####################
 
-# Persistent storage lookups (Phase 3)
+# Persistent storage lookups
 storage_hits_total = Counter(
     "storage_hits_total",
     "Persistent storage lookup results",
     ["result"],  # "hit", "miss"
 )
 
-# Stale responses served from persistent storage (Phase 3)
+# Stale responses served from persistent storage
 stale_responses_total = Counter(
     "stale_responses_total",
     "Stale responses served from persistent storage (SWR)",
 )
 
-# Background refresh tasks triggered (Phase 4 onwards)
+# Background refresh tasks triggered
 background_refresh_triggered_total = Counter(
     "background_refresh_triggered_total",
     "Background refresh tasks triggered by SWR staleness detection",
@@ -95,7 +95,7 @@ background_tasks_duration_seconds = Histogram(
 )
 
 ########################
-# Throttle / Blizzard Metrics (Phase 5)
+# Throttle / Blizzard Metrics
 ########################
 
 throttle_current_delay_seconds = Gauge(
@@ -133,7 +133,7 @@ blizzard_rate_limited_total = Counter(
 )
 
 ########################
-# Storage Metrics (Phase 3)
+# Storage Metrics
 ########################
 
 storage_size_bytes = Gauge(
@@ -153,7 +153,7 @@ storage_write_errors_total = Counter(
     ["error_type"],  # "disk_error", "compression_error", "unknown"
 )
 
-# Phase 3.5B: Comprehensive storage monitoring
+# Comprehensive storage monitoring
 storage_operation_duration_seconds = Histogram(
     "storage_operation_duration_seconds",
     "Storage operation duration in seconds",

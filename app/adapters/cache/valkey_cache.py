@@ -57,7 +57,7 @@ def handle_valkey_error(
                 return await func(*args, **kwargs)
             except valkey.ValkeyError as err:
                 func_name = getattr(func, "__name__", "unknown")
-                logger.warning(f"Valkey server error in {func_name}: {err}")
+                logger.warning("Valkey server error in %s: %s", func_name, err)
                 return default_return
 
         return wrapper

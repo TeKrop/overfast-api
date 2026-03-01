@@ -147,7 +147,7 @@ def test_get_hero_no_hitpoints(
             ],
         ),
         patch(
-            "app.adapters.csv.csv_reader.CSVReader.read_csv_file",
+            "app.domain.utils.csv_reader.CSVReader.read_csv_file",
             return_value=[],
         ),
     ):
