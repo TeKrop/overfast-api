@@ -1,6 +1,6 @@
 """Task queue port protocol for background job processing"""
 
-from typing import Any, Protocol
+from typing import Protocol
 
 
 class TaskQueuePort(Protocol):
@@ -9,9 +9,8 @@ class TaskQueuePort(Protocol):
     async def enqueue(
         self,
         task_name: str,
-        *args: Any,
+        *args: str,
         job_id: str | None = None,
-        **kwargs: Any,
     ) -> str:
         """Enqueue a background task by name, returning the effective job ID.
 

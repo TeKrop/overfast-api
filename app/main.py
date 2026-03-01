@@ -45,17 +45,18 @@ if settings.sentry_dsn:
 
 
 description = f"""OverFast API provides comprehensive data on Overwatch heroes,
-game modes, maps, and player statistics by scraping Blizzard pages. Developed with
-the efficiency of **FastAPI** and **Selectolax**, it leverages **nginx (OpenResty)** as a
-reverse proxy and **Valkey** for caching. Its tailored caching mechanism significantly
-reduces calls to Blizzard pages, ensuring swift and precise data delivery to users.
+game modes, maps, and player statistics by scraping Blizzard pages. Built with
+**FastAPI** and **Selectolax**, it uses **PostgreSQL** for
+persistent storage, **Stale-While-Revalidate caching** via **Valkey** and **nginx
+(OpenResty)**, **taskiq** background workers, and **TCP Slow Start + AIMD throttling**
+for Blizzard requests.
 
 This live instance is configured with the following restrictions:
 - Rate Limit per IP: **{settings.rate_limit_per_second_per_ip} requests/second** (burst capacity :
 **{settings.rate_limit_per_ip_burst}**)
 - Maximum connections/simultaneous requests per IP: **{settings.max_connections_per_ip}**
 - Adaptive Blizzard throttle: **{settings.throttle_start_delay}s** initial delay
-  (auto-adjusts based on Blizzard response latency; 503 returned when rate-limited)
+  (TCP Slow Start + AIMD; 503 returned when rate-limited)
 
 This limit may be adjusted as needed. If you require higher throughput, consider
 hosting your own instance on a server 👍

@@ -8,9 +8,7 @@
 [![License: MIT](https://img.shields.io/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)
 ![Mockup OverFast API](https://files.tekrop.fr/overfast_api_logo_full_1000.png)
 
-> **v4.0** — OverFast API now runs on a redesigned architecture introducing **Domain-Driven Design**, **persistent storage with PostgreSQL**, **Stale-While-Revalidate caching**, **taskiq background workers**, and **TCP Slow Start + AIMD throttling** for Blizzard requests.
-
-> OverFast API provides comprehensive data on Overwatch heroes, game modes, maps, and player statistics by scraping Blizzard pages. Developed with the efficiency of **FastAPI** and **Selectolax**, it leverages **nginx (OpenResty)** as a reverse proxy and **Valkey** for caching. Its tailored caching mechanism significantly reduces calls to Blizzard pages, ensuring swift and precise data delivery to users.
+> OverFast API provides comprehensive data on Overwatch heroes, game modes, maps, and player statistics by scraping Blizzard pages. Built with **FastAPI** and **Selectolax**, **PostgreSQL** for persistent storage, **Stale-While-Revalidate caching** via **Valkey** and **nginx (OpenResty)**, **taskiq** background workers, and **TCP Slow Start + AIMD throttling** for Blizzard requests.
 
 ## Table of contents
 * [✨ Live instance](#-live-instance)
@@ -142,13 +140,13 @@ sequenceDiagram
     participant Blizzard
 
     User->>+Nginx: Make an API request
-    Nginx->>+Valkey: Check API cache (SWR envelope)
+    Nginx->>Valkey: Check API cache (SWR envelope)
 
     alt Fresh cache hit
         Valkey-->>Nginx: Return fresh data
         Nginx-->>User: Return cached data
     else Stale hit (within SWR window)
-        Valkey-->>-Nginx: Return stale data + metadata
+        Valkey-->>Nginx: Return stale data + metadata
         Nginx-->>User: Return stale data (with Age header)
         Nginx->>App: Enqueue background refresh (async)
         App->>Worker: Push refresh task to Valkey queue
@@ -156,7 +154,7 @@ sequenceDiagram
         Blizzard-->>-Worker: Return data
         Worker->>Valkey: Store new SWR envelope
     else Cache miss
-        Valkey-->>-Nginx: No result
+        Valkey-->>Nginx: No result
         Nginx->>+App: Forward request
         App->>+Blizzard: Fetch data
         Blizzard-->>-App: Return data
@@ -183,13 +181,13 @@ sequenceDiagram
     participant Blizzard
 
     User->>+Nginx: Make player profile request
-    Nginx->>+Valkey: Check API cache (SWR envelope)
+    Nginx->>Valkey: Check API cache (SWR envelope)
 
     alt Fresh cache hit
         Valkey-->>Nginx: Return fresh data
         Nginx-->>User: Return cached data
     else Stale hit (within SWR window)
-        Valkey-->>-Nginx: Return stale data
+        Valkey-->>Nginx: Return stale data
         Nginx-->>User: Return stale data (with Age header)
         Nginx->>App: Enqueue refresh_player_profile task
         App->>Worker: Push task to Valkey queue
@@ -207,7 +205,7 @@ sequenceDiagram
             Worker->>Valkey: Store new SWR envelope
         end
     else Cache miss
-        Valkey-->>-Nginx: No result
+        Valkey-->>Nginx: No result
         Nginx->>+App: Forward request
         App->>+Blizzard: Fetch search + player HTML
         Blizzard-->>-App: Return data

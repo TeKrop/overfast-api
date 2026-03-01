@@ -107,8 +107,6 @@ app/
 │       ├── gamemodes.py
 │       └── players.py
 ├── infrastructure/
-│   ├── commands/
-│   │   └── check_new_hero.py        # CLI script (also run as taskiq cron)
 │   ├── decorators.py
 │   ├── logger.py                    # loguru logger (overfast_logger)
 │   └── metaclasses.py               # Singleton metaclass with clear_all()
@@ -147,7 +145,7 @@ When `get_or_fetch` finds cached data whose age ≥ `staleness_threshold`, it se
 A separate `taskiq worker` process shares dependency injection with the API via `taskiq_fastapi`. It runs:
 - `refresh_*` tasks — triggered by SWR enqueues
 - `cleanup_stale_players` — daily cron at 03:00
-- `check_new_hero` — daily cron at 02:00 (also runnable as a CLI script via `app/infrastructure/commands/check_new_hero.py`)
+- `check_new_hero` — daily cron at 02:00 (detects newly released heroes, sends Discord webhook)
 
 ### Throttle (`app/adapters/blizzard/throttle.py`)
 

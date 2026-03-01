@@ -29,16 +29,14 @@ class ValkeyTaskQueue:
     async def enqueue(
         self,
         task_name: str,
-        *args: Any,
+        *args: str,
         job_id: str | None = None,
-        **kwargs: Any,
     ) -> str:
         """Dispatch a job to the taskiq worker, skipping duplicates.
 
         Uses ``SET NX`` to atomically claim the dedup slot before calling
         ``task_fn.kiq()``.  If the slot is already taken the call is a no-op.
         """
-        del kwargs  # intentionally unused
         effective_id = job_id or task_name
 
         try:
