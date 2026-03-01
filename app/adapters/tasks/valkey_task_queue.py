@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.adapters.tasks.task_registry import TASK_MAP
-from app.overfast_logger import logger
+from app.infrastructure.logger import logger
 
 JOB_KEY_PREFIX = "worker:job:"
 JOB_TTL = 3600  # 1 hour — auto-expire stale dedup keys

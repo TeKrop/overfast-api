@@ -6,12 +6,12 @@ from fastapi import APIRouter, Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from app.adapters.storage import PostgresStorage
+from app.infrastructure.logger import logger
 from app.monitoring.metrics import (
     storage_entries_total,
     storage_player_profile_age_seconds,
     storage_size_bytes,
 )
-from app.overfast_logger import logger
 
 if TYPE_CHECKING:
     from app.domain.ports import StoragePort

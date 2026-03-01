@@ -7,7 +7,7 @@ from typing import ClassVar
 
 from loguru import logger as loguru_logger
 
-from .config import settings
+from app.config import settings
 
 
 class InterceptHandler(logging.Handler):

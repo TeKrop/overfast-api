@@ -14,7 +14,7 @@ from app.domain.enums import (
     PlayerPlatform,
     PlayerRegion,
 )
-from app.exceptions import ParserBlizzardError
+from app.domain.exceptions import ParserBlizzardError
 
 
 @pytest.mark.asyncio

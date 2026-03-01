@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 import valkey.asyncio as aiovalkey
 from taskiq.abc.broker import AsyncBroker
 
-from app.overfast_logger import logger
+from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator

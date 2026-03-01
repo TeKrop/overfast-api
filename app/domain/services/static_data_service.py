@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING, Any
 from app.config import settings
 from app.domain.ports.storage import StaticDataCategory
 from app.domain.services import BaseService
+from app.infrastructure.logger import logger
 from app.monitoring.metrics import (
     background_refresh_triggered_total,
     stale_responses_total,
     storage_hits_total,
 )
-from app.overfast_logger import logger
 
 if TYPE_CHECKING:
     from collections.abc import Callable

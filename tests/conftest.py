@@ -9,9 +9,6 @@ import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 
-from app.adapters.blizzard.client import BlizzardClient
-from app.adapters.blizzard.throttle import BlizzardThrottle
-from app.adapters.cache.valkey_cache import ValkeyCache
 from app.adapters.tasks.task_registry import TASK_MAP
 from app.api.dependencies import get_storage
 from app.main import app
@@ -51,18 +48,14 @@ async def _patch_before_every_test(
     # Clear all storage data before every test
     await storage_db.clear_all_data()
 
-    # Reset throttle singleton so penalty state doesn't bleed between tests
-    Singleton._instances.pop(BlizzardThrottle, None)
-    # Reset BlizzardClient singleton so it doesn't hold stale throttle/cache references
-    Singleton._instances.pop(BlizzardClient, None)
-    # Reset ValkeyCache singleton so each test gets a fresh redis client in the current event loop
-    Singleton._instances.pop(ValkeyCache, None)
+    # Reset singletons so state doesn't bleed between tests
+    Singleton.clear_all()
 
     app.dependency_overrides[get_storage] = lambda: storage_db
 
     with (
-        patch("app.helpers.settings.discord_webhook_enabled", False),
-        patch("app.helpers.settings.profiler", None),
+        patch("app.api.helpers.settings.discord_webhook_enabled", False),
+        patch("app.api.helpers.settings.profiler", None),
         patch(
             "app.adapters.cache.valkey_cache.valkey.Valkey",
             return_value=valkey_server,

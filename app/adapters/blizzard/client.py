@@ -7,14 +7,14 @@ from fastapi import HTTPException, status
 
 from app.adapters.blizzard.throttle import BlizzardThrottle
 from app.config import settings
-from app.exceptions import RateLimitedError
+from app.domain.exceptions import RateLimitedError
+from app.infrastructure.logger import logger
 from app.metaclasses import Singleton
 from app.monitoring.helpers import normalize_blizzard_url
 from app.monitoring.metrics import (
     blizzard_request_duration_seconds,
     blizzard_requests_total,
 )
-from app.overfast_logger import logger
 
 
 class BlizzardClient(metaclass=Singleton):

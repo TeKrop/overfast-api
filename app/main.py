@@ -13,27 +13,28 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.api.helpers import overfast_internal_error
+from app.infrastructure.logger import logger
+
 from .adapters.blizzard import OverFastClient
 from .adapters.cache import CacheManager
 from .adapters.storage import PostgresStorage
 from .adapters.tasks.worker import broker
+from .api.docs import render_documentation
 from .api.enums import Profiler, RouteTag
+from .api.middlewares import (
+    MemrayInMemoryMiddleware,
+    ObjGraphMiddleware,
+    PyInstrumentMiddleware,
+    TraceMallocMiddleware,
+)
 from .api.routers.gamemodes import router as gamemodes
 from .api.routers.heroes import router as heroes
 from .api.routers.maps import router as maps
 from .api.routers.players import router as players
 from .api.routers.roles import router as roles
 from .config import settings
-from .docs import render_documentation
-from .helpers import overfast_internal_error
-from .middlewares import (
-    MemrayInMemoryMiddleware,
-    ObjGraphMiddleware,
-    PyInstrumentMiddleware,
-    TraceMallocMiddleware,
-)
 from .monitoring.middleware import register_prometheus_middleware
-from .overfast_logger import logger
 
 if TYPE_CHECKING:
     from app.domain.ports import BlizzardClientPort, CachePort, StoragePort

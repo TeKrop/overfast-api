@@ -9,11 +9,11 @@ from fastapi import HTTPException
 
 from app.adapters.blizzard import OverFastClient
 from app.adapters.blizzard.parsers.heroes import fetch_heroes_html, parse_heroes_html
+from app.api.helpers import send_discord_webhook_message
 from app.config import settings
 from app.domain.enums import HeroKey
-from app.exceptions import ParserParsingError
-from app.helpers import send_discord_webhook_message
-from app.overfast_logger import logger
+from app.domain.exceptions import ParserParsingError
+from app.infrastructure.logger import logger
 
 
 async def get_distant_hero_keys(client: OverFastClient) -> set[str]:

@@ -6,6 +6,12 @@ from fastapi import APIRouter, Depends, Path, Query, Request, Response, status
 
 from app.api.dependencies import PlayerServiceDep
 from app.api.enums import RouteTag
+from app.api.helpers import (
+    apply_swr_headers,
+    build_cache_key,
+    get_human_readable_duration,
+)
+from app.api.helpers import routes_responses as common_routes_responses
 from app.api.models.players import (
     CareerStats,
     Player,
@@ -21,8 +27,6 @@ from app.domain.enums import (
     PlayerGamemode,
     PlayerPlatform,
 )
-from app.helpers import apply_swr_headers, build_cache_key, get_human_readable_duration
-from app.helpers import routes_responses as common_routes_responses
 
 # Custom route responses for player careers
 career_routes_responses = {

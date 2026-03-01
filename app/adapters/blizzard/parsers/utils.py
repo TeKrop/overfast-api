@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 from fastapi import HTTPException, status
 from selectolax.lexbor import LexborHTMLParser, LexborNode
 
-from app.exceptions import ParserParsingError
-from app.overfast_logger import logger
+from app.domain.exceptions import ParserParsingError
+from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
     import httpx

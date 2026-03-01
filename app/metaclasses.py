@@ -12,3 +12,8 @@ class Singleton(type):
         if cls not in cls._instances:
             cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
+
+    @classmethod
+    def clear_all(cls) -> None:
+        """Clear all singleton instances (used in tests for isolation)."""
+        cls._instances.clear()

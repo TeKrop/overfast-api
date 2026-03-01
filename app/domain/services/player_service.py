@@ -1,7 +1,6 @@
 """Player domain service — career, stats, summary, and search"""
 
 import time
-from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Never, cast
 
 from fastapi import HTTPException, status
@@ -25,52 +24,24 @@ from app.adapters.blizzard.parsers.player_summary import (
     parse_player_summary_json,
 )
 from app.adapters.blizzard.parsers.utils import is_blizzard_id
+from app.api.helpers import overfast_internal_error
 from app.config import settings
+from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.models.player import PlayerIdentity, PlayerRequest
 from app.domain.services.base_service import BaseService
-from app.exceptions import ParserBlizzardError, ParserParsingError
-from app.helpers import overfast_internal_error
+from app.infrastructure.logger import logger
 from app.monitoring.metrics import (
     storage_battletag_lookup_total,
     storage_cache_hit_total,
     storage_hits_total,
 )
-from app.overfast_logger import logger
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from app.domain.enums import (
         HeroKeyCareerFilter,
         PlayerGamemode,
         PlayerPlatform,
     )
-
-
-@dataclass
-class PlayerIdentity:
-    """Result of player identity resolution.
-
-    Groups the four fields that travel together after resolving a
-    BattleTag or Blizzard ID to a canonical identity.
-    """
-
-    blizzard_id: str | None = field(default=None)
-    player_summary: dict = field(default_factory=dict)
-    cached_html: str | None = field(default=None)
-    battletag_input: str | None = field(default=None)
-
-
-@dataclass
-class PlayerRequest:
-    """Parameter object for a player data request.
-
-    Pass a single ``PlayerRequest`` to ``PlayerService._execute_player_request``
-    instead of passing each field as a separate keyword argument.
-    """
-
-    player_id: str
-    cache_key: str
-    data_factory: Callable[[str, dict], dict]
 
 
 class PlayerService(BaseService):

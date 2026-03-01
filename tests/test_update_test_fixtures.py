@@ -20,7 +20,7 @@ def _setup_update_test_fixtures_test():
             "tests.update_test_fixtures.save_fixture_file",
             return_value=Mock(),
         ),
-        patch("app.overfast_logger.logger.debug"),
+        patch("app.infrastructure.logger.logger.debug"),
     ):
         yield
 
@@ -67,11 +67,11 @@ def test_update_with_different_options(parameters, expected_calls: list[str]):
             return_value=Mock(status_code=status.HTTP_200_OK, text="HTML_DATA"),
         ),
         patch(
-            "app.overfast_logger.logger.info",
+            "app.infrastructure.logger.logger.info",
             logger_info_mock,
         ),
         patch(
-            "app.overfast_logger.logger.error",
+            "app.infrastructure.logger.logger.error",
             logger_error_mock,
         ),
     ):
@@ -99,11 +99,11 @@ def test_update_with_blizzard_error():
             ),
         ),
         patch(
-            "app.overfast_logger.logger.info",
+            "app.infrastructure.logger.logger.info",
             Mock(),
         ),
         patch(
-            "app.overfast_logger.logger.error",
+            "app.infrastructure.logger.logger.error",
             logger_error_mock,
         ),
     ):

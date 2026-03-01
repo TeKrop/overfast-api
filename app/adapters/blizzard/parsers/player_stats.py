@@ -10,13 +10,16 @@ from collections import defaultdict
 from copy import deepcopy
 from typing import TYPE_CHECKING
 
+from app.adapters.blizzard.parsers.player_helpers import (
+    get_hero_role,
+    get_plural_stat_key,
+)
 from app.adapters.blizzard.parsers.player_profile import (
     parse_player_profile,
     parse_player_profile_html,
 )
 from app.domain.enums import HeroKey, PlayerGamemode, PlayerPlatform, Role
-from app.overfast_logger import logger
-from app.players.helpers import get_hero_role, get_plural_stat_key
+from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
     from app.domain.ports import BlizzardClientPort

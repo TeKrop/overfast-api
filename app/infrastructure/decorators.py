@@ -4,7 +4,7 @@ import time
 from functools import wraps
 from typing import TYPE_CHECKING
 
-from .overfast_logger import logger
+from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
     from collections.abc import Callable
