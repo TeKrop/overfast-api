@@ -1,6 +1,7 @@
 """Blizzard HTTP client adapter implementing BlizzardClientPort"""
 
 import time
+from typing import TYPE_CHECKING
 
 import httpx
 from fastapi import HTTPException, status
@@ -16,6 +17,9 @@ from app.monitoring.metrics import (
     blizzard_requests_total,
 )
 
+if TYPE_CHECKING:
+    from app.domain.ports import ThrottlePort
+
 
 class BlizzardClient(metaclass=Singleton):
     """
@@ -26,7 +30,7 @@ class BlizzardClient(metaclass=Singleton):
     """
 
     def __init__(self):
-        self.throttle = BlizzardThrottle() if settings.throttle_enabled else None
+        self.throttle: ThrottlePort | None = BlizzardThrottle() if settings.throttle_enabled else None
         self.client = httpx.AsyncClient(
             headers={
                 "User-Agent": (

@@ -1,43 +1,24 @@
 """Project main file containing FastAPI app and routes definitions"""
 
-import json
-from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING, Any
-
-from fastapi import FastAPI, Request
-from fastapi.exceptions import ResponseValidationError
-from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.openapi.utils import get_openapi
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.api.helpers import overfast_internal_error
+from app.api.docs import setup_custom_openapi
+from app.api.enums import RouteTag
+from app.api.exception_handlers import register_exception_handlers
+from app.api.lifespan import lifespan
+from app.api.profiler import register_profiler
+from app.api.responses import ASCIIJSONResponse
+from app.api.routers.docs import router as docs
+from app.api.routers.gamemodes import router as gamemodes
+from app.api.routers.heroes import router as heroes
+from app.api.routers.maps import router as maps
+from app.api.routers.players import router as players
+from app.api.routers.roles import router as roles
+from app.config import settings
 from app.infrastructure.logger import logger
-
-from .adapters.blizzard import OverFastClient
-from .adapters.cache import CacheManager
-from .adapters.storage import PostgresStorage
-from .adapters.tasks.worker import broker
-from .api.docs import render_documentation
-from .api.enums import Profiler, RouteTag
-from .api.middlewares import (
-    MemrayInMemoryMiddleware,
-    ObjGraphMiddleware,
-    PyInstrumentMiddleware,
-    TraceMallocMiddleware,
-)
-from .api.routers.gamemodes import router as gamemodes
-from .api.routers.heroes import router as heroes
-from .api.routers.maps import router as maps
-from .api.routers.players import router as players
-from .api.routers.roles import router as roles
-from .config import settings
-from .monitoring.middleware import register_prometheus_middleware
-
-if TYPE_CHECKING:
-    from app.domain.ports import BlizzardClientPort, CachePort, StoragePort
-
+from app.monitoring import router as monitoring_router
+from app.monitoring.middleware import register_prometheus_middleware
 
 if settings.sentry_dsn:
     import sentry_sdk
@@ -61,39 +42,6 @@ if settings.sentry_dsn:
         # Set a human-readable release identifier.
         release=settings.app_version,
     )
-
-
-@asynccontextmanager
-async def lifespan(_: FastAPI):  # pragma: no cover
-    logger.info("Initializing PostgreSQL storage...")
-    storage: StoragePort = PostgresStorage()
-    await storage.initialize()
-
-    logger.info("Instanciating HTTPX AsyncClient...")
-    overfast_client: BlizzardClientPort = OverFastClient()
-
-    # Evict stale api-cache data on startup (handles crash/deploy scenarios)
-    cache: CachePort = CacheManager()
-    await cache.evict_volatile_data()
-
-    # Start broker for task dispatch (skipped in worker mode — taskiq handles it).
-    if not broker.is_worker_process:
-        logger.info("Starting Valkey task broker...")
-        await broker.startup()
-
-    yield
-
-    # Properly close HTTPX Async Client and PostgreSQL storage
-    await overfast_client.aclose()
-
-    # Evict volatile Valkey data (api-cache, rate-limit, etc.) before RDB snapshot
-    await cache.evict_volatile_data()
-    await cache.bgsave()
-
-    await storage.close()
-
-    if not broker.is_worker_process:
-        await broker.shutdown()
 
 
 description = f"""OverFast API provides comprehensive data on Overwatch heroes,
@@ -124,18 +72,6 @@ In player career statistics, various conversions are applied for ease of use:
 - **Percent values** are represented as **integers**, omitting the percent symbol
 - Integer and float string representations are converted to their respective types
 """
-
-
-# Custom JSONResponse class that enforces ASCII encoding
-class ASCIIJSONResponse(JSONResponse):
-    def render(self, content: Any) -> bytes:
-        return json.dumps(
-            content,
-            ensure_ascii=True,
-            allow_nan=False,
-            indent=None,
-            separators=(",", ":"),
-        ).encode("utf-8")
 
 
 app = FastAPI(
@@ -191,115 +127,23 @@ app = FastAPI(
 # Mount static folder for development server
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-
-# Add customized OpenAPI specs with app logo
-def custom_openapi() -> dict[str, Any]:  # pragma: no cover
-    if app.openapi_schema:
-        return app.openapi_schema
-
-    openapi_schema = get_openapi(
-        title=app.title,
-        description=app.description,
-        version=app.version,
-        contact=app.contact,
-        license_info=app.license_info,
-        routes=app.routes,
-        tags=app.openapi_tags,
-        servers=app.servers,
-    )
-    openapi_schema["info"]["x-logo"] = {
-        "url": "/static/logo_light.png",
-        "altText": "OverFast API Logo",
-    }
-
-    # If specified, add the "NEW" badge on new route path
-    if settings.new_route_path and (
-        new_route_config := openapi_schema["paths"].get(settings.new_route_path)
-    ):
-        new_badge = {"name": "NEW", "color": "#ff9c00"}
-        for route_config in new_route_config.values():
-            route_config["x-badges"] = [new_badge]
-
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-
-app.openapi = custom_openapi  # type: ignore[method-assign]
-
-
-# Add custom exception handlers for Starlette HTTP exceptions, but also
-# for Pydantic Validation Errors
-@app.exception_handler(StarletteHTTPException)
-async def http_exception_handler(_: Request, exc: StarletteHTTPException):
-    return ASCIIJSONResponse(
-        content={"error": exc.detail},
-        status_code=exc.status_code,
-        headers=exc.headers,
-    )
-
-
-@app.exception_handler(ResponseValidationError)
-async def pydantic_validation_error_handler(
-    request: Request, error: ResponseValidationError
-):
-    raise overfast_internal_error(request.url.path, error) from error
-
-
-# We need to override default Redoc page in order to be
-# able to customize the favicon, same for Swagger
-common_doc_settings = {
-    "openapi_url": str(app.openapi_url),
-    "title": f"{app.title} - Documentation",
-    "favicon_url": "/static/favicon.png",
-}
-
-
-@app.get("/", include_in_schema=False)
-async def overridden_redoc() -> HTMLResponse:
-    return render_documentation(
-        title=common_doc_settings["title"],
-        favicon_url=common_doc_settings["favicon_url"],
-        openapi_url=common_doc_settings["openapi_url"],
-    )
-
-
-@app.get("/docs", include_in_schema=False)
-async def overridden_swagger() -> HTMLResponse:
-    return get_swagger_ui_html(
-        openapi_url=common_doc_settings["openapi_url"],
-        title=common_doc_settings["title"],
-        swagger_favicon_url=common_doc_settings["favicon_url"],
-    )
-
+# Setup FastAPI generic stuff and docs
+setup_custom_openapi(app, new_route_path=settings.new_route_path)
+register_exception_handlers(app)
 
 # Add supported profiler as middleware
 if settings.profiler:  # pragma: no cover
-    supported_profilers = {
-        Profiler.MEMRAY: MemrayInMemoryMiddleware,
-        Profiler.PYINSTRUMENT: PyInstrumentMiddleware,
-        Profiler.TRACEMALLOC: TraceMallocMiddleware,
-        Profiler.OBJGRAPH: ObjGraphMiddleware,
-    }
-    if settings.profiler not in supported_profilers:
-        logger.error(
-            f"{settings.profiler} is not a supported profiler, please use one of the "
-            f"following : {', '.join(Profiler)}"
-        )
-        raise SystemExit
-
-    logger.info(f"Profiling is enabled with {settings.profiler}")
-    app.add_middleware(supported_profilers[settings.profiler])  # type: ignore[arg-type]
+    register_profiler(app, settings.profiler)
 
 
 # Add Prometheus middleware and /metrics endpoint if enabled
 if settings.prometheus_enabled:
-    from app.monitoring import router as monitoring_router
-
     register_prometheus_middleware(app)
     app.include_router(monitoring_router.router)
 
 
 # Add application routers
+app.include_router(docs)
 app.include_router(heroes, prefix="/heroes")
 app.include_router(roles, prefix="/roles")
 app.include_router(gamemodes, prefix="/gamemodes")

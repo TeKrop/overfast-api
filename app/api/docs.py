@@ -1,6 +1,17 @@
-import json
+from __future__ import annotations
 
+import json
+from typing import TYPE_CHECKING, Any
+
+from fastapi.openapi.utils import get_openapi
 from fastapi.responses import HTMLResponse
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+
+_DOC_TITLE = "OverFast API - Documentation"
+_OPENAPI_URL = "/openapi.json"
+_FAVICON_URL = "/static/favicon.png"
 
 OVERFAST_REDOC_THEME = {
     "spacing": {"sectionVertical": 32, "sectionHorizontal": 28},
@@ -96,3 +107,41 @@ def render_documentation(
     """
 
     return HTMLResponse(content=html_content)
+
+
+def setup_custom_openapi(app: FastAPI, new_route_path: str | None = None) -> None:
+    """Wire a custom openapi() function onto the given FastAPI app.
+
+    Adds the OverFast logo and optionally a 'NEW' badge on ``new_route_path``.
+    """
+
+    def _custom_openapi() -> dict[str, Any]:
+        if app.openapi_schema:
+            return app.openapi_schema
+
+        openapi_schema = get_openapi(
+            title=app.title,
+            description=app.description,
+            version=app.version,
+            contact=app.contact,
+            license_info=app.license_info,
+            routes=app.routes,
+            tags=app.openapi_tags,
+            servers=app.servers,
+        )
+        openapi_schema["info"]["x-logo"] = {
+            "url": "/static/logo_light.png",
+            "altText": "OverFast API Logo",
+        }
+
+        if new_route_path and (
+            new_route_config := openapi_schema["paths"].get(new_route_path)
+        ):
+            new_badge = {"name": "NEW", "color": "#ff9c00"}
+            for route_config in new_route_config.values():
+                route_config["x-badges"] = [new_badge]
+
+        app.openapi_schema = openapi_schema
+        return app.openapi_schema
+
+    app.openapi = _custom_openapi  # type: ignore[method-assign]
