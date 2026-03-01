@@ -174,7 +174,9 @@ async def refresh_player_profile(entity_id: str, service: PlayerServiceDep) -> N
 async def cleanup_stale_players(storage: StorageDep) -> None:
     """Delete player profiles older than ``player_profile_max_age`` (runs daily at 03:00 UTC)."""
     if settings.player_profile_max_age <= 0:
-        logger.debug("[Worker] cleanup_stale_players: disabled (max_age <= 0), skipping.")
+        logger.debug(
+            "[Worker] cleanup_stale_players: disabled (max_age <= 0), skipping."
+        )
         return
 
     logger.info("[Worker] cleanup_stale_players: Deleting stale player profiles...")

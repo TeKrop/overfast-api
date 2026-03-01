@@ -30,7 +30,9 @@ class BlizzardClient(metaclass=Singleton):
     """
 
     def __init__(self):
-        self.throttle: ThrottlePort | None = BlizzardThrottle() if settings.throttle_enabled else None
+        self.throttle: ThrottlePort | None = (
+            BlizzardThrottle() if settings.throttle_enabled else None
+        )
         self.client = httpx.AsyncClient(
             headers={
                 "User-Agent": (
