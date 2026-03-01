@@ -37,11 +37,12 @@ from app.api.dependencies import (
     get_map_service,
     get_player_service,
     get_role_service,
+    get_storage,
 )
 from app.api.helpers import send_discord_webhook_message
 from app.config import settings
 from app.domain.enums import HeroKey, Locale
-from app.domain.ports import BlizzardClientPort
+from app.domain.ports import BlizzardClientPort, StoragePort
 from app.domain.services import (
     GamemodeService,
     HeroService,
@@ -82,6 +83,7 @@ MapServiceDep = Annotated[MapService, TaskiqDepends(get_map_service)]
 GamemodeServiceDep = Annotated[GamemodeService, TaskiqDepends(get_gamemode_service)]
 PlayerServiceDep = Annotated[PlayerService, TaskiqDepends(get_player_service)]
 BlizzardClientDep = Annotated[BlizzardClientPort, TaskiqDepends(get_blizzard_client)]
+StorageDep = Annotated[StoragePort, TaskiqDepends(get_storage)]
 
 
 # ─── Metrics helper ──────────────────────────────────────────────────────────
@@ -165,7 +167,24 @@ async def refresh_player_profile(entity_id: str, service: PlayerServiceDep) -> N
         )
 
 
-# ─── Cron task ────────────────────────────────────────────────────────────────
+# ─── Cron tasks ───────────────────────────────────────────────────────────────
+
+
+@broker.task(schedule=[{"cron": "0 3 * * *"}])
+async def cleanup_stale_players(storage: StorageDep) -> None:
+    """Delete player profiles older than ``player_profile_max_age`` (runs daily at 03:00 UTC)."""
+    if settings.player_profile_max_age <= 0:
+        logger.debug("[Worker] cleanup_stale_players: disabled (max_age <= 0), skipping.")
+        return
+
+    logger.info("[Worker] cleanup_stale_players: Deleting stale player profiles...")
+    try:
+        await storage.delete_old_player_profiles(settings.player_profile_max_age)
+    except Exception:  # noqa: BLE001
+        logger.exception("[Worker] cleanup_stale_players: Failed.")
+        return
+
+    logger.info("[Worker] cleanup_stale_players: Done.")
 
 
 @broker.task(schedule=[{"cron": "0 2 * * *"}])

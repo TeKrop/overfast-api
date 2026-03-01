@@ -1,1 +1,0 @@
-0 2 * * * cd /code && .venv/bin/python -m app.infrastructure.commands.check_new_hero
