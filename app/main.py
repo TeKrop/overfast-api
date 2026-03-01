@@ -15,11 +15,11 @@ from app.api.routers.heroes import router as heroes
 from app.api.routers.maps import router as maps
 from app.api.routers.players import router as players
 from app.api.routers.roles import router as roles
-from app.api.sentry import setup_sentry
 from app.config import settings
 from app.infrastructure.logger import logger
 from app.monitoring import router as monitoring_router
 from app.monitoring.middleware import register_prometheus_middleware
+from app.monitoring.sentry import setup_sentry
 
 setup_sentry()
 
