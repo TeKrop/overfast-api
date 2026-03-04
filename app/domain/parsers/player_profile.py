@@ -1,0 +1,703 @@
+"""Stateless parser for player profile data from Blizzard career page
+
+This module handles parsing of player profile HTML including:
+- Player summary (username, avatar, title, endorsement, competitive ranks)
+- Player stats across platforms, gamemodes, and heroes
+- Heroes comparisons (top heroes by category)
+- Career stats (detailed statistics per hero)
+"""
+
+from typing import TYPE_CHECKING
+
+from fastapi import status
+
+from app.config import settings
+from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.parsers.utils import (
+    extract_blizzard_id_from_url,
+    parse_html_root,
+    validate_response_status,
+)
+
+if TYPE_CHECKING:
+    from selectolax.lexbor import LexborNode
+
+    from app.domain.ports import BlizzardClientPort
+
+from app.domain.enums import (
+    CareerHeroesComparisonsCategory,
+    CompetitiveRole,
+    PlayerGamemode,
+    PlayerPlatform,
+)
+from app.domain.parsers.player_helpers import (
+    get_computed_stat_value,
+    get_division_from_icon,
+    get_endorsement_value_from_frame,
+    get_hero_keyname,
+    get_player_title,
+    get_plural_stat_key,
+    get_real_category_name,
+    get_role_key_from_icon,
+    get_stats_hero_class,
+    get_tier_from_icon,
+    normalize_career_stat_category_name,
+    string_to_snakecase,
+)
+from app.infrastructure.logger import logger
+
+# Platform/gamemode CSS class mappings
+PLATFORMS_DIV_MAPPING = {
+    PlayerPlatform.PC: "mouseKeyboard-view",
+    PlayerPlatform.CONSOLE: "controller-view",
+}
+GAMEMODES_DIV_MAPPING = {
+    PlayerGamemode.QUICKPLAY: "quickPlay-view",
+    PlayerGamemode.COMPETITIVE: "competitive-view",
+}
+
+
+async def fetch_player_html(
+    client: BlizzardClientPort, player_id: str
+) -> tuple[str, str | None]:
+    """
+    Fetch player profile HTML from Blizzard and extract Blizzard ID from redirect.
+
+    Blizzard redirects BattleTag URLs to canonical Blizzard ID URLs:
+    - Input:  /career/Kindness-11556/
+    - Redirect: 302 → /career/df51a381fe20caf8baa7|0bf3b4c47cbebe84b8db9c676a4e9c1f/
+    - Returns: (HTML content, Blizzard ID)
+
+    Args:
+        client: Blizzard HTTP client
+        player_id: Player ID (BattleTag or Blizzard ID format)
+
+    Returns:
+        Tuple of (HTML content, Blizzard ID extracted from redirect URL)
+
+    Raises:
+        ParserBlizzardError: If player not found (404)
+    """
+
+    url = f"{settings.blizzard_host}{settings.career_path}/{player_id}/"
+
+    response = await client.get(url)
+    validate_response_status(response, valid_codes=[200, 404])
+
+    # Extract Blizzard ID from final URL (after redirect)
+    blizzard_id = extract_blizzard_id_from_url(str(response.url))
+
+    return response.text, blizzard_id
+
+
+def extract_name_from_profile_html(html: str) -> str | None:
+    """
+    Extract player display name from profile HTML.
+
+    The name is found in the <h1 class="Profile-player--name"> tag.
+    Note: This is ONLY the display name (e.g., "TeKrop"), NOT the full
+    BattleTag with discriminator (e.g., "TeKrop-2217").
+
+    Args:
+        html: Raw HTML from player profile page
+
+    Returns:
+        Player display name if found, None otherwise
+
+    Example:
+        >>> html = '<h1 class="Profile-player--name">TeKrop</h1>'
+        >>> extract_name_from_profile_html(html)
+        'TeKrop'
+    """
+    root_tag = parse_html_root(html)
+    name_tag = root_tag.css_first("h1.Profile-player--name")
+
+    return name_tag.text().strip() if name_tag and name_tag.text() else None
+
+
+def parse_player_profile_html(
+    html: str,
+    player_summary: dict | None = None,
+) -> dict:
+    """
+    Parse player profile HTML into summary and stats
+
+    Args:
+        html: Raw HTML from player profile page
+        player_summary: Optional player summary data from search endpoint
+            (provides avatar, namecard, title, lastUpdated)
+
+    Returns:
+        Dict with "summary" and "stats" keys
+
+    Raises:
+        ParserBlizzardError: If player not found (profile section missing)
+    """
+    root_tag = parse_html_root(html)
+
+    # Check if player exists
+    if not root_tag.css_first("blz-section.Profile-masthead"):
+        raise ParserBlizzardError(
+            status_code=status.HTTP_404_NOT_FOUND,
+            message="Player not found",
+        )
+
+    return {
+        "summary": _parse_summary(root_tag, player_summary),
+        "stats": _parse_stats(root_tag),
+    }
+
+
+def _parse_summary(root_tag: LexborNode, player_summary: dict | None) -> dict:
+    """Parse player summary section (username, avatar, endorsement, ranks)"""
+    player_summary = player_summary or {}
+    error_msg_prefix = "Failed to parse player summary"
+
+    try:
+        profile_div = root_tag.css_first(
+            "blz-section.Profile-masthead > div.Profile-player"
+        )
+        summary_div = profile_div.css_first("div.Profile-player--summaryWrapper")
+        progression_div = profile_div.css_first("div.Profile-player--info")
+
+        return {
+            "username": summary_div.css_first("h1.Profile-player--name").text(),
+            "avatar": (
+                player_summary.get("avatar")
+                or summary_div.css_first("img.Profile-player--portrait").attributes.get(
+                    "src"
+                )
+            ),
+            "namecard": player_summary.get("namecard"),
+            "title": get_player_title(
+                player_summary.get("title") or _get_title(profile_div)
+            ),
+            "endorsement": _get_endorsement(progression_div),
+            "competitive": _get_competitive_ranks(root_tag, progression_div),
+            "last_updated_at": player_summary.get("lastUpdated"),
+        }
+    except (AttributeError, KeyError, IndexError, TypeError) as error:
+        error_msg = f"{error_msg_prefix}: {error!r}"
+        raise ParserParsingError(error_msg) from error
+
+
+def _get_title(profile_div: LexborNode) -> str | None:
+    """Extract player title from profile div"""
+    if not (title_tag := profile_div.css_first("h2.Profile-player--title")):
+        return None
+
+    # Special case: "no title" means there is no title
+    return title_tag.text() or None
+
+
+def _get_endorsement(progression_div: LexborNode) -> dict | None:
+    """Extract endorsement level and frame"""
+    endorsement_span = progression_div.css_first(
+        "span.Profile-player--endorsementWrapper"
+    )
+    if not endorsement_span:
+        return None
+
+    endorsement_frame_url = (
+        endorsement_span.css_first("img.Profile-playerSummary--endorsement").attributes[
+            "src"
+        ]
+        or ""
+    )
+
+    return {
+        "level": get_endorsement_value_from_frame(endorsement_frame_url),
+        "frame": endorsement_frame_url,
+    }
+
+
+def _get_competitive_ranks(
+    root_tag: LexborNode,
+    progression_div: LexborNode,
+) -> dict | None:
+    """Extract competitive ranks for all platforms"""
+    competitive_ranks = {
+        platform.value: _get_platform_competitive_ranks(
+            root_tag,
+            progression_div,
+            platform_class,
+        )
+        for platform, platform_class in PLATFORMS_DIV_MAPPING.items()
+    }
+
+    # If no data for any platform, return None
+    return None if not any(competitive_ranks.values()) else competitive_ranks
+
+
+def _get_platform_competitive_ranks(
+    root_tag: LexborNode,
+    progression_div: LexborNode,
+    platform_class: str,
+) -> dict | None:
+    """Extract competitive ranks for a specific platform"""
+    last_season_played = _get_last_season_played(root_tag, platform_class)
+
+    role_wrappers = progression_div.css(
+        f"div.Profile-playerSummary--rankWrapper.{platform_class} > div.Profile-playerSummary--roleWrapper",
+    )
+    if not role_wrappers and not last_season_played:
+        return None
+
+    competitive_ranks = {}
+
+    for role_wrapper in role_wrappers:
+        role_icon = _get_role_icon(role_wrapper)
+        role_key = get_role_key_from_icon(role_icon).value
+
+        rank_tier_icons = role_wrapper.css("img.Profile-playerSummary--rank")
+        rank_icon, tier_icon = (
+            rank_tier_icons[0].attributes["src"] or "",
+            rank_tier_icons[1].attributes["src"] or "",
+        )
+
+        competitive_ranks[role_key] = {
+            "division": get_division_from_icon(rank_icon).value,
+            "tier": get_tier_from_icon(tier_icon),
+            "role_icon": role_icon,
+            "rank_icon": rank_icon,
+            "tier_icon": tier_icon,
+        }
+
+    for role in CompetitiveRole:
+        if role.value not in competitive_ranks:  # ty: ignore[unresolved-attribute]
+            competitive_ranks[role.value] = None  # ty: ignore[unresolved-attribute]
+
+    competitive_ranks["season"] = last_season_played
+
+    return competitive_ranks
+
+
+def _get_last_season_played(root_tag: LexborNode, platform_class: str) -> int | None:
+    """Extract last competitive season played for a platform"""
+    if not (profile_section := _get_profile_view_section(root_tag, platform_class)):
+        return None
+
+    statistics_section = profile_section.css_first("blz-section.stats.competitive-view")
+    if not statistics_section:
+        return None
+
+    last_season_played = statistics_section.attributes.get(
+        "data-latestherostatrankseasonow2"
+    )
+    return int(last_season_played) if last_season_played else None
+
+
+def _get_profile_view_section(root_tag: LexborNode, platform_class: str) -> LexborNode:
+    """Get profile view section for a platform"""
+    return root_tag.css_first(f"div.Profile-view.{platform_class}")
+
+
+def _get_role_icon(role_wrapper: LexborNode) -> str:
+    """Extract role icon (format differs between PC and console)"""
+    # PC: img tag, Console: svg tag
+    if role_div := role_wrapper.css_first("div.Profile-playerSummary--role"):
+        return role_div.css_first("img").attributes["src"] or ""
+
+    role_svg = role_wrapper.css_first("svg.Profile-playerSummary--role")
+    return role_svg.css_first("use").attributes["xlink:href"] or ""
+
+
+def _parse_stats(root_tag: LexborNode) -> dict | None:
+    """Parse stats for all platforms"""
+    stats = {
+        platform.value: _parse_platform_stats(root_tag, platform_class)
+        for platform, platform_class in PLATFORMS_DIV_MAPPING.items()
+    }
+
+    # If no data for any platform, return None
+    return None if not any(stats.values()) else stats
+
+
+def _parse_platform_stats(
+    root_tag: LexborNode,
+    platform_class: str,
+) -> dict | None:
+    """Parse stats for a specific platform"""
+    statistics_section = _get_profile_view_section(root_tag, platform_class)
+    gamemodes_infos = {
+        gamemode.value: _parse_gamemode_stats(statistics_section, gamemode)
+        for gamemode in PlayerGamemode
+    }
+
+    # If no data for any gamemode, return None
+    return None if not any(gamemodes_infos.values()) else gamemodes_infos
+
+
+def _parse_gamemode_stats(
+    statistics_section: LexborNode,
+    gamemode: PlayerGamemode,
+) -> dict | None:
+    """Parse stats for a specific gamemode"""
+    if not statistics_section or not statistics_section.first_child:
+        return None
+
+    top_heroes_section = statistics_section.first_child.css_first(
+        f"div.{GAMEMODES_DIV_MAPPING[gamemode]}"
+    )
+
+    # Check if we have a select element (indicates data exists)
+    if not top_heroes_section or not top_heroes_section.css_first("select"):
+        return None
+
+    career_stats_section = statistics_section.css_first(
+        f"blz-section.{GAMEMODES_DIV_MAPPING[gamemode]}"
+    )
+    return {
+        "heroes_comparisons": _parse_heroes_comparisons(top_heroes_section),
+        "career_stats": _parse_career_stats(career_stats_section),
+    }
+
+
+def _parse_heroes_comparisons(top_heroes_section: LexborNode) -> dict:
+    """Parse heroes comparisons (top heroes by category)"""
+    categories = _get_heroes_options(top_heroes_section)
+
+    heroes_comparisons = {
+        string_to_snakecase(
+            get_real_category_name(categories[category.attributes["data-category-id"]]),
+        ): {
+            "label": get_real_category_name(
+                categories[category.attributes["data-category-id"]],
+            ),
+            "values": [
+                {
+                    # Normally, a valid data-hero-id is present. However, in some
+                    # cases — such as when a hero is newly available for testing —
+                    # stats may lack an associated ID. In these instances, we fall
+                    # back to using the hero's title in lowercase.
+                    "hero": (
+                        progress_bar_container.first_child.attributes.get(
+                            "data-hero-id"
+                        )
+                        or progress_bar_container.last_child.first_child.text().lower()
+                    ),
+                    "value": get_computed_stat_value(
+                        progress_bar_container.last_child.last_child.text()
+                    ),
+                }
+                for progress_bar in category.iter()
+                for progress_bar_container in progress_bar.iter()
+                if progress_bar_container.tag == "div"
+                and progress_bar_container.first_child is not None
+                and progress_bar_container.last_child is not None
+                and progress_bar_container.last_child.first_child is not None
+                and progress_bar_container.last_child.last_child is not None
+            ],
+        }
+        for category in top_heroes_section.iter()
+        if (
+            category.attributes["class"] is not None
+            and "Profile-progressBars" in category.attributes["class"]
+            and category.attributes["data-category-id"] in categories
+        )
+    }
+
+    for category in CareerHeroesComparisonsCategory:
+        # Sometimes, Blizzard exposes the categories without any value
+        # In that case, we must assume we have no data at all
+        if (
+            category.value not in heroes_comparisons
+            or not heroes_comparisons[category.value]["values"]
+        ):
+            heroes_comparisons[category.value] = None
+
+    return heroes_comparisons
+
+
+def _parse_stat_row(stat_row: LexborNode) -> dict | None:
+    """Parse a single stat row and return stat dict or None if invalid."""
+    if not stat_row.first_child or not stat_row.last_child:
+        logger.warning("Missing stat name or value in %s", stat_row)
+        return None
+
+    stat_name = stat_row.first_child.text()
+    return {
+        "key": get_plural_stat_key(string_to_snakecase(stat_name)),
+        "label": stat_name,
+        "value": get_computed_stat_value(stat_row.last_child.text()),
+    }
+
+
+def _parse_category_stats(content_div: LexborNode) -> list[dict]:
+    """Parse all stat rows for a given category."""
+    stats = []
+    for stat_row in content_div.iter():
+        stat_row_class = stat_row.attributes["class"] or ""
+        if "stat-item" not in stat_row_class:
+            continue
+
+        stat = _parse_stat_row(stat_row)
+        if stat:
+            stats.append(stat)
+
+    return stats
+
+
+def _parse_career_stats(career_stats_section: LexborNode) -> dict:
+    """Parse detailed career stats per hero"""
+    heroes_options = _get_heroes_options(career_stats_section, key_prefix="option-")
+
+    career_stats = {}
+
+    for hero_container in career_stats_section.iter():
+        # Hero container should be span with "stats-container" class
+        if hero_container.tag != "span":
+            continue
+
+        stats_hero_class = get_stats_hero_class(hero_container.attributes["class"])
+
+        # Sometimes, Blizzard makes some weird things and options don't
+        # have any label, so we can't know for sure which hero it is about.
+        # So we have to skip this field
+        if stats_hero_class not in heroes_options:
+            continue
+
+        hero_key = get_hero_keyname(heroes_options[stats_hero_class])
+
+        career_stats[hero_key] = []
+        # Hero container children are div with "category" class
+        for card_stat in hero_container.iter():
+            # Content div should be the only child ("content" class)
+            content_div = card_stat.first_child
+
+            # Ensure we have everything we need
+            if (
+                not content_div
+                or not content_div.first_child
+                or not content_div.first_child.first_child
+            ):
+                logger.warning("Missing content div for hero %s", hero_key)
+                continue
+
+            # Label should be the first div within content ("header" class)
+            category_label = content_div.first_child.first_child.text()
+
+            # Skip empty category labels (malformed HTML)
+            if not category_label or not category_label.strip():
+                logger.warning("Empty category label for hero %s, skipping", hero_key)
+                continue
+
+            # Normalize localized category names to English
+            normalized_category_label = normalize_career_stat_category_name(
+                category_label
+            )
+
+            # Skip if normalization resulted in empty string
+            if not normalized_category_label or not normalized_category_label.strip():
+                logger.warning(
+                    "Category label normalized to empty for hero %s (original: %r), skipping",
+                    hero_key,
+                    category_label,
+                )
+                continue
+
+            # Convert to snake_case for category key
+            category_key = string_to_snakecase(normalized_category_label)
+
+            # Skip if snake_case conversion resulted in empty string
+            if not category_key:
+                logger.warning(
+                    "Category key is empty after snake_case conversion for hero %s"
+                    " (normalized label: %r, original: %r), skipping",
+                    hero_key,
+                    normalized_category_label,
+                    category_label,
+                )
+                continue
+
+            # Parse all stats for this category
+            stats = _parse_category_stats(content_div)
+
+            career_stats[hero_key].append(
+                {
+                    "category": category_key,
+                    "label": normalized_category_label,
+                    "stats": stats,
+                },
+            )
+
+        # For a reason, sometimes the hero is in the dropdown but there
+        # is no stat to show. In this case, remove it as if there was
+        # no stat at all
+        if len(career_stats[hero_key]) == 0:
+            del career_stats[hero_key]
+
+    return career_stats
+
+
+def _get_heroes_options(
+    parent_section: LexborNode,
+    key_prefix: str = "",
+) -> dict[str, str]:
+    """Extract hero options from dropdown select element"""
+    # Sometimes, pages are not rendered correctly and select can be empty
+    if not (
+        options := parent_section.css_first("div.Profile-heroSummary--header > select")
+    ):
+        return {}
+
+    return {
+        f"{key_prefix}{option.attributes['value']}": str(option.attributes["option-id"])
+        for option in options.iter()
+        if option.attributes.get("option-id")
+    }
+
+
+# Filtering functions for API queries
+
+
+def filter_stats_by_query(
+    stats: dict | None,
+    platform: PlayerPlatform | str | None = None,
+    gamemode: PlayerGamemode | str | None = None,
+    hero: str | None = None,
+) -> dict:
+    """
+    Filter career stats by query parameters
+
+    Args:
+        stats: Raw stats dict from parser (keys are strings: platform.value, gamemode.value)
+        platform: Optional platform filter (enum or string)
+        gamemode: Optional gamemode filter (enum or string)
+        hero: Optional hero filter
+
+    Returns:
+        Filtered dict of career stats
+    """
+    filtered_data = stats or {}
+
+    # Normalize platform to string key
+    platform_key: str | None = None
+    if platform:
+        platform_key = platform.value if hasattr(platform, "value") else str(platform)  # type: ignore[arg-type]
+    else:
+        # Determine platform if not specified
+        possible_platforms = [
+            pk
+            for pk, platform_data in filtered_data.items()
+            if platform_data is not None
+        ]
+        if possible_platforms:
+            # Take the first one of the list, usually there will be only one.
+            # If there are two, the PC stats should come first
+            platform_key = possible_platforms[0]
+        else:
+            return {}
+
+    filtered_data = filtered_data.get(platform_key) or {}
+    if not filtered_data:
+        return {}
+
+    # Normalize gamemode to string key
+    gamemode_key: str | None = None
+    if gamemode:
+        gamemode_key = gamemode.value if hasattr(gamemode, "value") else str(gamemode)  # type: ignore[arg-type]
+    filtered_data = filtered_data.get(gamemode_key) or {}
+    if not filtered_data:
+        return {}
+
+    filtered_data = filtered_data.get("career_stats") or {}
+
+    return {
+        hero_key: statistics
+        for hero_key, statistics in filtered_data.items()
+        if not hero or hero == hero_key
+    }
+
+
+def filter_all_stats_data(
+    stats: dict | None,
+    platform: PlayerPlatform | str | None = None,
+    gamemode: PlayerGamemode | str | None = None,
+) -> dict | None:
+    """
+    Filter all stats data by platform and/or gamemode
+
+    Args:
+        stats: Raw stats dict from parser (keys are strings: platform.value, gamemode.value)
+        platform: Optional platform filter (enum or string)
+        gamemode: Optional gamemode filter (enum or string)
+
+    Returns:
+        Filtered stats dict (may set platforms/gamemodes to None if not matching),
+        or None if no stats data exists
+    """
+    # Return None if no stats data
+    if stats is None:
+        return None
+
+    # Check if stats dict is empty or all values are None
+    if not stats or all(v is None for v in stats.values()):
+        return None
+
+    stats_data = stats
+
+    # Return early if no filters (ensure both platform keys exist)
+    if not platform and not gamemode:
+        return {
+            PlayerPlatform.PC.value: stats_data.get(PlayerPlatform.PC.value),
+            PlayerPlatform.CONSOLE.value: stats_data.get(PlayerPlatform.CONSOLE.value),
+        }
+
+    # Normalize filters to string keys
+    platform_filter: str | None = None
+    if platform:
+        platform_filter = (
+            platform.value if hasattr(platform, "value") else str(platform)
+        )  # type: ignore[arg-type]
+
+    gamemode_filter: str | None = None
+    if gamemode:
+        gamemode_filter = (
+            gamemode.value if hasattr(gamemode, "value") else str(gamemode)
+        )  # type: ignore[arg-type]
+
+    # Ensure both platform keys exist in output
+    filtered_data = {}
+    for platform_enum in PlayerPlatform:
+        platform_key = platform_enum.value
+        platform_data = stats_data.get(platform_key)
+
+        if platform_filter and platform_key != platform_filter:
+            filtered_data[platform_key] = None
+            continue
+
+        if platform_data is None:
+            filtered_data[platform_key] = None
+            continue
+
+        if gamemode_filter is None:
+            filtered_data[platform_key] = platform_data
+            continue
+
+        filtered_data[platform_key] = {
+            gamemode_key: (gamemode_data if gamemode_key == gamemode_filter else None)
+            for gamemode_key, gamemode_data in platform_data.items()
+        }
+
+    return filtered_data
+
+
+async def parse_player_profile(
+    client: BlizzardClientPort,
+    player_id: str,
+    player_summary: dict | None = None,
+) -> tuple[dict, str | None]:
+    """
+    High-level function to fetch and parse player profile
+
+    Args:
+        client: Blizzard HTTP client
+        player_id: Player ID (Blizzard ID format or BattleTag)
+        player_summary: Optional player summary from search endpoint
+
+    Returns:
+        Tuple of (dict with "summary" and "stats" keys, Blizzard ID from redirect)
+    """
+    html, blizzard_id = await fetch_player_html(client, player_id)
+    return parse_player_profile_html(html, player_summary), blizzard_id
