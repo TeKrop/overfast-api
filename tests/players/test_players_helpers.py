@@ -1,7 +1,7 @@
 import pytest
 
-from app.adapters.blizzard.parsers import player_helpers as helpers
 from app.domain.enums import CompetitiveDivision, CompetitiveRole, HeroKey
+from app.domain.parsers import player_helpers as helpers
 
 
 @pytest.mark.parametrize(

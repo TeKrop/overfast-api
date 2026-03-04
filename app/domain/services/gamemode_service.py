@@ -1,7 +1,7 @@
 """Gamemode domain service — gamemodes list"""
 
-from app.adapters.blizzard.parsers.gamemodes import parse_gamemodes_csv
 from app.config import settings
+from app.domain.parsers.gamemodes import parse_gamemodes_csv
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
 
 

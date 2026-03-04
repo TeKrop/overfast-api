@@ -1,5 +1,5 @@
-from app.adapters.blizzard.parsers.gamemodes import parse_gamemodes_csv
 from app.domain.enums import MapGamemode
+from app.domain.parsers.gamemodes import parse_gamemodes_csv
 
 
 def test_parse_gamemodes_csv_returns_all_gamemodes():

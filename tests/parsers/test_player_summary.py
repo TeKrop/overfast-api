@@ -2,8 +2,8 @@
 
 import pytest
 
-from app.adapters.blizzard.parsers.player_summary import parse_player_summary_json
 from app.domain.exceptions import ParserParsingError
+from app.domain.parsers.player_summary import parse_player_summary_json
 
 # Shared fixtures
 PLAYER_BLIZZARD_ID = "abc123%7Cdef456"

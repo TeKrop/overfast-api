@@ -27,7 +27,6 @@ from taskiq.schedule_sources import LabelScheduleSource
 from taskiq.scheduler.scheduler import TaskiqScheduler
 from taskiq_fastapi import init as taskiq_init
 
-from app.adapters.blizzard.parsers.heroes import fetch_heroes_html, parse_heroes_html
 from app.adapters.tasks.task_registry import TASK_MAP
 from app.adapters.tasks.valkey_broker import ValkeyListBroker
 from app.api.dependencies import (
@@ -42,6 +41,7 @@ from app.api.dependencies import (
 from app.api.helpers import send_discord_webhook_message
 from app.config import settings
 from app.domain.enums import HeroKey, Locale
+from app.domain.parsers.heroes import fetch_heroes_html, parse_heroes_html
 from app.domain.ports import BlizzardClientPort, StoragePort
 from app.domain.services import (
     GamemodeService,

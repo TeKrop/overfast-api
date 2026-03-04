@@ -4,12 +4,12 @@ import pytest
 from fastapi import status
 
 from app.adapters.blizzard import OverFastClient
-from app.adapters.blizzard.parsers.heroes import (
+from app.domain.enums import HeroGamemode, HeroKey, Role
+from app.domain.parsers.heroes import (
     fetch_heroes_html,
     filter_heroes,
     parse_heroes_html,
 )
-from app.domain.enums import HeroGamemode, HeroKey, Role
 
 
 def test_parse_heroes_html_returns_all_heroes(heroes_html_data: str):

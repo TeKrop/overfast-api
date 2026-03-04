@@ -5,29 +5,29 @@ from typing import TYPE_CHECKING, Never, cast
 
 from fastapi import HTTPException, status
 
-from app.adapters.blizzard.parsers.player_career_stats import (
+from app.api.helpers import overfast_internal_error
+from app.config import settings
+from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.models.player import PlayerIdentity, PlayerRequest
+from app.domain.parsers.player_career_stats import (
     parse_player_career_stats_from_html,
 )
-from app.adapters.blizzard.parsers.player_profile import (
+from app.domain.parsers.player_profile import (
     extract_name_from_profile_html,
     fetch_player_html,
     filter_all_stats_data,
     filter_stats_by_query,
     parse_player_profile_html,
 )
-from app.adapters.blizzard.parsers.player_search import parse_player_search
-from app.adapters.blizzard.parsers.player_stats import (
+from app.domain.parsers.player_search import parse_player_search
+from app.domain.parsers.player_stats import (
     parse_player_stats_summary_from_html,
 )
-from app.adapters.blizzard.parsers.player_summary import (
+from app.domain.parsers.player_summary import (
     fetch_player_summary_json,
     parse_player_summary_json,
 )
-from app.adapters.blizzard.parsers.utils import is_blizzard_id
-from app.api.helpers import overfast_internal_error
-from app.config import settings
-from app.domain.exceptions import ParserBlizzardError, ParserParsingError
-from app.domain.models.player import PlayerIdentity, PlayerRequest
+from app.domain.parsers.utils import is_blizzard_id
 from app.domain.services.base_service import BaseService
 from app.infrastructure.logger import logger
 from app.monitoring.metrics import (

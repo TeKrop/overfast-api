@@ -1,7 +1,7 @@
 """Map domain service — maps list"""
 
-from app.adapters.blizzard.parsers.maps import parse_maps_csv
 from app.config import settings
+from app.domain.parsers.maps import parse_maps_csv
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
 
 

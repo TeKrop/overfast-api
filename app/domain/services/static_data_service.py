@@ -93,8 +93,10 @@ class StaticDataService(BaseService):
 
         if is_stale:
             logger.info(
-                f"[SWR] {config.entity_type} stale (age={age}s, "
-                f"threshold={config.staleness_threshold}s) — serving + triggering refresh"
+                "[SWR] %s stale (age=%ds, threshold=%ds) — serving + triggering refresh",
+                config.entity_type,
+                age,
+                config.staleness_threshold,
             )
             await self._enqueue_refresh(
                 config.entity_type,

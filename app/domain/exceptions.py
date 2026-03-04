@@ -21,6 +21,7 @@ class RateLimitedError(Exception):
 class OverfastError(Exception):
     """Generic OverFast API Exception"""
 
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     message = "OverFast API Error"
 
     def __str__(self):

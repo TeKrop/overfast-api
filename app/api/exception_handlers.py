@@ -9,6 +9,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.helpers import overfast_internal_error
 from app.api.responses import ASCIIJSONResponse
+from app.domain.exceptions import OverfastError
 
 if TYPE_CHECKING:
     from fastapi import FastAPI, Request
@@ -23,6 +24,13 @@ def register_exception_handlers(app: FastAPI) -> None:
             content={"error": exc.detail},
             status_code=exc.status_code,
             headers=exc.headers,
+        )
+
+    @app.exception_handler(OverfastError)
+    async def overfast_error_handler(_: Request, exc: OverfastError):
+        return ASCIIJSONResponse(
+            content={"error": exc.message},
+            status_code=exc.status_code,
         )
 
     @app.exception_handler(ResponseValidationError)

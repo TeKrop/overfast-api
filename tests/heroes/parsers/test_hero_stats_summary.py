@@ -3,11 +3,6 @@ from unittest.mock import Mock, patch
 import pytest
 
 from app.adapters.blizzard import OverFastClient
-from app.adapters.blizzard.parsers.hero_stats_summary import (
-    GAMEMODE_MAPPING,
-    PLATFORM_MAPPING,
-    parse_hero_stats_summary,
-)
 from app.domain.enums import (
     CompetitiveDivision,
     PlayerGamemode,
@@ -15,6 +10,11 @@ from app.domain.enums import (
     PlayerRegion,
 )
 from app.domain.exceptions import ParserBlizzardError
+from app.domain.parsers.hero_stats_summary import (
+    GAMEMODE_MAPPING,
+    PLATFORM_MAPPING,
+    parse_hero_stats_summary,
+)
 
 
 @pytest.mark.asyncio

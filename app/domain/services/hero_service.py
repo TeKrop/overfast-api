@@ -5,18 +5,18 @@ from typing import TYPE_CHECKING, Any
 
 from fastapi import HTTPException
 
-from app.adapters.blizzard.parsers.hero import fetch_hero_html, parse_hero_html
-from app.adapters.blizzard.parsers.hero_stats_summary import parse_hero_stats_summary
-from app.adapters.blizzard.parsers.heroes import (
-    fetch_heroes_html,
-    filter_heroes,
-    parse_heroes_html,
-)
-from app.adapters.blizzard.parsers.heroes_hitpoints import parse_heroes_hitpoints
 from app.api.helpers import overfast_internal_error
 from app.config import settings
 from app.domain.enums import Locale
 from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.parsers.hero import fetch_hero_html, parse_hero_html
+from app.domain.parsers.hero_stats_summary import parse_hero_stats_summary
+from app.domain.parsers.heroes import (
+    fetch_heroes_html,
+    filter_heroes,
+    parse_heroes_html,
+)
+from app.domain.parsers.heroes_hitpoints import parse_heroes_hitpoints
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
 
 if TYPE_CHECKING:
