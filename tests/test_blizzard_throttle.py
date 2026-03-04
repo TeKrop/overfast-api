@@ -49,13 +49,17 @@ def throttle(mock_cache: AsyncMock) -> BlizzardThrottle:
 
 class TestGetCurrentDelay:
     @pytest.mark.asyncio
-    async def test_returns_start_delay_when_no_stored_value(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_returns_start_delay_when_no_stored_value(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         mock_cache.get.return_value = None
         delay = await throttle.get_current_delay()
         assert delay == settings.throttle_start_delay
 
     @pytest.mark.asyncio
-    async def test_returns_stored_delay(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_returns_stored_delay(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         mock_cache.get.return_value = b"5.5"
         delay = await throttle.get_current_delay()
         assert delay == pytest.approx(5.5)
@@ -63,13 +67,17 @@ class TestGetCurrentDelay:
 
 class TestIsRateLimited:
     @pytest.mark.asyncio
-    async def test_returns_zero_when_no_403_recorded(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_returns_zero_when_no_403_recorded(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         mock_cache.get.return_value = None
         remaining = await throttle.is_rate_limited()
         assert remaining == 0
 
     @pytest.mark.asyncio
-    async def test_returns_zero_when_penalty_expired(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_returns_zero_when_penalty_expired(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         # Penalty was more than `penalty_duration` seconds ago
         old_ts = time.time() - settings.throttle_penalty_duration - 5
         mock_cache.get.return_value = str(old_ts).encode()
@@ -77,7 +85,9 @@ class TestIsRateLimited:
         assert remaining == 0
 
     @pytest.mark.asyncio
-    async def test_returns_remaining_during_penalty(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_returns_remaining_during_penalty(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         # 403 happened 10 seconds ago
         recent_ts = time.time() - 10
         mock_cache.get.return_value = str(recent_ts).encode()
@@ -88,7 +98,9 @@ class TestIsRateLimited:
 
 class TestWaitBeforeRequest:
     @pytest.mark.asyncio
-    async def test_raises_rate_limited_error_during_penalty(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_raises_rate_limited_error_during_penalty(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         recent_ts = time.time() - 5
         mock_cache.get.return_value = str(recent_ts).encode()
         with pytest.raises(RateLimitedError) as exc_info:
@@ -96,7 +108,9 @@ class TestWaitBeforeRequest:
         assert exc_info.value.retry_after > 0
 
     @pytest.mark.asyncio
-    async def test_no_sleep_when_enough_time_elapsed(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_no_sleep_when_enough_time_elapsed(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         # No penalty, last request was long ago
         def get_side_effect(key):
             if "last_403" in key:
@@ -114,7 +128,9 @@ class TestWaitBeforeRequest:
             mock_sleep.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_sleeps_when_request_too_soon(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_sleeps_when_request_too_soon(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         def get_side_effect(key):
             if "last_403" in key:
                 return None
@@ -135,7 +151,9 @@ class TestWaitBeforeRequest:
 
 class TestAdjustDelay:
     @pytest.mark.asyncio
-    async def test_403_sets_penalty_and_ssthresh(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_403_sets_penalty_and_ssthresh(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         """403 should double delay, set ssthresh, reset streak, record last_403."""
         mock_cache.get.return_value = b"2.0"
         await throttle.adjust_delay(HTTPStatus.FORBIDDEN)
@@ -147,26 +165,37 @@ class TestAdjustDelay:
         assert _STREAK_KEY in keys_set
 
     @pytest.mark.asyncio
-    async def test_403_doubles_delay_with_minimum(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_403_doubles_delay_with_minimum(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         mock_cache.get.return_value = b"2.0"
         await throttle.adjust_delay(HTTPStatus.FORBIDDEN)
         delay_set = next(
-            float(c[0][1]) for c in mock_cache.set.call_args_list if c[0][0] == _DELAY_KEY
+            float(c[0][1])
+            for c in mock_cache.set.call_args_list
+            if c[0][0] == _DELAY_KEY
         )
         assert delay_set == max(4.0, settings.throttle_penalty_delay)
 
     @pytest.mark.asyncio
-    async def test_403_sets_ssthresh_to_double_current(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_403_sets_ssthresh_to_double_current(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         mock_cache.get.return_value = b"2.0"
         await throttle.adjust_delay(HTTPStatus.FORBIDDEN)
         ssthresh_set = next(
-            float(c[0][1]) for c in mock_cache.set.call_args_list if c[0][0] == _SSTHRESH_KEY
+            float(c[0][1])
+            for c in mock_cache.set.call_args_list
+            if c[0][0] == _SSTHRESH_KEY
         )
         assert ssthresh_set == pytest.approx(4.0)
 
     @pytest.mark.asyncio
-    async def test_200_slow_start_halves_delay_after_n_successes(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_200_slow_start_halves_delay_after_n_successes(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         """In slow start (delay > ssthresh), delay halves every N successes."""
+
         # delay=4.0, ssthresh=1.0 (default min), streak reaching threshold
         def get_side_effect(key):
             if key == _LAST_403_KEY:
@@ -183,13 +212,18 @@ class TestAdjustDelay:
         await throttle.adjust_delay(HTTPStatus.OK)
 
         delay_set = next(
-            float(c[0][1]) for c in mock_cache.set.call_args_list if c[0][0] == _DELAY_KEY
+            float(c[0][1])
+            for c in mock_cache.set.call_args_list
+            if c[0][0] == _DELAY_KEY
         )
         assert delay_set == pytest.approx(2.0)
 
     @pytest.mark.asyncio
-    async def test_200_slow_start_no_change_below_n_successes(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_200_slow_start_no_change_below_n_successes(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         """In slow start, delay does not change if streak < N."""
+
         def get_side_effect(key):
             if key == _LAST_403_KEY:
                 return None
@@ -208,8 +242,11 @@ class TestAdjustDelay:
         assert _DELAY_KEY not in keys_set
 
     @pytest.mark.asyncio
-    async def test_200_aimd_decreases_delay_after_m_successes(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_200_aimd_decreases_delay_after_m_successes(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         """In AIMD phase (delay <= ssthresh), delay decreases by delta every M successes."""
+
         def get_side_effect(key):
             if key == _LAST_403_KEY:
                 return None
@@ -225,13 +262,18 @@ class TestAdjustDelay:
         await throttle.adjust_delay(HTTPStatus.OK)
 
         delay_set = next(
-            float(c[0][1]) for c in mock_cache.set.call_args_list if c[0][0] == _DELAY_KEY
+            float(c[0][1])
+            for c in mock_cache.set.call_args_list
+            if c[0][0] == _DELAY_KEY
         )
         assert delay_set == pytest.approx(0.5 - settings.throttle_aimd_delta)
 
     @pytest.mark.asyncio
-    async def test_200_aimd_no_change_below_m_successes(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_200_aimd_no_change_below_m_successes(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         """In AIMD phase, delay does not change if streak < M."""
+
         def get_side_effect(key):
             if key == _LAST_403_KEY:
                 return None
@@ -250,8 +292,11 @@ class TestAdjustDelay:
         assert _DELAY_KEY not in keys_set
 
     @pytest.mark.asyncio
-    async def test_200_during_penalty_does_nothing(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_200_during_penalty_does_nothing(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         """During penalty, 200 responses do not change delay or streak."""
+
         def get_side_effect(key):
             if key == _LAST_403_KEY:
                 return str(time.time() - 5).encode()  # active penalty
@@ -262,7 +307,9 @@ class TestAdjustDelay:
         mock_cache.set.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_non_200_resets_streak_only(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_non_200_resets_streak_only(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         """Non-200, non-403 responses only reset the streak."""
         mock_cache.get.return_value = b"2.0"
         await throttle.adjust_delay(HTTPStatus.SERVICE_UNAVAILABLE)
@@ -270,8 +317,11 @@ class TestAdjustDelay:
         assert keys_set == [_STREAK_KEY]
 
     @pytest.mark.asyncio
-    async def test_delay_respects_min_bound(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_delay_respects_min_bound(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         """AIMD phase: delay never goes below throttle_min_delay."""
+
         def get_side_effect(key):
             if key == _LAST_403_KEY:
                 return None
@@ -286,17 +336,23 @@ class TestAdjustDelay:
         mock_cache.get.side_effect = get_side_effect
         await throttle.adjust_delay(HTTPStatus.OK)
 
-        delay_set_calls = [c for c in mock_cache.set.call_args_list if c[0][0] == _DELAY_KEY]
+        delay_set_calls = [
+            c for c in mock_cache.set.call_args_list if c[0][0] == _DELAY_KEY
+        ]
         if delay_set_calls:
             new_delay = float(delay_set_calls[0][0][1])
             assert new_delay >= settings.throttle_min_delay
 
     @pytest.mark.asyncio
-    async def test_delay_respects_max_bound(self, throttle: BlizzardThrottle, mock_cache: AsyncMock) -> None:
+    async def test_delay_respects_max_bound(
+        self, throttle: BlizzardThrottle, mock_cache: AsyncMock
+    ) -> None:
         """403 on max delay stays at max."""
         mock_cache.get.return_value = str(settings.throttle_max_delay).encode()
         await throttle.adjust_delay(HTTPStatus.FORBIDDEN)
         delay_set = next(
-            float(c[0][1]) for c in mock_cache.set.call_args_list if c[0][0] == _DELAY_KEY
+            float(c[0][1])
+            for c in mock_cache.set.call_args_list
+            if c[0][0] == _DELAY_KEY
         )
         assert delay_set == settings.throttle_max_delay

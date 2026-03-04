@@ -64,9 +64,7 @@ class BlizzardClient(metaclass=Singleton):
             kwargs["params"] = params
 
         normalized_endpoint = normalize_blizzard_url(url)
-        response = await self._execute_request(
-            url, normalized_endpoint, kwargs
-        )
+        response = await self._execute_request(url, normalized_endpoint, kwargs)
 
         if self.throttle:
             await self.throttle.adjust_delay(response.status_code)
@@ -178,7 +176,3 @@ class BlizzardClient(metaclass=Singleton):
             ),
             headers={settings.retry_after_header: str(retry_after)},
         )
-
-
-# Backward compatibility alias
-OverFastClient = BlizzardClient

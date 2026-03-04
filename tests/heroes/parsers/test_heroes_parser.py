@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 from fastapi import status
 
-from app.adapters.blizzard import OverFastClient
+from app.adapters.blizzard import BlizzardClient
 from app.domain.enums import HeroGamemode, HeroKey, Role
 from app.domain.parsers.heroes import (
     fetch_heroes_html,
@@ -48,7 +48,7 @@ async def test_fetch_heroes_html_calls_blizzard(heroes_html_data: str):
         "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
     ):
-        client = OverFastClient()
+        client = BlizzardClient()
         html = await fetch_heroes_html(client)
 
     assert html == heroes_html_data

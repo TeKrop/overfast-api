@@ -179,7 +179,9 @@ class StaticDataService(BaseService):
 
     async def _cold_fetch(self, config: StaticFetchConfig) -> tuple[Any, bool, int]:
         """Fetch from source on cold start, persist to storage and Valkey."""
-        logger.info("[SWR] %s not in storage — fetching from source", config.entity_type)
+        logger.info(
+            "[SWR] %s not in storage — fetching from source", config.entity_type
+        )
         filtered = await self._fetch_and_store(config)
         return filtered, False, 0
 
