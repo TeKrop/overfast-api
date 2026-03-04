@@ -1,6 +1,6 @@
 """Tests for Blizzard parser utility functions"""
 
-from app.adapters.blizzard.parsers.utils import (
+from app.domain.parsers.utils import (
     extract_blizzard_id_from_url,
     is_blizzard_id,
     match_player_by_blizzard_id,

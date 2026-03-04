@@ -3,9 +3,9 @@ from unittest.mock import Mock, patch
 import pytest
 from fastapi import status
 
-from app.adapters.blizzard import OverFastClient
-from app.adapters.blizzard.parsers.roles import fetch_roles_html, parse_roles_html
-from app.roles.enums import Role
+from app.adapters.blizzard import BlizzardClient
+from app.domain.enums import Role
+from app.domain.parsers.roles import fetch_roles_html, parse_roles_html
 
 
 def test_parse_roles_html_returns_all_roles(home_html_data: str):
@@ -26,7 +26,7 @@ async def test_fetch_roles_html_calls_blizzard(home_html_data: str):
         "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=home_html_data),
     ):
-        client = OverFastClient()
+        client = BlizzardClient()
         html = await fetch_roles_html(client)
 
     assert html == home_html_data

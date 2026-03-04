@@ -2,18 +2,18 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from app.adapters.blizzard import OverFastClient
-from app.adapters.blizzard.parsers.hero_stats_summary import (
-    GAMEMODE_MAPPING,
-    PLATFORM_MAPPING,
-    parse_hero_stats_summary,
-)
-from app.exceptions import ParserBlizzardError
-from app.players.enums import (
+from app.adapters.blizzard import BlizzardClient
+from app.domain.enums import (
     CompetitiveDivision,
     PlayerGamemode,
     PlayerPlatform,
     PlayerRegion,
+)
+from app.domain.exceptions import ParserBlizzardError
+from app.domain.parsers.hero_stats_summary import (
+    GAMEMODE_MAPPING,
+    PLATFORM_MAPPING,
+    parse_hero_stats_summary,
 )
 
 
@@ -39,7 +39,7 @@ async def test_parse_hero_stats_summary(
     }
 
     with patch("httpx.AsyncClient.get", return_value=hero_stats_response_mock):
-        client = OverFastClient()
+        client = BlizzardClient()
         if raises_error:
             with pytest.raises(ParserBlizzardError):
                 await parse_hero_stats_summary(client, **base_kwargs, **extra_kwargs)  # ty: ignore[invalid-argument-type]
@@ -66,7 +66,7 @@ async def test_parse_hero_stats_summary_query_params(hero_stats_response_mock: M
     with patch(
         "httpx.AsyncClient.get", return_value=hero_stats_response_mock
     ) as mock_get:
-        client = OverFastClient()
+        client = BlizzardClient()
         await parse_hero_stats_summary(
             client,
             platform=platform,
@@ -94,7 +94,7 @@ async def test_parse_hero_stats_summary_invalid_map_error_message(
 ):
     """ParserBlizzardError message should name the incompatible map."""
     with patch("httpx.AsyncClient.get", return_value=hero_stats_response_mock):
-        client = OverFastClient()
+        client = BlizzardClient()
         with pytest.raises(ParserBlizzardError) as exc_info:
             await parse_hero_stats_summary(
                 client,

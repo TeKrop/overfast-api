@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING, Any
 from app.config import settings
 from app.domain.ports.storage import StaticDataCategory
 from app.domain.services import BaseService
+from app.infrastructure.logger import logger
 from app.monitoring.metrics import (
     background_refresh_triggered_total,
     stale_responses_total,
     storage_hits_total,
 )
-from app.overfast_logger import logger
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -93,13 +93,14 @@ class StaticDataService(BaseService):
 
         if is_stale:
             logger.info(
-                f"[SWR] {config.entity_type} stale (age={age}s, "
-                f"threshold={config.staleness_threshold}s) — serving + triggering refresh"
+                "[SWR] %s stale (age=%ds, threshold=%ds) — serving + triggering refresh",
+                config.entity_type,
+                age,
+                config.staleness_threshold,
             )
             await self._enqueue_refresh(
                 config.entity_type,
                 config.storage_key,
-                refresh_coro=self._refresh_static(config),
             )
             stale_responses_total.inc()
             background_refresh_triggered_total.labels(
@@ -147,18 +148,6 @@ class StaticDataService(BaseService):
         """Apply ``result_filter`` to ``data`` if provided, otherwise return as-is."""
         return result_filter(data) if result_filter is not None else data
 
-    async def _refresh_static(self, config: StaticFetchConfig) -> None:
-        """Fetch fresh data, persist to persistent storage and update Valkey with full TTL.
-
-        Exceptions are intentionally not caught here — they propagate to the
-        task queue adapter which calls the ``on_failure`` callback for metrics.
-        """
-        logger.info(
-            f"[SWR] Background refresh started for"
-            f" {config.entity_type}/{config.storage_key}"
-        )
-        await self._fetch_and_store(config)
-
     async def _fetch_and_store(self, config: StaticFetchConfig) -> Any:
         """Fetch from source, persist raw source to persistent storage, update Valkey, return filtered data."""
         if inspect.iscoroutinefunction(config.fetcher):
@@ -190,7 +179,9 @@ class StaticDataService(BaseService):
 
     async def _cold_fetch(self, config: StaticFetchConfig) -> tuple[Any, bool, int]:
         """Fetch from source on cold start, persist to storage and Valkey."""
-        logger.info(f"[SWR] {config.entity_type} not in storage — fetching from source")
+        logger.info(
+            "[SWR] %s not in storage — fetching from source", config.entity_type
+        )
         filtered = await self._fetch_and_store(config)
         return filtered, False, 0
 
@@ -205,4 +196,4 @@ class StaticDataService(BaseService):
                 category=StaticDataCategory(entity_type),
             )
         except Exception as exc:  # noqa: BLE001
-            logger.warning(f"[SWR] Storage write failed for {storage_key}: {exc}")
+            logger.warning("[SWR] Storage write failed for %s: %s", storage_key, exc)

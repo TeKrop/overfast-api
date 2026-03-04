@@ -5,7 +5,7 @@ import pytest
 from fastapi import status
 
 from app.config import settings
-from app.heroes.enums import HeroKey
+from app.domain.enums import HeroKey
 
 if TYPE_CHECKING:
     from fastapi.testclient import TestClient
@@ -90,11 +90,10 @@ def test_get_hero_blizzard_forbidden_error(client: TestClient):
     ):
         response = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
 
-    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
     assert response.json() == {
         "error": (
-            "API has been rate limited by Blizzard, please wait for "
-            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
+            "Blizzard is temporarily rate limiting this API. Please retry after 60 seconds."
         )
     }
 
@@ -148,7 +147,7 @@ def test_get_hero_no_hitpoints(
             ],
         ),
         patch(
-            "app.adapters.csv.csv_reader.CSVReader.read_csv_file",
+            "app.domain.utils.csv_reader.CSVReader.read_csv_file",
             return_value=[],
         ),
     ):
@@ -168,15 +167,15 @@ def test_get_hero_blizzard_forbidden_error_and_caching(client: TestClient):
     assert (
         response1.status_code
         == response2.status_code
-        == status.HTTP_429_TOO_MANY_REQUESTS
+        == status.HTTP_503_SERVICE_UNAVAILABLE
     )
+    assert response1.json() == {
+        "error": (
+            "Blizzard is temporarily rate limiting this API. Please retry after 60 seconds."
+        )
+    }
+    # Second response is still 503 but remaining time may be slightly less than 60s
     assert (
-        response1.json()
-        == response2.json()
-        == {
-            "error": (
-                "API has been rate limited by Blizzard, please wait for "
-                f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
-            )
-        }
+        "Blizzard is temporarily rate limiting this API. Please retry after"
+        in response2.json()["error"]
     )

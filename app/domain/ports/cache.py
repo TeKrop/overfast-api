@@ -83,19 +83,6 @@ class CachePort(Protocol):
         """
         ...
 
-    # Rate limiting methods
-    async def is_being_rate_limited(self) -> bool:
-        """Check if Blizzard rate limit is currently active"""
-        ...
-
-    async def get_global_rate_limit_remaining_time(self) -> int:
-        """Get remaining time in seconds for Blizzard rate limit"""
-        ...
-
-    async def set_global_rate_limit(self) -> None:
-        """Set Blizzard rate limit flag with configured TTL"""
-        ...
-
     # Unknown player tracking methods (two-key pattern: cooldown key with TTL + status key permanent)
     async def get_player_status(self, player_id: str) -> dict | None:
         """

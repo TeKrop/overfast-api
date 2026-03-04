@@ -6,12 +6,12 @@ from fastapi import APIRouter, Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from app.adapters.storage import PostgresStorage
+from app.infrastructure.logger import logger
 from app.monitoring.metrics import (
     storage_entries_total,
     storage_player_profile_age_seconds,
     storage_size_bytes,
 )
-from app.overfast_logger import logger
 
 if TYPE_CHECKING:
     from app.domain.ports import StoragePort
@@ -56,7 +56,7 @@ async def metrics() -> Response:
 
     except Exception as err:  # noqa: BLE001
         # Don't fail metrics endpoint if storage stats unavailable
-        logger.warning(f"Failed to collect storage metrics: {err}")
+        logger.warning("Failed to collect storage metrics: %s", err)
 
     return Response(
         content=generate_latest(),

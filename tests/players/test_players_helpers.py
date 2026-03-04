@@ -1,8 +1,7 @@
 import pytest
 
-from app.heroes.enums import HeroKey
-from app.players import helpers
-from app.players.enums import CompetitiveDivision, CompetitiveRole
+from app.domain.enums import CompetitiveDivision, CompetitiveRole, HeroKey
+from app.domain.parsers import player_helpers as helpers
 
 
 @pytest.mark.parametrize(

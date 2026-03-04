@@ -1,5 +1,5 @@
 """Blizzard adapters"""
 
-from .client import BlizzardClient, OverFastClient
+from .client import BlizzardClient
 
-__all__ = ["BlizzardClient", "OverFastClient"]
+__all__ = ["BlizzardClient"]

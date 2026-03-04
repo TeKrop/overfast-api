@@ -216,12 +216,12 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "aimd_current_rate{job=\"fastapi\"}",
+          "expr": "throttle_current_delay_seconds{job=\"fastapi\"}",
           "legendFormat": "__auto",
           "refId": "A"
         }
       ],
-      "title": "AIMD Current Rate",
+      "title": "Throttle Delay (s)",
       "type": "stat"
     },
     {
@@ -281,12 +281,12 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "round(increase(blizzard_rate_limited_total{job=\"fastapi\"}[1d]))",
+          "expr": "round(increase(throttle_403_total{job=\"fastapi\"}[1d]))",
           "legendFormat": "__auto",
           "refId": "A"
         }
       ],
-      "title": "Rate Limit Events (24h)",
+      "title": "403 Penalty Events (24h)",
       "type": "stat"
     },
     {
@@ -561,12 +561,12 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "aimd_current_rate{job=\"fastapi\"}",
+          "expr": "throttle_current_delay_seconds{job=\"fastapi\"}",
           "legendFormat": "Allowed rate",
           "refId": "A"
         }
       ],
-      "title": "AIMD Rate Over Time",
+      "title": "Throttle Delay Over Time",
       "type": "timeseries"
     },
     {
@@ -785,12 +785,12 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(blizzard_rate_limited_total{job=\"fastapi\"}[5m])",
+          "expr": "rate(throttle_403_total{job=\"fastapi\"}[5m])",
           "legendFormat": "Rate limit events/s",
           "refId": "A"
         }
       ],
-      "title": "Rate Limit Events Over Time",
+      "title": "403 Penalty Events Over Time",
       "type": "timeseries"
     },
     {

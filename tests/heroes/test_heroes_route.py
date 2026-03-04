@@ -5,8 +5,7 @@ import pytest
 from fastapi import status
 
 from app.config import settings
-from app.heroes.enums import HeroGamemode
-from app.roles.enums import Role
+from app.domain.enums import HeroGamemode, Role
 
 if TYPE_CHECKING:
     from fastapi.testclient import TestClient
@@ -87,10 +86,9 @@ def test_get_heroes_blizzard_forbidden_error(client: TestClient):
     ):
         response = client.get("/heroes")
 
-    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
     assert response.json() == {
         "error": (
-            "API has been rate limited by Blizzard, please wait for "
-            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
+            "Blizzard is temporarily rate limiting this API. Please retry after 60 seconds."
         )
     }

@@ -5,16 +5,14 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Path, Query, Request, Response, status
 
 from app.api.dependencies import PlayerServiceDep
-from app.config import settings
-from app.enums import RouteTag
-from app.helpers import apply_swr_headers, build_cache_key, get_human_readable_duration
-from app.helpers import routes_responses as common_routes_responses
-from app.players.enums import (
-    HeroKeyCareerFilter,
-    PlayerGamemode,
-    PlayerPlatform,
+from app.api.enums import RouteTag
+from app.api.helpers import (
+    apply_swr_headers,
+    build_cache_key,
+    get_human_readable_duration,
 )
-from app.players.models import (
+from app.api.helpers import routes_responses as common_routes_responses
+from app.api.models.players import (
     CareerStats,
     Player,
     PlayerCareerStats,
@@ -22,6 +20,12 @@ from app.players.models import (
     PlayerSearchResult,
     PlayerStatsSummary,
     PlayerSummary,
+)
+from app.config import settings
+from app.domain.enums import (
+    HeroKeyCareerFilter,
+    PlayerGamemode,
+    PlayerPlatform,
 )
 
 # Custom route responses for player careers

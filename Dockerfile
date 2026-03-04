@@ -26,10 +26,6 @@ RUN apk add --no-cache build-base \
 COPY ./app /code/app
 COPY ./static /code/static
 
-# Copy crontabs file and make it executable
-COPY ./build/overfast-crontab /etc/crontabs/root
-RUN chmod +x /etc/crontabs/root
-
 # For dev image, copy the tests and install necessary dependencies
 FROM main AS dev
 RUN uv sync --frozen --no-cache

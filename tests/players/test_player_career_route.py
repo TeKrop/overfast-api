@@ -115,11 +115,10 @@ def test_get_player_career_blizzard_forbidden_error(client: TestClient):
     ):
         response = client.get("/players/TeKrop-2217")
 
-    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
     assert response.json() == {
         "error": (
-            "API has been rate limited by Blizzard, please wait for "
-            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
+            "Blizzard is temporarily rate limiting this API. Please retry after 60 seconds."
         )
     }
 
@@ -134,7 +133,6 @@ def test_get_player_parser_init_error(client: TestClient, player_html_data: str 
             # Players search call first
             Mock(status_code=status.HTTP_200_OK, text="[]", json=list),
             # Player profile page (for Blizzard ID resolution in _resolve_player_identity)
-            # With Phase 3.5 Step 1 optimization, this HTML is reused and we don't make a second call
             Mock(status_code=status.HTTP_200_OK, text=player_html_data),
         ],
     ):
