@@ -1,3 +1,4 @@
+import os
 import subprocess
 import tempfile
 import tracemalloc
@@ -6,6 +7,7 @@ from contextlib import suppress
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from anyio import to_thread
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import HTMLResponse, JSONResponse
 
@@ -41,9 +43,12 @@ class OverFastMiddleware(BaseHTTPMiddleware, ABC):  # pragma: no cover
 
 class MemrayInMemoryMiddleware(OverFastMiddleware):  # pragma: no cover
     async def _dispatch(self, request: Request, call_next: Callable) -> HTMLResponse:
-        # Create an temporary file
-        with tempfile.NamedTemporaryFile(suffix=".bin", delete=False) as tmp_bin_file:
-            tmp_bin_path = Path(tmp_bin_file.name)
+        # Create a temporary file path using an async-friendly thread call
+        fd, tmp_bin_name = await to_thread.run_sync(
+            lambda: tempfile.mkstemp(suffix=".bin")
+        )
+        os.close(fd)
+        tmp_bin_path = Path(tmp_bin_name)
 
         # Start Memray Tracker with the in-memory buffer
         destination = memray.FileDestination(path=tmp_bin_path, overwrite=True)

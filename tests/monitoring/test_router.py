@@ -6,12 +6,21 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from app import config
 from app.main import app
+from app.monitoring import router as monitoring_router
 
 
 @pytest.fixture
 def client_fixture():
-    return TestClient(app)
+    """Real app with prometheus_enabled forced to True so the monitoring router
+    is registered, matching the exact conditional in main.py."""
+    routes_before = len(app.router.routes)
+    with patch.object(config.settings, "prometheus_enabled", True):
+        app.include_router(monitoring_router.router)
+        yield TestClient(app)
+    # Restore the route list to avoid duplicate routes across tests in the same worker
+    app.router.routes = app.router.routes[:routes_before]
 
 
 class TestMetricsEndpoint:
