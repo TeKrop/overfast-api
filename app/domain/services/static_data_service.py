@@ -93,7 +93,7 @@ class StaticDataService(BaseService):
 
         if is_stale:
             logger.info(
-                "[SWR] %s stale (age=%ds, threshold=%ds) — serving + triggering refresh",
+                "[SWR] {} stale (age={}s, threshold={}s) — serving + triggering refresh",
                 config.entity_type,
                 age,
                 config.staleness_threshold,
@@ -116,7 +116,9 @@ class StaticDataService(BaseService):
             )
         else:
             logger.info(
-                f"[SWR] {config.entity_type} fresh (age={age}s) — serving from persistent storage"
+                "[SWR] {} fresh (age={}s) — serving from persistent storage",
+                config.entity_type,
+                age,
             )
             await self._update_api_cache(
                 config.cache_key,
@@ -180,7 +182,7 @@ class StaticDataService(BaseService):
     async def _cold_fetch(self, config: StaticFetchConfig) -> tuple[Any, bool, int]:
         """Fetch from source on cold start, persist to storage and Valkey."""
         logger.info(
-            "[SWR] %s not in storage — fetching from source", config.entity_type
+            "[SWR] {} not in storage — fetching from source", config.entity_type
         )
         filtered = await self._fetch_and_store(config)
         return filtered, False, 0
@@ -196,4 +198,4 @@ class StaticDataService(BaseService):
                 category=StaticDataCategory(entity_type),
             )
         except Exception as exc:  # noqa: BLE001
-            logger.warning("[SWR] Storage write failed for %s: %s", storage_key, exc)
+            logger.warning("[SWR] Storage write failed for {}: {}", storage_key, exc)

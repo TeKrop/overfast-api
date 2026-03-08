@@ -45,20 +45,20 @@ class ValkeyTaskQueue:
                 f"{JOB_KEY_PREFIX}{effective_id}", "pending", nx=True, ex=JOB_TTL
             )
             if not claimed:
-                logger.debug("[ValkeyTaskQueue] Already queued: %s", effective_id)
+                logger.debug("[ValkeyTaskQueue] Already queued: {}", effective_id)
                 return effective_id
 
             task_fn = TASK_MAP.get(task_name)
             if task_fn is None:
-                logger.warning("[ValkeyTaskQueue] Unknown task: %r", task_name)
+                logger.warning("[ValkeyTaskQueue] Unknown task: {!r}", task_name)
                 return effective_id
 
             await task_fn.kiq(effective_id)
             logger.debug(
-                "[ValkeyTaskQueue] Enqueued %s (job_id=%s)", task_name, effective_id
+                "[ValkeyTaskQueue] Enqueued {} (job_id={})", task_name, effective_id
             )
         except Exception as exc:  # noqa: BLE001
-            logger.warning("[ValkeyTaskQueue] Failed to enqueue %s: %s", task_name, exc)
+            logger.warning("[ValkeyTaskQueue] Failed to enqueue {}: {}", task_name, exc)
 
         return effective_id
 
@@ -78,6 +78,6 @@ class ValkeyTaskQueue:
         """
         try:
             await self._valkey.delete(f"{JOB_KEY_PREFIX}{job_id}")
-            logger.debug("[ValkeyTaskQueue] Released job: %s", job_id)
+            logger.debug("[ValkeyTaskQueue] Released job: {}", job_id)
         except Exception:  # noqa: BLE001
-            logger.warning("[ValkeyTaskQueue] Failed to release job: %s", job_id)
+            logger.warning("[ValkeyTaskQueue] Failed to release job: {}", job_id)

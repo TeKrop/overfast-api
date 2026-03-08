@@ -521,7 +521,7 @@ class PlayerService(BaseService):
                 if player_summary:
                     return player_summary, html
         except Exception as exc:  # noqa: BLE001
-            logger.warning("Reverse enrichment failed: %s", exc)
+            logger.warning("Reverse enrichment failed: {}", exc)
 
         return {}, html
 
@@ -564,8 +564,10 @@ class PlayerService(BaseService):
         }
 
         logger.info(
-            f"Marked player {blizzard_id} as unknown (check #{check_count}, "
-            f"retry in {retry_after}s)"
+            "Marked player {} as unknown (check #{}, retry in {}s)",
+            blizzard_id,
+            check_count,
+            retry_after,
         )
 
     async def _handle_player_exceptions(

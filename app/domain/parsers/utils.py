@@ -95,7 +95,7 @@ def extract_blizzard_id_from_url(url: str) -> str | None:
         if not blizzard_id:
             return None
     except (IndexError, ValueError):
-        logger.warning("Failed to extract Blizzard ID from URL: %s", url)
+        logger.warning("Failed to extract Blizzard ID from URL: {}", url)
         return None
 
     return blizzard_id
@@ -133,6 +133,6 @@ def match_player_by_blizzard_id(
             return player
 
     logger.warning(
-        "No player found in search results matching Blizzard ID: %s", blizzard_id
+        "No player found in search results matching Blizzard ID: {}", blizzard_id
     )
     return None

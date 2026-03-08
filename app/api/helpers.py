@@ -218,7 +218,7 @@ def send_discord_webhook_message(
         color: Optional color for the embed (decimal format, e.g., 0xFF0000 for red)
     """
     if not settings.discord_webhook_enabled:
-        logger.error("%s: %s", title, description)
+        logger.error("{}: {}", title, description)
         return None
 
     # Apply Discord embed length limits

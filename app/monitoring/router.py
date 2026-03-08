@@ -56,7 +56,7 @@ async def metrics() -> Response:
 
     except Exception as err:  # noqa: BLE001
         # Don't fail metrics endpoint if storage stats unavailable
-        logger.warning("Failed to collect storage metrics: %s", err)
+        logger.warning("Failed to collect storage metrics: {}", err)
 
     return Response(
         content=generate_latest(),

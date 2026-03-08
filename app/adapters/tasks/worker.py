@@ -102,15 +102,22 @@ async def _run_refresh_task(
     the job can be re-enqueued immediately after completion.
     """
     start = time.monotonic()
+    duration = 0.0
     try:
         yield
+        duration = time.monotonic() - start
         background_refresh_completed_total.labels(entity_type=entity_type).inc()
-    except Exception:
+        logger.info("[Worker] Refresh completed: {} in {:.3f}s", entity_id, duration)
+    except Exception as exc:
+        duration = time.monotonic() - start
         background_refresh_failed_total.labels(entity_type=entity_type).inc()
+        logger.warning(
+            "[Worker] Refresh failed: {} — {} ({:.3f}s)", entity_id, exc, duration
+        )
         raise
     finally:
         background_tasks_duration_seconds.labels(entity_type=entity_type).observe(
-            time.monotonic() - start
+            duration
         )
         await task_queue.release_job(entity_id)
 
@@ -227,7 +234,7 @@ async def check_new_hero(client: BlizzardClientDep) -> None:
         html = await fetch_heroes_html(client)
         heroes = parse_heroes_html(html)
     except Exception as exc:  # noqa: BLE001
-        logger.warning("[Worker] check_new_hero: Failed to fetch heroes: %s", exc)
+        logger.warning("[Worker] check_new_hero: Failed to fetch heroes: {}", exc)
         return
 
     new_keys = {hero["key"] for hero in heroes} - set(HeroKey)
@@ -235,7 +242,7 @@ async def check_new_hero(client: BlizzardClientDep) -> None:
         logger.info("[Worker] check_new_hero: No new heroes found.")
         return
 
-    logger.info("[Worker] check_new_hero: New heroes found: %s", new_keys)
+    logger.info("[Worker] check_new_hero: New heroes found: {}", new_keys)
     send_discord_webhook_message(
         title="🎮 New Heroes Detected",
         description="New Overwatch heroes have been released!",

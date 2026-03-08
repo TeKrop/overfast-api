@@ -67,7 +67,7 @@ class ValkeyListBroker(AsyncBroker):
             **self._connection_kwargs,
         )
         logger.info(
-            "ValkeyListBroker started (url=%s, queue=%s)", self._url, self.queue_name
+            "ValkeyListBroker started (url={}, queue={})", self._url, self.queue_name
         )
 
     async def shutdown(self) -> None:

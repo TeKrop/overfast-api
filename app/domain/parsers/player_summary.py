@@ -74,14 +74,14 @@ def parse_player_summary_json(
             # a wrong player even when there is only one name match.
             if len(matching_players) > 1:
                 logger.info(
-                    "Multiple players found for %s, using Blizzard ID to resolve: %s",
+                    "Multiple players found for {}, using Blizzard ID to resolve: {}",
                     player_id,
                     blizzard_id,
                 )
             player_data = match_player_by_blizzard_id(matching_players, blizzard_id)
             if not player_data:
                 logger.warning(
-                    "Blizzard ID %s not found in search results for %s",
+                    "Blizzard ID {} not found in search results for {}",
                     blizzard_id,
                     player_id,
                 )
@@ -133,7 +133,7 @@ async def parse_player_summary(
     # If player_id is a Blizzard ID, skip search (won't find anything useful)
     if is_blizzard_id(player_id):
         logger.info(
-            "Player ID %s is a Blizzard ID, skipping search (not supported)", player_id
+            "Player ID {} is a Blizzard ID, skipping search (not supported)", player_id
         )
         return {}
 

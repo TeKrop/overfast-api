@@ -148,7 +148,11 @@ Router → get_* dependency (api/dependencies.py)
 
 - Use `from app.infrastructure.logger import logger` (loguru).
 - Log levels: `debug`, `info`, `warning`, `error`, `critical` — `critical` is reserved for unexpected parsing failures.
-- Brace-style formatting: `logger.info("fetching {}", url)`.
+- Always use loguru's native **brace-style** formatting: `logger.info("fetching {}", url)`.
+  - Never use `%s`/`%d`/`%r` percent-style (stdlib `logging` style) — loguru ignores it silently instead of interpolating.
+  - Never use f-strings in log calls — they are eagerly evaluated even when the log level is suppressed, defeating lazy evaluation.
+  - Use `{!r}` for repr formatting: `logger.warning("unexpected value: {!r}", val)`.
+  - Use format specs for floats: `logger.debug("took {:.3f}s", duration)`.
 
 ### Structural typing (Ports)
 
