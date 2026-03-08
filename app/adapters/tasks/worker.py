@@ -19,10 +19,12 @@ import time
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, Annotated
 
+from prometheus_client import start_http_server
+
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-from taskiq import TaskiqDepends
+from taskiq import TaskiqDepends, TaskiqEvents
 from taskiq.schedule_sources import LabelScheduleSource
 from taskiq.scheduler.scheduler import TaskiqScheduler
 from taskiq_fastapi import init as taskiq_init
@@ -56,7 +58,6 @@ from app.monitoring.metrics import (
     background_refresh_completed_total,
     background_refresh_failed_total,
     background_tasks_duration_seconds,
-    background_tasks_queue_size,
 )
 
 # ─── Broker ───────────────────────────────────────────────────────────────────
@@ -69,6 +70,18 @@ broker = ValkeyListBroker(
 # Wire FastAPI DI into taskiq tasks.
 # In worker mode this also triggers the FastAPI lifespan (DB init, cache eviction…).
 taskiq_init(broker, "app.main:app")
+
+
+@broker.on_event(TaskiqEvents.WORKER_STARTUP)
+async def start_metrics_server(state: object) -> None:  # noqa: ARG001
+    """Expose a Prometheus /metrics endpoint from the worker process."""
+    if settings.prometheus_enabled:
+        start_http_server(settings.prometheus_worker_port)
+        logger.info(
+            "[Worker] Prometheus metrics server started on port {}",
+            settings.prometheus_worker_port,
+        )
+
 
 # ─── Scheduler (cron) ────────────────────────────────────────────────────────
 
@@ -120,7 +133,6 @@ async def _run_refresh_task(
         background_tasks_duration_seconds.labels(entity_type=entity_type).observe(
             duration
         )
-        background_tasks_queue_size.dec()
         await task_queue.release_job(entity_id)
 
 

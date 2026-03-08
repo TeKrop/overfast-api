@@ -13,7 +13,6 @@ import valkey.asyncio as aiovalkey
 from taskiq.abc.broker import AsyncBroker
 
 from app.infrastructure.logger import logger
-from app.monitoring.metrics import background_tasks_queue_size
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
@@ -69,7 +68,6 @@ class ValkeyListBroker(AsyncBroker):
         )
         async with self._get_client() as conn:
             queue_size = await conn.llen(self.queue_name)  # type: ignore[misc]
-        background_tasks_queue_size.set(queue_size)
         logger.info(
             "ValkeyListBroker started (url={}, queue={}, queue_size={})",
             self._url,

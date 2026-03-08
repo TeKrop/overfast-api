@@ -24,6 +24,8 @@ services:
       target: ${BUILD_TARGET:-main}
     command: /code/.venv/bin/taskiq worker app.adapters.tasks.worker:broker
     env_file: ${APP_VOLUME_PATH:-.}/.env
+    ports:
+      - "${PROMETHEUS_WORKER_PORT:-9091}:9091"
     volumes:
       - ${APP_VOLUME_PATH:-/tmp}/worker-logs:/code/logs
     depends_on:

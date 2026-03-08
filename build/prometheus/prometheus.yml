@@ -21,6 +21,13 @@ scrape_configs:
     scrape_interval: 10s
     metrics_path: /metrics
 
+  # Worker metrics (prometheus_client, separate process)
+  - job_name: 'worker'
+    static_configs:
+      - targets: ['worker:9091']
+    scrape_interval: 10s
+    metrics_path: /metrics
+
   # Valkey metrics (redis_exporter)
   - job_name: 'valkey'
     static_configs:

@@ -51,6 +51,9 @@ class Settings(BaseSettings):
     # Enable Prometheus metrics collection and /metrics endpoint
     prometheus_enabled: bool = False
 
+    # Port for the worker process Prometheus metrics endpoint
+    prometheus_worker_port: int = 9091
+
     ############
     # PERSISTENT STORAGE CONFIGURATION (PostgreSQL)
     ############

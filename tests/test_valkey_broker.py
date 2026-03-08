@@ -51,7 +51,6 @@ class TestStartup:
                 return_value=mock_pool,
             ) as mock_from_url,
             patch.object(broker, "_get_client", return_value=mock_conn),
-            patch(f"{_MODULE}.background_tasks_queue_size") as mock_gauge,
         ):
             await broker.startup()
 
@@ -60,7 +59,6 @@ class TestStartup:
             max_connections=broker._max_pool_size,
         )
         assert broker._pool is mock_pool
-        mock_gauge.set.assert_called_once_with(0)
 
     @pytest.mark.asyncio
     async def test_startup_sets_pool(self, broker: ValkeyListBroker):
@@ -77,33 +75,10 @@ class TestStartup:
                 return_value=mock_pool,
             ),
             patch.object(broker, "_get_client", return_value=mock_conn),
-            patch(f"{_MODULE}.background_tasks_queue_size"),
         ):
             await broker.startup()
 
         assert broker._pool is not None
-
-    @pytest.mark.asyncio
-    async def test_startup_seeds_queue_size_gauge(self, broker: ValkeyListBroker):
-        """startup() seeds the background_tasks_queue_size gauge from LLEN."""
-        mock_pool = MagicMock()
-        mock_conn = AsyncMock()
-        mock_conn.__aenter__ = AsyncMock(return_value=mock_conn)
-        mock_conn.__aexit__ = AsyncMock(return_value=False)
-        mock_conn.llen = AsyncMock(return_value=7)
-
-        with (
-            patch(
-                f"{_MODULE}.aiovalkey.BlockingConnectionPool.from_url",
-                return_value=mock_pool,
-            ),
-            patch.object(broker, "_get_client", return_value=mock_conn),
-            patch(f"{_MODULE}.background_tasks_queue_size") as mock_gauge,
-        ):
-            await broker.startup()
-
-        mock_conn.llen.assert_awaited_once_with(broker.queue_name)
-        mock_gauge.set.assert_called_once_with(7)
 
 
 class TestShutdown:

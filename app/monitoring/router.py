@@ -5,9 +5,12 @@ from typing import TYPE_CHECKING
 from fastapi import APIRouter, Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
+from app.adapters.cache.valkey_cache import ValkeyCache
 from app.adapters.storage import PostgresStorage
+from app.adapters.tasks.valkey_broker import _QUEUE_DEFAULT
 from app.infrastructure.logger import logger
 from app.monitoring.metrics import (
+    background_tasks_queue_size,
     storage_entries_total,
     storage_player_profile_age_seconds,
     storage_size_bytes,
@@ -24,10 +27,18 @@ async def metrics() -> Response:
     """
     Prometheus metrics endpoint.
 
-    Collects current storage statistics before generating metrics.
+    Collects current storage statistics and queue size before generating metrics.
     All other metrics (API requests, Blizzard calls, etc.) are updated
     in real-time via middleware and adapters.
     """
+    # Collect queue size from Valkey (single source of truth shared across processes)
+    try:
+        valkey = ValkeyCache()
+        queue_size = await valkey.valkey_server.llen(_QUEUE_DEFAULT)  # type: ignore[misc]
+        background_tasks_queue_size.set(queue_size)
+    except Exception as err:  # noqa: BLE001
+        logger.warning("Failed to collect queue size metric: {}", err)
+
     # Collect storage metrics
     try:
         storage: StoragePort = PostgresStorage()
