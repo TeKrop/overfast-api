@@ -8,7 +8,7 @@ As of now, only some specific stuff can easily be updated by anyone, even withou
 - The CSV file containing the list of gamemodes of the game
 - The CSV file containing the list of maps of the game
 
-All CSV files are located in `app/domain/utils/csv/data` folder.
+All CSV files are located in `app/domain/utils/data` folder.
 
 ## 🦸 Heroes data
 The CSV file containing heroes statistics data is `heroes.csv`. Data is divided into 6 columns :
