@@ -120,7 +120,7 @@ def _parse_hero_summary(overview_section: LexborNode, locale: Locale) -> dict:
 
 def _parse_birthday_and_age(text: str, locale: Locale) -> tuple[str | None, int | None]:
     """Extract birthday and age from text for a given locale"""
-    birthday_regex = r"^(.*) [\(（].*[:：] ?(\d+).*[\)）]$"
+    birthday_regex = r"^([^\(（]+) [\(（][^:：]*[:：] ?(\d+)[^\)）]*[\)）]$"
 
     result = re.match(birthday_regex, text)
     if not result:

@@ -68,3 +68,16 @@ class ValkeyTaskQueue:
             return (await self._valkey.exists(f"{JOB_KEY_PREFIX}{job_id}")) > 0
         except Exception:  # noqa: BLE001
             return False
+
+    async def release_job(self, job_id: str) -> None:
+        """Delete the dedup key for ``job_id``, allowing it to be re-enqueued.
+
+        Called by the worker in a ``finally`` block after a refresh task
+        completes (success or failure) so that the next SWR cycle can
+        immediately enqueue the same job again.
+        """
+        try:
+            await self._valkey.delete(f"{JOB_KEY_PREFIX}{job_id}")
+            logger.debug("[ValkeyTaskQueue] Released job: %s", job_id)
+        except Exception:  # noqa: BLE001
+            logger.warning("[ValkeyTaskQueue] Failed to release job: %s", job_id)

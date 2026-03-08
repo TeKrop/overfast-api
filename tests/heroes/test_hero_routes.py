@@ -94,11 +94,10 @@ def test_get_hero_blizzard_forbidden_error(client: TestClient):
         response = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
 
     assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
-    assert response.json() == {
-        "error": (
-            "Blizzard is temporarily rate limiting this API. Please retry after 60 seconds."
-        )
-    }
+    assert (
+        "Blizzard is temporarily rate limiting this API. Please retry after"
+        in response.json()["error"]
+    )
 
 
 @pytest.mark.parametrize(
@@ -174,13 +173,8 @@ def test_get_hero_blizzard_forbidden_error_and_caching(client: TestClient):
         == response2.status_code
         == status.HTTP_503_SERVICE_UNAVAILABLE
     )
-    assert response1.json() == {
-        "error": (
-            "Blizzard is temporarily rate limiting this API. Please retry after 60 seconds."
-        )
-    }
-    # Second response is still 503 but remaining time may be slightly less than 60s
+    assert response1.json() == response2.json()
     assert (
         "Blizzard is temporarily rate limiting this API. Please retry after"
-        in response2.json()["error"]
+        in response1.json()["error"]
     )

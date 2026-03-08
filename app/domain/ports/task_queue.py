@@ -23,3 +23,12 @@ class TaskQueuePort(Protocol):
     async def is_job_pending_or_running(self, job_id: str) -> bool:
         """Return True if a job with this ID is already pending or running."""
         ...
+
+    async def release_job(self, job_id: str) -> None:
+        """Delete the dedup key for ``job_id``, allowing it to be re-enqueued.
+
+        Called by the worker after a refresh task finishes (success or failure)
+        so that the next SWR cycle can enqueue the same job again immediately.
+        The TTL on the key acts as a fallback for crashed workers.
+        """
+        ...

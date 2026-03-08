@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from app.adapters.tasks.worker import (
-    _track_refresh,
+    _run_refresh_task,
     check_new_hero,
     cleanup_stale_players,
     refresh_gamemodes,
@@ -40,16 +40,17 @@ def mock_worker_metrics():
         yield mock_completed, mock_failed, mock_duration
 
 
-# ── _track_refresh ────────────────────────────────────────────────────────────
+# ── _run_refresh_task ─────────────────────────────────────────────────────────
 
 
-class TestTrackRefresh:
+class TestRunRefreshTask:
     @pytest.mark.asyncio
     async def test_success_increments_completed_counter(self, mock_worker_metrics):
         """On success, background_refresh_completed_total is incremented."""
         mock_completed, mock_failed, _ = mock_worker_metrics
+        mock_queue = AsyncMock()
 
-        async with _track_refresh("heroes"):
+        async with _run_refresh_task("heroes", "heroes:en-us", mock_queue):
             pass
 
         mock_completed.labels.assert_called_once_with(entity_type="heroes")
@@ -62,9 +63,10 @@ class TestTrackRefresh:
     ):
         """On exception, background_refresh_failed_total is incremented and exception re-raised."""
         mock_completed, mock_failed, _ = mock_worker_metrics
+        mock_queue = AsyncMock()
 
         async def _fail():
-            async with _track_refresh("maps"):
+            async with _run_refresh_task("maps", "maps:all", mock_queue):
                 msg = "task failed"
                 raise RuntimeError(msg)
 
@@ -81,9 +83,10 @@ class TestTrackRefresh:
         _, _, mock_duration = mock_worker_metrics
         mock_obs = MagicMock()
         mock_duration.labels.return_value = mock_obs
+        mock_queue = AsyncMock()
 
         async def _raise_in_context():
-            async with _track_refresh("roles"):
+            async with _run_refresh_task("roles", "roles:en-us", mock_queue):
                 msg = "oops"
                 raise ValueError(msg)
 
@@ -93,6 +96,31 @@ class TestTrackRefresh:
         mock_duration.labels.assert_called_once_with(entity_type="roles")
         mock_obs.observe.assert_called_once()
 
+    @pytest.mark.asyncio
+    async def test_release_job_called_on_success(self):
+        """release_job is called with entity_id after a successful refresh."""
+        mock_queue = AsyncMock()
+
+        async with _run_refresh_task("player", "Player-1234", mock_queue):
+            pass
+
+        mock_queue.release_job.assert_awaited_once_with("Player-1234")
+
+    @pytest.mark.asyncio
+    async def test_release_job_called_on_failure(self):
+        """release_job is called with entity_id even when the refresh raises."""
+        mock_queue = AsyncMock()
+
+        async def _fail():
+            async with _run_refresh_task("hero", "hero:ana:en-us", mock_queue):
+                msg = "oops"
+                raise RuntimeError(msg)
+
+        with contextlib.suppress(RuntimeError):
+            await _fail()
+
+        mock_queue.release_job.assert_awaited_once_with("hero:ana:en-us")
+
 
 # ── refresh tasks ─────────────────────────────────────────────────────────────
 
@@ -101,8 +129,11 @@ class TestRefreshHeroes:
     @pytest.mark.asyncio
     async def test_calls_service_refresh_list(self):
         mock_service = AsyncMock()
+        mock_queue = AsyncMock()
 
-        await cast("Any", refresh_heroes).__wrapped__("heroes:en-us", mock_service)
+        await cast("Any", refresh_heroes).__wrapped__(
+            "heroes:en-us", mock_service, mock_queue
+        )
 
         mock_service.refresh_list.assert_awaited_once_with(Locale.ENGLISH_US)
 
@@ -111,10 +142,11 @@ class TestRefreshHero:
     @pytest.mark.asyncio
     async def test_calls_service_refresh_single(self):
         mock_service = AsyncMock()
+        mock_queue = AsyncMock()
         first_key = str(next(iter(HeroKey)))
 
         await cast("Any", refresh_hero).__wrapped__(
-            f"hero:{first_key}:en-us", mock_service
+            f"hero:{first_key}:en-us", mock_service, mock_queue
         )
 
         mock_service.refresh_single.assert_awaited_once_with(
@@ -126,8 +158,11 @@ class TestRefreshRoles:
     @pytest.mark.asyncio
     async def test_calls_service_refresh_list(self):
         mock_service = AsyncMock()
+        mock_queue = AsyncMock()
 
-        await cast("Any", refresh_roles).__wrapped__("roles:fr-fr", mock_service)
+        await cast("Any", refresh_roles).__wrapped__(
+            "roles:fr-fr", mock_service, mock_queue
+        )
 
         mock_service.refresh_list.assert_awaited_once_with(Locale.FRENCH)
 
@@ -136,8 +171,11 @@ class TestRefreshMaps:
     @pytest.mark.asyncio
     async def test_calls_service_refresh_list(self):
         mock_service = AsyncMock()
+        mock_queue = AsyncMock()
 
-        await cast("Any", refresh_maps).__wrapped__("maps:all", mock_service)
+        await cast("Any", refresh_maps).__wrapped__(
+            "maps:all", mock_service, mock_queue
+        )
 
         mock_service.refresh_list.assert_awaited_once()
 
@@ -146,8 +184,11 @@ class TestRefreshGamemodes:
     @pytest.mark.asyncio
     async def test_calls_service_refresh_list(self):
         mock_service = AsyncMock()
+        mock_queue = AsyncMock()
 
-        await cast("Any", refresh_gamemodes).__wrapped__("gamemodes:all", mock_service)
+        await cast("Any", refresh_gamemodes).__wrapped__(
+            "gamemodes:all", mock_service, mock_queue
+        )
 
         mock_service.refresh_list.assert_awaited_once()
 
@@ -156,9 +197,10 @@ class TestRefreshPlayerProfile:
     @pytest.mark.asyncio
     async def test_calls_service_get_player_career(self):
         mock_service = AsyncMock()
+        mock_queue = AsyncMock()
 
         await cast("Any", refresh_player_profile).__wrapped__(
-            "Player-1234", mock_service
+            "Player-1234", mock_service, mock_queue
         )
 
         mock_service.get_player_career.assert_awaited_once_with(

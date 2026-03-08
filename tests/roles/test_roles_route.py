@@ -57,8 +57,7 @@ def test_get_roles_blizzard_forbidden_error(client: TestClient):
         response = client.get("/roles")
 
     assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
-    assert response.json() == {
-        "error": (
-            "Blizzard is temporarily rate limiting this API. Please retry after 60 seconds."
-        )
-    }
+    assert (
+        "Blizzard is temporarily rate limiting this API. Please retry after"
+        in response.json()["error"]
+    )

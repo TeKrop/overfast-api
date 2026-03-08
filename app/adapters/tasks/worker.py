@@ -37,12 +37,13 @@ from app.api.dependencies import (
     get_player_service,
     get_role_service,
     get_storage,
+    get_task_queue,
 )
 from app.api.helpers import send_discord_webhook_message
 from app.config import settings
 from app.domain.enums import HeroKey, Locale
 from app.domain.parsers.heroes import fetch_heroes_html, parse_heroes_html
-from app.domain.ports import BlizzardClientPort, StoragePort
+from app.domain.ports import BlizzardClientPort, StoragePort, TaskQueuePort
 from app.domain.services import (
     GamemodeService,
     HeroService,
@@ -84,14 +85,22 @@ GamemodeServiceDep = Annotated[GamemodeService, TaskiqDepends(get_gamemode_servi
 PlayerServiceDep = Annotated[PlayerService, TaskiqDepends(get_player_service)]
 BlizzardClientDep = Annotated[BlizzardClientPort, TaskiqDepends(get_blizzard_client)]
 StorageDep = Annotated[StoragePort, TaskiqDepends(get_storage)]
+TaskQueueDep = Annotated[TaskQueuePort, TaskiqDepends(get_task_queue)]
 
 
 # ─── Metrics helper ──────────────────────────────────────────────────────────
 
 
 @asynccontextmanager
-async def _track_refresh(entity_type: str) -> AsyncIterator[None]:
-    """Context manager that records duration and success/failure metrics."""
+async def _run_refresh_task(
+    entity_type: str,
+    entity_id: str,
+    task_queue: TaskQueuePort,
+) -> AsyncIterator[None]:
+    """Context manager that executes a refresh task end-to-end: records
+    duration and success/failure metrics, then releases the dedup key so
+    the job can be re-enqueued immediately after completion.
+    """
     start = time.monotonic()
     try:
         yield
@@ -103,65 +112,82 @@ async def _track_refresh(entity_type: str) -> AsyncIterator[None]:
         background_tasks_duration_seconds.labels(entity_type=entity_type).observe(
             time.monotonic() - start
         )
+        await task_queue.release_job(entity_id)
 
 
 # ─── Refresh tasks ────────────────────────────────────────────────────────────
 
 
 @broker.task
-async def refresh_heroes(entity_id: str, service: HeroServiceDep) -> None:
+async def refresh_heroes(
+    entity_id: str, service: HeroServiceDep, task_queue: TaskQueueDep
+) -> None:
     """Refresh the heroes list for one locale.
 
     ``entity_id`` format: ``heroes:{locale}``  e.g. ``heroes:en-us``
     """
     _, locale_str = entity_id.split(":", 1)
-    async with _track_refresh("heroes"):
+    async with _run_refresh_task("heroes", entity_id, task_queue):
         await service.refresh_list(Locale(locale_str))
 
 
 @broker.task
-async def refresh_hero(entity_id: str, service: HeroServiceDep) -> None:
+async def refresh_hero(
+    entity_id: str, service: HeroServiceDep, task_queue: TaskQueueDep
+) -> None:
     """Refresh a single hero for one locale.
 
     ``entity_id`` format: ``hero:{hero_key}:{locale}``  e.g. ``hero:ana:en-us``
     """
     _, hero_key, locale_str = entity_id.split(":", 2)
-    async with _track_refresh("hero"):
+    async with _run_refresh_task("hero", entity_id, task_queue):
         await service.refresh_single(hero_key, Locale(locale_str))
 
 
 @broker.task
-async def refresh_roles(entity_id: str, service: RoleServiceDep) -> None:
+async def refresh_roles(
+    entity_id: str, service: RoleServiceDep, task_queue: TaskQueueDep
+) -> None:
     """Refresh roles for one locale.
 
     ``entity_id`` format: ``roles:{locale}``  e.g. ``roles:en-us``
     """
     _, locale_str = entity_id.split(":", 1)
-    async with _track_refresh("roles"):
+    async with _run_refresh_task("roles", entity_id, task_queue):
         await service.refresh_list(Locale(locale_str))
 
 
 @broker.task
-async def refresh_maps(entity_id: str, service: MapServiceDep) -> None:  # noqa: ARG001
+async def refresh_maps(
+    entity_id: str,
+    service: MapServiceDep,
+    task_queue: TaskQueueDep,
+) -> None:
     """Refresh all maps. ``entity_id`` is always ``maps:all``."""
-    async with _track_refresh("maps"):
+    async with _run_refresh_task("maps", entity_id, task_queue):
         await service.refresh_list()
 
 
 @broker.task
-async def refresh_gamemodes(entity_id: str, service: GamemodeServiceDep) -> None:  # noqa: ARG001
+async def refresh_gamemodes(
+    entity_id: str,
+    service: GamemodeServiceDep,
+    task_queue: TaskQueueDep,
+) -> None:
     """Refresh all game modes. ``entity_id`` is always ``gamemodes:all``."""
-    async with _track_refresh("gamemodes"):
+    async with _run_refresh_task("gamemodes", entity_id, task_queue):
         await service.refresh_list()
 
 
 @broker.task
-async def refresh_player_profile(entity_id: str, service: PlayerServiceDep) -> None:
+async def refresh_player_profile(
+    entity_id: str, service: PlayerServiceDep, task_queue: TaskQueueDep
+) -> None:
     """Refresh a player career profile.
 
     ``entity_id`` is the raw ``player_id`` string.
     """
-    async with _track_refresh("player"):
+    async with _run_refresh_task("player", entity_id, task_queue):
         await service.get_player_career(
             entity_id, gamemode=None, platform=None, cache_key=f"/players/{entity_id}"
         )

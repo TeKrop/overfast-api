@@ -12,7 +12,7 @@ from app.domain.enums import (
 from app.domain.utils.csv_reader import CSVReader
 from app.domain.utils.helpers import key_to_label
 
-DURATION_HOURS_PATTERN = re.compile(r"^(-?\d+,?\d*?):(\d+):(\d+)$")
+DURATION_HOURS_PATTERN = re.compile(r"^(-?\d+(?:,\d+)?):(\d+):(\d+)$")
 DURATION_MINUTES_PATTERN = re.compile(r"^(-?\d+):(\d+)$")
 INT_PATTERN = re.compile(r"^-?\d+(,\d+)*%?$")
 FLOAT_PATTERN = re.compile(r"^-?\d+(,\d+)*\.\d+$")

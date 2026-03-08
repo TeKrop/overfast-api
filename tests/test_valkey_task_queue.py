@@ -22,13 +22,16 @@ def queue(fake_redis: fakeredis.FakeAsyncRedis) -> ValkeyTaskQueue:
 class TestDeduplication:
     @pytest.mark.asyncio
     async def test_duplicate_job_skipped(self, queue: ValkeyTaskQueue):
-        await queue.enqueue("refresh", job_id="job-1")
-        await queue.enqueue("refresh", job_id="job-1")
+        mock_task = MagicMock()
+        mock_task.kiq = AsyncMock()
+        with patch.dict(
+            "app.adapters.tasks.valkey_task_queue.TASK_MAP",
+            {"refresh": mock_task},
+        ):
+            await queue.enqueue("refresh", job_id="job-1")
+            await queue.enqueue("refresh", job_id="job-1")
 
-        # Only one key should exist in redis
-        result = await queue.is_job_pending_or_running("job-1")
-
-        assert result
+        mock_task.kiq.assert_awaited_once_with("job-1")
 
     @pytest.mark.asyncio
     async def test_different_job_ids_both_recorded(self, queue: ValkeyTaskQueue):
@@ -134,3 +137,46 @@ class TestIsJobPendingOrRunningExceptionHandling:
         result = await queue.is_job_pending_or_running("any-job")
 
         assert result is False
+
+
+class TestReleaseJob:
+    @pytest.mark.asyncio
+    async def test_release_removes_dedup_key(self, queue: ValkeyTaskQueue):
+        """After release_job, is_job_pending_or_running returns False."""
+        await queue.enqueue("refresh", job_id="job-1")
+
+        await queue.release_job("job-1")
+
+        result = await queue.is_job_pending_or_running("job-1")
+        assert not result
+
+    @pytest.mark.asyncio
+    async def test_release_allows_reenqueue(self, queue: ValkeyTaskQueue):
+        """After release_job the same job_id can be dispatched again."""
+        mock_task = MagicMock()
+        mock_task.kiq = AsyncMock()
+        with patch.dict(
+            "app.adapters.tasks.valkey_task_queue.TASK_MAP",
+            {"refresh": mock_task},
+        ):
+            await queue.enqueue("refresh", job_id="job-1")
+            await queue.release_job("job-1")
+            await queue.enqueue("refresh", job_id="job-1")
+
+        assert mock_task.kiq.await_count == 2  # noqa: PLR2004
+
+    @pytest.mark.asyncio
+    async def test_release_nonexistent_job_is_noop(self, queue: ValkeyTaskQueue):
+        """Releasing an unknown job_id does not raise."""
+        await queue.release_job("nonexistent-job")
+
+    @pytest.mark.asyncio
+    async def test_redis_exception_is_swallowed(
+        self, fake_redis: fakeredis.FakeAsyncRedis
+    ):
+        """If redis raises during release, the exception is swallowed."""
+        queue = ValkeyTaskQueue(fake_redis)
+        cast("Any", fake_redis).delete = AsyncMock(
+            side_effect=RuntimeError("redis down")
+        )
+        await queue.release_job("any-job")
