@@ -101,7 +101,7 @@ class BlizzardThrottle(metaclass=Singleton):
                 if settings.prometheus_enabled:
                     throttle_wait_seconds.observe(wait)
                 logger.debug(
-                    f"[Throttle] Waiting {wait:.2f}s before next Blizzard request"
+                    "[Throttle] Waiting {:.2f}s before next Blizzard request", wait
                 )
                 await asyncio.sleep(wait)
 
@@ -155,8 +155,10 @@ class BlizzardThrottle(metaclass=Singleton):
             throttle_403_total.inc()
 
         logger.warning(
-            f"[Throttle] Blizzard 403 — delay {current_delay:.2f}s → {new_delay:.2f}s "
-            f"(penalty {settings.throttle_penalty_duration}s)"
+            "[Throttle] Blizzard 403 — delay {:.2f}s → {:.2f}s (penalty {}s)",
+            current_delay,
+            new_delay,
+            settings.throttle_penalty_duration,
         )
 
         if settings.discord_message_on_rate_limit:
@@ -207,6 +209,8 @@ class BlizzardThrottle(metaclass=Singleton):
                 throttle_current_delay_seconds.set(new_delay)
 
             logger.debug(
-                f"[Throttle] {'Slow Start' if current_delay > ssthresh else 'AIMD'}: "
-                f"{current_delay:.3f}s → {new_delay:.3f}s (streak reset)"
+                "[Throttle] {}: {:.3f}s → {:.3f}s (streak reset)",
+                "Slow Start" if current_delay > ssthresh else "AIMD",
+                current_delay,
+                new_delay,
             )

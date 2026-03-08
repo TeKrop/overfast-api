@@ -72,7 +72,7 @@ class BlizzardClient(metaclass=Singleton):
         logger.debug("OverFast request done!")
 
         if response.status_code == status.HTTP_403_FORBIDDEN:
-            raise self._blizzard_rate_limited_error()
+            raise await self._blizzard_rate_limited_error()
 
         return response
 
@@ -158,13 +158,18 @@ class BlizzardClient(metaclass=Singleton):
             detail=f"Couldn't get Blizzard page (HTTP {status_code} error) : {error}",
         )
 
-    @staticmethod
-    def _blizzard_rate_limited_error() -> HTTPException:
+    async def _blizzard_rate_limited_error(self) -> HTTPException:
         """Return 503 when Blizzard is rate limiting us (HTTP 403 received).
 
-        The throttle has already recorded the penalty and adjusted the delay.
+        Queries the throttle for the true remaining penalty time so that the
+        Retry-After header and detail message reflect how long the caller must
+        actually wait, rather than always advertising the full configured
+        penalty duration.
         """
-        retry_after = settings.throttle_penalty_duration
+        if self.throttle:
+            retry_after = await self.throttle.is_rate_limited()
+        else:
+            retry_after = settings.throttle_penalty_duration
         logger.warning(
             "[BlizzardClient] Rate limited by Blizzard (403) — returning 503 to client"
         )
