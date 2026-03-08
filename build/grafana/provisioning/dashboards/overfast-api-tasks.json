@@ -93,9 +93,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -152,9 +150,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -210,9 +206,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -268,9 +262,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -443,7 +435,7 @@
       },
       "targets": [
         {
-          "expr": "round(100 * sum(increase(background_refresh_completed_total{job=\"worker\"}[1d])) / clamp_min(sum(increase(background_refresh_triggered_total{job=\"worker\"}[1d])), 1))",
+          "expr": "round(100 * sum(increase(background_refresh_completed_total{job=\"worker\"}[1d])) / clamp_min(sum(increase(background_refresh_triggered_total{job=\"fastapi\"}[1d])), 1))",
           "refId": "A"
         }
       ],
@@ -476,9 +468,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "background",
         "graphMode": "none",
@@ -624,9 +614,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -683,9 +671,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -741,9 +727,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
