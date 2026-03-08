@@ -249,6 +249,14 @@ class ValkeyCache(metaclass=Singleton):
             )
         await self.valkey_server.delete(*keys_to_delete)
 
+    @handle_valkey_error(default_return=[])
+    async def scan_keys(self, pattern: str) -> list[str]:
+        """Return all Valkey keys matching *pattern* using SCAN iteration."""
+        return [
+            key.decode("utf-8") if isinstance(key, bytes) else key
+            async for key in self.valkey_server.scan_iter(match=pattern)
+        ]
+
     @handle_valkey_error(default_return=None)
     async def evict_volatile_data(self) -> None:
         """Delete all Valkey keys except unknown-player status and cooldown keys."""

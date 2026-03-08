@@ -40,17 +40,17 @@ class ValkeyTaskQueue:
         """
         effective_id = job_id or task_name
 
+        task_fn = TASK_MAP.get(task_name)
+        if task_fn is None:
+            logger.warning("[ValkeyTaskQueue] Unknown task: {!r}", task_name)
+            return effective_id
+
         try:
             claimed = await self._valkey.set(
                 f"{JOB_KEY_PREFIX}{effective_id}", "pending", nx=True, ex=JOB_TTL
             )
             if not claimed:
                 logger.debug("[ValkeyTaskQueue] Already queued: {}", effective_id)
-                return effective_id
-
-            task_fn = TASK_MAP.get(task_name)
-            if task_fn is None:
-                logger.warning("[ValkeyTaskQueue] Unknown task: {!r}", task_name)
                 return effective_id
 
             await task_fn.kiq(effective_id)

@@ -82,7 +82,11 @@ class BlizzardThrottle(metaclass=Singleton):
             return 0
         elapsed = time.time() - float(raw)
         remaining = settings.throttle_penalty_duration - elapsed
-        return max(0, int(remaining))
+        if remaining > 0:
+            # Sync the in-process monotonic clock so subsequent calls bypass Valkey.
+            self._penalty_start = time.monotonic() - elapsed
+            return int(remaining)
+        return 0
 
     async def wait_before_request(self) -> None:
         """Sleep for the current throttle delay, or raise RateLimitedError if in penalty.

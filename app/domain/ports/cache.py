@@ -116,6 +116,14 @@ class CachePort(Protocol):
         """Delete status and all associated cooldown keys for player (by Blizzard ID)."""
         ...
 
+    async def scan_keys(self, pattern: str) -> list[str]:
+        """Return all Valkey keys matching the given glob pattern.
+
+        Uses ``SCAN`` iteration to avoid blocking the server.  Returns an empty
+        list if no keys match or on error.
+        """
+        ...
+
     async def evict_volatile_data(self) -> None:
         """
         Delete all Valkey keys except unknown-player status and cooldown keys.

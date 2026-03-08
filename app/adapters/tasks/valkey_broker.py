@@ -7,6 +7,7 @@ operations to avoid connection exhaustion.
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING, Any
 
 import valkey.asyncio as aiovalkey
@@ -21,6 +22,8 @@ if TYPE_CHECKING:
 
 _QUEUE_DEFAULT = "taskiq:queue"
 _BRPOP_TIMEOUT = 2  # seconds; controls shutdown responsiveness
+_RECONNECT_INITIAL_DELAY = 1.0  # seconds before first retry
+_RECONNECT_MAX_DELAY = 30.0  # cap for exponential back-off
 
 
 class ValkeyListBroker(AsyncBroker):
@@ -93,10 +96,28 @@ class ValkeyListBroker(AsyncBroker):
 
         Keeps a single long-lived connection open for the worker lifetime.
         The short ``BRPOP`` timeout ensures shutdown is responsive.
+
+        On a transient Valkey disconnection the generator reconnects with
+        exponential back-off (capped at ``_RECONNECT_MAX_DELAY`` seconds)
+        and resumes consuming without losing already-queued messages.
         """
-        async with self._get_client() as conn:
-            while True:
-                result = await conn.brpop(self.queue_name, timeout=_BRPOP_TIMEOUT)  # type: ignore[misc, arg-type]
-                if result is not None:
-                    _, data = result
-                    yield data
+        delay = _RECONNECT_INITIAL_DELAY
+        while True:
+            try:
+                async with self._get_client() as conn:
+                    delay = _RECONNECT_INITIAL_DELAY  # reset on successful connect
+                    while True:
+                        result = await conn.brpop(
+                            self.queue_name,  # ty: ignore[invalid-argument-type]
+                            timeout=_BRPOP_TIMEOUT,
+                        )  # type: ignore[misc]
+                        if result is not None:
+                            _, data = result
+                            yield data
+            except Exception:  # noqa: BLE001
+                logger.warning(
+                    "[ValkeyListBroker] Valkey connection lost — reconnecting in {:.1f}s",
+                    delay,
+                )
+                await asyncio.sleep(delay)
+                delay = min(delay * 2, _RECONNECT_MAX_DELAY)
