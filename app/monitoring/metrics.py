@@ -94,6 +94,11 @@ background_tasks_duration_seconds = Histogram(
     buckets=(0.1, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0),
 )
 
+background_tasks_queue_size = Gauge(
+    "background_tasks_queue_size",
+    "Number of background refresh tasks currently queued or in-flight",
+)
+
 ########################
 # Throttle / Blizzard Metrics
 ########################

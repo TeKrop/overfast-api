@@ -535,3 +535,99 @@ class TestExecutePlayerRequest:
             )
         # Profile is stale (age > threshold), slow path → fresh fetch → age=0 → not stale
         assert result == {}
+
+
+# ---------------------------------------------------------------------------
+# refresh_player_profile — bypasses storage fast-path
+# ---------------------------------------------------------------------------
+
+
+class TestRefreshPlayerProfile:
+    @pytest.mark.asyncio
+    async def test_always_calls_blizzard_even_when_profile_is_fresh(self):
+        """refresh_player_profile bypasses _get_fresh_stored_profile and always
+        fetches from Blizzard, even when the stored profile is within the
+        staleness threshold."""
+        storage = FakeStorage()
+        await storage.set_player_profile(
+            "abc123|def456",
+            html=_TEKROP_HTML,
+            summary=_PLAYER_SUMMARY,
+        )
+        svc = _make_service(storage=storage)
+
+        with (
+            patch(
+                "app.domain.services.player_service.is_blizzard_id", return_value=True
+            ),
+            patch(
+                "app.domain.services.player_service.fetch_player_html",
+                new_callable=AsyncMock,
+                return_value=(_TEKROP_HTML, "abc123|def456"),
+            ) as mock_fetch,
+            patch("app.domain.services.player_service.settings") as s,
+        ):
+            s.player_staleness_threshold = (
+                99999  # profile would pass the fast-path check
+            )
+            s.prometheus_enabled = False
+            s.career_path_cache_timeout = 300
+            s.unknown_players_cache_enabled = False
+            await svc.refresh_player_profile("abc123|def456")
+
+        mock_fetch.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_updates_persistent_storage(self):
+        """refresh_player_profile writes a fresh profile to persistent storage."""
+        storage = FakeStorage()
+        svc = _make_service(storage=storage)
+
+        with (
+            patch(
+                "app.domain.services.player_service.is_blizzard_id", return_value=True
+            ),
+            patch(
+                "app.domain.services.player_service.fetch_player_html",
+                new_callable=AsyncMock,
+                return_value=(_TEKROP_HTML, "abc123|def456"),
+            ),
+            patch("app.domain.services.player_service.settings") as s,
+        ):
+            s.player_staleness_threshold = 3600
+            s.prometheus_enabled = False
+            s.career_path_cache_timeout = 300
+            s.unknown_players_cache_enabled = False
+            await svc.refresh_player_profile("abc123|def456")
+
+        profile = await storage.get_player_profile("abc123|def456")
+        assert profile is not None
+
+    @pytest.mark.asyncio
+    async def test_blizzard_error_propagates_as_http_exception(self):
+        """A ParserBlizzardError from identity resolution is translated to an
+        HTTPException by _handle_player_exceptions and re-raised — the worker's
+        _run_refresh_task except block captures it."""
+        svc = _make_service()
+        err = ParserBlizzardError(
+            status.HTTP_503_SERVICE_UNAVAILABLE, "Blizzard unavailable"
+        )
+
+        with (
+            patch(
+                "app.domain.services.player_service.is_blizzard_id", return_value=False
+            ),
+            patch(
+                "app.domain.services.player_service.fetch_player_summary_json",
+                new_callable=AsyncMock,
+                side_effect=err,
+            ),
+            patch("app.domain.services.player_service.settings") as s,
+        ):
+            s.player_staleness_threshold = 3600
+            s.prometheus_enabled = False
+            s.unknown_players_cache_enabled = False
+            with pytest.raises(HTTPException) as exc_info:
+                await svc.refresh_player_profile("TeKrop-2217")
+
+        assert exc_info.value.status_code == status.HTTP_503_SERVICE_UNAVAILABLE

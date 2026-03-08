@@ -11,6 +11,7 @@ from typing import Any
 
 from app.adapters.tasks.task_registry import TASK_MAP
 from app.infrastructure.logger import logger
+from app.monitoring.metrics import background_tasks_queue_size
 
 JOB_KEY_PREFIX = "worker:job:"
 JOB_TTL = 3600  # 1 hour — auto-expire stale dedup keys
@@ -54,6 +55,7 @@ class ValkeyTaskQueue:
                 return effective_id
 
             await task_fn.kiq(effective_id)
+            background_tasks_queue_size.inc()
             logger.debug(
                 "[ValkeyTaskQueue] Enqueued {} (job_id={})", task_name, effective_id
             )

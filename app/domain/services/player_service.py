@@ -133,6 +133,37 @@ class PlayerService(BaseService):
         )
 
     # ------------------------------------------------------------------
+    # Background refresh  (worker only — bypasses storage fast-path)
+    # ------------------------------------------------------------------
+
+    async def refresh_player_profile(self, player_id: str) -> None:
+        """Unconditionally fetch fresh player data from Blizzard and persist it.
+
+        Unlike the public endpoint methods, this method bypasses
+        ``_get_fresh_stored_profile`` entirely, so the worker always
+        issues a live Blizzard request regardless of how recently the
+        profile was last stored.  This prevents the background refresh
+        task from silently no-oping when the stored profile is still
+        within the staleness threshold.
+        """
+        identity = PlayerIdentity()
+        try:
+            identity = await self._resolve_player_identity(player_id)
+            effective_id = identity.blizzard_id or player_id
+            html = await self._get_player_html(effective_id, identity)
+            data = parse_player_profile_html(html, identity.player_summary)
+            await self._update_api_cache(
+                f"/players/{player_id}",
+                {
+                    "summary": data.get("summary") or {},
+                    "stats": filter_all_stats_data(data.get("stats") or {}, None, None),
+                },
+                settings.career_path_cache_timeout,
+            )
+        except Exception as exc:  # noqa: BLE001
+            await self._handle_player_exceptions(exc, player_id, identity)
+
+    # ------------------------------------------------------------------
     # Player stats  (GET /players/{player_id}/stats)
     # ------------------------------------------------------------------
 

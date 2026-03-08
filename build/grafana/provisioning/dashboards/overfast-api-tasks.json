@@ -67,7 +67,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(background_tasks_total{job=\"fastapi\", status=\"success\"}[1d])))",
+          "expr": "round(sum(increase(background_refresh_completed_total{job=\"fastapi\"}[1d])))",
           "refId": "A"
         }
       ],
@@ -118,7 +118,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(background_tasks_total{job=\"fastapi\", status=\"failure\"}[1d])))",
+          "expr": "round(sum(increase(background_refresh_failed_total{job=\"fastapi\"}[1d])))",
           "refId": "A"
         }
       ],
@@ -177,7 +177,7 @@
       },
       "targets": [
         {
-          "expr": "sum(background_tasks_queue_size{job=\"fastapi\"})",
+          "expr": "background_tasks_queue_size{job=\"fastapi\"}",
           "refId": "A"
         }
       ],
@@ -293,13 +293,13 @@
       },
       "targets": [
         {
-          "expr": "sum by (task_type) (rate(background_tasks_total{job=\"fastapi\", status=\"success\"}[5m]))",
-          "legendFormat": "{{task_type}} - success",
+          "expr": "sum by (entity_type) (rate(background_refresh_completed_total{job=\"fastapi\"}[5m]))",
+          "legendFormat": "{{entity_type}} - success",
           "refId": "A"
         },
         {
-          "expr": "sum by (task_type) (rate(background_tasks_total{job=\"fastapi\", status=\"failure\"}[5m]))",
-          "legendFormat": "{{task_type}} - failure",
+          "expr": "sum by (entity_type) (rate(background_refresh_failed_total{job=\"fastapi\"}[5m]))",
+          "legendFormat": "{{entity_type}} - failure",
           "refId": "B"
         }
       ],
@@ -339,8 +339,8 @@
       },
       "targets": [
         {
-          "expr": "sum by (task_type) (background_tasks_queue_size{job=\"fastapi\"})",
-          "legendFormat": "{{task_type}}",
+          "expr": "background_tasks_queue_size{job=\"fastapi\"}",
+          "legendFormat": "queue size",
           "refId": "A"
         }
       ],
@@ -380,18 +380,18 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.5, sum by (le, task_type) (rate(background_tasks_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
-          "legendFormat": "p50 - {{task_type}}",
+          "expr": "histogram_quantile(0.5, sum by (le, entity_type) (rate(background_tasks_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
+          "legendFormat": "p50 - {{entity_type}}",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum by (le, task_type) (rate(background_tasks_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
-          "legendFormat": "p95 - {{task_type}}",
+          "expr": "histogram_quantile(0.95, sum by (le, entity_type) (rate(background_tasks_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
+          "legendFormat": "p95 - {{entity_type}}",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, sum by (le, task_type) (rate(background_tasks_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
-          "legendFormat": "p99 - {{task_type}}",
+          "expr": "histogram_quantile(0.99, sum by (le, entity_type) (rate(background_tasks_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
+          "legendFormat": "p99 - {{entity_type}}",
           "refId": "C"
         }
       ],

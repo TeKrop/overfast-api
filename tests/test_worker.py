@@ -22,7 +22,7 @@ from app.domain.enums import HeroKey, Locale
 
 @pytest.fixture(autouse=True)
 def mock_worker_metrics():
-    """Patch all three worker Prometheus metrics for every test in this module."""
+    """Patch all worker Prometheus metrics for every test in this module."""
     with (
         patch(
             "app.adapters.tasks.worker.background_refresh_completed_total"
@@ -33,11 +33,15 @@ def mock_worker_metrics():
         patch(
             "app.adapters.tasks.worker.background_tasks_duration_seconds"
         ) as mock_duration,
+        patch(
+            "app.adapters.tasks.worker.background_tasks_queue_size"
+        ) as mock_queue_size,
     ):
         mock_completed.labels.return_value = MagicMock()
         mock_failed.labels.return_value = MagicMock()
         mock_duration.labels.return_value = MagicMock()
-        yield mock_completed, mock_failed, mock_duration
+        mock_queue_size.return_value = MagicMock()
+        yield mock_completed, mock_failed, mock_duration, mock_queue_size
 
 
 # ── _run_refresh_task ─────────────────────────────────────────────────────────
@@ -47,7 +51,7 @@ class TestRunRefreshTask:
     @pytest.mark.asyncio
     async def test_success_increments_completed_counter(self, mock_worker_metrics):
         """On success, background_refresh_completed_total is incremented."""
-        mock_completed, mock_failed, _ = mock_worker_metrics
+        mock_completed, mock_failed, _, _qs = mock_worker_metrics
         mock_queue = AsyncMock()
 
         async with _run_refresh_task("heroes", "heroes:en-us", mock_queue):
@@ -62,7 +66,7 @@ class TestRunRefreshTask:
         self, mock_worker_metrics
     ):
         """On exception, background_refresh_failed_total is incremented and exception re-raised."""
-        mock_completed, mock_failed, _ = mock_worker_metrics
+        mock_completed, mock_failed, _, _qs = mock_worker_metrics
         mock_queue = AsyncMock()
 
         async def _fail():
@@ -80,7 +84,7 @@ class TestRunRefreshTask:
     @pytest.mark.asyncio
     async def test_duration_always_recorded(self, mock_worker_metrics):
         """Duration histogram is observed regardless of success or failure."""
-        _, _, mock_duration = mock_worker_metrics
+        _, _, mock_duration, _qs = mock_worker_metrics
         mock_obs = MagicMock()
         mock_duration.labels.return_value = mock_obs
         mock_queue = AsyncMock()
@@ -95,6 +99,33 @@ class TestRunRefreshTask:
 
         mock_duration.labels.assert_called_once_with(entity_type="roles")
         mock_obs.observe.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_queue_size_decremented_on_success(self, mock_worker_metrics):
+        """background_tasks_queue_size is decremented in the finally block on success."""
+        _, _, _, mock_queue_size = mock_worker_metrics
+        mock_queue = AsyncMock()
+
+        async with _run_refresh_task("heroes", "heroes:en-us", mock_queue):
+            pass
+
+        mock_queue_size.dec.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_queue_size_decremented_on_failure(self, mock_worker_metrics):
+        """background_tasks_queue_size is decremented in the finally block even on failure."""
+        _, _, _, mock_queue_size = mock_worker_metrics
+        mock_queue = AsyncMock()
+
+        async def _fail():
+            async with _run_refresh_task("maps", "maps:all", mock_queue):
+                msg = "oops"
+                raise RuntimeError(msg)
+
+        with contextlib.suppress(RuntimeError):
+            await _fail()
+
+        mock_queue_size.dec.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_release_job_called_on_success(self):
@@ -195,7 +226,7 @@ class TestRefreshGamemodes:
 
 class TestRefreshPlayerProfile:
     @pytest.mark.asyncio
-    async def test_calls_service_get_player_career(self):
+    async def test_calls_service_refresh_player_profile(self):
         mock_service = AsyncMock()
         mock_queue = AsyncMock()
 
@@ -203,12 +234,7 @@ class TestRefreshPlayerProfile:
             "Player-1234", mock_service, mock_queue
         )
 
-        mock_service.get_player_career.assert_awaited_once_with(
-            "Player-1234",
-            gamemode=None,
-            platform=None,
-            cache_key="/players/Player-1234",
-        )
+        mock_service.refresh_player_profile.assert_awaited_once_with("Player-1234")
 
 
 # ── cleanup_stale_players ─────────────────────────────────────────────────────

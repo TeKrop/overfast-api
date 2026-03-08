@@ -56,6 +56,7 @@ from app.monitoring.metrics import (
     background_refresh_completed_total,
     background_refresh_failed_total,
     background_tasks_duration_seconds,
+    background_tasks_queue_size,
 )
 
 # ─── Broker ───────────────────────────────────────────────────────────────────
@@ -119,6 +120,7 @@ async def _run_refresh_task(
         background_tasks_duration_seconds.labels(entity_type=entity_type).observe(
             duration
         )
+        background_tasks_queue_size.dec()
         await task_queue.release_job(entity_id)
 
 
@@ -193,11 +195,12 @@ async def refresh_player_profile(
     """Refresh a player career profile.
 
     ``entity_id`` is the raw ``player_id`` string.
+    Calls :meth:`~app.domain.services.PlayerService.refresh_player_profile`
+    which bypasses the persistent-storage fast-path to guarantee a live
+    Blizzard fetch regardless of how recently the profile was stored.
     """
     async with _run_refresh_task("player", entity_id, task_queue):
-        await service.get_player_career(
-            entity_id, gamemode=None, platform=None, cache_key=f"/players/{entity_id}"
-        )
+        await service.refresh_player_profile(entity_id)
 
 
 # ─── Cron tasks ───────────────────────────────────────────────────────────────

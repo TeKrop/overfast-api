@@ -29,6 +29,7 @@ from app.domain.exceptions import RateLimitedError
 from app.infrastructure.logger import logger
 from app.infrastructure.metaclasses import Singleton
 from app.monitoring.metrics import (
+    blizzard_rate_limited_total,
     throttle_403_total,
     throttle_current_delay_seconds,
     throttle_wait_seconds,
@@ -153,6 +154,7 @@ class BlizzardThrottle(metaclass=Singleton):
         if settings.prometheus_enabled:
             throttle_current_delay_seconds.set(new_delay)
             throttle_403_total.inc()
+            blizzard_rate_limited_total.inc()
 
         logger.warning(
             "[Throttle] Blizzard 403 — delay {:.2f}s → {:.2f}s (penalty {}s)",
