@@ -24,8 +24,16 @@ class InternalServerErrorMessage(BaseModel):
 class RateLimitErrorMessage(BaseModel):
     error: str = Field(
         ...,
-        description="Message describing the rate limit error and number of seconds before retrying",
+        description="Message describing the nginx rate limit error",
+        examples=["API rate limit reached, please wait for 1 second before retrying"],
+    )
+
+
+class BlizzardRateLimitErrorMessage(BaseModel):
+    error: str = Field(
+        ...,
+        description="Message describing the Blizzard rate limit error and number of seconds before retrying",
         examples=[
-            "API has been rate limited by Blizzard, please wait for 5 seconds before retrying"
+            "Blizzard is temporarily rate limiting this API. Please retry after 5 seconds."
         ],
     )

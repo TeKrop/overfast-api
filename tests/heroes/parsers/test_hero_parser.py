@@ -38,7 +38,7 @@ from app.domain.parsers.hero import _parse_birthday_and_age
         # zh-tw
         ("5月9日 （年齡：1）", Locale.CHINESE_TAIWAN, ("5月9日", 1)),
         # pt-br
-        ("Desconhecido (Idade: 10)", Locale.PORTUGUESE_BRAZIL, ("Unknown", 10)),
+        ("Desconhecido (Idade: 10)", Locale.PORTUGUESE_BRAZIL, (None, 10)),
     ],
 )
 def test_parse_birthday_and_age(

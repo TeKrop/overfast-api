@@ -10,6 +10,7 @@ from fastapi import HTTPException, status
 
 from app.api.models.errors import (
     BlizzardErrorMessage,
+    BlizzardRateLimitErrorMessage,
     InternalServerErrorMessage,
     RateLimitErrorMessage,
 )
@@ -76,7 +77,20 @@ routes_responses = {
     **success_responses,
     status.HTTP_429_TOO_MANY_REQUESTS: {
         "model": RateLimitErrorMessage,
-        "description": "Rate Limit Error",
+        "description": "API Rate Limit Error",
+        "headers": {
+            settings.retry_after_header: {
+                "description": "Indicates how long to wait before making a new request",
+                "schema": {
+                    "type": "string",
+                    "example": "1",
+                },
+            }
+        },
+    },
+    status.HTTP_503_SERVICE_UNAVAILABLE: {
+        "model": BlizzardRateLimitErrorMessage,
+        "description": "Blizzard Rate Limit Error",
         "headers": {
             settings.retry_after_header: {
                 "description": "Indicates how long to wait before making a new request",
