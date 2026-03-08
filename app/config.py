@@ -167,7 +167,7 @@ class Settings(BaseSettings):
     csv_cache_timeout: int = 86400
 
     # Cache TTL for career pages data (seconds)
-    career_path_cache_timeout: int = 3600
+    career_path_cache_timeout: int = 600
 
     # Cache TTL for search account data (seconds)
     search_account_path_cache_timeout: int = 600

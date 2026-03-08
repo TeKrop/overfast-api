@@ -106,11 +106,14 @@ class StaticDataService(BaseService):
             background_refresh_triggered_total.labels(
                 entity_type=config.entity_type
             ).inc()
-            # Short TTL absorbs burst traffic while the background refresh is in-flight.
+            # Preserve the original stored_at so Age is computed correctly by nginx/Lua.
+            # Use the full cache_ttl (not stale_cache_timeout) so X-Cache-TTL reflects the
+            # real remaining lifetime of the entry, not just the short SWR window.
             await self._update_api_cache(
                 config.cache_key,
                 filtered,
-                settings.stale_cache_timeout,
+                config.cache_ttl,
+                stored_at=stored["updated_at"],
                 staleness_threshold=config.staleness_threshold,
                 stale_while_revalidate=settings.stale_cache_timeout,
             )
@@ -120,10 +123,13 @@ class StaticDataService(BaseService):
                 config.entity_type,
                 age,
             )
+            # Preserve the original stored_at so Age is computed correctly by nginx/Lua.
+            # Without this, every Valkey re-write resets stored_at to now, making Age ≈ 0.
             await self._update_api_cache(
                 config.cache_key,
                 filtered,
                 config.cache_ttl,
+                stored_at=stored["updated_at"],
                 staleness_threshold=config.staleness_threshold,
             )
 

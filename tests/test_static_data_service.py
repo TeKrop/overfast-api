@@ -80,14 +80,20 @@ class TestGetOrFetch:
         assert is_stale is False
         assert 99 <= age <= 102  # noqa: PLR2004
 
+        # Age header correctness: stored_at must be the original updated_at (not now)
+        # so that nginx/Lua computes Age from the true data age, not the Valkey write time.
+        call_kwargs = cast("Any", svc.cache).update_api_cache.call_args.kwargs
+        assert call_kwargs["stored_at"] == now - 100
+
     @pytest.mark.asyncio
     async def test_serves_stale_from_storage_and_enqueues_refresh(self):
         """Storage hit with stale data returns is_stale=True and enqueues refresh."""
         svc = _make_service()
         now = int(time.time())
+        updated_at = now - 7200  # 7200s old, threshold=3600 → stale
         cast("Any", svc.storage).get_static_data.return_value = {
             "data": "old-html",
-            "updated_at": now - 7200,  # 7200s old, threshold=3600 → stale
+            "updated_at": updated_at,
         }
 
         parsed = [{"key": "ana"}]
@@ -102,6 +108,15 @@ class TestGetOrFetch:
         assert is_stale is True
         assert age >= 3600  # noqa: PLR2004
         cast("Any", svc.task_queue).enqueue.assert_awaited_once()
+
+        # Age header correctness: stored_at must be the original updated_at (not now),
+        # and cache_ttl must be the full config.cache_ttl (not stale_cache_timeout).
+        call_kwargs = cast("Any", svc.cache).update_api_cache.call_args.kwargs
+        assert call_kwargs["stored_at"] == updated_at
+        assert (
+            cast("Any", svc.cache).update_api_cache.call_args.args[2]
+            == config.cache_ttl
+        )
 
     @pytest.mark.asyncio
     async def test_result_filter_applied(self):

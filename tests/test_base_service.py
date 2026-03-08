@@ -39,6 +39,7 @@ class TestUpdateApiCache:
             "my-key",
             {"data": 1},
             3600,
+            stored_at=None,
             staleness_threshold=None,
             stale_while_revalidate=0,
         )
@@ -64,8 +65,23 @@ class TestUpdateApiCache:
             "key",
             [],
             1800,
+            stored_at=None,
             staleness_threshold=900,
             stale_while_revalidate=60,
+        )
+
+    @pytest.mark.asyncio
+    async def test_stored_at_forwarded(self):
+        """stored_at is forwarded verbatim so Age is preserved across SWR rewrites."""
+        svc = _make_service()
+        await svc._update_api_cache("key", [], 86400, stored_at=1_000_000)
+        cast("Any", svc.cache).update_api_cache.assert_awaited_once_with(
+            "key",
+            [],
+            86400,
+            stored_at=1_000_000,
+            staleness_threshold=None,
+            stale_while_revalidate=0,
         )
 
 

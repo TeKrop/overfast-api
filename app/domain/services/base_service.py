@@ -61,6 +61,7 @@ class BaseService:
         data: Any,
         cache_ttl: int,
         *,
+        stored_at: int | None = None,
         staleness_threshold: int | None = None,
         stale_while_revalidate: int = 0,
     ) -> None:
@@ -70,6 +71,7 @@ class BaseService:
                 cache_key,
                 data,
                 cache_ttl,
+                stored_at=stored_at,
                 staleness_threshold=staleness_threshold,
                 stale_while_revalidate=stale_while_revalidate,
             )

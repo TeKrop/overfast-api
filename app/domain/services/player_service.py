@@ -259,11 +259,13 @@ class PlayerService(BaseService):
         effective_id = request.player_id
         data: dict = {}
         age = 0
+        stored_at: int | None = None
 
         try:
             fresh = await self._get_fresh_stored_profile(request.player_id)
             if fresh is not None:
                 profile, age = fresh
+                stored_at = profile["updated_at"]
                 logger.info(
                     "Serving player data from persistent storage (within staleness threshold)"
                 )
@@ -278,7 +280,11 @@ class PlayerService(BaseService):
 
         is_stale = self._check_player_staleness(age)
         await self._update_api_cache(
-            request.cache_key, data, settings.career_path_cache_timeout
+            request.cache_key,
+            data,
+            settings.career_path_cache_timeout,
+            stored_at=stored_at,
+            stale_while_revalidate=settings.stale_cache_timeout if is_stale else 0,
         )
         if is_stale:
             await self._enqueue_refresh("player_profile", request.player_id)

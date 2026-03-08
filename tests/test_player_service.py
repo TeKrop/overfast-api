@@ -536,6 +536,126 @@ class TestExecutePlayerRequest:
         # Profile is stale (age > threshold), slow path → fresh fetch → age=0 → not stale
         assert result == {}
 
+    @pytest.mark.asyncio
+    async def test_fast_path_preserves_stored_at_in_cache(self):
+        """When serving from storage, stored_at is forwarded to the cache write
+        so the Lua Age header reflects the real data age, not the write time."""
+        storage = FakeStorage()
+        await storage.set_player_profile(
+            "abc123|def456",
+            html=_TEKROP_HTML,
+            summary=_PLAYER_SUMMARY,
+        )
+        original_updated_at = storage._profiles["abc123|def456"]["updated_at"]
+        cache = AsyncMock()
+        svc = _make_service(storage=storage, cache=cache)
+
+        with (
+            patch(
+                "app.domain.services.player_service.is_blizzard_id", return_value=True
+            ),
+            patch("app.domain.services.player_service.settings") as s,
+        ):
+            s.player_staleness_threshold = 99999
+            s.prometheus_enabled = False
+            s.career_path_cache_timeout = 300
+            s.stale_cache_timeout = 60
+            await svc._execute_player_request(
+                PlayerRequest(
+                    player_id="abc123|def456",
+                    cache_key="test-key",
+                    data_factory=lambda _html, _summary: {},
+                )
+            )
+
+        call_kwargs = cache.update_api_cache.call_args.kwargs
+        assert call_kwargs["stored_at"] == original_updated_at
+
+    @pytest.mark.asyncio
+    async def test_stale_fast_path_sets_stale_while_revalidate(self):
+        """When is_stale=True (storage path), stale_while_revalidate is set in the
+        cache envelope so Lua emits the correct X-Cache-Status: stale header."""
+        storage = FakeStorage()
+        await storage.set_player_profile(
+            "abc123|def456",
+            html=_TEKROP_HTML,
+            summary=_PLAYER_SUMMARY,
+        )
+        # Age the profile into the stale window (>= threshold // 2)
+        storage._profiles["abc123|def456"]["updated_at"] = int(time.time()) - 2000
+        cache = AsyncMock()
+        task_queue = AsyncMock()
+        task_queue.is_job_pending_or_running = AsyncMock(return_value=False)
+        svc = _make_service(storage=storage, cache=cache, task_queue=task_queue)
+
+        with (
+            patch(
+                "app.domain.services.player_service.is_blizzard_id", return_value=True
+            ),
+            patch("app.domain.services.player_service.settings") as s,
+        ):
+            s.player_staleness_threshold = 3600
+            s.prometheus_enabled = False
+            s.career_path_cache_timeout = 300
+            s.stale_cache_timeout = 60
+            _data, is_stale, _age = await svc._execute_player_request(
+                PlayerRequest(
+                    player_id="abc123|def456",
+                    cache_key="test-key",
+                    data_factory=lambda _html, _summary: {},
+                )
+            )
+
+        assert is_stale is True
+        call_kwargs = cache.update_api_cache.call_args.kwargs
+        assert call_kwargs["stale_while_revalidate"] == 60  # noqa: PLR2004
+
+    @pytest.mark.asyncio
+    async def test_fresh_blizzard_fetch_stored_at_is_none(self):
+        """On a fresh Blizzard fetch (age=0), stored_at=None so the cache adapter
+        stamps the current time, which is correct."""
+        svc = _make_service()
+        cache = AsyncMock()
+        svc.cache = cache
+
+        with (
+            patch(
+                "app.domain.services.player_service.is_blizzard_id", return_value=False
+            ),
+            patch(
+                "app.domain.services.player_service.fetch_player_summary_json",
+                new_callable=AsyncMock,
+                return_value=[],
+            ),
+            patch(
+                "app.domain.services.player_service.parse_player_summary_json",
+                return_value=None,
+            ),
+            patch(
+                "app.domain.services.player_service.fetch_player_html",
+                new_callable=AsyncMock,
+                return_value=(_TEKROP_HTML, "abc123|def456"),
+            ),
+            patch("app.domain.services.player_service.settings") as s,
+        ):
+            s.player_staleness_threshold = 0
+            s.prometheus_enabled = False
+            s.career_path_cache_timeout = 300
+            s.stale_cache_timeout = 60
+            s.blizzard_host = "https://overwatch.blizzard.com"
+            s.career_path = "/career"
+            s.unknown_players_cache_enabled = False
+            await svc._execute_player_request(
+                PlayerRequest(
+                    player_id="TeKrop-2217",
+                    cache_key="test-key",
+                    data_factory=lambda _html, _summary: {},
+                )
+            )
+
+        call_kwargs = cache.update_api_cache.call_args.kwargs
+        assert call_kwargs["stored_at"] is None
+
 
 # ---------------------------------------------------------------------------
 # refresh_player_profile — bypasses storage fast-path
