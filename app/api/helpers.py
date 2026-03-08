@@ -3,7 +3,7 @@
 import traceback
 from datetime import UTC, datetime
 from functools import cache
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import httpx
 from fastapi import HTTPException, status
@@ -164,8 +164,8 @@ def _truncate_text(text: str, max_length: int, suffix: str = "...") -> str:
 
 
 def _truncate_embed_fields(
-    fields: list[dict[str, str | bool]],
-) -> list[dict[str, str | bool]]:
+    fields: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     """Truncate field names and values to Discord limits."""
     max_field_name_length = 250  # Actual limit: 256
     max_field_value_length = 1000  # Actual limit: 1024
@@ -190,7 +190,7 @@ def send_discord_webhook_message(
     title: str | None = None,
     description: str | None = None,
     url: str | None = None,
-    fields: list[dict[str, str | bool]] | None = None,
+    fields: list[dict[str, Any]] | None = None,
     color: int | None = None,
 ) -> httpx.Response | None:
     """Helper method for sending a Discord webhook message using modern embed syntax.

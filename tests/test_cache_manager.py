@@ -42,7 +42,9 @@ def test_get_cache_key_from_request(
     req: Request,
     expected: str,
 ):
-    assert cache_manager.get_cache_key_from_request(req) == expected
+    actual = cache_manager.get_cache_key_from_request(req)
+
+    assert actual == expected
 
 
 @pytest.mark.parametrize(
@@ -123,6 +125,7 @@ class TestPlayerStatus:
         await cache_manager.set_player_status(blizzard_id, check_count, retry_after)
 
         result = await cache_manager.get_player_status(blizzard_id)
+
         assert result is not None
         assert result["check_count"] == check_count
         assert 0 < result["retry_after"] <= retry_after
@@ -143,6 +146,7 @@ class TestPlayerStatus:
 
         # Early rejection: lookup by battletag (before blizzard_id is resolved)
         result = await cache_manager.get_player_status(battletag)
+
         assert result is not None
         assert result["check_count"] == check_count
 
@@ -160,6 +164,7 @@ class TestPlayerStatus:
 
         # Cooldown key expired but status key must still hold check_count
         result = await cache_manager.get_player_status(blizzard_id)
+
         assert result is not None
         assert result["check_count"] == check_count
         assert result["retry_after"] == 0  # No active cooldown
@@ -175,6 +180,7 @@ class TestPlayerStatus:
         await cache_manager.set_player_status(blizzard_id, 2, 1800)
 
         result = await cache_manager.get_player_status(blizzard_id)
+
         assert result is not None
         assert result["check_count"] == 2  # noqa: PLR2004
 
@@ -184,6 +190,7 @@ class TestPlayerStatus:
     ):
         """Returns None for a player that was never marked unknown"""
         result = await cache_manager.get_player_status("NeverUnknown-9999")
+
         assert result is None
 
     @pytest.mark.asyncio
@@ -197,8 +204,11 @@ class TestPlayerStatus:
 
         await cache_manager.delete_player_status(blizzard_id)
 
-        assert await cache_manager.get_player_status(blizzard_id) is None
-        assert await cache_manager.get_player_status(battletag) is None
+        result_by_id = await cache_manager.get_player_status(blizzard_id)
+        result_by_battletag = await cache_manager.get_player_status(battletag)
+
+        assert result_by_id is None
+        assert result_by_battletag is None
 
     @pytest.mark.asyncio
     async def test_delete_player_status_is_idempotent_when_not_tracked(
@@ -208,13 +218,16 @@ class TestPlayerStatus:
         blizzard_id = "never-stored-1234"
 
         # Precondition: no status exists for this player
-        assert await cache_manager.get_player_status(blizzard_id) is None
+        precondition = await cache_manager.get_player_status(blizzard_id)
+        assert precondition is None
 
         # Deleting when no keys exist should not error
         await cache_manager.delete_player_status(blizzard_id)
 
         # Postcondition: status is still None
-        assert await cache_manager.get_player_status(blizzard_id) is None
+        final_result = await cache_manager.get_player_status(blizzard_id)
+
+        assert final_result is None
 
     @pytest.mark.asyncio
     async def test_evict_volatile_data_keeps_unknown_player_keys(
@@ -228,8 +241,10 @@ class TestPlayerStatus:
         await cache_manager.evict_volatile_data()
 
         # api-cache key should be gone
-        assert await cache_manager.get_api_cache("/heroes") is None
+        api_cache_result = await cache_manager.get_api_cache("/heroes")
         # unknown-player status/cooldown should survive
         result = await cache_manager.get_player_status(blizzard_id)
+
+        assert api_cache_result is None
         assert result is not None
         assert result["check_count"] == 1

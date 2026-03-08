@@ -42,7 +42,9 @@ from app.domain.parsers import player_helpers as helpers
     ],
 )
 def test_get_computed_stat_value(input_str: str, result: float | str):
-    assert helpers.get_computed_stat_value(input_str) == result
+    actual = helpers.get_computed_stat_value(input_str)
+
+    assert actual == result
 
 
 @pytest.mark.parametrize(
@@ -83,7 +85,9 @@ def test_get_computed_stat_value(input_str: str, result: float | str):
     ],
 )
 def test_get_division_from_icon(rank_url: str, division: CompetitiveDivision):
-    assert helpers.get_division_from_icon(rank_url) == division
+    actual = helpers.get_division_from_icon(rank_url)
+
+    assert actual == division
 
 
 @pytest.mark.parametrize(
@@ -116,7 +120,9 @@ def test_get_division_from_icon(rank_url: str, division: CompetitiveDivision):
     ],
 )
 def test_get_endorsement_value_from_frame(frame_url: str, endorsement_value: int):
-    assert helpers.get_endorsement_value_from_frame(frame_url) == endorsement_value
+    actual = helpers.get_endorsement_value_from_frame(frame_url)
+
+    assert actual == endorsement_value
 
 
 @pytest.mark.parametrize(
@@ -135,7 +141,9 @@ def test_get_endorsement_value_from_frame(frame_url: str, endorsement_value: int
     ],
 )
 def test_get_hero_keyname(input_str: str, result: str):
-    assert helpers.get_hero_keyname(input_str) == result
+    actual = helpers.get_hero_keyname(input_str)
+
+    assert actual == result
 
 
 @pytest.mark.parametrize(
@@ -160,7 +168,9 @@ def test_get_hero_keyname(input_str: str, result: str):
     ],
 )
 def test_get_role_key_from_icon(icon_url: str, role: CompetitiveRole):  # ty: ignore[invalid-type-form]
-    assert helpers.get_role_key_from_icon(icon_url) == role
+    actual = helpers.get_role_key_from_icon(icon_url)
+
+    assert actual == role
 
 
 @pytest.mark.parametrize(
@@ -172,7 +182,9 @@ def test_get_role_key_from_icon(icon_url: str, role: CompetitiveRole):  # ty: ig
     ],
 )
 def test_get_stats_hero_class(hero_classes: str | None, result: str):
-    assert helpers.get_stats_hero_class(hero_classes) == result
+    actual = helpers.get_stats_hero_class(hero_classes)
+
+    assert actual == result
 
 
 @pytest.mark.parametrize(
@@ -198,7 +210,9 @@ def test_get_stats_hero_class(hero_classes: str | None, result: str):
     ],
 )
 def test_get_tier_from_icon(tier_url: str | None, tier: int):
-    assert helpers.get_tier_from_icon(tier_url) == tier
+    actual = helpers.get_tier_from_icon(tier_url)
+
+    assert actual == tier
 
 
 @pytest.mark.parametrize(
@@ -214,7 +228,9 @@ def test_get_tier_from_icon(tier_url: str | None, tier: int):
     ],
 )
 def test_remove_accents(input_str: str, result: str):
-    assert helpers.remove_accents(input_str) == result
+    actual = helpers.remove_accents(input_str)
+
+    assert actual == result
 
 
 @pytest.mark.parametrize(
@@ -233,7 +249,9 @@ def test_remove_accents(input_str: str, result: str):
     ],
 )
 def test_string_to_snakecase(input_str: str, result: str):
-    assert helpers.string_to_snakecase(input_str) == result
+    actual = helpers.string_to_snakecase(input_str)
+
+    assert actual == result
 
 
 @pytest.mark.parametrize(("hero_key"), list(HeroKey))
@@ -253,7 +271,9 @@ def test_get_hero_role(hero_key: HeroKey):  # ty: ignore[invalid-type-form]
     ],
 )
 def test_key_to_label(key: str, result_label: str):
-    assert helpers.key_to_label(key) == result_label
+    actual = helpers.key_to_label(key)
+
+    assert actual == result_label
 
 
 @pytest.mark.parametrize(
@@ -281,4 +301,6 @@ def test_key_to_label(key: str, result_label: str):
     ],
 )
 def test_get_player_title(title: dict | str | None, resulting_title: str | None):
-    assert helpers.get_player_title(title) == resulting_title
+    actual = helpers.get_player_title(title)
+
+    assert actual == resulting_title

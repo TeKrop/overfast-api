@@ -36,6 +36,7 @@ def test_get_player_stats(client: TestClient, uri: str):
         f"/players/TeKrop-2217{uri}",
         params={"gamemode": PlayerGamemode.QUICKPLAY},
     )
+
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json().keys()) > 0
 
@@ -50,6 +51,7 @@ def test_get_player_stats_valid_hero(client: TestClient, uri: str):
             "hero": HeroKeyCareerFilter.ANA,  # ty: ignore[unresolved-attribute]
         },
     )
+
     assert response.status_code == status.HTTP_200_OK
     assert set(response.json().keys()) == {HeroKeyCareerFilter.ANA}  # ty: ignore[unresolved-attribute]
 
@@ -64,6 +66,7 @@ def test_get_player_stats_invalid_hero(client: TestClient, uri: str):
             "hero": "invalid_hero",
         },
     )
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -71,6 +74,7 @@ def test_get_player_stats_invalid_hero(client: TestClient, uri: str):
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_missing_gamemode(client: TestClient, uri: str):
     response = client.get(f"/players/TeKrop-2217{uri}")
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -81,6 +85,7 @@ def test_get_player_stats_invalid_gamemode(client: TestClient, uri: str):
         f"/players/TeKrop-2217{uri}",
         params={"gamemode": "invalid_gamemode"},
     )
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -94,6 +99,7 @@ def test_get_player_stats_valid_platform(client: TestClient, uri: str):
             "platform": PlayerPlatform.PC,
         },
     )
+
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json().keys()) > 0
 
@@ -108,6 +114,7 @@ def test_get_player_stats_empty_platform(client: TestClient, uri: str):
             "platform": PlayerPlatform.CONSOLE,
         },
     )
+
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {}
 
@@ -122,6 +129,7 @@ def test_get_player_stats_invalid_platform(client: TestClient, uri: str):
             "platform": "invalid_platform",
         },
     )
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -224,5 +232,6 @@ def test_get_player_stats_internal_error(
             f"/players/TeKrop-2217{uri}",
             params={"gamemode": PlayerGamemode.QUICKPLAY},
         )
-        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.json() == {"error": settings.internal_server_error_message}
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"error": settings.internal_server_error_message}

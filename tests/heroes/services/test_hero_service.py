@@ -60,6 +60,6 @@ def test_dict_insert_value_before_key_valid(
     new_value: Any,
     result_dict: dict,
 ):
-    assert (
-        dict_insert_value_before_key(input_dict, key, new_key, new_value) == result_dict
-    )
+    actual = dict_insert_value_before_key(input_dict, key, new_key, new_value)
+
+    assert actual == result_dict

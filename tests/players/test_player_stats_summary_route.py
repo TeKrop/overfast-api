@@ -32,6 +32,7 @@ def _setup_player_stats_test(
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)
 def test_get_player_stats(client: TestClient):
     response = client.get("/players/TeKrop-2217/stats/summary")
+
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json().keys()) > 0
 
@@ -42,6 +43,7 @@ def test_get_player_stats_summary_valid_gamemode(client: TestClient):
         "/players/TeKrop-2217/stats/summary",
         params={"gamemode": PlayerGamemode.QUICKPLAY},
     )
+
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json().keys()) > 0
 
@@ -52,6 +54,7 @@ def test_get_player_stats_summary_invalid_gamemode(client: TestClient):
         "/players/TeKrop-2217/stats/summary",
         params={"gamemode": "invalid_gamemode"},
     )
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -61,6 +64,7 @@ def test_get_player_stats_summary_valid_platform(client: TestClient):
         "/players/TeKrop-2217/stats/summary",
         params={"platform": PlayerPlatform.PC},
     )
+
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json().keys()) > 0
 
@@ -71,6 +75,7 @@ def test_get_player_stats_summary_empty_platform(client: TestClient):
         "/players/TeKrop-2217/stats/summary",
         params={"platform": PlayerPlatform.CONSOLE},
     )
+
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {}
 
@@ -81,6 +86,7 @@ def test_get_player_stats_summary_invalid_platform(client: TestClient):
         "/players/TeKrop-2217/stats/summary",
         params={"platform": "invalid_platform"},
     )
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -143,8 +149,9 @@ def test_get_player_stats_summary_internal_error(client: TestClient):
             "/players/TeKrop-2217/stats/summary",
             params={"gamemode": PlayerGamemode.QUICKPLAY},
         )
-        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.json() == {"error": settings.internal_server_error_message}
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"error": settings.internal_server_error_message}
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)

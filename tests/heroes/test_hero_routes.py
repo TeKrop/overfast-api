@@ -33,6 +33,7 @@ def test_get_hero(
         ],
     ):
         response = client.get(f"/heroes/{hero_name}")
+
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) > 0
 
@@ -50,6 +51,7 @@ def test_get_unreleased_hero(client: TestClient, hero_html_data: str):
         ],
     ):
         response = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
+
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"error": "Hero not found or not released yet"}
 
@@ -76,8 +78,9 @@ def test_get_hero_internal_error(client: TestClient):
         return_value=({"invalid_key": "invalid_value"}, False, 0),
     ):
         response = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
-        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.json() == {"error": settings.internal_server_error_message}
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"error": settings.internal_server_error_message}
 
 
 def test_get_hero_blizzard_forbidden_error(client: TestClient):
@@ -123,6 +126,7 @@ def test_get_hero_no_portrait(
         ),
     ):
         response = client.get(f"/heroes/{hero_name}")
+
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["portrait"] is None
 
@@ -152,6 +156,7 @@ def test_get_hero_no_hitpoints(
         ),
     ):
         response = client.get(f"/heroes/{hero_name}")
+
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["hitpoints"] is None
 

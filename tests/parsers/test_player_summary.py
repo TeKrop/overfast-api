@@ -1,9 +1,17 @@
 """Tests for parse_player_summary_json"""
 
-import pytest
+from unittest.mock import AsyncMock, Mock, patch
 
+import pytest
+from fastapi import status
+
+from app.adapters.blizzard import BlizzardClient
 from app.domain.exceptions import ParserParsingError
-from app.domain.parsers.player_summary import parse_player_summary_json
+from app.domain.parsers.player_summary import (
+    fetch_player_summary_json,
+    parse_player_summary,
+    parse_player_summary_json,
+)
 
 # Shared fixtures
 PLAYER_BLIZZARD_ID = "abc123%7Cdef456"
@@ -216,3 +224,113 @@ class TestParsePlayerSummaryJsonDiscriminatorValidation:
         """Malformed payload raises ParserParsingError."""
         with pytest.raises(ParserParsingError):
             parse_player_summary_json([{"bad": "data"}], "Progresso-2749")
+
+
+class TestPortraitNormalization:
+    """Tests for the portrait→avatar/namecard/title normalization branch (lines 102-105)."""
+
+    def test_portrait_field_sets_avatar_namecard_title_to_none(self):
+        """When a player has a 'portrait' field, avatar/namecard/title are forced to None."""
+
+        # Arrange
+        json_data = [
+            {
+                "name": "Progresso",
+                "isPublic": True,
+                "lastUpdated": 1700000000,
+                "portrait": "https://example.com/portrait.png",
+                "url": PLAYER_BLIZZARD_ID,
+                "avatar": "https://example.com/avatar.png",
+                "namecard": "https://example.com/namecard.png",
+                "title": "Legend",
+            }
+        ]
+
+        # Act
+        result = parse_player_summary_json(
+            json_data, "Progresso-2749", blizzard_id=PLAYER_BLIZZARD_ID
+        )
+
+        # Assert
+        assert result != {}
+        assert result["avatar"] is None
+        assert result["namecard"] is None
+        assert result["title"] is None
+        # portrait field itself is still present
+        assert result["portrait"] == "https://example.com/portrait.png"
+
+    def test_no_portrait_field_preserves_avatar(self):
+        """When there is no 'portrait' field, avatar is kept as-is."""
+        json_data = [
+            {
+                "name": "Progresso",
+                "isPublic": True,
+                "lastUpdated": 1700000000,
+                "avatar": "https://example.com/avatar.png",
+                "namecard": None,
+                "title": None,
+                "url": PLAYER_BLIZZARD_ID,
+            }
+        ]
+        result = parse_player_summary_json(
+            json_data, "Progresso-2749", blizzard_id=PLAYER_BLIZZARD_ID
+        )
+        assert result != {}
+        assert result["avatar"] == "https://example.com/avatar.png"
+
+
+class TestFetchPlayerSummaryJson:
+    """Tests for fetch_player_summary_json (line 34-37)."""
+
+    @pytest.mark.asyncio
+    async def test_fetch_calls_blizzard_and_returns_json(self):
+        json_payload = [{"name": "TeKrop", "url": "abc123"}]
+        mock_response = Mock(
+            status_code=status.HTTP_200_OK,
+            json=lambda: json_payload,
+        )
+        with patch("httpx.AsyncClient.get", return_value=mock_response):
+            client = BlizzardClient()
+            result = await fetch_player_summary_json(client, "TeKrop-2217")
+        assert result == json_payload
+
+
+class TestParsePlayerSummaryHighLevel:
+    """Tests for parse_player_summary() high-level async function (lines 134-141)."""
+
+    @pytest.mark.asyncio
+    async def test_blizzard_id_returns_empty_without_fetch(self):
+        """parse_player_summary skips the search when given a Blizzard ID."""
+        mock_client = AsyncMock()
+        # If a Blizzard ID is passed, no HTTP call should be made
+        result = await parse_player_summary(
+            mock_client, "abc123%7Cdef456", blizzard_id=None
+        )
+        assert result == {}
+        mock_client.get.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_battletag_triggers_fetch_and_parse(self):
+        """parse_player_summary fetches and parses for a normal BattleTag."""
+        json_payload = [
+            {
+                "name": "TeKrop",
+                "isPublic": True,
+                "lastUpdated": 1700000000,
+                "avatar": "https://example.com/avatar.png",
+                "namecard": None,
+                "title": None,
+                "url": "abc123%7Cdef456",
+            }
+        ]
+        mock_response = Mock(
+            status_code=status.HTTP_200_OK,
+            json=lambda: json_payload,
+        )
+        with patch("httpx.AsyncClient.get", return_value=mock_response):
+            client = BlizzardClient()
+            result = await parse_player_summary(
+                client, "TeKrop-2217", blizzard_id="abc123%7Cdef456"
+            )
+        assert result != {}
+        assert result["url"] == "abc123%7Cdef456"

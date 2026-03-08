@@ -19,6 +19,7 @@ def _setup_hero_stats_test(hero_stats_response_mock: Mock):
 
 def test_get_hero_stats_missing_parameters(client: TestClient):
     response = client.get("/heroes/stats")
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -31,6 +32,7 @@ def test_get_hero_stats_success(client: TestClient):
             "region": PlayerRegion.EUROPE,
         },
     )
+
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) > 0
 
@@ -44,6 +46,7 @@ def test_get_hero_stats_invalid_platform(client: TestClient):
             "region": PlayerRegion.EUROPE,
         },
     )
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -56,6 +59,7 @@ def test_get_hero_stats_invalid_gamemode(client: TestClient):
             "region": PlayerRegion.EUROPE,
         },
     )
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -68,6 +72,7 @@ def test_get_hero_stats_invalid_region(client: TestClient):
             "region": "invalid_region",
         },
     )
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -107,8 +112,9 @@ def test_get_heroes_internal_error(client: TestClient):
                 "region": PlayerRegion.EUROPE,
             },
         )
-        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.json() == {"error": settings.internal_server_error_message}
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"error": settings.internal_server_error_message}
 
 
 def test_get_heroes_blizzard_forbidden_error(client: TestClient):
