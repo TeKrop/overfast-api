@@ -79,7 +79,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 5,
         "x": 0,
         "y": 1
       },
@@ -104,12 +104,12 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "round(sum(increase(blizzard_requests_total{job=\"fastapi\"}[1d])))",
+          "expr": "round(sum(increase(blizzard_requests_total{job=\"fastapi\"}[$__range])))",
           "legendFormat": "__auto",
           "refId": "A"
         }
       ],
-      "title": "Total Calls Today",
+      "title": "Total Calls",
       "type": "stat"
     },
     {
@@ -135,8 +135,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 6,
+        "w": 5,
+        "x": 5,
         "y": 1
       },
       "id": 2,
@@ -191,8 +191,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 12,
+        "w": 5,
+        "x": 10,
         "y": 1
       },
       "id": 3,
@@ -256,8 +256,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 18,
+        "w": 5,
+        "x": 15,
         "y": 1
       },
       "id": 4,
@@ -281,12 +281,93 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "round(increase(throttle_403_total{job=\"fastapi\"}[1d]))",
+          "expr": "round(increase(throttle_403_total{job=\"fastapi\"}[$__range]))",
           "legendFormat": "__auto",
           "refId": "A"
         }
       ],
-      "title": "403 Penalty Events (24h)",
+      "title": "403 Penalty Events",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "result": {
+                  "index": 0,
+                  "text": "Never"
+                }
+              },
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "Never"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 3600
+              },
+              {
+                "color": "red",
+                "value": 86400
+              }
+            ]
+          },
+          "unit": "s",
+          "noValue": "Never"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(time() - throttle_403_total{job=\"fastapi\"}) * (throttle_403_total{job=\"fastapi\"} > 0)",
+          "legendFormat": "__auto",
+          "refId": "A"
+        }
+      ],
+      "title": "Last Rate Limit Event (ago)",
       "type": "stat"
     },
     {
@@ -358,7 +439,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (endpoint) (increase(blizzard_requests_total{job=\"fastapi\"}[1h]))",
+          "expr": "sum by (endpoint) (increase(blizzard_requests_total{job=\"fastapi\"}[$__range]))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
@@ -422,7 +503,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (status) (increase(blizzard_requests_total{job=\"fastapi\"}[1h]))",
+          "expr": "sum by (status) (increase(blizzard_requests_total{job=\"fastapi\"}[$__range]))",
           "legendFormat": "{{status}}",
           "refId": "A"
         }
@@ -570,84 +651,282 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "lineWidth": 2,
-            "fillOpacity": 10,
-            "showPoints": "never",
-            "spanNulls": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
+      "collapsed": false,
       "gridPos": {
-        "h": 8,
+        "h": 1,
         "w": 24,
         "x": 0,
         "y": 23
       },
-      "id": 9,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
+      "id": 104,
+      "title": "\u23f1\ufe0f Response Time per Endpoint",
+      "type": "row",
+      "panels": []
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never", "spanNulls": false },
+          "unit": "s"
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "id": 20,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
       },
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "histogram_quantile(0.5, sum by (le, endpoint) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
-          "legendFormat": "p50 - {{endpoint}}",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/career/{player_id}\"}[5m])))",
+          "legendFormat": "p50",
           "refId": "A"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "histogram_quantile(0.95, sum by (le, endpoint) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
-          "legendFormat": "p95 - {{endpoint}}",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/career/{player_id}\"}[5m])))",
+          "legendFormat": "p95",
           "refId": "B"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "histogram_quantile(0.99, sum by (le, endpoint) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
-          "legendFormat": "p99 - {{endpoint}}",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/career/{player_id}\"}[5m])))",
+          "legendFormat": "p99",
           "refId": "C"
         }
       ],
-      "title": "Response Time by Endpoint (p50/p95/p99)",
+      "title": "/career/{player_id}",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never", "spanNulls": false },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "id": 21,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/heroes/{hero_key}\"}[5m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/heroes/{hero_key}\"}[5m])))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/heroes/{hero_key}\"}[5m])))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ],
+      "title": "/heroes/{hero_key}",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never", "spanNulls": false },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+      "id": 22,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/heroes\"}[5m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/heroes\"}[5m])))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/heroes\"}[5m])))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ],
+      "title": "/heroes",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never", "spanNulls": false },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+      "id": 23,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/search/account-by-name/{search_name}\"}[5m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/search/account-by-name/{search_name}\"}[5m])))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/search/account-by-name/{search_name}\"}[5m])))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ],
+      "title": "/search/account-by-name/{search_name}",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never", "spanNulls": false },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+      "id": 24,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/gamemodes\"}[5m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/gamemodes\"}[5m])))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/gamemodes\"}[5m])))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ],
+      "title": "/gamemodes",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never", "spanNulls": false },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
+      "id": 25,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/maps\"}[5m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/maps\"}[5m])))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/maps\"}[5m])))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ],
+      "title": "/maps",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "never", "spanNulls": false },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 48 },
+      "id": 26,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/rates/data\"}[5m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/rates/data\"}[5m])))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(blizzard_request_duration_seconds_bucket{job=\"fastapi\", endpoint=\"/rates/data\"}[5m])))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ],
+      "title": "/rates/data",
       "type": "timeseries"
     },
     {
@@ -656,7 +935,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 56
       },
       "id": 103,
       "title": "\ud83d\udea8 Errors & Rate Limiting",
@@ -694,7 +973,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 32
+        "y": 57
       },
       "id": 10,
       "options": {
@@ -761,7 +1040,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 32
+        "y": 57
       },
       "id": 11,
       "options": {
@@ -818,7 +1097,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 65
       },
       "id": 12,
       "options": {
@@ -833,7 +1112,8 @@
         },
         "showUnfilled": true,
         "minVizWidth": 0,
-        "minVizHeight": 10
+        "minVizHeight": 10,
+        "sort": "asc"
       },
       "targets": [
         {
@@ -841,12 +1121,25 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "bottomk(10, sum by (endpoint) (increase(blizzard_requests_total{job=\"fastapi\"}[1h])))",
+          "expr": "sum by (endpoint) (increase(blizzard_requests_total{job=\"fastapi\"}[$__range]))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
       ],
       "title": "Least Used Endpoints",
+      "transformations": [
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": [
+              {
+                "desc": false,
+                "displayName": "Value"
+              }
+            ]
+          }
+        }
+      ],
       "type": "bargauge"
     }
   ],
