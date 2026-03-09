@@ -42,6 +42,8 @@ async def lifespan(_: FastAPI):  # pragma: no cover
 
     # Evict volatile Valkey data (api-cache, rate-limit, etc.) before RDB snapshot
     await cache.evict_volatile_data()
+    # Evict low-signal unknown-player entries before persisting the RDB snapshot
+    await cache.evict_low_count_player_statuses()
     await cache.bgsave()
 
     await storage.close()

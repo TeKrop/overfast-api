@@ -84,6 +84,12 @@ class Settings(BaseSettings):
     unknown_player_retry_multiplier: int = 3  # retry_after *= 3 each check
     unknown_player_max_retry: int = 21600  # 6 hours cap
 
+    # Minimum check_count to retain a player status entry on shutdown.
+    # Entries with check_count strictly below this value (and their associated
+    # cooldown keys) are evicted before the Valkey RDB snapshot.
+    # Set to 0 to disable this cleanup entirely.
+    unknown_player_min_retention_count: int = 5
+
     ############
     # RATE LIMITING
     ############

@@ -248,3 +248,84 @@ class TestPlayerStatus:
         assert api_cache_result is None
         assert result is not None
         assert result["check_count"] == 1
+
+
+class TestEvictLowCountPlayerStatuses:
+    """Tests for shutdown-time eviction of low-check_count unknown-player entries."""
+
+    @pytest.mark.asyncio
+    async def test_evicts_entries_below_min_count(self, cache_manager: CacheManager):
+        """Entries with check_count strictly below the minimum are deleted on eviction"""
+        low_id = "low-count-player"
+        high_id = "high-count-player"
+        high_check_count = 5
+        await cache_manager.set_player_status(low_id, 2, 1800)
+        await cache_manager.set_player_status(high_id, high_check_count, 21600)
+
+        with patch.object(settings, "unknown_player_min_retention_count", 5):
+            await cache_manager.evict_low_count_player_statuses()
+
+        low_result = await cache_manager.get_player_status(low_id)
+        high_result = await cache_manager.get_player_status(high_id)
+
+        assert low_result is None
+        assert high_result is not None
+        assert high_result["check_count"] == high_check_count
+
+    @pytest.mark.asyncio
+    async def test_keeps_entries_at_or_above_min_count(
+        self, cache_manager: CacheManager
+    ):
+        """Entries with check_count >= minimum are preserved"""
+        ids_and_counts = [("player-at-5", 5), ("player-at-10", 10)]
+        for player_id, count in ids_and_counts:
+            await cache_manager.set_player_status(player_id, count, 21600)
+
+        with patch.object(settings, "unknown_player_min_retention_count", 5):
+            await cache_manager.evict_low_count_player_statuses()
+
+        for player_id, expected_count in ids_and_counts:
+            result = await cache_manager.get_player_status(player_id)
+
+            assert result is not None
+            assert result["check_count"] == expected_count
+
+    @pytest.mark.asyncio
+    async def test_also_removes_cooldown_and_battletag_keys(
+        self, cache_manager: CacheManager
+    ):
+        """Evicting a low-count entry removes both status and all associated cooldown keys"""
+        blizzard_id = "low-with-battletag"
+        battletag = "LowCount-1234"
+        await cache_manager.set_player_status(blizzard_id, 1, 600, battletag=battletag)
+
+        with patch.object(settings, "unknown_player_min_retention_count", 5):
+            await cache_manager.evict_low_count_player_statuses()
+
+        result_by_id = await cache_manager.get_player_status(blizzard_id)
+        result_by_battletag = await cache_manager.get_player_status(battletag)
+
+        assert result_by_id is None
+        assert result_by_battletag is None
+
+    @pytest.mark.asyncio
+    async def test_no_op_when_min_retention_count_is_zero(
+        self, cache_manager: CacheManager
+    ):
+        """Setting min_retention_count to 0 disables the cleanup entirely"""
+        player_id = "should-survive"
+        await cache_manager.set_player_status(player_id, 1, 600)
+
+        with patch.object(settings, "unknown_player_min_retention_count", 0):
+            await cache_manager.evict_low_count_player_statuses()
+
+        result = await cache_manager.get_player_status(player_id)
+
+        assert result is not None
+        assert result["check_count"] == 1
+
+    @pytest.mark.asyncio
+    async def test_handles_empty_store(self, cache_manager: CacheManager):
+        """Calling evict on an empty store raises no error and evicts nothing"""
+        with patch.object(settings, "unknown_player_min_retention_count", 5):
+            await cache_manager.evict_low_count_player_statuses()
