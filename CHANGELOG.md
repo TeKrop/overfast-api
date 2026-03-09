@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.47.0 (2026-03-09)
+
+### Features
+
+- Phase 5 - Introduced Blizzard API calls throttling system
+  ([#387](https://github.com/TeKrop/overfast-api/pull/387),
+  [`22a31f7`](https://github.com/TeKrop/overfast-api/commit/22a31f72cf022b5ff883bcd09a23a88002e3d27d))
+
+
 ## v3.46.0 (2026-02-25)
 
 ### Features
