@@ -161,7 +161,8 @@
           "values": false
         },
         "showUnfilled": true,
-        "valueMode": "color"
+        "valueMode": "color",
+        "sort": "asc"
       },
       "targets": [
         {
@@ -169,12 +170,25 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "bottomk(10, sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\"}[1h])))",
+          "expr": "sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"(/|/(heroes|maps|gamemodes|roles|players)(/.*)?)\"}[$__range]))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
       ],
       "title": "Least Used Endpoints",
+      "transformations": [
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": [
+              {
+                "desc": false,
+                "displayName": "Value"
+              }
+            ]
+          }
+        }
+      ],
       "type": "bargauge"
     },
     {
@@ -671,7 +685,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/players.*\"}[1h]))",
+          "expr": "sum by (endpoint) (increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/players/\\\\{player_id\\\\}.*\"}[1h]))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
@@ -759,7 +773,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (endpoint) (rate(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/players.*\"}[5m]))",
+          "expr": "sum by (endpoint) (rate(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/players/\\\\{player_id\\\\}.*\"}[5m]))",
           "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
@@ -1355,7 +1369,7 @@
         "y": 47
       },
       "id": 16,
-      "interval": "1d",
+      "interval": "1h",
       "options": {
         "legend": {
           "calcs": [],
@@ -1374,12 +1388,12 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "round(sum(increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/players.*\"}[1h])) * 24)",
-          "legendFormat": "Estimated calls/day",
+          "expr": "round(sum(increase(nginx_http_requests_total{job=\"nginx\", endpoint=~\"/players.*\"}[1h])))",
+          "legendFormat": "Calls/hour",
           "refId": "A"
         }
       ],
-      "title": "Players Calls Per Day",
+      "title": "Players Calls Per Hour",
       "type": "timeseries"
     }
   ],
