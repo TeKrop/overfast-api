@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.48.0 (2026-03-09)
+
+### Features
+
+- **grafana**: Improved dashboards accuracy
+  ([#388](https://github.com/TeKrop/overfast-api/pull/388),
+  [`1ed0915`](https://github.com/TeKrop/overfast-api/commit/1ed0915f9355236c3e74379722a5bf82b0bee9b6))
+
+
 ## v3.47.0 (2026-03-09)
 
 ### Features
