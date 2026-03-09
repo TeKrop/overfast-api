@@ -12,12 +12,12 @@ from typing import TYPE_CHECKING
 import asyncpg
 
 from app.config import settings
-from app.metaclasses import Singleton
+from app.infrastructure.logger import logger
+from app.infrastructure.metaclasses import Singleton
 from app.monitoring.metrics import (
     storage_connection_errors_total,
     track_storage_operation,
 )
-from app.overfast_logger import logger
 
 if TYPE_CHECKING:
     from app.domain.ports.storage import StaticDataCategory
@@ -78,11 +78,13 @@ class PostgresStorage(metaclass=Singleton):
                             storage_connection_errors_total.labels(
                                 error_type="pool_creation"
                             ).inc()
-                        logger.error(f"Failed to create PostgreSQL pool: {exc}")
+                        logger.error("Failed to create PostgreSQL pool: {}", exc)
                         raise
                     logger.warning(
-                        f"PostgreSQL pool creation attempt {attempt}/{self._MAX_POOL_CREATION_ATTEMPTS}"
-                        f" failed: {exc}. Retrying in 2s…"
+                        "PostgreSQL pool creation attempt {}/{} failed: {}. Retrying in 2s…",
+                        attempt,
+                        self._MAX_POOL_CREATION_ATTEMPTS,
+                        exc,
                     )
                     await asyncio.sleep(2)
 
@@ -269,7 +271,7 @@ class PostgresStorage(metaclass=Singleton):
             )
         deleted = int(result.split()[-1])
         logger.info(
-            f"Deleted {deleted} old player profiles (max_age={max_age_seconds}s)"
+            "Deleted {} old player profiles (max_age={}s)", deleted, max_age_seconds
         )
         return deleted
 
@@ -323,6 +325,6 @@ class PostgresStorage(metaclass=Singleton):
                     p99_index = min(int(n * 0.99), n - 1)
                     stats["player_profile_age_p99"] = age_list[p99_index]
         except Exception as exc:  # noqa: BLE001
-            logger.warning(f"Failed to collect storage stats: {exc}")
+            logger.warning("Failed to collect storage stats: {}", exc)
 
         return stats

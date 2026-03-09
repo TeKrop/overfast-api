@@ -28,8 +28,8 @@ from typing import TYPE_CHECKING, Any
 import valkey.asyncio as valkey
 
 from app.config import settings
-from app.metaclasses import Singleton
-from app.overfast_logger import logger
+from app.infrastructure.logger import logger
+from app.infrastructure.metaclasses import Singleton
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -57,7 +57,7 @@ def handle_valkey_error(
                 return await func(*args, **kwargs)
             except valkey.ValkeyError as err:
                 func_name = getattr(func, "__name__", "unknown")
-                logger.warning(f"Valkey server error in {func_name}: {err}")
+                logger.warning("Valkey server error in {}: {}", func_name, err)
                 return default_return
 
         return wrapper
@@ -73,10 +73,11 @@ class ValkeyCache(metaclass=Singleton):
     Protocol compliance is verified by type checkers at injection points.
     """
 
-    # Valkey server global variable (async client)
-    valkey_server = valkey.Valkey(
-        host=settings.valkey_host, port=settings.valkey_port, protocol=3
-    )
+    def __init__(self) -> None:
+        # Create the Valkey client lazily so it binds to the running event loop
+        self.valkey_server = valkey.Valkey(
+            host=settings.valkey_host, port=settings.valkey_port, protocol=3
+        )
 
     @staticmethod
     def get_cache_key_from_request(request: Request) -> str:
@@ -171,29 +172,6 @@ class ValkeyCache(metaclass=Singleton):
             ex=expire,
         )
 
-    @handle_valkey_error(default_return=False)
-    async def is_being_rate_limited(self) -> bool:
-        """Check if Blizzard rate limit is currently active"""
-        result = await self.valkey_server.exists(settings.blizzard_rate_limit_key)
-        return bool(result)
-
-    @handle_valkey_error(default_return=0)
-    async def get_global_rate_limit_remaining_time(self) -> int:
-        """Get remaining time in seconds for Blizzard rate limit"""
-        blizzard_rate_limit = await self.valkey_server.ttl(
-            settings.blizzard_rate_limit_key
-        )
-        return blizzard_rate_limit if isinstance(blizzard_rate_limit, int) else 0
-
-    @handle_valkey_error(default_return=None)
-    async def set_global_rate_limit(self) -> None:
-        """Set Blizzard rate limit flag"""
-        await self.valkey_server.set(
-            settings.blizzard_rate_limit_key,
-            value=0,
-            ex=settings.blizzard_rate_limit_retry_after,
-        )
-
     @handle_valkey_error(default_return=None)
     async def get_player_status(self, player_id: str) -> dict | None:
         """
@@ -271,6 +249,14 @@ class ValkeyCache(metaclass=Singleton):
             )
         await self.valkey_server.delete(*keys_to_delete)
 
+    @handle_valkey_error(default_return=[])
+    async def scan_keys(self, pattern: str) -> list[str]:
+        """Return all Valkey keys matching *pattern* using SCAN iteration."""
+        return [
+            key.decode("utf-8") if isinstance(key, bytes) else key
+            async for key in self.valkey_server.scan_iter(match=pattern)
+        ]
+
     @handle_valkey_error(default_return=None)
     async def evict_volatile_data(self) -> None:
         """Delete all Valkey keys except unknown-player status and cooldown keys."""
@@ -292,6 +278,58 @@ class ValkeyCache(metaclass=Singleton):
         if keys_to_delete:
             await self.valkey_server.delete(*keys_to_delete)
         logger.info("Evicted volatile Valkey keys before shutdown")
+
+    @handle_valkey_error(default_return=None)
+    async def evict_low_count_player_statuses(self) -> None:
+        """Delete unknown-player status entries (and their cooldown keys) whose
+        check_count is strictly below the configured minimum retention count.
+
+        Uses batched MGET to minimise round-trips: keys are collected via SCAN
+        in batches of 1000, then fetched in a single MGET per batch before
+        deciding which ones to evict.
+        """
+        min_count = settings.unknown_player_min_retention_count
+        if min_count <= 0:
+            return
+
+        _batch_size = 1000
+        status_prefix = settings.unknown_player_status_key_prefix
+        pattern = f"{status_prefix}:*"
+        evicted = 0
+
+        batch: list[str] = []
+
+        async def _process_batch(keys: list[str]) -> int:
+            if not keys:
+                return 0
+            count = 0
+            values = await self.valkey_server.mget(*keys)
+            for key, value in zip(keys, values, strict=True):
+                if value is None:
+                    continue
+                status = json.loads(value)
+                if status.get("check_count", 0) < min_count:
+                    player_id = key.removeprefix(f"{status_prefix}:")
+                    await self.delete_player_status(player_id)
+                    count += 1
+            return count
+
+        async for raw_key in self.valkey_server.scan_iter(
+            match=pattern, count=_batch_size
+        ):
+            key_str = raw_key.decode("utf-8") if isinstance(raw_key, bytes) else raw_key
+            batch.append(key_str)
+            if len(batch) >= _batch_size:
+                evicted += await _process_batch(batch)
+                batch.clear()
+
+        evicted += await _process_batch(batch)
+
+        logger.info(
+            "Evicted {} unknown-player status entries with check_count < {}",
+            evicted,
+            min_count,
+        )
 
     @handle_valkey_error(default_return=None)
     async def bgsave(self) -> None:

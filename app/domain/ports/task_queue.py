@@ -1,38 +1,34 @@
 """Task queue port protocol for background job processing"""
 
-from typing import TYPE_CHECKING, Any, Protocol
-
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable, Coroutine
+from typing import Protocol
 
 
 class TaskQueuePort(Protocol):
-    """Protocol for background task queue operations (arq in Phase 5)"""
+    """Protocol for background task queue operations"""
 
     async def enqueue(
         self,
         task_name: str,
-        *args: Any,
+        *,
         job_id: str | None = None,
-        coro: Coroutine[Any, Any, Any] | None = None,
-        on_complete: Callable[[str], Awaitable[None]] | None = None,
-        on_failure: Callable[[str, Exception], Awaitable[None]] | None = None,
-        **kwargs: Any,
     ) -> str:
-        """Enqueue a background task.
+        """Enqueue a background task by name, returning the effective job ID.
 
-        ``coro``, when provided, is executed immediately (Phase 4 asyncio) or
-        dispatched to a worker process (Phase 5 arq).  ``task_name`` is kept for
-        arq compatibility and logging.
-
-        ``on_complete(job_id)`` is awaited when the task finishes successfully.
-        ``on_failure(job_id, exc)`` is awaited when the task raises an exception.
-        Both callbacks are optional and intended for domain-level monitoring.
-
-        Returns the effective job ID.
+        Implementations must silently skip the enqueue when the job is already
+        pending or running (deduplication by ``job_id``).
+        The ``job_id`` is also passed to the task as its first positional argument.
         """
         ...
 
     async def is_job_pending_or_running(self, job_id: str) -> bool:
         """Return True if a job with this ID is already pending or running."""
+        ...
+
+    async def release_job(self, job_id: str) -> None:
+        """Delete the dedup key for ``job_id``, allowing it to be re-enqueued.
+
+        Called by the worker after a refresh task finishes (success or failure)
+        so that the next SWR cycle can enqueue the same job again immediately.
+        The TTL on the key acts as a fallback for crashed workers.
+        """
         ...

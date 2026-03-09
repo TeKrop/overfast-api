@@ -22,7 +22,27 @@ services:
     build:
       context: .
       target: ${BUILD_TARGET:-main}
-    command: crond -f
+    command: /code/.venv/bin/taskiq worker app.adapters.tasks.worker:broker --workers 1
+    env_file: ${APP_VOLUME_PATH:-.}/.env
+    ports:
+      - "${PROMETHEUS_WORKER_PORT:-9091}:9091"
+    volumes:
+      - ${APP_VOLUME_PATH:-/tmp}/worker-logs:/code/logs
+    depends_on:
+      valkey:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'taskiq worker' || exit 1"]
+      interval: 10s
+      timeout: 5s
+
+  scheduler:
+    build:
+      context: .
+      target: ${BUILD_TARGET:-main}
+    command: /code/.venv/bin/taskiq scheduler app.adapters.tasks.worker:scheduler
     env_file: ${APP_VOLUME_PATH:-.}/.env
     volumes:
       - ${APP_VOLUME_PATH:-/tmp}/worker-logs:/code/logs
@@ -32,9 +52,9 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "ps aux | grep -i crond | grep -wv grep || exit 1"]
-      interval: 5s
-      timeout: 2s
+      test: ["CMD-SHELL", "pgrep -f 'taskiq scheduler' || exit 1"]
+      interval: 10s
+      timeout: 5s
 
   postgres:
     image: postgres:18-alpine

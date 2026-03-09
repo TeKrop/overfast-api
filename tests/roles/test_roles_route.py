@@ -15,6 +15,7 @@ def test_get_roles(client: TestClient, home_html_data: str):
         return_value=Mock(status_code=status.HTTP_200_OK, text=home_html_data),
     ):
         response = client.get("/roles")
+
     assert response.status_code == status.HTTP_200_OK
 
 
@@ -40,8 +41,9 @@ def test_get_roles_internal_error(client: TestClient):
         return_value=([{"invalid_key": "invalid_value"}], False, 0),
     ):
         response = client.get("/roles")
-        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.json() == {"error": settings.internal_server_error_message}
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"error": settings.internal_server_error_message}
 
 
 def test_get_roles_blizzard_forbidden_error(client: TestClient):
@@ -54,10 +56,8 @@ def test_get_roles_blizzard_forbidden_error(client: TestClient):
     ):
         response = client.get("/roles")
 
-    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
-    assert response.json() == {
-        "error": (
-            "API has been rate limited by Blizzard, please wait for "
-            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
-        )
-    }
+    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+    assert (
+        "Blizzard is temporarily rate limiting this API. Please retry after"
+        in response.json()["error"]
+    )

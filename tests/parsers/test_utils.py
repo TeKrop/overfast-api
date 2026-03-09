@@ -1,6 +1,6 @@
 """Tests for Blizzard parser utility functions"""
 
-from app.adapters.blizzard.parsers.utils import (
+from app.domain.parsers.utils import (
     extract_blizzard_id_from_url,
     is_blizzard_id,
     match_player_by_blizzard_id,
@@ -12,31 +12,42 @@ class TestIsBlizzardId:
 
     def test_battletag_format(self):
         """Should return False for BattleTag format (Name-12345)"""
-        assert is_blizzard_id("TeKrop-2217") is False
-        assert is_blizzard_id("Player-1234") is False
-        assert is_blizzard_id("Kindness-11556") is False
+        result1 = is_blizzard_id("TeKrop-2217")
+        result2 = is_blizzard_id("Player-1234")
+        result3 = is_blizzard_id("Kindness-11556")
+
+        assert result1 is False
+        assert result2 is False
+        assert result3 is False
 
     def test_blizzard_id_url_encoded(self):
         """Should return True for Blizzard ID with URL-encoded pipe (%7C)"""
-        assert (
-            is_blizzard_id("df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f")
-            is True
+        result1 = is_blizzard_id(
+            "df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f"
         )
-        assert is_blizzard_id("abc123%7Cdef456") is True
+        result2 = is_blizzard_id("abc123%7Cdef456")
+
+        assert result1 is True
+        assert result2 is True
 
     def test_blizzard_id_pipe(self):
         """Should return True for Blizzard ID with pipe (|)"""
-        assert (
-            is_blizzard_id("df51a381fe20caf8baa7|0bf3b4c47cbebe84b8db9c676a4e9c1f")
-            is True
+        result1 = is_blizzard_id(
+            "df51a381fe20caf8baa7|0bf3b4c47cbebe84b8db9c676a4e9c1f"
         )
-        assert is_blizzard_id("abc123|def456") is True
+        result2 = is_blizzard_id("abc123|def456")
+
+        assert result1 is True
+        assert result2 is True
 
     def test_ambiguous_with_hyphen_and_pipe(self):
         """Should handle edge case with both hyphen and pipe (prioritize pipe)"""
         # This shouldn't happen in practice, but if it does, pipe indicates Blizzard ID
-        assert is_blizzard_id("some-name|id") is False  # Has hyphen, fails check
-        assert is_blizzard_id("somename|id") is True  # No hyphen, passes
+        result1 = is_blizzard_id("some-name|id")
+        result2 = is_blizzard_id("somename|id")
+
+        assert result1 is False  # Has hyphen, fails check
+        assert result2 is True  # No hyphen, passes
 
 
 class TestExtractBlizzardIdFromUrl:
@@ -46,58 +57,78 @@ class TestExtractBlizzardIdFromUrl:
         """Should extract Blizzard ID from full URL (keeps URL-encoded format)"""
         url = "https://overwatch.blizzard.com/en-us/career/df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f/"
         expected = "df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f"
-        assert extract_blizzard_id_from_url(url) == expected
+        actual = extract_blizzard_id_from_url(url)
+
+        assert actual == expected
 
     def test_extract_from_path_only(self):
         """Should extract Blizzard ID from path (keeps URL-encoded format)"""
         url = "/career/df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f/"
         expected = "df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f"
-        assert extract_blizzard_id_from_url(url) == expected
+        actual = extract_blizzard_id_from_url(url)
+
+        assert actual == expected
 
     def test_extract_without_trailing_slash(self):
         """Should extract Blizzard ID without trailing slash"""
         url = "/career/df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f"
         expected = "df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f"
-        assert extract_blizzard_id_from_url(url) == expected
+        actual = extract_blizzard_id_from_url(url)
+
+        assert actual == expected
 
     def test_extract_from_battle_tag_url(self):
         """Should extract Blizzard ID from BattleTag URL (after redirect)"""
         # This simulates what we get after Blizzard redirects BattleTag → ID
         url = "/en-us/career/df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f/"
         expected = "df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f"
-        assert extract_blizzard_id_from_url(url) == expected
+        actual = extract_blizzard_id_from_url(url)
+
+        assert actual == expected
 
     def test_keeps_url_encoding(self):
         """Should keep URL-encoded format (%7C, not |) to match search results"""
         url = "/career/abc123%7Cdef456/"
         expected = "abc123%7Cdef456"
-        assert extract_blizzard_id_from_url(url) == expected
+        actual = extract_blizzard_id_from_url(url)
+
+        assert actual == expected
 
     def test_complex_blizzard_id(self):
         """Should handle complex Blizzard ID formats"""
         url = "/career/a1b2c3d4e5f6%7Cg7h8i9j0k1l2m3n4o5p6/"
         expected = "a1b2c3d4e5f6%7Cg7h8i9j0k1l2m3n4o5p6"
-        assert extract_blizzard_id_from_url(url) == expected
+        actual = extract_blizzard_id_from_url(url)
+
+        assert actual == expected
 
     def test_no_career_path(self):
         """Should return None if /career/ not in URL"""
         url = "https://overwatch.blizzard.com/en-us/"
-        assert extract_blizzard_id_from_url(url) is None
+        actual = extract_blizzard_id_from_url(url)
+
+        assert actual is None
 
     def test_empty_url(self):
         """Should return None for empty URL"""
-        assert extract_blizzard_id_from_url("") is None
+        actual = extract_blizzard_id_from_url("")
+
+        assert actual is None
 
     def test_malformed_url(self):
         """Should return None for malformed URL"""
         url = "/career/"
-        assert extract_blizzard_id_from_url(url) is None
+        actual = extract_blizzard_id_from_url(url)
+
+        assert actual is None
 
     def test_multiple_slashes(self):
         """Should handle URLs with additional path segments"""
         url = "/en-us/career/df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f/summary/"
         expected = "df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f"
-        assert extract_blizzard_id_from_url(url) == expected
+        actual = extract_blizzard_id_from_url(url)
+
+        assert actual == expected
 
 
 class TestMatchPlayerByBlizzardId:
@@ -114,6 +145,7 @@ class TestMatchPlayerByBlizzardId:
         ]
         blizzard_id = "df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f"
         result = match_player_by_blizzard_id(search_results, blizzard_id)
+
         assert result is not None
         assert result["name"] == "Kindness"
         assert result["url"] == blizzard_id
@@ -132,6 +164,7 @@ class TestMatchPlayerByBlizzardId:
         ]
         blizzard_id = "df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f"
         result = match_player_by_blizzard_id(search_results, blizzard_id)
+
         assert result is not None
         assert result["url"] == blizzard_id
 
@@ -143,6 +176,7 @@ class TestMatchPlayerByBlizzardId:
         ]
         blizzard_id = "notfound%7Cxyz999"
         result = match_player_by_blizzard_id(search_results, blizzard_id)
+
         assert result is None
 
     def test_empty_search_results(self):
@@ -150,6 +184,7 @@ class TestMatchPlayerByBlizzardId:
         search_results = []
         blizzard_id = "abc123%7Cdef456"
         result = match_player_by_blizzard_id(search_results, blizzard_id)
+
         assert result is None
 
     def test_missing_url_field(self):
@@ -160,6 +195,7 @@ class TestMatchPlayerByBlizzardId:
         ]
         blizzard_id = "abc123%7Cdef456"
         result = match_player_by_blizzard_id(search_results, blizzard_id)
+
         assert result is not None
         assert result["url"] == blizzard_id
 
@@ -182,6 +218,7 @@ class TestMatchPlayerByBlizzardId:
         ]
         blizzard_id = "abc123%7Cdef456"
         result = match_player_by_blizzard_id(search_results, blizzard_id)
+
         assert result is not None
         assert result["name"] == "Player1"  # First match
         assert result["avatar"] == "url1"

@@ -55,13 +55,13 @@ class StoragePort(Protocol):
 
     async def get_player_id_by_battletag(self, battletag: str) -> str | None:
         """
-        Get Blizzard ID (player_id) for a given BattleTag.
+        Get the canonical player ID for a given battletag.
 
-        Enables lookup optimization: when user provides a BattleTag we've seen before,
-        skip Blizzard redirect and use the cached Blizzard ID directly.
+        Enables lookup optimisation: when a battletag has been seen before,
+        the stored player ID can be used directly without an extra resolution step.
 
         Returns:
-            Blizzard ID if found, None otherwise
+            Player ID if found, None otherwise
         """
         ...
 

@@ -1,11 +1,23 @@
 default_language_version:
   python: python3.14
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.14
+  - repo: local
     hooks:
       - id: ruff
         name: (ruff) Linting and fixing code
-        args: [--fix, --exit-non-zero-on-fix]
+        entry: uv run ruff check --fix --exit-non-zero-on-fix
+        language: system
+        pass_filenames: false
+        always_run: true
       - id: ruff-format
         name: (ruff) Formatting code
+        entry: uv run ruff format
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: ty
+        name: (ty) Type checking code
+        entry: uv run ty check .
+        language: system
+        pass_filenames: false
+        always_run: true

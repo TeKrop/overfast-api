@@ -132,11 +132,15 @@ class TestPlayerProfiles:
             battletag=battletag,
         )
 
-        assert await storage_db.get_player_id_by_battletag(battletag) == player_id
+        actual = await storage_db.get_player_id_by_battletag(battletag)
+
+        assert actual == player_id
 
     @pytest.mark.asyncio
     async def test_get_player_id_by_battletag_not_found(self, storage_db):
-        assert await storage_db.get_player_id_by_battletag("Unknown-9999") is None
+        actual = await storage_db.get_player_id_by_battletag("Unknown-9999")
+
+        assert actual is None
 
 
 class TestStorageStats:

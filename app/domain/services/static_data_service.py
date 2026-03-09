@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING, Any
 from app.config import settings
 from app.domain.ports.storage import StaticDataCategory
 from app.domain.services import BaseService
+from app.infrastructure.logger import logger
 from app.monitoring.metrics import (
     background_refresh_triggered_total,
     stale_responses_total,
     storage_hits_total,
 )
-from app.overfast_logger import logger
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -93,34 +93,43 @@ class StaticDataService(BaseService):
 
         if is_stale:
             logger.info(
-                f"[SWR] {config.entity_type} stale (age={age}s, "
-                f"threshold={config.staleness_threshold}s) — serving + triggering refresh"
+                "[SWR] {} stale (age={}s, threshold={}s) — serving + triggering refresh",
+                config.entity_type,
+                age,
+                config.staleness_threshold,
             )
             await self._enqueue_refresh(
                 config.entity_type,
                 config.storage_key,
-                refresh_coro=self._refresh_static(config),
             )
             stale_responses_total.inc()
             background_refresh_triggered_total.labels(
                 entity_type=config.entity_type
             ).inc()
-            # Short TTL absorbs burst traffic while the background refresh is in-flight.
+            # Preserve the original stored_at so Age is computed correctly by nginx/Lua.
+            # Use the full cache_ttl (not stale_cache_timeout) so X-Cache-TTL reflects the
+            # real remaining lifetime of the entry, not just the short SWR window.
             await self._update_api_cache(
                 config.cache_key,
                 filtered,
-                settings.stale_cache_timeout,
+                config.cache_ttl,
+                stored_at=stored["updated_at"],
                 staleness_threshold=config.staleness_threshold,
                 stale_while_revalidate=settings.stale_cache_timeout,
             )
         else:
             logger.info(
-                f"[SWR] {config.entity_type} fresh (age={age}s) — serving from persistent storage"
+                "[SWR] {} fresh (age={}s) — serving from persistent storage",
+                config.entity_type,
+                age,
             )
+            # Preserve the original stored_at so Age is computed correctly by nginx/Lua.
+            # Without this, every Valkey re-write resets stored_at to now, making Age ≈ 0.
             await self._update_api_cache(
                 config.cache_key,
                 filtered,
                 config.cache_ttl,
+                stored_at=stored["updated_at"],
                 staleness_threshold=config.staleness_threshold,
             )
 
@@ -146,18 +155,6 @@ class StaticDataService(BaseService):
     def _apply_filter(data: Any, result_filter: Callable[[Any], Any] | None) -> Any:
         """Apply ``result_filter`` to ``data`` if provided, otherwise return as-is."""
         return result_filter(data) if result_filter is not None else data
-
-    async def _refresh_static(self, config: StaticFetchConfig) -> None:
-        """Fetch fresh data, persist to persistent storage and update Valkey with full TTL.
-
-        Exceptions are intentionally not caught here — they propagate to the
-        task queue adapter which calls the ``on_failure`` callback for metrics.
-        """
-        logger.info(
-            f"[SWR] Background refresh started for"
-            f" {config.entity_type}/{config.storage_key}"
-        )
-        await self._fetch_and_store(config)
 
     async def _fetch_and_store(self, config: StaticFetchConfig) -> Any:
         """Fetch from source, persist raw source to persistent storage, update Valkey, return filtered data."""
@@ -190,7 +187,9 @@ class StaticDataService(BaseService):
 
     async def _cold_fetch(self, config: StaticFetchConfig) -> tuple[Any, bool, int]:
         """Fetch from source on cold start, persist to storage and Valkey."""
-        logger.info(f"[SWR] {config.entity_type} not in storage — fetching from source")
+        logger.info(
+            "[SWR] {} not in storage — fetching from source", config.entity_type
+        )
         filtered = await self._fetch_and_store(config)
         return filtered, False, 0
 
@@ -205,4 +204,4 @@ class StaticDataService(BaseService):
                 category=StaticDataCategory(entity_type),
             )
         except Exception as exc:  # noqa: BLE001
-            logger.warning(f"[SWR] Storage write failed for {storage_key}: {exc}")
+            logger.warning("[SWR] Storage write failed for {}: {}", storage_key, exc)

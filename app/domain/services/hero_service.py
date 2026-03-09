@@ -5,30 +5,30 @@ from typing import TYPE_CHECKING, Any
 
 from fastapi import HTTPException
 
-from app.adapters.blizzard.parsers.hero import fetch_hero_html, parse_hero_html
-from app.adapters.blizzard.parsers.hero_stats_summary import parse_hero_stats_summary
-from app.adapters.blizzard.parsers.heroes import (
+from app.api.helpers import overfast_internal_error
+from app.config import settings
+from app.domain.enums import Locale
+from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.parsers.hero import fetch_hero_html, parse_hero_html
+from app.domain.parsers.hero_stats_summary import parse_hero_stats_summary
+from app.domain.parsers.heroes import (
     fetch_heroes_html,
     filter_heroes,
     parse_heroes_html,
 )
-from app.adapters.blizzard.parsers.heroes_hitpoints import parse_heroes_hitpoints
-from app.config import settings
+from app.domain.parsers.heroes_hitpoints import parse_heroes_hitpoints
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
-from app.enums import Locale
-from app.exceptions import ParserBlizzardError, ParserParsingError
-from app.helpers import overfast_internal_error
 
 if TYPE_CHECKING:
-    from app.heroes.enums import HeroGamemode
-    from app.maps.enums import MapKey
-    from app.players.enums import (
+    from app.domain.enums import (
         CompetitiveDivisionFilter,
+        HeroGamemode,
+        MapKey,
         PlayerGamemode,
         PlayerPlatform,
         PlayerRegion,
+        Role,
     )
-    from app.roles.enums import Role
 
 
 class HeroService(StaticDataService):
@@ -37,6 +37,31 @@ class HeroService(StaticDataService):
     # ------------------------------------------------------------------
     # Heroes list  (GET /heroes)
     # ------------------------------------------------------------------
+
+    def _heroes_list_config(
+        self,
+        locale: Locale,
+        cache_key: str,
+        role: Role | None = None,
+        gamemode: HeroGamemode | None = None,
+    ) -> StaticFetchConfig:
+        """Build a StaticFetchConfig for the heroes list."""
+
+        async def _fetch() -> str:
+            return await fetch_heroes_html(self.blizzard_client, locale)
+
+        return StaticFetchConfig(
+            storage_key=f"heroes:{locale}",
+            fetcher=_fetch,
+            parser=parse_heroes_html,
+            result_filter=(lambda data: filter_heroes(data, role, gamemode))
+            if (role or gamemode)
+            else None,
+            cache_key=cache_key,
+            cache_ttl=settings.heroes_path_cache_timeout,
+            staleness_threshold=settings.heroes_staleness_threshold,
+            entity_type="heroes",
+        )
 
     async def list_heroes(
         self,
@@ -50,42 +75,30 @@ class HeroService(StaticDataService):
         Stores raw Blizzard HTML per locale in persistent storage so that
         code changes to the parser take effect on the next request after restart.
         """
-
-        async def _fetch() -> str:
-            return await fetch_heroes_html(self.blizzard_client, locale)
-
-        def _filter(data: list[dict]) -> list[dict]:
-            return filter_heroes(data, role, gamemode)
-
         return await self.get_or_fetch(
-            StaticFetchConfig(
-                storage_key=f"heroes:{locale}",
-                fetcher=_fetch,
-                parser=parse_heroes_html,
-                result_filter=_filter,
-                cache_key=cache_key,
-                cache_ttl=settings.heroes_path_cache_timeout,
-                staleness_threshold=settings.heroes_staleness_threshold,
-                entity_type="heroes",
-            )
+            self._heroes_list_config(locale, cache_key, role, gamemode)
         )
+
+    async def refresh_list(self, locale: Locale) -> None:
+        """Fetch fresh heroes list, persist to storage and update API cache.
+
+        Called by the background worker — bypasses the SWR layer so that
+        fresh data is always fetched from Blizzard regardless of stored age.
+        """
+        locale_str = locale.value
+        cache_key = (
+            f"/heroes?locale={locale_str}" if locale != Locale.ENGLISH_US else "/heroes"
+        )
+        await self._fetch_and_store(self._heroes_list_config(locale, cache_key))
 
     # ------------------------------------------------------------------
     # Single hero  (GET /heroes/{hero_key})
     # ------------------------------------------------------------------
 
-    async def get_hero(
-        self,
-        hero_key: str,
-        locale: Locale,
-        cache_key: str,
-    ) -> tuple[dict, bool, int]:
-        """Return full hero details merged with portrait and hitpoints.
-
-        Stores a JSON-encoded dict of raw HTML sources per ``hero_key:locale``
-        in persistent storage so that code changes to the parser take effect
-        on the next request after restart.
-        """
+    def _hero_detail_config(
+        self, hero_key: str, locale: Locale, cache_key: str
+    ) -> StaticFetchConfig:
+        """Build a StaticFetchConfig for a single hero detail."""
 
         async def _fetch() -> str:
             try:
@@ -118,16 +131,45 @@ class HeroService(StaticDataService):
                 blizzard_url = f"{settings.blizzard_host}/{locale}{settings.heroes_path}{hero_key}/"
                 raise overfast_internal_error(blizzard_url, exc) from exc
 
+        return StaticFetchConfig(
+            storage_key=f"hero:{hero_key}:{locale}",
+            fetcher=_fetch,
+            parser=_parse,
+            cache_key=cache_key,
+            cache_ttl=settings.hero_path_cache_timeout,
+            staleness_threshold=settings.heroes_staleness_threshold,
+            entity_type="hero",
+        )
+
+    async def get_hero(
+        self,
+        hero_key: str,
+        locale: Locale,
+        cache_key: str,
+    ) -> tuple[dict, bool, int]:
+        """Return full hero details merged with portrait and hitpoints.
+
+        Stores a JSON-encoded dict of raw HTML sources per ``hero_key:locale``
+        in persistent storage so that code changes to the parser take effect
+        on the next request after restart.
+        """
         return await self.get_or_fetch(
-            StaticFetchConfig(
-                storage_key=f"hero:{hero_key}:{locale}",
-                fetcher=_fetch,
-                parser=_parse,
-                cache_key=cache_key,
-                cache_ttl=settings.hero_path_cache_timeout,
-                staleness_threshold=settings.heroes_staleness_threshold,
-                entity_type="hero",
-            )
+            self._hero_detail_config(hero_key, locale, cache_key)
+        )
+
+    async def refresh_single(self, hero_key: str, locale: Locale) -> None:
+        """Fetch fresh hero detail, persist to storage and update API cache.
+
+        Called by the background worker — bypasses the SWR layer.
+        """
+        locale_str = locale.value
+        cache_key = (
+            f"/heroes/{hero_key}?locale={locale_str}"
+            if locale != Locale.ENGLISH_US
+            else f"/heroes/{hero_key}"
+        )
+        await self._fetch_and_store(
+            self._hero_detail_config(hero_key, locale, cache_key)
         )
 
     # ------------------------------------------------------------------

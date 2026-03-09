@@ -22,6 +22,7 @@ def _setup_search_players_test(player_search_response_mock: Mock):
 
 def test_search_players_missing_name(client: TestClient):
     response = client.get("/players")
+
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -85,20 +86,19 @@ def test_get_roles_blizzard_forbidden_error(client: TestClient):
     ):
         response = client.get("/players", params={"name": "Player"})
 
-    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
-    assert response.json() == {
-        "error": (
-            "API has been rate limited by Blizzard, please wait for "
-            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
-        )
-    }
+    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+    assert (
+        "Blizzard is temporarily rate limiting this API. Please retry after"
+        in response.json()["error"]
+    )
 
 
 def test_search_players(client: TestClient):
     response = client.get("/players", params={"name": "Test"})
-    assert response.status_code == status.HTTP_200_OK
 
     json_response = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
     assert (
         json_response["results"]
         == sorted(json_response["results"], key=lambda k: k["player_id"])[:20]
@@ -127,9 +127,10 @@ def test_search_players_with_offset_and_limit(
             "limit": limit,
         },
     )
-    assert response.status_code == status.HTTP_200_OK
 
     json_response = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
     assert (
         json_response["results"]
         == sorted(json_response["results"], key=lambda k: k["player_id"])[:limit]
@@ -148,10 +149,11 @@ def test_search_players_ordering(
             "order_by": order_by,
         },
     )
-    assert response.status_code == status.HTTP_200_OK
 
     order_field, order_arrangement = order_by.split(":")
     json_response = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
     assert json_response["results"] == sorted(
         json_response["results"],
         key=lambda k: k[order_field],
@@ -165,5 +167,6 @@ def test_search_players_internal_error(client: TestClient):
         return_value={"invalid_key": "invalid_value"},
     ):
         response = client.get("/players", params={"name": "Test"})
-        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.json() == {"error": settings.internal_server_error_message}
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"error": settings.internal_server_error_message}

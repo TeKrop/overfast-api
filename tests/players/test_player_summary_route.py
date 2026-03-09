@@ -33,6 +33,7 @@ def test_get_player_summary(
         ],
     ):
         response = client.get(f"/players/{player_id}/summary")
+
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json().keys()) > 0
 
@@ -78,8 +79,9 @@ def test_get_player_summary_internal_error(client: TestClient):
         return_value=({"invalid_key": "invalid_value"}, False, 0),
     ):
         response = client.get("/players/TeKrop-2217/summary")
-        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.json() == {"error": settings.internal_server_error_message}
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"error": settings.internal_server_error_message}
 
 
 def test_get_player_summary_blizzard_forbidden_error(client: TestClient):
@@ -92,10 +94,8 @@ def test_get_player_summary_blizzard_forbidden_error(client: TestClient):
     ):
         response = client.get("/players/TeKrop-2217/summary")
 
-    assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
-    assert response.json() == {
-        "error": (
-            "API has been rate limited by Blizzard, please wait for "
-            f"{settings.blizzard_rate_limit_retry_after} seconds before retrying"
-        )
-    }
+    assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+    assert (
+        "Blizzard is temporarily rate limiting this API. Please retry after"
+        in response.json()["error"]
+    )

@@ -67,7 +67,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(background_tasks_total{job=\"fastapi\", status=\"success\"}[1d])))",
+          "expr": "round(sum(increase(background_refresh_completed_total{job=\"worker\"}[1d])))",
           "refId": "A"
         }
       ],
@@ -93,9 +93,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -118,7 +116,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(background_tasks_total{job=\"fastapi\", status=\"failure\"}[1d])))",
+          "expr": "round(sum(increase(background_refresh_failed_total{job=\"worker\"}[1d])))",
           "refId": "A"
         }
       ],
@@ -152,9 +150,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -177,7 +173,7 @@
       },
       "targets": [
         {
-          "expr": "sum(background_tasks_queue_size{job=\"fastapi\"})",
+          "expr": "background_tasks_queue_size{job=\"fastapi\"}",
           "refId": "A"
         }
       ],
@@ -210,9 +206,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -235,7 +229,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(background_tasks_duration_seconds_bucket{job=\"fastapi\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(background_tasks_duration_seconds_bucket{job=\"worker\"}[5m])) by (le))",
           "refId": "A"
         }
       ],
@@ -268,9 +262,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -293,13 +285,13 @@
       },
       "targets": [
         {
-          "expr": "sum by (task_type) (rate(background_tasks_total{job=\"fastapi\", status=\"success\"}[5m]))",
-          "legendFormat": "{{task_type}} - success",
+          "expr": "sum by (entity_type) (rate(background_refresh_completed_total{job=\"worker\"}[5m]))",
+          "legendFormat": "{{entity_type}} - success",
           "refId": "A"
         },
         {
-          "expr": "sum by (task_type) (rate(background_tasks_total{job=\"fastapi\", status=\"failure\"}[5m]))",
-          "legendFormat": "{{task_type}} - failure",
+          "expr": "sum by (entity_type) (rate(background_refresh_failed_total{job=\"worker\"}[5m]))",
+          "legendFormat": "{{entity_type}} - failure",
           "refId": "B"
         }
       ],
@@ -339,8 +331,8 @@
       },
       "targets": [
         {
-          "expr": "sum by (task_type) (background_tasks_queue_size{job=\"fastapi\"})",
-          "legendFormat": "{{task_type}}",
+          "expr": "background_tasks_queue_size{job=\"fastapi\"}",
+          "legendFormat": "queue size",
           "refId": "A"
         }
       ],
@@ -380,18 +372,18 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.5, sum by (le, task_type) (rate(background_tasks_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
-          "legendFormat": "p50 - {{task_type}}",
+          "expr": "histogram_quantile(0.5, sum by (le, entity_type) (rate(background_tasks_duration_seconds_bucket{job=\"worker\"}[5m])))",
+          "legendFormat": "p50 - {{entity_type}}",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum by (le, task_type) (rate(background_tasks_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
-          "legendFormat": "p95 - {{task_type}}",
+          "expr": "histogram_quantile(0.95, sum by (le, entity_type) (rate(background_tasks_duration_seconds_bucket{job=\"worker\"}[5m])))",
+          "legendFormat": "p95 - {{entity_type}}",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, sum by (le, task_type) (rate(background_tasks_duration_seconds_bucket{job=\"fastapi\"}[5m])))",
-          "legendFormat": "p99 - {{task_type}}",
+          "expr": "histogram_quantile(0.99, sum by (le, entity_type) (rate(background_tasks_duration_seconds_bucket{job=\"worker\"}[5m])))",
+          "legendFormat": "p99 - {{entity_type}}",
           "refId": "C"
         }
       ],
@@ -430,10 +422,10 @@
     },
     {
       "type": "stat",
-      "title": "Refreshes Completed (24h)",
+      "title": "Refresh Success Rate (24h)",
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 24,
         "x": 0,
         "y": 22
       },
@@ -443,112 +435,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(increase(background_refresh_completed_total{job=\"fastapi\"}[1d])))",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "green"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "value": null,
-                "color": "green"
-              }
-            ]
-          },
-          "decimals": 0
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
-        },
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "textMode": "auto"
-      }
-    },
-    {
-      "type": "stat",
-      "title": "Refreshes Failed (24h)",
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 22
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "targets": [
-        {
-          "expr": "round(sum(increase(background_refresh_failed_total{job=\"fastapi\"}[1d])))",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "value": null,
-                "color": "green"
-              },
-              {
-                "value": 1,
-                "color": "red"
-              }
-            ]
-          },
-          "decimals": 0
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
-        },
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "textMode": "auto"
-      }
-    },
-    {
-      "type": "stat",
-      "title": "Refresh Success Rate (24h)",
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 22
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "targets": [
-        {
-          "expr": "round(100 * sum(increase(background_refresh_completed_total{job=\"fastapi\"}[1d])) / clamp_min(sum(increase(background_refresh_triggered_total{job=\"fastapi\"}[1d])), 1))",
+          "expr": "round(100 * sum(increase(background_refresh_completed_total{job=\"worker\"}[1d])) / clamp_min(sum(increase(background_refresh_triggered_total{job=\"fastapi\"}[1d])), 1))",
           "refId": "A"
         }
       ],
@@ -581,9 +468,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "background",
         "graphMode": "none",
@@ -606,7 +491,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (entity_type) (rate(background_refresh_completed_total{job=\"fastapi\"}[5m]))",
+          "expr": "sum by (entity_type) (rate(background_refresh_completed_total{job=\"worker\"}[5m]))",
           "legendFormat": "{{entity_type}}",
           "refId": "A"
         }
@@ -647,7 +532,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (entity_type) (rate(background_refresh_failed_total{job=\"fastapi\"}[5m]))",
+          "expr": "sum by (entity_type) (rate(background_refresh_failed_total{job=\"worker\"}[5m]))",
           "legendFormat": "{{entity_type}}",
           "refId": "A"
         }
@@ -691,7 +576,7 @@
     },
     {
       "type": "stat",
-      "title": "AIMD Current Rate",
+      "title": "Throttle Delay (s)",
       "gridPos": {
         "h": 4,
         "w": 8,
@@ -704,7 +589,7 @@
       },
       "targets": [
         {
-          "expr": "aimd_current_rate{job=\"fastapi\"}",
+          "expr": "throttle_current_delay_seconds{job=\"fastapi\"}",
           "refId": "A"
         }
       ],
@@ -729,9 +614,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -741,7 +624,7 @@
     },
     {
       "type": "stat",
-      "title": "Rate Limit Events (24h)",
+      "title": "403 Penalty Events (24h)",
       "gridPos": {
         "h": 4,
         "w": 8,
@@ -754,7 +637,7 @@
       },
       "targets": [
         {
-          "expr": "round(increase(blizzard_rate_limited_total{job=\"fastapi\"}[1d]))",
+          "expr": "round(increase(throttle_403_total{job=\"fastapi\"}[1d]))",
           "refId": "A"
         }
       ],
@@ -788,9 +671,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -846,9 +727,7 @@
       },
       "options": {
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "colorMode": "value",
         "graphMode": "none",
@@ -858,7 +737,7 @@
     },
     {
       "type": "timeseries",
-      "title": "AIMD Rate Over Time",
+      "title": "Throttle Delay Over Time",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -871,7 +750,7 @@
       },
       "targets": [
         {
-          "expr": "aimd_current_rate{job=\"fastapi\"}",
+          "expr": "throttle_current_delay_seconds{job=\"fastapi\"}",
           "legendFormat": "Allowed rate",
           "refId": "A"
         }
@@ -899,7 +778,7 @@
     },
     {
       "type": "timeseries",
-      "title": "Rate Limit Events Over Time",
+      "title": "403 Penalty Events Over Time",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -912,7 +791,7 @@
       },
       "targets": [
         {
-          "expr": "rate(blizzard_rate_limited_total{job=\"fastapi\"}[5m])",
+          "expr": "rate(throttle_403_total{job=\"fastapi\"}[5m])",
           "legendFormat": "Rate limit events/s",
           "refId": "A"
         }

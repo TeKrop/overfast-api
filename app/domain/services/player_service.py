@@ -1,76 +1,41 @@
 """Player domain service — career, stats, summary, and search"""
 
 import time
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Never, cast
+from typing import Never, cast
 
 from fastapi import HTTPException, status
 
-from app.adapters.blizzard.parsers.player_career_stats import (
+from app.api.helpers import overfast_internal_error
+from app.config import settings
+from app.domain.enums import HeroKeyCareerFilter, PlayerGamemode, PlayerPlatform
+from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.models.player import PlayerIdentity, PlayerRequest
+from app.domain.parsers.player_career_stats import (
     parse_player_career_stats_from_html,
 )
-from app.adapters.blizzard.parsers.player_profile import (
+from app.domain.parsers.player_profile import (
     extract_name_from_profile_html,
     fetch_player_html,
     filter_all_stats_data,
     filter_stats_by_query,
     parse_player_profile_html,
 )
-from app.adapters.blizzard.parsers.player_search import parse_player_search
-from app.adapters.blizzard.parsers.player_stats import (
+from app.domain.parsers.player_search import parse_player_search
+from app.domain.parsers.player_stats import (
     parse_player_stats_summary_from_html,
 )
-from app.adapters.blizzard.parsers.player_summary import (
+from app.domain.parsers.player_summary import (
     fetch_player_summary_json,
     parse_player_summary_json,
 )
-from app.adapters.blizzard.parsers.utils import is_blizzard_id
-from app.config import settings
+from app.domain.parsers.utils import is_blizzard_id
 from app.domain.services.base_service import BaseService
-from app.exceptions import ParserBlizzardError, ParserParsingError
-from app.helpers import overfast_internal_error
+from app.infrastructure.logger import logger
 from app.monitoring.metrics import (
     storage_battletag_lookup_total,
     storage_cache_hit_total,
     storage_hits_total,
 )
-from app.overfast_logger import logger
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
-
-    from app.players.enums import (
-        HeroKeyCareerFilter,
-        PlayerGamemode,
-        PlayerPlatform,
-    )
-
-
-@dataclass
-class PlayerIdentity:
-    """Result of player identity resolution.
-
-    Groups the four fields that travel together after resolving a
-    BattleTag or Blizzard ID to a canonical identity.
-    """
-
-    blizzard_id: str | None = field(default=None)
-    player_summary: dict = field(default_factory=dict)
-    cached_html: str | None = field(default=None)
-    battletag_input: str | None = field(default=None)
-
-
-@dataclass
-class PlayerRequest:
-    """Parameter object for a player data request.
-
-    Pass a single ``PlayerRequest`` to ``PlayerService._execute_player_request``
-    instead of passing each field as a separate keyword argument.
-    """
-
-    player_id: str
-    cache_key: str
-    data_factory: Callable[[str, dict], dict]
 
 
 class PlayerService(BaseService):
@@ -160,6 +125,50 @@ class PlayerService(BaseService):
                 player_id=player_id, cache_key=cache_key, data_factory=extract
             )
         )
+
+    # ------------------------------------------------------------------
+    # Background refresh  (worker only — bypasses storage fast-path)
+    # ------------------------------------------------------------------
+
+    async def refresh_player_profile(self, player_id: str) -> None:
+        """Unconditionally fetch fresh player data from Blizzard and persist it.
+
+        Unlike the public endpoint methods, this method bypasses
+        ``_get_fresh_stored_profile`` entirely, so the worker always
+        issues a live Blizzard request regardless of how recently the
+        profile was last stored.  This prevents the background refresh
+        task from silently no-oping when the stored profile is still
+        within the staleness threshold.
+
+        After updating persistent storage, all existing API cache keys for this
+        player are deleted.  The next request will find a cache miss, hit the
+        storage fast-path (profile is now fresh), compute the correct data slice,
+        and repopulate the cache — without touching Blizzard.
+        """
+        identity = PlayerIdentity()
+        try:
+            identity = await self._resolve_player_identity(player_id)
+            effective_id = identity.blizzard_id or player_id
+            await self._get_player_html(effective_id, identity)
+            await self._evict_player_cache_keys(player_id)
+        except Exception as exc:  # noqa: BLE001
+            await self._handle_player_exceptions(exc, player_id, identity)
+
+    async def _evict_player_cache_keys(self, player_id: str) -> None:
+        """Delete all API cache keys for *player_id* from Valkey.
+
+        Uses a glob scan so every endpoint/parameter combination is cleared
+        without needing to enumerate them explicitly.  The next request for
+        each key will hit the storage fast-path and repopulate the cache.
+        """
+        pattern = f"{settings.api_cache_key_prefix}:/players/{player_id}*"
+        keys = await self.cache.scan_keys(pattern)
+        for key in keys:
+            await self.cache.delete(key)
+        if keys:
+            logger.debug(
+                "[refresh] Evicted {} cache key(s) for {}", len(keys), player_id
+            )
 
     # ------------------------------------------------------------------
     # Player stats  (GET /players/{player_id}/stats)
@@ -257,11 +266,13 @@ class PlayerService(BaseService):
         effective_id = request.player_id
         data: dict = {}
         age = 0
+        stored_at: int | None = None
 
         try:
             fresh = await self._get_fresh_stored_profile(request.player_id)
             if fresh is not None:
                 profile, age = fresh
+                stored_at = profile["updated_at"]
                 logger.info(
                     "Serving player data from persistent storage (within staleness threshold)"
                 )
@@ -274,10 +285,16 @@ class PlayerService(BaseService):
         except Exception as exc:  # noqa: BLE001
             await self._handle_player_exceptions(exc, request.player_id, identity)
 
-        is_stale = self._check_player_staleness()
+        is_stale = self._check_player_staleness(age)
         await self._update_api_cache(
-            request.cache_key, data, settings.career_path_cache_timeout
+            request.cache_key,
+            data,
+            settings.career_path_cache_timeout,
+            stored_at=stored_at,
+            stale_while_revalidate=settings.stale_cache_timeout if is_stale else 0,
         )
+        if is_stale:
+            await self._enqueue_refresh("player_profile", request.player_id)
         return data, is_stale, age
 
     # ------------------------------------------------------------------
@@ -324,13 +341,28 @@ class PlayerService(BaseService):
             name=name,
         )
 
-    def _check_player_staleness(self) -> bool:
-        """Return is_stale — stub always returning False until Phase 5.
+    def _check_player_staleness(self, age: int) -> bool:
+        """Return True when the stored profile is old enough to warrant a background pre-refresh.
 
-        Phase 5 will perform a real async storage lookup comparing
-        ``player_profiles.updated_at`` against ``player_staleness_threshold``.
+        Applies SWR semantics: if the profile was served from persistent storage
+        (``age > 0``) and has consumed at least half its staleness window, the response
+        is marked stale so the caller enqueues a background refresh.  This keeps profiles
+        pre-warmed and avoids a synchronous Blizzard call on the next request.
+
+        ``age == 0`` means we just fetched fresh data from Blizzard — never stale.
+
+        The SWR lifecycle for a player profile across the two threshold values:
+
+        - ``0 ≤ age < threshold // 2``  — fresh; served from storage, no refresh enqueued.
+        - ``threshold // 2 ≤ age < threshold``  — stale window: served from storage *and*
+          a background refresh is enqueued so the next request finds a warm profile.
+        - ``age ≥ threshold``  — ``_get_fresh_stored_profile`` returns ``None``; the
+          request falls through to a synchronous Blizzard fetch.
         """
-        return False
+        if age == 0:
+            return False
+        swr_threshold = settings.player_staleness_threshold // 2
+        return age >= swr_threshold
 
     async def _get_fresh_stored_profile(
         self, player_id: str
@@ -341,6 +373,8 @@ class PlayerService(BaseService):
         For BattleTag inputs, resolves to a Blizzard ID via the stored mapping
         before fetching the profile.  Returns ``None`` if no mapping exists, the
         profile is absent, or the profile is older than the threshold.
+
+        See ``_check_player_staleness`` for the full SWR lifecycle description.
         """
         if is_blizzard_id(player_id):
             blizzard_id = player_id
@@ -541,7 +575,7 @@ class PlayerService(BaseService):
                 if player_summary:
                     return player_summary, html
         except Exception as exc:  # noqa: BLE001
-            logger.warning(f"Reverse enrichment failed: {exc}")
+            logger.warning("Reverse enrichment failed: {}", exc)
 
         return {}, html
 
@@ -584,8 +618,10 @@ class PlayerService(BaseService):
         }
 
         logger.info(
-            f"Marked player {blizzard_id} as unknown (check #{check_count}, "
-            f"retry in {retry_after}s)"
+            "Marked player {} as unknown (check #{}, retry in {}s)",
+            blizzard_id,
+            check_count,
+            retry_after,
         )
 
     async def _handle_player_exceptions(

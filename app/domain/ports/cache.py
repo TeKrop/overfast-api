@@ -5,11 +5,11 @@ from typing import Protocol
 
 class CachePort(Protocol):
     """
-    Protocol for cache operations with application-specific methods.
+    Protocol for cache operations.
 
     This protocol defines both low-level cache operations (get/set/delete/exists)
-    and high-level application-specific methods for API cache, player cache,
-    rate limiting, and unknown player tracking.
+    and high-level application-specific methods for API cache management and
+    unknown player tracking.
 
     Implementations should use structural typing (duck typing) - no explicit
     inheritance required. Protocol compliance is verified by type checkers.
@@ -40,7 +40,7 @@ class CachePort(Protocol):
     # Application-specific cache methods
     async def get_api_cache(self, cache_key: str) -> dict | list | None:
         """
-        Get the API Cache value associated with a given cache key.
+        Get the API cache value associated with a given cache key.
 
         Returns decompressed JSON data (dict or list) or None if not found.
         """
@@ -56,56 +56,35 @@ class CachePort(Protocol):
         staleness_threshold: int | None = None,
         stale_while_revalidate: int = 0,
     ) -> None:
-        """Update or set an API Cache value with an expiration value (in seconds).
+        """Update or set an API cache value with an expiration (in seconds).
 
-        Value is wrapped in a metadata envelope before compression::
+        Value is wrapped in a metadata envelope before storage::
 
             {"data_json": "<pre-serialized JSON string>",
              "stored_at": <unix epoch>,
              "staleness_threshold": <seconds>,
              "stale_while_revalidate": <seconds>}
 
-        ``data_json`` is a pre-serialized JSON string so nginx/Lua can print it
-        verbatim without re-encoding through cjson, preserving key ordering.
-        The envelope allows nginx/Lua to set standard ``Age``
-        and ``Cache-Control: stale-while-revalidate`` headers without calling
-        FastAPI.
-
         Args:
-            cache_key: Valkey key suffix (after ``api-cache:``).
+            cache_key: Cache key suffix.
             value: Data payload to cache.
-            expire: Valkey key TTL in seconds.
-            stored_at: Unix timestamp when the data was generated.  Defaults to now.
+            expire: Key TTL in seconds.
+            stored_at: Unix timestamp when the data was generated. Defaults to now.
             staleness_threshold: Seconds after which the payload is considered stale.
-                Used for ``Cache-Control: max-age``.  Defaults to ``expire``.
-            stale_while_revalidate: Seconds nginx may serve stale while revalidating.
-                0 means no SWR window (omits the directive).
+                Defaults to ``expire``.
+            stale_while_revalidate: Seconds the caller may serve stale data while
+                revalidating. 0 means no SWR window.
         """
         ...
 
-    # Rate limiting methods
-    async def is_being_rate_limited(self) -> bool:
-        """Check if Blizzard rate limit is currently active"""
-        ...
-
-    async def get_global_rate_limit_remaining_time(self) -> int:
-        """Get remaining time in seconds for Blizzard rate limit"""
-        ...
-
-    async def set_global_rate_limit(self) -> None:
-        """Set Blizzard rate limit flag with configured TTL"""
-        ...
-
-    # Unknown player tracking methods (two-key pattern: cooldown key with TTL + status key permanent)
+    # Unknown player tracking methods
     async def get_player_status(self, player_id: str) -> dict | None:
         """
-        Get unknown player status.
+        Get the tracking status for an unknown player.
 
-        Checks cooldown:{player_id} key first (active rejection window),
-        then falls back to status:{player_id} key (persistent check count).
-
-        Returns dict with 'check_count' and 'retry_after' (remaining seconds, 0 if
-        cooldown expired but status persists), or None if player is not tracked.
+        Returns a dict with 'check_count' and 'retry_after' (remaining seconds,
+        0 if the active window expired but the record persists), or None if the
+        player is not tracked.
         """
         ...
 
@@ -117,27 +96,44 @@ class CachePort(Protocol):
         battletag: str | None = None,
     ) -> None:
         """
-        Set persistent status key and cooldown keys for an unknown player.
+        Record or update the tracking status for an unknown player.
 
-        player_id should be the Blizzard ID (canonical key for status).
-        If battletag is provided, an additional cooldown key is set by battletag
-        to enable early rejection before identity resolution.
+        player_id is the canonical identifier. If battletag is provided, an
+        additional short-lived entry is stored by battletag to allow early
+        rejection before full identity resolution.
         """
         ...
 
     async def delete_player_status(self, player_id: str) -> None:
-        """Delete status and all associated cooldown keys for player (by Blizzard ID)."""
+        """Delete the tracking status and all associated entries for a player."""
+        ...
+
+    async def scan_keys(self, pattern: str) -> list[str]:
+        """Return all cache keys matching the given glob pattern.
+
+        Uses non-blocking iteration. Returns an empty list if no keys match
+        or on error.
+        """
         ...
 
     async def evict_volatile_data(self) -> None:
         """
-        Delete all Valkey keys except unknown-player status and cooldown keys.
+        Delete all volatile (short-lived) cache entries, preserving persistent ones.
 
-        Called on app shutdown before triggering RDB save so that the snapshot
-        contains only persistent unknown-player data.
+        Called on startup and shutdown to ensure the persisted cache state
+        contains only durable data.
+        """
+        ...
+
+    async def evict_low_count_player_statuses(self) -> None:
+        """Delete player status entries whose check_count is strictly below the
+        configured minimum retention count, along with their associated entries.
+
+        Called on shutdown after evict_volatile_data() so that low-signal entries
+        are not persisted. Set the minimum retention count to 0 to disable.
         """
         ...
 
     async def bgsave(self) -> None:
-        """Trigger a background RDB save (best-effort, errors are logged not raised)."""
+        """Persist the current cache state to durable storage (best-effort)."""
         ...

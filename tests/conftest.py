@@ -9,8 +9,9 @@ import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 
-from app.adapters.blizzard import BlizzardClient
+from app.adapters.tasks.task_registry import TASK_MAP
 from app.api.dependencies import get_storage
+from app.infrastructure.metaclasses import Singleton
 from app.main import app
 from tests.fake_storage import FakeStorage
 
@@ -20,13 +21,17 @@ def client() -> TestClient:
     return TestClient(app)
 
 
-@pytest_asyncio.fixture(scope="session")
-async def valkey_server():
-    """Provide async FakeValkey server for tests"""
+@pytest.fixture
+def valkey_server() -> fakeredis.FakeAsyncRedis:
+    """Fresh FakeAsyncRedis per test with no event-loop binding at creation time.
+
+    Using a sync (non-async) fixture avoids binding asyncio.Lock to the
+    pytest-asyncio function loop, which differs from TestClient's internal loop.
+    """
     return fakeredis.FakeAsyncRedis(protocol=3)
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture
 async def storage_db() -> AsyncIterator[FakeStorage]:
     """Provide in-memory FakeStorage for tests"""
     storage = FakeStorage()
@@ -40,25 +45,27 @@ async def _patch_before_every_test(
     valkey_server: fakeredis.FakeAsyncRedis,
     storage_db: FakeStorage,
 ):
-    # Flush Valkey and clear all storage data before every test
-    await valkey_server.flushdb()
+    # Clear all storage data before every test
     await storage_db.clear_all_data()
 
-    # Reset in-memory rate limit state on the singleton
-    BlizzardClient()._rate_limited_until = 0
+    # Reset singletons so state doesn't bleed between tests
+    Singleton.clear_all()
+
     app.dependency_overrides[get_storage] = lambda: storage_db
 
     with (
-        patch("app.helpers.settings.discord_webhook_enabled", False),
-        patch("app.helpers.settings.profiler", None),
+        patch("app.api.helpers.settings.discord_webhook_enabled", False),
+        patch("app.api.helpers.settings.profiler", None),
         patch(
-            "app.adapters.cache.valkey_cache.ValkeyCache.valkey_server",
-            valkey_server,
+            "app.adapters.cache.valkey_cache.valkey.Valkey",
+            return_value=valkey_server,
         ),
+        # Prevent ValkeyTaskQueue from dispatching to the broker (not running in tests).
+        # Deduplication via SET NX/EXISTS still works through the patched fake redis.
+        patch.dict(TASK_MAP, {}, clear=True),
     ):
         yield
 
     app.dependency_overrides.pop(get_storage, None)
 
-    await valkey_server.flushdb()
     await storage_db.clear_all_data()

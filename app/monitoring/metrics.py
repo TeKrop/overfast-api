@@ -53,71 +53,70 @@ api_requests_in_progress = Gauge(
 # Cache & SWR Metrics
 ####################
 
-# Persistent storage lookups (Phase 3)
+# Persistent storage lookups
 storage_hits_total = Counter(
     "storage_hits_total",
     "Persistent storage lookup results",
     ["result"],  # "hit", "miss"
 )
 
-# Stale responses served from persistent storage (Phase 3)
+# Stale responses served from persistent storage
 stale_responses_total = Counter(
     "stale_responses_total",
     "Stale responses served from persistent storage (SWR)",
 )
 
-# Background refresh tasks triggered (Phase 4 onwards)
+# Background refresh tasks triggered
 background_refresh_triggered_total = Counter(
     "background_refresh_triggered_total",
     "Background refresh tasks triggered by SWR staleness detection",
     ["entity_type"],  # "heroes", "maps", "gamemodes", "roles", "player", "hero_stats"
 )
 
+# Worker execution outcomes — requires PROMETHEUS_MULTIPROC_DIR to be scraped
+# from the worker process alongside the API process.
 background_refresh_completed_total = Counter(
     "background_refresh_completed_total",
-    "Background refresh tasks that completed successfully",
+    "Background refresh tasks completed successfully by the worker",
     ["entity_type"],
 )
 
 background_refresh_failed_total = Counter(
     "background_refresh_failed_total",
-    "Background refresh tasks that raised an exception",
+    "Background refresh tasks that raised an exception in the worker",
     ["entity_type"],
-)
-
-########################
-# Background Task Metrics (Phase 5)
-########################
-
-background_tasks_total = Counter(
-    "background_tasks_total",
-    "Background refresh tasks",
-    [
-        "task_type",
-        "status",
-    ],  # task_type: "player", "hero", etc. | status: "success", "failure"
-)
-
-background_tasks_queue_size = Gauge(
-    "background_tasks_queue_size",
-    "Current number of tasks waiting in queue",
-    ["task_type"],
 )
 
 background_tasks_duration_seconds = Histogram(
     "background_tasks_duration_seconds",
-    "Background task execution duration in seconds",
-    ["task_type"],
+    "Worker task execution duration in seconds",
+    ["entity_type"],
     buckets=(0.1, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0),
 )
 
+background_tasks_queue_size = Gauge(
+    "background_tasks_queue_size",
+    "Number of background refresh tasks currently queued or in-flight",
+)
+
 ########################
-# AIMD / Blizzard Metrics (Phase 5)
+# Throttle / Blizzard Metrics
 ########################
 
-aimd_current_rate = Gauge(
-    "aimd_current_rate",
-    "Current allowed Blizzard request rate (requests per second)",
+throttle_current_delay_seconds = Gauge(
+    "throttle_current_delay_seconds",
+    "Current adaptive throttle delay between Blizzard requests (seconds)",
+)
+
+throttle_403_total = Counter(
+    "throttle_403_total",
+    "Blizzard 403 rate-limit events that triggered a throttle penalty",
+)
+
+throttle_wait_seconds = Histogram(
+    "throttle_wait_seconds",
+    "Time spent waiting before Blizzard requests due to throttle delay",
+    buckets=(0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0),
 )
 
 blizzard_requests_total = Counter(
@@ -139,7 +138,7 @@ blizzard_rate_limited_total = Counter(
 )
 
 ########################
-# Storage Metrics (Phase 3)
+# Storage Metrics
 ########################
 
 storage_size_bytes = Gauge(
@@ -159,7 +158,7 @@ storage_write_errors_total = Counter(
     ["error_type"],  # "disk_error", "compression_error", "unknown"
 )
 
-# Phase 3.5B: Comprehensive storage monitoring
+# Comprehensive storage monitoring
 storage_operation_duration_seconds = Histogram(
     "storage_operation_duration_seconds",
     "Storage operation duration in seconds",

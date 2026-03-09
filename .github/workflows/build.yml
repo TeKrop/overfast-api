@@ -38,7 +38,7 @@ jobs:
 
       - name: Run tests suite
         run: |
-          PYTHONPATH=app/ uv run python -m pytest -v --cov-fail-under=80 --cov-report=html --cov=app/ tests/
+          PYTHONPATH=app/ uv run python -m pytest -v --cov-fail-under=80 --cov-report=html --cov=app/ -n auto tests/
           PERCENT=$(cat htmlcov/index.html | grep "pc_cov" | awk -F '>' '{print $2}' | awk -F '%' '{print $1}')
           echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
 

@@ -16,7 +16,7 @@ class BlizzardClientPort(Protocol):
         headers: dict[str, str] | None = None,
         params: dict[str, str] | None = None,
     ) -> httpx.Response:
-        """GET request to Blizzard URL with rate limiting"""
+        """GET request to the given URL, respecting configured throttling."""
         ...
 
     async def close(self) -> None:
