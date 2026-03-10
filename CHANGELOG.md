@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v3.48.1 (2026-03-10)
+
+### Bug Fixes
+
+- **players**: Fixed edge case in refresh process
+  ([#389](https://github.com/TeKrop/overfast-api/pull/389),
+  [`3084134`](https://github.com/TeKrop/overfast-api/commit/308413421749405845efaed5d111e9ede2cb314e))
+
+
 ## v3.48.0 (2026-03-09)
 
 ### Features
