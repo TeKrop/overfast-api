@@ -1,11 +1,11 @@
 """Role domain service — roles list"""
 
-from app.api.helpers import overfast_internal_error
 from app.config import settings
 from app.domain.enums import Locale
 from app.domain.exceptions import ParserParsingError
 from app.domain.parsers.roles import fetch_roles_html, parse_roles_html
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
+from app.infrastructure.helpers import overfast_internal_error
 
 
 class RoleService(StaticDataService):

@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING
 from fastapi.exceptions import ResponseValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.api.helpers import overfast_internal_error
 from app.api.responses import ASCIIJSONResponse
 from app.domain.exceptions import OverfastError
+from app.infrastructure.helpers import overfast_internal_error
 
 if TYPE_CHECKING:
     from fastapi import FastAPI, Request

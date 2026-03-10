@@ -1,6 +1,6 @@
 """Set of custom exceptions used in the API"""
 
-from fastapi import status
+from http import HTTPStatus
 
 
 class RateLimitedError(Exception):
@@ -21,7 +21,7 @@ class RateLimitedError(Exception):
 class OverfastError(Exception):
     """Generic OverFast API Exception"""
 
-    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
     message = "OverFast API Error"
 
     def __str__(self):
@@ -33,7 +33,7 @@ class ParserBlizzardError(OverfastError):
     initialization, usually when the data is not available
     """
 
-    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
     message = "Parser Blizzard Error"
 
     def __init__(self, status_code: int, message: str):
@@ -45,7 +45,7 @@ class ParserBlizzardError(OverfastError):
 class ParserParsingError(OverfastError):
     """Exception raised when there was an error during data parsing"""
 
-    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
     message = "Parser Parsing Error"
 
     def __init__(self, message: str):

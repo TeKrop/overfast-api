@@ -23,9 +23,9 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 from app.adapters.cache.valkey_cache import ValkeyCache
-from app.api.helpers import send_discord_webhook_message
 from app.config import settings
 from app.domain.exceptions import RateLimitedError
+from app.infrastructure.helpers import send_discord_webhook_message
 from app.infrastructure.logger import logger
 from app.infrastructure.metaclasses import Singleton
 from app.monitoring.metrics import (

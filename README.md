@@ -74,7 +74,7 @@ just format    # Run ruff formatter
 ```
 
 ### Testing
-The code has been tested using unit testing, except some rare parts which are not relevant to test. There are tests on the parsers classes, the common classes, but also on the commands (run in CLI) and the API views (using FastAPI TestClient class).
+The code has been tested using unit testing, except some rare parts which are not relevant to test. There are tests on the parsers, the domain services, the adapters, and the API views (using FastAPI TestClient class). Tests are organized to mirror the DDD layer structure: `tests/domain/`, `tests/adapters/`, `tests/infrastructure/`, `tests/players/`, `tests/heroes/`, etc.
 
 Running tests with coverage (default)
 ```shell
@@ -83,17 +83,18 @@ just test
 
 Running tests with given args (without coverage)
 ```shell
-just test tests/common
-make test PYTEST_ARGS="tests/common"
+just test tests/domain/services
+make test PYTEST_ARGS="tests/domain/services"
 ```
 
 
 ### Pre-commit
 The project is using [pre-commit](https://pre-commit.com/) framework to ensure code quality before making any commit on the repository. After installing the project dependencies, you can install the pre-commit by using the `pre-commit install` command.
 
-The configuration can be found in the `.pre-commit-config.yaml` file. It consists in launching 2 processes on modified files before making any commit :
-- `ruff` for linting and code formatting (with `ruff format`)
-- `sourcery` for more code quality checks and a lot of simplifications
+The configuration can be found in the `.pre-commit-config.yaml` file. It runs the following checks on modified files before each commit:
+- `ruff` for linting and auto-fixing
+- `ruff format` for code formatting
+- `ty` for type checking
 
 ## 👨‍💻 Technical details
 

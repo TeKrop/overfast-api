@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any
 
 from fastapi import HTTPException
 
-from app.api.helpers import overfast_internal_error
 from app.config import settings
 from app.domain.enums import Locale
 from app.domain.exceptions import ParserBlizzardError, ParserParsingError
@@ -18,6 +17,7 @@ from app.domain.parsers.heroes import (
 )
 from app.domain.parsers.heroes_hitpoints import parse_heroes_hitpoints
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
+from app.infrastructure.helpers import overfast_internal_error
 
 if TYPE_CHECKING:
     from app.domain.enums import (
