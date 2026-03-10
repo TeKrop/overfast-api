@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v4.0.0 (2026-03-10)
+
+### Features
+
+- Polishing project for v4.0.0 ([#391](https://github.com/TeKrop/overfast-api/pull/391),
+  [`d237f2e`](https://github.com/TeKrop/overfast-api/commit/d237f2edf51d896808b9be18f44b7422e162c65c))
+
+
 ## v3.48.2 (2026-03-10)
 
 ### Bug Fixes
