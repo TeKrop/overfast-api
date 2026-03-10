@@ -1,14 +1,18 @@
 """Player domain service — career, stats, summary, and search"""
 
 import time
+from http import HTTPStatus
 from typing import Never, cast
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 
-from app.api.helpers import overfast_internal_error
 from app.config import settings
 from app.domain.enums import HeroKeyCareerFilter, PlayerGamemode, PlayerPlatform
-from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.exceptions import (
+    ParserBlizzardError,
+    ParserInternalError,
+    ParserParsingError,
+)
 from app.domain.models.player import PlayerIdentity, PlayerRequest
 from app.domain.parsers.player_career_stats import (
     parse_player_career_stats_from_html,
@@ -71,7 +75,7 @@ class PlayerService(BaseService):
             blizzard_url = (
                 f"{settings.blizzard_host}{settings.search_account_path}/{search_name}/"
             )
-            raise overfast_internal_error(blizzard_url, exc) from exc
+            raise ParserInternalError(blizzard_url, exc) from exc
 
         await self._update_api_cache(
             cache_key, data, settings.search_account_path_cache_timeout
@@ -606,7 +610,7 @@ class PlayerService(BaseService):
     ) -> None:
         if not settings.unknown_players_cache_enabled:
             return
-        if exception.status_code != status.HTTP_404_NOT_FOUND:
+        if exception.status_code != HTTPStatus.NOT_FOUND.value:
             return
 
         player_status = await self.cache.get_player_status(blizzard_id)
@@ -645,7 +649,7 @@ class PlayerService(BaseService):
 
         if isinstance(error, ParserBlizzardError):
             exc = HTTPException(status_code=error.status_code, detail=error.message)
-            if error.status_code == status.HTTP_404_NOT_FOUND:
+            if error.status_code == HTTPStatus.NOT_FOUND.value:
                 await self._mark_player_unknown(
                     effective_id, exc, battletag=battletag_input
                 )
@@ -654,7 +658,7 @@ class PlayerService(BaseService):
         if isinstance(error, ParserParsingError):
             if "Could not find main content in HTML" in str(error):
                 exc = HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
+                    status_code=HTTPStatus.NOT_FOUND.value,
                     detail="Player not found",
                 )
                 await self._mark_player_unknown(
@@ -666,10 +670,10 @@ class PlayerService(BaseService):
                 f"{settings.blizzard_host}{settings.career_path}/"
                 f"{player_summary.get('url', effective_id) if player_summary else effective_id}/"
             )
-            raise overfast_internal_error(blizzard_url, error) from error
+            raise ParserInternalError(blizzard_url, error) from error
 
         if isinstance(error, HTTPException):
-            if error.status_code == status.HTTP_404_NOT_FOUND:
+            if error.status_code == HTTPStatus.NOT_FOUND.value:
                 await self._mark_player_unknown(
                     effective_id, error, battletag=battletag_input
                 )

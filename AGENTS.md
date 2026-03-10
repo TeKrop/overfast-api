@@ -41,9 +41,9 @@ Four strict DDD layers; dependencies only flow inward.
 
 | Layer | May depend on | Must not depend on |
 |---|---|---|
-| `domain` | stdlib only | `adapters`, `api`, `infrastructure` |
-| `adapters` | `domain` | `api` |
-| `api` | `domain`, `adapters` (via DI) | — |
+| `domain` | stdlib, `infrastructure` (logger only) | `adapters`, `api` |
+| `adapters` | `domain`, `infrastructure` | `api` |
+| `api` | `domain`, `adapters` (via DI), `infrastructure` | — |
 | `infrastructure` | anything | — |
 
 ```
@@ -52,7 +52,7 @@ app/
 ├── config.py                      # Pydantic BaseSettings (settings singleton)
 ├── domain/
 │   ├── enums.py                   # All domain enums; HeroKey/MapKey built dynamically from CSV
-│   ├── exceptions.py              # Domain exceptions (ParserParsingError, RateLimitedError, …)
+│       ├── exceptions.py              # Domain exceptions (ParserParsingError, ParserInternalError, RateLimitedError, …)
 │   ├── models/player.py           # PlayerIdentity, PlayerRequest dataclasses
 │   ├── parsers/                   # HTML parsers (stateless functions, selectolax)
 │   ├── ports/                     # typing.Protocol interfaces (structural typing)
@@ -74,13 +74,14 @@ app/
 ├── api/
 │   ├── dependencies.py            # FastAPI Depends() providers + type aliases
 │   ├── exception_handlers.py
-│   ├── helpers.py                 # overfast_internal_error, Discord webhook
+│       ├── helpers.py                 # SWR headers and response helpers (routes_responses, apply_swr_headers, …)
 │   ├── lifespan.py
 │   ├── responses.py               # ASCIIJSONResponse (default response class)
 │   ├── models/                    # Pydantic response models
 │   └── routers/
 ├── infrastructure/
 │   ├── decorators.py              # @rate_limited
+│   ├── helpers.py                 # overfast_internal_error, send_discord_webhook_message
 │   ├── logger.py                  # loguru logger
 │   └── metaclasses.py             # Singleton with clear_all()
 └── monitoring/                    # Prometheus metrics + middleware

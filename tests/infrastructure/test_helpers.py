@@ -4,15 +4,15 @@ import pytest
 from fastapi import status
 from fastapi.responses import Response
 
-from app.api import helpers
-from app.api.helpers import (
+from app.api import helpers as api_helpers
+from app.api.helpers import apply_swr_headers
+from app.config import settings
+from app.infrastructure.helpers import (
     _truncate_embed_fields,
     _truncate_text,
-    apply_swr_headers,
     overfast_internal_error,
     send_discord_webhook_message,
 )
-from app.config import settings
 
 
 @pytest.mark.parametrize(
@@ -27,7 +27,7 @@ from app.config import settings
     ],
 )
 def test_get_human_readable_duration(input_duration: int, result: str):
-    actual = helpers.get_human_readable_duration(input_duration)
+    actual = api_helpers.get_human_readable_duration(input_duration)
 
     assert actual == result
 
@@ -107,7 +107,9 @@ class TestSendDiscordWebhookMessage:
         assert result is None
 
     def test_webhook_disabled_logs_error(self):
-        with patch("app.api.helpers.settings.discord_webhook_enabled", False):
+        with patch(
+            "app.infrastructure.helpers.settings.discord_webhook_enabled", False
+        ):
             send_discord_webhook_message(title="Alert", description="Something broke")
         # Should have logged to the logger (tested indirectly via no exception)
 
@@ -115,9 +117,9 @@ class TestSendDiscordWebhookMessage:
         """When webhook is enabled, httpx.post is called with correct structure."""
         mock_response = MagicMock()
         with (
-            patch("app.api.helpers.settings.discord_webhook_enabled", True),
+            patch("app.infrastructure.helpers.settings.discord_webhook_enabled", True),
             patch(
-                "app.api.helpers.settings.discord_webhook_url",
+                "app.infrastructure.helpers.settings.discord_webhook_url",
                 "https://discord.example.com/webhook",
             ),
             patch("httpx.post", return_value=mock_response) as mock_post,

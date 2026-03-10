@@ -41,7 +41,6 @@ from app.api.dependencies import (
     get_storage,
     get_task_queue,
 )
-from app.api.helpers import send_discord_webhook_message
 from app.config import settings
 from app.domain.enums import HeroKey, Locale
 from app.domain.parsers.heroes import fetch_heroes_html, parse_heroes_html
@@ -53,6 +52,7 @@ from app.domain.services import (
     PlayerService,
     RoleService,
 )
+from app.infrastructure.helpers import send_discord_webhook_message
 from app.infrastructure.logger import logger
 from app.monitoring.metrics import (
     background_refresh_completed_total,

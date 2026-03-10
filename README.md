@@ -6,7 +6,7 @@
 [![Issues](https://img.shields.io/github/issues/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/issues)
 [![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)](https://overfast-api.tekrop.fr)
 [![License: MIT](https://img.shields.io/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)
-![Mockup OverFast API](https://files.tekrop.fr/overfast_api_logo_full_1000.png)
+![Mockup OverFast API](static/logo.png)
 
 > OverFast API provides comprehensive data on Overwatch heroes, game modes, maps, and player statistics by scraping Blizzard pages. Built with **FastAPI** and **Selectolax**, **PostgreSQL** for persistent storage, **Stale-While-Revalidate caching** via **Valkey** and **nginx (OpenResty)**, **taskiq** background workers, and **TCP Slow Start + AIMD throttling** for Blizzard requests.
 
@@ -16,6 +16,7 @@
 * [💽 Run as developer](#-run-as-developer)
 * [👨‍💻 Technical details](#-technical-details)
 * [🐍 Architecture](#-architecture)
+* [📊 Monitoring](#-monitoring)
 * [🤝 Contributing](#-contributing)
 * [🚀 Community projects](#-community-projects)
 * [🙏 Credits](#-credits)
@@ -74,7 +75,7 @@ just format    # Run ruff formatter
 ```
 
 ### Testing
-The code has been tested using unit testing, except some rare parts which are not relevant to test. There are tests on the parsers classes, the common classes, but also on the commands (run in CLI) and the API views (using FastAPI TestClient class).
+The code has been tested using unit testing, except some rare parts which are not relevant to test. There are tests on the parsers, the domain services, the adapters, and the API views (using FastAPI TestClient class). Tests are organized to mirror the DDD layer structure: `tests/domain/`, `tests/adapters/`, `tests/infrastructure/`, `tests/players/`, `tests/heroes/`, etc.
 
 Running tests with coverage (default)
 ```shell
@@ -83,17 +84,18 @@ just test
 
 Running tests with given args (without coverage)
 ```shell
-just test tests/common
-make test PYTEST_ARGS="tests/common"
+just test tests/domain/services
+make test PYTEST_ARGS="tests/domain/services"
 ```
 
 
 ### Pre-commit
 The project is using [pre-commit](https://pre-commit.com/) framework to ensure code quality before making any commit on the repository. After installing the project dependencies, you can install the pre-commit by using the `pre-commit install` command.
 
-The configuration can be found in the `.pre-commit-config.yaml` file. It consists in launching 2 processes on modified files before making any commit :
-- `ruff` for linting and code formatting (with `ruff format`)
-- `sourcery` for more code quality checks and a lot of simplifications
+The configuration can be found in the `.pre-commit-config.yaml` file. It runs the following checks on modified files before each commit:
+- `ruff` for linting and auto-fixing
+- `ruff format` for code formatting
+- `ty` for type checking
 
 ## 👨‍💻 Technical details
 
@@ -283,6 +285,22 @@ stateDiagram-v2
     SlowStart --> SlowStart : non-200 — reset streak
     AIMD --> AIMD : non-200 — reset streak
 ```
+
+## 📊 Monitoring
+
+OverFast API ships an optional observability stack built on **Prometheus** and **Grafana**. When enabled, metrics are collected from two sources: **Nginx/OpenResty** (all requests, including Valkey cache hits) via a Lua module, and **FastAPI middleware** (requests that reach the app — cache misses only). Both sources normalize dynamic path segments (player IDs, hero keys) to prevent cardinality explosion, using matching Python and Lua implementations.
+
+![Grafana dashboard screenshot](static/monitoring/grafana_dashboard.png)
+
+Key metrics tracked include request rates and status code distribution, cache hit/miss ratios, Blizzard upstream call rates, AIMD throttle state, and background task throughput. Auto-provisioned Grafana dashboards cover API usage, API health, Blizzard calls, tasks & rate limiting, and system metrics.
+
+Enable the full stack with a single command:
+
+```shell
+just up monitoring=true
+```
+
+For detailed metric definitions, normalization rules, dashboard descriptions, and troubleshooting, see [app/monitoring/README.md](app/monitoring/README.md).
 
 ## 🤝 Contributing
 

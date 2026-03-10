@@ -7,7 +7,11 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from fastapi import HTTPException, status
 
-from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.exceptions import (
+    ParserBlizzardError,
+    ParserInternalError,
+    ParserParsingError,
+)
 from app.domain.models.player import PlayerIdentity, PlayerRequest
 from app.domain.services.player_service import PlayerService
 from tests.fake_storage import FakeStorage
@@ -349,25 +353,19 @@ class TestHandlePlayerExceptions:
         assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_parser_parsing_error_other_raises_500(self):
+    async def test_parser_parsing_error_other_raises_parser_internal_error(self):
         svc = _make_service()
         error = ParserParsingError("Some DOM parsing failure")
         identity = PlayerIdentity(player_summary={"url": "abc123"})
-        with (
-            patch("app.domain.services.player_service.settings") as s,
-            patch(
-                "app.domain.services.player_service.overfast_internal_error"
-            ) as m_err,
-        ):
+
+        with patch("app.domain.services.player_service.settings") as s:
             s.blizzard_host = "https://overwatch.blizzard.com"
             s.career_path = "/career"
-            m_err.side_effect = HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-            with pytest.raises(HTTPException) as exc_info:
+            with pytest.raises(ParserInternalError) as exc_info:
                 await svc._handle_player_exceptions(error, "TeKrop-2217", identity)
 
-        assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert "overwatch.blizzard.com" in exc_info.value.blizzard_url
+        assert exc_info.value.cause is error
 
     @pytest.mark.asyncio
     async def test_http_exception_404_marks_and_reraises(self):
