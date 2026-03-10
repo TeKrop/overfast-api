@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v3.48.2 (2026-03-10)
+
+### Bug Fixes
+
+- Fixed issue inducing tests being slow ([#390](https://github.com/TeKrop/overfast-api/pull/390),
+  [`19e5eea`](https://github.com/TeKrop/overfast-api/commit/19e5eea0e9a0fa35a03737af74d85d34d8ab20dd))
+
+
 ## v3.48.1 (2026-03-10)
 
 ### Bug Fixes
