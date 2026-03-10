@@ -8,7 +8,11 @@ from fastapi import HTTPException
 
 from app.config import settings
 from app.domain.enums import HeroKeyCareerFilter, PlayerGamemode, PlayerPlatform
-from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.exceptions import (
+    ParserBlizzardError,
+    ParserInternalError,
+    ParserParsingError,
+)
 from app.domain.models.player import PlayerIdentity, PlayerRequest
 from app.domain.parsers.player_career_stats import (
     parse_player_career_stats_from_html,
@@ -30,7 +34,6 @@ from app.domain.parsers.player_summary import (
 )
 from app.domain.parsers.utils import is_blizzard_id
 from app.domain.services.base_service import BaseService
-from app.infrastructure.helpers import overfast_internal_error
 from app.infrastructure.logger import logger
 from app.monitoring.metrics import (
     storage_battletag_lookup_total,
@@ -72,7 +75,7 @@ class PlayerService(BaseService):
             blizzard_url = (
                 f"{settings.blizzard_host}{settings.search_account_path}/{search_name}/"
             )
-            raise overfast_internal_error(blizzard_url, exc) from exc
+            raise ParserInternalError(blizzard_url, exc) from exc
 
         await self._update_api_cache(
             cache_key, data, settings.search_account_path_cache_timeout
@@ -667,7 +670,7 @@ class PlayerService(BaseService):
                 f"{settings.blizzard_host}{settings.career_path}/"
                 f"{player_summary.get('url', effective_id) if player_summary else effective_id}/"
             )
-            raise overfast_internal_error(blizzard_url, error) from error
+            raise ParserInternalError(blizzard_url, error) from error
 
         if isinstance(error, HTTPException):
             if error.status_code == HTTPStatus.NOT_FOUND.value:

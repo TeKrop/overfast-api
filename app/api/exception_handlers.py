@@ -8,7 +8,7 @@ from fastapi.exceptions import ResponseValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.responses import ASCIIJSONResponse
-from app.domain.exceptions import OverfastError
+from app.domain.exceptions import OverfastError, ParserInternalError
 from app.infrastructure.helpers import overfast_internal_error
 
 if TYPE_CHECKING:
@@ -32,6 +32,10 @@ def register_exception_handlers(app: FastAPI) -> None:
             content={"error": exc.message},
             status_code=exc.status_code,
         )
+
+    @app.exception_handler(ParserInternalError)
+    async def parser_internal_error_handler(_: Request, exc: ParserInternalError):
+        raise overfast_internal_error(exc.blizzard_url, exc.cause) from exc
 
     @app.exception_handler(ResponseValidationError)
     async def pydantic_validation_error_handler(

@@ -2,10 +2,9 @@
 
 from app.config import settings
 from app.domain.enums import Locale
-from app.domain.exceptions import ParserParsingError
+from app.domain.exceptions import ParserInternalError, ParserParsingError
 from app.domain.parsers.roles import fetch_roles_html, parse_roles_html
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
-from app.infrastructure.helpers import overfast_internal_error
 
 
 class RoleService(StaticDataService):
@@ -22,7 +21,7 @@ class RoleService(StaticDataService):
                 return parse_roles_html(html)
             except ParserParsingError as exc:
                 blizzard_url = f"{settings.blizzard_host}/{locale}{settings.home_path}"
-                raise overfast_internal_error(blizzard_url, exc) from exc
+                raise ParserInternalError(blizzard_url, exc) from exc
 
         return StaticFetchConfig(
             storage_key=f"roles:{locale}",

@@ -52,7 +52,7 @@ app/
 ├── config.py                      # Pydantic BaseSettings (settings singleton)
 ├── domain/
 │   ├── enums.py                   # All domain enums; HeroKey/MapKey built dynamically from CSV
-│   ├── exceptions.py              # Domain exceptions (ParserParsingError, RateLimitedError, …)
+│       ├── exceptions.py              # Domain exceptions (ParserParsingError, ParserInternalError, RateLimitedError, …)
 │   ├── models/player.py           # PlayerIdentity, PlayerRequest dataclasses
 │   ├── parsers/                   # HTML parsers (stateless functions, selectolax)
 │   ├── ports/                     # typing.Protocol interfaces (structural typing)
@@ -74,7 +74,7 @@ app/
 ├── api/
 │   ├── dependencies.py            # FastAPI Depends() providers + type aliases
 │   ├── exception_handlers.py
-│   ├── helpers.py                 # SWR headers, response helpers, re-exports from infrastructure
+│       ├── helpers.py                 # SWR headers and response helpers (routes_responses, apply_swr_headers, …)
 │   ├── lifespan.py
 │   ├── responses.py               # ASCIIJSONResponse (default response class)
 │   ├── models/                    # Pydantic response models

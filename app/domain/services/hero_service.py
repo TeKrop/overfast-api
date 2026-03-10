@@ -7,7 +7,11 @@ from fastapi import HTTPException
 
 from app.config import settings
 from app.domain.enums import Locale
-from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.exceptions import (
+    ParserBlizzardError,
+    ParserInternalError,
+    ParserParsingError,
+)
 from app.domain.parsers.hero import fetch_hero_html, parse_hero_html
 from app.domain.parsers.hero_stats_summary import parse_hero_stats_summary
 from app.domain.parsers.heroes import (
@@ -17,7 +21,6 @@ from app.domain.parsers.heroes import (
 )
 from app.domain.parsers.heroes_hitpoints import parse_heroes_hitpoints
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
-from app.infrastructure.helpers import overfast_internal_error
 
 if TYPE_CHECKING:
     from app.domain.enums import (
@@ -129,7 +132,7 @@ class HeroService(StaticDataService):
                 )
             except ParserParsingError as exc:
                 blizzard_url = f"{settings.blizzard_host}/{locale}{settings.heroes_path}{hero_key}/"
-                raise overfast_internal_error(blizzard_url, exc) from exc
+                raise ParserInternalError(blizzard_url, exc) from exc
 
         return StaticFetchConfig(
             storage_key=f"hero:{hero_key}:{locale}",

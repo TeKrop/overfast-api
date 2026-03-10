@@ -53,6 +53,22 @@ class ParserParsingError(OverfastError):
         self.message = message
 
 
+class ParserInternalError(OverfastError):
+    """Raised by domain services when an unexpected parsing failure occurs.
+
+    Carries the ``blizzard_url`` that was being parsed and the underlying
+    ``cause`` so the API layer can call ``overfast_internal_error`` and send
+    an alert without the domain needing to know about FastAPI or Discord.
+    """
+
+    message = "Internal Server Error"
+
+    def __init__(self, blizzard_url: str, cause: Exception):
+        super().__init__()
+        self.blizzard_url = blizzard_url
+        self.cause = cause
+
+
 class SearchDataRetrievalError(OverfastError):
     """Generic search data retrieval Exception (namecards, titles, etc.)"""
 

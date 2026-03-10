@@ -3,10 +3,9 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from fastapi import HTTPException, status
 
 from app.domain.enums import Locale
-from app.domain.exceptions import ParserParsingError
+from app.domain.exceptions import ParserInternalError, ParserParsingError
 from app.domain.services.role_service import RoleService
 
 
@@ -20,8 +19,8 @@ def _make_role_service() -> RoleService:
 
 
 class TestRoleServiceParseError:
-    def test_parse_raises_http_exception_on_parser_parsing_error(self):
-        """If parse_roles_html raises ParserParsingError, _parse converts it to HTTPException."""
+    def test_parse_raises_parser_internal_error_on_parser_parsing_error(self):
+        """If parse_roles_html raises ParserParsingError, _parse wraps it in ParserInternalError."""
         svc = _make_role_service()
         config = svc._roles_config(Locale.ENGLISH_US, "/roles")
         parser = config.parser
@@ -32,11 +31,11 @@ class TestRoleServiceParseError:
                 "app.domain.services.role_service.parse_roles_html",
                 side_effect=ParserParsingError("bad HTML"),
             ),
-            pytest.raises(HTTPException) as exc_info,
+            pytest.raises(ParserInternalError) as exc_info,
         ):
             parser("<bad-html>")
 
-        assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert str(Locale.ENGLISH_US) in exc_info.value.blizzard_url
 
 
 class TestRoleServiceRefreshList:
