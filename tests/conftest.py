@@ -60,6 +60,11 @@ async def _patch_before_every_test(
             "app.adapters.cache.valkey_cache.valkey.Valkey",
             return_value=valkey_server,
         ),
+        # Zero out the throttle start delay so tests don't sleep between Blizzard calls.
+        # The throttle defaults to a 2s inter-request delay; without this patch every
+        # test that makes two sequential mocked HTTP calls would wait ~2s needlessly.
+        # We keep the throttle enabled so that penalty-state (403 → 503) tests still work.
+        patch("app.adapters.blizzard.throttle.settings.throttle_start_delay", 0.0),
         # Prevent ValkeyTaskQueue from dispatching to the broker (not running in tests).
         # Deduplication via SET NX/EXISTS still works through the patched fake redis.
         patch.dict(TASK_MAP, {}, clear=True),
