@@ -149,7 +149,7 @@ class PlayerService(BaseService):
         try:
             identity = await self._resolve_player_identity(player_id)
             effective_id = identity.blizzard_id or player_id
-            await self._get_player_html(effective_id, identity)
+            await self._get_player_html(effective_id, identity, force_update=True)
             await self._evict_player_cache_keys(player_id)
         except Exception as exc:  # noqa: BLE001
             await self._handle_player_exceptions(exc, player_id, identity)
@@ -291,6 +291,7 @@ class PlayerService(BaseService):
             data,
             settings.career_path_cache_timeout,
             stored_at=stored_at,
+            staleness_threshold=settings.player_staleness_threshold,
             stale_while_revalidate=settings.stale_cache_timeout if is_stale else 0,
         )
         if is_stale:
@@ -403,13 +404,18 @@ class PlayerService(BaseService):
         self,
         effective_id: str,
         identity: PlayerIdentity,
+        *,
+        force_update: bool = False,
     ) -> str:
         """Return player HTML, always storing fresh HTML in persistent storage.
 
         Priority order:
         1. ``identity.cached_html`` — fetched during identity resolution; store and return.
-        2. persistent storage hit with matching ``lastUpdated`` — return cached HTML, backfilling
-           battletag if it was missing.
+        2. persistent storage hit with matching ``lastUpdated`` — the profile hasn't changed
+           on Blizzard's side, so there is no need to re-fetch the HTML page.  When
+           ``force_update=True`` (background worker), ``update_player_profile_cache`` is
+           called with the existing HTML to bump ``updated_at`` and reset the staleness clock.
+           Battletag is backfilled in either case when it was previously missing.
         3. Fetch from Blizzard, store, return.
         """
         if identity.cached_html:
@@ -433,7 +439,9 @@ class PlayerService(BaseService):
             == identity.player_summary.get("lastUpdated")
         ):
             html = cast("str", player_cache["profile"])
-            if identity.battletag_input and not player_cache.get("battletag"):
+            if force_update or (
+                identity.battletag_input and not player_cache.get("battletag")
+            ):
                 await self.update_player_profile_cache(
                     effective_id,
                     identity.player_summary,
