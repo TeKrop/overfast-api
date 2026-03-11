@@ -224,6 +224,12 @@ class Settings(BaseSettings):
     # Job timeout in seconds
     worker_job_timeout: int = 300
 
+    # Maximum number of retries for a background task that fails with a Blizzard timeout
+    worker_task_max_retries: int = 3
+
+    # Delay in seconds between retries for timed-out background tasks
+    worker_task_retry_delay: float = 5.0
+
     ############
     # BLIZZARD
     ############

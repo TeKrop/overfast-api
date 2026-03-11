@@ -5,6 +5,7 @@ from typing import Any, cast
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from fastapi import HTTPException, status
 
 from app.adapters.tasks.worker import (
     _run_refresh_task,
@@ -18,6 +19,7 @@ from app.adapters.tasks.worker import (
     refresh_roles,
 )
 from app.domain.enums import HeroKey, Locale
+from app.domain.exceptions import BlizzardTimeoutError
 
 
 @pytest.fixture(autouse=True)
@@ -120,6 +122,48 @@ class TestRunRefreshTask:
             await _fail()
 
         mock_queue.release_job.assert_awaited_once_with("hero:ana:en-us")
+
+    @pytest.mark.asyncio
+    async def test_504_http_exception_raises_blizzard_timeout_error(
+        self, mock_worker_metrics
+    ):
+        """A 504 HTTPException from Blizzard is translated to BlizzardTimeoutError."""
+        mock_completed, mock_failed, _ = mock_worker_metrics
+        mock_queue = AsyncMock()
+
+        async def _timeout():
+            async with _run_refresh_task("player", "Player-1234", mock_queue):
+                raise HTTPException(status_code=504, detail="timeout")
+
+        with pytest.raises(BlizzardTimeoutError):
+            await _timeout()
+
+        mock_failed.labels.assert_called_once_with(entity_type="player")
+        mock_failed.labels.return_value.inc.assert_called_once()
+        mock_completed.labels.return_value.inc.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_non_504_http_exception_reraises_as_is(self):
+        """Non-504 HTTPExceptions (e.g. 503) are re-raised unchanged."""
+        mock_queue = AsyncMock()
+
+        async def _rate_limited():
+            async with _run_refresh_task("player", "Player-1234", mock_queue):
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="rate limited",
+                )
+
+        exc = None
+        with contextlib.suppress(HTTPException):
+            try:
+                await _rate_limited()
+            except HTTPException as e:
+                exc = e
+                raise
+
+        assert exc is not None
+        assert exc.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
 
 
 # ── refresh tasks ─────────────────────────────────────────────────────────────

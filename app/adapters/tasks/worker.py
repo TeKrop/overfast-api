@@ -19,12 +19,9 @@ import time
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, Annotated
 
+from fastapi import HTTPException, status
 from prometheus_client import start_http_server
-
-if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
-
-from taskiq import TaskiqDepends, TaskiqEvents
+from taskiq import SmartRetryMiddleware, TaskiqDepends, TaskiqEvents
 from taskiq.schedule_sources import LabelScheduleSource
 from taskiq.scheduler.scheduler import TaskiqScheduler
 from taskiq_fastapi import init as taskiq_init
@@ -43,6 +40,7 @@ from app.api.dependencies import (
 )
 from app.config import settings
 from app.domain.enums import HeroKey, Locale
+from app.domain.exceptions import BlizzardTimeoutError
 from app.domain.parsers.heroes import fetch_heroes_html, parse_heroes_html
 from app.domain.ports import BlizzardClientPort, StoragePort, TaskQueuePort
 from app.domain.services import (
@@ -60,11 +58,22 @@ from app.monitoring.metrics import (
     background_tasks_duration_seconds,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+
 # ─── Broker ───────────────────────────────────────────────────────────────────
 
 broker = ValkeyListBroker(
     url=f"valkey://{settings.valkey_host}:{settings.valkey_port}",
     queue_name="taskiq:queue",
+)
+broker.add_middlewares(
+    SmartRetryMiddleware(
+        default_retry_count=settings.worker_task_max_retries,
+        default_retry_label=False,
+        default_delay=settings.worker_task_retry_delay,
+        types_of_exceptions=(BlizzardTimeoutError,),
+    )
 )
 
 # Wire FastAPI DI into taskiq tasks.
@@ -122,6 +131,15 @@ async def _run_refresh_task(
         duration = time.monotonic() - start
         background_refresh_completed_total.labels(entity_type=entity_type).inc()
         logger.info("[Worker] Refresh completed: {} in {:.3f}s", entity_id, duration)
+    except HTTPException as exc:
+        duration = time.monotonic() - start
+        background_refresh_failed_total.labels(entity_type=entity_type).inc()
+        logger.warning(
+            "[Worker] Refresh failed: {} — {} ({:.3f}s)", entity_id, exc, duration
+        )
+        if exc.status_code == status.HTTP_504_GATEWAY_TIMEOUT:
+            raise BlizzardTimeoutError from exc
+        raise
     except Exception as exc:
         duration = time.monotonic() - start
         background_refresh_failed_total.labels(entity_type=entity_type).inc()
@@ -139,7 +157,7 @@ async def _run_refresh_task(
 # ─── Refresh tasks ────────────────────────────────────────────────────────────
 
 
-@broker.task
+@broker.task(retry_on_error=True)
 async def refresh_heroes(
     entity_id: str, service: HeroServiceDep, task_queue: TaskQueueDep
 ) -> None:
@@ -152,7 +170,7 @@ async def refresh_heroes(
         await service.refresh_list(Locale(locale_str))
 
 
-@broker.task
+@broker.task(retry_on_error=True)
 async def refresh_hero(
     entity_id: str, service: HeroServiceDep, task_queue: TaskQueueDep
 ) -> None:
@@ -165,7 +183,7 @@ async def refresh_hero(
         await service.refresh_single(hero_key, Locale(locale_str))
 
 
-@broker.task
+@broker.task(retry_on_error=True)
 async def refresh_roles(
     entity_id: str, service: RoleServiceDep, task_queue: TaskQueueDep
 ) -> None:
@@ -178,7 +196,7 @@ async def refresh_roles(
         await service.refresh_list(Locale(locale_str))
 
 
-@broker.task
+@broker.task(retry_on_error=True)
 async def refresh_maps(
     entity_id: str,
     service: MapServiceDep,
@@ -189,7 +207,7 @@ async def refresh_maps(
         await service.refresh_list()
 
 
-@broker.task
+@broker.task(retry_on_error=True)
 async def refresh_gamemodes(
     entity_id: str,
     service: GamemodeServiceDep,
@@ -200,7 +218,7 @@ async def refresh_gamemodes(
         await service.refresh_list()
 
 
-@broker.task
+@broker.task(retry_on_error=True)
 async def refresh_player_profile(
     entity_id: str, service: PlayerServiceDep, task_queue: TaskQueueDep
 ) -> None:
