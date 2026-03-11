@@ -26,6 +26,7 @@ from taskiq.schedule_sources import LabelScheduleSource
 from taskiq.scheduler.scheduler import TaskiqScheduler
 from taskiq_fastapi import init as taskiq_init
 
+from app.adapters.tasks.exceptions import BlizzardTimeoutError
 from app.adapters.tasks.task_registry import TASK_MAP
 from app.adapters.tasks.valkey_broker import ValkeyListBroker
 from app.api.dependencies import (
@@ -40,7 +41,6 @@ from app.api.dependencies import (
 )
 from app.config import settings
 from app.domain.enums import HeroKey, Locale
-from app.domain.exceptions import BlizzardTimeoutError
 from app.domain.parsers.heroes import fetch_heroes_html, parse_heroes_html
 from app.domain.ports import BlizzardClientPort, StoragePort, TaskQueuePort
 from app.domain.services import (
@@ -123,6 +123,12 @@ async def _run_refresh_task(
     """Context manager that executes a refresh task end-to-end: records
     duration and success/failure metrics, then releases the dedup key so
     the job can be re-enqueued immediately after completion.
+
+    The dedup key is intentionally *not* released when a ``BlizzardTimeoutError``
+    is raised: the key stays in Valkey while ``SmartRetryMiddleware`` schedules
+    the retry, preventing a concurrent SWR cycle from enqueuing a duplicate job
+    during the retry delay window.  The key is released by the final retry
+    attempt (success or non-retryable failure).
     """
     start = time.monotonic()
     duration = 0.0
@@ -131,6 +137,7 @@ async def _run_refresh_task(
         duration = time.monotonic() - start
         background_refresh_completed_total.labels(entity_type=entity_type).inc()
         logger.info("[Worker] Refresh completed: {} in {:.3f}s", entity_id, duration)
+        await task_queue.release_job(entity_id)
     except HTTPException as exc:
         duration = time.monotonic() - start
         background_refresh_failed_total.labels(entity_type=entity_type).inc()
@@ -138,7 +145,11 @@ async def _run_refresh_task(
             "[Worker] Refresh failed: {} — {} ({:.3f}s)", entity_id, exc, duration
         )
         if exc.status_code == status.HTTP_504_GATEWAY_TIMEOUT:
+            # Do NOT release the dedup key — the retry middleware will re-enqueue
+            # the task after WORKER_TASK_RETRY_DELAY seconds.  Keeping the key
+            # alive blocks duplicate SWR enqueues during the delay window.
             raise BlizzardTimeoutError from exc
+        await task_queue.release_job(entity_id)
         raise
     except Exception as exc:
         duration = time.monotonic() - start
@@ -146,12 +157,12 @@ async def _run_refresh_task(
         logger.warning(
             "[Worker] Refresh failed: {} — {} ({:.3f}s)", entity_id, exc, duration
         )
+        await task_queue.release_job(entity_id)
         raise
     finally:
         background_tasks_duration_seconds.labels(entity_type=entity_type).observe(
             duration
         )
-        await task_queue.release_job(entity_id)
 
 
 # ─── Refresh tasks ────────────────────────────────────────────────────────────

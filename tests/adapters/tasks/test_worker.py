@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi import HTTPException, status
 
+from app.adapters.tasks.exceptions import BlizzardTimeoutError
 from app.adapters.tasks.worker import (
     _run_refresh_task,
     check_new_hero,
@@ -19,7 +20,6 @@ from app.adapters.tasks.worker import (
     refresh_roles,
 )
 from app.domain.enums import HeroKey, Locale
-from app.domain.exceptions import BlizzardTimeoutError
 
 
 @pytest.fixture(autouse=True)
@@ -127,7 +127,8 @@ class TestRunRefreshTask:
     async def test_504_http_exception_raises_blizzard_timeout_error(
         self, mock_worker_metrics
     ):
-        """A 504 HTTPException from Blizzard is translated to BlizzardTimeoutError."""
+        """A 504 HTTPException from Blizzard is translated to BlizzardTimeoutError
+        and the dedup key is NOT released so retries are not raced by SWR."""
         mock_completed, mock_failed, _ = mock_worker_metrics
         mock_queue = AsyncMock()
 
@@ -141,10 +142,12 @@ class TestRunRefreshTask:
         mock_failed.labels.assert_called_once_with(entity_type="player")
         mock_failed.labels.return_value.inc.assert_called_once()
         mock_completed.labels.return_value.inc.assert_not_called()
+        mock_queue.release_job.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_non_504_http_exception_reraises_as_is(self):
-        """Non-504 HTTPExceptions (e.g. 503) are re-raised unchanged."""
+        """Non-504 HTTPExceptions (e.g. 503) are re-raised unchanged and the
+        dedup key is released."""
         mock_queue = AsyncMock()
 
         async def _rate_limited():
@@ -154,16 +157,11 @@ class TestRunRefreshTask:
                     detail="rate limited",
                 )
 
-        exc = None
-        with contextlib.suppress(HTTPException):
-            try:
-                await _rate_limited()
-            except HTTPException as e:
-                exc = e
-                raise
+        with pytest.raises(HTTPException) as exc_info:
+            await _rate_limited()
 
-        assert exc is not None
-        assert exc.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+        assert exc_info.value.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+        mock_queue.release_job.assert_awaited_once_with("Player-1234")
 
 
 # ── refresh tasks ─────────────────────────────────────────────────────────────
