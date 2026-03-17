@@ -311,14 +311,12 @@ Contributions, issues and feature requests are welcome ! Do you want to update t
 Projects using OverFast API as a data source are listed below. Using it in your project? Reach out via email with your project link, and I'll add it!
 
 - Counterwatch, an Overwatch overlay and stat tracker (https://www.counterwatch.gg)
-- Datastrike, analysis and results tracking tool (https://datastrike.cloud)
 - Discord Bot OW2 for stats (https://github.com/polsojac/ow2discordbot)
-- OverBot, the best Overwatch bot for Discord (https://github.com/davidetacchini/overbot)
+- Futuregamers Interface, including an Overwatch profile tracker (https://fi.futuregamers.eu/overwatch)
 - Overfast API client (https://github.com/Sipixer/overfast-api-client)
 - Overwatch Career Profile (https://github.com/EliaRenov/ow-career-profile)
 - OverwatchPy, a Python wrapper for the API (https://github.com/alexraskin/overwatchpy)
-- OWCOUNTER, a tool to help players learn and improve their hero selection and team strategy (https://owcounter.com/)
-- Watch Over, mobile app by @Backxtar (https://play.google.com/store/apps/details?id=de.backxtar.watchoveroverwatch)
+- Watch Over, mobile app by @Backxtar (https://gitlab.backxtar.de/backxtar/watch-over-app)
 
 ## 🙏 Credits
 
@@ -329,6 +327,6 @@ All maps screenshots hosted by the API are owned by Blizzard. Sources :
 
 ## 📝 License
 
-Copyright © 2021-2025 [Valentin PORCHET](https://github.com/TeKrop).
+Copyright © 2021-2026 [Valentin PORCHET](https://github.com/TeKrop).
 
 This project is [MIT](https://github.com/TeKrop/overfast-api/blob/master/LICENSE) licensed.
