@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v4.0.1 (2026-03-17)
+
+### Bug Fixes
+
+- Fixed invalid gamemode id again for hero stats
+  ([#396](https://github.com/TeKrop/overfast-api/pull/396),
+  [`a267e9c`](https://github.com/TeKrop/overfast-api/commit/a267e9cac46758e3de87f4566131028bb74d2388))
+
+### Build System
+
+- **deps-dev**: Bump memray from 1.19.1 to 1.19.2
+  ([#393](https://github.com/TeKrop/overfast-api/pull/393),
+  [`8d7a3ad`](https://github.com/TeKrop/overfast-api/commit/8d7a3ad072fed5abfd1dbcd5ff7ec182656071cc))
+
+
 ## v4.0.0 (2026-03-10)
 
 ### Features
