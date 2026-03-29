@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v4.0.2 (2026-03-29)
+
+### Bug Fixes
+
+- Invalid gamemode id again and again for hero stats
+  ([#398](https://github.com/TeKrop/overfast-api/pull/398),
+  [`89a99a6`](https://github.com/TeKrop/overfast-api/commit/89a99a622b6904ed1fd04a6b89c57d286995d2ed))
+
+### Chores
+
+- Revise community projects and copyright year
+  ([`992210a`](https://github.com/TeKrop/overfast-api/commit/992210a15ded2cda0dbcb868d6ed6f669df3aa8c))
+
+
 ## v4.0.1 (2026-03-17)
 
 ### Bug Fixes
