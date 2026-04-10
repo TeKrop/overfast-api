@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v4.1.0 (2026-04-10)
+
+### Build System
+
+- **deps**: Bump aiohttp from 3.13.3 to 3.13.4
+  ([#400](https://github.com/TeKrop/overfast-api/pull/400),
+  [`0477e36`](https://github.com/TeKrop/overfast-api/commit/0477e365c1521cd545ad7d78e5f2fbbe6afee70f))
+
+- **deps**: Bump pygments from 2.19.2 to 2.20.0
+  ([#399](https://github.com/TeKrop/overfast-api/pull/399),
+  [`f9c90cc`](https://github.com/TeKrop/overfast-api/commit/f9c90cc9c920e06ecad680b90d82ef9020d84ccf))
+
+### Features
+
+- Added Sierra damage hero ([#401](https://github.com/TeKrop/overfast-api/pull/401),
+  [`7613779`](https://github.com/TeKrop/overfast-api/commit/7613779cce6c6d840b3b615e9ba8c64cd37636a9))
+
+
 ## v4.0.2 (2026-03-29)
 
 ### Bug Fixes
