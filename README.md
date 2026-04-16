@@ -313,8 +313,9 @@ Projects using OverFast API as a data source are listed below. Using it in your 
 - Counterwatch, an Overwatch overlay and stat tracker (https://www.counterwatch.gg)
 - Discord Bot OW2 for stats (https://github.com/polsojac/ow2discordbot)
 - Futuregamers Interface, including an Overwatch profile tracker (https://fi.futuregamers.eu/overwatch)
-- Overfast API client (https://github.com/Sipixer/overfast-api-client)
+- OverFast API client, a TypeScript package (https://github.com/Sipixer/overfast-api-client)
 - Overwatch Career Profile (https://github.com/EliaRenov/ow-career-profile)
+- overwatch_py, an async Python client for the OverFast API (https://github.com/Leo890728/overwatch_py)
 - OverwatchPy, a Python wrapper for the API (https://github.com/alexraskin/overwatchpy)
 - Watch Over, mobile app by @Backxtar (https://gitlab.backxtar.de/backxtar/watch-over-app)
 
