@@ -164,7 +164,7 @@ class TestMatchPlayerByBlizzardId:
 
         assert result is not None
         assert result["name"] == "Kindness"
-        assert result["url"] == blizzard_id
+        assert result["url"] == search_results[0]["url"]
 
     def test_match_among_multiple_players(self):
         """Should match correct player among multiple results"""
