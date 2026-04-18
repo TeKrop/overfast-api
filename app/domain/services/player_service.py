@@ -578,7 +578,7 @@ class PlayerService(BaseService):
         try:
             player_name = extract_name_from_profile_html(html)
             if player_name:
-                logger.info("Player name {} found, fetching summary...", player_name)
+                logger.debug("Player name {} found, fetching summary...", player_name)
                 search_json = await fetch_player_summary_json(
                     self.blizzard_client, player_name
                 )
