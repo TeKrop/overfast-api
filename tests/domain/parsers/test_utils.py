@@ -150,6 +150,22 @@ class TestMatchPlayerByBlizzardId:
         assert result["name"] == "Kindness"
         assert result["url"] == blizzard_id
 
+    def test_match_single_player_not_encoded_format(self):
+        """Should match player by Blizzard ID (not URL-encoded format)"""
+        search_results = [
+            {
+                "name": "Kindness",
+                "url": "df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f",
+                "isPublic": True,
+            }
+        ]
+        blizzard_id = "df51a381fe20caf8baa7|0bf3b4c47cbebe84b8db9c676a4e9c1f"
+        result = match_player_by_blizzard_id(search_results, blizzard_id)
+
+        assert result is not None
+        assert result["name"] == "Kindness"
+        assert result["url"] == search_results[0]["url"]
+
     def test_match_among_multiple_players(self):
         """Should match correct player among multiple results"""
         search_results = [

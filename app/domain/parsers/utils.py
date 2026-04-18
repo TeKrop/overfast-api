@@ -128,8 +128,9 @@ def match_player_by_blizzard_id(
     Returns:
         Matching player dict, or None if not found
     """
+    normalized_blizzard_id = blizzard_id.replace("|", "%7C")  # Normalize for comparison
     for player in search_results:
-        if player.get("url") == blizzard_id:
+        if player.get("url") == normalized_blizzard_id:
             return player
 
     logger.warning(
