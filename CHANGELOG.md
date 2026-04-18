@@ -2,6 +2,30 @@
 
 <!-- version list -->
 
+## v4.1.1 (2026-04-18)
+
+### Bug Fixes
+
+- Fixed an issue where reverse enrichment with Blizzard ID
+  ([#405](https://github.com/TeKrop/overfast-api/pull/405),
+  [`b38b44a`](https://github.com/TeKrop/overfast-api/commit/b38b44a5a6f5f548d66935c433321810e6062e23))
+
+### Build System
+
+- **deps**: Bump python-multipart from 0.0.22 to 0.0.26
+  ([#403](https://github.com/TeKrop/overfast-api/pull/403),
+  [`ad36a88`](https://github.com/TeKrop/overfast-api/commit/ad36a885468e95bd250a7503fc6d2fe84be555e1))
+
+- **deps-dev**: Bump pytest from 9.0.2 to 9.0.3
+  ([#402](https://github.com/TeKrop/overfast-api/pull/402),
+  [`89c5cfb`](https://github.com/TeKrop/overfast-api/commit/89c5cfb7c238f439f37c5e18c8cab9f61da89623))
+
+### Chores
+
+- Revise OverFast API client entry and add overwatch_py
+  ([`bc8ba2d`](https://github.com/TeKrop/overfast-api/commit/bc8ba2db3f810f73c05cbac389eee089c98375d2))
+
+
 ## v4.1.0 (2026-04-10)
 
 ### Build System
