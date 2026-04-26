@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v4.2.0 (2026-04-26)
+
+### Build System
+
+- **deps**: Bump python-dotenv from 1.2.1 to 1.2.2
+  ([#406](https://github.com/TeKrop/overfast-api/pull/406),
+  [`1c27881`](https://github.com/TeKrop/overfast-api/commit/1c27881ab1890c787b6666d8c3b6f1e673f8645b))
+
+### Features
+
+- Added support for heroes subroles and perks
+  ([#407](https://github.com/TeKrop/overfast-api/pull/407),
+  [`6148399`](https://github.com/TeKrop/overfast-api/commit/61483997c6344c26b4ec30baac47885c52f61d52))
+
+
 ## v4.1.1 (2026-04-18)
 
 ### Bug Fixes
