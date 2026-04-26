@@ -1,6 +1,7 @@
 """Consolidated domain enums for OverFast API"""
 
 from enum import StrEnum
+from xxlimited import Str
 
 from app.domain.utils.csv_reader import CSVReader
 
@@ -29,6 +30,26 @@ class Role(StrEnum):
     DAMAGE = "damage"
     SUPPORT = "support"
     TANK = "tank"
+
+
+class SubRole(StrEnum):
+    """Overwatch heroes Sub-Roles"""
+
+    # Damage
+    FLANKER = "flanker"
+    RECON = "recon"
+    SHARPSHOOTER = "sharpshooter"
+    SPECIALIST = "specialist"
+
+    # Support
+    MEDIC = "medic"
+    SURVIVOR = "survivor"
+    TACTICIAN = "tactician"
+
+    # Tank
+    BRUISER = "bruiser"
+    INITIATOR = "initiator"
+    STALWART = "stalwart"
 
 
 class BackgroundImageSize(StrEnum):

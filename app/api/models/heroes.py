@@ -2,7 +2,14 @@
 
 from pydantic import BaseModel, Field, HttpUrl
 
-from app.domain.enums import BackgroundImageSize, HeroGamemode, HeroKey, MediaType, Role
+from app.domain.enums import (
+    BackgroundImageSize,
+    HeroGamemode,
+    HeroKey,
+    MediaType,
+    Role,
+    SubRole,
+)
 
 
 class HeroBackground(BaseModel):
@@ -158,6 +165,39 @@ class Story(BaseModel):
     )
 
 
+class Perk(BaseModel):
+    name: str = Field(..., description="Name of the perk", examples=["Bang Bang"])
+    description: str = Field(
+        ...,
+        description="Description of the perk",
+        examples=[
+            "Cassidy throws a second Flashbang that travels farther, but both Flashbangs deal 40% reduced damage."
+        ],
+    )
+    icon: HttpUrl = Field(
+        ...,
+        description="Icon URL of the perk",
+        examples=[
+            "https://d15f34w2p8l1cc.cloudfront.net/overwatch/4cf99ebedab5eb72e47c1388000cb29ad521fb2faf7e7b31f526bbbe3f212632.png",
+        ],
+    )
+
+
+class PerksContainer(BaseModel):
+    minor: list[Perk] = Field(
+        ...,
+        description="List of minor perks.",
+        min_length=2,
+        max_length=2,
+    )
+    major: list[Perk] = Field(
+        ...,
+        description="List of major perks.",
+        min_length=2,
+        max_length=2,
+    )
+
+
 class Hero(BaseModel):
     name: str = Field(..., description="Name of the hero", examples=["Cassidy"])
     description: str = Field(
@@ -205,6 +245,11 @@ class Hero(BaseModel):
         description="Role of the hero",
         examples=["damage"],
     )
+    subrole: SubRole = Field(
+        ...,
+        description="Sub-Role of the hero",
+        examples=["sharpshooter"],
+    )
     location: str = Field(
         ...,
         description="Location of the hero",
@@ -231,6 +276,10 @@ class Hero(BaseModel):
         ...,
         description="List of hero abilities",
         min_length=1,
+    )
+    perks: PerksContainer = Field(
+        ...,
+        description="Hero perks (minor and major)",
     )
     stadium_powers: list[StadiumPower] | None = Field(
         None,
