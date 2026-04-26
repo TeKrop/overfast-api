@@ -69,6 +69,7 @@ def parse_heroes_html(html: str) -> list[dict]:
                     "name": safe_get_text(name_element),
                     "portrait": safe_get_attribute(portrait_element, "src"),
                     "role": safe_get_attribute(hero_element, "data-role"),
+                    "subrole": safe_get_attribute(hero_element, "data-subrole"),
                     "gamemodes": gamemodes,
                 }
             )
@@ -85,7 +86,9 @@ def filter_heroes(
 ) -> list[dict]:
     """Filter heroes list by role and gamemode"""
     if role:
-        heroes = [hero for hero in heroes if hero["role"] == role]
+        heroes = [
+            hero for hero in heroes if hero["role"] == role or hero["subrole"] == role
+        ]
 
     if gamemode:
         heroes = [hero for hero in heroes if gamemode in hero["gamemodes"]]

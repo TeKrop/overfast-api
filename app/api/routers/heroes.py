@@ -30,6 +30,7 @@ from app.domain.enums import (
     PlayerPlatform,
     PlayerRegion,
     Role,
+    SubRole,
 )
 
 router = APIRouter()
@@ -41,7 +42,7 @@ router = APIRouter()
     tags=[RouteTag.HEROES],
     summary="Get a list of heroes",
     description=(
-        "Get a list of Overwatch heroes, which can be filtered using roles or gamemodes. "
+        "Get a list of Overwatch heroes, which can be filtered using roles, subroles or gamemodes. "
         f"<br />**Cache TTL : {get_human_readable_duration(settings.heroes_path_cache_timeout)}.**"
     ),
     operation_id="list_heroes",
@@ -51,7 +52,7 @@ async def list_heroes(
     request: Request,
     response: Response,
     service: HeroServiceDep,
-    role: Annotated[Role | None, Query(title="Role filter")] = None,
+    role: Annotated[Role | SubRole | None, Query(title="Role filter")] = None,
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,

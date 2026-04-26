@@ -62,6 +62,7 @@ def parse_hero_html(html: str, locale: Locale = Locale.ENGLISH_US) -> dict:
                 message="Hero not found or not released yet",
             )
 
+        perks_section = root_tag.css_first("blz-section#perks")
         overview_section = root_tag.css_first("blz-page-header")
         lore_section = root_tag.css_first("blz-section.lore")
 
@@ -72,6 +73,7 @@ def parse_hero_html(html: str, locale: Locale = Locale.ENGLISH_US) -> dict:
         hero_data = {
             **_parse_hero_summary(overview_section, locale),
             "abilities": _parse_hero_abilities(abilities_section),
+            "perks": _parse_hero_perks(perks_section),
             "story": _parse_hero_story(lore_section),
         }
         if stadium_wrapper := root_tag.css_first("div.stadium-wrapper"):
@@ -92,11 +94,14 @@ def _parse_hero_summary(overview_section: LexborNode, locale: Locale) -> dict:
     header_section = overview_section.css_first("blz-header")
     extra_list_items = overview_section.css_first("blz-list").css("blz-list-item")
 
-    birthday_text = safe_get_text(extra_list_items[2].css_first("p"))
+    birthday_text = safe_get_text(extra_list_items[3].css_first("p"))
     birthday, age = _parse_birthday_and_age(birthday_text, locale)
 
-    icon_element = extra_list_items[0].css_first("blz-icon")
-    icon_url = safe_get_attribute(icon_element, "src")
+    role_icon_element = extra_list_items[0].css_first("blz-icon")
+    role_icon_url = safe_get_attribute(role_icon_element, "src")
+
+    subrole_icon_element = extra_list_items[1].css_first("blz-icon")
+    subrole_icon_url = safe_get_attribute(subrole_icon_element, "src")
 
     backgrounds = [
         {
@@ -111,8 +116,9 @@ def _parse_hero_summary(overview_section: LexborNode, locale: Locale) -> dict:
         "name": safe_get_text(header_section.css_first("h2")),
         "description": safe_get_text(header_section.css_first("p")),
         "backgrounds": backgrounds,
-        "role": get_role_from_icon_url(icon_url or ""),
-        "location": safe_get_text(extra_list_items[1]),
+        "role": get_role_from_icon_url(role_icon_url or ""),
+        "subrole": get_role_from_icon_url(subrole_icon_url or ""),
+        "location": safe_get_text(extra_list_items[2]),
         "birthday": birthday,
         "age": age,
     }
@@ -195,6 +201,32 @@ def _parse_hero_abilities(abilities_section: LexborNode) -> list[dict]:
         )
 
     return abilities
+
+
+def _parse_hero_perks(perks_section: LexborNode) -> dict:
+    """Parse hero perks section"""
+    return {
+        "minor": _parse_perk_level(perks_section.css_first("div.perk-category.minor")),
+        "major": _parse_perk_level(perks_section.css_first("div.perk-category.major")),
+    }
+
+
+def _parse_perk_level(perk_level_div: LexborNode) -> list[dict]:
+    return [
+        _parse_perk_detail(perk_level_div.css_first("div.perk-details.left")),
+        _parse_perk_detail(perk_level_div.css_first("div.perk-details.right")),
+    ]
+
+
+def _parse_perk_detail(perk_detail_div: LexborNode) -> dict:
+    perk_icon = safe_get_attribute(perk_detail_div.css_first("img"), "src")
+    perk_info_div = perk_detail_div.css_first("div.perk-info")
+
+    return {
+        "name": safe_get_text(perk_info_div.css_first("h3")),
+        "description": safe_get_text(perk_info_div.css_first("div[slot=description]")),
+        "icon": perk_icon,
+    }
 
 
 def _parse_hero_story(lore_section: LexborNode) -> dict:

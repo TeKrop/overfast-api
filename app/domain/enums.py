@@ -31,6 +31,26 @@ class Role(StrEnum):
     TANK = "tank"
 
 
+class SubRole(StrEnum):
+    """Overwatch heroes Sub-Roles"""
+
+    # Damage
+    FLANKER = "flanker"
+    RECON = "recon"
+    SHARPSHOOTER = "sharpshooter"
+    SPECIALIST = "specialist"
+
+    # Support
+    MEDIC = "medic"
+    SURVIVOR = "survivor"
+    TACTICIAN = "tactician"
+
+    # Tank
+    BRUISER = "bruiser"
+    INITIATOR = "initiator"
+    STALWART = "stalwart"
+
+
 class BackgroundImageSize(StrEnum):
     """Responsive breakpoint sizes for hero background images"""
 
