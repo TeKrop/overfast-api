@@ -86,7 +86,9 @@ def filter_heroes(
 ) -> list[dict]:
     """Filter heroes list by role and gamemode"""
     if role:
-        heroes = [hero for hero in heroes if hero["role"] == role]
+        heroes = [
+            hero for hero in heroes if hero["role"] == role or hero["subrole"] == role
+        ]
 
     if gamemode:
         heroes = [hero for hero in heroes if gamemode in hero["gamemodes"]]

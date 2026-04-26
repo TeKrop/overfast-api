@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 from fastapi import HTTPException
 
 from app.config import settings
-from app.domain.enums import Locale
+from app.domain.enums import Locale, SubRole
 from app.domain.exceptions import (
     ParserBlizzardError,
     ParserInternalError,
@@ -45,7 +45,7 @@ class HeroService(StaticDataService):
         self,
         locale: Locale,
         cache_key: str,
-        role: Role | None = None,
+        role: Role | SubRole | None = None,
         gamemode: HeroGamemode | None = None,
     ) -> StaticFetchConfig:
         """Build a StaticFetchConfig for the heroes list."""
@@ -57,9 +57,11 @@ class HeroService(StaticDataService):
             storage_key=f"heroes:{locale}",
             fetcher=_fetch,
             parser=parse_heroes_html,
-            result_filter=(lambda data: filter_heroes(data, role, gamemode))
-            if (role or gamemode)
-            else None,
+            result_filter=(
+                (lambda data: filter_heroes(data, role, gamemode))
+                if (role or gamemode)
+                else None
+            ),
             cache_key=cache_key,
             cache_ttl=settings.heroes_path_cache_timeout,
             staleness_threshold=settings.heroes_staleness_threshold,
@@ -69,7 +71,7 @@ class HeroService(StaticDataService):
     async def list_heroes(
         self,
         locale: Locale,
-        role: Role | None,
+        role: Role | SubRole | None,
         gamemode: HeroGamemode | None,
         cache_key: str,
     ) -> tuple[list[dict], bool, int]:
