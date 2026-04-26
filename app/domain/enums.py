@@ -1,7 +1,6 @@
 """Consolidated domain enums for OverFast API"""
 
 from enum import StrEnum
-from xxlimited import Str
 
 from app.domain.utils.csv_reader import CSVReader
 

@@ -309,6 +309,11 @@ class HeroShort(BaseModel):
         description="Role of the hero",
         examples=["support"],
     )
+    subrole: SubRole = Field(
+        ...,
+        description="Sub-Role of the hero",
+        examples=["tactician"],
+    )
     gamemodes: list[HeroGamemode] = Field(
         ...,
         description="List of gamemodes in which the hero is available",

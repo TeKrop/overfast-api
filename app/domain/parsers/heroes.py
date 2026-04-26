@@ -69,6 +69,7 @@ def parse_heroes_html(html: str) -> list[dict]:
                     "name": safe_get_text(name_element),
                     "portrait": safe_get_attribute(portrait_element, "src"),
                     "role": safe_get_attribute(hero_element, "data-role"),
+                    "subrole": safe_get_attribute(hero_element, "data-subrole"),
                     "gamemodes": gamemodes,
                 }
             )

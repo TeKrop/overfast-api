@@ -25,7 +25,14 @@ def test_parse_heroes_html_entry_format(heroes_html_data: str):
     result = parse_heroes_html(heroes_html_data)
     first = result[0]
 
-    assert set(first.keys()) == {"key", "name", "portrait", "role", "gamemodes"}
+    assert set(first.keys()) == {
+        "key",
+        "name",
+        "portrait",
+        "role",
+        "subrole",
+        "gamemodes",
+    }
 
 
 def test_filter_heroes_by_role(heroes_html_data: str):
