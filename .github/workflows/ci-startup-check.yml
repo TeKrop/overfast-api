@@ -1,0 +1,66 @@
+name: Startup Sanity Check
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  startup-check-just:
+    name: Startup Test (just)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install just
+        run: |
+          sudo apt update
+          sudo apt install -y just
+
+      - name: Prepare environment file
+        run: cp .env.dist .env
+
+      - name: Build and start with monitoring stack (just)
+        run: just up_monitoring
+
+      - name: Check container health (just)
+        run: |
+          docker ps
+          unhealthy=$(docker ps --filter 'health=unhealthy' -q)
+          if [ -n "$unhealthy" ]; then
+            echo "Unhealthy containers detected!"; exit 1
+          fi
+
+      - name: Tear down containers (just)
+        run: just down
+
+  startup-check-make:
+    name: Startup Test (make)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install make
+        run: |
+          sudo apt update
+          sudo apt install -y make
+
+      - name: Prepare environment file
+        run: cp .env.dist .env
+
+      - name: Build and start with monitoring stack (make)
+        run: make up_monitoring
+
+      - name: Check container health (make)
+        run: |
+          docker ps
+          unhealthy=$(docker ps --filter 'health=unhealthy' -q)
+          if [ -n "$unhealthy" ]; then
+            echo "Unhealthy containers detected!"; exit 1
+          fi
+
+      - name: Tear down containers (make)
+        run: make down
