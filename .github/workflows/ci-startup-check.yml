@@ -1,0 +1,53 @@
+name: Startup Sanity Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  startup-check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tool: [just, make]
+        mode: [up, up_monitoring]
+    name: Startup Test (${{ matrix.tool }} ${{ matrix.mode }})
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install ${{ matrix.tool }}
+        run: |
+          sudo apt update
+          sudo apt install -y ${{ matrix.tool }}
+
+      - name: Prepare environment file
+        run: cp .env.dist .env
+
+      - name: Build and start stack
+        run: ${{ matrix.tool }} ${{ matrix.mode }}
+
+      - name: Wait for all containers to be healthy
+        run: |
+          tries=0
+          max=24
+          while [ "$(docker ps --filter health=starting --format '{{.ID}}' | wc -l)" -gt 0 ]; do
+            tries=$((tries+1))
+            if [ "$tries" -ge "$max" ]; then
+              echo "Timed out waiting for healthy containers" >&2
+              docker ps
+              exit 1
+            fi
+            sleep 5
+          done
+          unhealthy=$(docker ps --filter 'health=unhealthy' -q)
+          if [ -n "$unhealthy" ]; then
+            echo "Unhealthy containers detected!" >&2
+            docker ps
+            exit 1
+          fi
+
+      - name: Tear down containers
+        run: ${{ matrix.tool }} down
