@@ -623,7 +623,7 @@ class PlayerService(BaseService):
             blizzard_id, check_count, retry_after, battletag=battletag
         )
 
-        exception.detail = {
+        exception.detail = {  # ty: ignore[invalid-assignment]
             "error": "Player not found",
             "retry_after": retry_after,
             "next_check_at": next_check_at,

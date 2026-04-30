@@ -45,8 +45,8 @@ STATS_PLACEHOLDER = {
     "games_won": 0,
     "games_lost": 0,
     "time_played": 0,
-    "winrate": 0,
-    "kda": 0,
+    "winrate": 0.0,
+    "kda": 0.0,
     "total": {
         "eliminations": 0,
         "assists": 0,

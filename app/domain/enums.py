@@ -153,7 +153,7 @@ HeroKeyCareerFilter = StrEnum(
     {
         "ALL_HEROES": "all-heroes",
         **{hero_key.name: hero_key.value for hero_key in HeroKey},
-    },
+    },  # ty : ignore[invalid-argument-type]
 )
 HeroKeyCareerFilter.__doc__ = "Hero keys filter for career statistics endpoint"
 
@@ -165,7 +165,7 @@ CompetitiveRole = StrEnum(
     {
         **{role.name: role.value for role in Role},
         "OPEN": "open",
-    },
+    },  # ty : ignore[invalid-argument-type]
 )
 CompetitiveRole.__doc__ = "Competitive roles for ranks in stats summary"
 

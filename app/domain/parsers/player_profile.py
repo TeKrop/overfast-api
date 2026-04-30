@@ -404,7 +404,7 @@ def _parse_heroes_comparisons(top_heroes_section: LexborNode) -> dict:
             category.value not in heroes_comparisons
             or not heroes_comparisons[category.value]["values"]
         ):
-            heroes_comparisons[category.value] = None
+            heroes_comparisons[category.value] = None  # ty: ignore[invalid-assignment]
 
     return heroes_comparisons
 
@@ -572,9 +572,8 @@ def filter_stats_by_query(
     filtered_data = stats or {}
 
     # Normalize platform to string key
-    platform_key: str | None = None
     if platform:
-        platform_key = platform.value if hasattr(platform, "value") else str(platform)  # type: ignore[arg-type]
+        platform_key = str(platform.value if hasattr(platform, "value") else platform)
     else:
         # Determine platform if not specified
         possible_platforms = [
@@ -585,7 +584,7 @@ def filter_stats_by_query(
         if possible_platforms:
             # Take the first one of the list, usually there will be only one.
             # If there are two, the PC stats should come first
-            platform_key = possible_platforms[0]
+            platform_key = str(possible_platforms[0])
         else:
             return {}
 
@@ -594,12 +593,11 @@ def filter_stats_by_query(
         return {}
 
     # Normalize gamemode to string key
-    gamemode_key: str | None = None
     if gamemode:
-        gamemode_key = gamemode.value if hasattr(gamemode, "value") else str(gamemode)  # type: ignore[arg-type]
-    filtered_data = filtered_data.get(gamemode_key) or {}
-    if not filtered_data:
-        return {}
+        gamemode_key = str(gamemode.value if hasattr(gamemode, "value") else gamemode)
+        filtered_data = filtered_data.get(gamemode_key) or {}
+        if not filtered_data:
+            return {}
 
     filtered_data = filtered_data.get("career_stats") or {}
 
@@ -647,15 +645,15 @@ def filter_all_stats_data(
     # Normalize filters to string keys
     platform_filter: str | None = None
     if platform:
-        platform_filter = (
-            platform.value if hasattr(platform, "value") else str(platform)
-        )  # type: ignore[arg-type]
+        platform_filter = str(
+            platform.value if hasattr(platform, "value") else platform
+        )
 
     gamemode_filter: str | None = None
     if gamemode:
-        gamemode_filter = (
-            gamemode.value if hasattr(gamemode, "value") else str(gamemode)
-        )  # type: ignore[arg-type]
+        gamemode_filter = str(
+            gamemode.value if hasattr(gamemode, "value") else gamemode
+        )
 
     # Ensure both platform keys exist in output
     filtered_data = {}

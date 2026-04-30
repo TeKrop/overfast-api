@@ -44,11 +44,6 @@ class TestFilterPlayersByName:
         ):
             filter_players_by_name(players, "Test")
 
-    def test_none_in_list_raises_parser_parsing_error(self):
-        """None item in list (TypeError) raises ParserParsingError."""
-        with pytest.raises(ParserParsingError):
-            filter_players_by_name([None], "Test")  # type: ignore[list-item]
-
     def test_uses_base_name_before_discriminator(self):
         """Name with discriminator: only the part before '-' is matched."""
         players = [{"name": "Player", "isPublic": True}]

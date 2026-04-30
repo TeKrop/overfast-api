@@ -580,7 +580,7 @@ PlayerCareerStats = create_model(  # ty: ignore[no-matching-overload]
             Field(
                 None,
                 description=f"Career statistics for {get_hero_name(hero_key)}",
-                alias=hero_key.value,  # ty: ignore[unresolved-attribute]
+                alias=hero_key.value,
             ),
         )
         for hero_key in HeroKey

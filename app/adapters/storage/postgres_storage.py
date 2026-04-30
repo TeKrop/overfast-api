@@ -37,7 +37,7 @@ class PostgresStorage(metaclass=Singleton):
     """
 
     def __init__(self) -> None:
-        self._pool: asyncpg.Pool | None = None
+        self._pool: asyncpg.Pool
         self._initialized = False
         self._init_lock = asyncio.Lock()
 
@@ -101,7 +101,6 @@ class PostgresStorage(metaclass=Singleton):
         """Close the connection pool."""
         if self._pool:
             await self._pool.close()
-            self._pool = None
         self._initialized = False
 
     # ------------------------------------------------------------------ #
