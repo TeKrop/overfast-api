@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v4.2.1 (2026-04-30)
+
+### Bug Fixes
+
+- Update Postgres mount ([#408](https://github.com/TeKrop/overfast-api/pull/408),
+  [`cd57389`](https://github.com/TeKrop/overfast-api/commit/cd57389b13e4100097c78c18ee48d117f07eee0e))
+
+
 ## v4.2.0 (2026-04-26)
 
 ### Build System
