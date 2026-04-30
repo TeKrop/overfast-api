@@ -187,8 +187,8 @@ class HeroService(StaticDataService):
         gamemode: PlayerGamemode,
         region: PlayerRegion,
         role: Role | None,
-        map_filter: MapKey | None,  # ty: ignore[invalid-type-form]
-        competitive_division: CompetitiveDivisionFilter | None,  # ty: ignore[invalid-type-form]
+        map_filter: MapKey | None,
+        competitive_division: CompetitiveDivisionFilter | None,
         order_by: str,
         cache_key: str,
     ) -> tuple[list[dict], bool, int]:

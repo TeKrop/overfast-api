@@ -73,7 +73,7 @@ async def get_player_career_common_parameters(
         ),
         examples=["pc"],
     ),
-    hero: HeroKeyCareerFilter = Query(  # ty: ignore[invalid-type-form]
+    hero: HeroKeyCareerFilter = Query(
         None,
         title="Hero key",
         description=(

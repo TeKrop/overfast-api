@@ -6,7 +6,7 @@ from app.domain.enums import MapGamemode, MapKey
 
 
 class Map(BaseModel):
-    key: MapKey = Field(  # ty: ignore[invalid-type-form]
+    key: MapKey = Field(
         ...,
         description="Key name of the map",
         examples=["aatlis"],
@@ -17,7 +17,7 @@ class Map(BaseModel):
         description="Screenshot of the map",
         examples=["https://overfast-api.tekrop.fr/static/maps/aatlis.jpg"],
     )
-    gamemodes: list[MapGamemode] = Field(  # ty: ignore[invalid-type-form]
+    gamemodes: list[MapGamemode] = Field(
         ...,
         description="Main gamemodes on which the map is playable",
     )

@@ -36,7 +36,7 @@ async def list_maps(
     response: Response,
     service: MapServiceDep,
     gamemode: Annotated[
-        MapGamemode | None,  # ty: ignore[invalid-type-form]
+        MapGamemode | None,
         Query(
             title="Gamemode filter",
             description="Filter maps available for a specific gamemode",

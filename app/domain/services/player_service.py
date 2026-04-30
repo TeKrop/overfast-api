@@ -183,7 +183,7 @@ class PlayerService(BaseService):
         player_id: str,
         gamemode: PlayerGamemode | None,
         platform: PlayerPlatform | None,
-        hero: HeroKeyCareerFilter | None,  # ty: ignore[invalid-type-form]
+        hero: HeroKeyCareerFilter | None,
         cache_key: str,
     ) -> tuple[dict, bool, int]:
         """Return player stats with category labels."""
@@ -233,7 +233,7 @@ class PlayerService(BaseService):
         player_id: str,
         gamemode: PlayerGamemode | None,
         platform: PlayerPlatform | None,
-        hero: HeroKeyCareerFilter | None,  # ty: ignore[invalid-type-form]
+        hero: HeroKeyCareerFilter | None,
         cache_key: str,
     ) -> tuple[dict, bool, int]:
         """Return player career stats (no labels)."""

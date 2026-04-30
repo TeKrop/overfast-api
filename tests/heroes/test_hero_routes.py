@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 )
 def test_get_hero(
     client: TestClient,
-    hero_name: HeroKey,  # ty: ignore[invalid-type-form]
+    hero_name: HeroKey,
     hero_html_data: str,
     heroes_html_data: str,
 ):
@@ -50,7 +50,7 @@ def test_get_unreleased_hero(client: TestClient, hero_html_data: str):
             Mock(status_code=status.HTTP_404_NOT_FOUND, text=hero_html_data),
         ],
     ):
-        response = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
+        response = client.get(f"/heroes/{HeroKey.ANA}")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"error": "Hero not found or not released yet"}
@@ -64,7 +64,7 @@ def test_get_hero_blizzard_error(client: TestClient):
             text="Service Unavailable",
         ),
     ):
-        response = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
+        response = client.get(f"/heroes/{HeroKey.ANA}")
 
     assert response.status_code == status.HTTP_504_GATEWAY_TIMEOUT
     assert response.json() == {
@@ -77,7 +77,7 @@ def test_get_hero_internal_error(client: TestClient):
         "app.domain.services.hero_service.HeroService.get_hero",
         return_value=({"invalid_key": "invalid_value"}, False, 0),
     ):
-        response = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
+        response = client.get(f"/heroes/{HeroKey.ANA}")
 
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response.json() == {"error": settings.internal_server_error_message}
@@ -91,7 +91,7 @@ def test_get_hero_blizzard_forbidden_error(client: TestClient):
             text="403 Forbidden",
         ),
     ):
-        response = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
+        response = client.get(f"/heroes/{HeroKey.ANA}")
 
     assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
     assert (
@@ -102,12 +102,12 @@ def test_get_hero_blizzard_forbidden_error(client: TestClient):
 
 @pytest.mark.parametrize(
     ("hero_name", "hero_html_data"),
-    [(HeroKey.ANA, HeroKey.ANA)],  # ty: ignore[unresolved-attribute]
+    [(HeroKey.ANA, HeroKey.ANA)],
     indirect=["hero_html_data"],
 )
 def test_get_hero_no_portrait(
     client: TestClient,
-    hero_name: HeroKey,  # ty: ignore[invalid-type-form]
+    hero_name: HeroKey,
     hero_html_data: str,
     heroes_html_data: str,
 ):
@@ -132,12 +132,12 @@ def test_get_hero_no_portrait(
 
 @pytest.mark.parametrize(
     ("hero_name", "hero_html_data"),
-    [(HeroKey.ANA, HeroKey.ANA)],  # ty: ignore[unresolved-attribute]
+    [(HeroKey.ANA, HeroKey.ANA)],
     indirect=["hero_html_data"],
 )
 def test_get_hero_no_hitpoints(
     client: TestClient,
-    hero_name: HeroKey,  # ty: ignore[invalid-type-form]
+    hero_name: HeroKey,
     hero_html_data: str,
     heroes_html_data: str,
 ):
@@ -165,8 +165,8 @@ def test_get_hero_blizzard_forbidden_error_and_caching(client: TestClient):
         "httpx.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_403_FORBIDDEN, text="403 Forbidden"),
     ):
-        response1 = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
-    response2 = client.get(f"/heroes/{HeroKey.ANA}")  # ty: ignore[unresolved-attribute]
+        response1 = client.get(f"/heroes/{HeroKey.ANA}")
+    response2 = client.get(f"/heroes/{HeroKey.ANA}")
 
     assert (
         response1.status_code
