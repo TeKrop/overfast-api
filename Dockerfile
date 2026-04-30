@@ -1,6 +1,6 @@
 # Build arguments
 ARG PYTHON_VERSION=3.14
-ARG UV_VERSION=0.9.28
+ARG UV_VERSION=0.11.8
 
 # Create a temporary stage to pull the uv binary
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv-stage
