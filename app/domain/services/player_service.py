@@ -181,7 +181,7 @@ class PlayerService(BaseService):
     async def get_player_stats(
         self,
         player_id: str,
-        gamemode: PlayerGamemode | None,
+        gamemode: PlayerGamemode,
         platform: PlayerPlatform | None,
         hero: HeroKeyCareerFilter | None,
         cache_key: str,
@@ -191,7 +191,7 @@ class PlayerService(BaseService):
         def extract(html: str, player_summary: dict) -> dict:
             profile = parse_player_profile_html(html, player_summary)
             return filter_stats_by_query(
-                profile.get("stats") or {}, platform, gamemode, hero
+                profile.get("stats") or {}, gamemode, platform, hero
             )
 
         return await self._execute_player_request(
@@ -231,7 +231,7 @@ class PlayerService(BaseService):
     async def get_player_career_stats(
         self,
         player_id: str,
-        gamemode: PlayerGamemode | None,
+        gamemode: PlayerGamemode,
         platform: PlayerPlatform | None,
         hero: HeroKeyCareerFilter | None,
         cache_key: str,
@@ -240,7 +240,7 @@ class PlayerService(BaseService):
 
         def extract(html: str, player_summary: dict) -> dict:
             return parse_player_career_stats_from_html(
-                html, player_summary, platform, gamemode, hero
+                html, gamemode, player_summary, platform, hero
             )
 
         return await self._execute_player_request(

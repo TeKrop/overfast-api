@@ -553,8 +553,8 @@ def _get_heroes_options(
 
 def filter_stats_by_query(
     stats: dict | None,
+    gamemode: PlayerGamemode | str,
     platform: PlayerPlatform | str | None = None,
-    gamemode: PlayerGamemode | str | None = None,
     hero: str | None = None,
 ) -> dict:
     """
@@ -562,8 +562,8 @@ def filter_stats_by_query(
 
     Args:
         stats: Raw stats dict from parser (keys are strings: platform.value, gamemode.value)
+        gamemode: Mandatory gamemode filter (enum or string)
         platform: Optional platform filter (enum or string)
-        gamemode: Optional gamemode filter (enum or string)
         hero: Optional hero filter
 
     Returns:
@@ -593,11 +593,10 @@ def filter_stats_by_query(
         return {}
 
     # Normalize gamemode to string key
-    if gamemode:
-        gamemode_key = str(gamemode.value if hasattr(gamemode, "value") else gamemode)
-        filtered_data = filtered_data.get(gamemode_key) or {}
-        if not filtered_data:
-            return {}
+    gamemode_key = str(gamemode.value) if hasattr(gamemode, "value") else gamemode
+    filtered_data = filtered_data.get(gamemode_key) or {}
+    if not filtered_data:
+        return {}
 
     filtered_data = filtered_data.get("career_stats") or {}
 
@@ -645,14 +644,14 @@ def filter_all_stats_data(
     # Normalize filters to string keys
     platform_filter: str | None = None
     if platform:
-        platform_filter = str(
-            platform.value if hasattr(platform, "value") else platform
+        platform_filter = (
+            str(platform.value) if hasattr(platform, "value") else platform
         )
 
     gamemode_filter: str | None = None
     if gamemode:
-        gamemode_filter = str(
-            gamemode.value if hasattr(gamemode, "value") else gamemode
+        gamemode_filter = (
+            str(gamemode.value) if hasattr(gamemode, "value") else gamemode
         )
 
     # Ensure both platform keys exist in output

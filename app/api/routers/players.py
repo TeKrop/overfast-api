@@ -251,7 +251,7 @@ async def get_player_career_stats(
     cache_key = build_cache_key(request)
     data, is_stale, age = await service.get_player_career_stats(
         player_id=commons["player_id"],
-        gamemode=commons.get("gamemode"),
+        gamemode=commons["gamemode"],
         platform=commons.get("platform"),
         hero=commons.get("hero"),
         cache_key=cache_key,
@@ -283,7 +283,7 @@ async def get_player_stats(
     cache_key = build_cache_key(request)
     data, is_stale, age = await service.get_player_stats(
         player_id=commons["player_id"],
-        gamemode=commons.get("gamemode"),
+        gamemode=commons["gamemode"],
         platform=commons.get("platform"),
         hero=commons.get("hero"),
         cache_key=cache_key,

@@ -54,23 +54,14 @@ class TestFilterStatsByQuery:
         """When all platform data is None, returns {}."""
         stats = {_PC_KEY: None, _CONSOLE_KEY: None}
 
-        result = filter_stats_by_query(stats)
+        result = filter_stats_by_query(stats, PlayerGamemode.QUICKPLAY)
 
         assert result == {}
 
     def test_none_stats_returns_empty(self):
         """None input returns {}."""
-        result = filter_stats_by_query(None)
+        result = filter_stats_by_query(None, PlayerGamemode.QUICKPLAY)
 
-        assert result == {}
-
-    def test_auto_detect_platform(self):
-        """Without explicit platform, first non-None platform is used."""
-        # No gamemode specified → filtered_data after platform = {_QP_KEY: ..., _COMP_KEY: None}
-        # Then gamemode_key=None → filtered_data.get(None) = {} → returns {}
-        result = filter_stats_by_query(_FULL_STATS)
-
-        # With no gamemode, get(None) returns {} → empty
         assert result == {}
 
     def test_explicit_platform_and_gamemode(self):
