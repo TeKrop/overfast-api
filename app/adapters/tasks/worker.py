@@ -65,6 +65,7 @@ from app.monitoring.metrics import (
 broker = ValkeyListBroker(
     url=f"valkey://{settings.valkey_host}:{settings.valkey_port}",
     queue_name="taskiq:queue",
+    max_pool_size=settings.worker_max_concurrent_jobs,
 )
 
 # Wire FastAPI DI into taskiq tasks.

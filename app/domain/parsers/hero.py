@@ -322,23 +322,3 @@ def _parse_hero_stadium_powers(stadium_wrapper: LexborNode) -> list[dict]:
         }
         for power in stadium_carousel.css("blz-card.talent-card")
     ]
-
-
-async def parse_hero(
-    client: BlizzardClientPort,
-    hero_key: str,
-    locale: Locale = Locale.ENGLISH_US,
-) -> dict:
-    """
-    High-level function to fetch and parse single hero
-
-    Args:
-        client: Blizzard HTTP client
-        hero_key: Hero identifier (e.g., "ana", "mercy")
-        locale: Blizzard page locale
-
-    Returns:
-        Complete hero data dict
-    """
-    html = await fetch_hero_html(client, hero_key, locale)
-    return parse_hero_html(html, locale)
