@@ -678,23 +678,3 @@ def filter_all_stats_data(
         }
 
     return filtered_data
-
-
-async def parse_player_profile(
-    client: BlizzardClientPort,
-    player_id: str,
-    player_summary: dict | None = None,
-) -> tuple[dict, str | None]:
-    """
-    High-level function to fetch and parse player profile
-
-    Args:
-        client: Blizzard HTTP client
-        player_id: Player ID (Blizzard ID format or BattleTag)
-        player_summary: Optional player summary from search endpoint
-
-    Returns:
-        Tuple of (dict with "summary" and "stats" keys, Blizzard ID from redirect)
-    """
-    html, blizzard_id = await fetch_player_html(client, player_id)
-    return parse_player_profile_html(html, player_summary), blizzard_id

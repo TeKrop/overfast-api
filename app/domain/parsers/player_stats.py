@@ -8,21 +8,14 @@ This module computes aggregated player statistics with:
 
 from collections import defaultdict
 from copy import deepcopy
-from typing import TYPE_CHECKING
 
 from app.domain.enums import HeroKey, PlayerGamemode, PlayerPlatform, Role
 from app.domain.parsers.player_helpers import (
     get_hero_role,
     get_plural_stat_key,
 )
-from app.domain.parsers.player_profile import (
-    parse_player_profile,
-    parse_player_profile_html,
-)
+from app.domain.parsers.player_profile import parse_player_profile_html
 from app.infrastructure.logger import logger
-
-if TYPE_CHECKING:
-    from app.domain.ports import BlizzardClientPort
 
 # Stat names for aggregation
 GENERIC_STATS_NAMES = [
@@ -395,29 +388,3 @@ def parse_player_stats_summary_from_html(
     """
     profile_data = parse_player_profile_html(html, player_summary)
     return _process_player_stats_summary(profile_data, gamemode, platform)
-
-
-async def parse_player_stats_summary(
-    client: BlizzardClientPort,
-    player_id: str,
-    player_summary: dict | None = None,
-    gamemode: PlayerGamemode | None = None,
-    platform: PlayerPlatform | None = None,
-) -> tuple[dict, str | None]:
-    """
-    High-level function to parse player stats summary
-
-    Args:
-        client: Blizzard HTTP client
-        player_id: Player ID (Blizzard ID format or BattleTag)
-        player_summary: Optional player summary from search endpoint
-        gamemode: Optional gamemode filter
-        platform: Optional platform filter
-
-    Returns:
-        Tuple of (dict with "general", "roles", and "heroes" stats, Blizzard ID from redirect)
-    """
-    profile_data, blizzard_id = await parse_player_profile(
-        client, player_id, player_summary
-    )
-    return _process_player_stats_summary(profile_data, gamemode, platform), blizzard_id
