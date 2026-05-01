@@ -1,16 +1,9 @@
 """Unit tests for player_career_stats parser module"""
 
-from unittest.mock import Mock, patch
-
-import pytest
-from fastapi import status
-
-from app.adapters.blizzard import BlizzardClient
 from app.domain.enums import PlayerGamemode, PlayerPlatform
 from app.domain.parsers.player_career_stats import (
     _process_career_stats,
     extract_career_stats_from_profile,
-    parse_player_career_stats,
     parse_player_career_stats_from_html,
 )
 from tests.helpers import read_html_file
@@ -99,15 +92,18 @@ class TestExtractCareerStatsFromProfile:
 class TestProcessCareerStats:
     def test_empty_profile_returns_empty(self):
         """_process_career_stats with empty profile returns {}."""
-        result = _process_career_stats({})
+        result = _process_career_stats({}, gamemode=PlayerGamemode.QUICKPLAY)
 
         assert result == {}
 
-    def test_no_filters_returns_full_structure(self):
-        """Without filters, returns the full career_stats_data."""
-        result = _process_career_stats(_PROFILE_WITH_STATS)
+    def test_no_filters_returns_quickplay_stats(self):
+        """Without filters, returns the only quickplay stats."""
+        result = _process_career_stats(
+            _PROFILE_WITH_STATS, gamemode=PlayerGamemode.QUICKPLAY
+        )
 
-        assert "stats" in result
+        assert "tracer" in result
+        assert len(result) == 1
 
     def test_platform_filter_applied(self):
         """With platform filter, delegates to filter_stats_by_query."""
@@ -147,7 +143,9 @@ class TestProcessCareerStats:
 class TestParsePlayerCareerStatsFromHtml:
     def test_with_real_fixture_no_filter(self):
         """parse_player_career_stats_from_html returns a dict from real HTML."""
-        result = parse_player_career_stats_from_html(_TEKROP_HTML)
+        result = parse_player_career_stats_from_html(
+            _TEKROP_HTML, PlayerGamemode.QUICKPLAY
+        )
 
         assert isinstance(result, dict)
 
@@ -155,48 +153,8 @@ class TestParsePlayerCareerStatsFromHtml:
         """Filters are applied correctly."""
         result = parse_player_career_stats_from_html(
             _TEKROP_HTML,
-            platform=PlayerPlatform.PC,
             gamemode=PlayerGamemode.QUICKPLAY,
+            platform=PlayerPlatform.PC,
         )
-
-        assert isinstance(result, dict)
-
-
-class TestParsePlayerCareerStatsAsync:
-    @pytest.mark.asyncio
-    async def test_calls_parse_player_profile_and_processes(self):
-        """parse_player_career_stats fetches and processes career stats."""
-        mock_response = Mock(
-            status_code=status.HTTP_200_OK,
-            text=_TEKROP_HTML,
-            url="https://overwatch.blizzard.com/career/TeKrop-2217/",
-        )
-
-        with patch("httpx.AsyncClient.get", return_value=mock_response):
-            client = BlizzardClient()
-            result, _blizzard_id = await parse_player_career_stats(
-                client,
-                "TeKrop-2217",
-            )
-
-        assert isinstance(result, dict)
-
-    @pytest.mark.asyncio
-    async def test_with_filters(self):
-        """parse_player_career_stats with platform/gamemode filters."""
-        mock_response = Mock(
-            status_code=status.HTTP_200_OK,
-            text=_TEKROP_HTML,
-            url="https://overwatch.blizzard.com/career/TeKrop-2217/",
-        )
-
-        with patch("httpx.AsyncClient.get", return_value=mock_response):
-            client = BlizzardClient()
-            result, _blizzard_id = await parse_player_career_stats(
-                client,
-                "TeKrop-2217",
-                platform=PlayerPlatform.PC,
-                gamemode=PlayerGamemode.QUICKPLAY,
-            )
 
         assert isinstance(result, dict)

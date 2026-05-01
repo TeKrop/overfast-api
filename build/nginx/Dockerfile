@@ -1,5 +1,5 @@
 # Build arguments
-ARG OPENRESTY_VERSION=1.27.1.2-3
+ARG OPENRESTY_VERSION=1.29.2.3-4
 
 # Use the OpenResty Alpine base image
 FROM openresty/openresty:${OPENRESTY_VERSION}-alpine-fat

@@ -37,7 +37,6 @@ class PostgresStorage(metaclass=Singleton):
     """
 
     def __init__(self) -> None:
-        self._pool: asyncpg.Pool | None = None
         self._initialized = False
         self._init_lock = asyncio.Lock()
 
@@ -65,7 +64,7 @@ class PostgresStorage(metaclass=Singleton):
 
             for attempt in range(1, self._MAX_POOL_CREATION_ATTEMPTS + 1):
                 try:
-                    self._pool = await asyncpg.create_pool(
+                    self._pool: asyncpg.Pool = await asyncpg.create_pool(
                         dsn=settings.postgres_dsn,
                         min_size=settings.postgres_pool_min_size,
                         max_size=settings.postgres_pool_max_size,
@@ -101,7 +100,6 @@ class PostgresStorage(metaclass=Singleton):
         """Close the connection pool."""
         if self._pool:
             await self._pool.close()
-            self._pool = None
         self._initialized = False
 
     # ------------------------------------------------------------------ #

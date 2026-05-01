@@ -1,17 +1,12 @@
 """Unit tests for player_profile parser module"""
 
-from unittest.mock import Mock, patch
-
 import pytest
-from fastapi import status
 
-from app.adapters.blizzard import BlizzardClient
 from app.domain.enums import PlayerGamemode, PlayerPlatform
 from app.domain.exceptions import ParserBlizzardError
 from app.domain.parsers.player_profile import (
     filter_all_stats_data,
     filter_stats_by_query,
-    parse_player_profile,
     parse_player_profile_html,
 )
 from tests.helpers import read_html_file
@@ -54,23 +49,14 @@ class TestFilterStatsByQuery:
         """When all platform data is None, returns {}."""
         stats = {_PC_KEY: None, _CONSOLE_KEY: None}
 
-        result = filter_stats_by_query(stats)
+        result = filter_stats_by_query(stats, PlayerGamemode.QUICKPLAY)
 
         assert result == {}
 
     def test_none_stats_returns_empty(self):
         """None input returns {}."""
-        result = filter_stats_by_query(None)
+        result = filter_stats_by_query(None, PlayerGamemode.QUICKPLAY)
 
-        assert result == {}
-
-    def test_auto_detect_platform(self):
-        """Without explicit platform, first non-None platform is used."""
-        # No gamemode specified → filtered_data after platform = {_QP_KEY: ..., _COMP_KEY: None}
-        # Then gamemode_key=None → filtered_data.get(None) = {} → returns {}
-        result = filter_stats_by_query(_FULL_STATS)
-
-        # With no gamemode, get(None) returns {} → empty
         assert result == {}
 
     def test_explicit_platform_and_gamemode(self):
@@ -128,6 +114,24 @@ class TestFilterStatsByQuery:
         )
 
         assert "tracer" in result
+
+    def test_auto_detect_platform_with_gamemode(self):
+        """Without explicit platform, first non-None platform is auto-detected and correct gamemode slice is returned."""
+        # Provide stats for multiple platforms and rely on auto-detection to prefer PC.
+        result = filter_stats_by_query(
+            _FULL_STATS,
+            PlayerGamemode.QUICKPLAY,
+            platform=None,
+        )
+
+        # Expect the same data as if we had explicitly requested the PC platform.
+        expected = filter_stats_by_query(
+            _FULL_STATS,
+            PlayerGamemode.QUICKPLAY,
+            platform=PlayerPlatform.PC,
+        )
+
+        assert result == expected
 
 
 # ---------------------------------------------------------------------------
@@ -255,45 +259,3 @@ class TestParsePlayerProfileHtml:
         )
 
         assert result["summary"]["avatar"] == "https://example.com/avatar.png"
-
-
-# ---------------------------------------------------------------------------
-# parse_player_profile — high-level async
-# ---------------------------------------------------------------------------
-
-
-class TestParsePlayerProfile:
-    @pytest.mark.asyncio
-    async def test_fetches_and_parses(self):
-        """parse_player_profile fetches HTML and returns profile + blizzard_id."""
-        mock_response = Mock(
-            status_code=status.HTTP_200_OK,
-            text=_TEKROP_HTML,
-            url="https://overwatch.blizzard.com/career/abc123/",
-        )
-
-        with patch("httpx.AsyncClient.get", return_value=mock_response):
-            client = BlizzardClient()
-            result, _blizzard_id = await parse_player_profile(client, "TeKrop-2217")
-
-        assert "summary" in result
-        assert "stats" in result
-
-    @pytest.mark.asyncio
-    async def test_with_player_summary(self):
-        """parse_player_profile passes player_summary through."""
-        mock_response = Mock(
-            status_code=status.HTTP_200_OK,
-            text=_TEKROP_HTML,
-            url="https://overwatch.blizzard.com/career/abc123/",
-        )
-
-        with patch("httpx.AsyncClient.get", return_value=mock_response):
-            client = BlizzardClient()
-            result, _ = await parse_player_profile(
-                client,
-                "TeKrop-2217",
-                player_summary={"avatar": "https://example.com/custom.png"},
-            )
-
-        assert result["summary"]["avatar"] == "https://example.com/custom.png"

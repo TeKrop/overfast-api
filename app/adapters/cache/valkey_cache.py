@@ -34,8 +34,6 @@ from app.infrastructure.metaclasses import Singleton
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from fastapi import Request
-
 
 def handle_valkey_error(
     default_return: Any = None,
@@ -77,13 +75,6 @@ class ValkeyCache(metaclass=Singleton):
         # Create the Valkey client lazily so it binds to the running event loop
         self.valkey_server = valkey.Valkey(
             host=settings.valkey_host, port=settings.valkey_port, protocol=3
-        )
-
-    @staticmethod
-    def get_cache_key_from_request(request: Request) -> str:
-        """Get the cache key associated with a user request"""
-        return request.url.path + (
-            f"?{request.query_params}" if request.query_params else ""
         )
 
     @staticmethod

@@ -197,27 +197,27 @@ class TestGetPlayerProfileCache:
 
 class TestGetFreshStoredProfile:
     @pytest.mark.asyncio
-    async def test_blizzard_id_no_profile_returns_none(self):
+    async def test_blizzard_id_no_profile_returns_none_with_zero_age(self):
         svc = _make_service()
         with patch(
             "app.domain.services.player_service.is_blizzard_id", return_value=True
         ):
             result = await svc._get_fresh_stored_profile("abc123|def456")
 
-        assert result is None
+        assert result == (None, 0)
 
     @pytest.mark.asyncio
-    async def test_battletag_no_mapping_returns_none(self):
+    async def test_battletag_no_mapping_returns_none_with_zero_age(self):
         svc = _make_service()
         with patch(
             "app.domain.services.player_service.is_blizzard_id", return_value=False
         ):
             result = await svc._get_fresh_stored_profile("TeKrop-2217")
 
-        assert result is None
+        assert result == (None, 0)
 
     @pytest.mark.asyncio
-    async def test_stale_profile_returns_none(self):
+    async def test_stale_profile_returns_none_with_age(self):
         storage = FakeStorage()
         await storage.set_player_profile("abc123", html=_TEKROP_HTML)
         # Artificially age the profile
@@ -233,7 +233,7 @@ class TestGetFreshStoredProfile:
             s.prometheus_enabled = False
             result = await svc._get_fresh_stored_profile("abc123")
 
-        assert result is None
+        assert result == (None, 99999)
 
     @pytest.mark.asyncio
     async def test_fresh_profile_returns_tuple(self):
@@ -255,6 +255,7 @@ class TestGetFreshStoredProfile:
         assert result is not None
         profile, age = result
 
+        assert profile is not None
         assert profile["profile"] == _TEKROP_HTML
         assert age >= 0
 

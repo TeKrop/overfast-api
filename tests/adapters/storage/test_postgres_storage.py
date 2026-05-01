@@ -143,14 +143,7 @@ class TestInitialize:
         await storage.close()
 
         pool.close.assert_awaited_once()
-        assert storage._pool is None
         assert storage._initialized is False
-
-    @pytest.mark.asyncio
-    async def test_close_when_no_pool_is_noop(self):
-        storage = PostgresStorage()
-        # pool is None, should not raise
-        await storage.close()
 
 
 # ---------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 """API Helpers module"""
 
 from functools import cache
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import status
 
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from fastapi import Request, Response
 
 # Typical routes responses to return
-success_responses = {
+success_responses: dict[int | str, dict[str, Any]] = {
     status.HTTP_200_OK: {
         "description": "Successful Response",
         "headers": {
@@ -68,7 +68,7 @@ success_responses = {
     },
 }
 
-routes_responses = {
+routes_responses: dict[int | str, dict[str, Any]] = {
     **success_responses,
     status.HTTP_429_TOO_MANY_REQUESTS: {
         "model": RateLimitErrorMessage,

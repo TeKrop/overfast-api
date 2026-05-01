@@ -133,7 +133,7 @@ def send_discord_webhook_message(
         fields = _truncate_embed_fields(fields)
 
     # Build the embed payload
-    embed = {
+    embed: dict[str, Any] = {
         "color": color or 0xE74C3C,  # Default to red for errors/alerts
         "timestamp": datetime.now(UTC).isoformat(),
     }

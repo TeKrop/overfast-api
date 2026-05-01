@@ -8,13 +8,11 @@ from typing import TYPE_CHECKING
 
 from app.domain.parsers.player_profile import (
     filter_stats_by_query,
-    parse_player_profile,
     parse_player_profile_html,
 )
 
 if TYPE_CHECKING:
     from app.domain.enums import PlayerGamemode, PlayerPlatform
-    from app.domain.ports import BlizzardClientPort
 
 
 def extract_career_stats_from_profile(profile_data: dict) -> dict:
@@ -62,8 +60,8 @@ def extract_career_stats_from_profile(profile_data: dict) -> dict:
 
 def _process_career_stats(
     profile_data: dict,
+    gamemode: PlayerGamemode | str,
     platform: PlayerPlatform | str | None = None,
-    gamemode: PlayerGamemode | str | None = None,
     hero: str | None = None,
 ) -> dict:
     """
@@ -71,8 +69,8 @@ def _process_career_stats(
 
     Args:
         profile_data: Full profile dict with "summary" and "stats"
+        gamemode: Mandatory gamemode filter
         platform: Optional platform filter
-        gamemode: Optional gamemode filter
         hero: Optional hero filter
 
     Returns:
@@ -85,19 +83,16 @@ def _process_career_stats(
     if not career_stats_data:
         return {}
 
-    # If filters provided, apply them
-    if platform or gamemode or hero:
-        stats = career_stats_data.get("stats")
-        return filter_stats_by_query(stats, platform, gamemode, hero)
-
-    return career_stats_data
+    # We have at least gamemode filter provided, filter results
+    stats = career_stats_data.get("stats")
+    return filter_stats_by_query(stats, gamemode, platform, hero)
 
 
 def parse_player_career_stats_from_html(
     html: str,
+    gamemode: PlayerGamemode | str,
     player_summary: dict | None = None,
     platform: PlayerPlatform | str | None = None,
-    gamemode: PlayerGamemode | str | None = None,
     hero: str | None = None,
 ) -> dict:
     """
@@ -105,41 +100,13 @@ def parse_player_career_stats_from_html(
 
     Args:
         html: Player profile HTML
+        gamemode: Mandatory gamemode filter
         player_summary: Optional player summary from search endpoint
         platform: Optional platform filter
-        gamemode: Optional gamemode filter
         hero: Optional hero filter
 
     Returns:
         Career stats dict, filtered by query parameters
     """
     profile_data = parse_player_profile_html(html, player_summary)
-    return _process_career_stats(profile_data, platform, gamemode, hero)
-
-
-async def parse_player_career_stats(
-    client: BlizzardClientPort,
-    player_id: str,
-    player_summary: dict | None = None,
-    platform: PlayerPlatform | str | None = None,
-    gamemode: PlayerGamemode | str | None = None,
-    hero: str | None = None,
-) -> tuple[dict, str | None]:
-    """
-    Fetch and parse player career stats
-
-    Args:
-        client: Blizzard HTTP client
-        player_id: Player ID (Blizzard ID format or BattleTag)
-        player_summary: Optional player summary from search endpoint
-        platform: Optional platform filter
-        gamemode: Optional gamemode filter
-        hero: Optional hero filter
-
-    Returns:
-        Tuple of (career stats dict filtered by query parameters, Blizzard ID from redirect)
-    """
-    profile_data, blizzard_id = await parse_player_profile(
-        client, player_id, player_summary
-    )
-    return _process_career_stats(profile_data, platform, gamemode, hero), blizzard_id
+    return _process_career_stats(profile_data, gamemode, platform, hero)

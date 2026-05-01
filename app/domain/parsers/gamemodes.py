@@ -29,13 +29,3 @@ def parse_gamemodes_csv() -> list[dict]:
         }
         for gamemode in csv_data
     ]
-
-
-def parse_gamemodes() -> list[dict]:
-    """
-    High-level function to parse gamemodes
-
-    Returns:
-        List of gamemode dicts
-    """
-    return parse_gamemodes_csv()

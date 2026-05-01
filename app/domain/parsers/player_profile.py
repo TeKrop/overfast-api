@@ -264,8 +264,8 @@ def _get_platform_competitive_ranks(
         }
 
     for role in CompetitiveRole:
-        if role.value not in competitive_ranks:  # ty: ignore[unresolved-attribute]
-            competitive_ranks[role.value] = None  # ty: ignore[unresolved-attribute]
+        if role.value not in competitive_ranks:
+            competitive_ranks[role.value] = None
 
     competitive_ranks["season"] = last_season_played
 
@@ -404,7 +404,7 @@ def _parse_heroes_comparisons(top_heroes_section: LexborNode) -> dict:
             category.value not in heroes_comparisons
             or not heroes_comparisons[category.value]["values"]
         ):
-            heroes_comparisons[category.value] = None
+            heroes_comparisons[category.value] = None  # ty: ignore[invalid-assignment]
 
     return heroes_comparisons
 
@@ -553,8 +553,8 @@ def _get_heroes_options(
 
 def filter_stats_by_query(
     stats: dict | None,
+    gamemode: PlayerGamemode | str,
     platform: PlayerPlatform | str | None = None,
-    gamemode: PlayerGamemode | str | None = None,
     hero: str | None = None,
 ) -> dict:
     """
@@ -562,8 +562,8 @@ def filter_stats_by_query(
 
     Args:
         stats: Raw stats dict from parser (keys are strings: platform.value, gamemode.value)
+        gamemode: Mandatory gamemode filter (enum or string)
         platform: Optional platform filter (enum or string)
-        gamemode: Optional gamemode filter (enum or string)
         hero: Optional hero filter
 
     Returns:
@@ -572,9 +572,8 @@ def filter_stats_by_query(
     filtered_data = stats or {}
 
     # Normalize platform to string key
-    platform_key: str | None = None
     if platform:
-        platform_key = platform.value if hasattr(platform, "value") else str(platform)  # type: ignore[arg-type]
+        platform_key = str(platform.value if hasattr(platform, "value") else platform)
     else:
         # Determine platform if not specified
         possible_platforms = [
@@ -585,7 +584,7 @@ def filter_stats_by_query(
         if possible_platforms:
             # Take the first one of the list, usually there will be only one.
             # If there are two, the PC stats should come first
-            platform_key = possible_platforms[0]
+            platform_key = str(possible_platforms[0])
         else:
             return {}
 
@@ -594,9 +593,7 @@ def filter_stats_by_query(
         return {}
 
     # Normalize gamemode to string key
-    gamemode_key: str | None = None
-    if gamemode:
-        gamemode_key = gamemode.value if hasattr(gamemode, "value") else str(gamemode)  # type: ignore[arg-type]
+    gamemode_key = str(gamemode.value) if hasattr(gamemode, "value") else gamemode
     filtered_data = filtered_data.get(gamemode_key) or {}
     if not filtered_data:
         return {}
@@ -648,14 +645,14 @@ def filter_all_stats_data(
     platform_filter: str | None = None
     if platform:
         platform_filter = (
-            platform.value if hasattr(platform, "value") else str(platform)
-        )  # type: ignore[arg-type]
+            str(platform.value) if hasattr(platform, "value") else platform
+        )
 
     gamemode_filter: str | None = None
     if gamemode:
         gamemode_filter = (
-            gamemode.value if hasattr(gamemode, "value") else str(gamemode)
-        )  # type: ignore[arg-type]
+            str(gamemode.value) if hasattr(gamemode, "value") else gamemode
+        )
 
     # Ensure both platform keys exist in output
     filtered_data = {}
@@ -681,23 +678,3 @@ def filter_all_stats_data(
         }
 
     return filtered_data
-
-
-async def parse_player_profile(
-    client: BlizzardClientPort,
-    player_id: str,
-    player_summary: dict | None = None,
-) -> tuple[dict, str | None]:
-    """
-    High-level function to fetch and parse player profile
-
-    Args:
-        client: Blizzard HTTP client
-        player_id: Player ID (Blizzard ID format or BattleTag)
-        player_summary: Optional player summary from search endpoint
-
-    Returns:
-        Tuple of (dict with "summary" and "stats" keys, Blizzard ID from redirect)
-    """
-    html, blizzard_id = await fetch_player_html(client, player_id)
-    return parse_player_profile_html(html, player_summary), blizzard_id

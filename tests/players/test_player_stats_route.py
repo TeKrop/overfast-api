@@ -48,12 +48,12 @@ def test_get_player_stats_valid_hero(client: TestClient, uri: str):
         f"/players/TeKrop-2217{uri}",
         params={
             "gamemode": PlayerGamemode.QUICKPLAY,
-            "hero": HeroKeyCareerFilter.ANA,  # ty: ignore[unresolved-attribute]
+            "hero": HeroKeyCareerFilter.ANA,
         },
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert set(response.json().keys()) == {HeroKeyCareerFilter.ANA}  # ty: ignore[unresolved-attribute]
+    assert set(response.json().keys()) == {HeroKeyCareerFilter.ANA}
 
 
 @pytest.mark.parametrize("player_html_data", ["TeKrop-2217"], indirect=True)

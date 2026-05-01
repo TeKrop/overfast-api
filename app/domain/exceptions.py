@@ -67,9 +67,3 @@ class ParserInternalError(OverfastError):
         super().__init__()
         self.blizzard_url = blizzard_url
         self.cause = cause
-
-
-class SearchDataRetrievalError(OverfastError):
-    """Generic search data retrieval Exception (namecards, titles, etc.)"""
-
-    message = "Error while retrieving search data"

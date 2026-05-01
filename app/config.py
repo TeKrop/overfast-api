@@ -21,13 +21,6 @@ class Settings(BaseSettings):
     # APPLICATION SETTINGS
     ############
 
-    # Application volume path for container (logs, dotenv settings, etc.)
-    # If not specified, temporary folder will be used
-    app_volume_path: str = ""
-
-    # Application port
-    app_port: int = 80
-
     # Application version, retrieved from pyproject.toml. It should never be
     # overriden in dotenv. Only used in OpenAPI spec and request headers.
     app_version: str = get_app_version()
@@ -147,9 +140,6 @@ class Settings(BaseSettings):
 
     # Valkey server port
     valkey_port: int = 6379
-
-    # Valkey memory limit
-    valkey_memory_limit: str = "1gb"
 
     ############
     # CACHE CONFIGURATION

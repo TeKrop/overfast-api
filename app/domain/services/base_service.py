@@ -13,7 +13,6 @@ staleness strategy (Blizzard ``lastUpdated`` comparison) and storage logic
 (``player_profiles`` table).
 """
 
-from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from app.infrastructure.logger import logger
@@ -25,13 +24,6 @@ if TYPE_CHECKING:
         StoragePort,
         TaskQueuePort,
     )
-
-
-class StorageTable(StrEnum):
-    """Persistent storage table identifiers."""
-
-    STATIC_DATA = "static_data"
-    PLAYER_PROFILES = "player_profiles"
 
 
 class BaseService:

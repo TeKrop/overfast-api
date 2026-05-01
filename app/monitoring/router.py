@@ -34,7 +34,7 @@ async def metrics() -> Response:
     # Collect queue size from Valkey (single source of truth shared across processes)
     try:
         valkey = ValkeyCache()
-        queue_size = await valkey.valkey_server.llen(_QUEUE_DEFAULT)  # type: ignore[misc]
+        queue_size = await valkey.valkey_server.llen(_QUEUE_DEFAULT)  # ty: ignore[invalid-await]
         background_tasks_queue_size.set(queue_size)
     except Exception as err:  # noqa: BLE001
         logger.warning("Failed to collect queue size metric: {}", err)

@@ -35,4 +35,4 @@ def register_profiler(app: FastAPI, profiler: str) -> None:  # pragma: no cover
         raise SystemExit
 
     logger.info("Profiling is enabled with {}", profiler)
-    app.add_middleware(_SUPPORTED_PROFILERS[profiler])  # type: ignore[arg-type]
+    app.add_middleware(_SUPPORTED_PROFILERS[profiler])  # ty: ignore[invalid-argument-type]

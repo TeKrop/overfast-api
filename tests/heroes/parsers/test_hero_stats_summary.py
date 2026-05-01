@@ -42,11 +42,11 @@ async def test_parse_hero_stats_summary(
         client = BlizzardClient()
         if raises_error:
             with pytest.raises(ParserBlizzardError):
-                await parse_hero_stats_summary(client, **base_kwargs, **extra_kwargs)  # ty: ignore[invalid-argument-type]
+                await parse_hero_stats_summary(client, **base_kwargs, **extra_kwargs)
         else:
             result = await parse_hero_stats_summary(
                 client,
-                **base_kwargs,  # ty: ignore[invalid-argument-type]
+                **base_kwargs,
                 **extra_kwargs,
             )
             assert isinstance(result, list)

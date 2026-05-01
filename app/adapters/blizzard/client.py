@@ -139,12 +139,6 @@ class BlizzardClient(metaclass=Singleton):
         """Alias for close() - deprecated, use close() instead"""
         await self.close()
 
-    def blizzard_response_error_from_response(
-        self, response: httpx.Response
-    ) -> HTTPException:
-        """Alias for sending Blizzard error from a request directly"""
-        return self._blizzard_response_error(response.status_code, response.text)
-
     @staticmethod
     def _blizzard_response_error(status_code: int, error: str) -> HTTPException:
         """Retrieve a generic error response when a Blizzard page doesn't load"""

@@ -97,15 +97,15 @@ def get_hero_keyname(input_str: str) -> str:
     return string_to_snakecase(input_str).replace("_", "-")
 
 
-def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:  # ty: ignore[invalid-type-form]
+def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:
     """Extract role key from the role icon."""
     icon_role_key = (
         icon_url.rsplit("/", maxsplit=1)[-1].split("-", maxsplit=1)[0].upper()
     )
     return (
-        CompetitiveRole.DAMAGE  # ty: ignore[unresolved-attribute]
+        CompetitiveRole.DAMAGE
         if icon_role_key == "OFFENSE"
-        else CompetitiveRole[icon_role_key]  # ty: ignore[invalid-argument-type]
+        else CompetitiveRole[icon_role_key]
     )
 
 
@@ -128,7 +128,7 @@ def get_tier_from_icon(tier_url: str | None) -> int:
 
     try:
         return int(tier_url.split("/")[-1].split("-")[0].split("_")[-1])
-    except (IndexError, ValueError):
+    except IndexError, ValueError:
         return 0
 
 
@@ -149,7 +149,7 @@ def remove_accents(input_str: str) -> str:
 
 
 @cache
-def get_hero_role(hero_key: HeroKey) -> Role | None:  # ty: ignore[invalid-type-form]
+def get_hero_role(hero_key: HeroKey) -> Role | None:
     """Get the role of a given hero based on the CSV file"""
     heroes_data = CSVReader.read_csv_file("heroes")
     role_key = next(

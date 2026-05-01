@@ -189,7 +189,7 @@ class PlayerEndorsement(BaseModel):
 
 
 class HeroStat(BaseModel):
-    hero: HeroKey = Field(...)  # ty: ignore[invalid-type-form]
+    hero: HeroKey = Field(...)
     value: StrictInt | StrictFloat = Field(
         ...,
         description=(
@@ -352,12 +352,12 @@ CareerStats = create_model(  # ty: ignore[no-matching-overload]
         ),
     ),
     **{
-        hero_key.name.lower(): (  # ty: ignore[unresolved-attribute]
+        hero_key.name.lower(): (
             list[HeroCareerStats] | None,
             Field(
                 None,
                 description=f"Career statistics for {get_hero_name(hero_key)}",
-                alias=hero_key.value,  # ty: ignore[unresolved-attribute]
+                alias=hero_key.value,
                 min_length=1,
             ),
         )
@@ -509,7 +509,7 @@ class PlayerRolesStats(BaseModel):
 PlayerHeroesStats = create_model(  # ty: ignore[no-matching-overload]
     "PlayerHeroesStats",
     **{
-        hero_key.name.lower(): (  # ty: ignore[unresolved-attribute]
+        hero_key.name.lower(): (
             StatsSummary | None,
             Field(
                 None,
@@ -517,7 +517,7 @@ PlayerHeroesStats = create_model(  # ty: ignore[no-matching-overload]
                     f"Stats summary for {get_hero_name(hero_key)}. "
                     "Not defined if he never played the hero."
                 ),
-                alias=hero_key.value,  # ty: ignore[unresolved-attribute]
+                alias=hero_key.value,
             ),
         )
         for hero_key in HeroKey
@@ -575,12 +575,12 @@ PlayerCareerStats = create_model(  # ty: ignore[no-matching-overload]
         ),
     ),
     **{
-        hero_key.name.lower(): (  # ty: ignore[unresolved-attribute]
+        hero_key.name.lower(): (
             HeroPlayerCareerStats | None,
             Field(
                 None,
                 description=f"Career statistics for {get_hero_name(hero_key)}",
-                alias=hero_key.value,  # ty: ignore[unresolved-attribute]
+                alias=hero_key.value,
             ),
         )
         for hero_key in HeroKey
