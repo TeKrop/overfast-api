@@ -115,6 +115,24 @@ class TestFilterStatsByQuery:
 
         assert "tracer" in result
 
+    def test_auto_detect_platform_with_gamemode(self):
+        """Without explicit platform, first non-None platform is auto-detected and correct gamemode slice is returned."""
+        # Provide stats for multiple platforms and rely on auto-detection to prefer PC.
+        result = filter_stats_by_query(
+            _FULL_STATS,
+            PlayerGamemode.QUICKPLAY,
+            platform=None,
+        )
+
+        # Expect the same data as if we had explicitly requested the PC platform.
+        expected = filter_stats_by_query(
+            _FULL_STATS,
+            PlayerGamemode.QUICKPLAY,
+            platform=PlayerPlatform.PC,
+        )
+
+        assert result == expected
+
 
 # ---------------------------------------------------------------------------
 # filter_all_stats_data
