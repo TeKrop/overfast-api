@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v4.4.0 (2026-05-01)
+
+### Features
+
+- Updated Valkey from v8 to v9 ([#411](https://github.com/TeKrop/overfast-api/pull/411),
+  [`6089dd0`](https://github.com/TeKrop/overfast-api/commit/6089dd0c39a0e9815e34de853c288c8bc85ef4c6))
+
+
 ## v4.3.0 (2026-05-01)
 
 ### Build System
