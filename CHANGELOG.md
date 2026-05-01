@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v4.3.0 (2026-05-01)
+
+### Build System
+
+- Added just/make startup checks in CI ([#409](https://github.com/TeKrop/overfast-api/pull/409),
+  [`748152a`](https://github.com/TeKrop/overfast-api/commit/748152a625fcb989aa46fc5754b682184bbacb0d))
+
+### Features
+
+- Updated images and app dependencies, fixed background refresh issue
+  ([#410](https://github.com/TeKrop/overfast-api/pull/410),
+  [`20db6b2`](https://github.com/TeKrop/overfast-api/commit/20db6b20171c3054fe3625b5840b9d64b11531e1))
+
+
 ## v4.2.1 (2026-04-30)
 
 ### Bug Fixes
