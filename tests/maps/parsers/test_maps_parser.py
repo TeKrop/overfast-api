@@ -1,5 +1,5 @@
 from app.domain.enums import MapKey
-from app.domain.parsers.maps import filter_maps_by_gamemode, parse_maps, parse_maps_csv
+from app.domain.parsers.maps import filter_maps_by_gamemode, parse_maps_csv
 
 
 def test_parse_maps_csv_returns_all_maps():
@@ -55,22 +55,3 @@ def test_filter_maps_by_gamemode_no_match_returns_empty():
     actual = filter_maps_by_gamemode(maps, "nonexistent")
 
     assert actual == []
-
-
-# ── parse_maps ────────────────────────────────────────────────────────────────
-
-
-def test_parse_maps_without_gamemode_returns_all():
-    result = parse_maps()
-
-    assert len(result) == len(parse_maps_csv())
-
-
-def test_parse_maps_with_gamemode_returns_subset():
-    all_maps = parse_maps_csv()
-    # Pick a gamemode that actually exists in the data
-    some_gamemode = all_maps[0]["gamemodes"][0]
-    filtered = parse_maps(gamemode=some_gamemode)
-
-    assert len(filtered) <= len(all_maps)
-    assert all(some_gamemode in m["gamemodes"] for m in filtered)

@@ -37,17 +37,3 @@ def filter_maps_by_gamemode(maps: list[dict], gamemode: str | None) -> list[dict
     if not gamemode:
         return maps
     return [map_dict for map_dict in maps if gamemode in map_dict["gamemodes"]]
-
-
-def parse_maps(gamemode: str | None = None) -> list[dict]:
-    """
-    High-level function to parse and filter maps
-
-    Args:
-        gamemode: Optional gamemode filter
-
-    Returns:
-        List of map dicts, optionally filtered by gamemode
-    """
-    maps = parse_maps_csv()
-    return filter_maps_by_gamemode(maps, gamemode)

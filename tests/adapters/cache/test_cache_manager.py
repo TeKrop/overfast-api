@@ -1,6 +1,5 @@
 import asyncio
-from typing import TYPE_CHECKING
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 from valkey.exceptions import ValkeyError
@@ -8,9 +7,6 @@ from valkey.exceptions import ValkeyError
 from app.adapters.cache import CacheManager
 from app.config import settings
 from app.domain.enums import Locale
-
-if TYPE_CHECKING:
-    from fastapi import Request
 
 
 @pytest.fixture
@@ -21,30 +17,6 @@ def cache_manager():
 @pytest.fixture
 def locale():
     return Locale.ENGLISH_US
-
-
-@pytest.mark.parametrize(
-    ("req", "expected"),
-    [
-        (Mock(url=Mock(path="/heroes"), query_params=None), "/heroes"),
-        (
-            Mock(url=Mock(path="/heroes"), query_params="role=damage"),
-            "/heroes?role=damage",
-        ),
-        (
-            Mock(url=Mock(path="/players"), query_params="name=TeKrop"),
-            "/players?name=TeKrop",
-        ),
-    ],
-)
-def test_get_cache_key_from_request(
-    cache_manager: CacheManager,
-    req: Request,
-    expected: str,
-):
-    actual = cache_manager.get_cache_key_from_request(req)
-
-    assert actual == expected
 
 
 @pytest.mark.parametrize(
