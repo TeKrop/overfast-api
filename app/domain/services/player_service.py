@@ -269,13 +269,13 @@ class PlayerService(BaseService):
         identity = PlayerIdentity()
         effective_id = request.player_id
         data: dict = {}
-        age = 0
+        age: int = 0
         stored_at: int | None = None
 
         try:
-            fresh = await self._get_fresh_stored_profile(request.player_id)
-            if fresh is not None:
-                profile, age = fresh
+            profile, age = await self._get_fresh_stored_profile(request.player_id)
+
+            if profile is not None:
                 stored_at = profile["updated_at"]
                 logger.info(
                     "Serving player data from persistent storage (within staleness threshold)"
@@ -286,6 +286,7 @@ class PlayerService(BaseService):
                 effective_id = identity.blizzard_id or request.player_id
                 html = await self._get_player_html(effective_id, identity)
                 data = request.data_factory(html, identity.player_summary)
+
         except Exception as exc:  # noqa: BLE001
             await self._handle_player_exceptions(exc, request.player_id, identity)
 
@@ -371,13 +372,14 @@ class PlayerService(BaseService):
 
     async def _get_fresh_stored_profile(
         self, player_id: str
-    ) -> tuple[dict, int] | None:
+    ) -> tuple[dict | None, int]:
         """Return ``(profile, age_seconds)`` if the stored profile was updated within
-        ``player_staleness_threshold``, else ``None``.
+        ``player_staleness_threshold``, else ``(None, 0)``.
 
         For BattleTag inputs, resolves to a Blizzard ID via the stored mapping
-        before fetching the profile.  Returns ``None`` if no mapping exists, the
-        profile is absent, or the profile is older than the threshold.
+        before fetching the profile.  Returns ``None`` if no mapping exists or if the
+        profile is absent. Returns tuple with ``(None, age)`` if the profile exists
+        but is older than the threshold.
 
         See ``_check_player_staleness`` for the full SWR lifecycle description.
         """
@@ -386,11 +388,11 @@ class PlayerService(BaseService):
         else:
             blizzard_id = await self.storage.get_player_id_by_battletag(player_id)
             if not blizzard_id:
-                return None
+                return None, 0
 
         profile = await self.get_player_profile_cache(blizzard_id)
         if not profile:
-            return None
+            return None, 0
 
         age = int(time.time()) - profile["updated_at"]
         if age < settings.player_staleness_threshold:
@@ -402,7 +404,7 @@ class PlayerService(BaseService):
             )
             return profile, age
 
-        return None
+        return None, age
 
     async def _get_player_html(
         self,
