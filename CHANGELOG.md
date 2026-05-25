@@ -2,6 +2,28 @@
 
 <!-- version list -->
 
+## v4.4.1 (2026-05-25)
+
+### Bug Fixes
+
+- Adapt parser to new Blizzard hero stats response shape
+  ([#415](https://github.com/TeKrop/overfast-api/pull/415),
+  [`a8148d4`](https://github.com/TeKrop/overfast-api/commit/a8148d4775ae49de4e80ca319f3363d4e07119e2))
+
+### Build System
+
+- **deps**: Bump idna from 3.13 to 3.15 ([#414](https://github.com/TeKrop/overfast-api/pull/414),
+  [`d666943`](https://github.com/TeKrop/overfast-api/commit/d66694380ee51b0de8444d68363d5885fcbd2df8))
+
+- **deps**: Bump urllib3 from 2.6.3 to 2.7.0
+  ([#413](https://github.com/TeKrop/overfast-api/pull/413),
+  [`c87492b`](https://github.com/TeKrop/overfast-api/commit/c87492bf86791d78c0ebe6412bfb441c12573caf))
+
+- **deps-dev**: Bump ty from 0.0.33 to 0.0.34 in the uv-deps group
+  ([#412](https://github.com/TeKrop/overfast-api/pull/412),
+  [`326719d`](https://github.com/TeKrop/overfast-api/commit/326719de3844a34c5be342070551860b134eeb39))
+
+
 ## v4.4.0 (2026-05-01)
 
 ### Features
