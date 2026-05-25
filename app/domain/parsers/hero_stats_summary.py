@@ -81,8 +81,12 @@ def parse_hero_stats_json(
     Raises:
         ParserBlizzardError: If map doesn't match gamemode
     """
+    # Blizzard now wraps the payload under a top-level "rates" object;
+    # the previous "selected" and "rates" keys live inside it.
+    rates_payload = json_data["rates"]
+
     # Validate map matches gamemode
-    if map_filter != json_data["selected"]["map"]:
+    if map_filter != rates_payload["selected"]["map"]:
         raise ParserBlizzardError(
             status_code=status.HTTP_400_BAD_REQUEST,
             message=f"Selected map '{map_filter}' is not compatible with '{gamemode}' gamemode.",
@@ -91,7 +95,7 @@ def parse_hero_stats_json(
     # Filter by role if provided
     hero_stats = [
         rate
-        for rate in json_data["rates"]
+        for rate in rates_payload["rates"]
         if role_filter is None or rate["hero"]["role"].lower() == role_filter
     ]
 
