@@ -9,10 +9,11 @@ from app.domain.enums import (
     PlayerPlatform,
     PlayerRegion,
 )
-from app.domain.exceptions import ParserBlizzardError
+from app.domain.exceptions import ParserBlizzardError, ParserParsingError
 from app.domain.parsers.hero_stats_summary import (
     GAMEMODE_MAPPING,
     PLATFORM_MAPPING,
+    parse_hero_stats_json,
     parse_hero_stats_summary,
 )
 
@@ -106,3 +107,23 @@ async def test_parse_hero_stats_summary_invalid_map_error_message(
 
     assert "hanaoka" in exc_info.value.message
     assert "compatible" in exc_info.value.message.lower()
+
+
+@pytest.mark.parametrize(
+    "json_data",
+    [
+        {},
+        {"rates": None},
+        {"rates": {"selected": {}, "rates": []}},
+        {"rates": {"selected": {"map": "all-maps"}, "rates": [{"id": "ana"}]}},
+    ],
+)
+def test_parse_hero_stats_json_raises_parsing_error_on_unexpected_structure(
+    json_data: dict,
+):
+    with pytest.raises(ParserParsingError):
+        parse_hero_stats_json(
+            json_data,
+            map_filter="all-maps",
+            gamemode=PlayerGamemode.QUICKPLAY,
+        )

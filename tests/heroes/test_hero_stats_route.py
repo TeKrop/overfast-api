@@ -12,6 +12,7 @@ from app.domain.enums import (
     PlayerRegion,
     Role,
 )
+from app.domain.exceptions import ParserInternalError, ParserParsingError
 
 if TYPE_CHECKING:
     from fastapi.testclient import TestClient
@@ -244,3 +245,17 @@ def test_get_hero_stats_blizzard_forbidden_error_and_caching(client: TestClient)
         "Blizzard is temporarily rate limiting this API. Please retry after"
         in response1.json()["error"]
     )
+
+
+def test_get_hero_stats_parser_parsing_error(client: TestClient):
+    cause = ParserParsingError("unexpected JSON structure")
+    with patch(
+        "app.domain.services.hero_service.HeroService.get_hero_stats",
+        side_effect=ParserInternalError(
+            "https://overwatch.blizzard.com/en-us/rates/data/", cause
+        ),
+    ):
+        response = client.get("/heroes/stats", params=_BASE_PARAMS)
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"error": settings.internal_server_error_message}
