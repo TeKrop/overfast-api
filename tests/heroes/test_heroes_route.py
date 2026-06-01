@@ -6,6 +6,7 @@ from fastapi import status
 
 from app.config import settings
 from app.domain.enums import HeroGamemode, Role
+from app.domain.exceptions import ParserInternalError, ParserParsingError
 
 if TYPE_CHECKING:
     from fastapi.testclient import TestClient
@@ -97,3 +98,17 @@ def test_get_heroes_blizzard_forbidden_error(client: TestClient):
         "Blizzard is temporarily rate limiting this API. Please retry after"
         in response.json()["error"]
     )
+
+
+def test_get_heroes_parser_parsing_error(client: TestClient):
+    cause = ParserParsingError("unexpected HTML structure")
+    with patch(
+        "app.domain.services.hero_service.HeroService.list_heroes",
+        side_effect=ParserInternalError(
+            "https://overwatch.blizzard.com/heroes/", cause
+        ),
+    ):
+        response = client.get("/heroes")
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"error": settings.internal_server_error_message}

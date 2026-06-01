@@ -53,10 +53,19 @@ class HeroService(StaticDataService):
         async def _fetch() -> str:
             return await fetch_heroes_html(self.blizzard_client, locale)
 
+        def _parse(html: str) -> list[dict]:
+            try:
+                return parse_heroes_html(html)
+            except ParserParsingError as exc:
+                blizzard_url = (
+                    f"{settings.blizzard_host}/{locale}{settings.heroes_path}"
+                )
+                raise ParserInternalError(blizzard_url, exc) from exc
+
         return StaticFetchConfig(
             storage_key=f"heroes:{locale}",
             fetcher=_fetch,
-            parser=parse_heroes_html,
+            parser=_parse,
             result_filter=(
                 (lambda data: filter_heroes(data, role, gamemode))
                 if (role or gamemode)
@@ -213,6 +222,9 @@ class HeroService(StaticDataService):
             raise HTTPException(
                 status_code=exc.status_code, detail=exc.message
             ) from exc
+        except ParserParsingError as exc:
+            blizzard_url = f"{settings.blizzard_host}{settings.hero_stats_path}"
+            raise ParserInternalError(blizzard_url, exc) from exc
 
         await self._update_api_cache(
             cache_key,

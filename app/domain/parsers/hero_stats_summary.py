@@ -6,7 +6,7 @@ from fastapi import status
 
 from app.config import settings
 from app.domain.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
-from app.domain.exceptions import ParserBlizzardError
+from app.domain.exceptions import ParserBlizzardError, ParserParsingError
 from app.domain.parsers.utils import validate_response_status
 
 if TYPE_CHECKING:
@@ -81,33 +81,43 @@ def parse_hero_stats_json(
     Raises:
         ParserBlizzardError: If map doesn't match gamemode
     """
-    # Blizzard now wraps the payload under a top-level "rates" object;
-    # the previous "selected" and "rates" keys live inside it.
-    rates_payload = json_data["rates"]
+    # Extract top-level structure; raise ParserParsingError on unexpected shape.
+    try:
+        # Blizzard now wraps the payload under a top-level "rates" object;
+        # the previous "selected" and "rates" keys live inside it.
+        rates_payload = json_data["rates"]
+        selected_map = rates_payload["selected"]["map"]
+        rates = rates_payload["rates"]
+    except (KeyError, TypeError) as error:
+        msg = f"Unexpected Blizzard hero stats JSON structure: {error!r}"
+        raise ParserParsingError(msg) from error
 
-    # Validate map matches gamemode
-    if map_filter != rates_payload["selected"]["map"]:
+    # Validate map matches gamemode (outside try so this is never caught above).
+    if map_filter != selected_map:
         raise ParserBlizzardError(
             status_code=status.HTTP_400_BAD_REQUEST,
             message=f"Selected map '{map_filter}' is not compatible with '{gamemode}' gamemode.",
         )
 
-    # Filter by role if provided
-    hero_stats = [
-        rate
-        for rate in rates_payload["rates"]
-        if role_filter is None or rate["hero"]["role"].lower() == role_filter
-    ]
-
-    # Transform to simplified format
-    hero_stats = [
-        {
-            "hero": rate["id"],
-            "pickrate": _normalize_rate(rate["cells"]["pickrate"]),
-            "winrate": _normalize_rate(rate["cells"]["winrate"]),
-        }
-        for rate in hero_stats
-    ]
+    # Filter by role and transform to simplified format; raise ParserParsingError on
+    # unexpected per-entry shape.
+    try:
+        hero_stats = [
+            rate
+            for rate in rates
+            if role_filter is None or rate["hero"]["role"].lower() == role_filter
+        ]
+        hero_stats = [
+            {
+                "hero": rate["id"],
+                "pickrate": _normalize_rate(rate["cells"]["pickrate"]),
+                "winrate": _normalize_rate(rate["cells"]["winrate"]),
+            }
+            for rate in hero_stats
+        ]
+    except (KeyError, TypeError) as error:
+        msg = f"Unexpected Blizzard hero stats JSON structure: {error!r}"
+        raise ParserParsingError(msg) from error
 
     # Apply ordering
     order_field, order_arrangement = order_by.split(":")
