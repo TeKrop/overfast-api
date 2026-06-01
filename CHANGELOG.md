@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v4.4.2 (2026-06-01)
+
+### Bug Fixes
+
+- Fixed issue with server error not properly handled by some endpoints
+  ([#416](https://github.com/TeKrop/overfast-api/pull/416),
+  [`291556a`](https://github.com/TeKrop/overfast-api/commit/291556a908fc3298ff85d612ecc870f7cbda204e))
+
+
 ## v4.4.1 (2026-05-25)
 
 ### Bug Fixes
