@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v4.4.3 (2026-06-07)
+
+### Bug Fixes
+
+- Adjusted human readable duration on doc cache TTL while under one minute
+  ([#419](https://github.com/TeKrop/overfast-api/pull/419),
+  [`7a9505e`](https://github.com/TeKrop/overfast-api/commit/7a9505e3e9b32a475d55dce60e873ae6dab25251))
+
+### Build System
+
+- **deps**: Bump aiohttp from 3.13.5 to 3.14.0
+  ([#417](https://github.com/TeKrop/overfast-api/pull/417),
+  [`396f3a8`](https://github.com/TeKrop/overfast-api/commit/396f3a878d5d2477c543edaf959d9f0f1ce7ea0d))
+
+- **deps**: Bump starlette from 1.0.0 to 1.0.1
+  ([#418](https://github.com/TeKrop/overfast-api/pull/418),
+  [`a321655`](https://github.com/TeKrop/overfast-api/commit/a32165518f50fb0f49cf22ae14badd7ea87c65dd))
+
+
 ## v4.4.2 (2026-06-01)
 
 ### Bug Fixes
