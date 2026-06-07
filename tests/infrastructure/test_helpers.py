@@ -24,6 +24,7 @@ from app.infrastructure.helpers import (
         (3600, "1 hour"),
         (600, "10 minutes"),
         (60, "1 minute"),
+        (30, "less than a minute"),
     ],
 )
 def test_get_human_readable_duration(input_duration: int, result: str):

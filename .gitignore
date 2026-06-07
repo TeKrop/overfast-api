@@ -138,3 +138,6 @@ dump.rdb
 
 # ruff related folders
 .ruff_*/
+
+# AI Agents
+.opencode
