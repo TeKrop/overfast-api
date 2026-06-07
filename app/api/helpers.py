@@ -123,6 +123,9 @@ def get_human_readable_duration(duration: int) -> str:
     if minutes > 0:
         duration_parts.append(f"{minutes} minute{'s' if minutes > 1 else ''}")
 
+    if not duration_parts:
+        return "less than a minute"
+
     return ", ".join(duration_parts)
 
 
