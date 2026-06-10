@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v4.5.0 (2026-06-10)
+
+### Features
+
+- Added Shion hero support ([#420](https://github.com/TeKrop/overfast-api/pull/420),
+  [`d5f5a65`](https://github.com/TeKrop/overfast-api/commit/d5f5a65c66cbdce0d1db892e6453a9c3a58e0deb))
+
+
 ## v4.4.3 (2026-06-07)
 
 ### Bug Fixes
