@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v4.6.0 (2026-06-14)
+
+### Chores
+
+- **ai**: Added CLAUDE.md
+  ([`22ebcb8`](https://github.com/TeKrop/overfast-api/commit/22ebcb80207788b8f900e5f97ad6d60fdd403d3b))
+
+### Features
+
+- Added hero stats gamemode filter resilience system
+  ([#423](https://github.com/TeKrop/overfast-api/pull/423),
+  [`86e5403`](https://github.com/TeKrop/overfast-api/commit/86e54039cc0db5f898dc948ed80e907bc0dab47e))
+
+
 ## v4.5.1 (2026-06-14)
 
 ### Bug Fixes
