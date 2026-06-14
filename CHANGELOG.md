@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v4.5.1 (2026-06-14)
+
+### Bug Fixes
+
+- Fixed heroes stat competitive filtering again
+  ([#422](https://github.com/TeKrop/overfast-api/pull/422),
+  [`f94bbd1`](https://github.com/TeKrop/overfast-api/commit/f94bbd1eff736ebf0ecf4c8e8383bdf8fde9af5e))
+
+
 ## v4.5.0 (2026-06-10)
 
 ### Features

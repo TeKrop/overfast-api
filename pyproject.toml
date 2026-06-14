@@ -1,6 +1,6 @@
 [project]
 name = "overfast-api"
-version = "4.5.0"
+version = "4.5.1"
 description = "Overwatch API giving data about heroes, maps, and players statistics."
 license = {file = "LICENSE"}
 authors = [
@@ -28,6 +28,7 @@ Homepage = "https://overfast-api.tekrop.fr"
 Documentation = "https://overfast-api.tekrop.fr"
 Repository = "https://github.com/TeKrop/overfast-api"
 Issues = "https://github.com/TeKrop/overfast-api/issues"
+
 
 
 
