@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v4.7.0 (2026-06-14)
+
+### Features
+
+- Added caching mechanism for gamemode filter value
+  ([#424](https://github.com/TeKrop/overfast-api/pull/424),
+  [`e733c71`](https://github.com/TeKrop/overfast-api/commit/e733c710b7f1253749ac07ba7c5a0b0054aab02f))
+
+
 ## v4.6.0 (2026-06-14)
 
 ### Chores
