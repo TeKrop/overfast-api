@@ -204,6 +204,9 @@ class Settings(BaseSettings):
     # Prefix for Valkey keys storing persistent check count (no TTL, survives cooldown expiry)
     unknown_player_status_key_prefix: str = "unknown-player:status"
 
+    # Prefix for Valkey keys caching the working Blizzard gamemode filter value per gamemode
+    gamemode_filter_key_prefix: str = "gamemode-filter"
+
     ############
     # BACKGROUND WORKER
     ############
