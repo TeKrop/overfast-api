@@ -108,6 +108,14 @@ class CachePort(Protocol):
         """Delete the tracking status and all associated entries for a player."""
         ...
 
+    async def get_gamemode_filter(self, gamemode: str) -> str | None:
+        """Return the last known-working Blizzard filter value for gamemode, or None."""
+        ...
+
+    async def set_gamemode_filter(self, gamemode: str, filter_value: str) -> None:
+        """Persist the working Blizzard filter value for gamemode with no TTL."""
+        ...
+
     async def scan_keys(self, pattern: str) -> list[str]:
         """Return all cache keys matching the given glob pattern.
 

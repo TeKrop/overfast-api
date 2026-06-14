@@ -240,6 +240,19 @@ class ValkeyCache(metaclass=Singleton):
             )
         await self.valkey_server.delete(*keys_to_delete)
 
+    @handle_valkey_error(default_return=None)
+    async def get_gamemode_filter(self, gamemode: str) -> str | None:
+        """Return the cached working Blizzard filter string for gamemode, or None."""
+        key = f"{settings.gamemode_filter_key_prefix}:{gamemode}"
+        value = await self.valkey_server.get(key)
+        return value.decode("utf-8") if value else None
+
+    @handle_valkey_error(default_return=None)
+    async def set_gamemode_filter(self, gamemode: str, filter_value: str) -> None:
+        """Persist the working Blizzard filter string for gamemode with no TTL."""
+        key = f"{settings.gamemode_filter_key_prefix}:{gamemode}"
+        await self.valkey_server.set(key, filter_value.encode("utf-8"))
+
     @handle_valkey_error(default_return=[])
     async def scan_keys(self, pattern: str) -> list[str]:
         """Return all Valkey keys matching *pattern* using SCAN iteration."""

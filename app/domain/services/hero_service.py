@@ -208,9 +208,7 @@ class HeroService(StaticDataService):
         is sufficient.
         """
 
-        possible_gamemode_filters = self._get_hero_stats_gamemode_filters(gamemode)
-
-        for gamemode_filter in possible_gamemode_filters:
+        for gamemode_filter in await self._get_hero_stats_gamemode_filters(gamemode):
             try:
                 data = await self._get_hero_stats(
                     platform,
@@ -222,6 +220,7 @@ class HeroService(StaticDataService):
                     competitive_division,
                     order_by,
                 )
+                working_filter = gamemode_filter
                 break  # filter worked — stop retrying (data may legitimately be empty)
             except InvalidGamemodeFilterError as exc:
                 # Blizzard may have changed the filter value; try the next candidate.
@@ -233,6 +232,7 @@ class HeroService(StaticDataService):
                 blizzard_url, gamemode_filter_exception
             ) from gamemode_filter_exception
 
+        await self.cache.set_gamemode_filter(gamemode, working_filter)
         await self._update_api_cache(
             cache_key,
             data,
@@ -240,18 +240,19 @@ class HeroService(StaticDataService):
         )
         return data, False, 0
 
-    def _get_hero_stats_gamemode_filters(self, gamemode: PlayerGamemode) -> list[str]:
-        """Get gamemode filters depending on the case.
+    async def _get_hero_stats_gamemode_filters(
+        self, gamemode: PlayerGamemode
+    ) -> list[str]:
+        """Return the ordered candidate filter values to try for a given gamemode.
 
-        Gamemodes having several possible values on Blizzard side will be
-        dynamically managed with dedicated cache in a future version in order
-        to ensure continuity across calls.
+        The cached working filter (if any) is moved to the front so the correct
+        value is tried first, avoiding a redundant Blizzard call on every request.
 
         Args:
             gamemode: Gamemode for validation
 
         Returns:
-            Possible filter values for Blizzard API call
+            Filter values ordered with the cached working filter first
 
         Raises:
             ParserParsingError: If gamemode is not supported
@@ -265,7 +266,13 @@ class HeroService(StaticDataService):
             msg = f"{gamemode} is not a supported gamemode filter"
             raise ParserParsingError(msg)
 
-        return gamemode_mapping[gamemode]
+        candidates = gamemode_mapping[gamemode]
+
+        cached_filter = await self.cache.get_gamemode_filter(gamemode)
+        if cached_filter and cached_filter in candidates:
+            return [cached_filter] + [f for f in candidates if f != cached_filter]
+
+        return candidates
 
     async def _get_hero_stats(
         self,

@@ -1,4 +1,4 @@
-from typing import Any, ClassVar
+from typing import Any, ClassVar, cast
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -120,6 +120,110 @@ class TestHeroServiceGetHeroStatsGamemodeFilter:
 
         assert data == []
         assert mock_parse.call_count == 1
+
+
+class TestHeroServiceGamemodeFilterCaching:
+    _base_kwargs: ClassVar[dict] = {
+        "platform": PlayerPlatform.PC,
+        "gamemode": PlayerGamemode.COMPETITIVE,
+        "region": PlayerRegion.EUROPE,
+        "role": None,
+        "map_filter": None,
+        "competitive_division": None,
+        "order_by": "hero:asc",
+        "cache_key": "/heroes/stats",
+    }
+
+    @pytest.mark.asyncio
+    async def test_cached_filter_is_tried_first(self):
+        svc = _make_hero_service()
+        cast("Any", svc.cache).get_gamemode_filter.return_value = "2"
+        expected = [{"hero": "ana"}]
+
+        with patch(
+            "app.domain.services.hero_service.parse_hero_stats_summary",
+            return_value=expected,
+        ) as mock_parse:
+            data, _, _ = await svc.get_hero_stats(**self._base_kwargs)
+
+        assert mock_parse.call_count == 1
+        assert mock_parse.call_args.kwargs["gamemode_filter"] == "2"
+        assert data == expected
+
+    @pytest.mark.asyncio
+    async def test_no_cache_writes_working_filter(self):
+        svc = _make_hero_service()
+        cast("Any", svc.cache).get_gamemode_filter.return_value = None
+
+        with patch(
+            "app.domain.services.hero_service.parse_hero_stats_summary",
+            return_value=[],
+        ):
+            await svc.get_hero_stats(**self._base_kwargs)
+
+        cast("Any", svc.cache).set_gamemode_filter.assert_awaited_once_with(
+            PlayerGamemode.COMPETITIVE, "1"
+        )
+
+    @pytest.mark.asyncio
+    async def test_stale_cached_filter_falls_back_and_updates_cache(self):
+        svc = _make_hero_service()
+        cast("Any", svc.cache).get_gamemode_filter.return_value = "2"
+        expected = [{"hero": "ana"}]
+
+        with patch(
+            "app.domain.services.hero_service.parse_hero_stats_summary",
+            side_effect=[
+                InvalidGamemodeFilterError("filter '2' != selected '1'"),
+                expected,
+            ],
+        ) as mock_parse:
+            data, _, _ = await svc.get_hero_stats(**self._base_kwargs)
+
+        assert mock_parse.call_count == 2  # noqa: PLR2004
+        assert data == expected
+        cast("Any", svc.cache).set_gamemode_filter.assert_awaited_once_with(
+            PlayerGamemode.COMPETITIVE, "1"
+        )
+
+    @pytest.mark.asyncio
+    async def test_filter_written_to_cache_unconditionally(self):
+        svc = _make_hero_service()
+        cast("Any", svc.cache).get_gamemode_filter.return_value = "1"
+
+        with patch(
+            "app.domain.services.hero_service.parse_hero_stats_summary",
+            return_value=[],
+        ):
+            await svc.get_hero_stats(**self._base_kwargs)
+
+        cast("Any", svc.cache).set_gamemode_filter.assert_awaited_once_with(
+            PlayerGamemode.COMPETITIVE, "1"
+        )
+
+    @pytest.mark.asyncio
+    async def test_quickplay_single_filter_cached_and_written(self):
+        svc = _make_hero_service()
+        cast("Any", svc.cache).get_gamemode_filter.return_value = None
+
+        with patch(
+            "app.domain.services.hero_service.parse_hero_stats_summary",
+            return_value=[],
+        ):
+            await svc.get_hero_stats(
+                platform=PlayerPlatform.PC,
+                gamemode=PlayerGamemode.QUICKPLAY,
+                region=PlayerRegion.EUROPE,
+                role=None,
+                map_filter=None,
+                competitive_division=None,
+                order_by="hero:asc",
+                cache_key="/heroes/stats",
+            )
+
+        cast("Any", svc.cache).set_gamemode_filter.assert_awaited_once_with(
+            PlayerGamemode.QUICKPLAY, "0"
+        )
 
 
 @pytest.mark.parametrize(
