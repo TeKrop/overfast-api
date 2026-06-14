@@ -9,9 +9,12 @@ from app.domain.enums import (
     PlayerPlatform,
     PlayerRegion,
 )
-from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.exceptions import (
+    InvalidGamemodeFilterError,
+    ParserBlizzardError,
+    ParserParsingError,
+)
 from app.domain.parsers.hero_stats_summary import (
-    GAMEMODE_MAPPING,
     PLATFORM_MAPPING,
     parse_hero_stats_json,
     parse_hero_stats_summary,
@@ -35,6 +38,7 @@ async def test_parse_hero_stats_summary(
     base_kwargs = {
         "platform": PlayerPlatform.PC,
         "gamemode": PlayerGamemode.COMPETITIVE,
+        "gamemode_filter": "1",
         "region": PlayerRegion.EUROPE,
         "order_by": "hero:asc",
     }
@@ -72,6 +76,7 @@ async def test_parse_hero_stats_summary_query_params(hero_stats_response_mock: M
             client,
             platform=platform,
             gamemode=gamemode,
+            gamemode_filter="1",
             region=region,
             competitive_division=division,
             map_filter=map_key,
@@ -83,7 +88,7 @@ async def test_parse_hero_stats_summary_query_params(hero_stats_response_mock: M
     params = kwargs.get("params", {})
 
     assert params["input"] == PLATFORM_MAPPING[platform]
-    assert params["rq"] == GAMEMODE_MAPPING[gamemode]
+    assert params["rq"] == "1"
     assert params["region"] == region.capitalize()
     assert params["map"] == map_key
     assert params["tier"] == division.capitalize()
@@ -101,12 +106,28 @@ async def test_parse_hero_stats_summary_invalid_map_error_message(
                 client,
                 platform=PlayerPlatform.PC,
                 gamemode=PlayerGamemode.COMPETITIVE,
+                gamemode_filter="1",
                 region=PlayerRegion.EUROPE,
                 map_filter="hanaoka",
             )
 
     assert "hanaoka" in exc_info.value.message
     assert "compatible" in exc_info.value.message.lower()
+
+
+def test_parse_hero_stats_json_raises_invalid_gamemode_filter_error():
+    json_data = {"rates": {"selected": {"map": "all-maps", "rq": "1"}, "rates": []}}
+
+    with pytest.raises(InvalidGamemodeFilterError) as exc_info:
+        parse_hero_stats_json(
+            json_data,
+            map_filter="all-maps",
+            gamemode=PlayerGamemode.COMPETITIVE,
+            gamemode_filter="2",
+        )
+
+    assert "2" in exc_info.value.message
+    assert "1" in exc_info.value.message
 
 
 @pytest.mark.parametrize(
@@ -126,4 +147,5 @@ def test_parse_hero_stats_json_raises_parsing_error_on_unexpected_structure(
             json_data,
             map_filter="all-maps",
             gamemode=PlayerGamemode.QUICKPLAY,
+            gamemode_filter="0",
         )
