@@ -6,7 +6,11 @@ from fastapi import status
 
 from app.config import settings
 from app.domain.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
-from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.exceptions import (
+    InvalidGamemodeFilterError,
+    ParserBlizzardError,
+    ParserParsingError,
+)
 from app.domain.parsers.utils import validate_response_status
 
 if TYPE_CHECKING:
@@ -18,27 +22,27 @@ PLATFORM_MAPPING: dict[PlayerPlatform, str] = {
     PlayerPlatform.CONSOLE: "Console",
 }
 
-GAMEMODE_MAPPING: dict[PlayerGamemode, str] = {
-    PlayerGamemode.QUICKPLAY: "0",
-    PlayerGamemode.COMPETITIVE: "1",
-}
-
 
 async def fetch_hero_stats_json(
     client: BlizzardClientPort,
     platform: PlayerPlatform,
     gamemode: PlayerGamemode,
+    gamemode_filter: str,
     region: PlayerRegion,
     map_filter: str = "all-maps",
     competitive_division: str | None = None,
 ) -> dict:
-    """Fetch hero stats JSON from Blizzard API"""
+    """Fetch hero stats JSON from Blizzard API
+
+    As gamemode filter values are dynamically changing on Blizzard side,
+    both gamemode and gamemode_filter are needed to properly build query params
+    """
     url = f"{settings.blizzard_host}{settings.hero_stats_path}"
 
     # Build query params
     query_params = {
         "input": PLATFORM_MAPPING[platform],
-        "rq": GAMEMODE_MAPPING[gamemode],
+        "rq": gamemode_filter,
         "region": region.capitalize(),
         "map": map_filter,
     }
@@ -62,6 +66,7 @@ def parse_hero_stats_json(
     json_data: dict,
     map_filter: str,
     gamemode: PlayerGamemode,
+    gamemode_filter: str,
     role_filter: str | None = None,
     order_by: str = "hero:asc",
 ) -> list[dict]:
@@ -87,10 +92,21 @@ def parse_hero_stats_json(
         # the previous "selected" and "rates" keys live inside it.
         rates_payload = json_data["rates"]
         selected_map = rates_payload["selected"]["map"]
+        selected_gamemode = rates_payload["selected"]["rq"]
         rates = rates_payload["rates"]
     except (KeyError, TypeError) as error:
         msg = f"Unexpected Blizzard hero stats JSON structure: {error!r}"
         raise ParserParsingError(msg) from error
+
+    # Validate gamemode filter against selected according to Blizzard response
+    # Could be invalid if Blizzard filtering value has changed, it happened
+    # several times for competitive in past few months
+    if gamemode_filter != selected_gamemode:
+        msg = (
+            f"Gamemode filter '{gamemode_filter}' is different from "
+            f"selected gamemode '{selected_gamemode}'"
+        )
+        raise InvalidGamemodeFilterError(msg)
 
     # Validate map matches gamemode (outside try so this is never caught above).
     if map_filter != selected_map:
@@ -142,6 +158,7 @@ async def parse_hero_stats_summary(
     client: BlizzardClientPort,
     platform: PlayerPlatform,
     gamemode: PlayerGamemode,
+    gamemode_filter: str,
     region: PlayerRegion,
     role: str | None = None,
     map_filter: str | None = None,
@@ -170,9 +187,12 @@ async def parse_hero_stats_summary(
         client,
         platform,
         gamemode,
+        gamemode_filter,
         region,
         map_key,
         competitive_division,
     )
 
-    return parse_hero_stats_json(json_data, map_key, gamemode, role, order_by)
+    return parse_hero_stats_json(
+        json_data, map_key, gamemode, gamemode_filter, role, order_by
+    )

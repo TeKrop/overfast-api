@@ -67,3 +67,12 @@ class ParserInternalError(OverfastError):
         super().__init__()
         self.blizzard_url = blizzard_url
         self.cause = cause
+
+
+class InvalidGamemodeFilterError(OverfastError):
+    status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
+    message = "Invalid Gamemode Filter Error"
+
+    def __init__(self, message: str):
+        super().__init__()
+        self.message = message
