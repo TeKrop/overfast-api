@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 _BASE_PARAMS = {
     "platform": PlayerPlatform.PC,
-    "gamemode": PlayerGamemode.QUICKPLAY,
+    "gamemode": PlayerGamemode.COMPETITIVE,
     "region": PlayerRegion.EUROPE,
 }
 

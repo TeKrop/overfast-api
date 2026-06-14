@@ -6,8 +6,9 @@ from typing import TYPE_CHECKING, Any
 from fastapi import HTTPException
 
 from app.config import settings
-from app.domain.enums import Locale, SubRole
+from app.domain.enums import Locale, PlayerGamemode, SubRole
 from app.domain.exceptions import (
+    InvalidGamemodeFilterError,
     ParserBlizzardError,
     ParserInternalError,
     ParserParsingError,
@@ -27,7 +28,6 @@ if TYPE_CHECKING:
         CompetitiveDivisionFilter,
         HeroGamemode,
         MapKey,
-        PlayerGamemode,
         PlayerPlatform,
         PlayerRegion,
         Role,
@@ -207,11 +207,83 @@ class HeroService(StaticDataService):
         store in persistent storage. The Valkey API cache (populated here, served by nginx)
         is sufficient.
         """
+
+        possible_gamemode_filters = self._get_hero_stats_gamemode_filters(gamemode)
+
+        for gamemode_filter in possible_gamemode_filters:
+            try:
+                data = await self._get_hero_stats(
+                    platform,
+                    gamemode,
+                    gamemode_filter,
+                    region,
+                    role,
+                    map_filter,
+                    competitive_division,
+                    order_by,
+                )
+                break  # filter worked — stop retrying (data may legitimately be empty)
+            except InvalidGamemodeFilterError as exc:
+                # Blizzard may have changed the filter value; try the next candidate.
+                gamemode_filter_exception = exc
+        else:
+            # All filter candidates exhausted without a successful call.
+            blizzard_url = f"{settings.blizzard_host}{settings.hero_stats_path}"
+            raise ParserInternalError(
+                blizzard_url, gamemode_filter_exception
+            ) from gamemode_filter_exception
+
+        await self._update_api_cache(
+            cache_key,
+            data,
+            settings.hero_stats_cache_timeout,
+        )
+        return data, False, 0
+
+    def _get_hero_stats_gamemode_filters(self, gamemode: PlayerGamemode) -> list[str]:
+        """Get gamemode filters depending on the case.
+
+        Gamemodes having several possible values on Blizzard side will be
+        dynamically managed with dedicated cache in a future version in order
+        to ensure continuity across calls.
+
+        Args:
+            gamemode: Gamemode for validation
+
+        Returns:
+            Possible filter values for Blizzard API call
+
+        Raises:
+            ParserParsingError: If gamemode is not supported
+        """
+        gamemode_mapping: dict[PlayerGamemode, list[str]] = {
+            PlayerGamemode.QUICKPLAY: ["0"],
+            PlayerGamemode.COMPETITIVE: ["1", "2"],
+        }
+
+        if gamemode not in gamemode_mapping:
+            msg = f"{gamemode} is not a supported gamemode filter"
+            raise ParserParsingError(msg)
+
+        return gamemode_mapping[gamemode]
+
+    async def _get_hero_stats(
+        self,
+        platform: PlayerPlatform,
+        gamemode: PlayerGamemode,
+        gamemode_filter: str,
+        region: PlayerRegion,
+        role: Role | None,
+        map_filter: MapKey | None,
+        competitive_division: CompetitiveDivisionFilter | None,
+        order_by: str,
+    ) -> list[dict]:
         try:
             data = await parse_hero_stats_summary(
                 self.blizzard_client,
                 platform=platform,
                 gamemode=gamemode,
+                gamemode_filter=gamemode_filter,
                 region=region,
                 role=role,
                 map_filter=map_filter,
@@ -226,12 +298,7 @@ class HeroService(StaticDataService):
             blizzard_url = f"{settings.blizzard_host}{settings.hero_stats_path}"
             raise ParserInternalError(blizzard_url, exc) from exc
 
-        await self._update_api_cache(
-            cache_key,
-            data,
-            settings.hero_stats_cache_timeout,
-        )
-        return data, False, 0
+        return data
 
 
 # ---------------------------------------------------------------------------

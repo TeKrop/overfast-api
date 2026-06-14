@@ -1,10 +1,14 @@
-from typing import Any
+from typing import Any, ClassVar
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from app.domain.enums import Locale, PlayerGamemode, PlayerPlatform, PlayerRegion
-from app.domain.exceptions import ParserInternalError, ParserParsingError
+from app.domain.exceptions import (
+    InvalidGamemodeFilterError,
+    ParserInternalError,
+    ParserParsingError,
+)
 from app.domain.services.hero_service import HeroService, dict_insert_value_before_key
 
 
@@ -60,6 +64,62 @@ class TestHeroServiceGetHeroStatsParseError:
                 order_by="hero:asc",
                 cache_key="/heroes/stats",
             )
+
+
+class TestHeroServiceGetHeroStatsGamemodeFilter:
+    _base_kwargs: ClassVar[dict] = {
+        "platform": PlayerPlatform.PC,
+        "gamemode": PlayerGamemode.COMPETITIVE,
+        "region": PlayerRegion.EUROPE,
+        "role": None,
+        "map_filter": None,
+        "competitive_division": None,
+        "order_by": "hero:asc",
+        "cache_key": "/heroes/stats",
+    }
+
+    @pytest.mark.asyncio
+    async def test_retries_on_invalid_gamemode_filter(self):
+        svc = _make_hero_service()
+        expected = [{"hero": "ana", "pickrate": 0.1, "winrate": 0.5}]
+
+        with patch(
+            "app.domain.services.hero_service.parse_hero_stats_summary",
+            side_effect=[
+                InvalidGamemodeFilterError("filter '1' != selected '2'"),
+                expected,
+            ],
+        ) as mock_parse:
+            data, _, _ = await svc.get_hero_stats(**self._base_kwargs)
+
+        assert data == expected
+        assert mock_parse.call_count == 2  # noqa: PLR2004
+
+    @pytest.mark.asyncio
+    async def test_raises_parser_internal_error_when_all_filters_exhausted(self):
+        svc = _make_hero_service()
+
+        with (
+            patch(
+                "app.domain.services.hero_service.parse_hero_stats_summary",
+                side_effect=InvalidGamemodeFilterError("no valid filter found"),
+            ),
+            pytest.raises(ParserInternalError),
+        ):
+            await svc.get_hero_stats(**self._base_kwargs)
+
+    @pytest.mark.asyncio
+    async def test_returns_empty_list_without_retry(self):
+        svc = _make_hero_service()
+
+        with patch(
+            "app.domain.services.hero_service.parse_hero_stats_summary",
+            return_value=[],
+        ) as mock_parse:
+            data, _, _ = await svc.get_hero_stats(**self._base_kwargs)
+
+        assert data == []
+        assert mock_parse.call_count == 1
 
 
 @pytest.mark.parametrize(
