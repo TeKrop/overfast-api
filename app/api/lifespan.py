@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
 from app.adapters.blizzard import BlizzardClient
-from app.adapters.cache import CacheManager
+from app.adapters.cache import ValkeyCache
 from app.adapters.storage import PostgresStorage
 from app.adapters.tasks.worker import broker
 from app.infrastructure.logger import logger
@@ -27,7 +27,7 @@ async def lifespan(_: FastAPI):  # pragma: no cover
     overfast_client: BlizzardClientPort = BlizzardClient()
 
     # Evict stale api-cache data on startup (handles crash/deploy scenarios)
-    cache: CachePort = CacheManager()
+    cache: CachePort = ValkeyCache()
     await cache.evict_volatile_data()
 
     # Start broker for task dispatch (skipped in worker mode — taskiq handles it).

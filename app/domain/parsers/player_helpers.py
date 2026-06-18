@@ -9,7 +9,7 @@ from app.domain.enums import (
     HeroKey,
     Role,
 )
-from app.domain.utils.csv_reader import CSVReader
+from app.domain.utils.csv_reader import read_csv_file
 from app.domain.utils.helpers import key_to_label
 
 DURATION_HOURS_PATTERN = re.compile(r"^(-?\d+(?:,\d+)?):(\d+):(\d+)$")
@@ -151,7 +151,7 @@ def remove_accents(input_str: str) -> str:
 @cache
 def get_hero_role(hero_key: HeroKey) -> Role | None:
     """Get the role of a given hero based on the CSV file"""
-    heroes_data = CSVReader.read_csv_file("heroes")
+    heroes_data = read_csv_file("heroes")
     role_key = next(
         (
             hero_data["role"]

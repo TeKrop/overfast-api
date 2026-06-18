@@ -1,5 +1,5 @@
 """Domain models package."""
 
-from app.domain.models.player import PlayerIdentity, PlayerRequest
+from app.domain.models.player import PlayerIdentity
 
-__all__ = ["PlayerIdentity", "PlayerRequest"]
+__all__ = ["PlayerIdentity"]

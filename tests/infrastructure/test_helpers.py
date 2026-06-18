@@ -8,8 +8,7 @@ from app.api import helpers as api_helpers
 from app.api.helpers import apply_swr_headers
 from app.config import settings
 from app.infrastructure.helpers import (
-    _truncate_embed_fields,
-    _truncate_text,
+    _build_embed,
     overfast_internal_error,
     send_discord_webhook_message,
 )
@@ -33,68 +32,38 @@ def test_get_human_readable_duration(input_duration: int, result: str):
     assert actual == result
 
 
-# ── _truncate_text ────────────────────────────────────────────────────────────
+# ── _build_embed ──────────────────────────────────────────────────────────────
 
 
-class TestTruncateText:
-    def test_short_text_not_truncated(self):
-        result = _truncate_text("hello", 10)
+class TestBuildEmbed:
+    def test_always_includes_color_and_timestamp(self):
+        embed = _build_embed(None, None, None, None, 0xFF0000)
 
-        assert result == "hello"
+        assert embed["color"] == 0xFF0000  # noqa: PLR2004
+        assert "timestamp" in embed
 
-    def test_exact_length_not_truncated(self):
-        result = _truncate_text("hello", 5)
+    def test_none_color_uses_default_red(self):
+        embed = _build_embed(None, None, None, None, None)
 
-        assert result == "hello"
+        assert embed["color"] == 0xE74C3C  # noqa: PLR2004
 
-    def test_long_text_truncated_with_default_suffix(self):
-        result = _truncate_text("hello world", 8)
+    def test_optional_fields_absent_when_none(self):
+        embed = _build_embed(None, None, None, None, None)
 
-        assert result == "hello..."
-        assert len(result) == 8  # noqa: PLR2004
+        assert "title" not in embed
+        assert "description" not in embed
+        assert "url" not in embed
+        assert "fields" not in embed
 
-    def test_long_text_truncated_with_custom_suffix(self):
-        result = _truncate_text("hello world", 7, suffix="--")
+    def test_optional_fields_present_when_provided(self):
+        fields = [{"name": "n", "value": "v"}]
 
-        assert result.endswith("--")
-        assert len(result) == 7  # noqa: PLR2004
+        embed = _build_embed("Title", "Desc", "https://x.com", fields, None)
 
-
-# ── _truncate_embed_fields ────────────────────────────────────────────────────
-
-
-class TestTruncateEmbedFields:
-    def test_short_fields_untouched(self):
-        fields = [{"name": "Error", "value": "short"}]
-        result = _truncate_embed_fields(fields)
-
-        assert result[0]["name"] == "Error"
-        assert result[0]["value"] == "short"
-
-    def test_long_name_truncated(self):
-        long_name = "X" * 300
-        fields = [{"name": long_name, "value": "v"}]
-        result = _truncate_embed_fields(fields)
-
-        assert len(result[0]["name"]) <= 250  # noqa: PLR2004
-
-    def test_long_value_truncated(self):
-        long_value = "Y" * 1100
-        fields = [{"name": "n", "value": long_value}]
-        result = _truncate_embed_fields(fields)
-
-        assert len(result[0]["value"]) <= 1000  # noqa: PLR2004
-
-    def test_multiple_fields_all_truncated(self):
-        fields = [
-            {"name": "A" * 300, "value": "B" * 1100},
-            {"name": "ok", "value": "also ok"},
-        ]
-        result = _truncate_embed_fields(fields)
-
-        assert len(result[0]["name"]) <= 250  # noqa: PLR2004
-        assert len(result[0]["value"]) <= 1000  # noqa: PLR2004
-        assert result[1]["name"] == "ok"
+        assert embed["title"] == "Title"
+        assert embed["description"] == "Desc"
+        assert embed["url"] == "https://x.com"
+        assert embed["fields"] is fields
 
 
 # ── send_discord_webhook_message ──────────────────────────────────────────────

@@ -12,7 +12,7 @@ from app.domain.exceptions import (
     ParserInternalError,
     ParserParsingError,
 )
-from app.domain.models.player import PlayerIdentity, PlayerRequest
+from app.domain.models.player import PlayerIdentity
 from app.domain.services.player_service import PlayerService
 from tests.fake_storage import FakeStorage
 from tests.helpers import read_html_file
@@ -427,11 +427,7 @@ class TestExecutePlayerRequest:
             s.prometheus_enabled = False
             s.career_path_cache_timeout = 300
             result, _is_stale, _age = await svc._execute_player_request(
-                PlayerRequest(
-                    player_id="abc123|def456",
-                    cache_key="test-key",
-                    data_factory=data_factory,
-                )
+                "abc123|def456", "test-key", data_factory
             )
 
         assert result == {"result": "ok"}
@@ -477,11 +473,7 @@ class TestExecutePlayerRequest:
             s.career_path = "/career"
             s.unknown_players_cache_enabled = False
             result, _is_stale, _age = await svc._execute_player_request(
-                PlayerRequest(
-                    player_id="TeKrop-2217",
-                    cache_key="test-key",
-                    data_factory=lambda _html, _summary: {"from": "blizzard"},
-                )
+                "TeKrop-2217", "test-key", lambda _html, _summary: {"from": "blizzard"}
             )
 
         assert result == {"from": "blizzard"}
@@ -526,11 +518,7 @@ class TestExecutePlayerRequest:
             s.prometheus_enabled = False
             s.career_path_cache_timeout = 300
             result, _is_stale, _age = await svc._execute_player_request(
-                PlayerRequest(
-                    player_id="abc123|def456",
-                    cache_key="test-key",
-                    data_factory=lambda _html, _summary: {},
-                )
+                "abc123|def456", "test-key", lambda _html, _summary: {}
             )
         # Profile is stale (age > threshold), slow path → fresh fetch → age=0 → not stale
         assert result == {}
@@ -560,11 +548,7 @@ class TestExecutePlayerRequest:
             s.career_path_cache_timeout = 300
             s.stale_cache_timeout = 60
             await svc._execute_player_request(
-                PlayerRequest(
-                    player_id="abc123|def456",
-                    cache_key="test-key",
-                    data_factory=lambda _html, _summary: {},
-                )
+                "abc123|def456", "test-key", lambda _html, _summary: {}
             )
 
         call_kwargs = cache.update_api_cache.call_args.kwargs
@@ -598,11 +582,7 @@ class TestExecutePlayerRequest:
             s.career_path_cache_timeout = 300
             s.stale_cache_timeout = 60
             _data, is_stale, _age = await svc._execute_player_request(
-                PlayerRequest(
-                    player_id="abc123|def456",
-                    cache_key="test-key",
-                    data_factory=lambda _html, _summary: {},
-                )
+                "abc123|def456", "test-key", lambda _html, _summary: {}
             )
 
         assert is_stale is True
@@ -645,11 +625,7 @@ class TestExecutePlayerRequest:
             s.career_path = "/career"
             s.unknown_players_cache_enabled = False
             await svc._execute_player_request(
-                PlayerRequest(
-                    player_id="TeKrop-2217",
-                    cache_key="test-key",
-                    data_factory=lambda _html, _summary: {},
-                )
+                "TeKrop-2217", "test-key", lambda _html, _summary: {}
             )
 
         call_kwargs = cache.update_api_cache.call_args.kwargs
