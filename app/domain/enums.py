@@ -2,7 +2,7 @@
 
 from enum import StrEnum
 
-from app.domain.utils.csv_reader import CSVReader
+from app.domain.utils.csv_reader import read_csv_file
 
 
 class Locale(StrEnum):
@@ -71,7 +71,7 @@ class MediaType(StrEnum):
 
 
 # Dynamically create the HeroKey enum by using the CSV File
-heroes_data = CSVReader.read_csv_file("heroes")
+heroes_data = read_csv_file("heroes")
 HeroKey = StrEnum(
     "HeroKey",
     {
@@ -90,7 +90,7 @@ class HeroGamemode(StrEnum):
 
 
 # Dynamically create the MapKey enum by using the CSV File
-maps_data = CSVReader.read_csv_file("maps")
+maps_data = read_csv_file("maps")
 MapKey = StrEnum(
     "MapKey",
     {
@@ -102,7 +102,7 @@ MapKey.__doc__ = "Map keys used to identify Overwatch maps in general"
 
 
 # Dynamically create the MapGamemode enum by using the CSV File
-gamemodes_data = CSVReader.read_csv_file("gamemodes")
+gamemodes_data = read_csv_file("gamemodes")
 MapGamemode = StrEnum(
     "MapGamemode",
     {

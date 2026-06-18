@@ -340,7 +340,3 @@ class ValkeyCache(metaclass=Singleton):
         """Trigger a background RDB save."""
         await self.valkey_server.bgsave()
         logger.info("Valkey BGSAVE triggered")
-
-
-# Backward compatibility alias
-CacheManager = ValkeyCache

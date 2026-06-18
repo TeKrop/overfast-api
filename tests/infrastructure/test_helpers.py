@@ -8,8 +8,12 @@ from app.api import helpers as api_helpers
 from app.api.helpers import apply_swr_headers
 from app.config import settings
 from app.infrastructure.helpers import (
-    _truncate_embed_fields,
-    _truncate_text,
+    _MAX_DESC_LEN,
+    _MAX_FIELD_NAME_LEN,
+    _MAX_FIELD_VALUE_LEN,
+    _MAX_TITLE_LEN,
+    _build_embed,
+    _truncate_embed_content,
     overfast_internal_error,
     send_discord_webhook_message,
 )
@@ -33,68 +37,121 @@ def test_get_human_readable_duration(input_duration: int, result: str):
     assert actual == result
 
 
-# ── _truncate_text ────────────────────────────────────────────────────────────
+# ── _build_embed ──────────────────────────────────────────────────────────────
 
 
-class TestTruncateText:
-    def test_short_text_not_truncated(self):
-        result = _truncate_text("hello", 10)
+class TestBuildEmbed:
+    def test_always_includes_color_and_timestamp(self):
+        embed = _build_embed(None, None, None, None, 0xFF0000)
 
-        assert result == "hello"
+        assert embed["color"] == 0xFF0000  # noqa: PLR2004
+        assert "timestamp" in embed
 
-    def test_exact_length_not_truncated(self):
-        result = _truncate_text("hello", 5)
+    def test_none_color_uses_default_red(self):
+        embed = _build_embed(None, None, None, None, None)
 
-        assert result == "hello"
+        assert embed["color"] == 0xE74C3C  # noqa: PLR2004
 
-    def test_long_text_truncated_with_default_suffix(self):
-        result = _truncate_text("hello world", 8)
+    def test_optional_fields_absent_when_none(self):
+        embed = _build_embed(None, None, None, None, None)
 
-        assert result == "hello..."
-        assert len(result) == 8  # noqa: PLR2004
+        assert "title" not in embed
+        assert "description" not in embed
+        assert "url" not in embed
+        assert "fields" not in embed
 
-    def test_long_text_truncated_with_custom_suffix(self):
-        result = _truncate_text("hello world", 7, suffix="--")
+    def test_optional_fields_present_when_provided(self):
+        fields = [{"name": "n", "value": "v"}]
 
-        assert result.endswith("--")
-        assert len(result) == 7  # noqa: PLR2004
+        embed = _build_embed("Title", "Desc", "https://x.com", fields, None)
+
+        assert embed["title"] == "Title"
+        assert embed["description"] == "Desc"
+        assert embed["url"] == "https://x.com"
+        assert embed["fields"] == fields
 
 
-# ── _truncate_embed_fields ────────────────────────────────────────────────────
+# ── _truncate_embed_content ───────────────────────────────────────────────────
 
 
-class TestTruncateEmbedFields:
-    def test_short_fields_untouched(self):
-        fields = [{"name": "Error", "value": "short"}]
-        result = _truncate_embed_fields(fields)
+class TestTruncateEmbedContent:
+    def test_title_at_limit_not_truncated(self):
+        title = "x" * _MAX_TITLE_LEN
 
-        assert result[0]["name"] == "Error"
-        assert result[0]["value"] == "short"
+        result_title, _, _ = _truncate_embed_content(title, None, None)
 
-    def test_long_name_truncated(self):
-        long_name = "X" * 300
-        fields = [{"name": long_name, "value": "v"}]
-        result = _truncate_embed_fields(fields)
+        assert result_title == title
 
-        assert len(result[0]["name"]) <= 250  # noqa: PLR2004
+    def test_title_over_limit_truncated_with_ellipsis(self):
+        title = "x" * (_MAX_TITLE_LEN + 1)
 
-    def test_long_value_truncated(self):
-        long_value = "Y" * 1100
-        fields = [{"name": "n", "value": long_value}]
-        result = _truncate_embed_fields(fields)
+        result_title, _, _ = _truncate_embed_content(title, None, None)
 
-        assert len(result[0]["value"]) <= 1000  # noqa: PLR2004
+        assert isinstance(result_title, str)
+        assert len(result_title) == _MAX_TITLE_LEN
+        assert result_title.endswith("...")
 
-    def test_multiple_fields_all_truncated(self):
+    def test_description_at_limit_not_truncated(self):
+        desc = "y" * _MAX_DESC_LEN
+
+        _, result_desc, _ = _truncate_embed_content(None, desc, None)
+
+        assert result_desc == desc
+
+    def test_description_over_limit_truncated_with_suffix(self):
+        desc = "y" * (_MAX_DESC_LEN + 1)
+
+        _, result_desc, _ = _truncate_embed_content(None, desc, None)
+
+        assert isinstance(result_desc, str)
+        assert len(result_desc) == _MAX_DESC_LEN
+        assert result_desc.endswith("\n\n*(truncated)*")
+
+    def test_field_name_over_limit_truncated(self):
+        fields = [{"name": "n" * (_MAX_FIELD_NAME_LEN + 1), "value": "v"}]
+
+        _, _, result_fields = _truncate_embed_content(None, None, fields)
+
+        assert result_fields is not None
+        assert len(result_fields[0]["name"]) == _MAX_FIELD_NAME_LEN
+        assert result_fields[0]["name"].endswith("...")
+
+    def test_field_value_over_limit_truncated(self):
+        fields = [{"name": "n", "value": "v" * (_MAX_FIELD_VALUE_LEN + 1)}]
+
+        _, _, result_fields = _truncate_embed_content(None, None, fields)
+
+        assert result_fields is not None
+        assert len(result_fields[0]["value"]) == _MAX_FIELD_VALUE_LEN
+        assert result_fields[0]["value"].endswith("\n*(truncated)*")
+
+    def test_field_name_at_limit_not_truncated(self):
+        name = "n" * _MAX_FIELD_NAME_LEN
+        fields = [{"name": name, "value": "v"}]
+
+        _, _, result_fields = _truncate_embed_content(None, None, fields)
+
+        assert result_fields is not None
+        assert result_fields[0]["name"] == name
+
+    def test_multiple_fields_mixed_truncation(self):
+        short_name = "short"
+        long_name = "n" * (_MAX_FIELD_NAME_LEN + 1)
         fields = [
-            {"name": "A" * 300, "value": "B" * 1100},
-            {"name": "ok", "value": "also ok"},
+            {"name": short_name, "value": "v"},
+            {"name": long_name, "value": "v"},
         ]
-        result = _truncate_embed_fields(fields)
 
-        assert len(result[0]["name"]) <= 250  # noqa: PLR2004
-        assert len(result[0]["value"]) <= 1000  # noqa: PLR2004
-        assert result[1]["name"] == "ok"
+        _, _, result_fields = _truncate_embed_content(None, None, fields)
+
+        assert result_fields is not None
+        assert result_fields[0]["name"] == short_name
+        assert result_fields[1]["name"].endswith("...")
+
+    def test_none_inputs_pass_through(self):
+        result = _truncate_embed_content(None, None, None)
+
+        assert result == (None, None, None)
 
 
 # ── send_discord_webhook_message ──────────────────────────────────────────────

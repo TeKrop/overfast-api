@@ -4,14 +4,14 @@ from unittest.mock import patch
 import pytest
 from valkey.exceptions import ValkeyError
 
-from app.adapters.cache import CacheManager
+from app.adapters.cache import ValkeyCache
 from app.config import settings
 from app.domain.enums import Locale
 
 
 @pytest.fixture
 def cache_manager():
-    return CacheManager()
+    return ValkeyCache()
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def locale():
 )
 @pytest.mark.asyncio
 async def test_update_and_get_api_cache(
-    cache_manager: CacheManager,
+    cache_manager: ValkeyCache,
     cache_key: str,
     value: list,
     expire: int,
@@ -48,7 +48,7 @@ async def test_update_and_get_api_cache(
 
 
 @pytest.mark.asyncio
-async def test_valkey_connection_error(cache_manager: CacheManager, locale):
+async def test_valkey_connection_error(cache_manager: ValkeyCache, locale):
     """Test that cache operations handle Valkey connection errors gracefully"""
     valkey_connection_error = ValkeyError(
         "Error 111 connecting to 127.0.0.1:6379. Connection refused.",
@@ -87,7 +87,7 @@ class TestPlayerStatus:
 
     @pytest.mark.asyncio
     async def test_set_and_get_player_status_in_cooldown(
-        self, cache_manager: CacheManager
+        self, cache_manager: ValkeyCache
     ):
         """Cooldown key is set with TTL; get returns remaining retry_after and check_count"""
         blizzard_id = "abc123"
@@ -104,7 +104,7 @@ class TestPlayerStatus:
 
     @pytest.mark.asyncio
     async def test_get_player_status_with_battletag_early_rejection(
-        self, cache_manager: CacheManager
+        self, cache_manager: ValkeyCache
     ):
         """Battletag-based cooldown key enables early rejection before identity resolution"""
         blizzard_id = "abc123"
@@ -124,7 +124,7 @@ class TestPlayerStatus:
 
     @pytest.mark.asyncio
     async def test_get_player_status_persists_after_cooldown_expiry(
-        self, cache_manager: CacheManager
+        self, cache_manager: ValkeyCache
     ):
         """Status key (no TTL) remains accessible after cooldown TTL expires"""
         blizzard_id = "persistent123"
@@ -143,7 +143,7 @@ class TestPlayerStatus:
 
     @pytest.mark.asyncio
     async def test_exponential_backoff_increments_check_count(
-        self, cache_manager: CacheManager
+        self, cache_manager: ValkeyCache
     ):
         """Setting player status multiple times correctly increments check_count"""
         blizzard_id = "backoff-player"
@@ -158,7 +158,7 @@ class TestPlayerStatus:
 
     @pytest.mark.asyncio
     async def test_get_player_status_returns_none_when_not_tracked(
-        self, cache_manager: CacheManager
+        self, cache_manager: ValkeyCache
     ):
         """Returns None for a player that was never marked unknown"""
         result = await cache_manager.get_player_status("NeverUnknown-9999")
@@ -167,7 +167,7 @@ class TestPlayerStatus:
 
     @pytest.mark.asyncio
     async def test_delete_player_status_removes_all_keys(
-        self, cache_manager: CacheManager
+        self, cache_manager: ValkeyCache
     ):
         """Deleting player status removes both status and cooldown keys"""
         blizzard_id = "todelete123"
@@ -184,7 +184,7 @@ class TestPlayerStatus:
 
     @pytest.mark.asyncio
     async def test_delete_player_status_is_idempotent_when_not_tracked(
-        self, cache_manager: CacheManager
+        self, cache_manager: ValkeyCache
     ):
         """Deleting player status for a non-existent player is safe and idempotent"""
         blizzard_id = "never-stored-1234"
@@ -203,7 +203,7 @@ class TestPlayerStatus:
 
     @pytest.mark.asyncio
     async def test_evict_volatile_data_keeps_unknown_player_keys(
-        self, cache_manager: CacheManager
+        self, cache_manager: ValkeyCache
     ):
         """evict_volatile_data removes api-cache keys but preserves unknown-player keys"""
         blizzard_id = "keep-me"
@@ -226,7 +226,7 @@ class TestEvictLowCountPlayerStatuses:
     """Tests for shutdown-time eviction of low-check_count unknown-player entries."""
 
     @pytest.mark.asyncio
-    async def test_evicts_entries_below_min_count(self, cache_manager: CacheManager):
+    async def test_evicts_entries_below_min_count(self, cache_manager: ValkeyCache):
         """Entries with check_count strictly below the minimum are deleted on eviction"""
         low_id = "low-count-player"
         high_id = "high-count-player"
@@ -246,7 +246,7 @@ class TestEvictLowCountPlayerStatuses:
 
     @pytest.mark.asyncio
     async def test_keeps_entries_at_or_above_min_count(
-        self, cache_manager: CacheManager
+        self, cache_manager: ValkeyCache
     ):
         """Entries with check_count >= minimum are preserved"""
         ids_and_counts = [("player-at-5", 5), ("player-at-10", 10)]
@@ -264,7 +264,7 @@ class TestEvictLowCountPlayerStatuses:
 
     @pytest.mark.asyncio
     async def test_also_removes_cooldown_and_battletag_keys(
-        self, cache_manager: CacheManager
+        self, cache_manager: ValkeyCache
     ):
         """Evicting a low-count entry removes both status and all associated cooldown keys"""
         blizzard_id = "low-with-battletag"
@@ -282,7 +282,7 @@ class TestEvictLowCountPlayerStatuses:
 
     @pytest.mark.asyncio
     async def test_no_op_when_min_retention_count_is_zero(
-        self, cache_manager: CacheManager
+        self, cache_manager: ValkeyCache
     ):
         """Setting min_retention_count to 0 disables the cleanup entirely"""
         player_id = "should-survive"
@@ -297,7 +297,7 @@ class TestEvictLowCountPlayerStatuses:
         assert result["check_count"] == 1
 
     @pytest.mark.asyncio
-    async def test_handles_empty_store(self, cache_manager: CacheManager):
+    async def test_handles_empty_store(self, cache_manager: ValkeyCache):
         """Calling evict on an empty store raises no error and evicts nothing"""
         with patch.object(settings, "unknown_player_min_retention_count", 5):
             await cache_manager.evict_low_count_player_statuses()

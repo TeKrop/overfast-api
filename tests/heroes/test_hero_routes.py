@@ -150,7 +150,7 @@ def test_get_hero_no_hitpoints(
             ],
         ),
         patch(
-            "app.domain.utils.csv_reader.CSVReader.read_csv_file",
+            "app.domain.parsers.heroes_hitpoints.read_csv_file",
             return_value=[],
         ),
     ):

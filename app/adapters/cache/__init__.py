@@ -1,5 +1,5 @@
 """Cache adapters"""
 
-from .valkey_cache import CacheManager, ValkeyCache
+from .valkey_cache import ValkeyCache
 
-__all__ = ["CacheManager", "ValkeyCache"]
+__all__ = ["ValkeyCache"]

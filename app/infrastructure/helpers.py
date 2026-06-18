@@ -72,32 +72,60 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
     )
 
 
-def _truncate_text(text: str, max_length: int, suffix: str = "...") -> str:
-    """Truncate text to max length with suffix if needed."""
-    if len(text) <= max_length:
-        return text
-    return text[: max_length - len(suffix)] + suffix
+_TITLE_SUFFIX = "..."
+_DESC_SUFFIX = "\n\n*(truncated)*"
+_FIELD_SUFFIX = "\n*(truncated)*"
+
+_MAX_TITLE_LEN = 250
+_MAX_DESC_LEN = 4000
+_MAX_FIELD_NAME_LEN = 250
+_MAX_FIELD_VALUE_LEN = 1000
 
 
-def _truncate_embed_fields(
-    fields: list[dict[str, Any]],
-) -> list[dict[str, Any]]:
-    """Truncate field names and values to Discord limits."""
-    max_field_name_length = 250  # Actual limit: 256
-    max_field_value_length = 1000  # Actual limit: 1024
+def _truncate_embed_content(
+    title: str | None,
+    description: str | None,
+    fields: list[dict[str, Any]] | None,
+) -> tuple[str | None, str | None, list[dict[str, Any]] | None]:
+    """Enforce Discord embed length limits, truncating with a visible suffix."""
+    if title and len(title) > _MAX_TITLE_LEN:
+        title = title[: _MAX_TITLE_LEN - len(_TITLE_SUFFIX)] + _TITLE_SUFFIX
+    if description and len(description) > _MAX_DESC_LEN:
+        description = description[: _MAX_DESC_LEN - len(_DESC_SUFFIX)] + _DESC_SUFFIX
+    if fields:
+        for f in fields:
+            name, value = f.get("name", ""), f.get("value", "")
+            if isinstance(name, str) and len(name) > _MAX_FIELD_NAME_LEN:
+                f["name"] = (
+                    name[: _MAX_FIELD_NAME_LEN - len(_TITLE_SUFFIX)] + _TITLE_SUFFIX
+                )
+            if isinstance(value, str) and len(value) > _MAX_FIELD_VALUE_LEN:
+                f["value"] = (
+                    value[: _MAX_FIELD_VALUE_LEN - len(_FIELD_SUFFIX)] + _FIELD_SUFFIX
+                )
+    return title, description, fields
 
-    for field in fields:
-        name = field.get("name", "")
-        value = field.get("value", "")
 
-        if isinstance(name, str) and len(name) > max_field_name_length:
-            field["name"] = _truncate_text(name, max_field_name_length)
-        if isinstance(value, str) and len(value) > max_field_value_length:
-            field["value"] = _truncate_text(
-                value, max_field_value_length, "\n*(truncated)*"
-            )
-
-    return fields
+def _build_embed(
+    title: str | None,
+    description: str | None,
+    url: str | None,
+    fields: list[dict[str, Any]] | None,
+    color: int | None,
+) -> dict[str, Any]:
+    embed: dict[str, Any] = {
+        "color": color or 0xE74C3C,
+        "timestamp": datetime.now(UTC).isoformat(),
+    }
+    if title:
+        embed["title"] = title
+    if description:
+        embed["description"] = description
+    if url:
+        embed["url"] = url
+    if fields:
+        embed["fields"] = fields
+    return embed
 
 
 @rate_limited(max_calls=1, interval=1800)
@@ -124,29 +152,8 @@ def send_discord_webhook_message(
         logger.error("{}: {}", title, description)
         return None
 
-    # Apply Discord embed length limits
-    if title:
-        title = _truncate_text(title, 250)
-    if description:
-        description = _truncate_text(description, 4000, "\n\n*(truncated)*")
-    if fields:
-        fields = _truncate_embed_fields(fields)
-
-    # Build the embed payload
-    embed: dict[str, Any] = {
-        "color": color or 0xE74C3C,  # Default to red for errors/alerts
-        "timestamp": datetime.now(UTC).isoformat(),
-    }
-
-    if title:
-        embed["title"] = title
-    if description:
-        embed["description"] = description
-    if url:
-        embed["url"] = url
-    if fields:
-        embed["fields"] = fields
-
+    title, description, fields = _truncate_embed_content(title, description, fields)
+    embed = _build_embed(title, description, url, fields, color)
     payload = {"username": "OverFast API", "embeds": [embed]}
 
     return httpx.post(  # pragma: no cover

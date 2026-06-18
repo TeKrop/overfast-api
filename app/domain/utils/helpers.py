@@ -2,13 +2,13 @@
 
 from functools import cache
 
-from app.domain.utils.csv_reader import CSVReader
+from app.domain.utils.csv_reader import read_csv_file
 
 
 @cache
 def get_hero_name(hero_key: str) -> str:
     """Return the display name for a hero key, falling back to the key itself."""
-    heroes_data = CSVReader.read_csv_file("heroes")
+    heroes_data = read_csv_file("heroes")
     return next(
         (
             hero_data["name"]

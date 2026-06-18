@@ -2,7 +2,10 @@
 
 import time
 from http import HTTPStatus
-from typing import Never, cast
+from typing import TYPE_CHECKING, Never, cast
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 from fastapi import HTTPException
 
@@ -13,7 +16,7 @@ from app.domain.exceptions import (
     ParserInternalError,
     ParserParsingError,
 )
-from app.domain.models.player import PlayerIdentity, PlayerRequest
+from app.domain.models.player import PlayerIdentity
 from app.domain.parsers.player_career_stats import (
     parse_player_career_stats_from_html,
 )
@@ -96,11 +99,7 @@ class PlayerService(BaseService):
         def extract(html: str, player_summary: dict) -> dict:
             return parse_player_profile_html(html, player_summary).get("summary") or {}
 
-        return await self._execute_player_request(
-            PlayerRequest(
-                player_id=player_id, cache_key=cache_key, data_factory=extract
-            )
-        )
+        return await self._execute_player_request(player_id, cache_key, extract)
 
     # ------------------------------------------------------------------
     # Player career  (GET /players/{player_id})
@@ -124,11 +123,7 @@ class PlayerService(BaseService):
                 ),
             }
 
-        return await self._execute_player_request(
-            PlayerRequest(
-                player_id=player_id, cache_key=cache_key, data_factory=extract
-            )
-        )
+        return await self._execute_player_request(player_id, cache_key, extract)
 
     # ------------------------------------------------------------------
     # Background refresh  (worker only — bypasses storage fast-path)
@@ -194,11 +189,7 @@ class PlayerService(BaseService):
                 profile.get("stats") or {}, gamemode, platform, hero
             )
 
-        return await self._execute_player_request(
-            PlayerRequest(
-                player_id=player_id, cache_key=cache_key, data_factory=extract
-            )
-        )
+        return await self._execute_player_request(player_id, cache_key, extract)
 
     # ------------------------------------------------------------------
     # Player stats summary  (GET /players/{player_id}/stats/summary)
@@ -218,11 +209,7 @@ class PlayerService(BaseService):
                 html, player_summary, gamemode, platform
             )
 
-        return await self._execute_player_request(
-            PlayerRequest(
-                player_id=player_id, cache_key=cache_key, data_factory=extract
-            )
-        )
+        return await self._execute_player_request(player_id, cache_key, extract)
 
     # ------------------------------------------------------------------
     # Player career stats  (GET /players/{player_id}/stats/career)
@@ -243,56 +230,51 @@ class PlayerService(BaseService):
                 html, gamemode, player_summary, platform, hero
             )
 
-        return await self._execute_player_request(
-            PlayerRequest(
-                player_id=player_id, cache_key=cache_key, data_factory=extract
-            )
-        )
+        return await self._execute_player_request(player_id, cache_key, extract)
 
     # ------------------------------------------------------------------
     # Core request execution — universal scaffold
     # ------------------------------------------------------------------
 
     async def _execute_player_request(
-        self, request: PlayerRequest
+        self,
+        player_id: str,
+        cache_key: str,
+        data_factory: Callable[[str, dict], dict],
     ) -> tuple[dict, bool, int]:
         """Resolve identity → get HTML → compute data → update cache → return.
 
         Fast path: if persistent storage has a profile fresher than
         ``player_staleness_threshold``, all Blizzard calls are skipped and
         the cached HTML + summary are used directly.
-
-        Args:
-            request: ``PlayerRequest`` holding ``player_id``, ``cache_key``,
-                     and the endpoint-specific ``data_factory``.
         """
         identity = PlayerIdentity()
-        effective_id = request.player_id
+        effective_id = player_id
         data: dict = {}
         age: int = 0
         stored_at: int | None = None
 
         try:
-            profile, age = await self._get_fresh_stored_profile(request.player_id)
+            profile, age = await self._get_fresh_stored_profile(player_id)
 
             if profile is not None:
                 stored_at = profile["updated_at"]
                 logger.info(
                     "Serving player data from persistent storage (within staleness threshold)"
                 )
-                data = request.data_factory(profile["profile"], profile["summary"])
+                data = data_factory(profile["profile"], profile["summary"])
             else:
-                identity = await self._resolve_player_identity(request.player_id)
-                effective_id = identity.blizzard_id or request.player_id
+                identity = await self._resolve_player_identity(player_id)
+                effective_id = identity.blizzard_id or player_id
                 html = await self._get_player_html(effective_id, identity)
-                data = request.data_factory(html, identity.player_summary)
+                data = data_factory(html, identity.player_summary)
 
         except Exception as exc:  # noqa: BLE001
-            await self._handle_player_exceptions(exc, request.player_id, identity)
+            await self._handle_player_exceptions(exc, player_id, identity)
 
         is_stale = self._check_player_staleness(age)
         await self._update_api_cache(
-            request.cache_key,
+            cache_key,
             data,
             settings.career_path_cache_timeout,
             stored_at=stored_at,
@@ -300,7 +282,7 @@ class PlayerService(BaseService):
             stale_while_revalidate=settings.stale_cache_timeout if is_stale else 0,
         )
         if is_stale:
-            await self._enqueue_refresh("player_profile", request.player_id)
+            await self._enqueue_refresh("player_profile", player_id)
         return data, is_stale, age
 
     # ------------------------------------------------------------------

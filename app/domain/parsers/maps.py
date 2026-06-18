@@ -1,7 +1,7 @@
 """Stateless parser functions for maps data"""
 
 from app.config import settings
-from app.domain.utils.csv_reader import CSVReader
+from app.domain.utils.csv_reader import read_csv_file
 
 
 def get_static_url_maps(key: str, extension: str = "jpg") -> str:
@@ -16,8 +16,7 @@ def parse_maps_csv() -> list[dict]:
     Returns:
         List of map dicts with keys: key, name, screenshot, gamemodes, location, country_code
     """
-    csv_reader = CSVReader()
-    csv_data = csv_reader.read_csv_file("maps")
+    csv_data = read_csv_file("maps")
 
     return [
         {
@@ -30,10 +29,3 @@ def parse_maps_csv() -> list[dict]:
         }
         for map_dict in csv_data
     ]
-
-
-def filter_maps_by_gamemode(maps: list[dict], gamemode: str | None) -> list[dict]:
-    """Filter maps by gamemode"""
-    if not gamemode:
-        return maps
-    return [map_dict for map_dict in maps if gamemode in map_dict["gamemodes"]]
