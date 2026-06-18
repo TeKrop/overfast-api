@@ -8,7 +8,12 @@ from app.api import helpers as api_helpers
 from app.api.helpers import apply_swr_headers
 from app.config import settings
 from app.infrastructure.helpers import (
+    _MAX_DESC_LEN,
+    _MAX_FIELD_NAME_LEN,
+    _MAX_FIELD_VALUE_LEN,
+    _MAX_TITLE_LEN,
     _build_embed,
+    _truncate_embed_content,
     overfast_internal_error,
     send_discord_webhook_message,
 )
@@ -63,7 +68,90 @@ class TestBuildEmbed:
         assert embed["title"] == "Title"
         assert embed["description"] == "Desc"
         assert embed["url"] == "https://x.com"
-        assert embed["fields"] is fields
+        assert embed["fields"] == fields
+
+
+# ── _truncate_embed_content ───────────────────────────────────────────────────
+
+
+class TestTruncateEmbedContent:
+    def test_title_at_limit_not_truncated(self):
+        title = "x" * _MAX_TITLE_LEN
+
+        result_title, _, _ = _truncate_embed_content(title, None, None)
+
+        assert result_title == title
+
+    def test_title_over_limit_truncated_with_ellipsis(self):
+        title = "x" * (_MAX_TITLE_LEN + 1)
+
+        result_title, _, _ = _truncate_embed_content(title, None, None)
+
+        assert isinstance(result_title, str)
+        assert len(result_title) == _MAX_TITLE_LEN
+        assert result_title.endswith("...")
+
+    def test_description_at_limit_not_truncated(self):
+        desc = "y" * _MAX_DESC_LEN
+
+        _, result_desc, _ = _truncate_embed_content(None, desc, None)
+
+        assert result_desc == desc
+
+    def test_description_over_limit_truncated_with_suffix(self):
+        desc = "y" * (_MAX_DESC_LEN + 1)
+
+        _, result_desc, _ = _truncate_embed_content(None, desc, None)
+
+        assert isinstance(result_desc, str)
+        assert len(result_desc) == _MAX_DESC_LEN
+        assert result_desc.endswith("\n\n*(truncated)*")
+
+    def test_field_name_over_limit_truncated(self):
+        fields = [{"name": "n" * (_MAX_FIELD_NAME_LEN + 1), "value": "v"}]
+
+        _, _, result_fields = _truncate_embed_content(None, None, fields)
+
+        assert result_fields is not None
+        assert len(result_fields[0]["name"]) == _MAX_FIELD_NAME_LEN
+        assert result_fields[0]["name"].endswith("...")
+
+    def test_field_value_over_limit_truncated(self):
+        fields = [{"name": "n", "value": "v" * (_MAX_FIELD_VALUE_LEN + 1)}]
+
+        _, _, result_fields = _truncate_embed_content(None, None, fields)
+
+        assert result_fields is not None
+        assert len(result_fields[0]["value"]) == _MAX_FIELD_VALUE_LEN
+        assert result_fields[0]["value"].endswith("\n*(truncated)*")
+
+    def test_field_name_at_limit_not_truncated(self):
+        name = "n" * _MAX_FIELD_NAME_LEN
+        fields = [{"name": name, "value": "v"}]
+
+        _, _, result_fields = _truncate_embed_content(None, None, fields)
+
+        assert result_fields is not None
+        assert result_fields[0]["name"] == name
+
+    def test_multiple_fields_mixed_truncation(self):
+        short_name = "short"
+        long_name = "n" * (_MAX_FIELD_NAME_LEN + 1)
+        fields = [
+            {"name": short_name, "value": "v"},
+            {"name": long_name, "value": "v"},
+        ]
+
+        _, _, result_fields = _truncate_embed_content(None, None, fields)
+
+        assert result_fields is not None
+        assert result_fields[0]["name"] == short_name
+        assert result_fields[1]["name"].endswith("...")
+
+    def test_none_inputs_pass_through(self):
+        result = _truncate_embed_content(None, None, None)
+
+        assert result == (None, None, None)
 
 
 # ── send_discord_webhook_message ──────────────────────────────────────────────

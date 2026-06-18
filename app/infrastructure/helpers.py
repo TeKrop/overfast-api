@@ -72,6 +72,40 @@ def overfast_internal_error(url: str, error: Exception) -> HTTPException:
     )
 
 
+_TITLE_SUFFIX = "..."
+_DESC_SUFFIX = "\n\n*(truncated)*"
+_FIELD_SUFFIX = "\n*(truncated)*"
+
+_MAX_TITLE_LEN = 250
+_MAX_DESC_LEN = 4000
+_MAX_FIELD_NAME_LEN = 250
+_MAX_FIELD_VALUE_LEN = 1000
+
+
+def _truncate_embed_content(
+    title: str | None,
+    description: str | None,
+    fields: list[dict[str, Any]] | None,
+) -> tuple[str | None, str | None, list[dict[str, Any]] | None]:
+    """Enforce Discord embed length limits, truncating with a visible suffix."""
+    if title and len(title) > _MAX_TITLE_LEN:
+        title = title[: _MAX_TITLE_LEN - len(_TITLE_SUFFIX)] + _TITLE_SUFFIX
+    if description and len(description) > _MAX_DESC_LEN:
+        description = description[: _MAX_DESC_LEN - len(_DESC_SUFFIX)] + _DESC_SUFFIX
+    if fields:
+        for f in fields:
+            name, value = f.get("name", ""), f.get("value", "")
+            if isinstance(name, str) and len(name) > _MAX_FIELD_NAME_LEN:
+                f["name"] = (
+                    name[: _MAX_FIELD_NAME_LEN - len(_TITLE_SUFFIX)] + _TITLE_SUFFIX
+                )
+            if isinstance(value, str) and len(value) > _MAX_FIELD_VALUE_LEN:
+                f["value"] = (
+                    value[: _MAX_FIELD_VALUE_LEN - len(_FIELD_SUFFIX)] + _FIELD_SUFFIX
+                )
+    return title, description, fields
+
+
 def _build_embed(
     title: str | None,
     description: str | None,
@@ -118,24 +152,7 @@ def send_discord_webhook_message(
         logger.error("{}: {}", title, description)
         return None
 
-    # Discord embed length limits
-    max_title = 250
-    max_desc = 4000
-    max_field_name = 250
-    max_field_value = 1000
-
-    if title and len(title) > max_title:
-        title = title[: max_title - 3] + "..."
-    if description and len(description) > max_desc:
-        description = description[: max_desc - 15] + "\n\n*(truncated)*"
-    if fields:
-        for f in fields:
-            name, value = f.get("name", ""), f.get("value", "")
-            if isinstance(name, str) and len(name) > max_field_name:
-                f["name"] = name[: max_field_name - 3] + "..."
-            if isinstance(value, str) and len(value) > max_field_value:
-                f["value"] = value[: max_field_value - 14] + "\n*(truncated)*"
-
+    title, description, fields = _truncate_embed_content(title, description, fields)
     embed = _build_embed(title, description, url, fields, color)
     payload = {"username": "OverFast API", "embeds": [embed]}
 
