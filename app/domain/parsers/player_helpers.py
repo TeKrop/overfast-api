@@ -73,11 +73,14 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
 
 def get_division_from_icon(rank_url: str) -> CompetitiveDivision:
     division_name = (
-        rank_url.rsplit("/", maxsplit=1)[-1]
+        rank_url.rsplit("/", maxsplit=1)[-1]  # filename or inline-SVG symbol id
+        .split(".", maxsplit=1)[0]  # drop content hash / ".png": "Rank_DiamondTier" / "goldtier"
         .split("-", maxsplit=1)[0]
-        .rsplit("_", maxsplit=1)[-1]
+        .rsplit("_", maxsplit=1)[-1]  # drop "Rank_" prefix: "DiamondTier" / "goldtier"
     )
-    return CompetitiveDivision(division_name[:-4].lower())
+    if division_name.lower().endswith("tier"):
+        division_name = division_name[:-4]  # strip the "Tier" suffix
+    return CompetitiveDivision(division_name.lower())
 
 
 def get_endorsement_value_from_frame(frame_url: str) -> int:
@@ -100,7 +103,10 @@ def get_hero_keyname(input_str: str) -> str:
 def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:
     """Extract role key from the role icon."""
     icon_role_key = (
-        icon_url.rsplit("/", maxsplit=1)[-1].split("-", maxsplit=1)[0].upper()
+        icon_url.rsplit("/", maxsplit=1)[-1]
+        .split("-", maxsplit=1)[0]
+        .split(".", maxsplit=1)[0]  # inline-SVG symbol ids: "TANK.<hash>.SVG#ICON"
+        .upper()
     )
     return (
         CompetitiveRole.DAMAGE
@@ -122,14 +128,18 @@ def get_stats_hero_class(hero_class: str | None) -> str:
 
 
 def get_tier_from_icon(tier_url: str | None) -> int:
-    """Extracts the rank tier from the rank URL. 0 if not found."""
+    """Extracts the rank tier number from the rank URL. 0 if not found."""
     if not tier_url:
         return 0
 
-    try:
-        return int(tier_url.split("/")[-1].split("-")[0].split("_")[-1])
-    except IndexError, ValueError:
+    # Tier number is the digits right after the final "_", e.g.
+    # "TierDivision_4-<hash>.png" or "TierDivision_4.<hash>.png" -> 4.
+    # Icons without a "_" (non-tier images) yield 0.
+    filename = tier_url.rsplit("/", maxsplit=1)[-1]
+    if "_" not in filename:
         return 0
+    match = re.match(r"\d+", filename.rsplit("_", maxsplit=1)[-1])
+    return int(match.group()) if match else 0
 
 
 @cache
