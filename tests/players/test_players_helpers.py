@@ -82,6 +82,15 @@ def test_get_computed_stat_value(input_str: str, result: float | str):
             "https://static.playoverwatch.com/img/pages/career/icons/rank/Rank_UltimateTier-99f8248b65.png",
             CompetitiveDivision.ULTIMATE,
         ),
+        # New formats: content-hashed filename (dot separator) and inline-SVG symbol id
+        (
+            "https://static.playoverwatch.com/img/pages/career/icons/rank/Rank_DiamondTier.bc8c5d6005f916c62c51728087aeb26f4facaa9b.png",
+            CompetitiveDivision.DIAMOND,
+        ),
+        (
+            "goldtier.8d40eab551020b46a84002019dd98714149ed5e2",
+            CompetitiveDivision.GOLD,
+        ),
     ],
 )
 def test_get_division_from_icon(rank_url: str, division: CompetitiveDivision):
@@ -165,6 +174,15 @@ def test_get_hero_keyname(input_str: str, result: str):
             "https://static.playoverwatch.com/img/pages/career/icons/role/open-163b3b8ddc.svg#icon",
             CompetitiveRole.OPEN,
         ),
+        # New format: inline-SVG symbol id (uppercase role, dot before the hash)
+        (
+            "TANK.e363265db45af83a0a5613072d7a888b1bf8a5b5.SVG#ICON",
+            CompetitiveRole.TANK,
+        ),
+        (
+            "OFFENSE.0f3b1a2c9d4e5f6a7b8c9d0e1f2a3b4c.SVG#ICON",
+            CompetitiveRole.DAMAGE,
+        ),
     ],
 )
 def test_get_role_key_from_icon(icon_url: str, role: CompetitiveRole):
@@ -205,6 +223,11 @@ def test_get_stats_hero_class(hero_classes: str | None, result: str):
         (
             "https://static.playoverwatch.com/img/pages/career/icons/rank/6b6e7959d4.png",
             0,
+        ),
+        # New format: content-hashed filename with a dot separator before the hash
+        (
+            "https://static.playoverwatch.com/img/pages/career/icons/rank/TierDivision_4.a86ba72795dcef9e04b6346163d3369eec13393f.png",
+            4,
         ),
         (None, 0),
     ],
