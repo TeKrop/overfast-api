@@ -2,6 +2,38 @@
 
 <!-- version list -->
 
+## v4.7.1 (2026-06-26)
+
+### Bug Fixes
+
+- Support Blizzard's new inline-SVG/hashed career-page icon format
+  ([#430](https://github.com/TeKrop/overfast-api/pull/430),
+  [`76c3ee5`](https://github.com/TeKrop/overfast-api/commit/76c3ee57527b9bcb43786768b442447079b51c44))
+
+### Build System
+
+- **deps**: Bump aiohttp from 3.14.0 to 3.14.1
+  ([#427](https://github.com/TeKrop/overfast-api/pull/427),
+  [`0c1a6a7`](https://github.com/TeKrop/overfast-api/commit/0c1a6a7a18f09347ed1d45253fef35dd4109d2be))
+
+- **deps**: Bump pydantic-settings from 2.14.0 to 2.14.2
+  ([#429](https://github.com/TeKrop/overfast-api/pull/429),
+  [`3789c82`](https://github.com/TeKrop/overfast-api/commit/3789c829184d47e8b6e81aebecb4d5e10af4259b))
+
+- **deps**: Bump python-multipart from 0.0.27 to 0.0.31
+  ([#425](https://github.com/TeKrop/overfast-api/pull/425),
+  [`af00c06`](https://github.com/TeKrop/overfast-api/commit/af00c06f2e4f2f1647fffeb252eba5c5bfc4c4f4))
+
+- **deps**: Bump starlette from 1.0.1 to 1.3.1
+  ([#426](https://github.com/TeKrop/overfast-api/pull/426),
+  [`abd39ce`](https://github.com/TeKrop/overfast-api/commit/abd39ceba7dedd7ffcff12d3754bad70dc0b394a))
+
+### Chores
+
+- Code cleanup with ponytail ([#428](https://github.com/TeKrop/overfast-api/pull/428),
+  [`047ad98`](https://github.com/TeKrop/overfast-api/commit/047ad982cdcea269618ff1d542dacc4077220b3a))
+
+
 ## v4.7.0 (2026-06-14)
 
 ### Features
