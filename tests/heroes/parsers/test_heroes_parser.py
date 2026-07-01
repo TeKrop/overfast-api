@@ -60,7 +60,7 @@ def test_filter_heroes_no_filter(heroes_html_data: str):
 @pytest.mark.asyncio
 async def test_fetch_heroes_html_calls_blizzard(heroes_html_data: str):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
     ):
         client = BlizzardClient()
@@ -111,7 +111,7 @@ def test_parse_heroes_html_dom_error_raises():
 async def test_parse_heroes_high_level(heroes_html_data: str):
     """parse_heroes() fetches HTML then parses and filters it."""
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
     ):
         client = BlizzardClient()
@@ -126,7 +126,7 @@ async def test_parse_heroes_high_level(heroes_html_data: str):
 async def test_parse_heroes_with_role_filter(heroes_html_data: str):
     """parse_heroes() with role filter returns only matching heroes."""
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
     ):
         client = BlizzardClient()

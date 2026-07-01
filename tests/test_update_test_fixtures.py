@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import status
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 
 from app.config import settings
 from app.domain.enums import HeroKey

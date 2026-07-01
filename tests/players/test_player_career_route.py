@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import status
-from httpx import RemoteProtocolError, TimeoutException
+from httpx2 import RemoteProtocolError, TimeoutException
 
 from app.config import settings
 from tests.helpers import players_ids
@@ -26,7 +26,7 @@ def test_get_player_career(
     assert player_html_data is not None
 
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         side_effect=[
             # Players search call first
             player_search_response_mock,
@@ -44,7 +44,7 @@ def test_get_player_career(
 
 def test_get_player_career_blizzard_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
@@ -60,7 +60,7 @@ def test_get_player_career_blizzard_error(client: TestClient):
 
 def test_get_player_career_blizzard_timeout(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)",
@@ -79,7 +79,7 @@ def test_get_player_career_blizzard_timeout(client: TestClient):
 
 def test_get_player_career_blizzard_remote_protocol_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         side_effect=RemoteProtocolError(
             "<ConnectionTerminated error_code:0, last_stream_id:12101, additional_data:None>"
         ),
@@ -108,7 +108,7 @@ def test_get_player_career_internal_error(client: TestClient):
 
 def test_get_player_career_blizzard_forbidden_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_403_FORBIDDEN,
             text="403 Forbidden",
@@ -128,7 +128,7 @@ def test_get_player_parser_init_error(client: TestClient, player_html_data: str 
     assert player_html_data is not None
 
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         side_effect=[
             # Players search call first
             Mock(status_code=status.HTTP_200_OK, text="[]", json=list),
@@ -162,7 +162,7 @@ def test_get_player_parser_parsing_error(
         'class="blabla"',
     )
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         side_effect=[
             # Players search call first
             player_search_response_mock,

@@ -4,7 +4,7 @@ import traceback
 from datetime import UTC, datetime
 from typing import Any
 
-import httpx
+import httpx2
 from fastapi import HTTPException, status
 
 from app.config import settings
@@ -136,7 +136,7 @@ def send_discord_webhook_message(
     url: str | None = None,
     fields: list[dict[str, Any]] | None = None,
     color: int | None = None,
-) -> httpx.Response | None:
+) -> httpx2.Response | None:
     """Send a Discord webhook message using modern embed syntax.
 
     Rate-limited to one call per 30 minutes with the same parameters.
@@ -156,6 +156,6 @@ def send_discord_webhook_message(
     embed = _build_embed(title, description, url, fields, color)
     payload = {"username": "OverFast API", "embeds": [embed]}
 
-    return httpx.post(  # pragma: no cover
+    return httpx2.post(  # pragma: no cover
         settings.discord_webhook_url, json=payload, timeout=10
     )

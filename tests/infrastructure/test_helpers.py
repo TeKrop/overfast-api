@@ -172,7 +172,7 @@ class TestSendDiscordWebhookMessage:
         # Should have logged to the logger (tested indirectly via no exception)
 
     def test_webhook_enabled_builds_payload(self):
-        """When webhook is enabled, httpx.post is called with correct structure."""
+        """When webhook is enabled, httpx2.post is called with correct structure."""
         mock_response = MagicMock()
         with (
             patch("app.infrastructure.helpers.settings.discord_webhook_enabled", True),
@@ -180,7 +180,7 @@ class TestSendDiscordWebhookMessage:
                 "app.infrastructure.helpers.settings.discord_webhook_url",
                 "https://discord.example.com/webhook",
             ),
-            patch("httpx.post", return_value=mock_response) as mock_post,
+            patch("httpx2.post", return_value=mock_response) as mock_post,
         ):
             result = send_discord_webhook_message(
                 title="New Alert",

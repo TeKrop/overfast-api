@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import status
-from httpx import TimeoutException
+from httpx2 import TimeoutException
 
 from app.config import settings
 from app.domain.enums import HeroKeyCareerFilter, PlayerGamemode, PlayerPlatform
@@ -18,7 +18,7 @@ def _setup_player_stats_test(
     player_search_response_mock: Mock,
 ):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         side_effect=[
             # Players search call first
             player_search_response_mock,
@@ -137,7 +137,7 @@ def test_get_player_stats_invalid_platform(client: TestClient, uri: str):
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_blizzard_error(client: TestClient, uri: str):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
@@ -158,7 +158,7 @@ def test_get_player_stats_blizzard_error(client: TestClient, uri: str):
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_blizzard_timeout(client: TestClient, uri: str):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)",
@@ -182,7 +182,7 @@ def test_get_player_stats_blizzard_timeout(client: TestClient, uri: str):
 @pytest.mark.parametrize(("uri"), [("/stats"), ("/stats/career")])
 def test_get_player_stats_blizzard_forbidden_error(client: TestClient, uri: str):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_403_FORBIDDEN,
             text="403 Forbidden",

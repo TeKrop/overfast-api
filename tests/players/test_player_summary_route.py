@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import status
-from httpx import TimeoutException
+from httpx2 import TimeoutException
 
 from app.config import settings
 from tests.helpers import players_ids
@@ -24,7 +24,7 @@ def test_get_player_summary(
     player_search_response_mock: Mock,
 ):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         side_effect=[
             # Players search call first
             player_search_response_mock,
@@ -40,7 +40,7 @@ def test_get_player_summary(
 
 def test_get_player_summary_blizzard_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
@@ -56,7 +56,7 @@ def test_get_player_summary_blizzard_error(client: TestClient):
 
 def test_get_player_summary_blizzard_timeout(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         side_effect=TimeoutException(
             "HTTPSConnectionPool(host='overwatch.blizzard.com', port=443): "
             "Read timed out. (read timeout=10)",
@@ -86,7 +86,7 @@ def test_get_player_summary_internal_error(client: TestClient):
 
 def test_get_player_summary_blizzard_forbidden_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_403_FORBIDDEN,
             text="403 Forbidden",

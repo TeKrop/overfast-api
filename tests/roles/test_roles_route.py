@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 def test_get_roles(client: TestClient, home_html_data: str):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=home_html_data),
     ):
         response = client.get("/roles")
@@ -21,7 +21,7 @@ def test_get_roles(client: TestClient, home_html_data: str):
 
 def test_get_roles_blizzard_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
@@ -48,7 +48,7 @@ def test_get_roles_internal_error(client: TestClient):
 
 def test_get_roles_blizzard_forbidden_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_403_FORBIDDEN,
             text="403 Forbidden",

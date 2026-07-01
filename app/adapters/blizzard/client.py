@@ -3,7 +3,7 @@
 import time
 from typing import TYPE_CHECKING
 
-import httpx
+import httpx2
 from fastapi import HTTPException, status
 
 from app.adapters.blizzard.throttle import BlizzardThrottle
@@ -33,7 +33,7 @@ class BlizzardClient(metaclass=Singleton):
         self.throttle: ThrottlePort | None = (
             BlizzardThrottle() if settings.throttle_enabled else None
         )
-        self.client = httpx.AsyncClient(
+        self.client = httpx2.AsyncClient(
             headers={
                 "User-Agent": (
                     f"OverFastAPI v{settings.app_version} - "
@@ -52,7 +52,7 @@ class BlizzardClient(metaclass=Singleton):
         *,
         headers: dict[str, str] | None = None,
         params: dict[str, str] | None = None,
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         """Make an HTTP GET request, respecting the adaptive throttle."""
         if self.throttle:
             await self._throttle_wait()
@@ -98,19 +98,19 @@ class BlizzardClient(metaclass=Singleton):
         url: str,
         normalized_endpoint: str,
         kwargs: dict,
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         """Execute the HTTP GET and record metrics."""
         start_time = time.perf_counter()
         try:
             response = await self.client.get(url, **kwargs)
-        except httpx.TimeoutException as error:
+        except httpx2.TimeoutException as error:
             duration = time.perf_counter() - start_time
             self._record_metrics(normalized_endpoint, "timeout", duration)
             raise self._blizzard_response_error(
                 status_code=0,
                 error="Blizzard took more than 10 seconds to respond, resulting in a timeout",
             ) from error
-        except httpx.RemoteProtocolError as error:
+        except httpx2.RemoteProtocolError as error:
             duration = time.perf_counter() - start_time
             self._record_metrics(normalized_endpoint, "error", duration)
             raise self._blizzard_response_error(

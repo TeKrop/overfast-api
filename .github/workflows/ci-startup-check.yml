@@ -16,7 +16,7 @@ jobs:
     name: Startup Test (${{ matrix.tool }} ${{ matrix.mode }})
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install ${{ matrix.tool }}
         run: |

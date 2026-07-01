@@ -222,7 +222,10 @@ def compute_heroes_data(
     # Calculate special values (winrate, kda, averages)
     for hero_key, hero_stats in computed_heroes_stats.items():
         # Ignore computation for heroes without stats
-        if hero_stats["time_played"] <= 0:
+        if (
+            not isinstance(hero_stats["time_played"], int)
+            or hero_stats["time_played"] <= 0
+        ):
             continue
 
         computed_heroes_stats[hero_key]["winrate"] = _calculate_winrate(hero_stats)
@@ -233,7 +236,7 @@ def compute_heroes_data(
     return {
         hero_key: hero_stats
         for hero_key, hero_stats in computed_heroes_stats.items()
-        if hero_stats["time_played"] > 0
+        if isinstance(hero_stats["time_played"], int) and hero_stats["time_played"] > 0
     }
 
 

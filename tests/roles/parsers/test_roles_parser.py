@@ -31,7 +31,7 @@ def test_parse_roles_html_entry_format(home_html_data: str):
 @pytest.mark.asyncio
 async def test_fetch_roles_html_calls_blizzard(home_html_data: str):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=home_html_data),
     ):
         client = BlizzardClient()

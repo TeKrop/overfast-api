@@ -7,7 +7,7 @@ import argparse
 import asyncio
 from pathlib import Path
 
-import httpx
+import httpx2
 from fastapi import status
 
 from app.config import settings
@@ -110,7 +110,7 @@ async def main():
 
     # Do the job
     test_data_path = f"{settings.test_fixtures_root_path}/html"
-    async with httpx.AsyncClient() as client:
+    async with httpx2.AsyncClient() as client:
         for route, filepath in route_file_mapping.items():
             logger.info("Updating {}{}...", test_data_path, filepath)
             logger.info("GET {}/{}{}...", settings.blizzard_host, locale, route)

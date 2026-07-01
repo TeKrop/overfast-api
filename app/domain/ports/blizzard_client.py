@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    import httpx
+    import httpx2
 
 
 class BlizzardClientPort(Protocol):
@@ -15,7 +15,7 @@ class BlizzardClientPort(Protocol):
         *,
         headers: dict[str, str] | None = None,
         params: dict[str, str] | None = None,
-    ) -> httpx.Response:
+    ) -> httpx2.Response:
         """GET request to the given URL, respecting configured throttling."""
         ...
 
