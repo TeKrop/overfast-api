@@ -123,6 +123,18 @@ Below is the current list of TTL values configured for the API cache. The latest
 
 ## 🐍 Architecture
 
+The codebase follows strict DDD layering — dependencies only flow inward. `domain` has no knowledge of FastAPI, Valkey, or Postgres; it only sees `typing.Protocol` ports, which `adapters` implement.
+
+```mermaid
+flowchart TD
+    api["api — routers, DI, response models"] --> domain
+    api --> adapters
+    api --> infrastructure
+    adapters["adapters — Blizzard client, Valkey cache, Postgres storage, taskiq"] --> domain
+    adapters --> infrastructure
+    domain["domain — parsers, services (SWR), ports"] -.->|logger only| infrastructure["infrastructure — logger, singletons, error helpers"]
+```
+
 ### Request flow (Stale-While-Revalidate)
 
 Every cached response is stored in Valkey as an **SWR envelope** containing the payload and three timestamps: `stored_at`, `staleness_threshold`, and `stale_while_revalidate`. Nginx/OpenResty inspects the envelope on every request:

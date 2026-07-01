@@ -74,7 +74,9 @@ def get_computed_stat_value(input_str: str) -> str | float | int:
 def get_division_from_icon(rank_url: str) -> CompetitiveDivision:
     division_name = (
         rank_url.rsplit("/", maxsplit=1)[-1]  # filename or inline-SVG symbol id
-        .split(".", maxsplit=1)[0]  # drop content hash / ".png": "Rank_DiamondTier" / "goldtier"
+        .split(".", maxsplit=1)[
+            0
+        ]  # drop content hash / ".png": "Rank_DiamondTier" / "goldtier"
         .split("-", maxsplit=1)[0]
         .rsplit("_", maxsplit=1)[-1]  # drop "Rank_" prefix: "DiamondTier" / "goldtier"
     )

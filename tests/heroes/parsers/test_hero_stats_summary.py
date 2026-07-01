@@ -111,8 +111,10 @@ async def test_parse_hero_stats_summary_invalid_map_error_message(
                 map_filter="hanaoka",
             )
 
-    assert "hanaoka" in exc_info.value.message
-    assert "compatible" in exc_info.value.message.lower()
+    message = str(exc_info.value.message)
+
+    assert "hanaoka" in message
+    assert "compatible" in message.lower()
 
 
 def test_parse_hero_stats_json_raises_invalid_gamemode_filter_error():

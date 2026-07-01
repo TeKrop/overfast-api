@@ -1,8 +1,7 @@
 """Stateless parser functions for hero stats summary (pickrate/winrate from Blizzard API)"""
 
+from http import HTTPStatus
 from typing import TYPE_CHECKING
-
-from fastapi import status
 
 from app.config import settings
 from app.domain.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
@@ -111,7 +110,7 @@ def parse_hero_stats_json(
     # Validate map matches gamemode (outside try so this is never caught above).
     if map_filter != selected_map:
         raise ParserBlizzardError(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=HTTPStatus.BAD_REQUEST.value,
             message=f"Selected map '{map_filter}' is not compatible with '{gamemode}' gamemode.",
         )
 

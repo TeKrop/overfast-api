@@ -7,8 +7,6 @@ from typing import TYPE_CHECKING, Never, cast
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-from fastapi import HTTPException
-
 from app.config import settings
 from app.domain.enums import HeroKeyCareerFilter, PlayerGamemode, PlayerPlatform
 from app.domain.exceptions import (
@@ -590,7 +588,7 @@ class PlayerService(BaseService):
     async def _mark_player_unknown(
         self,
         blizzard_id: str,
-        exception: HTTPException,
+        exception: ParserBlizzardError,
         battletag: str | None = None,
     ) -> None:
         if not settings.unknown_players_cache_enabled:
@@ -607,7 +605,7 @@ class PlayerService(BaseService):
             blizzard_id, check_count, retry_after, battletag=battletag
         )
 
-        exception.detail = {  # ty: ignore[invalid-assignment]
+        exception.message = {
             "error": "Player not found",
             "retry_after": retry_after,
             "next_check_at": next_check_at,
@@ -627,41 +625,37 @@ class PlayerService(BaseService):
         player_id: str,
         identity: PlayerIdentity,
     ) -> Never:
-        """Translate all player exceptions to HTTPException and always raise."""
+        """Translate known parser exceptions to a client-facing error and always raise.
+
+        Raised errors are ``ParserBlizzardError``/``ParserInternalError`` — the API
+        layer's registered ``OverfastError`` handler turns them into HTTP responses.
+        """
         effective_id = identity.blizzard_id or player_id
         battletag_input = identity.battletag_input
         player_summary = identity.player_summary
 
         if isinstance(error, ParserBlizzardError):
-            exc = HTTPException(status_code=error.status_code, detail=error.message)
             if error.status_code == HTTPStatus.NOT_FOUND.value:
                 await self._mark_player_unknown(
-                    effective_id, exc, battletag=battletag_input
+                    effective_id, error, battletag=battletag_input
                 )
-            raise exc from error
+            raise error
 
         if isinstance(error, ParserParsingError):
             if "Could not find main content in HTML" in str(error):
-                exc = HTTPException(
+                not_found = ParserBlizzardError(
                     status_code=HTTPStatus.NOT_FOUND.value,
-                    detail="Player not found",
+                    message="Player not found",
                 )
                 await self._mark_player_unknown(
-                    effective_id, exc, battletag=battletag_input
+                    effective_id, not_found, battletag=battletag_input
                 )
-                raise exc from error
+                raise not_found from error
 
             blizzard_url = (
                 f"{settings.blizzard_host}{settings.career_path}/"
                 f"{player_summary.get('url', effective_id) if player_summary else effective_id}/"
             )
             raise ParserInternalError(blizzard_url, error) from error
-
-        if isinstance(error, HTTPException):
-            if error.status_code == HTTPStatus.NOT_FOUND.value:
-                await self._mark_player_unknown(
-                    effective_id, error, battletag=battletag_input
-                )
-            raise error
 
         raise error
