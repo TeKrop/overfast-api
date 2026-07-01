@@ -1,9 +1,8 @@
 """Stateless parser functions for single hero details"""
 
 import re
+from http import HTTPStatus
 from typing import TYPE_CHECKING
-
-from fastapi import status
 
 from app.config import settings
 from app.domain.parsers.utils import (
@@ -58,7 +57,7 @@ def parse_hero_html(html: str, locale: Locale = Locale.ENGLISH_US) -> dict:
         abilities_section = root_tag.css_first("div.abilities-container")
         if not abilities_section:
             raise ParserBlizzardError(  # noqa: TRY301
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=HTTPStatus.NOT_FOUND.value,
                 message="Hero not found or not released yet",
             )
 

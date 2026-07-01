@@ -3,13 +3,10 @@
 import json
 from typing import TYPE_CHECKING, Any
 
-from fastapi import HTTPException
-
 from app.config import settings
 from app.domain.enums import Locale, PlayerGamemode, SubRole
 from app.domain.exceptions import (
     InvalidGamemodeFilterError,
-    ParserBlizzardError,
     ParserInternalError,
     ParserParsingError,
 )
@@ -115,18 +112,12 @@ class HeroService(StaticDataService):
         """Build a StaticFetchConfig for a single hero detail."""
 
         async def _fetch() -> str:
-            try:
-                hero_html = await fetch_hero_html(
-                    self.blizzard_client, hero_key, locale
-                )
-                # Validate hero exists before making the second Blizzard request.
-                # parse_hero_html raises ParserBlizzardError (404) for unknown heroes.
-                parse_hero_html(hero_html, locale)
-                heroes_html = await fetch_heroes_html(self.blizzard_client, locale)
-            except ParserBlizzardError as exc:
-                raise HTTPException(
-                    status_code=exc.status_code, detail=exc.message
-                ) from exc
+            hero_html = await fetch_hero_html(self.blizzard_client, hero_key, locale)
+            # Validate hero exists before making the second Blizzard request.
+            # parse_hero_html raises ParserBlizzardError (404) for unknown heroes,
+            # which propagates to the API layer's registered OverfastError handler.
+            parse_hero_html(hero_html, locale)
+            heroes_html = await fetch_heroes_html(self.blizzard_client, locale)
             return json.dumps(
                 {"hero_html": hero_html, "heroes_html": heroes_html},
                 separators=(",", ":"),
@@ -297,10 +288,6 @@ class HeroService(StaticDataService):
                 competitive_division=competitive_division,
                 order_by=order_by,
             )
-        except ParserBlizzardError as exc:
-            raise HTTPException(
-                status_code=exc.status_code, detail=exc.message
-            ) from exc
         except ParserParsingError as exc:
             blizzard_url = f"{settings.blizzard_host}{settings.hero_stats_path}"
             raise ParserInternalError(blizzard_url, exc) from exc

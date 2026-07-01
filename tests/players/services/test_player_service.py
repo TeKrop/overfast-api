@@ -269,7 +269,9 @@ class TestMarkPlayerUnknown:
     @pytest.mark.asyncio
     async def test_disabled_feature_is_noop(self):
         svc = _make_service()
-        exc = HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
+        exc = ParserBlizzardError(
+            status_code=status.HTTP_404_NOT_FOUND, message="not found"
+        )
         with patch("app.domain.services.player_service.settings") as s:
             s.unknown_players_cache_enabled = False
             await svc._mark_player_unknown("abc123", exc)
@@ -278,8 +280,8 @@ class TestMarkPlayerUnknown:
     @pytest.mark.asyncio
     async def test_non_404_is_noop(self):
         svc = _make_service()
-        exc = HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="error"
+        exc = ParserBlizzardError(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message="error"
         )
         with patch("app.domain.services.player_service.settings") as s:
             s.unknown_players_cache_enabled = True
@@ -292,14 +294,22 @@ class TestMarkPlayerUnknown:
         cache.get_player_status = AsyncMock(return_value=None)
         cache.set_player_status = AsyncMock()
         svc = _make_service(cache=cache)
-        exc = HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
+        exc = ParserBlizzardError(
+            status_code=status.HTTP_404_NOT_FOUND, message="not found"
+        )
         with patch("app.domain.services.player_service.settings") as s:
             s.unknown_players_cache_enabled = True
             s.unknown_player_initial_retry = 60
             s.unknown_player_retry_multiplier = 2
             s.unknown_player_max_retry = 3600
             await svc._mark_player_unknown("abc123", exc, battletag="TeKrop-2217")
+
         cache.set_player_status.assert_awaited_once()
+        assert isinstance(exc.message, dict)
+        assert exc.message["error"] == "Player not found"
+        assert "retry_after" in exc.message
+        assert "next_check_at" in exc.message
+        assert "check_count" in exc.message
 
     @pytest.mark.asyncio
     async def test_404_increments_check_count(self):
@@ -307,7 +317,9 @@ class TestMarkPlayerUnknown:
         cache.get_player_status = AsyncMock(return_value={"check_count": 3})
         cache.set_player_status = AsyncMock()
         svc = _make_service(cache=cache)
-        exc = HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
+        exc = ParserBlizzardError(
+            status_code=status.HTTP_404_NOT_FOUND, message="not found"
+        )
         with patch("app.domain.services.player_service.settings") as s:
             s.unknown_players_cache_enabled = True
             s.unknown_player_initial_retry = 60
@@ -336,7 +348,7 @@ class TestHandlePlayerExceptions:
         identity = PlayerIdentity()
         with patch("app.domain.services.player_service.settings") as s:
             s.unknown_players_cache_enabled = False
-            with pytest.raises(HTTPException) as exc_info:
+            with pytest.raises(ParserBlizzardError) as exc_info:
                 await svc._handle_player_exceptions(error, "TeKrop-2217", identity)
 
         assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
@@ -348,7 +360,7 @@ class TestHandlePlayerExceptions:
         identity = PlayerIdentity()
         with patch("app.domain.services.player_service.settings") as s:
             s.unknown_players_cache_enabled = False
-            with pytest.raises(HTTPException) as exc_info:
+            with pytest.raises(ParserBlizzardError) as exc_info:
                 await svc._handle_player_exceptions(error, "TeKrop-2217", identity)
 
         assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
@@ -369,14 +381,18 @@ class TestHandlePlayerExceptions:
         assert exc_info.value.cause is error
 
     @pytest.mark.asyncio
-    async def test_http_exception_404_marks_and_reraises(self):
+    async def test_unrecognized_exception_type_reraises_unmarked(self):
+        """An HTTPException raised by the Blizzard adapter (e.g. 503 rate limit)
+        isn't a domain exception, so it passes through unchanged — no unknown-player
+        marking, since the marking logic only inspects ParserBlizzardError/ParserParsingError."""
         svc = _make_service()
         error = HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
         identity = PlayerIdentity()
-        with patch("app.domain.services.player_service.settings") as s:
-            s.unknown_players_cache_enabled = False
-            with pytest.raises(HTTPException):
-                await svc._handle_player_exceptions(error, "TeKrop-2217", identity)
+        with pytest.raises(HTTPException) as exc_info:
+            await svc._handle_player_exceptions(error, "TeKrop-2217", identity)
+
+        assert exc_info.value is error
+        cast("Any", svc.cache).set_player_status.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_http_exception_non_404_reraises(self):
@@ -699,10 +715,10 @@ class TestRefreshPlayerProfile:
         assert profile is not None
 
     @pytest.mark.asyncio
-    async def test_blizzard_error_propagates_as_http_exception(self):
-        """A ParserBlizzardError from identity resolution is translated to an
-        HTTPException by _handle_player_exceptions and re-raised — the worker's
-        _run_refresh_task except block captures it."""
+    async def test_blizzard_error_propagates(self):
+        """A ParserBlizzardError from identity resolution is re-raised as-is by
+        _handle_player_exceptions — the worker's _run_refresh_task except block
+        captures it."""
         svc = _make_service()
         err = ParserBlizzardError(
             status.HTTP_503_SERVICE_UNAVAILABLE, "Blizzard unavailable"
@@ -722,7 +738,7 @@ class TestRefreshPlayerProfile:
             s.player_staleness_threshold = 3600
             s.prometheus_enabled = False
             s.unknown_players_cache_enabled = False
-            with pytest.raises(HTTPException) as exc_info:
+            with pytest.raises(ParserBlizzardError) as exc_info:
                 await svc.refresh_player_profile("TeKrop-2217")
 
         assert exc_info.value.status_code == status.HTTP_503_SERVICE_UNAVAILABLE

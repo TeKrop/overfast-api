@@ -143,11 +143,19 @@ ignore = [
 allowed-confusables = ["（", "）", "："]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["SLF001"]  # Ignore private member access in tests
+"tests/**" = ["SLF001", "TID251"]  # Ignore private member access + fastapi.TestClient in tests
 "app/api/models/**" = ["TC001"]  # Ignore type-checking block (Pydantic models definition)
 "app/api/routers/**" = ["TC001"]  # Enums used in FastAPI path/query parameters need runtime import
 "app/api/dependencies.py" = ["TC001"]  # Port types needed at runtime for FastAPI Depends
 "app/domain/services/**" = ["TC001"]  # Locale/enums used in runtime method annotations
+"app/api/**" = ["TID251"]           # API layer owns FastAPI
+"app/adapters/**" = ["TID251"]      # BlizzardClient raises HTTPException for transport errors
+"app/infrastructure/**" = ["TID251"]  # Shared HTTPException helpers (Discord alerts, etc.)
+"app/monitoring/**" = ["TID251"]    # Prometheus/FastAPI router glue
+"app/main.py" = ["TID251"]          # App assembly
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"fastapi".msg = "Domain layer must stay framework-agnostic. Raise app.domain.exceptions instead of fastapi.HTTPException, use http.HTTPStatus instead of fastapi.status."
 
 [tool.ruff.lint.isort]
 # Consider app as first-party for imports in tests

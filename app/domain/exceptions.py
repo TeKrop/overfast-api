@@ -1,6 +1,7 @@
 """Set of custom exceptions used in the API"""
 
 from http import HTTPStatus
+from typing import Any
 
 
 class RateLimitedError(Exception):
@@ -22,10 +23,10 @@ class OverfastError(Exception):
     """Generic OverFast API Exception"""
 
     status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
-    message = "OverFast API Error"
+    message: str | dict[str, Any] = "OverFast API Error"
 
     def __str__(self):
-        return self.message
+        return str(self.message)
 
 
 class ParserBlizzardError(OverfastError):
@@ -34,9 +35,9 @@ class ParserBlizzardError(OverfastError):
     """
 
     status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
-    message = "Parser Blizzard Error"
+    message: str | dict[str, Any] = "Parser Blizzard Error"
 
-    def __init__(self, status_code: int, message: str):
+    def __init__(self, status_code: int, message: str | dict[str, Any]):
         super().__init__()
         self.status_code = status_code
         self.message = message
