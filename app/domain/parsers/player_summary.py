@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from app.config import settings
 from app.domain.exceptions import ParserParsingError
 from app.domain.parsers.utils import (
+    build_blizzard_url,
     is_blizzard_id,
     match_player_by_blizzard_id,
     validate_response_status,
@@ -29,7 +30,7 @@ async def fetch_player_summary_json(
         Raw JSON response from Blizzard (list of player dicts)
     """
     player_name = player_id.split("-", 1)[0]
-    url = f"{settings.blizzard_host}{settings.search_account_path}/{player_name}/"
+    url = build_blizzard_url(settings.search_account_path, player_name)
 
     response = await client.get(url)
     validate_response_status(response)

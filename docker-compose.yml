@@ -61,7 +61,7 @@ services:
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-overfast}
       - POSTGRES_USER=${POSTGRES_USER:-overfast}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-overfast}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - pg-data:/var/lib/postgresql
     healthcheck:
@@ -79,8 +79,6 @@ services:
       context: ./build/valkey
     command: sh -c "./entrypoint.sh"
     env_file: ${APP_VOLUME_PATH:-.}/.env
-    # Run as privileged to allow the container to change the vm.overcommit_memory setting
-    privileged: true
     restart: always
     deploy:
       resources:
@@ -164,7 +162,7 @@ services:
     image: prometheuscommunity/postgres-exporter:latest
     command: ["--config.file="]
     environment:
-      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-overfast}:${POSTGRES_PASSWORD:-overfast}@postgres:5432/${POSTGRES_DB:-overfast}?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-overfast}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-overfast}?sslmode=disable
     ports:
       - "${POSTGRES_EXPORTER_PORT:-9187}:9187"
     depends_on:
@@ -216,7 +214,11 @@ services:
       - "${GRAFANA_PORT:-3000}:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      # Compose interpolates every service's environment block up front, even
+      # when the grafana/monitoring profile isn't active, so this can't use
+      # the hard-required `:?` syntax without breaking plain `docker compose up`.
+      # Enforcement instead lives in `just up`/`make up_monitoring` (see justfile/Makefile).
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-}
       - GF_SERVER_ROOT_URL=${GRAFANA_SERVER_ROOT_URL:-%(protocol)s://%(domain)s:%(http_port)s/}
       - GF_USERS_ALLOW_SIGN_UP=false
     depends_on:

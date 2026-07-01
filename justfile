@@ -66,6 +66,9 @@ up profile="":
     {{ docker_compose }} build
     @echo "Stopping OverFastAPI and cleaning containers..."
     {{ docker_compose }} down --remove-orphans
+    @if [ "{{ profile }}" = "monitoring" ] || [ "{{ profile }}" = "grafana" ]; then \
+        grep -qE '^GRAFANA_ADMIN_PASSWORD=.+' .env 2>/dev/null || { echo "ERROR: Set GRAFANA_ADMIN_PASSWORD in .env before using the '{{ profile }}' profile" >&2; exit 1; }; \
+    fi
     @echo "Launching OverFastAPI (production mode)..."
     {{ if profile != "" { docker_compose + " --profile " + profile + " up -d" } else { docker_compose + " up -d" } }}
 

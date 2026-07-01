@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from app.config import settings
 from app.domain.exceptions import ParserParsingError
 from app.domain.parsers.player_helpers import get_player_title
-from app.domain.parsers.utils import validate_response_status
+from app.domain.parsers.utils import build_blizzard_url, validate_response_status
 from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
@@ -24,7 +24,7 @@ async def fetch_player_search_json(client: BlizzardClientPort, name: str) -> lis
         List of player dicts from Blizzard search
     """
     search_name = name.split("-", 1)[0]
-    url = f"{settings.blizzard_host}{settings.search_account_path}/{search_name}/"
+    url = build_blizzard_url(settings.search_account_path, search_name)
 
     response = await client.get(url)
     validate_response_status(response)

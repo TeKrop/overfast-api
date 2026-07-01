@@ -1,16 +1,13 @@
 #!/bin/sh
 
-# WARNING overcommit_memory is set to 0! Background save may fail under low memory condition.
-# To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot
-# or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
-# The overcommit_memory has 3 options.
-# 0, the system kernel check if there is enough memory to be allocated to the process or not, 
-# if not enough, it will return errors to the process.
-# 1, the system kernel is allowed to allocate the whole memory to the process
-# no matter what the status of memory is.
-# 2, the system kernel is allowed to allocate a memory whose size could be bigger than
-# the sum of the size of physical memory and the size of exchange workspace to the process.
-sysctl vm.overcommit_memory=1
+# vm.overcommit_memory is a host-wide (non-namespaced) kernel setting: a container
+# cannot change it without running --privileged, which we don't want to grant.
+# If it's 0 on the host, background save may fail under low memory conditions.
+# Set it on the HOST (not in this container) with:
+#   echo 'vm.overcommit_memory = 1' >> /etc/sysctl.conf && sysctl -p
+if [ "$(cat /proc/sys/vm/overcommit_memory 2>/dev/null)" != "1" ]; then
+    echo ">>> WARNING: host vm.overcommit_memory is not 1; background save may fail under low memory. See entrypoint.sh for the host-side fix." >&2
+fi
 
 # Determine how many CPU cores to use for Valkey
 CORES=$(nproc)

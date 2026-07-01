@@ -1,9 +1,11 @@
 """Common utilities for Blizzard HTML/JSON parsing"""
 
 from typing import TYPE_CHECKING
+from urllib.parse import quote
 
 from selectolax.lexbor import LexborHTMLParser, LexborNode
 
+from app.config import settings
 from app.domain.exceptions import ParserBlizzardError, ParserParsingError
 from app.infrastructure.logger import logger
 
@@ -11,6 +13,17 @@ if TYPE_CHECKING:
     import httpx2
 
 _HTTP_504 = 504
+
+
+def build_blizzard_url(path: str, segment: str) -> str:
+    """Build a Blizzard request URL, percent-quoting a user-supplied segment.
+
+    Blizzard IDs are already %7C-encoded (see extract_blizzard_id_from_url), so
+    that's normalized back to "|" first -- otherwise quote() would re-escape the
+    literal "%" and double-encode it (e.g. "%7C" -> "%257C").
+    """
+    quoted_segment = quote(segment.replace("%7C", "|"), safe="")
+    return f"{settings.blizzard_host}{path}/{quoted_segment}/"
 
 
 def validate_response_status(
