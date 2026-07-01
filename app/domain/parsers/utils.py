@@ -8,13 +8,13 @@ from app.domain.exceptions import ParserBlizzardError, ParserParsingError
 from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
-    import httpx
+    import httpx2
 
 _HTTP_504 = 504
 
 
 def validate_response_status(
-    response: httpx.Response,
+    response: httpx2.Response,
     valid_codes: list[int] | None = None,
 ) -> None:
     """Validate HTTP response status code.

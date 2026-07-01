@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 @pytest.fixture(scope="module", autouse=True)
 def _setup_heroes_test(heroes_html_data: str):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
     ):
         yield
@@ -58,7 +58,7 @@ def test_get_heroes_invalid_gamemode(client: TestClient):
 
 def test_get_heroes_blizzard_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
@@ -85,7 +85,7 @@ def test_get_heroes_internal_error(client: TestClient):
 
 def test_get_heroes_blizzard_forbidden_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_403_FORBIDDEN,
             text="403 Forbidden",

@@ -14,13 +14,13 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.14"]
-        uv-version: ["0.11.8"]
+        uv-version: ["0.11.26"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v8
         with:
           version: "${{ matrix.uv-version }}"
 
@@ -44,7 +44,7 @@ jobs:
 
       - name: Update test coverage badge
         if: github.event_name == 'push'
-        uses: schneegans/dynamic-badges-action@v1.7.0
+        uses: schneegans/dynamic-badges-action@v1.8.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 1362ebafcd51d3f65dae7935b1d322eb
@@ -57,7 +57,7 @@ jobs:
 
       - name: Update python version badge
         if: github.event_name == 'push'
-        uses: schneegans/dynamic-badges-action@v1.7.0
+        uses: schneegans/dynamic-badges-action@v1.8.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 15a234815aa74059953a766a10e92688

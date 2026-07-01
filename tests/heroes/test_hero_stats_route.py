@@ -32,7 +32,7 @@ _COMPETITIVE_PARAMS = {
 
 @pytest.fixture(scope="module", autouse=True)
 def _setup_hero_stats_test(hero_stats_response_mock: Mock):
-    with patch("httpx.AsyncClient.get", return_value=hero_stats_response_mock):
+    with patch("httpx2.AsyncClient.get", return_value=hero_stats_response_mock):
         yield
 
 
@@ -185,7 +185,7 @@ def test_get_hero_stats_order_by_hero_asc_is_sorted(client: TestClient):
 
 def test_get_hero_stats_blizzard_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
@@ -212,7 +212,7 @@ def test_get_hero_stats_internal_error(client: TestClient):
 
 def test_get_hero_stats_blizzard_forbidden_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_403_FORBIDDEN,
             text="403 Forbidden",
@@ -229,7 +229,7 @@ def test_get_hero_stats_blizzard_forbidden_error(client: TestClient):
 
 def test_get_hero_stats_blizzard_forbidden_error_and_caching(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_403_FORBIDDEN, text="403 Forbidden"),
     ):
         response1 = client.get("/heroes/stats", params=_BASE_PARAMS)

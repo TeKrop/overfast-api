@@ -289,7 +289,7 @@ class TestFetchPlayerSummaryJson:
             status_code=status.HTTP_200_OK,
             json=lambda: json_payload,
         )
-        with patch("httpx.AsyncClient.get", return_value=mock_response):
+        with patch("httpx2.AsyncClient.get", return_value=mock_response):
             client = BlizzardClient()
             result = await fetch_player_summary_json(client, "TeKrop-2217")
         assert result == json_payload
@@ -327,7 +327,7 @@ class TestParsePlayerSummaryHighLevel:
             status_code=status.HTTP_200_OK,
             json=lambda: json_payload,
         )
-        with patch("httpx.AsyncClient.get", return_value=mock_response):
+        with patch("httpx2.AsyncClient.get", return_value=mock_response):
             client = BlizzardClient()
             result = await parse_player_summary(
                 client, "TeKrop-2217", blizzard_id="abc123%7Cdef456"

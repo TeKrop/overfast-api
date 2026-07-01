@@ -26,7 +26,7 @@ def test_get_hero(
         pytest.skip("Hero HTML file not saved yet, skipping")
 
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         side_effect=[
             Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
             Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
@@ -45,7 +45,7 @@ def test_get_hero(
 )
 def test_get_unreleased_hero(client: TestClient, hero_html_data: str):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         side_effect=[
             Mock(status_code=status.HTTP_404_NOT_FOUND, text=hero_html_data),
         ],
@@ -58,7 +58,7 @@ def test_get_unreleased_hero(client: TestClient, hero_html_data: str):
 
 def test_get_hero_blizzard_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             text="Service Unavailable",
@@ -85,7 +85,7 @@ def test_get_hero_internal_error(client: TestClient):
 
 def test_get_hero_blizzard_forbidden_error(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(
             status_code=status.HTTP_403_FORBIDDEN,
             text="403 Forbidden",
@@ -113,7 +113,7 @@ def test_get_hero_no_portrait(
 ):
     with (
         patch(
-            "httpx.AsyncClient.get",
+            "httpx2.AsyncClient.get",
             side_effect=[
                 Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
                 Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
@@ -143,7 +143,7 @@ def test_get_hero_no_hitpoints(
 ):
     with (
         patch(
-            "httpx.AsyncClient.get",
+            "httpx2.AsyncClient.get",
             side_effect=[
                 Mock(status_code=status.HTTP_200_OK, text=hero_html_data),
                 Mock(status_code=status.HTTP_200_OK, text=heroes_html_data),
@@ -162,7 +162,7 @@ def test_get_hero_no_hitpoints(
 
 def test_get_hero_blizzard_forbidden_error_and_caching(client: TestClient):
     with patch(
-        "httpx.AsyncClient.get",
+        "httpx2.AsyncClient.get",
         return_value=Mock(status_code=status.HTTP_403_FORBIDDEN, text="403 Forbidden"),
     ):
         response1 = client.get(f"/heroes/{HeroKey.ANA}")

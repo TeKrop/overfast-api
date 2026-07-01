@@ -175,7 +175,7 @@ Router → get_* dependency (api/dependencies.py)
 - Test structure mirrors `app/` DDD layout (`tests/domain/`, `tests/adapters/`, etc.).
 - HTML/JSON fixtures for parser tests: `tests/fixtures/`.
 - Refresh test fixtures from live pages: `just exec "python -m tests.update_test_fixtures"`.
-- `patch("httpx.AsyncClient.get", ...)` is the standard mock pattern for HTTP calls.
+- `patch("httpx2.AsyncClient.get", ...)` is the standard mock pattern for HTTP calls.
 - `pytest.mark.parametrize` used extensively for enum coverage.
 - Tests run in parallel via `pytest-xdist` (`-n auto`). Ensure test isolation.
 
