@@ -19,6 +19,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Prepare environment file
+        run: |
+          cp .env.dist .env
+          echo "POSTGRES_PASSWORD=ci-test-password" >> .env
+          echo "GRAFANA_ADMIN_PASSWORD=ci-test-password" >> .env
+
       - name: Set up uv
         uses: astral-sh/setup-uv@v8.2.0
         with:
