@@ -303,7 +303,13 @@ class TestMarkPlayerUnknown:
             s.unknown_player_retry_multiplier = 2
             s.unknown_player_max_retry = 3600
             await svc._mark_player_unknown("abc123", exc, battletag="TeKrop-2217")
+
         cache.set_player_status.assert_awaited_once()
+        assert isinstance(exc.message, dict)
+        assert exc.message["error"] == "Player not found"
+        assert "retry_after" in exc.message
+        assert "next_check_at" in exc.message
+        assert "check_count" in exc.message
 
     @pytest.mark.asyncio
     async def test_404_increments_check_count(self):
