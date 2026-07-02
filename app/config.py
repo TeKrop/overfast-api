@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     postgres_port: int = 5432
     postgres_db: str = "overfast"
     postgres_user: str = "overfast"
-    postgres_password: str = "overfast"  # noqa: S105
+    postgres_password: str
     postgres_pool_min_size: int = 2
     postgres_pool_max_size: int = 10
 
@@ -261,13 +261,6 @@ class Settings(BaseSettings):
     discord_message_on_rate_limit: bool = False
 
     ############
-    # SENTRY CONFIGURATION
-    ############
-
-    # Sentry DSN
-    sentry_dsn: str = ""
-
-    ############
     # LOCAL
     ############
 
@@ -281,7 +274,9 @@ class Settings(BaseSettings):
 
 @cache
 def get_settings() -> Settings:
-    return Settings()
+    # postgres_password has no default (must be set via env/`.env`); ty can't see
+    # that BaseSettings populates required fields from the environment at runtime.
+    return Settings()  # ty: ignore[missing-argument]
 
 
 settings = get_settings()

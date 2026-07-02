@@ -85,6 +85,7 @@ up_monitoring: ## Build & run with monitoring (Prometheus + Grafana)
 	$(DOCKER_COMPOSE) build
 	@echo "Stopping OverFastAPI and cleaning containers..."
 	$(DOCKER_COMPOSE) down --remove-orphans
+	@grep -qE '^GRAFANA_ADMIN_PASSWORD=.+' .env 2>/dev/null || { echo "ERROR: Set GRAFANA_ADMIN_PASSWORD in .env before using the monitoring profile" >&2; exit 1; }
 	@echo "Launching OverFastAPI with monitoring..."
 	$(DOCKER_COMPOSE) --profile monitoring up -d
 

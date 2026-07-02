@@ -1,10 +1,15 @@
 """Unit tests for player_profile parser module"""
 
-import pytest
+from unittest.mock import Mock, patch
 
+import pytest
+from fastapi import status
+
+from app.adapters.blizzard import BlizzardClient
 from app.domain.enums import PlayerGamemode, PlayerPlatform
 from app.domain.exceptions import ParserBlizzardError
 from app.domain.parsers.player_profile import (
+    fetch_player_html,
     filter_all_stats_data,
     filter_stats_by_query,
     parse_player_profile_html,
@@ -259,3 +264,36 @@ class TestParsePlayerProfileHtml:
         )
 
         assert result["summary"]["avatar"] == "https://example.com/avatar.png"
+
+
+# ---------------------------------------------------------------------------
+# fetch_player_html — URL building
+# ---------------------------------------------------------------------------
+
+
+class TestFetchPlayerHtml:
+    @pytest.mark.asyncio
+    async def test_battletag_player_id_is_url_quoted(self):
+        """A raw BattleTag player_id is percent-quoted in the request URL."""
+        mock_response = Mock(status_code=status.HTTP_200_OK, url="https://example.com")
+
+        with patch("httpx2.AsyncClient.get", return_value=mock_response) as mock_get:
+            client = BlizzardClient()
+            await fetch_player_html(client, "TeKrop/../secrets")
+
+        requested_url = mock_get.call_args.args[0]
+        assert "TeKrop%2F..%2Fsecrets" in requested_url
+
+    @pytest.mark.asyncio
+    async def test_blizzard_id_player_id_is_not_double_encoded(self):
+        """A player_id already in %7C-encoded Blizzard ID form isn't double-quoted."""
+        blizzard_id = "df51a381fe20caf8baa7%7C0bf3b4c47cbebe84b8db9c676a4e9c1f"
+        mock_response = Mock(status_code=status.HTTP_200_OK, url="https://example.com")
+
+        with patch("httpx2.AsyncClient.get", return_value=mock_response) as mock_get:
+            client = BlizzardClient()
+            await fetch_player_html(client, blizzard_id)
+
+        requested_url = mock_get.call_args.args[0]
+        assert requested_url.endswith(f"/{blizzard_id}/")
+        assert "%25" not in requested_url

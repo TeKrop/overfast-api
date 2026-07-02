@@ -31,7 +31,7 @@ The live instance operates with a rate limit applied per second, shared across a
 - Status page : https://uptime-overfast-api.tekrop.fr/
 
 ## 🐋 Run for production
-Running the project is straightforward. Ensure you have `docker` and `docker compose` installed. Next, generate a `.env` file using the provided `.env.dist` template. Finally, if `just` is already installed on your machine, execute the following command :
+Running the project is straightforward. Ensure you have `docker` and `docker compose` installed. Next, generate a `.env` file using the provided `.env.dist` template, and set `POSTGRES_PASSWORD` (and `GRAFANA_ADMIN_PASSWORD` if enabling monitoring) — these ship blank on purpose. `POSTGRES_PASSWORD` is required by docker compose itself; `GRAFANA_ADMIN_PASSWORD` is checked by the `just up`/`make up` monitoring targets before starting the stack. Finally, if `just` is already installed on your machine, execute the following command :
 
 ```shell
 just up
@@ -61,7 +61,7 @@ Should you wish to customize according to your specific requirements, here is a 
 - `APP_VOLUME_PATH`: Folder for shared app data like logs, Valkey save file and dotenv file (app settings)
 - `APP_PORT`: Port for the app container (default is `80`).
 - `APP_BASE_URL` : Base URL for exposed links in endpoints like player search and maps listing.
-- `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`: PostgreSQL connection settings for persistent storage.
+- `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`: PostgreSQL connection settings for persistent storage. `POSTGRES_PASSWORD` has no default and **must** be set in `.env`, docker compose will refuse to start otherwise.
 
 You likely won't need to modify other generic settings, but if you're curious about their functionality, consult the docstrings within the `app/config.py` file for further details.
 
@@ -311,6 +311,8 @@ Enable the full stack with a single command:
 ```shell
 just up monitoring=true
 ```
+
+`GRAFANA_ADMIN_PASSWORD` has no default and **must** be set in `.env`; `just up monitoring`/`make up_monitoring` refuse to start the stack otherwise.
 
 For detailed metric definitions, normalization rules, dashboard descriptions, and troubleshooting, see [app/monitoring/README.md](app/monitoring/README.md).
 

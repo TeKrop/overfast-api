@@ -24,7 +24,10 @@ jobs:
           sudo apt install -y ${{ matrix.tool }}
 
       - name: Prepare environment file
-        run: cp .env.dist .env
+        run: |
+          cp .env.dist .env
+          echo "POSTGRES_PASSWORD=ci-test-password" >> .env
+          echo "GRAFANA_ADMIN_PASSWORD=ci-test-password" >> .env
 
       - name: Build and start stack
         run: ${{ matrix.tool }} ${{ matrix.mode }}

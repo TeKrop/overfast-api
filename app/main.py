@@ -19,10 +19,6 @@ from app.config import settings
 from app.infrastructure.logger import logger
 from app.monitoring import router as monitoring_router
 from app.monitoring.middleware import register_prometheus_middleware
-from app.monitoring.sentry import setup_sentry
-
-setup_sentry()
-
 
 description = f"""OverFast API provides comprehensive data on Overwatch heroes,
 game modes, maps, and player statistics by scraping Blizzard pages. Built with
