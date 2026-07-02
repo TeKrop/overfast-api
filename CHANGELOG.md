@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v4.8.1 (2026-07-02)
+
+### Bug Fixes
+
+- Various security fixes and Sentry support removal
+  ([#434](https://github.com/TeKrop/overfast-api/pull/434),
+  [`ef8f0ba`](https://github.com/TeKrop/overfast-api/commit/ef8f0ba093e91d2028b873a891a6c1bcb17a27d0))
+
+
 ## v4.8.0 (2026-07-01)
 
 ### Chores
