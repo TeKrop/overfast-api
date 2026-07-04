@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v4.8.3 (2026-07-04)
+
+### Bug Fixes
+
+- Fixed uv lock not being properly updated after release
+  ([#437](https://github.com/TeKrop/overfast-api/pull/437),
+  [`b6b3994`](https://github.com/TeKrop/overfast-api/commit/b6b39944309322affcc809885aa37ac8ada8bd85))
+
+
 ## v4.8.2 (2026-07-04)
 
 ### Bug Fixes
