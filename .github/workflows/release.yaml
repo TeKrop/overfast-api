@@ -16,6 +16,10 @@ jobs:
     permissions:
       contents: write
 
+    env:
+      GIT_COMMITTER_NAME: "github-actions"
+      GIT_COMMITTER_EMAIL: "actions@users.noreply.github.com"
+
     steps:
       - name: Setup | Checkout Repository
         uses: actions/checkout@v7
@@ -28,8 +32,8 @@ jobs:
         uses: python-semantic-release/python-semantic-release@v10.5.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          git_committer_name: "github-actions"
-          git_committer_email: "actions@users.noreply.github.com"
+          git_committer_name: ${{ env.GIT_COMMITTER_NAME }}
+          git_committer_email: ${{ env.GIT_COMMITTER_EMAIL }}
 
       - name: Setup | uv
         if: steps.release.outputs.released == 'true'
@@ -42,10 +46,13 @@ jobs:
         run: |
           uv lock
           if ! git diff --quiet -- uv.lock; then
-            git config user.name "github-actions"
-            git config user.email "actions@users.noreply.github.com"
+            # The PSR step's git config above only applies inside its own Docker
+            # container, so it isn't visible to this (non-containerized) step.
+            git config user.name "$GIT_COMMITTER_NAME"
+            git config user.email "$GIT_COMMITTER_EMAIL"
             git add uv.lock
             git commit -m "chore: update uv.lock for v${{ steps.release.outputs.version }}"
+            git pull --rebase
             git push
           fi
   deploy:
