@@ -86,11 +86,12 @@ def get_division_from_icon(rank_url: str) -> CompetitiveDivision:
 
 
 def get_endorsement_value_from_frame(frame_url: str) -> int:
-    """Extracts the endorsement level from the frame URL. 0 if not found."""
-    try:
-        return int(frame_url.rsplit("/", maxsplit=1)[-1].split("-", maxsplit=1)[0])
-    except ValueError:
-        return 0
+    """Extracts the endorsement level from the frame URL. 0 if not found.
+    Handles both "5.<hash>.svg" and "5-<hash>.svg" filename formats.
+    """
+    name = frame_url.rsplit("/", maxsplit=1)[-1].split(".", maxsplit=1)[0]
+    name = name if name.isdigit() else name.split("-", maxsplit=1)[0]
+    return int(name) if name.isdigit() else 0
 
 
 @cache

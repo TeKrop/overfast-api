@@ -126,6 +126,10 @@ def test_get_division_from_icon(rank_url: str, division: CompetitiveDivision):
             "https://static.playoverwatch.com/img/pages/career/icons/endorsement/4-48261e1164.svg#icon",
             4,
         ),
+        (
+            "https://static.playoverwatch.com/images/pages/career/icons/endorsement/5.47a76a6a547ef91d729ae62c21aa0d0ba5487aed.svg#icon",
+            5,
+        ),
     ],
 )
 def test_get_endorsement_value_from_frame(frame_url: str, endorsement_value: int):

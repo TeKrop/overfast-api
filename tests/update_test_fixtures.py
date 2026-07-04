@@ -75,9 +75,12 @@ def list_routes_to_update(args: argparse.Namespace) -> dict[str, str]:
 
     if args.players:
         logger.info("Adding player careers routes...")
+        # career_path already includes the "/en-us" locale prefix, which main()
+        # also prepends to every route, so strip it here to avoid duplication.
+        career_path = settings.career_path.removeprefix(f"/{Locale.ENGLISH_US}")
         route_file_mapping.update(
             **{
-                f"{settings.career_path}/{player_id}/": f"/players/{player_id}.html"
+                f"{career_path}/{player_id}/": f"/players/{player_id}.html"
                 for player_id in [*players_ids, unknown_player_id]
             },
         )
