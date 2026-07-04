@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v4.8.2 (2026-07-04)
+
+### Bug Fixes
+
+- Parse endorsement level from new Blizzard frame URL format
+  ([#436](https://github.com/TeKrop/overfast-api/pull/436),
+  [`a9581bc`](https://github.com/TeKrop/overfast-api/commit/a9581bc9fe3b96732b2aac58fc07518e0a078608))
+
+
 ## v4.8.1 (2026-07-02)
 
 ### Bug Fixes
