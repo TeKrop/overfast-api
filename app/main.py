@@ -37,6 +37,10 @@ This live instance is configured with the following restrictions:
 This limit may be adjusted as needed. If you require higher throughput, consider
 hosting your own instance on a server 👍
 
+🕸️ Prefer GraphQL ? Check out
+[OverGraphQL API](https://github.com/TeKrop/overgraphql-api), a GraphQL facade
+over OverFast API exposing the same data as a single relational graph.
+
 Swagger UI (useful for trying API calls) : {settings.app_base_url}/docs
 
 {f"Status page : {settings.status_page_url}" if settings.status_page_url else ""}

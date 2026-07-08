@@ -10,6 +10,8 @@
 
 > OverFast API provides comprehensive data on Overwatch heroes, game modes, maps, and player statistics by scraping Blizzard pages. Built with **FastAPI** and **Selectolax**, **PostgreSQL** for persistent storage, **Stale-While-Revalidate caching** via **Valkey** and **nginx (OpenResty)**, **taskiq** background workers, and **TCP Slow Start + AIMD throttling** for Blizzard requests.
 
+> 🕸️ Prefer GraphQL ? Check out [**OverGraphQL API**](https://github.com/TeKrop/overgraphql-api), a GraphQL facade over OverFast API exposing the same data as a single relational graph — fetch exactly what you need in one query.
+
 ## Table of contents
 * [✨ Live instance](#-live-instance)
 * [🐋 Run for production](#-run-for-production)
