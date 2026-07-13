@@ -276,7 +276,7 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     # postgres_password has no default (must be set via env/`.env`); ty can't see
     # that BaseSettings populates required fields from the environment at runtime.
-    return Settings()  # ty: ignore[missing-argument]
+    return Settings()
 
 
 settings = get_settings()
