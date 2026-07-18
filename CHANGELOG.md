@@ -2,6 +2,35 @@
 
 <!-- version list -->
 
+## v4.9.0 (2026-07-18)
+
+### Build System
+
+- **deps-dev**: Bump the uv-deps group with 2 updates
+  ([#440](https://github.com/TeKrop/overfast-api/pull/440),
+  [`88d6a6b`](https://github.com/TeKrop/overfast-api/commit/88d6a6bf7f36515e0a656b8e7b99dcb749d6ec4b))
+
+- **deps-dev**: Bump ty from 0.0.55 to 0.0.56 in the uv-deps group
+  ([#438](https://github.com/TeKrop/overfast-api/pull/438),
+  [`5358d6b`](https://github.com/TeKrop/overfast-api/commit/5358d6b2f5d86647819db2ca52386bfa92d1fa71))
+
+### Chores
+
+- Update uv.lock for v4.8.3
+  ([`2eabba1`](https://github.com/TeKrop/overfast-api/commit/2eabba1e15f7103859819cd92c26af1b3f0e9e21))
+
+### Documentation
+
+- Promote OverGraphQL API in README and Redoc description
+  ([#439](https://github.com/TeKrop/overfast-api/pull/439),
+  [`b634782`](https://github.com/TeKrop/overfast-api/commit/b6347821fe8c0d1bd9f356358b11ec459af8537d))
+
+### Features
+
+- Add neon junction ([#441](https://github.com/TeKrop/overfast-api/pull/441),
+  [`649a50b`](https://github.com/TeKrop/overfast-api/commit/649a50bf3bb3d310763c37c8de3ef54540f33436))
+
+
 ## v4.8.3 (2026-07-04)
 
 ### Bug Fixes
