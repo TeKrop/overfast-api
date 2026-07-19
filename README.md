@@ -1,11 +1,11 @@
 # ⚡ OverFast API
-![Python](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/TeKrop/15a234815aa74059953a766a10e92688/raw/python-version.json)
+![Python](https://shields.tekrop.fr/endpoint?url=https://gist.githubusercontent.com/TeKrop/15a234815aa74059953a766a10e92688/raw/python-version.json)
 [![Build Status](https://github.com/TeKrop/overfast-api/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/TeKrop/overfast-api/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=TeKrop_overfast-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=TeKrop_overfast-api)
-![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/TeKrop/1362ebafcd51d3f65dae7935b1d322eb/raw/pytest.json)
-[![Issues](https://img.shields.io/github/issues/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/issues)
-[![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)](https://overfast-api.tekrop.fr)
-[![License: MIT](https://img.shields.io/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)
+![Coverage](https://shields.tekrop.fr/endpoint?url=https://gist.githubusercontent.com/TeKrop/1362ebafcd51d3f65dae7935b1d322eb/raw/pytest.json)
+[![Issues](https://shields.tekrop.fr/github/issues/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/issues)
+[![Documentation](https://shields.tekrop.fr/badge/documentation-yes-brightgreen.svg)](https://overfast-api.tekrop.fr)
+[![License: MIT](https://shields.tekrop.fr/github/license/TeKrop/overfast-api)](https://github.com/TeKrop/overfast-api/blob/master/LICENSE)
 ![Mockup OverFast API](static/logo.png)
 
 > OverFast API provides comprehensive data on Overwatch heroes, game modes, maps, and player statistics by scraping Blizzard pages. Built with **FastAPI** and **Selectolax**, **PostgreSQL** for persistent storage, **Stale-While-Revalidate caching** via **Valkey** and **nginx (OpenResty)**, **taskiq** background workers, and **TCP Slow Start + AIMD throttling** for Blizzard requests.
