@@ -50,7 +50,7 @@ jobs:
 
       - name: Update test coverage badge
         if: github.event_name == 'push'
-        uses: schneegans/dynamic-badges-action@v1.8.0
+        uses: schneegans/dynamic-badges-action@v1.9.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 1362ebafcd51d3f65dae7935b1d322eb
@@ -63,7 +63,7 @@ jobs:
 
       - name: Update python version badge
         if: github.event_name == 'push'
-        uses: schneegans/dynamic-badges-action@v1.8.0
+        uses: schneegans/dynamic-badges-action@v1.9.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 15a234815aa74059953a766a10e92688
