@@ -1,0 +1,16 @@
+.git
+.github
+.venv
+.pytest_cache
+.ruff_cache
+.opencode
+.claude
+htmlcov
+logs
+__pycache__
+*.pyc
+.env
+.env.dist
+*.md
+LICENSE
+docker-compose.yml
