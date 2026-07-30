@@ -45,6 +45,12 @@ You can also use the `Makefile` alternative :
 make up
 ```
 
+> ⚠️ **Running behind another reverse proxy?** Set `TRUSTED_PROXY_CIDRS` in your `.env`, otherwise all your users will share a single rate limit bucket.
+>
+> nginx rate limits per client IP using the TCP peer address. When another proxy sits in front of the stack, every request appears to come from that proxy, so the whole traffic ends up throttled as one client. Set `TRUSTED_PROXY_CIDRS` to the CIDR(s) your proxy connects from (e.g. `172.16.0.0/12` for a host level proxy reaching the published port), so the real client IP is recovered from the `X-Forwarded-For` header. Your proxy must forward it with `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`.
+>
+> Leave it empty when nginx is exposed directly to the internet : the header is then ignored, which is exactly what prevents clients from spoofing it to bypass the rate limit. Never set it to `0.0.0.0/0`, as it would trust every client and allow anyone to bypass the rate limit.
+
 ## 💽 Run as developer
 Same as earlier, ensure you have `docker` and `docker compose` installed, and generate a `.env` file using the provided `.env.dist` template. You can customize the `.env` file according to your requirements to configure the volumes used by the OverFast API.
 
@@ -63,6 +69,7 @@ Should you wish to customize according to your specific requirements, here is a 
 - `APP_VOLUME_PATH`: Folder for shared app data like logs, Valkey save file and dotenv file (app settings)
 - `APP_PORT`: Port for the app container (default is `80`).
 - `APP_BASE_URL` : Base URL for exposed links in endpoints like player search and maps listing.
+- `TRUSTED_PROXY_CIDRS`: Comma-separated CIDRs of upstream proxies allowed to set `X-Forwarded-For` (e.g. `10.0.0.0/8,172.16.0.0/12`). Empty by default, meaning rate limits key on the TCP peer address. See the warning in the [production section](#-run-for-production).
 - `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`: PostgreSQL connection settings for persistent storage. `POSTGRES_PASSWORD` has no default and **must** be set in `.env`, docker compose will refuse to start otherwise.
 
 You likely won't need to modify other generic settings, but if you're curious about their functionality, consult the docstrings within the `app/config.py` file for further details.
