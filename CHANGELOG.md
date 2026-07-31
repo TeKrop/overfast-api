@@ -2,6 +2,39 @@
 
 <!-- version list -->
 
+## v4.9.1 (2026-07-30)
+
+### Bug Fixes
+
+- **nginx**: Key rate limits on real peer address instead of X-Forwarded-For
+  ([`cefb5ba`](https://github.com/TeKrop/overfast-api/commit/cefb5ba51b099ca7a85a144fea8c21821a5669ac))
+
+### Build System
+
+- **deps**: Bump astral-sh/setup-uv from 8.2.0 to 9.0.0
+  ([#442](https://github.com/TeKrop/overfast-api/pull/442),
+  [`743a815`](https://github.com/TeKrop/overfast-api/commit/743a815e40de88796d64326f670719fa848a9424))
+
+- **deps**: Bump python-semantic-release/python-semantic-release
+  ([#443](https://github.com/TeKrop/overfast-api/pull/443),
+  [`3b69813`](https://github.com/TeKrop/overfast-api/commit/3b69813f3c3bf194536c007d19d17b0c13e3231e))
+
+- **deps**: Bump schneegans/dynamic-badges-action from 1.8.0 to 1.9.0
+  ([#444](https://github.com/TeKrop/overfast-api/pull/444),
+  [`f7041cd`](https://github.com/TeKrop/overfast-api/commit/f7041cd824be95c6ea96191a2ce0760d000f5d71))
+
+### Chores
+
+- Add .dockerignore ([#445](https://github.com/TeKrop/overfast-api/pull/445),
+  [`8d32cf8`](https://github.com/TeKrop/overfast-api/commit/8d32cf8e5b7e3e8204d377c861a1adeb9a4c7b88))
+
+- Add weekly update schedules for Docker and GitHub Actions
+  ([`765c203`](https://github.com/TeKrop/overfast-api/commit/765c203423ff079e890bea47a29e5dba6e81779e))
+
+- Update uv.lock for v4.9.0
+  ([`a9aaae9`](https://github.com/TeKrop/overfast-api/commit/a9aaae94a5cb11f0781a6638ee344efde1a3bc09))
+
+
 ## v4.9.0 (2026-07-18)
 
 ### Build System
