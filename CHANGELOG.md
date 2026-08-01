@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v4.9.2 (2026-08-01)
+
+### Bug Fixes
+
+- Exclude the uv.lock bump commit from the generated changelog
+  ([#446](https://github.com/TeKrop/overfast-api/pull/446),
+  [`c326bab`](https://github.com/TeKrop/overfast-api/commit/c326babbac4b6bb531042bf032a4de4d38c1b1bd))
+
+### Documentation
+
+- Document TRUSTED_PROXY_CIDRS for deployments behind a reverse proxy
+  ([`8ba265f`](https://github.com/TeKrop/overfast-api/commit/8ba265ffa39c33287b8e81cbe650b4aaba5a581f))
+
+
 ## v4.9.1 (2026-07-30)
 
 ### Bug Fixes
