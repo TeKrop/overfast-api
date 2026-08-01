@@ -169,5 +169,8 @@ version_toml = ["pyproject.toml:project.version"]
 [tool.semantic_release.commit_parser_options]
 parse_squash_commits = false
 
+[tool.semantic_release.changelog]
+exclude_commit_patterns = ['^chore: update uv\.lock for v\d+\.\d+\.\d+$']
+
 [tool.semantic_release.publish]
 upload_to_vcs_release = false
