@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v4.10.0 (2026-08-08)
+
+### Build System
+
+- **deps**: Bump aiohttp from 3.14.1 to 3.14.3
+  ([#447](https://github.com/TeKrop/overfast-api/pull/447),
+  [`367a662`](https://github.com/TeKrop/overfast-api/commit/367a6624f6f83bf8311fb7cd3a024de6a30441ef))
+
+- **deps**: Bump h2 from 4.3.0 to 4.4.1 ([#448](https://github.com/TeKrop/overfast-api/pull/448),
+  [`5820181`](https://github.com/TeKrop/overfast-api/commit/58201815f992cc1f5df947d4aebcb976fd5ae1f2))
+
+### Features
+
+- Added D.Mon hero ([#449](https://github.com/TeKrop/overfast-api/pull/449),
+  [`a04d290`](https://github.com/TeKrop/overfast-api/commit/a04d2902ade925f56a4b0aa4d95183a2927f1e3a))
+
+
 ## v4.9.2 (2026-08-01)
 
 ### Bug Fixes
