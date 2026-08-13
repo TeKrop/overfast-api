@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v4.11.0 (2026-08-13)
+
+### Features
+
+- Added emerald competitive division ([#451](https://github.com/TeKrop/overfast-api/pull/451),
+  [`524bee5`](https://github.com/TeKrop/overfast-api/commit/524bee5ee44fb49e24e04a5c838e0118151099b4))
+
+
 ## v4.10.0 (2026-08-08)
 
 ### Build System
