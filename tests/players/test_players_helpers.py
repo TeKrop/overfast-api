@@ -71,6 +71,10 @@ def test_get_computed_stat_value(input_str: str, result: float | str):
             CompetitiveDivision.DIAMOND,
         ),
         (
+            "https://static.playoverwatch.com/img/pages/career/icons/rank/EmeraldTier-2-397f8722e0.png",
+            CompetitiveDivision.EMERALD,
+        ),
+        (
             "https://static.playoverwatch.com/img/pages/career/icons/rank/MasterTier-4-397f8722e0.png",
             CompetitiveDivision.MASTER,
         ),
