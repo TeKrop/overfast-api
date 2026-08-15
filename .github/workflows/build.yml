@@ -32,5 +32,10 @@ jobs:
         run: uv run ty check .
 
       - name: Run tests suite
+        # postgres_password is the only Settings field without a default, and
+        # app/config.py instantiates Settings at import time, so pytest fails
+        # during conftest collection without it.
+        env:
+          POSTGRES_PASSWORD: ci-test-password
         run: |
           PYTHONPATH=app/ uv run python -m pytest -v --cov-fail-under=80 --cov-report=term-missing --cov=app/ tests/
