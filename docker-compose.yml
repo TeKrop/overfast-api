@@ -165,7 +165,8 @@ services:
     environment:
       - REDIS_ADDR=valkey:6379
     ports:
-      - "${VALKEY_EXPORTER_PORT:-9121}:9121"
+      # Bind to loopback only — exporters expose unauthenticated internals.
+      - "127.0.0.1:${VALKEY_EXPORTER_PORT:-9121}:9121"
     depends_on:
       valkey:
         condition: service_healthy
@@ -193,7 +194,8 @@ services:
     environment:
       - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-overfast}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-overfast}?sslmode=disable
     ports:
-      - "${POSTGRES_EXPORTER_PORT:-9187}:9187"
+      # Bind to loopback only — exporters expose unauthenticated internals.
+      - "127.0.0.1:${POSTGRES_EXPORTER_PORT:-9187}:9187"
     depends_on:
       postgres:
         condition: service_healthy
@@ -219,7 +221,8 @@ services:
       - ./build/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
     ports:
-      - "${PROMETHEUS_PORT:-9090}:9090"
+      # Bind to loopback only — Prometheus has no authentication.
+      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
     depends_on:
       - nginx
       - app
@@ -240,10 +243,11 @@ services:
       - ./build/grafana/provisioning:/etc/grafana/provisioning
       - grafana-data:/var/lib/grafana
     ports:
-      - "${GRAFANA_PORT:-3000}:3000"
+      # Bind to loopback only — front it with Caddy if it needs to be public.
+      - "127.0.0.1:${GRAFANA_PORT:-3000}:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env}
       - GF_SERVER_ROOT_URL=${GRAFANA_SERVER_ROOT_URL:-%(protocol)s://%(domain)s:%(http_port)s/}
       - GF_USERS_ALLOW_SIGN_UP=false
     depends_on:
