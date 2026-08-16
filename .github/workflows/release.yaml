@@ -45,51 +45,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Create .env from defaults
-        run: |
-          cp .env.dist .env
-          sed -i 's/^APP_PORT=.*/APP_PORT=8080/' .env
-          # .env.dist ships POSTGRES_PASSWORD/GRAFANA_ADMIN_PASSWORD empty
-          # (must be set explicitly); supply CI values so postgres auth works.
-          sed -i 's/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=ci-test-password/' .env
-          sed -i 's/^GRAFANA_ADMIN_PASSWORD=.*/GRAFANA_ADMIN_PASSWORD=ci-test-password/' .env
-
-      - name: Build and start services
-        run: |
-          docker compose build
-          docker compose up -d
-
-      - name: Wait for services to be healthy
-        run: |
-          set -euo pipefail
-          SERVICES="app nginx valkey"
-          TIMEOUT=150
-          INTERVAL=5
-          for i in $(seq 1 $((TIMEOUT / INTERVAL))); do
-            HEALTHY=0
-            for SERVICE in $SERVICES; do
-              STATUS=$(docker compose ps --format json | jq -rs \
-                "[.[] | select(.Service == \"$SERVICE\")] | .[0].Health // \"starting\"")
-              [ "$STATUS" = "healthy" ] && HEALTHY=$((HEALTHY + 1))
-            done
-            ELAPSED=$((i * INTERVAL))
-            echo "[$ELAPSED/${TIMEOUT}s] $HEALTHY/3 services healthy"
-            [ "$HEALTHY" -eq 3 ] && exit 0
-            sleep $INTERVAL
-          done
-          echo "::error::Services did not become healthy in time"
-          docker compose ps
-          docker compose logs --tail=200
-          exit 1
-
-      - name: Validate critical endpoints
-        run: |
-          set -euo pipefail
-          BASE_URL="http://localhost:8080"
-          curl -sf --compressed "$BASE_URL/openapi.json" | jq -e '.openapi' > /dev/null
-          curl -sf --compressed "$BASE_URL/roles" | jq -e 'length == 3' > /dev/null
-          curl -sf --compressed "$BASE_URL/heroes" | jq -e 'length >= 40' > /dev/null
-          echo "Critical endpoints OK"
+      - name: Run smoke test
+        run: bash scripts/smoke-test.sh
 
       - name: Dump logs on failure
         if: failure()

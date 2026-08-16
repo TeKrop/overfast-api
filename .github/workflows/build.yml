@@ -39,3 +39,20 @@ jobs:
           POSTGRES_PASSWORD: ci-test-password
         run: |
           PYTHONPATH=app/ uv run python -m pytest -v --cov-fail-under=80 --cov-report=term-missing --cov=app/ tests/
+
+  smoke-test:
+    name: Smoke test (Docker)
+    runs-on: ubuntu-latest
+
+    # Runs the same script as the deploy gate in release.yaml. Without it a PR
+    # can be green on unit tests and still break the compose stack, which is
+    # only discovered after the merge to main has already triggered a deploy.
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run smoke test
+        run: bash scripts/smoke-test.sh
+
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose logs --tail=200
