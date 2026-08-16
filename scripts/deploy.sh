@@ -57,14 +57,25 @@ log "  nginx  : ${NGINX_IMAGE_BEFORE:-<none>}"
 log "  valkey : ${VALKEY_IMAGE_BEFORE:-<none>}"
 
 # ── Step 2: Build all images, pulling fresh base layers ──────────────────────
-# --pull: re-fetch FROM bases (postgres:17-alpine, valkey/valkey:9-alpine,
-# python, openresty, ...). Without it we silently skip security/feature
-# updates whenever the registry tag is unchanged but its content moved.
+# --pull: re-fetch FROM bases of the services we build ourselves
+# (python, openresty, valkey/valkey:9-alpine, ...). Without it we silently
+# skip security/feature updates whenever the registry tag is unchanged but
+# its content moved.
 log "Building Docker images (--pull)..."
 docker compose build --pull 2>&1 | tee -a "$LOG_FILE"
 log "Build complete."
 
 # ── Step 3: Ensure postgres is running and healthy ───────────────────────────
+# postgres is the only service in the default profile without a `build:`
+# context, so `build --pull` above never touches it and `up -d` reuses
+# whatever is in the local image store. Pull it explicitly, otherwise the
+# tag stays frozen at whatever was first pulled onto the host.
+# Non-fatal: a registry outage or rate limit must not abort a deploy that
+# has no postgres change to apply.
+log "Pulling postgres base image..."
+docker compose pull postgres 2>&1 | tee -a "$LOG_FILE" \
+    || log "WARNING: postgres pull failed, continuing with the local image."
+
 # `docker compose up -d --no-deps` is idempotent: only recreates the
 # container when image or config changed.
 log "Ensuring postgres is running..."
