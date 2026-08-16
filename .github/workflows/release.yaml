@@ -49,6 +49,10 @@ jobs:
         run: |
           cp .env.dist .env
           sed -i 's/^APP_PORT=.*/APP_PORT=8080/' .env
+          # .env.dist ships POSTGRES_PASSWORD/GRAFANA_ADMIN_PASSWORD empty
+          # (must be set explicitly); supply CI values so postgres auth works.
+          sed -i 's/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=ci-test-password/' .env
+          sed -i 's/^GRAFANA_ADMIN_PASSWORD=.*/GRAFANA_ADMIN_PASSWORD=ci-test-password/' .env
 
       - name: Build and start services
         run: |

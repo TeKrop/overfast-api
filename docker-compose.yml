@@ -77,7 +77,7 @@ services:
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-overfast}
       - POSTGRES_USER=${POSTGRES_USER:-overfast}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-overfast}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     restart: unless-stopped
     deploy:
       resources:
@@ -191,7 +191,7 @@ services:
     image: prometheuscommunity/postgres-exporter:latest
     command: ["--config.file="]
     environment:
-      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-overfast}:${POSTGRES_PASSWORD:-overfast}@postgres:5432/${POSTGRES_DB:-overfast}?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-overfast}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-overfast}?sslmode=disable
     ports:
       - "${POSTGRES_EXPORTER_PORT:-9187}:9187"
     depends_on:
