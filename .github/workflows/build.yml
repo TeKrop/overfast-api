@@ -26,7 +26,7 @@ jobs:
           echo "GRAFANA_ADMIN_PASSWORD=ci-test-password" >> .env
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v9.0.0
+        uses: astral-sh/setup-uv@v10.0.1
         with:
           version: "${{ matrix.uv-version }}"
 
