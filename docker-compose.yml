@@ -177,7 +177,7 @@ services:
     profiles:
       - monitoring
       - prometheus
-    image: oliver006/redis_exporter:alpine
+    image: oliver006/redis_exporter:v1.90.0-alpine
     environment:
       - REDIS_ADDR=valkey:6379
     ports:
@@ -206,7 +206,7 @@ services:
     profiles:
       - monitoring
       - prometheus
-    image: prometheuscommunity/postgres-exporter:latest
+    image: prometheuscommunity/postgres-exporter:v0.20.1
     command: ["--config.file="]
     environment:
       - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-overfast}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-overfast}?sslmode=disable
@@ -228,7 +228,7 @@ services:
     profiles:
       - monitoring
       - prometheus
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.14.0
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -257,7 +257,7 @@ services:
     profiles:
       - monitoring
       - grafana
-    image: grafana/grafana:latest
+    image: grafana/grafana:13.2.0
     volumes:
       - ./build/grafana/provisioning:/etc/grafana/provisioning
       - grafana-data:/var/lib/grafana
