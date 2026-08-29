@@ -84,7 +84,11 @@ services:
         limits:
           memory: 1g
     volumes:
-      - pg-data:/var/lib/postgresql
+      # Must be the PGDATA path itself: postgres:17 declares
+      # VOLUME /var/lib/postgresql/data, which shadows a mount on the parent
+      # with an anonymous volume — `docker compose down` then drops the cluster.
+      # (Upstream mounts the parent because it runs postgres:18, where PGDATA moved up.)
+      - pg-data:/var/lib/postgresql/data
     healthcheck:
       test:
         [

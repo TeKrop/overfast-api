@@ -53,6 +53,12 @@ jobs:
       - name: Run smoke test
         run: bash scripts/smoke-test.sh
 
+      # The smoke test only reads static endpoints, so it stayed green while
+      # the cluster was written to a throwaway anonymous volume. This asserts
+      # the database actually survives a container lifecycle.
+      - name: Run persistence test
+        run: bash scripts/persistence-test.sh
+
       - name: Dump logs on failure
         if: failure()
         run: docker compose logs --tail=200

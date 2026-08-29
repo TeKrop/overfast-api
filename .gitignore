@@ -99,6 +99,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.smoke-backup
 .venv
 env/
 venv/

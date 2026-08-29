@@ -29,10 +29,18 @@ fail() {
 # .env.dist ships POSTGRES_PASSWORD/GRAFANA_ADMIN_PASSWORD empty on purpose
 # (docker-compose.yml requires them via ${VAR:?}), so supply test values.
 echo "=== Creating .env from defaults ==="
-cp .env.dist .env
-sed -i'' -e 's/^APP_PORT=.*/APP_PORT=8080/' .env
-sed -i'' -e 's/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=ci-test-password/' .env
-sed -i'' -e 's/^GRAFANA_ADMIN_PASSWORD=.*/GRAFANA_ADMIN_PASSWORD=ci-test-password/' .env
+# Keep a local developer .env recoverable — this script is runnable by hand.
+# Plain `[ -f .env ] && ...` would abort under `set -e` when no .env exists.
+if [ -f .env ]; then
+    cp .env .env.smoke-backup
+    echo "  existing .env saved to .env.smoke-backup"
+fi
+# One non-in-place pass: `sed -i'' -e` is read by BSD sed (macOS) as a backup
+# suffix of "-e", which left a credential-carrying .env-e behind on every run.
+sed -e 's/^APP_PORT=.*/APP_PORT=8080/' \
+    -e 's/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=ci-test-password/' \
+    -e 's/^GRAFANA_ADMIN_PASSWORD=.*/GRAFANA_ADMIN_PASSWORD=ci-test-password/' \
+    .env.dist > .env
 
 # ── Step 2: Build and start ──────────────────────────────────────────────────
 echo "=== Building and starting services ==="
