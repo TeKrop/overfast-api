@@ -1,3 +1,11 @@
+# Long-lived services on the default json-file driver grow without bound; a
+# full disk on the VPS takes down postgres and valkey together.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   app:
     build:
@@ -6,6 +14,7 @@ services:
     command: /code/.venv/bin/fastapi run app/main.py --port 8080 --proxy-headers
     env_file: ${APP_VOLUME_PATH:-.}/.env
     restart: unless-stopped
+    logging: *default-logging
     deploy:
       resources:
         limits:
@@ -30,6 +39,7 @@ services:
     command: /code/.venv/bin/taskiq worker app.adapters.tasks.worker:broker --workers 1
     env_file: ${APP_VOLUME_PATH:-.}/.env
     restart: unless-stopped
+    logging: *default-logging
     deploy:
       resources:
         limits:
@@ -56,6 +66,7 @@ services:
     command: /code/.venv/bin/taskiq scheduler app.adapters.tasks.worker:scheduler
     env_file: ${APP_VOLUME_PATH:-.}/.env
     restart: unless-stopped
+    logging: *default-logging
     deploy:
       resources:
         limits:
@@ -79,6 +90,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-overfast}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     restart: unless-stopped
+    logging: *default-logging
     deploy:
       resources:
         limits:
@@ -104,9 +116,8 @@ services:
       context: ./build/valkey
     command: sh -c "./entrypoint.sh"
     env_file: ${APP_VOLUME_PATH:-.}/.env
-    # Run as privileged to allow the container to change the vm.overcommit_memory setting
-    privileged: true
     restart: unless-stopped
+    logging: *default-logging
     deploy:
       resources:
         limits:
@@ -122,6 +133,7 @@ services:
     build:
       context: ./build/nginx
     restart: unless-stopped
+    logging: *default-logging
     deploy:
       resources:
         limits:
@@ -188,6 +200,7 @@ services:
       timeout: 5s
       retries: 3
     restart: unless-stopped
+    logging: *default-logging
 
   postgres-exporter:
     profiles:
@@ -209,6 +222,7 @@ services:
       timeout: 5s
       retries: 3
     restart: unless-stopped
+    logging: *default-logging
 
   prometheus:
     profiles:
@@ -231,6 +245,7 @@ services:
       - nginx
       - app
     restart: unless-stopped
+    logging: *default-logging
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
       interval: 10s
@@ -257,6 +272,7 @@ services:
     depends_on:
       - prometheus
     restart: unless-stopped
+    logging: *default-logging
     healthcheck:
       test:
         ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
