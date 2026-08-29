@@ -56,6 +56,11 @@ class BlizzardThrottle(metaclass=Singleton):
     def __init__(self) -> None:
         self._cache: CachePort = ValkeyCache()
         self._penalty_start: float | None = None
+        # Serialises the read-sleep-write in wait_before_request. Without it,
+        # concurrent requests all read the same last_request, compute the same
+        # wait, sleep in parallel and fire simultaneously — one delay per burst
+        # instead of per request, exactly when the throttle matters most.
+        self._pace_lock = asyncio.Lock()
 
     async def get_current_delay(self) -> float:
         """Return the current inter-request delay (seconds)."""
@@ -98,19 +103,22 @@ class BlizzardThrottle(metaclass=Singleton):
         if remaining > 0:
             raise RateLimitedError(retry_after=remaining)
 
-        delay = await self.get_current_delay()
-        raw_last = await self._cache.get(_LAST_REQUEST_KEY)
-        if raw_last:
-            wait = max(0.0, delay - (time.time() - float(raw_last)))
-            if wait > 0:
-                if settings.prometheus_enabled:
-                    throttle_wait_seconds.observe(wait)
-                logger.debug(
-                    "[Throttle] Waiting {:.2f}s before next Blizzard request", wait
-                )
-                await asyncio.sleep(wait)
+        # Held across the whole read-sleep-write so that N concurrent callers
+        # pace one after another rather than all waking at the same instant.
+        async with self._pace_lock:
+            delay = await self.get_current_delay()
+            raw_last = await self._cache.get(_LAST_REQUEST_KEY)
+            if raw_last:
+                wait = max(0.0, delay - (time.time() - float(raw_last)))
+                if wait > 0:
+                    if settings.prometheus_enabled:
+                        throttle_wait_seconds.observe(wait)
+                    logger.debug(
+                        "[Throttle] Waiting {:.2f}s before next Blizzard request", wait
+                    )
+                    await asyncio.sleep(wait)
 
-        await self._cache.set(_LAST_REQUEST_KEY, str(time.time()).encode())
+            await self._cache.set(_LAST_REQUEST_KEY, str(time.time()).encode())
 
     async def adjust_delay(self, status_code: int) -> None:
         """Update the throttle delay based on the observed response.

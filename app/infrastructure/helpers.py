@@ -1,8 +1,12 @@
 """Infrastructure helpers — error reporting and Discord notifications."""
 
+import asyncio
 import traceback
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from asyncio import Future
 
 import httpx2
 from fastapi import HTTPException, status
@@ -156,6 +160,26 @@ def send_discord_webhook_message(
     embed = _build_embed(title, description, url, fields, color)
     payload = {"username": "OverFast API", "embeds": [embed]}
 
-    return httpx2.post(  # pragma: no cover
-        settings.discord_webhook_url, json=payload, timeout=10
+    # This fires from async paths — a Blizzard 403 penalty and the unhandled
+    # exception handlers — so a synchronous post would freeze the event loop for
+    # up to the full timeout precisely when the API is already degraded.
+    # Off the loop when there is one; direct when called synchronously.
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        return _post_webhook(payload)
+
+    loop.run_in_executor(None, _post_webhook, payload).add_done_callback(
+        _log_webhook_failure
     )
+    return None
+
+
+def _post_webhook(payload: dict[str, Any]) -> httpx2.Response:  # pragma: no cover
+    return httpx2.post(settings.discord_webhook_url, json=payload, timeout=10)
+
+
+def _log_webhook_failure(future: Future[httpx2.Response]) -> None:
+    """Surface delivery errors that would otherwise vanish in the executor."""
+    if exc := future.exception():
+        logger.error("Discord webhook delivery failed: {}", exc)

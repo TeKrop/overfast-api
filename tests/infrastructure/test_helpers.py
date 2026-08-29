@@ -1,3 +1,5 @@
+import threading
+import time
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -205,6 +207,40 @@ class TestSendDiscordWebhookMessage:
         assert embed["color"] == 0x00FF00  # noqa: PLR2004
         assert embed["fields"] == [{"name": "Field", "value": "Value"}]
         assert result is mock_response
+
+    @pytest.mark.asyncio
+    async def test_does_not_block_the_event_loop(self):
+        """Inside a running loop the post is offloaded and the caller returns at once.
+
+        The webhook fires from the Blizzard 403 penalty path and from the
+        unhandled-exception handlers, so a synchronous 10s post froze the whole
+        worker exactly when the API was already degraded.
+        """
+        started = threading.Event()
+
+        def slow_post(*_args, **_kwargs):
+            started.set()
+            time.sleep(0.4)
+            return MagicMock()
+
+        with (
+            patch("app.infrastructure.helpers.settings.discord_webhook_enabled", True),
+            patch(
+                "app.infrastructure.helpers.settings.discord_webhook_url",
+                "https://discord.example.com/webhook",
+            ),
+            patch("httpx2.post", side_effect=slow_post),
+        ):
+            start = time.monotonic()
+            result = send_discord_webhook_message(
+                title="Offloaded", description="must not block"
+            )
+            elapsed = time.monotonic() - start
+
+            # Blocking would make this >= 0.4s; offloaded it returns immediately.
+            assert elapsed < 0.2, f"caller blocked for {elapsed:.3f}s"  # noqa: PLR2004
+            assert result is None  # nothing to return once offloaded
+            assert started.wait(timeout=2), "the post never ran in the executor"
 
 
 # ── overfast_internal_error ───────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 """Unit tests for BlizzardThrottle adaptive rate limiter."""
 
+import asyncio
 import time
 from http import HTTPStatus
 from typing import TYPE_CHECKING
@@ -356,3 +357,51 @@ class TestAdjustDelay:
             if c[0][0] == _DELAY_KEY
         )
         assert delay_set == settings.throttle_max_delay
+
+
+class TestConcurrentPacing:
+    """The throttle must pace concurrent callers, not just sequential ones."""
+
+    @pytest.mark.asyncio
+    async def test_concurrent_requests_are_paced_one_by_one(self) -> None:
+        """A burst of N callers costs ~N delays, not one.
+
+        wait_before_request reads last_request, sleeps, then writes it back.
+        Unsynchronised, every caller in a burst reads the same timestamp,
+        computes the same wait, sleeps in parallel and fires simultaneously —
+        so the AIMD delay collapses to one delay per burst exactly when
+        traffic spikes. Without the pace lock this finishes in ~1 delay.
+        """
+        store: dict[bytes | str, bytes] = {}
+        cache = AsyncMock()
+        cache.get = AsyncMock(side_effect=store.get)
+        cache.set = AsyncMock(
+            side_effect=lambda key, value, *_a, **_kw: store.__setitem__(key, value)
+        )
+
+        with patch(
+            "app.adapters.blizzard.throttle.ValkeyCache",
+            return_value=cache,
+        ):
+            throttle = BlizzardThrottle()
+
+        delay = 0.05
+        callers = 4
+
+        # The autouse conftest fixture zeroes throttle_start_delay; restore a
+        # measurable delay for this test only.
+        with patch(
+            "app.adapters.blizzard.throttle.settings.throttle_start_delay", delay
+        ):
+            await throttle.wait_before_request()  # prime last_request
+            start = time.monotonic()
+            await asyncio.gather(
+                *(throttle.wait_before_request() for _ in range(callers))
+            )
+            elapsed = time.monotonic() - start
+
+        # Serialised: ~callers * delay. Parallel (the bug): ~1 * delay.
+        assert elapsed >= delay * (callers - 1), (
+            f"burst of {callers} finished in {elapsed:.3f}s; "
+            f"expected >= {delay * (callers - 1):.3f}s"
+        )
