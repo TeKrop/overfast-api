@@ -255,8 +255,24 @@ def _get_platform_competitive_ranks(
             rank_tier_icons[1].attributes["src"] or "",
         )
 
+        try:
+            division = get_division_from_icon(rank_icon).value
+        except ValueError:
+            # Blizzard ships a new division before we can add it to the enum
+            # (emerald did exactly that). The ValueError is not in the set
+            # _parse_summary catches, so it used to surface as a 500 for every
+            # player in that tier. Degrade the role to "no rank" instead — the
+            # loop below already represents an unranked role as None.
+            logger.warning(
+                "[Player] Unknown competitive division in rank icon {} — "
+                "reporting role {} as unranked",
+                rank_icon,
+                role_key,
+            )
+            continue
+
         competitive_ranks[role_key] = {
-            "division": get_division_from_icon(rank_icon).value,
+            "division": division,
             "tier": get_tier_from_icon(tier_icon),
             "role_icon": role_icon,
             "rank_icon": rank_icon,

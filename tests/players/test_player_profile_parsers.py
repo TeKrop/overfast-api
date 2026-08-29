@@ -297,3 +297,33 @@ class TestFetchPlayerHtml:
         requested_url = mock_get.call_args.args[0]
         assert requested_url.endswith(f"/{blizzard_id}/")
         assert "%25" not in requested_url
+
+
+class TestUnknownCompetitiveDivision:
+    """Blizzard ships new ranks before the enum knows them."""
+
+    def test_unknown_division_degrades_to_unranked_instead_of_500(self):
+        """An unrecognised rank icon must not take the whole profile down.
+
+        get_division_from_icon raises ValueError for a division missing from
+        the enum, and _parse_summary only catches AttributeError/KeyError/
+        IndexError/TypeError — so every player in a newly released tier got a
+        500 until someone patched the enum. Emerald was exactly this case.
+        """
+        # Rename the tier in the fixture to one the enum cannot know.
+        html = _TEKROP_HTML.replace("Rank_SilverTier", "Rank_AscendantTier")
+        assert "Rank_AscendantTier" in html, "fixture no longer carries a rank icon"
+
+        result = parse_player_profile_html(html)
+
+        # The profile still parses, and the affected roles report no rank
+        # rather than blowing up the request.
+        competitive = result["summary"]["competitive"]
+        assert competitive is not None
+        for platform_ranks in competitive.values():
+            if not isinstance(platform_ranks, dict):
+                continue
+            for role, rank in platform_ranks.items():
+                if role == "season":
+                    continue
+                assert rank is None, f"{role} should be unranked, got {rank}"
