@@ -146,25 +146,36 @@ Caddy automatically obtains and renews SSL certificates from Let's Encrypt.
 
 ### Updating the Deployment
 
-**Update from your fork:**
-```bash
-cd /opt/overfast-api
-git pull
-docker compose down
-docker compose build
-docker compose up -d
-```
+**Normal path — don't deploy by hand.** Merging to `main` runs
+`.github/workflows/release.yaml`: semantic-release, then the smoke test, then a
+zero-downtime deploy over SSH. To redeploy the current `main` without a code
+change, run that workflow manually from the Actions tab (`workflow_dispatch`).
 
-**Sync with upstream (original repo):**
+**On the box**, if you ever need to deploy manually:
 ```bash
-cd /opt/overfast-api
-git remote add upstream https://github.com/TeKrop/overfast-api.git  # Only once
-git fetch upstream
-git merge upstream/main
-docker compose down
-docker compose build
-docker compose up -d
+/opt/deploy-overfast.sh
 ```
+It reconciles the checkout and calls `scripts/deploy.sh`, which rolls the app
+container with a second instance before retiring the old one, and reloads nginx
+rather than restarting it.
+
+> ⚠️ Do **not** deploy with `docker compose down && build && up -d`. Beyond the
+> hard downtime, `down` removes the containers and drops the cache: valkey loses
+> its API cache and every player profile has to be refetched from Blizzard
+> behind the throttle.
+
+**Staying current with upstream.** This fork is deliberately divergent — `app/`
+is fork-owned and there is no automatic merge. Upstream is still the fastest
+source of Blizzard compatibility (new heroes, maps and competitive divisions
+usually land there within days), so track it as a cherry-pick source:
+```bash
+git remote add upstream https://github.com/TeKrop/overfast-api.git  # once
+git fetch upstream --no-tags
+git log --oneline HEAD..upstream/main -- app/domain/parsers/ app/domain/utils/data/
+git cherry-pick <sha>
+```
+Open a PR with the cherry-pick so it goes through the smoke test like anything
+else.
 
 ### Useful Commands
 
