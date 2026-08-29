@@ -2,11 +2,10 @@
 # Full-stack smoke test: boots the compose stack from .env.dist defaults and
 # validates the static endpoints end to end through nginx.
 #
-# Single source of truth for build.yml (pull requests), release.yaml (deploy
-# gate) and sync-upstream.yml (nightly upstream merge). These three used to
-# carry their own copy of this logic and drifted apart — the release copy was
-# missing the POSTGRES_PASSWORD line, which let a credential mismatch reach
-# the deploy gate unnoticed.
+# Single source of truth for build.yml (pull requests) and release.yaml
+# (deploy gate). These used to carry their own copy of this logic and drifted
+# apart — the release copy was missing the POSTGRES_PASSWORD line, which let a
+# credential mismatch reach the deploy gate unnoticed.
 #
 # Runnable locally: `bash scripts/smoke-test.sh` (overwrites .env).
 set -euo pipefail

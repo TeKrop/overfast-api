@@ -1,13 +1,15 @@
 name: "Release & Deploy"
 
 # Triggered by human pushes to main (e.g. PR merges) — runs semantic-release,
-# smoke tests, and then deploys to the VPS. Bot-pushed merge commits from
-# sync-upstream are skipped here; sync-upstream owns its own deploy step.
+# smoke tests, and then deploys to the VPS. This is the only deploy path;
+# workflow_dispatch allows a redeploy of current main without a code change
+# (semantic-release simply finds nothing to release and the deploy proceeds).
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 concurrency:
   group: release-deploy-${{ github.ref_name }}
