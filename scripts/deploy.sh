@@ -65,6 +65,34 @@ log "Building Docker images (--pull)..."
 docker compose build --pull 2>&1 | tee -a "$LOG_FILE"
 log "Build complete."
 
+# ── Step 2b: one-time PGDATA volume migration ────────────────────────────────
+# The pg-data mount moved from /var/lib/postgresql to /var/lib/postgresql/data.
+# postgres:17 declares VOLUME on the latter, so the old parent mount was
+# shadowed by an anonymous volume and the named volume was left holding a
+# single empty `data/` directory. After the move that directory sits *inside*
+# PGDATA, and initdb refuses to start on a non-empty PGDATA — postgres would
+# never come up again.
+#
+# Self-limiting by construction: acts only when the volume holds no cluster of
+# its own, and uses rmdir, which refuses to delete a non-empty directory. Once
+# migrated the condition is false and this is a no-op on every later deploy.
+PG_VOLUME="${COMPOSE_PROJECT}_pg-data"
+PG_IMAGE=$(docker compose config --images postgres 2>/dev/null | head -1)
+
+if [ -n "$PG_IMAGE" ] && docker volume inspect "$PG_VOLUME" >/dev/null 2>&1; then
+    if docker run --rm --user root -v "$PG_VOLUME":/v "$PG_IMAGE" \
+        sh -c '[ -d /v/data ] && [ ! -f /v/PG_VERSION ]' >/dev/null 2>&1; then
+        log "Migrating $PG_VOLUME: clearing the stale data/ left by the old mount path..."
+        if docker run --rm --user root -v "$PG_VOLUME":/v "$PG_IMAGE" \
+            rmdir /v/data 2>&1 | tee -a "$LOG_FILE"; then
+            log "  Migration complete — PGDATA is now the named volume root."
+        else
+            log "  WARNING: /v/data is not empty; leaving it untouched."
+            log "  Postgres will fail to start until it is inspected by hand."
+        fi
+    fi
+fi
+
 # ── Step 3: Ensure postgres is running and healthy ───────────────────────────
 # postgres is the only service in the default profile without a `build:`
 # context, so `build --pull` above never touches it and `up -d` reuses
