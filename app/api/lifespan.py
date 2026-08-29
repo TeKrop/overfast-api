@@ -42,7 +42,7 @@ async def lifespan(_: FastAPI):  # pragma: no cover
     yield
 
     # Properly close HTTPX Async Client and PostgreSQL storage
-    await overfast_client.aclose()
+    await overfast_client.close()
 
     # Same reasoning as startup: a worker shutting down must not evict the
     # cache the app process is still serving from, nor trigger a BGSAVE.

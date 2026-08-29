@@ -134,11 +134,6 @@ class BlizzardClient(metaclass=Singleton):
         """Properly close HTTPX Async Client"""
         await self.client.aclose()
 
-    # Legacy alias for backward compatibility
-    async def aclose(self) -> None:
-        """Alias for close() - deprecated, use close() instead"""
-        await self.close()
-
     @staticmethod
     def _blizzard_response_error(status_code: int, error: str) -> HTTPException:
         """Retrieve a generic error response when a Blizzard page doesn't load"""
