@@ -8,6 +8,7 @@ This module computes aggregated player statistics with:
 
 from collections import defaultdict
 from copy import deepcopy
+from typing import Any
 
 from app.domain.enums import HeroKey, PlayerGamemode, PlayerPlatform, Role
 from app.domain.parsers.player_helpers import (
@@ -33,7 +34,10 @@ TOTAL_STATS_NAMES = [
 ]
 
 # Placeholder structure for stats
-STATS_PLACEHOLDER = {
+# Annotated rather than inferred: the literal is heterogeneous, so a checker
+# narrows it to dict[str, int | float | dict[...]] and then rejects the
+# ["total"][stat] accesses below as subscripting a possible int.
+STATS_PLACEHOLDER: dict[str, Any] = {
     "games_played": 0,
     "games_won": 0,
     "games_lost": 0,
