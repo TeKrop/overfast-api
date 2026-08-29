@@ -10,12 +10,12 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "asyncpg==0.31.*",
-    "fastapi[standard-no-fastapi-cloud-cli]==0.139.*",
-    "httpx2[http2]==2.5.*",
+    "fastapi[standard-no-fastapi-cloud-cli]==0.141.*",
+    "httpx2[http2]==2.12.*",
     "loguru==0.7.*",
-    "prometheus-client==0.25.*",
+    "prometheus-client==0.26.*",
     "pydantic==2.13.*",
-    "pydantic-settings==2.14.*",
+    "pydantic-settings==2.15.*",
     "selectolax==0.4.*",
     "taskiq==0.12.*",
     "taskiq-fastapi==0.5.*",
