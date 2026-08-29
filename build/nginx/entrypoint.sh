@@ -11,6 +11,7 @@ set -o pipefail 2>/dev/null || true
 
 # Set defaults for rate limiting variables if not provided
 : "${TRUSTED_PROXY_CIDRS:=}"
+: "${PROMETHEUS_ENABLED:=false}"
 : "${RETRY_AFTER_HEADER:=Retry-After}"
 : "${UNKNOWN_PLAYER_COOLDOWN_KEY_PREFIX:=unknown-player:cooldown}"
 : "${UNKNOWN_PLAYERS_CACHE_ENABLED:=true}"
