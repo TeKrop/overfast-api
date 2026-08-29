@@ -12,7 +12,6 @@ def _make_service(
     *,
     cache_fail: bool = False,
     queue_fail: bool = False,
-    is_pending: bool = False,
 ) -> BaseService:
     cache = AsyncMock()
     if cache_fail:
@@ -23,9 +22,7 @@ def _make_service(
 
     task_queue = AsyncMock()
     if queue_fail:
-        task_queue.is_job_pending_or_running.side_effect = Exception("Queue error")
-    else:
-        task_queue.is_job_pending_or_running.return_value = is_pending
+        task_queue.enqueue.side_effect = Exception("Queue error")
 
     return BaseService(cache, storage, blizzard_client, task_queue)
 
@@ -87,8 +84,8 @@ class TestUpdateApiCache:
 
 class TestEnqueueRefresh:
     @pytest.mark.asyncio
-    async def test_enqueues_when_job_not_pending(self):
-        svc = _make_service(is_pending=False)
+    async def test_enqueues_the_refresh(self):
+        svc = _make_service()
         await svc._enqueue_refresh("heroes", "heroes:en-us")
         cast("Any", svc.task_queue).enqueue.assert_awaited_once_with(
             "refresh_heroes",
@@ -96,10 +93,17 @@ class TestEnqueueRefresh:
         )
 
     @pytest.mark.asyncio
-    async def test_skips_when_job_already_pending(self):
-        svc = _make_service(is_pending=True)
+    async def test_does_not_pre_check_for_a_pending_job(self):
+        """Deduplication belongs to the queue, which claims with SET NX.
+
+        Asking first cost an extra round-trip on every stale read and left a
+        window for another process to claim in between. See
+        tests/adapters/tasks/test_valkey_task_queue.py::test_duplicate_job_skipped
+        for the dedup itself.
+        """
+        svc = _make_service()
         await svc._enqueue_refresh("heroes", "heroes:en-us")
-        cast("Any", svc.task_queue).enqueue.assert_not_awaited()
+        cast("Any", svc.task_queue).is_job_pending_or_running.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_exception_is_swallowed(self):

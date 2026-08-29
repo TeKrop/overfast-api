@@ -1,5 +1,7 @@
 """Tests for monitoring/metrics.py — track_storage_operation decorator and _record_metrics"""
 
+from unittest.mock import patch
+
 import pytest
 from prometheus_client import REGISTRY
 
@@ -7,6 +9,17 @@ from app.monitoring.metrics import (
     _record_metrics,
     track_storage_operation,
 )
+
+
+@pytest.fixture(autouse=True)
+def _prometheus_enabled():
+    """These tests are about metric recording, which is gated on the flag.
+
+    .env.dist ships PROMETHEUS_ENABLED=false, so without this every
+    assertion below would read an unchanged counter.
+    """
+    with patch("app.monitoring.metrics.settings.prometheus_enabled", True):
+        yield
 
 
 def _counter_value(name: str, **labels) -> float:
@@ -356,3 +369,26 @@ class TestRecordMetrics:
             status="success",
         )
         assert after == before + 1
+
+
+class TestPrometheusDisabled:
+    """The storage decorator must honour the feature flag like everything else."""
+
+    def test_nothing_is_recorded_when_prometheus_is_disabled(self):
+        """Storage was the only path still recording with Prometheus off.
+
+        The blizzard client, player service and static data service all check
+        settings.prometheus_enabled before touching a metric; the storage
+        decorator called _record_metrics unconditionally.
+        """
+        labels = {
+            "table": "player_profiles",
+            "operation": "get",
+            "status": "success",
+        }
+        before = _counter_value("storage_operations", **labels)
+
+        with patch("app.monitoring.metrics.settings.prometheus_enabled", False):
+            _record_metrics("player_profiles", "get", 0.01, "success")
+
+        assert _counter_value("storage_operations", **labels) == before

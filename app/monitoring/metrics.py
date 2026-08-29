@@ -10,6 +10,8 @@ from functools import wraps
 
 from prometheus_client import Counter, Gauge, Histogram
 
+from app.config import settings
+
 ##############
 # API Metrics
 ##############
@@ -237,6 +239,13 @@ SLOW_QUERY_THRESHOLD_100MS = 0.1
 
 def _record_metrics(table: str, operation: str, duration: float, status: str):
     """Helper to record storage metrics (extracted to reduce complexity)"""
+    # Every other call site checks this flag first (blizzard client, player
+    # service, static data service); the storage decorator did not, so these
+    # were the only metrics still collected with Prometheus switched off.
+    # Guarding here rather than at both wrappers keeps it to one place.
+    if not settings.prometheus_enabled:
+        return
+
     storage_operation_duration_seconds.labels(table=table, operation=operation).observe(
         duration
     )

@@ -82,11 +82,13 @@ class BaseService:
         """
         job_id = entity_id
         try:
-            if not await self.task_queue.is_job_pending_or_running(job_id):
-                await self.task_queue.enqueue(
-                    f"refresh_{entity_type}",
-                    job_id=job_id,
-                )
+            # No pre-check: enqueue() claims the job with SET NX and returns
+            # early when it loses. Asking first only added a round-trip and a
+            # window for another process to claim in between.
+            await self.task_queue.enqueue(
+                f"refresh_{entity_type}",
+                job_id=job_id,
+            )
         except Exception as exc:  # noqa: BLE001
             logger.warning(
                 "[SWR] Failed to enqueue refresh for {}/{}: {}",
