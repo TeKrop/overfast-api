@@ -45,7 +45,7 @@ dev = [
     "pytest-cov==7.1.*",
     "pytest-randomly==4.1.*",
     "pytest-xdist==3.8.*",
-    "ruff==0.15.*",
+    "ruff==0.16.*",
     "pre-commit==4.6.*",
     "pyinstrument==5.1.*",
     "memray==1.19.*",
@@ -122,6 +122,8 @@ ignore = [
     "RET505",  # allow using else after return statement
     "PLE1205", # error checking doesn't support {} format
     "PLR0913", # allow 6/7 arguments for some functions
+    "PLR0917", # same, for positional ones (new in ruff 0.16); FastAPI routers
+               # and storage signatures legitimately take many parameters
     "FAST003", # false positive on router parameters
 
     # Rules already handled by ruff formatter
