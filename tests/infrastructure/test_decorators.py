@@ -44,3 +44,41 @@ def test_rate_limited():
     with patch("app.infrastructure.logger.logger.info", logger_info_mock):
         method_to_limit(param1=42, param2="test", param3=True)
         logger_info_mock.assert_called()
+
+
+def test_rate_limited_does_not_leak_keys():
+    """Expired entries must be dropped, not just their timestamps.
+
+    The cache key embeds the call arguments, and the real caller
+    (send_discord_webhook_message) passes the error text in `fields`, so a
+    distinct traceback produced a permanent entry. Trimming only the
+    timestamp list inside a key left the key itself behind forever — an
+    unbounded dict on the error path, where volume spikes.
+    """
+
+    @rate_limited(max_calls=1, interval=1)
+    def method_to_limit(payload: str):
+        return payload
+
+    # Each call carries a unique payload, mimicking distinct tracebacks.
+    distinct_errors = 50
+    for i in range(distinct_errors):
+        method_to_limit(payload=f"error-{i}")
+
+    # Reach the decorator's call_history through the wrapper's closure.
+    call_history = next(
+        cell.cell_contents
+        for cell in method_to_limit.__closure__
+        if isinstance(cell.cell_contents, dict)
+    )
+    assert len(call_history) == distinct_errors, (
+        "sanity: every key is still live inside the window"
+    )
+
+    sleep(1.1)
+    method_to_limit(payload="error-final")
+
+    # One call after the window expires must collapse all the earlier keys.
+    assert len(call_history) == 1, (
+        f"expired keys were not dropped: {len(call_history)} entries remain"
+    )

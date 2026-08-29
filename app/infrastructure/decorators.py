@@ -38,29 +38,30 @@ def rate_limited(max_calls: int, interval: int):
             )
             key = (hashable_args, hashable_kwargs)
             now = time.time()
+            cutoff = now - interval
 
-            # If the key is not already in history, insert it and make the call
-            if key not in call_history:
-                call_history[key] = [now]
-                return func(*args, **kwargs)
+            # Expire whole keys, not just the timestamps inside them. The key
+            # embeds the call arguments, and the only caller passes the error
+            # text in `fields`, so without dropping empty keys every distinct
+            # traceback leaks an entry for the lifetime of the process — on
+            # the error path, where volume spikes.
+            for seen_key in list(call_history):
+                kept = [t for t in call_history[seen_key] if t >= cutoff]
+                if kept:
+                    call_history[seen_key] = kept
+                else:
+                    del call_history[seen_key]
 
-            # Else, update the call history by removing expired limits
-            timestamps = call_history[key]
-            timestamps[:] = [t for t in timestamps if t >= now - interval]
-
-            # If there is no limit anymore or if the max
-            # number of calls hasn't been reached yet, continue
+            timestamps = call_history.setdefault(key, [])
             if len(timestamps) < max_calls:
                 timestamps.append(now)
                 return func(*args, **kwargs)
-            else:
-                # Else the function is being rate limited
-                logger.warning(
-                    "Rate limit exceeded for {} with the same "
-                    "parameters. Try again later.",
-                    func.__name__,  # ty: ignore[unresolved-attribute]
-                )
-                return None
+
+            logger.warning(
+                "Rate limit exceeded for {} with the same parameters. Try again later.",
+                func.__name__,  # ty: ignore[unresolved-attribute]
+            )
+            return None
 
         return wrapper
 
