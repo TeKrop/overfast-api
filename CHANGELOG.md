@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v4.12.0 (2026-09-02)
+
+### Build System
+
+- **deps**: Bump astral-sh/setup-uv from 9.0.0 to 10.0.1
+  ([#452](https://github.com/TeKrop/overfast-api/pull/452),
+  [`82247e7`](https://github.com/TeKrop/overfast-api/commit/82247e767d6c518b4fac7e68a068dcac78162f6d))
+
+### Features
+
+- Added banrate in heroes stats ([#455](https://github.com/TeKrop/overfast-api/pull/455),
+  [`0af2f6f`](https://github.com/TeKrop/overfast-api/commit/0af2f6f22565ece3b723bfe0e44ce94c1e10043c))
+
+
 ## v4.11.0 (2026-08-13)
 
 ### Features
