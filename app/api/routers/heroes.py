@@ -89,6 +89,7 @@ async def list_heroes(
     ),
     operation_id="get_hero_stats",
     response_model=list[HeroStatsSummary],
+    response_model_exclude_none=True,
 )
 async def get_hero_stats(
     request: Request,
@@ -130,7 +131,7 @@ async def get_hero_stats(
         str,
         Query(
             title="Ordering field and the way it's arranged (asc[ending]/desc[ending])",
-            pattern=r"^(hero|winrate|pickrate):(asc|desc)$",
+            pattern=r"^(hero|winrate|pickrate|banrate):(asc|desc)$",
         ),
     ] = "hero:asc",
 ) -> Any:

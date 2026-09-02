@@ -14,7 +14,8 @@
                 "cells": {
                     "name": "Ana",
                     "pickrate": 22.3,
-                    "winrate": 43.1
+                    "winrate": 43.1,
+                    "banrate": 1.6
                 },
                 "hero": {
                     "color": "48699eff",
@@ -29,7 +30,8 @@
                 "cells": {
                     "name": "Ashe",
                     "pickrate": 28.9,
-                    "winrate": 55.1
+                    "winrate": 55.1,
+                    "banrate": 3.8
                 },
                 "hero": {
                     "color": "3e3c3aff",
@@ -44,7 +46,8 @@
                 "cells": {
                     "name": "Baptiste",
                     "pickrate": 47.8,
-                    "winrate": 57.4
+                    "winrate": 57.4,
+                    "banrate": 3.3
                 },
                 "hero": {
                     "color": "28a5c3ff",
@@ -59,7 +62,8 @@
                 "cells": {
                     "name": "Bastion",
                     "pickrate": 2.7,
-                    "winrate": 57
+                    "winrate": 57,
+                    "banrate": 1.7
                 },
                 "hero": {
                     "color": "5b7351ff",
@@ -74,7 +78,8 @@
                 "cells": {
                     "name": "Brigitte",
                     "pickrate": 25.2,
-                    "winrate": 46.8
+                    "winrate": 46.8,
+                    "banrate": 1.4
                 },
                 "hero": {
                     "color": "72332aff",
@@ -89,7 +94,8 @@
                 "cells": {
                     "name": "Cassidy",
                     "pickrate": 21.3,
-                    "winrate": 41
+                    "winrate": 41,
+                    "banrate": 2.8
                 },
                 "hero": {
                     "color": "a62927ff",
@@ -104,7 +110,8 @@
                 "cells": {
                     "name": "D.Va",
                     "pickrate": 12.9,
-                    "winrate": 64.8
+                    "winrate": 64.8,
+                    "banrate": 3.3
                 },
                 "hero": {
                     "color": "fc79bdff",
@@ -119,7 +126,8 @@
                 "cells": {
                     "name": "Doomfist",
                     "pickrate": 7.2,
-                    "winrate": 43.5
+                    "winrate": 43.5,
+                    "banrate": 1.4
                 },
                 "hero": {
                     "color": "661e0fff",
@@ -134,7 +142,8 @@
                 "cells": {
                     "name": "Echo",
                     "pickrate": 1,
-                    "winrate": 59.1
+                    "winrate": 59.1,
+                    "banrate": 4.9
                 },
                 "hero": {
                     "color": "89c8ffff",
@@ -149,7 +158,8 @@
                 "cells": {
                     "name": "Freja",
                     "pickrate": 2.7,
-                    "winrate": 46
+                    "winrate": 46,
+                    "banrate": 1.7
                 },
                 "hero": {
                     "color": "3f93ffff",
@@ -164,7 +174,8 @@
                 "cells": {
                     "name": "Genji",
                     "pickrate": 10.4,
-                    "winrate": 49.8
+                    "winrate": 49.8,
+                    "banrate": 0.3
                 },
                 "hero": {
                     "color": "80fb00ff",
@@ -179,7 +190,8 @@
                 "cells": {
                     "name": "Hanzo",
                     "pickrate": 4.5,
-                    "winrate": 50.2
+                    "winrate": 50.2,
+                    "banrate": 1.7
                 },
                 "hero": {
                     "color": "b2a865ff",
@@ -194,7 +206,8 @@
                 "cells": {
                     "name": "Hazard",
                     "pickrate": 7.9,
-                    "winrate": 50.7
+                    "winrate": 50.7,
+                    "banrate": 4.7
                 },
                 "hero": {
                     "color": "985ec0ff",
@@ -209,7 +222,8 @@
                 "cells": {
                     "name": "Illari",
                     "pickrate": 32.2,
-                    "winrate": 57.2
+                    "winrate": 57.2,
+                    "banrate": 3.2
                 },
                 "hero": {
                     "color": "a58c54ff",
@@ -224,7 +238,8 @@
                 "cells": {
                     "name": "Junker Queen",
                     "pickrate": 4.3,
-                    "winrate": 45.9
+                    "winrate": 45.9,
+                    "banrate": 4.6
                 },
                 "hero": {
                     "color": "579fcfff",
@@ -239,7 +254,8 @@
                 "cells": {
                     "name": "Junkrat",
                     "pickrate": 1.1,
-                    "winrate": 33.9
+                    "winrate": 33.9,
+                    "banrate": 5.0
                 },
                 "hero": {
                     "color": "f7b217ff",
@@ -254,7 +270,8 @@
                 "cells": {
                     "name": "Juno",
                     "pickrate": 3.1,
-                    "winrate": 56.4
+                    "winrate": 56.4,
+                    "banrate": 4.4
                 },
                 "hero": {
                     "color": "721fa3ff",
@@ -269,7 +286,8 @@
                 "cells": {
                     "name": "Kiriko",
                     "pickrate": 19.7,
-                    "winrate": 41.2
+                    "winrate": 41.2,
+                    "banrate": 2.9
                 },
                 "hero": {
                     "color": "d04656ff",
@@ -284,7 +302,8 @@
                 "cells": {
                     "name": "Lifeweaver",
                     "pickrate": 3.8,
-                    "winrate": 31
+                    "winrate": 31,
+                    "banrate": 1.1
                 },
                 "hero": {
                     "color": "e1a5baff",
@@ -299,7 +318,8 @@
                 "cells": {
                     "name": "L\u00facio",
                     "pickrate": 8.4,
-                    "winrate": 52.7
+                    "winrate": 52.7,
+                    "banrate": 4.8
                 },
                 "hero": {
                     "color": "67c519ff",
@@ -314,7 +334,8 @@
                 "cells": {
                     "name": "Mauga",
                     "pickrate": 15.2,
-                    "winrate": 52.5
+                    "winrate": 52.5,
+                    "banrate": 2.5
                 },
                 "hero": {
                     "color": "db4216ff",
@@ -329,7 +350,8 @@
                 "cells": {
                     "name": "Mei",
                     "pickrate": 4.4,
-                    "winrate": 43.9
+                    "winrate": 43.9,
+                    "banrate": 1.3
                 },
                 "hero": {
                     "color": "469af0ff",
@@ -344,7 +366,8 @@
                 "cells": {
                     "name": "Mercy",
                     "pickrate": 10.4,
-                    "winrate": 48.5
+                    "winrate": 48.5,
+                    "banrate": 2.6
                 },
                 "hero": {
                     "color": "faf2adff",
@@ -359,7 +382,8 @@
                 "cells": {
                     "name": "Moira",
                     "pickrate": 6,
-                    "winrate": 35
+                    "winrate": 35,
+                    "banrate": 1.1
                 },
                 "hero": {
                     "color": "804be5ff",
@@ -374,7 +398,8 @@
                 "cells": {
                     "name": "Orisa",
                     "pickrate": -1,
-                    "winrate": -1
+                    "winrate": -1,
+                    "banrate": 3.1
                 },
                 "hero": {
                     "color": "106f04ff",
@@ -389,7 +414,8 @@
                 "cells": {
                     "name": "Pharah",
                     "pickrate": 2.4,
-                    "winrate": 62.8
+                    "winrate": 62.8,
+                    "banrate": 4.9
                 },
                 "hero": {
                     "color": "58bcff",
@@ -404,7 +430,8 @@
                 "cells": {
                     "name": "Ramattra",
                     "pickrate": 4.2,
-                    "winrate": 37.7
+                    "winrate": 37.7,
+                    "banrate": 2.2
                 },
                 "hero": {
                     "color": "7d55c7ff",
@@ -419,7 +446,8 @@
                 "cells": {
                     "name": "Reaper",
                     "pickrate": 4.2,
-                    "winrate": 49.5
+                    "winrate": 49.5,
+                    "banrate": 4.0
                 },
                 "hero": {
                     "color": "5e001aff",
@@ -434,7 +462,8 @@
                 "cells": {
                     "name": "Reinhardt",
                     "pickrate": 5.3,
-                    "winrate": 48.8
+                    "winrate": 48.8,
+                    "banrate": 3.4
                 },
                 "hero": {
                     "color": "7c8b8cff",
@@ -449,7 +478,8 @@
                 "cells": {
                     "name": "Roadhog",
                     "pickrate": 3.5,
-                    "winrate": 42.6
+                    "winrate": 42.6,
+                    "banrate": 3.2
                 },
                 "hero": {
                     "color": "ae6f1cff",
@@ -464,7 +494,8 @@
                 "cells": {
                     "name": "Sigma",
                     "pickrate": 9.2,
-                    "winrate": 54.6
+                    "winrate": 54.6,
+                    "banrate": 1.2
                 },
                 "hero": {
                     "color": "7c8b8cff",
@@ -479,7 +510,8 @@
                 "cells": {
                     "name": "Sojourn",
                     "pickrate": 33.3,
-                    "winrate": 45.2
+                    "winrate": 45.2,
+                    "banrate": 3.9
                 },
                 "hero": {
                     "color": "d73e2cff",
@@ -494,7 +526,8 @@
                 "cells": {
                     "name": "Soldier: 76",
                     "pickrate": 36.6,
-                    "winrate": 50
+                    "winrate": 50,
+                    "banrate": 3.6
                 },
                 "hero": {
                     "color": "445275ff",
@@ -509,7 +542,8 @@
                 "cells": {
                     "name": "Sombra",
                     "pickrate": 5,
-                    "winrate": 50
+                    "winrate": 50,
+                    "banrate": 1.6
                 },
                 "hero": {
                     "color": "5128a9ff",
@@ -524,7 +558,8 @@
                 "cells": {
                     "name": "Symmetra",
                     "pickrate": 4.2,
-                    "winrate": 61.1
+                    "winrate": 61.1,
+                    "banrate": 1.4
                 },
                 "hero": {
                     "color": "76b4c9ff",
@@ -539,7 +574,8 @@
                 "cells": {
                     "name": "Torbj\u00f6rn",
                     "pickrate": 1.8,
-                    "winrate": 38.3
+                    "winrate": 38.3,
+                    "banrate": 3.1
                 },
                 "hero": {
                     "color": "ba4c3fff",
@@ -554,7 +590,8 @@
                 "cells": {
                     "name": "Tracer",
                     "pickrate": 22.1,
-                    "winrate": 54.1
+                    "winrate": 54.1,
+                    "banrate": 4.9
                 },
                 "hero": {
                     "color": "de7a00ff",
@@ -569,7 +606,8 @@
                 "cells": {
                     "name": "Venture",
                     "pickrate": 4.5,
-                    "winrate": 45.8
+                    "winrate": 45.8,
+                    "banrate": 3.0
                 },
                 "hero": {
                     "color": "79614eff",
@@ -584,7 +622,8 @@
                 "cells": {
                     "name": "Widowmaker",
                     "pickrate": 10.6,
-                    "winrate": 56
+                    "winrate": 56,
+                    "banrate": 1.2
                 },
                 "hero": {
                     "color": "8b3f8fff",
@@ -599,7 +638,8 @@
                 "cells": {
                     "name": "Winston",
                     "pickrate": 3.1,
-                    "winrate": 44.7
+                    "winrate": 44.7,
+                    "banrate": 4.7
                 },
                 "hero": {
                     "color": "8f92aeff",
@@ -614,7 +654,8 @@
                 "cells": {
                     "name": "Wrecking Ball",
                     "pickrate": 4.2,
-                    "winrate": 45
+                    "winrate": 45,
+                    "banrate": 2.8
                 },
                 "hero": {
                     "color": "e2790aff",
@@ -629,7 +670,8 @@
                 "cells": {
                     "name": "Wuyang",
                     "pickrate": 14.5,
-                    "winrate": 58.7
+                    "winrate": 58.7,
+                    "banrate": 3.5
                 },
                 "hero": {
                     "color": "4c7fefff",
@@ -644,7 +686,8 @@
                 "cells": {
                     "name": "Zarya",
                     "pickrate": 3.7,
-                    "winrate": 42
+                    "winrate": 42,
+                    "banrate": 1.7
                 },
                 "hero": {
                     "color": "f65ea6ff",
@@ -659,7 +702,8 @@
                 "cells": {
                     "name": "Zenyatta",
                     "pickrate": 6.7,
-                    "winrate": 47.1
+                    "winrate": 47.1,
+                    "banrate": 1.6
                 },
                 "hero": {
                     "color": "fcee5aff",
