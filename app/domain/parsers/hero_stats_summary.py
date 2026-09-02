@@ -1,4 +1,4 @@
-"""Stateless parser functions for hero stats summary (pickrate/winrate from Blizzard API)"""
+"""Stateless parser functions for hero stats summary (pickrate/winrate/banrate from Blizzard API)"""
 
 from http import HTTPStatus
 from typing import TYPE_CHECKING
@@ -80,7 +80,8 @@ def parse_hero_stats_json(
         order_by: Ordering field and direction (e.g., "pickrate:desc")
 
     Returns:
-        List of hero stats dicts with hero, pickrate, winrate
+        List of hero stats dicts with hero, pickrate, winrate, banrate
+        (banrate is None outside of the competitive gamemode)
 
     Raises:
         ParserBlizzardError: If map doesn't match gamemode
@@ -127,6 +128,13 @@ def parse_hero_stats_json(
                 "hero": rate["id"],
                 "pickrate": _normalize_rate(rate["cells"]["pickrate"]),
                 "winrate": _normalize_rate(rate["cells"]["winrate"]),
+                # Blizzard doesn't track bans outside competitive; a rate would be 0.0
+                # for every hero there, which is not accurate data to expose.
+                "banrate": (
+                    _normalize_rate(rate["cells"]["banrate"])
+                    if gamemode == PlayerGamemode.COMPETITIVE
+                    else None
+                ),
             }
             for rate in hero_stats
         ]
@@ -136,6 +144,12 @@ def parse_hero_stats_json(
 
     # Apply ordering
     order_field, order_arrangement = order_by.split(":")
+    if order_field == "banrate" and gamemode != PlayerGamemode.COMPETITIVE:
+        msg = "Cannot order by 'banrate' outside of the competitive gamemode."
+        raise ParserBlizzardError(
+            status_code=HTTPStatus.BAD_REQUEST.value,
+            message=msg,
+        )
     hero_stats.sort(
         key=lambda stat: stat[order_field],
         reverse=(order_arrangement == "desc"),

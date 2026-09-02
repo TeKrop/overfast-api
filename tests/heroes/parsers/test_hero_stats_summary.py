@@ -21,6 +21,82 @@ from app.domain.parsers.hero_stats_summary import (
 )
 
 
+def test_parse_hero_stats_json_normalizes_banrate():
+    json_data = {
+        "rates": {
+            "selected": {"map": "all-maps", "rq": "1"},
+            "rates": [
+                {
+                    "id": "ana",
+                    "hero": {"role": "SUPPORT"},
+                    "cells": {"pickrate": 22.3, "winrate": 43.1, "banrate": -1},
+                }
+            ],
+        }
+    }
+
+    result = parse_hero_stats_json(
+        json_data,
+        map_filter="all-maps",
+        gamemode=PlayerGamemode.COMPETITIVE,
+        gamemode_filter="1",
+    )
+
+    assert result == [
+        {"hero": "ana", "pickrate": 22.3, "winrate": 43.1, "banrate": 0.0}
+    ]
+
+
+def test_parse_hero_stats_json_omits_banrate_outside_competitive():
+    json_data = {
+        "rates": {
+            "selected": {"map": "all-maps", "rq": "0"},
+            "rates": [
+                {
+                    "id": "ana",
+                    "hero": {"role": "SUPPORT"},
+                    "cells": {"pickrate": 22.3, "winrate": 43.1, "banrate": 0},
+                }
+            ],
+        }
+    }
+
+    result = parse_hero_stats_json(
+        json_data,
+        map_filter="all-maps",
+        gamemode=PlayerGamemode.QUICKPLAY,
+        gamemode_filter="0",
+    )
+
+    assert result == [
+        {"hero": "ana", "pickrate": 22.3, "winrate": 43.1, "banrate": None}
+    ]
+
+
+def test_parse_hero_stats_json_order_by_banrate_outside_competitive_raises():
+    json_data = {
+        "rates": {
+            "selected": {"map": "all-maps", "rq": "0"},
+            "rates": [
+                {
+                    "id": "ana",
+                    "hero": {"role": "SUPPORT"},
+                    "cells": {"pickrate": 22.3, "winrate": 43.1, "banrate": 0},
+                }
+            ],
+        }
+    }
+
+    with pytest.raises(ParserBlizzardError):
+        parse_hero_stats_json(
+            json_data,
+            map_filter="all-maps",
+            gamemode=PlayerGamemode.QUICKPLAY,
+            gamemode_filter="0",
+            order_by="banrate:desc",
+        )
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("extra_kwargs", "raises_error"),

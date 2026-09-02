@@ -336,6 +336,12 @@ class HeroStatsSummary(BaseModel):
     )
     pickrate: float = Field(..., description="Pickrate (in percent)", ge=0.0, le=100.0)
     winrate: float = Field(..., description="Winrate (in percent)", ge=0.0, le=100.0)
+    banrate: float | None = Field(
+        None,
+        description="Banrate (in percent). Only available for the competitive gamemode.",
+        ge=0.0,
+        le=100.0,
+    )
 
 
 class BadRequestErrorMessage(BaseModel):

@@ -54,10 +54,30 @@ def test_get_hero_stats_response_shape(client: TestClient):
 
     first = response.json()[0]
 
-    assert set(first.keys()) == {"hero", "pickrate", "winrate"}
+    assert set(first.keys()) == {"hero", "pickrate", "winrate", "banrate"}
     assert isinstance(first["hero"], str)
     assert isinstance(first["pickrate"], float)
     assert isinstance(first["winrate"], float)
+    assert isinstance(first["banrate"], float)
+
+
+def test_get_hero_stats_response_shape_quickplay_has_no_banrate(client: TestClient):
+    with patch(
+        "app.domain.services.hero_service.HeroService.get_hero_stats",
+        return_value=(
+            [{"hero": "ana", "pickrate": 5.0, "winrate": 50.0, "banrate": None}],
+            False,
+            0,
+        ),
+    ):
+        response = client.get(
+            "/heroes/stats",
+            params={**_BASE_PARAMS, "gamemode": PlayerGamemode.QUICKPLAY},
+        )
+
+    first = response.json()[0]
+
+    assert set(first.keys()) == {"hero", "pickrate", "winrate"}
 
 
 def test_get_hero_stats_invalid_platform(client: TestClient):
@@ -134,6 +154,8 @@ def test_get_hero_stats_filter_by_invalid_competitive_division(client: TestClien
         "pickrate:desc",
         "winrate:asc",
         "winrate:desc",
+        "banrate:asc",
+        "banrate:desc",
     ],
 )
 def test_get_hero_stats_order_by(client: TestClient, order_by: str):
@@ -168,6 +190,19 @@ def test_get_hero_stats_order_by_pickrate_desc_is_sorted(client: TestClient):
     assert response.status_code == status.HTTP_200_OK
     pickrates = [hero["pickrate"] for hero in data]
     assert pickrates == sorted(pickrates, reverse=True)
+
+
+def test_get_hero_stats_order_by_banrate_desc_is_sorted(client: TestClient):
+    response = client.get(
+        "/heroes/stats",
+        params={**_BASE_PARAMS, "order_by": "banrate:desc"},
+    )
+
+    data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    banrates = [hero["banrate"] for hero in data]
+    assert banrates == sorted(banrates, reverse=True)
 
 
 def test_get_hero_stats_order_by_hero_asc_is_sorted(client: TestClient):
