@@ -10,12 +10,12 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "asyncpg==0.31.*",
-    "fastapi[standard-no-fastapi-cloud-cli]==0.139.*",
-    "httpx2[http2]==2.5.*",
+    "fastapi[standard-no-fastapi-cloud-cli]==0.141.*",
+    "httpx2[http2]==2.12.*",
     "loguru==0.7.*",
-    "prometheus-client==0.25.*",
+    "prometheus-client==0.26.*",
     "pydantic==2.13.*",
-    "pydantic-settings==2.14.*",
+    "pydantic-settings==2.15.*",
     "selectolax==0.4.*",
     "taskiq==0.12.*",
     "taskiq-fastapi==0.5.*",
@@ -28,27 +28,19 @@ Documentation = "https://overfast-api.tekrop.fr"
 Repository = "https://github.com/TeKrop/overfast-api"
 Issues = "https://github.com/TeKrop/overfast-api/issues"
 
-
-
-
-
-
-
-
-
 [dependency-groups]
 dev = [
-    "fakeredis[valkey]==2.36.*",
+    "fakeredis[valkey]==2.38.*",
     "ipdb==0.13.*",
     "pytest==9.1.*",
     "pytest-asyncio==1.4.*",
     "pytest-cov==7.1.*",
-    "pytest-randomly==4.1.*",
+    "pytest-randomly==5.0.*",
     "pytest-xdist==3.8.*",
-    "ruff==0.15.*",
+    "ruff==0.16.*",
     "pre-commit==4.6.*",
     "pyinstrument==5.1.*",
-    "memray==1.19.*",
+    "memray==1.20.*",
     "objgraph==3.6.*",
     "ty==0.0.*",
 ]
@@ -124,6 +116,7 @@ ignore = [
     "RET505",  # allow using else after return statement
     "PLE1205", # error checking doesn't support {} format
     "PLR0913", # allow 6/7 arguments for some functions
+    "PLR0917", # allow 6+ positional arguments (FastAPI endpoints, storage ports)
     "TID252",  # allow relative imports from parents
     "FAST003", # false positive on router parameters
 

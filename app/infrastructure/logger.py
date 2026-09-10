@@ -14,7 +14,7 @@ class InterceptHandler(logging.Handler):
     to transform them into loguru logs.
     """
 
-    def emit(self, record):  # pragma: no cover
+    def emit(self, record: logging.LogRecord):  # pragma: no cover
         try:
             level = logger.level(record.levelname).name
         except AttributeError:

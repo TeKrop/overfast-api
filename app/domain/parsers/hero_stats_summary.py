@@ -1,7 +1,7 @@
 """Stateless parser functions for hero stats summary (pickrate/winrate/banrate from Blizzard API)"""
 
 from http import HTTPStatus
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from app.config import settings
 from app.domain.enums import PlayerGamemode, PlayerPlatform, PlayerRegion
@@ -118,7 +118,7 @@ def parse_hero_stats_json(
     # Filter by role and transform to simplified format; raise ParserParsingError on
     # unexpected per-entry shape.
     try:
-        hero_stats = [
+        hero_stats: list[dict[str, Any]] = [
             rate
             for rate in rates
             if role_filter is None or rate["hero"]["role"].lower() == role_filter
