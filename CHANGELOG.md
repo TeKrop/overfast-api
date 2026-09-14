@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v4.13.0 (2026-09-14)
+
+### Build System
+
+- **deps**: Bump python-semantic-release/python-semantic-release
+  ([#456](https://github.com/TeKrop/overfast-api/pull/456),
+  [`db1a076`](https://github.com/TeKrop/overfast-api/commit/db1a0761847ed73361c18ee4d5e7561ca667db0c))
+
+- **deps**: Update dependencies ([#457](https://github.com/TeKrop/overfast-api/pull/457),
+  [`ce73cff`](https://github.com/TeKrop/overfast-api/commit/ce73cff4aa04d5d0c18a4aba3beae92742ab9617))
+
+### Features
+
+- Added Doctrine hero ([#458](https://github.com/TeKrop/overfast-api/pull/458),
+  [`9a0e17f`](https://github.com/TeKrop/overfast-api/commit/9a0e17f25686af6d05920b217a391a298d790ef2))
+
+
 ## v4.12.0 (2026-09-02)
 
 ### Build System
