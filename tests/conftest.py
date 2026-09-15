@@ -9,7 +9,6 @@ import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 
-from app.adapters.tasks.task_registry import TASK_MAP
 from app.api.dependencies import get_storage
 from app.infrastructure.metaclasses import Singleton
 from app.main import app
@@ -67,7 +66,7 @@ async def _patch_before_every_test(
         patch("app.adapters.blizzard.throttle.settings.throttle_start_delay", 0.0),
         # Prevent ValkeyTaskQueue from dispatching to the broker (not running in tests).
         # Deduplication via SET NX/EXISTS still works through the patched fake redis.
-        patch.dict(TASK_MAP, {}, clear=True),
+        patch("app.adapters.tasks.valkey_broker.broker.kick"),
     ):
         yield
 

@@ -29,7 +29,6 @@ from taskiq.schedule_sources import LabelScheduleSource
 from taskiq.scheduler.scheduler import TaskiqScheduler
 from taskiq_fastapi import init as taskiq_init
 
-from app.adapters.tasks.task_registry import TASK_MAP
 from app.adapters.tasks.valkey_broker import broker
 from app.api.dependencies import (
     get_blizzard_client,
@@ -134,7 +133,7 @@ async def _run_refresh_task(
 # ─── Refresh tasks ────────────────────────────────────────────────────────────
 
 
-@broker.task
+@broker.task(task_name="refresh_heroes")
 async def refresh_heroes(
     entity_id: str, service: HeroServiceDep, task_queue: TaskQueueDep
 ) -> None:
@@ -147,7 +146,7 @@ async def refresh_heroes(
         await service.refresh_list(Locale(locale_str))
 
 
-@broker.task
+@broker.task(task_name="refresh_hero")
 async def refresh_hero(
     entity_id: str, service: HeroServiceDep, task_queue: TaskQueueDep
 ) -> None:
@@ -160,7 +159,7 @@ async def refresh_hero(
         await service.refresh_single(hero_key, Locale(locale_str))
 
 
-@broker.task
+@broker.task(task_name="refresh_roles")
 async def refresh_roles(
     entity_id: str, service: RoleServiceDep, task_queue: TaskQueueDep
 ) -> None:
@@ -173,7 +172,7 @@ async def refresh_roles(
         await service.refresh_list(Locale(locale_str))
 
 
-@broker.task
+@broker.task(task_name="refresh_maps")
 async def refresh_maps(
     entity_id: str,
     service: MapServiceDep,
@@ -184,7 +183,7 @@ async def refresh_maps(
         await service.refresh_list()
 
 
-@broker.task
+@broker.task(task_name="refresh_gamemodes")
 async def refresh_gamemodes(
     entity_id: str,
     service: GamemodeServiceDep,
@@ -195,7 +194,7 @@ async def refresh_gamemodes(
         await service.refresh_list()
 
 
-@broker.task
+@broker.task(task_name="refresh_player_profile")
 async def refresh_player_profile(
     entity_id: str, service: PlayerServiceDep, task_queue: TaskQueueDep
 ) -> None:
@@ -270,17 +269,3 @@ async def check_new_hero(client: BlizzardClientDep) -> None:
         ],
         color=0x2ECC71,
     )
-
-
-# ─── Task registry (used by ValkeyTaskQueue for dispatch) ────────────────────
-
-TASK_MAP.update(
-    {
-        "refresh_heroes": refresh_heroes,
-        "refresh_hero": refresh_hero,
-        "refresh_roles": refresh_roles,
-        "refresh_maps": refresh_maps,
-        "refresh_gamemodes": refresh_gamemodes,
-        "refresh_player_profile": refresh_player_profile,
-    }
-)

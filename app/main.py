@@ -3,7 +3,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app import worker  # noqa: F401  (registers tasks in TASK_MAP for ValkeyTaskQueue)
 from app.api.docs import setup_custom_openapi
 from app.api.enums import RouteTag
 from app.api.exception_handlers import register_exception_handlers

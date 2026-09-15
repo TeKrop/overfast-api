@@ -73,8 +73,7 @@ app/
 │   ├── storage/postgres_storage.py
 │   └── tasks/
 │       ├── valkey_broker.py       # ValkeyListBroker (taskiq) + shared broker instance
-│       ├── valkey_task_queue.py   # SWR enqueue, dedup via SET NX
-│       └── task_registry.py       # TASK_MAP, filled by app/worker.py
+│       └── valkey_task_queue.py   # SWR enqueue, dedup via SET NX, kicks tasks by name
 ├── api/
 │   ├── dependencies.py            # FastAPI Depends() providers + type aliases
 │   ├── exception_handlers.py
@@ -129,7 +128,7 @@ Router → get_* dependency (api/dependencies.py)
 
 - `snake_case` — functions, variables, module attributes, config keys.
 - `PascalCase` — all classes.
-- `UPPER_SNAKE_CASE` — constants (e.g. `TASK_MAP`, `JOB_KEY_PREFIX`).
+- `UPPER_SNAKE_CASE` — constants (e.g. `JOB_KEY_PREFIX`).
 - `_leading_underscore` — private helpers and private Valkey key constants.
 - CSV/static filenames and `key` column values — `lowercase-hyphenated`.
 
