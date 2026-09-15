@@ -10,6 +10,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from app.adapters.storage.postgres_storage import PostgresStorage
+from app.config import settings
 from app.domain.ports.storage import StaticDataCategory
 
 
@@ -296,6 +297,66 @@ class TestGetPlayerIdByBattletag:
         result = await storage.get_player_id_by_battletag("TeKrop-2217")
 
         assert result == "abc123|def456"
+
+
+# ---------------------------------------------------------------------------
+# Lookup metrics
+# ---------------------------------------------------------------------------
+
+
+class TestLookupMetrics:
+    @pytest.mark.asyncio
+    async def test_static_data_miss_recorded(self):
+        pool, conn = _make_pool()
+        conn.fetchrow = AsyncMock(return_value=None)
+        storage = _make_storage(pool=pool)
+        with (
+            patch.object(settings, "prometheus_enabled", True),
+            patch(
+                "app.adapters.storage.postgres_storage.storage_hits_total"
+            ) as m_total,
+        ):
+            await storage.get_static_data("heroes")
+
+        m_total.labels.assert_called_once_with(result="miss")
+
+    @pytest.mark.asyncio
+    async def test_player_profile_miss_recorded(self):
+        pool, conn = _make_pool()
+        conn.fetchrow = AsyncMock(return_value=None)
+        storage = _make_storage(pool=pool)
+        with (
+            patch.object(settings, "prometheus_enabled", True),
+            patch(
+                "app.adapters.storage.postgres_storage.storage_cache_hit_total"
+            ) as m_hit,
+            patch(
+                "app.adapters.storage.postgres_storage.storage_hits_total"
+            ) as m_total,
+        ):
+            await storage.get_player_profile("nobody-0000")
+
+        m_hit.labels.assert_called_once_with(table="player_profiles", result="miss")
+        m_total.labels.assert_called_once_with(result="miss")
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("row", "expected"),
+        [(None, "miss"), ({"player_id": "abc123|def456"}, "hit")],
+    )
+    async def test_battletag_lookup_recorded(self, row, expected):
+        pool, conn = _make_pool()
+        conn.fetchrow = AsyncMock(return_value=row)
+        storage = _make_storage(pool=pool)
+        with (
+            patch.object(settings, "prometheus_enabled", True),
+            patch(
+                "app.adapters.storage.postgres_storage.storage_battletag_lookup_total"
+            ) as m_lookup,
+        ):
+            await storage.get_player_id_by_battletag("TeKrop-2217")
+
+        m_lookup.labels.assert_called_once_with(result=expected)
 
 
 # ---------------------------------------------------------------------------

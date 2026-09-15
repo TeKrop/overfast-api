@@ -9,9 +9,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.adapters.tasks.task_registry import TASK_MAP
+from taskiq.kicker import AsyncKicker
+
+from app.adapters.tasks.valkey_broker import broker
 from app.config import settings
 from app.infrastructure.logger import logger
+from app.monitoring.metrics import background_refresh_triggered_total
 
 JOB_KEY_PREFIX = "worker:job:"
 
@@ -34,16 +37,12 @@ class ValkeyTaskQueue:
     ) -> str:
         """Dispatch a job to the taskiq worker, skipping duplicates.
 
-        Uses ``SET NX`` to atomically claim the dedup slot before calling
-        ``task_fn.kiq()``.  If the slot is already taken the call is a no-op.
+        Uses ``SET NX`` to atomically claim the dedup slot before kicking the
+        task by name (``task_name`` must match a ``@broker.task(task_name=...)``
+        in ``app/worker.py``).  If the slot is already taken the call is a no-op.
         The ``job_id`` is passed to the task as its first positional argument.
         """
         effective_id = job_id or task_name
-
-        task_fn = TASK_MAP.get(task_name)
-        if task_fn is None:
-            logger.warning("[ValkeyTaskQueue] Unknown task: {!r}", task_name)
-            return effective_id
 
         try:
             claimed = await self._valkey.set(
@@ -56,7 +55,11 @@ class ValkeyTaskQueue:
                 logger.debug("[ValkeyTaskQueue] Already queued: {}", effective_id)
                 return effective_id
 
-            await task_fn.kiq(effective_id)
+            await AsyncKicker(task_name, broker, {}).kiq(effective_id)
+            if settings.prometheus_enabled:
+                background_refresh_triggered_total.labels(
+                    entity_type=task_name.removeprefix("refresh_")
+                ).inc()
             logger.debug(
                 "[ValkeyTaskQueue] Enqueued {} (job_id={})", task_name, effective_id
             )

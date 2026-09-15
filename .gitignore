@@ -46,6 +46,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.import_linter_cache/
 
 # Translations
 *.mo

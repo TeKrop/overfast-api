@@ -1,9 +1,21 @@
 """Blizzard client port protocol for dependency injection"""
 
-from typing import TYPE_CHECKING, Protocol
+from typing import Any, Protocol
 
-if TYPE_CHECKING:
-    import httpx2
+
+class BlizzardResponse(Protocol):
+    """Subset of an HTTP response read by the domain"""
+
+    @property
+    def status_code(self) -> int: ...
+
+    @property
+    def text(self) -> str: ...
+
+    @property
+    def url(self) -> object: ...
+
+    def json(self) -> Any: ...
 
 
 class BlizzardClientPort(Protocol):
@@ -15,10 +27,10 @@ class BlizzardClientPort(Protocol):
         *,
         headers: dict[str, str] | None = None,
         params: dict[str, str] | None = None,
-    ) -> httpx2.Response:
+    ) -> BlizzardResponse:
         """GET request to the given URL, respecting configured throttling."""
         ...
 
-    async def close(self) -> None:
+    async def aclose(self) -> None:
         """Close HTTP client connections"""
         ...

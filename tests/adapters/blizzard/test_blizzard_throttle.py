@@ -40,11 +40,7 @@ def mock_cache() -> AsyncMock:
 
 @pytest.fixture
 def throttle(mock_cache: AsyncMock) -> BlizzardThrottle:
-    with patch(
-        "app.adapters.blizzard.throttle.ValkeyCache",
-        return_value=mock_cache,
-    ):
-        return BlizzardThrottle()
+    return BlizzardThrottle(mock_cache)
 
 
 class TestGetCurrentDelay:

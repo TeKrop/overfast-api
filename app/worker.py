@@ -2,11 +2,11 @@
 
 Tasks are executed by the taskiq worker process::
 
-    taskiq worker app.adapters.tasks.worker:broker
+    taskiq worker app.worker:broker
 
 The cron task ``check_new_hero`` is scheduled by the taskiq scheduler::
 
-    taskiq scheduler app.adapters.tasks.worker:scheduler
+    taskiq scheduler app.worker:scheduler
 
 :func:`taskiq_fastapi.init` wires FastAPI's dependency injection so each task
 function receives its service dependencies from the same DI container used by
@@ -29,8 +29,7 @@ from taskiq.schedule_sources import LabelScheduleSource
 from taskiq.scheduler.scheduler import TaskiqScheduler
 from taskiq_fastapi import init as taskiq_init
 
-from app.adapters.tasks.task_registry import TASK_MAP
-from app.adapters.tasks.valkey_broker import ValkeyListBroker
+from app.adapters.tasks.valkey_broker import broker
 from app.api.dependencies import (
     get_blizzard_client,
     get_gamemode_service,
@@ -61,12 +60,6 @@ from app.monitoring.metrics import (
 )
 
 # ─── Broker ───────────────────────────────────────────────────────────────────
-
-broker = ValkeyListBroker(
-    url=f"valkey://{settings.valkey_host}:{settings.valkey_port}",
-    queue_name="taskiq:queue",
-    max_pool_size=settings.worker_max_concurrent_jobs,
-)
 
 # Wire FastAPI DI into taskiq tasks.
 # In worker mode this also triggers the FastAPI lifespan (DB init, cache eviction…).
@@ -140,7 +133,7 @@ async def _run_refresh_task(
 # ─── Refresh tasks ────────────────────────────────────────────────────────────
 
 
-@broker.task
+@broker.task(task_name="refresh_heroes")
 async def refresh_heroes(
     entity_id: str, service: HeroServiceDep, task_queue: TaskQueueDep
 ) -> None:
@@ -153,7 +146,7 @@ async def refresh_heroes(
         await service.refresh_list(Locale(locale_str))
 
 
-@broker.task
+@broker.task(task_name="refresh_hero")
 async def refresh_hero(
     entity_id: str, service: HeroServiceDep, task_queue: TaskQueueDep
 ) -> None:
@@ -166,7 +159,7 @@ async def refresh_hero(
         await service.refresh_single(hero_key, Locale(locale_str))
 
 
-@broker.task
+@broker.task(task_name="refresh_roles")
 async def refresh_roles(
     entity_id: str, service: RoleServiceDep, task_queue: TaskQueueDep
 ) -> None:
@@ -179,7 +172,7 @@ async def refresh_roles(
         await service.refresh_list(Locale(locale_str))
 
 
-@broker.task
+@broker.task(task_name="refresh_maps")
 async def refresh_maps(
     entity_id: str,
     service: MapServiceDep,
@@ -190,7 +183,7 @@ async def refresh_maps(
         await service.refresh_list()
 
 
-@broker.task
+@broker.task(task_name="refresh_gamemodes")
 async def refresh_gamemodes(
     entity_id: str,
     service: GamemodeServiceDep,
@@ -201,7 +194,7 @@ async def refresh_gamemodes(
         await service.refresh_list()
 
 
-@broker.task
+@broker.task(task_name="refresh_player_profile")
 async def refresh_player_profile(
     entity_id: str, service: PlayerServiceDep, task_queue: TaskQueueDep
 ) -> None:
@@ -276,17 +269,3 @@ async def check_new_hero(client: BlizzardClientDep) -> None:
         ],
         color=0x2ECC71,
     )
-
-
-# ─── Task registry (used by ValkeyTaskQueue for dispatch) ────────────────────
-
-TASK_MAP.update(
-    {
-        "refresh_heroes": refresh_heroes,
-        "refresh_hero": refresh_hero,
-        "refresh_roles": refresh_roles,
-        "refresh_maps": refresh_maps,
-        "refresh_gamemodes": refresh_gamemodes,
-        "refresh_player_profile": refresh_player_profile,
-    }
-)

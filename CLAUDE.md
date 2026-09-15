@@ -14,7 +14,7 @@ All commands use `just` (or `make` as a fallback). Linting/type-checking run loc
 just build                                         # Build Docker images (required first)
 just start                                         # Run app with autoreload on localhost:8000
 just check                                         # Type check with ty (uv run ty check)
-just lint                                          # Ruff linter with --fix
+just lint                                          # Ruff linter with --fix + import-linter contracts
 just format                                        # Ruff formatter
 just test                                          # All tests with coverage (-n auto)
 just test tests/domain/services/                   # Specific directory
@@ -32,11 +32,10 @@ Always run `just check`, `just lint`, and `just test` before proposing changes. 
 FastAPI app following strict DDD layering — dependencies flow inward only:
 
 ```
-domain → (no outward deps)
-adapters → domain, infrastructure
-api → domain, adapters (via DI), infrastructure
-infrastructure → anything
+main, worker → api → adapters → domain → monitoring → infrastructure → config
 ```
+
+Enforced by import-linter (`[tool.importlinter]` in `pyproject.toml`, `uv run lint-imports`): only `api/dependencies.py`, `api/lifespan.py`, `api/routers/monitoring.py` and `worker.py` import concrete adapters, adapters never import each other, and the domain only uses the logger and `config` (metrics are recorded in adapters or `api`).
 
 **Request flow:**
 ```
@@ -54,7 +53,8 @@ Key locations:
 - `app/domain/ports/` — `typing.Protocol` interfaces (structural typing, not inheritance)
 - `app/adapters/blizzard/client.py` — HTTP client with throttle and metrics
 - `app/adapters/cache/valkey_cache.py` — SWR envelope, zstd-compressed
-- `app/adapters/tasks/` — taskiq worker + Valkey broker
+- `app/worker.py` — taskiq worker entrypoint (refresh tasks + cron jobs)
+- `app/adapters/tasks/` — Valkey broker + task queue
 - `app/api/dependencies.py` — FastAPI `Depends()` providers
 - `app/api/helpers.py` — SWR headers, `routes_responses`
 - `app/domain/utils/data/` — `heroes.csv`, `maps.csv`, `gamemodes.csv` (enums generated from these)

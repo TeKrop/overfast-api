@@ -2,7 +2,7 @@
 
 import time
 from typing import Any, cast
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, status
@@ -153,42 +153,6 @@ class TestGetPlayerProfileCache:
         assert result["profile"] == _TEKROP_HTML
         assert result["summary"] == _PLAYER_SUMMARY
 
-    @pytest.mark.asyncio
-    async def test_miss_increments_prometheus(self):
-        svc = _make_service()
-        with (
-            patch("app.domain.services.player_service.settings") as s,
-            patch(
-                "app.domain.services.player_service.storage_cache_hit_total"
-            ) as m_hit,
-            patch("app.domain.services.player_service.storage_hits_total") as m_total,
-        ):
-            s.prometheus_enabled = True
-            m_hit.labels = MagicMock(return_value=MagicMock())
-            m_total.labels = MagicMock(return_value=MagicMock())
-            await svc.get_player_profile_cache("nobody-0000")
-        m_hit.labels.assert_called_with(table="player_profiles", result="miss")
-        m_total.labels.assert_called_with(result="miss")
-
-    @pytest.mark.asyncio
-    async def test_hit_increments_prometheus(self):
-        storage = FakeStorage()
-        await storage.set_player_profile("abc123", html=_TEKROP_HTML)
-        svc = _make_service(storage=storage)
-        with (
-            patch("app.domain.services.player_service.settings") as s,
-            patch(
-                "app.domain.services.player_service.storage_cache_hit_total"
-            ) as m_hit,
-            patch("app.domain.services.player_service.storage_hits_total") as m_total,
-        ):
-            s.prometheus_enabled = True
-            m_hit.labels = MagicMock(return_value=MagicMock())
-            m_total.labels = MagicMock(return_value=MagicMock())
-            await svc.get_player_profile_cache("abc123")
-        m_hit.labels.assert_called_with(table="player_profiles", result="hit")
-        m_total.labels.assert_called_with(result="hit")
-
 
 # ---------------------------------------------------------------------------
 # _get_fresh_stored_profile
@@ -230,7 +194,6 @@ class TestGetFreshStoredProfile:
             patch("app.domain.services.player_service.settings") as s,
         ):
             s.player_staleness_threshold = 3600
-            s.prometheus_enabled = False
             result = await svc._get_fresh_stored_profile("abc123")
 
         assert result == (None, 99999)
@@ -249,7 +212,6 @@ class TestGetFreshStoredProfile:
             patch("app.domain.services.player_service.settings") as s,
         ):
             s.player_staleness_threshold = 99999
-            s.prometheus_enabled = False
             result = await svc._get_fresh_stored_profile("abc123")
 
         assert result is not None
@@ -440,7 +402,6 @@ class TestExecutePlayerRequest:
             patch("app.domain.services.player_service.settings") as s,
         ):
             s.player_staleness_threshold = 99999
-            s.prometheus_enabled = False
             s.career_path_cache_timeout = 300
             result, _is_stale, _age = await svc._execute_player_request(
                 "abc123|def456", "test-key", data_factory
@@ -483,7 +444,6 @@ class TestExecutePlayerRequest:
             patch("app.domain.services.player_service.settings") as s,
         ):
             s.player_staleness_threshold = 0
-            s.prometheus_enabled = False
             s.career_path_cache_timeout = 300
             s.blizzard_host = "https://overwatch.blizzard.com"
             s.career_path = "/career"
@@ -531,7 +491,6 @@ class TestExecutePlayerRequest:
             patch("app.domain.services.player_service.settings") as s,
         ):
             s.player_staleness_threshold = 3600
-            s.prometheus_enabled = False
             s.career_path_cache_timeout = 300
             result, _is_stale, _age = await svc._execute_player_request(
                 "abc123|def456", "test-key", lambda _html, _summary: {}
@@ -560,7 +519,6 @@ class TestExecutePlayerRequest:
             patch("app.domain.services.player_service.settings") as s,
         ):
             s.player_staleness_threshold = 99999
-            s.prometheus_enabled = False
             s.career_path_cache_timeout = 300
             s.stale_cache_timeout = 60
             await svc._execute_player_request(
@@ -594,7 +552,6 @@ class TestExecutePlayerRequest:
             patch("app.domain.services.player_service.settings") as s,
         ):
             s.player_staleness_threshold = 3600
-            s.prometheus_enabled = False
             s.career_path_cache_timeout = 300
             s.stale_cache_timeout = 60
             _data, is_stale, _age = await svc._execute_player_request(
@@ -634,7 +591,6 @@ class TestExecutePlayerRequest:
             patch("app.domain.services.player_service.settings") as s,
         ):
             s.player_staleness_threshold = 0
-            s.prometheus_enabled = False
             s.career_path_cache_timeout = 300
             s.stale_cache_timeout = 60
             s.blizzard_host = "https://overwatch.blizzard.com"
@@ -681,7 +637,6 @@ class TestRefreshPlayerProfile:
             s.player_staleness_threshold = (
                 99999  # profile would pass the fast-path check
             )
-            s.prometheus_enabled = False
             s.career_path_cache_timeout = 300
             s.unknown_players_cache_enabled = False
             await svc.refresh_player_profile("abc123|def456")
@@ -706,7 +661,6 @@ class TestRefreshPlayerProfile:
             patch("app.domain.services.player_service.settings") as s,
         ):
             s.player_staleness_threshold = 3600
-            s.prometheus_enabled = False
             s.career_path_cache_timeout = 300
             s.unknown_players_cache_enabled = False
             await svc.refresh_player_profile("abc123|def456")
@@ -736,7 +690,6 @@ class TestRefreshPlayerProfile:
             patch("app.domain.services.player_service.settings") as s,
         ):
             s.player_staleness_threshold = 3600
-            s.prometheus_enabled = False
             s.unknown_players_cache_enabled = False
             with pytest.raises(ParserBlizzardError) as exc_info:
                 await svc.refresh_player_profile("TeKrop-2217")
