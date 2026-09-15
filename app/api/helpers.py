@@ -12,6 +12,7 @@ from app.api.models.errors import (
     RateLimitErrorMessage,
 )
 from app.config import settings
+from app.monitoring.metrics import stale_responses_total
 
 if TYPE_CHECKING:
     from fastapi import Request, Response
@@ -163,6 +164,8 @@ def apply_swr_headers(
     if age_seconds > 0:
         response.headers["Age"] = str(age_seconds)
     if is_stale:
+        if settings.prometheus_enabled:
+            stale_responses_total.inc()
         response.headers["Cache-Control"] = (
             f"public, max-age={max_age},"
             f" stale-while-revalidate={settings.stale_cache_timeout}"

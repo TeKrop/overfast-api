@@ -7,6 +7,7 @@ import fakeredis
 import pytest
 
 from app.adapters.tasks.valkey_task_queue import ValkeyTaskQueue
+from app.config import settings
 
 
 @pytest.fixture
@@ -125,6 +126,26 @@ class TestEnqueueTaskDispatch:
         ):
             await queue.enqueue("refresh_heroes", job_id="heroes")
         mock_task.kiq.assert_awaited_once_with("heroes")
+
+    @pytest.mark.asyncio
+    async def test_dispatch_records_refresh_metric(self, queue: ValkeyTaskQueue):
+        """Only dispatched jobs are counted, labelled by entity type."""
+        mock_task = MagicMock()
+        mock_task.kiq = AsyncMock()
+        with (
+            patch.dict(
+                "app.adapters.tasks.valkey_task_queue.TASK_MAP",
+                {"refresh_heroes": mock_task},
+            ),
+            patch.object(settings, "prometheus_enabled", True),
+            patch(
+                "app.adapters.tasks.valkey_task_queue.background_refresh_triggered_total"
+            ) as m_refresh,
+        ):
+            await queue.enqueue("refresh_heroes", job_id="heroes")
+            await queue.enqueue("refresh_heroes", job_id="heroes")
+
+        m_refresh.labels.assert_called_once_with(entity_type="heroes")
 
     @pytest.mark.asyncio
     async def test_unknown_task_skips_kiq(self, queue: ValkeyTaskQueue):

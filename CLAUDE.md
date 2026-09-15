@@ -35,7 +35,7 @@ FastAPI app following strict DDD layering — dependencies flow inward only:
 main, worker → api → adapters → domain → monitoring → infrastructure → config
 ```
 
-Enforced by import-linter (`[tool.importlinter]` in `pyproject.toml`, `uv run lint-imports`): only `api/dependencies.py`, `api/lifespan.py`, `api/routers/monitoring.py` and `worker.py` import concrete adapters, adapters never import each other, and the domain only uses `monitoring.metrics`, the logger and `config`.
+Enforced by import-linter (`[tool.importlinter]` in `pyproject.toml`, `uv run lint-imports`): only `api/dependencies.py`, `api/lifespan.py`, `api/routers/monitoring.py` and `worker.py` import concrete adapters, adapters never import each other, and the domain only uses the logger and `config` (metrics are recorded in adapters or `api`).
 
 **Request flow:**
 ```

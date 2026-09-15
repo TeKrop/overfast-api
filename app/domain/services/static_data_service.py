@@ -8,11 +8,6 @@ from app.config import settings
 from app.domain.ports.storage import StaticDataCategory
 from app.domain.services.base_service import BaseService
 from app.infrastructure.logger import logger
-from app.monitoring.metrics import (
-    background_refresh_triggered_total,
-    stale_responses_total,
-    storage_hits_total,
-)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -58,10 +53,8 @@ class StaticDataService(BaseService):
         """
         stored = await self._load_from_storage(config.storage_key)
         if stored is not None:
-            storage_hits_total.labels(result="hit").inc()
             return await self._serve_from_storage(stored, config)
 
-        storage_hits_total.labels(result="miss").inc()
         return await self._cold_fetch(config)
 
     async def _load_from_storage(self, storage_key: str) -> dict[str, Any] | None:
@@ -102,10 +95,6 @@ class StaticDataService(BaseService):
                 config.entity_type,
                 config.storage_key,
             )
-            stale_responses_total.inc()
-            background_refresh_triggered_total.labels(
-                entity_type=config.entity_type
-            ).inc()
             # Preserve the original stored_at so Age is computed correctly by nginx/Lua.
             # Use the full cache_ttl (not stale_cache_timeout) so X-Cache-TTL reflects the
             # real remaining lifetime of the entry, not just the short SWR window.

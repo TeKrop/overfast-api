@@ -36,11 +36,6 @@ from app.domain.parsers.player_summary import (
 from app.domain.parsers.utils import is_blizzard_id
 from app.domain.services.base_service import BaseService
 from app.infrastructure.logger import logger
-from app.monitoring.metrics import (
-    storage_battletag_lookup_total,
-    storage_cache_hit_total,
-    storage_hits_total,
-)
 
 
 class PlayerService(BaseService):
@@ -291,16 +286,7 @@ class PlayerService(BaseService):
         """Get player profile from persistent storage."""
         profile = await self.storage.get_player_profile(player_id)
         if not profile:
-            if settings.prometheus_enabled:
-                storage_cache_hit_total.labels(
-                    table="player_profiles", result="miss"
-                ).inc()
-                storage_hits_total.labels(result="miss").inc()
             return None
-
-        if settings.prometheus_enabled:
-            storage_cache_hit_total.labels(table="player_profiles", result="hit").inc()
-            storage_hits_total.labels(result="hit").inc()
 
         return {
             "profile": profile["html"],
@@ -506,13 +492,9 @@ class PlayerService(BaseService):
         )
 
         if not cached_blizzard_id:
-            if settings.prometheus_enabled:
-                storage_battletag_lookup_total.labels(result="miss").inc()
             return None
 
         logger.info("Blizzard ID found — retrying to find in search")
-        if settings.prometheus_enabled:
-            storage_battletag_lookup_total.labels(result="hit").inc()
         player_summary = parse_player_summary_json(
             search_json, player_id, cached_blizzard_id
         )

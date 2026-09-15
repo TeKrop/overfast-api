@@ -15,7 +15,10 @@ from app.config import settings
 from app.infrastructure.logger import logger
 from app.infrastructure.metaclasses import Singleton
 from app.monitoring.metrics import (
+    storage_battletag_lookup_total,
+    storage_cache_hit_total,
     storage_connection_errors_total,
+    storage_hits_total,
     track_storage_operation,
 )
 
@@ -128,6 +131,8 @@ class PostgresStorage(metaclass=Singleton):
                    FROM static_data WHERE key = $1""",
                 key,
             )
+        if settings.prometheus_enabled:
+            storage_hits_total.labels(result="miss" if row is None else "hit").inc()
         if row is None:
             return None
 
@@ -183,6 +188,10 @@ class PostgresStorage(metaclass=Singleton):
                    FROM player_profiles WHERE player_id = $1""",
                 player_id,
             )
+        if settings.prometheus_enabled:
+            result = "miss" if row is None else "hit"
+            storage_cache_hit_total.labels(table="player_profiles", result=result).inc()
+            storage_hits_total.labels(result=result).inc()
         if row is None:
             return None
 
@@ -208,6 +217,8 @@ class PostgresStorage(metaclass=Singleton):
                 "SELECT player_id FROM player_profiles WHERE battletag = $1",
                 battletag,
             )
+        if settings.prometheus_enabled:
+            storage_battletag_lookup_total.labels(result="hit" if row else "miss").inc()
         return row["player_id"] if row else None
 
     @track_storage_operation("player_profiles", "set")

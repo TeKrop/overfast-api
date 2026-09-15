@@ -12,6 +12,7 @@ from typing import Any
 from app.adapters.tasks.task_registry import TASK_MAP
 from app.config import settings
 from app.infrastructure.logger import logger
+from app.monitoring.metrics import background_refresh_triggered_total
 
 JOB_KEY_PREFIX = "worker:job:"
 
@@ -57,6 +58,10 @@ class ValkeyTaskQueue:
                 return effective_id
 
             await task_fn.kiq(effective_id)
+            if settings.prometheus_enabled:
+                background_refresh_triggered_total.labels(
+                    entity_type=task_name.removeprefix("refresh_")
+                ).inc()
             logger.debug(
                 "[ValkeyTaskQueue] Enqueued {} (job_id={})", task_name, effective_id
             )

@@ -10,7 +10,7 @@ from app.domain.exceptions import ParserBlizzardError, ParserParsingError
 from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
-    import httpx2
+    from app.domain.ports import BlizzardResponse
 
 _HTTP_504 = 504
 
@@ -27,7 +27,7 @@ def build_blizzard_url(path: str, segment: str) -> str:
 
 
 def validate_response_status(
-    response: httpx2.Response,
+    response: BlizzardResponse,
     valid_codes: list[int] | None = None,
 ) -> None:
     """Validate HTTP response status code.

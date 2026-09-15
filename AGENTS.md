@@ -44,7 +44,7 @@ Strict DDD layers; dependencies only flow inward. Enforced by import-linter: con
 | `main`, `worker` (entrypoints) | any layer below |
 | `api` | `adapters` (only `dependencies.py`, `lifespan.py`, `routers/monitoring.py`), `domain`, `monitoring`, `infrastructure`, `config` |
 | `adapters` | `domain`, `monitoring`, `infrastructure`, `config`; never another adapter (inject it through a port) |
-| `domain` | `monitoring.metrics`, `infrastructure.logger`, `config`; no framework or I/O libraries |
+| `domain` | `infrastructure.logger`, `config`; no framework, I/O or metrics libraries (record metrics in adapters or `api`) |
 | `monitoring` | `infrastructure`, `config` |
 | `infrastructure` | `config` |
 

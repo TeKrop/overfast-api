@@ -270,6 +270,17 @@ class TestApplySWRHeaders:
         assert resp.headers["X-Cache-Status"] == "stale"
         assert "stale-while-revalidate" in resp.headers["Cache-Control"]
 
+    @pytest.mark.parametrize(("is_stale", "expected_calls"), [(True, 1), (False, 0)])
+    def test_stale_responses_metric(self, is_stale: bool, expected_calls: int):
+        resp = self._make_response()
+        with (
+            patch.object(settings, "prometheus_enabled", True),
+            patch.object(api_helpers, "stale_responses_total") as m_stale,
+        ):
+            apply_swr_headers(resp, cache_ttl=3600, is_stale=is_stale)
+
+        assert m_stale.inc.call_count == expected_calls
+
     def test_age_header_set_when_positive(self):
         resp = self._make_response()
         apply_swr_headers(resp, cache_ttl=3600, is_stale=False, age_seconds=42)
