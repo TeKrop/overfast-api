@@ -252,9 +252,9 @@ OverFast API runs a separate **taskiq** worker process alongside the FastAPI app
 
 ```shell
 # Worker
-taskiq worker app.adapters.tasks.worker:broker
+taskiq worker app.worker:broker
 # Scheduler
-taskiq scheduler app.adapters.tasks.worker:scheduler
+taskiq scheduler app.worker:scheduler
 ```
 
 **On-demand tasks** (enqueued via SWR stale hits):

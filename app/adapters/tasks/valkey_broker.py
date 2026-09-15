@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any
 import valkey.asyncio as aiovalkey
 from taskiq.abc.broker import AsyncBroker
 
+from app.config import settings
 from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
@@ -120,3 +121,11 @@ class ValkeyListBroker(AsyncBroker):
                 )
                 await asyncio.sleep(delay)
                 delay = min(delay * 2, _RECONNECT_MAX_DELAY)
+
+
+# Shared by the API (lifespan startup/shutdown, task dispatch) and app/worker.py
+broker = ValkeyListBroker(
+    url=f"valkey://{settings.valkey_host}:{settings.valkey_port}",
+    queue_name=_QUEUE_DEFAULT,
+    max_pool_size=settings.worker_max_concurrent_jobs,
+)

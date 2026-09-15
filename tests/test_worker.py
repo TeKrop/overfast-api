@@ -1,4 +1,4 @@
-"""Tests for app/adapters/tasks/worker.py — task functions and helpers"""
+"""Tests for app/worker.py — task functions and helpers"""
 
 import contextlib
 from typing import Any, cast
@@ -6,7 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.adapters.tasks.worker import (
+from app.domain.enums import HeroKey, Locale
+from app.worker import (
     _run_refresh_task,
     check_new_hero,
     cleanup_stale_players,
@@ -17,22 +18,15 @@ from app.adapters.tasks.worker import (
     refresh_player_profile,
     refresh_roles,
 )
-from app.domain.enums import HeroKey, Locale
 
 
 @pytest.fixture(autouse=True)
 def mock_worker_metrics():
     """Patch all worker Prometheus metrics for every test in this module."""
     with (
-        patch(
-            "app.adapters.tasks.worker.background_refresh_completed_total"
-        ) as mock_completed,
-        patch(
-            "app.adapters.tasks.worker.background_refresh_failed_total"
-        ) as mock_failed,
-        patch(
-            "app.adapters.tasks.worker.background_tasks_duration_seconds"
-        ) as mock_duration,
+        patch("app.worker.background_refresh_completed_total") as mock_completed,
+        patch("app.worker.background_refresh_failed_total") as mock_failed,
+        patch("app.worker.background_tasks_duration_seconds") as mock_duration,
     ):
         mock_completed.labels.return_value = MagicMock()
         mock_failed.labels.return_value = MagicMock()
@@ -213,7 +207,7 @@ class TestCleanupStalePlayers:
     @pytest.mark.asyncio
     async def test_skipped_when_max_age_zero(self):
         mock_storage = AsyncMock()
-        with patch("app.adapters.tasks.worker.settings") as mock_settings:
+        with patch("app.worker.settings") as mock_settings:
             mock_settings.player_profile_max_age = 0
             await cast("Any", cleanup_stale_players).__wrapped__(mock_storage)
 
@@ -222,7 +216,7 @@ class TestCleanupStalePlayers:
     @pytest.mark.asyncio
     async def test_calls_delete_old_player_profiles(self):
         mock_storage = AsyncMock()
-        with patch("app.adapters.tasks.worker.settings") as mock_settings:
+        with patch("app.worker.settings") as mock_settings:
             mock_settings.player_profile_max_age = 86400
             await cast("Any", cleanup_stale_players).__wrapped__(mock_storage)
 
@@ -232,7 +226,7 @@ class TestCleanupStalePlayers:
     async def test_storage_exception_is_swallowed(self):
         mock_storage = AsyncMock()
         mock_storage.delete_old_player_profiles.side_effect = Exception("DB gone")
-        with patch("app.adapters.tasks.worker.settings") as mock_settings:
+        with patch("app.worker.settings") as mock_settings:
             mock_settings.player_profile_max_age = 3600
             # Should not propagate
             await cast("Any", cleanup_stale_players).__wrapped__(mock_storage)
@@ -246,8 +240,8 @@ class TestCheckNewHero:
     async def test_skipped_when_webhook_disabled(self):
         mock_client = AsyncMock()
         with (
-            patch("app.adapters.tasks.worker.settings") as mock_settings,
-            patch("app.adapters.tasks.worker.fetch_heroes_html") as mock_fetch,
+            patch("app.worker.settings") as mock_settings,
+            patch("app.worker.fetch_heroes_html") as mock_fetch,
         ):
             mock_settings.discord_webhook_enabled = False
             await cast("Any", check_new_hero).__wrapped__(mock_client)
@@ -260,18 +254,16 @@ class TestCheckNewHero:
         existing_heroes = [{"key": str(k)} for k in HeroKey]
 
         with (
-            patch("app.adapters.tasks.worker.settings") as mock_settings,
+            patch("app.worker.settings") as mock_settings,
             patch(
-                "app.adapters.tasks.worker.fetch_heroes_html",
+                "app.worker.fetch_heroes_html",
                 return_value="<html>",
             ),
             patch(
-                "app.adapters.tasks.worker.parse_heroes_html",
+                "app.worker.parse_heroes_html",
                 return_value=existing_heroes,
             ),
-            patch(
-                "app.adapters.tasks.worker.send_discord_webhook_message"
-            ) as mock_discord,
+            patch("app.worker.send_discord_webhook_message") as mock_discord,
         ):
             mock_settings.discord_webhook_enabled = True
             await cast("Any", check_new_hero).__wrapped__(mock_client)
@@ -286,18 +278,16 @@ class TestCheckNewHero:
         ]
 
         with (
-            patch("app.adapters.tasks.worker.settings") as mock_settings,
+            patch("app.worker.settings") as mock_settings,
             patch(
-                "app.adapters.tasks.worker.fetch_heroes_html",
+                "app.worker.fetch_heroes_html",
                 return_value="<html>",
             ),
             patch(
-                "app.adapters.tasks.worker.parse_heroes_html",
+                "app.worker.parse_heroes_html",
                 return_value=heroes_with_new,
             ),
-            patch(
-                "app.adapters.tasks.worker.send_discord_webhook_message"
-            ) as mock_discord,
+            patch("app.worker.send_discord_webhook_message") as mock_discord,
         ):
             mock_settings.discord_webhook_enabled = True
             await cast("Any", check_new_hero).__wrapped__(mock_client)
@@ -310,14 +300,12 @@ class TestCheckNewHero:
     async def test_fetch_exception_is_swallowed(self):
         mock_client = AsyncMock()
         with (
-            patch("app.adapters.tasks.worker.settings") as mock_settings,
+            patch("app.worker.settings") as mock_settings,
             patch(
-                "app.adapters.tasks.worker.fetch_heroes_html",
+                "app.worker.fetch_heroes_html",
                 side_effect=Exception("network error"),
             ),
-            patch(
-                "app.adapters.tasks.worker.send_discord_webhook_message"
-            ) as mock_discord,
+            patch("app.worker.send_discord_webhook_message") as mock_discord,
         ):
             mock_settings.discord_webhook_enabled = True
             await cast("Any", check_new_hero).__wrapped__(mock_client)

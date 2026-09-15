@@ -1,4 +1,4 @@
-"""Tests for monitoring/router.py (Prometheus metrics endpoint)"""
+"""Tests for api/routers/monitoring.py (Prometheus metrics endpoint)"""
 
 from unittest.mock import AsyncMock, patch
 
@@ -7,8 +7,8 @@ from fastapi import status
 from fastapi.testclient import TestClient
 
 from app import config
+from app.api.routers import monitoring as monitoring_router
 from app.main import app
-from app.monitoring import router as monitoring_router
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ class TestMetricsEndpoint:
 
     def test_metrics_endpoint_returns_200(self, client_fixture: TestClient):
         with patch(
-            "app.monitoring.router.PostgresStorage",
+            "app.api.routers.monitoring.PostgresStorage",
         ) as mock_storage_class:
             mock_storage = AsyncMock()
             mock_storage.get_stats.return_value = {
@@ -47,7 +47,7 @@ class TestMetricsEndpoint:
 
     def test_metrics_endpoint_content_type(self, client_fixture: TestClient):
         with patch(
-            "app.monitoring.router.PostgresStorage",
+            "app.api.routers.monitoring.PostgresStorage",
         ) as mock_storage_class:
             mock_storage = AsyncMock()
             mock_storage.get_stats.return_value = {
@@ -68,7 +68,7 @@ class TestMetricsEndpoint:
     def test_metrics_endpoint_with_profile_age_stats(self, client_fixture: TestClient):
         """Test that profile age histogram observations are made when p50 > 0."""
         with patch(
-            "app.monitoring.router.PostgresStorage",
+            "app.api.routers.monitoring.PostgresStorage",
         ) as mock_storage_class:
             mock_storage = AsyncMock()
             mock_storage.get_stats.return_value = {
@@ -92,7 +92,7 @@ class TestMetricsEndpoint:
     ):
         """If storage fails, the /metrics endpoint still returns 200 (not 500)."""
         with patch(
-            "app.monitoring.router.PostgresStorage",
+            "app.api.routers.monitoring.PostgresStorage",
         ) as mock_storage_class:
             mock_storage = AsyncMock()
             mock_storage.get_stats.side_effect = Exception("DB connection lost")

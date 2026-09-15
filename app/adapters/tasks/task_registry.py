@@ -1,4 +1,4 @@
-"""Task registry — shared TASK_MAP populated by worker.py at startup.
+"""Task registry — shared TASK_MAP populated by app/worker.py at import time.
 
 Keeping this in a separate module breaks the circular import chain:
   worker.py → dependencies.py → valkey_task_queue.py → task_registry.py
@@ -7,5 +7,5 @@ Keeping this in a separate module breaks the circular import chain:
 
 from typing import Any
 
-# Populated by worker.py once the broker.task-decorated functions are defined.
+# Populated by app/worker.py once the broker.task-decorated functions are defined.
 TASK_MAP: dict[str, Any] = {}

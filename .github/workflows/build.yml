@@ -39,6 +39,9 @@ jobs:
       - name: Run ruff code analysis
         run: uv run ruff check .
 
+      - name: Run import-linter
+        run: uv run lint-imports
+
       - name: Run ty code analysis
         run: uv run ty check .
 

@@ -50,6 +50,7 @@ endif
 lint: ## Run linter
 	@echo "Running linter..."
 	uv run ruff check --fix --exit-non-zero-on-fix
+	uv run lint-imports
 
 format: ## Run formatter
 	@echo "Running formatter..."

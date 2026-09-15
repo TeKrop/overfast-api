@@ -21,3 +21,9 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+      - id: import-linter
+        name: (import-linter) Checking architecture contracts
+        entry: uv run lint-imports
+        language: system
+        pass_filenames: false
+        always_run: true

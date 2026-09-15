@@ -37,18 +37,23 @@ Pre-commit hooks (`ruff` lint + `ruff-format` + `ty` type checking) are configur
 
 ## Architecture summary
 
-Four strict DDD layers; dependencies only flow inward.
+Strict DDD layers; dependencies only flow inward. Enforced by import-linter: contracts live in `[tool.importlinter]` (`pyproject.toml`) and run via `just lint`, pre-commit and CI.
 
-| Layer | May depend on | Must not depend on |
-|---|---|---|
-| `domain` | stdlib, `infrastructure` (logger only) | `adapters`, `api` |
-| `adapters` | `domain`, `infrastructure` | `api` |
-| `api` | `domain`, `adapters` (via DI), `infrastructure` | — |
-| `infrastructure` | anything | — |
+| Layer (top → bottom) | May depend on |
+|---|---|
+| `main`, `worker` (entrypoints) | any layer below |
+| `api` | `adapters` (only `dependencies.py`, `lifespan.py`, `routers/monitoring.py`), `domain`, `monitoring`, `infrastructure`, `config` |
+| `adapters` | `domain`, `monitoring`, `infrastructure`, `config`; never another adapter (inject it through a port) |
+| `domain` | `monitoring.metrics`, `infrastructure.logger`, `config`; no framework or I/O libraries |
+| `monitoring` | `infrastructure`, `config` |
+| `infrastructure` | `config` |
+
+Inside `domain`: `services` → `parsers` → `ports`, and feature services never import each other. No import cycles between sibling packages. A new top-level module under `app/` must be added to the `layers` contract.
 
 ```
 app/
 ├── main.py                        # Thin app assembler
+├── worker.py                      # taskiq worker entrypoint: tasks + cron jobs
 ├── config.py                      # Pydantic BaseSettings (settings singleton)
 ├── domain/
 │   ├── enums.py                   # All domain enums; HeroKey/MapKey built dynamically from CSV
@@ -67,10 +72,9 @@ app/
 │   ├── cache/valkey_cache.py      # ValkeyCache (SWR envelope, zstd-compressed)
 │   ├── storage/postgres_storage.py
 │   └── tasks/
-│       ├── valkey_broker.py       # ValkeyListBroker (taskiq)
+│       ├── valkey_broker.py       # ValkeyListBroker (taskiq) + shared broker instance
 │       ├── valkey_task_queue.py   # SWR enqueue, dedup via SET NX
-│       ├── task_registry.py       # TASK_MAP — breaks circular import
-│       └── worker.py              # taskiq tasks + cron jobs
+│       └── task_registry.py       # TASK_MAP, filled by app/worker.py
 ├── api/
 │   ├── dependencies.py            # FastAPI Depends() providers + type aliases
 │   ├── exception_handlers.py
@@ -78,7 +82,7 @@ app/
 │   ├── lifespan.py
 │   ├── responses.py               # ASCIIJSONResponse (default response class)
 │   ├── models/                    # Pydantic response models
-│   └── routers/
+│   └── routers/                   # incl. monitoring.py (Prometheus /metrics)
 ├── infrastructure/
 │   ├── decorators.py              # @rate_limited
 │   ├── helpers.py                 # overfast_internal_error, send_discord_webhook_message

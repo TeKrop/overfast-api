@@ -2,11 +2,11 @@
 
 Tasks are executed by the taskiq worker process::
 
-    taskiq worker app.adapters.tasks.worker:broker
+    taskiq worker app.worker:broker
 
 The cron task ``check_new_hero`` is scheduled by the taskiq scheduler::
 
-    taskiq scheduler app.adapters.tasks.worker:scheduler
+    taskiq scheduler app.worker:scheduler
 
 :func:`taskiq_fastapi.init` wires FastAPI's dependency injection so each task
 function receives its service dependencies from the same DI container used by
@@ -30,7 +30,7 @@ from taskiq.scheduler.scheduler import TaskiqScheduler
 from taskiq_fastapi import init as taskiq_init
 
 from app.adapters.tasks.task_registry import TASK_MAP
-from app.adapters.tasks.valkey_broker import ValkeyListBroker
+from app.adapters.tasks.valkey_broker import broker
 from app.api.dependencies import (
     get_blizzard_client,
     get_gamemode_service,
@@ -61,12 +61,6 @@ from app.monitoring.metrics import (
 )
 
 # ─── Broker ───────────────────────────────────────────────────────────────────
-
-broker = ValkeyListBroker(
-    url=f"valkey://{settings.valkey_host}:{settings.valkey_port}",
-    queue_name="taskiq:queue",
-    max_pool_size=settings.worker_max_concurrent_jobs,
-)
 
 # Wire FastAPI DI into taskiq tasks.
 # In worker mode this also triggers the FastAPI lifespan (DB init, cache eviction…).

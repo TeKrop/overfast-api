@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 import httpx2
 from fastapi import HTTPException, status
 
-from app.adapters.blizzard.throttle import BlizzardThrottle
 from app.config import settings
 from app.domain.exceptions import RateLimitedError
 from app.infrastructure.logger import logger
@@ -29,10 +28,8 @@ class BlizzardClient(metaclass=Singleton):
     Protocol compliance is verified by type checkers at injection points.
     """
 
-    def __init__(self):
-        self.throttle: ThrottlePort | None = (
-            BlizzardThrottle() if settings.throttle_enabled else None
-        )
+    def __init__(self, throttle: ThrottlePort | None = None):
+        self.throttle = throttle
         self.client = httpx2.AsyncClient(
             headers={
                 "User-Agent": (

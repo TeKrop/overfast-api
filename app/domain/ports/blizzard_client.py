@@ -19,6 +19,6 @@ class BlizzardClientPort(Protocol):
         """GET request to the given URL, respecting configured throttling."""
         ...
 
-    async def close(self) -> None:
+    async def aclose(self) -> None:
         """Close HTTP client connections"""
         ...

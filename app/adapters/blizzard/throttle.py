@@ -22,7 +22,6 @@ import time
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
-from app.adapters.cache.valkey_cache import ValkeyCache
 from app.config import settings
 from app.domain.exceptions import RateLimitedError
 from app.infrastructure.helpers import send_discord_webhook_message
@@ -53,8 +52,8 @@ class BlizzardThrottle(metaclass=Singleton):
     I/O-free penalty detection within the same process instance.
     """
 
-    def __init__(self) -> None:
-        self._cache: CachePort = ValkeyCache()
+    def __init__(self, cache: CachePort) -> None:
+        self._cache = cache
         self._penalty_start: float | None = None
 
     async def get_current_delay(self) -> float:

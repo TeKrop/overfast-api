@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app import worker  # noqa: F401  (registers tasks in TASK_MAP for ValkeyTaskQueue)
 from app.api.docs import setup_custom_openapi
 from app.api.enums import RouteTag
 from app.api.exception_handlers import register_exception_handlers
@@ -13,11 +14,11 @@ from app.api.routers.docs import router as docs
 from app.api.routers.gamemodes import router as gamemodes
 from app.api.routers.heroes import router as heroes
 from app.api.routers.maps import router as maps
+from app.api.routers.monitoring import router as monitoring_router
 from app.api.routers.players import router as players
 from app.api.routers.roles import router as roles
 from app.config import settings
 from app.infrastructure.logger import logger
-from app.monitoring import router as monitoring_router
 from app.monitoring.middleware import register_prometheus_middleware
 
 description = f"""OverFast API provides comprehensive data on Overwatch heroes,
@@ -120,7 +121,7 @@ if settings.profiler:  # pragma: no cover
 # Add Prometheus middleware and /metrics endpoint if enabled
 if settings.prometheus_enabled:
     register_prometheus_middleware(app)
-    app.include_router(monitoring_router.router)
+    app.include_router(monitoring_router)
 
 
 # Add application routers

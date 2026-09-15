@@ -31,6 +31,7 @@ Issues = "https://github.com/TeKrop/overfast-api/issues"
 [dependency-groups]
 dev = [
     "fakeredis[valkey]==2.38.*",
+    "import-linter==2.15.*",
     "ipdb==0.13.*",
     "pytest==9.1.*",
     "pytest-asyncio==1.4.*",
@@ -135,23 +136,111 @@ ignore = [
 allowed-confusables = ["（", "）", "："]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["SLF001", "TID251"]  # Ignore private member access + fastapi.TestClient in tests
+"tests/**" = ["SLF001"]  # Ignore private member access
 "app/api/models/**" = ["TC001"]  # Ignore type-checking block (Pydantic models definition)
 "app/api/routers/**" = ["TC001"]  # Enums used in FastAPI path/query parameters need runtime import
 "app/api/dependencies.py" = ["TC001"]  # Port types needed at runtime for FastAPI Depends
 "app/domain/services/**" = ["TC001"]  # Locale/enums used in runtime method annotations
-"app/api/**" = ["TID251"]           # API layer owns FastAPI
-"app/adapters/**" = ["TID251"]      # BlizzardClient raises HTTPException for transport errors
-"app/infrastructure/**" = ["TID251"]  # Shared HTTPException helpers (Discord alerts, etc.)
-"app/monitoring/**" = ["TID251"]    # Prometheus/FastAPI router glue
-"app/main.py" = ["TID251"]          # App assembly
-
-[tool.ruff.lint.flake8-tidy-imports.banned-api]
-"fastapi".msg = "Domain layer must stay framework-agnostic. Raise app.domain.exceptions instead of fastapi.HTTPException, use http.HTTPStatus instead of fastapi.status."
 
 [tool.ruff.lint.isort]
 # Consider app as first-party for imports in tests
 known-first-party = ["app"]
+
+# Architecture contracts, checked by `uv run lint-imports` (just lint, pre-commit, CI)
+[tool.importlinter]
+root_package = "app"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+id = "layers"
+name = "DDD layers: dependencies flow inward only"
+type = "layers"
+containers = ["app"]
+layers = [
+    "main",
+    "worker",
+    "api",
+    "adapters",
+    "domain",
+    "monitoring",
+    "infrastructure",
+    "config",
+]
+exhaustive = true
+
+[[tool.importlinter.contracts]]
+id = "domain-pure"
+name = "Domain stays framework- and I/O-agnostic"
+type = "forbidden"
+source_modules = ["app.domain"]
+forbidden_modules = [
+    "fastapi",
+    "starlette",
+    "pydantic",
+    "valkey",
+    "asyncpg",
+    "taskiq",
+    "taskiq_fastapi",
+    "prometheus_client",
+    "httpx2",
+    "app.monitoring.middleware",
+    "app.monitoring.helpers",
+    "app.infrastructure.helpers",
+    "app.infrastructure.decorators",
+    "app.infrastructure.metaclasses",
+    "app.infrastructure.commands",
+]
+ignore_imports = [
+    # metrics are cross-cutting, like the logger
+    "app.monitoring.metrics -> prometheus_client",
+    # type-only: BlizzardClientPort exposes httpx2.Response
+    "app.domain.ports.blizzard_client -> httpx2",
+    "app.domain.parsers.utils -> httpx2",
+]
+broken_contract_guidance = "Raise app.domain.exceptions instead of fastapi.HTTPException, use http.HTTPStatus instead of fastapi.status, reach I/O through app.domain.ports."
+
+[[tool.importlinter.contracts]]
+id = "composition-root"
+name = "Only composition roots import concrete adapters"
+type = "protected"
+protected_modules = ["app.adapters"]
+allowed_importers = [
+    "app.api.dependencies",
+    "app.api.lifespan",
+    "app.api.routers.monitoring",
+    "app.worker",
+]
+
+[[tool.importlinter.contracts]]
+id = "domain-layers"
+name = "Domain internals: services > parsers > ports"
+type = "layers"
+containers = ["app.domain"]
+layers = ["services", "parsers", "ports"]
+
+[[tool.importlinter.contracts]]
+id = "services-independent"
+name = "Feature services don't import each other"
+type = "independence"
+modules = [
+    "app.domain.services.gamemode_service",
+    "app.domain.services.hero_service",
+    "app.domain.services.map_service",
+    "app.domain.services.player_service",
+    "app.domain.services.role_service",
+]
+
+[[tool.importlinter.contracts]]
+id = "adapters-independent"
+name = "Adapters don't import each other"
+type = "independence"
+modules = ["app.adapters.*"]
+
+[[tool.importlinter.contracts]]
+id = "acyclic"
+name = "No dependency cycles between sibling packages"
+type = "acyclic_siblings"
+ancestors = ["app"]
 
 [tool.semantic_release]
 commit_parser = "conventional"

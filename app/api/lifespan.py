@@ -5,16 +5,16 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
-from app.adapters.blizzard import BlizzardClient
 from app.adapters.cache import ValkeyCache
 from app.adapters.storage import PostgresStorage
-from app.adapters.tasks.worker import broker
+from app.adapters.tasks.valkey_broker import broker
+from app.api.dependencies import get_blizzard_client
 from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
-    from app.domain.ports import BlizzardClientPort, CachePort
+    from app.domain.ports import CachePort
 
 
 @asynccontextmanager
@@ -24,7 +24,8 @@ async def lifespan(_: FastAPI):  # pragma: no cover
     await storage.initialize()
 
     logger.info("Instanciating HTTPX AsyncClient...")
-    overfast_client: BlizzardClientPort = BlizzardClient()
+    # First construction of the BlizzardClient singleton: must carry the throttle
+    overfast_client = get_blizzard_client()
 
     # Evict stale api-cache data on startup (handles crash/deploy scenarios)
     cache: CachePort = ValkeyCache()
