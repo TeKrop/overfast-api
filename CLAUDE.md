@@ -1,7 +1,5 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 **Full guidance is in `AGENTS.md`** — read it before making changes. This file is a quick-reference summary.
 
 ---
@@ -35,8 +33,6 @@ FastAPI app following strict DDD layering — dependencies flow inward only:
 main, worker → api → adapters → domain → monitoring → infrastructure → config
 ```
 
-Enforced by import-linter (`[tool.importlinter]` in `pyproject.toml`, `uv run lint-imports`): only `api/dependencies.py`, `api/lifespan.py`, `api/routers/monitoring.py` and `worker.py` import concrete adapters, adapters never import each other, and the domain only uses the logger and `config` (metrics are recorded in adapters or `api`).
-
 **Request flow:**
 ```
 Router → get_* dependency (api/dependencies.py)
@@ -47,23 +43,11 @@ Router → get_* dependency (api/dependencies.py)
       └── MISS         → BlizzardClientPort.fetch() → parse → CachePort.set() → return
 ```
 
-Key locations:
-- `app/domain/parsers/` — stateless HTML parsers (selectolax)
-- `app/domain/services/` — SWR orchestration via `get_or_fetch()`
-- `app/domain/ports/` — `typing.Protocol` interfaces (structural typing, not inheritance)
-- `app/adapters/blizzard/client.py` — HTTP client with throttle and metrics
-- `app/adapters/cache/valkey_cache.py` — SWR envelope, zstd-compressed
-- `app/worker.py` — taskiq worker entrypoint (refresh tasks + cron jobs)
-- `app/adapters/tasks/` — Valkey broker + task queue
-- `app/api/dependencies.py` — FastAPI `Depends()` providers
-- `app/api/helpers.py` — SWR headers, `routes_responses`
-- `app/domain/utils/data/` — `heroes.csv`, `maps.csv`, `gamemodes.csv` (enums generated from these)
-
 ---
 
 ## Key conventions
 
-**Error handling:** Assign `msg = "..."` before `raise` (ruff EM rule). Use `raise Exc(msg) from exc` for chaining. Infrastructure errors caught with `except Exception:  # noqa: BLE001`, never crash requests.
+**Error handling:** Use `raise Exc(msg) from exc` for chaining. Infrastructure errors caught with `except Exception:  # noqa: BLE001`, never crash requests.
 
 **Logging:** `from app.infrastructure.logger import logger` (loguru). Always use brace-style: `logger.info("fetching {}", url)`. Never f-strings or `%s` in log calls.
 
