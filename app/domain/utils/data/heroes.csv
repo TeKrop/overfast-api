@@ -41,7 +41,7 @@ sigma,Sigma,tank,350,0,275
 sierra,Sierra,damage,250,0,0
 sojourn,Sojourn,damage,225,0,0
 soldier-76,Soldier: 76,damage,250,0,0
-sombra,Sombra,damage,225,0,0
+sombra,Sombra,support,225,0,0
 symmetra,Symmetra,damage,125,0,150
 torbjorn,Torbjörn,damage,225,75,0
 tracer,Tracer,damage,175,0,0
