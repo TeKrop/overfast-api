@@ -2,6 +2,46 @@
 
 <!-- version list -->
 
+## v4.14.0 (2026-10-06)
+
+### Build System
+
+- **deps**: Bump astral-sh/setup-uv from 10.0.1 to 10.1.0
+  ([#460](https://github.com/TeKrop/overfast-api/pull/460),
+  [`65284d6`](https://github.com/TeKrop/overfast-api/commit/65284d6ab2d0c271def99c001d22006bf8e58f57))
+
+- **deps**: Bump astral-sh/setup-uv from 10.1.0 to 10.2.0
+  ([#463](https://github.com/TeKrop/overfast-api/pull/463),
+  [`dab72ac`](https://github.com/TeKrop/overfast-api/commit/dab72acd15356dcb76b39a9d131c5c8522f0b337))
+
+- **deps**: Bump python-semantic-release/python-semantic-release
+  ([#464](https://github.com/TeKrop/overfast-api/pull/464),
+  [`ae55927`](https://github.com/TeKrop/overfast-api/commit/ae559272cf17f73a0a38fcf90d691ee3f01a732a))
+
+- **deps**: Bump virtualenv from 21.7.9 to 21.7.12
+  ([#465](https://github.com/TeKrop/overfast-api/pull/465),
+  [`2857c82`](https://github.com/TeKrop/overfast-api/commit/2857c822f0b36764daec6dca44e256293cbe226b))
+
+- **deps-dev**: Bump ruff from 0.16.6 to 0.16.7 in the uv-deps group
+  ([#461](https://github.com/TeKrop/overfast-api/pull/461),
+  [`e930c26`](https://github.com/TeKrop/overfast-api/commit/e930c26f41fae3d7bb7174bd4eddf6e4d5a3fdd7))
+
+### Documentation
+
+- Trim derivable content from CLAUDE.md ([#462](https://github.com/TeKrop/overfast-api/pull/462),
+  [`e54296b`](https://github.com/TeKrop/overfast-api/commit/e54296b15653ada34d00f963b6d2810ef271f3ff))
+
+### Features
+
+- Update for Season 5 ([#467](https://github.com/TeKrop/overfast-api/pull/467),
+  [`d9433e1`](https://github.com/TeKrop/overfast-api/commit/d9433e1eb1e9d7cbfdfc2a32be8b56a9cc886d80))
+
+### Refactoring
+
+- Enforce DDD layering with import-linter ([#459](https://github.com/TeKrop/overfast-api/pull/459),
+  [`67dc854`](https://github.com/TeKrop/overfast-api/commit/67dc854848e7df856a49e881fc17d28ad7d6a124))
+
+
 ## v4.13.0 (2026-09-14)
 
 ### Build System
