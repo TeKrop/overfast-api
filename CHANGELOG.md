@@ -2,6 +2,30 @@
 
 <!-- version list -->
 
+## v4.14.1 (2026-10-12)
+
+### Bug Fixes
+
+- Update hitpoints for Brigitte, D.Mon, D.Va and Sigma
+  ([#471](https://github.com/TeKrop/overfast-api/pull/471),
+  [`acec489`](https://github.com/TeKrop/overfast-api/commit/acec489a2713f640423ccd9da2a1d8e22679fae3))
+
+### Build System
+
+- **deps**: Bump multidict from 6.8.0 to 6.9.1
+  ([#468](https://github.com/TeKrop/overfast-api/pull/468),
+  [`6ca950e`](https://github.com/TeKrop/overfast-api/commit/6ca950ec3ed2b3419b2b89beb9fbf3f5bad77405))
+
+- **deps**: Bump virtualenv from 21.7.12 to 21.7.13
+  ([#469](https://github.com/TeKrop/overfast-api/pull/469),
+  [`da2424a`](https://github.com/TeKrop/overfast-api/commit/da2424aabbc075186c2e59fb0c2667170aa1efb3))
+
+### Documentation
+
+- Update community projects list in README
+  ([`d4901f8`](https://github.com/TeKrop/overfast-api/commit/d4901f80f28537935f1cfbf0f8abd428d7172c69))
+
+
 ## v4.14.0 (2026-10-06)
 
 ### Build System
