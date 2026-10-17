@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v4.15.0 (2026-10-17)
+
+### Bug Fixes
+
+- **docs**: Pin redoc to v2 on jsdelivr CDN
+  ([`7532938`](https://github.com/TeKrop/overfast-api/commit/7532938a165e37f86e7810969379a686cd53a0fa))
+
+### Build System
+
+- **deps**: Bump astral-sh/setup-uv from 10.2.0 to 10.3.0
+  ([#472](https://github.com/TeKrop/overfast-api/pull/472),
+  [`645e6ef`](https://github.com/TeKrop/overfast-api/commit/645e6efcc853deba1f14dbf0666a14f73551a3d8))
+
+### Features
+
+- Add `uses` to `/maps` endpoint ([#473](https://github.com/TeKrop/overfast-api/pull/473),
+  [`8576508`](https://github.com/TeKrop/overfast-api/commit/8576508012b0109042a5de4d05e43e7f68a4d7de))
+
+
 ## v4.14.1 (2026-10-12)
 
 ### Bug Fixes
