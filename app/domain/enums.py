@@ -89,6 +89,16 @@ class HeroGamemode(StrEnum):
     STADIUM = "stadium"
 
 
+class MapUse(StrEnum):
+    """Categories of play supported by Overwatch maps."""
+
+    ARCADE = "arcade"
+    STANDARD = "standard"
+    STADIUM = "stadium"
+    TRAINING = "training"
+    WORKSHOP = "workshop"
+
+
 # Dynamically create the MapKey enum by using the CSV File
 maps_data = read_csv_file("maps")
 MapKey = StrEnum(

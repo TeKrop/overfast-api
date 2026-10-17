@@ -19,6 +19,7 @@ def test_parse_maps_csv_entry_format():
         "name",
         "screenshot",
         "gamemodes",
+        "uses",
         "location",
         "country_code",
     }

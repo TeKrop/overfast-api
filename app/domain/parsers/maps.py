@@ -14,7 +14,8 @@ def parse_maps_csv() -> list[dict]:
     Parse maps list from CSV file
 
     Returns:
-        List of map dicts with keys: key, name, screenshot, gamemodes, location, country_code
+        List of map dicts with keys: key, name, screenshot, gamemodes, uses,
+        location, country_code
     """
     csv_data = read_csv_file("maps")
 
@@ -24,6 +25,7 @@ def parse_maps_csv() -> list[dict]:
             "name": map_dict["name"],
             "screenshot": get_static_url_maps(map_dict["key"]),
             "gamemodes": map_dict["gamemodes"].split(","),
+            "uses": map_dict["uses"].split(","),
             "location": map_dict["location"],
             "country_code": map_dict.get("country_code") or None,
         }
