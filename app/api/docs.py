@@ -60,7 +60,9 @@ OVERFAST_REDOC_THEME = {
     "rightPanel": {"backgroundColor": "rgba(5, 8, 15, 0.65)"},
 }
 
-OVERFAST_REDOC_SCRIPT = "https://cdn.jsdelivr.net/npm/redoc/bundles/redoc.standalone.js"
+OVERFAST_REDOC_SCRIPT = (
+    "https://cdn.jsdelivr.net/npm/redoc@2/bundles/redoc.standalone.js"
+)
 
 
 def render_documentation(
