@@ -69,6 +69,18 @@ def parse_html_root(html: str) -> LexborNode:
     return root_tag
 
 
+def css_first_or_raise(node: LexborNode, selector: str) -> LexborNode:
+    """Return the first node matching ``selector``.
+
+    Raises:
+        ParserParsingError: If no node matches
+    """
+    if (found := node.css_first(selector)) is None:
+        msg = f"Could not find node matching '{selector}'"
+        raise ParserParsingError(msg)
+    return found
+
+
 def safe_get_text(node: LexborNode | None, default: str = "") -> str:
     """Safely get text from a node, return default if None"""
     return node.text().strip() if node else default

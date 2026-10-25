@@ -7,19 +7,19 @@ authors = [
   {name = "Valentin PORCHET", email = "valentin.porchet@proton.me"}
 ]
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.15"
 dependencies = [
-    "asyncpg==0.31.*",
-    "fastapi[standard-no-fastapi-cloud-cli]==0.141.*",
-    "httpx2[http2]==2.12.*",
+    "asyncpg==0.32.*",
+    "fastapi[standard-no-fastapi-cloud-cli]==0.162.*",
+    "httpx2[http2]==2.16.*",
     "loguru==0.7.*",
     "prometheus-client==0.26.*",
-    "pydantic==2.13.*",
-    "pydantic-settings==2.15.*",
-    "selectolax==0.4.*",
-    "taskiq==0.12.*",
+    "pydantic==2.14.*",
+    "pydantic-settings==2.16.*",
+    "selectolax==1.0.*",
+    "taskiq==0.13.*",
     "taskiq-fastapi==0.5.*",
-    "valkey[libvalkey]==6.1.*",
+    "valkey[libvalkey]==6.2.*",
 ]
 
 [project.urls]
@@ -30,7 +30,7 @@ Issues = "https://github.com/TeKrop/overfast-api/issues"
 
 [dependency-groups]
 dev = [
-    "fakeredis[valkey]==2.38.*",
+    "fakeredis[valkey]==2.40.*",
     "import-linter==2.15.*",
     "ipdb==0.13.*",
     "pytest==9.1.*",
@@ -38,11 +38,11 @@ dev = [
     "pytest-cov==7.1.*",
     "pytest-randomly==5.0.*",
     "pytest-xdist==3.8.*",
-    "ruff==0.16.*",
-    "pre-commit==4.6.*",
+    "ruff==0.17.*",
+    "pre-commit==4.7.*",
     "pyinstrument==5.1.*",
     "memray==1.20.*",
-    "objgraph==3.6.*",
+    "objgraph==3.7.*",
     "ty==0.0.*",
 ]
 
@@ -53,8 +53,8 @@ compile-bytecode = true
 # Check app code and tests
 src = ["app", "tests"]
 
-# Assume Python 3.14
-target-version = "py314"
+# Assume Python 3.15
+target-version = "py315"
 
 [tool.ruff.lint]
 select = [

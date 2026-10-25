@@ -6,7 +6,7 @@ Guidance for automated assistants and code agents when interacting with this rep
 
 ## Project overview
 
-OverFast API is a FastAPI-based Overwatch data API that scrapes Blizzard pages to provide data about heroes, game modes, maps, and player statistics. It uses a Stale-While-Revalidate (SWR) caching strategy backed by Valkey, with Nginx/OpenResty as a reverse proxy. The codebase follows Domain-Driven Design (DDD) with a strict layering policy. Python 3.14+, package manager is `uv`.
+OverFast API is a FastAPI-based Overwatch data API that scrapes Blizzard pages to provide data about heroes, game modes, maps, and player statistics. It uses a Stale-While-Revalidate (SWR) caching strategy backed by Valkey, with Nginx/OpenResty as a reverse proxy. The codebase follows Domain-Driven Design (DDD) with a strict layering policy. Python 3.15+, package manager is `uv`.
 
 ---
 

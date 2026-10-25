@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import json
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, patch
@@ -166,7 +166,7 @@ class TestGetStaticData:
     async def test_returns_decompressed_data(self):
         payload = json.dumps({"heroes": []})
         compressed = PostgresStorage._compress(payload)
-        updated_at = datetime.datetime(2025, 1, 1, tzinfo=datetime.UTC)
+        updated_at = dt.datetime(2025, 1, 1, tzinfo=dt.UTC)
         row = {
             "data": compressed,
             "category": "heroes",
@@ -229,7 +229,7 @@ class TestGetPlayerProfile:
         html = "<html>player</html>"
         compressed = PostgresStorage._compress(html)
         summary = {"url": "abc123", "lastUpdated": 1700000000}
-        updated_at = datetime.datetime(2025, 6, 1, tzinfo=datetime.UTC)
+        updated_at = dt.datetime(2025, 6, 1, tzinfo=dt.UTC)
         row = {
             "html_compressed": compressed,
             "battletag": "TeKrop-2217",
@@ -254,7 +254,7 @@ class TestGetPlayerProfile:
         """When row summary is None, builds a minimal summary dict."""
         html = "<html>player</html>"
         compressed = PostgresStorage._compress(html)
-        updated_at = datetime.datetime(2025, 6, 1, tzinfo=datetime.UTC)
+        updated_at = dt.datetime(2025, 6, 1, tzinfo=dt.UTC)
         row = {
             "html_compressed": compressed,
             "battletag": None,

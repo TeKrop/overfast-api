@@ -1,6 +1,6 @@
 # Build arguments
-ARG PYTHON_VERSION=3.14
-ARG UV_VERSION=0.11.26
+ARG PYTHON_VERSION=3.15
+ARG UV_VERSION=0.13.5
 
 # Create a temporary stage to pull the uv binary
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv-stage
@@ -28,5 +28,8 @@ COPY ./static /code/static
 
 # For dev image, copy the tests and install necessary dependencies
 FROM main AS dev
-RUN uv sync --frozen --no-cache
+# build-base needed as pyinstrument/memray have no musl wheels for 3.15 yet
+RUN apk add --no-cache build-base \
+    && uv sync --frozen --no-cache \
+    && apk del build-base
 COPY ./tests /code/tests

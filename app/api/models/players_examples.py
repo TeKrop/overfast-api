@@ -1,6 +1,11 @@
 """Some API result examples, mainly used in the exposed documentation"""
 
-CareerStatsExample = {
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pydantic import JsonValue
+
+CareerStatsExample: dict[str, JsonValue] = {
     "all-heroes": [
         {
             "category": "best",
@@ -1393,7 +1398,7 @@ CareerStatsExample = {
     "zenyatta": None,
 }
 
-HeroesComparisonsExample = {
+HeroesComparisonsExample: dict[str, JsonValue] = {
     "time_played": {
         "label": "Time Played",
         "values": [
@@ -2026,7 +2031,7 @@ HeroesComparisonsExample = {
     },
 }
 
-PlayerStatsSummaryExample = {
+PlayerStatsSummaryExample: dict[str, JsonValue] = {
     "general": {
         "games_played": 12702,
         "games_won": 6548,
@@ -2869,7 +2874,7 @@ PlayerStatsSummaryExample = {
     },
 }
 
-PlayerCareerStatsExample = {
+PlayerCareerStatsExample: dict[str, JsonValue] = {
     "all-heroes": {
         "assists": {
             "assists": 35,
