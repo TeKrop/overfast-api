@@ -31,5 +31,6 @@ FROM main AS dev
 # build-base needed as pyinstrument/memray have no musl wheels for 3.15 yet
 RUN apk add --no-cache build-base \
     && uv sync --frozen --no-cache \
-    && apk del build-base
+    && apk del build-base \
+    && apk add --no-cache libstdc++
 COPY ./tests /code/tests

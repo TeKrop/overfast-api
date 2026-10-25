@@ -1,9 +1,6 @@
 """Some API result examples, mainly used in the exposed documentation"""
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from pydantic import JsonValue
+from pydantic import JsonValue  # noqa: TC002
 
 CareerStatsExample: dict[str, JsonValue] = {
     "all-heroes": [
