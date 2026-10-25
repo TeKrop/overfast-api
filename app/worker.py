@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING, Annotated
 from prometheus_client import start_http_server
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncGenerator
 
 from taskiq import TaskiqDepends, TaskiqEvents
 from taskiq.schedule_sources import LabelScheduleSource
@@ -104,7 +104,7 @@ async def _run_refresh_task(
     entity_type: str,
     entity_id: str,
     task_queue: TaskQueuePort,
-) -> AsyncIterator[None]:
+) -> AsyncGenerator[None]:
     """Context manager that executes a refresh task end-to-end: records
     duration and success/failure metrics, then releases the dedup key so
     the job can be re-enqueued immediately after completion.

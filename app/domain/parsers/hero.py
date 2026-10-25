@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from app.config import settings
 from app.domain.parsers.utils import (
+    css_first_or_raise,
     parse_html_root,
     safe_get_attribute,
     safe_get_text,
@@ -61,9 +62,9 @@ def parse_hero_html(html: str, locale: Locale = Locale.ENGLISH_US) -> dict:
                 message="Hero not found or not released yet",
             )
 
-        perks_section = root_tag.css_first("blz-section#perks")
-        overview_section = root_tag.css_first("blz-page-header")
-        lore_section = root_tag.css_first("blz-section.lore")
+        perks_section = css_first_or_raise(root_tag, "blz-section#perks")
+        overview_section = css_first_or_raise(root_tag, "blz-page-header")
+        lore_section = css_first_or_raise(root_tag, "blz-section.lore")
 
         if not overview_section:
             msg = "Hero overview section (blz-page-header) not found"
@@ -90,8 +91,10 @@ def parse_hero_html(html: str, locale: Locale = Locale.ENGLISH_US) -> dict:
 
 def _parse_hero_summary(overview_section: LexborNode, locale: Locale) -> dict:
     """Parse hero summary section (name, role, location, birthday, age)"""
-    header_section = overview_section.css_first("blz-header")
-    extra_list_items = overview_section.css_first("blz-list").css("blz-list-item")
+    header_section = css_first_or_raise(overview_section, "blz-header")
+    extra_list_items = css_first_or_raise(overview_section, "blz-list").css(
+        "blz-list-item"
+    )
 
     birthday_text = safe_get_text(extra_list_items[3].css_first("p"))
     birthday, age = _parse_birthday_and_age(birthday_text, locale)
@@ -163,8 +166,8 @@ def _parse_birthday_and_age(text: str, locale: Locale) -> tuple[str | None, int 
 
 def _parse_hero_abilities(abilities_section: LexborNode) -> list[dict]:
     """Parse hero abilities section"""
-    carousel_section_div = abilities_section.css_first("blz-carousel-section")
-    abilities_list_div = carousel_section_div.css_first("blz-carousel")
+    carousel_section_div = css_first_or_raise(abilities_section, "blz-carousel-section")
+    abilities_list_div = css_first_or_raise(carousel_section_div, "blz-carousel")
 
     # Parse ability descriptions
     abilities_desc = [
@@ -186,7 +189,7 @@ def _parse_hero_abilities(abilities_section: LexborNode) -> list[dict]:
 
     # Combine into abilities list
     abilities = []
-    tab_controls = abilities_list_div.css_first("blz-tab-controls").css(
+    tab_controls = css_first_or_raise(abilities_list_div, "blz-tab-controls").css(
         "blz-tab-control"
     )
     for ability_index, ability_div in enumerate(tab_controls):
@@ -205,21 +208,27 @@ def _parse_hero_abilities(abilities_section: LexborNode) -> list[dict]:
 def _parse_hero_perks(perks_section: LexborNode) -> dict:
     """Parse hero perks section"""
     return {
-        "minor": _parse_perk_level(perks_section.css_first("div.perk-category.minor")),
-        "major": _parse_perk_level(perks_section.css_first("div.perk-category.major")),
+        "minor": _parse_perk_level(
+            css_first_or_raise(perks_section, "div.perk-category.minor")
+        ),
+        "major": _parse_perk_level(
+            css_first_or_raise(perks_section, "div.perk-category.major")
+        ),
     }
 
 
 def _parse_perk_level(perk_level_div: LexborNode) -> list[dict]:
     return [
-        _parse_perk_detail(perk_level_div.css_first("div.perk-details.left")),
-        _parse_perk_detail(perk_level_div.css_first("div.perk-details.right")),
+        _parse_perk_detail(css_first_or_raise(perk_level_div, "div.perk-details.left")),
+        _parse_perk_detail(
+            css_first_or_raise(perk_level_div, "div.perk-details.right")
+        ),
     ]
 
 
 def _parse_perk_detail(perk_detail_div: LexborNode) -> dict:
     perk_icon = safe_get_attribute(perk_detail_div.css_first("img"), "src")
-    perk_info_div = perk_detail_div.css_first("div.perk-info")
+    perk_info_div = css_first_or_raise(perk_detail_div, "div.perk-info")
 
     return {
         "name": safe_get_text(perk_info_div.css_first("h3")),
@@ -230,12 +239,12 @@ def _parse_perk_detail(perk_detail_div: LexborNode) -> dict:
 
 def _parse_hero_story(lore_section: LexborNode) -> dict:
     """Parse hero story/lore section"""
-    showcase_section = lore_section.css_first("blz-showcase")
+    showcase_section = css_first_or_raise(lore_section, "blz-showcase")
 
     summary_text = safe_get_text(showcase_section.css_first("blz-header p"))
     summary = summary_text.replace("\n", "")
 
-    accordion = lore_section.css_first("blz-accordion-section blz-accordion")
+    accordion = css_first_or_raise(lore_section, "blz-accordion-section blz-accordion")
 
     return {
         "summary": summary,
@@ -309,14 +318,14 @@ def _parse_story_chapters(accordion: LexborNode) -> list[dict]:
 
 
 def _parse_hero_stadium_powers(stadium_wrapper: LexborNode) -> list[dict]:
-    stadium_carousel = stadium_wrapper.css_first(
-        "blz-section#stadium blz-carousel-beta"
+    stadium_carousel = css_first_or_raise(
+        stadium_wrapper, "blz-section#stadium blz-carousel-beta"
     )
 
     return [
         {
-            "name": power.css_first("p.talent-name").text(),
-            "description": power.css_first("p.talent-desc").text(),
+            "name": css_first_or_raise(power, "p.talent-name").text(),
+            "description": css_first_or_raise(power, "p.talent-desc").text(),
             "icon": safe_get_attribute(power.css_first("img"), "src"),
         }
         for power in stadium_carousel.css("blz-card.talent-card")

@@ -14,6 +14,7 @@ from app.config import settings
 from app.domain.exceptions import ParserBlizzardError, ParserParsingError
 from app.domain.parsers.utils import (
     build_blizzard_url,
+    css_first_or_raise,
     extract_blizzard_id_from_url,
     parse_html_root,
     validate_response_status,
@@ -154,19 +155,23 @@ def _parse_summary(root_tag: LexborNode, player_summary: dict | None) -> dict:
     error_msg_prefix = "Failed to parse player summary"
 
     try:
-        profile_div = root_tag.css_first(
-            "blz-section.Profile-masthead > div.Profile-player"
+        profile_div = css_first_or_raise(
+            root_tag, "blz-section.Profile-masthead > div.Profile-player"
         )
-        summary_div = profile_div.css_first("div.Profile-player--summaryWrapper")
-        progression_div = profile_div.css_first("div.Profile-player--info")
+        summary_div = css_first_or_raise(
+            profile_div, "div.Profile-player--summaryWrapper"
+        )
+        progression_div = css_first_or_raise(profile_div, "div.Profile-player--info")
 
         return {
-            "username": summary_div.css_first("h1.Profile-player--name").text(),
+            "username": css_first_or_raise(
+                summary_div, "h1.Profile-player--name"
+            ).text(),
             "avatar": (
                 player_summary.get("avatar")
-                or summary_div.css_first("img.Profile-player--portrait").attributes.get(
-                    "src"
-                )
+                or css_first_or_raise(
+                    summary_div, "img.Profile-player--portrait"
+                ).attributes.get("src")
             ),
             "namecard": player_summary.get("namecard"),
             "title": get_player_title(
@@ -199,9 +204,9 @@ def _get_endorsement(progression_div: LexborNode) -> dict | None:
         return None
 
     endorsement_frame_url = (
-        endorsement_span.css_first("img.Profile-playerSummary--endorsement").attributes[
-            "src"
-        ]
+        css_first_or_raise(
+            endorsement_span, "img.Profile-playerSummary--endorsement"
+        ).attributes["src"]
         or ""
     )
 
@@ -287,7 +292,9 @@ def _get_last_season_played(root_tag: LexborNode, platform_class: str) -> int | 
     return int(last_season_played) if last_season_played else None
 
 
-def _get_profile_view_section(root_tag: LexborNode, platform_class: str) -> LexborNode:
+def _get_profile_view_section(
+    root_tag: LexborNode, platform_class: str
+) -> LexborNode | None:
     """Get profile view section for a platform"""
     return root_tag.css_first(f"div.Profile-view.{platform_class}")
 
@@ -296,10 +303,10 @@ def _get_role_icon(role_wrapper: LexborNode) -> str:
     """Extract role icon (format differs between PC and console)"""
     # PC: img tag, Console: svg tag
     if role_div := role_wrapper.css_first("div.Profile-playerSummary--role"):
-        return role_div.css_first("img").attributes["src"] or ""
+        return css_first_or_raise(role_div, "img").attributes["src"] or ""
 
-    role_svg = role_wrapper.css_first("svg.Profile-playerSummary--role")
-    return role_svg.css_first("use").attributes["xlink:href"] or ""
+    role_svg = css_first_or_raise(role_wrapper, "svg.Profile-playerSummary--role")
+    return css_first_or_raise(role_svg, "use").attributes["xlink:href"] or ""
 
 
 def _parse_stats(root_tag: LexborNode) -> dict | None:
@@ -329,7 +336,7 @@ def _parse_platform_stats(
 
 
 def _parse_gamemode_stats(
-    statistics_section: LexborNode,
+    statistics_section: LexborNode | None,
     gamemode: PlayerGamemode,
 ) -> dict | None:
     """Parse stats for a specific gamemode"""
@@ -344,8 +351,8 @@ def _parse_gamemode_stats(
     if not top_heroes_section or not top_heroes_section.css_first("select"):
         return None
 
-    career_stats_section = statistics_section.css_first(
-        f"blz-section.{GAMEMODES_DIV_MAPPING[gamemode]}"
+    career_stats_section = css_first_or_raise(
+        statistics_section, f"blz-section.{GAMEMODES_DIV_MAPPING[gamemode]}"
     )
     return {
         "heroes_comparisons": _parse_heroes_comparisons(top_heroes_section),
