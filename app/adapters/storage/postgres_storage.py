@@ -23,7 +23,12 @@ from app.monitoring.metrics import (
 )
 
 if TYPE_CHECKING:
-    from app.domain.ports.storage import StaticDataCategory
+    from app.domain.ports.storage import (
+        StaticDataCategory,
+        StorageStats,
+        StoredPlayerProfile,
+        StoredStaticData,
+    )
 
 _SCHEMA_SQL = (Path(__file__).parent / "schema.sql").read_text()
 
@@ -122,9 +127,8 @@ class PostgresStorage(metaclass=Singleton):
     # ------------------------------------------------------------------ #
 
     @track_storage_operation("static_data", "get")
-    async def get_static_data(self, key: str) -> dict | None:
-        """Get static data by key. Returns dict with 'data' (decompressed str),
-        'category', 'updated_at' (Unix int), 'data_version' or None."""
+    async def get_static_data(self, key: str) -> StoredStaticData | None:
+        """Get static data by key (``data`` is decompressed). None on miss."""
         async with self._pool.acquire() as conn:  # type: ignore[union-attr]
             row = await conn.fetchrow(
                 """SELECT data, category, updated_at, data_version
@@ -174,13 +178,8 @@ class PostgresStorage(metaclass=Singleton):
     # ------------------------------------------------------------------ #
 
     @track_storage_operation("player_profiles", "get")
-    async def get_player_profile(self, player_id: str) -> dict | None:
-        """Get player profile by player_id.
-
-        Returns dict with 'html', 'summary' (dict), 'battletag', 'name',
-        'last_updated_blizzard', 'updated_at' (Unix int), 'data_version'
-        or None if not found.
-        """
+    async def get_player_profile(self, player_id: str) -> StoredPlayerProfile | None:
+        """Get player profile by player_id. None on miss."""
         async with self._pool.acquire() as conn:  # type: ignore[union-attr]
             row = await conn.fetchrow(
                 """SELECT battletag, name, html_compressed, summary,
@@ -293,9 +292,9 @@ class PostgresStorage(metaclass=Singleton):
     # Statistics
     # ------------------------------------------------------------------ #
 
-    async def get_stats(self) -> dict:
+    async def get_stats(self) -> StorageStats:
         """Return storage statistics for monitoring."""
-        stats: dict = {
+        stats: StorageStats = {
             "size_bytes": 0,
             "static_data_count": 0,
             "player_profiles_count": 0,

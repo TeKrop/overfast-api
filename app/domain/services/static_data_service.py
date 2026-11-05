@@ -12,6 +12,8 @@ from app.infrastructure.logger import logger
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from app.domain.ports.storage import StoredStaticData
+
 
 @dataclass
 class StaticFetchConfig:
@@ -51,35 +53,23 @@ class StaticDataService(BaseService):
             number of seconds since the data was last stored in persistent storage (0 on
             a cold-start fetch).
         """
-        stored = await self._load_from_storage(config.storage_key)
+        stored = await self.storage.get_static_data(config.storage_key)
         if stored is not None:
             return await self._serve_from_storage(stored, config)
 
         return await self._cold_fetch(config)
 
-    async def _load_from_storage(self, storage_key: str) -> dict[str, Any] | None:
-        """Load raw source from the ``static_data`` table. Returns ``None`` on miss."""
-        result = await self.storage.get_static_data(storage_key)
-        return (
-            {
-                "raw": result["data"],
-                "updated_at": result["updated_at"],
-            }
-            if result
-            else None
-        )
-
     async def _serve_from_storage(
-        self, stored: dict[str, Any], config: StaticFetchConfig
+        self, stored: StoredStaticData, config: StaticFetchConfig
     ) -> tuple[Any, bool, int]:
         """Serve data from a persistent storage hit, triggering a background refresh if stale.
 
-        The stored ``raw`` value is always re-parsed with the current parser (for
+        The stored ``data`` value is always re-parsed with the current parser (for
         Blizzard HTML sources) or re-fetched from the local source (for CSV sources) so
         that code-only changes (e.g. new fields added to the parser) take effect
         immediately on restart without waiting for the staleness threshold.
         """
-        data = await self._parse_stored(stored["raw"], config)
+        data = await self._parse_stored(stored["data"], config)
         age = int(time.time()) - stored["updated_at"]
         is_stale = age >= config.staleness_threshold
         filtered = self._apply_filter(data, config.result_filter)

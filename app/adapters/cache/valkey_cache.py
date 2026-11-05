@@ -34,6 +34,8 @@ from app.infrastructure.metaclasses import Singleton
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from app.domain.ports.cache import PlayerStatus
+
 
 def handle_valkey_error(
     default_return: Any = None,
@@ -164,7 +166,7 @@ class ValkeyCache(metaclass=Singleton):
         )
 
     @handle_valkey_error(default_return=None)
-    async def get_player_status(self, player_id: str) -> dict | None:
+    async def get_player_status(self, player_id: str) -> PlayerStatus | None:
         """
         Get unknown player status by battletag or Blizzard ID.
 

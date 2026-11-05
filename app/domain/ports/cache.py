@@ -1,6 +1,14 @@
 """Cache port protocol for dependency injection"""
 
-from typing import Protocol
+from typing import NotRequired, Protocol, TypedDict
+
+
+class PlayerStatus(TypedDict):
+    """Unknown-player tracking status as returned by ``get_player_status``."""
+
+    check_count: int
+    retry_after: int
+    battletag: NotRequired[str | None]
 
 
 class CachePort(Protocol):
@@ -78,13 +86,12 @@ class CachePort(Protocol):
         ...
 
     # Unknown player tracking methods
-    async def get_player_status(self, player_id: str) -> dict | None:
+    async def get_player_status(self, player_id: str) -> PlayerStatus | None:
         """
         Get the tracking status for an unknown player.
 
-        Returns a dict with 'check_count' and 'retry_after' (remaining seconds,
-        0 if the active window expired but the record persists), or None if the
-        player is not tracked.
+        ``retry_after`` is the remaining seconds (0 if the active window expired
+        but the record persists). Returns None if the player is not tracked.
         """
         ...
 
