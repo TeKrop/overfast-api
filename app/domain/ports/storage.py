@@ -1,7 +1,7 @@
 """Storage port protocol for persistent data storage"""
 
 from enum import StrEnum
-from typing import Protocol
+from typing import Protocol, TypedDict
 
 
 class StaticDataCategory(StrEnum):
@@ -12,6 +12,38 @@ class StaticDataCategory(StrEnum):
     GAMEMODES = "gamemodes"
     MAPS = "maps"
     ROLES = "roles"
+
+
+class StoredStaticData(TypedDict):
+    """Static data row as returned by ``get_static_data``."""
+
+    data: str
+    category: str
+    updated_at: int
+    data_version: int
+
+
+class StoredPlayerProfile(TypedDict):
+    """Player profile row as returned by ``get_player_profile``."""
+
+    html: str
+    summary: dict
+    battletag: str | None
+    name: str | None
+    last_updated_blizzard: int | None
+    updated_at: int
+    data_version: int
+
+
+class StorageStats(TypedDict):
+    """Storage statistics as returned by ``get_stats``."""
+
+    size_bytes: int
+    static_data_count: int
+    player_profiles_count: int
+    player_profile_age_p50: float
+    player_profile_age_p90: float
+    player_profile_age_p99: float
 
 
 class StoragePort(Protocol):
@@ -25,11 +57,11 @@ class StoragePort(Protocol):
         """Initialize storage (create tables, setup schema)"""
         ...
 
-    async def get_static_data(self, key: str) -> dict | None:
+    async def get_static_data(self, key: str) -> StoredStaticData | None:
         """Get static data (heroes, maps, gamemodes, roles) by key.
 
-        Returns dict with 'data' (str — raw HTML or JSON), 'category' (str),
-        'updated_at' (int Unix ts), 'data_version' (int) or None if not found.
+        ``data`` is raw HTML or JSON; ``updated_at`` is a Unix timestamp.
+        Returns None if not found.
         """
         ...
 
@@ -43,13 +75,11 @@ class StoragePort(Protocol):
         """Store static data. ``data`` is a raw string (HTML or JSON)."""
         ...
 
-    async def get_player_profile(self, player_id: str) -> dict | None:
+    async def get_player_profile(self, player_id: str) -> StoredPlayerProfile | None:
         """
         Get player profile HTML and parsed summary.
 
-        Returns dict with 'html', 'summary' (dict), 'battletag', 'name',
-        'last_updated_blizzard', 'updated_at' (int Unix ts), 'data_version'
-        or None if not found.
+        ``updated_at`` is a Unix timestamp. Returns None if not found.
         """
         ...
 
@@ -91,13 +121,8 @@ class StoragePort(Protocol):
         """Clear all data including static data (for testing)"""
         ...
 
-    async def get_stats(self) -> dict:
-        """
-        Get storage statistics for monitoring.
-
-        Returns dict with size_bytes, static_data_count,
-        player_profiles_count, player_profile_age_p50/p90/p99.
-        """
+    async def get_stats(self) -> StorageStats:
+        """Get storage statistics for monitoring."""
         ...
 
     async def close(self) -> None:

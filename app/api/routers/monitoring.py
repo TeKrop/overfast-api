@@ -54,16 +54,10 @@ async def metrics() -> Response:
         )
 
         # Data freshness (player profile ages)
-        if stats.get("player_profile_age_p50", 0) > 0:
-            storage_player_profile_age_seconds.observe(
-                stats.get("player_profile_age_p50", 0)
-            )
-            storage_player_profile_age_seconds.observe(
-                stats.get("player_profile_age_p90", 0)
-            )
-            storage_player_profile_age_seconds.observe(
-                stats.get("player_profile_age_p99", 0)
-            )
+        if stats["player_profile_age_p50"] > 0:
+            storage_player_profile_age_seconds.observe(stats["player_profile_age_p50"])
+            storage_player_profile_age_seconds.observe(stats["player_profile_age_p90"])
+            storage_player_profile_age_seconds.observe(stats["player_profile_age_p99"])
 
     except Exception as err:  # noqa: BLE001
         # Don't fail metrics endpoint if storage stats unavailable

@@ -2,7 +2,7 @@
 
 import time
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Never, TypedDict
+from typing import TYPE_CHECKING, Never
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -14,7 +14,7 @@ from app.domain.exceptions import (
     ParserInternalError,
     ParserParsingError,
 )
-from app.domain.models.player import PlayerIdentity
+from app.domain.models.player import PlayerIdentity, PlayerProfileCache
 from app.domain.parsers.player_career_stats import (
     parse_player_career_stats_from_html,
 )
@@ -37,16 +37,6 @@ from app.domain.parsers.player_summary import (
 from app.domain.parsers.utils import is_blizzard_id
 from app.domain.services.base_service import BaseService
 from app.infrastructure.logger import logger
-
-
-class PlayerProfileCache(TypedDict):
-    """Stored player profile as returned by ``get_player_profile_cache``."""
-
-    profile: str
-    summary: dict
-    battletag: str | None
-    name: str | None
-    updated_at: int
 
 
 class PlayerService(BaseService):
@@ -304,9 +294,9 @@ class PlayerService(BaseService):
         return {
             "profile": profile["html"],
             "summary": profile["summary"],
-            "battletag": profile.get("battletag"),
-            "name": profile.get("name"),
-            "updated_at": profile.get("updated_at", 0),
+            "battletag": profile["battletag"],
+            "name": profile["name"],
+            "updated_at": profile["updated_at"],
         }
 
     async def update_player_profile_cache(

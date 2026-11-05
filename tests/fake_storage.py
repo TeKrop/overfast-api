@@ -6,7 +6,12 @@ import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.domain.ports.storage import StaticDataCategory
+    from app.domain.ports.storage import (
+        StaticDataCategory,
+        StorageStats,
+        StoredPlayerProfile,
+        StoredStaticData,
+    )
 
 
 class FakeStorage:
@@ -19,8 +24,8 @@ class FakeStorage:
     """
 
     def __init__(self) -> None:
-        self._static: dict[str, dict] = {}
-        self._profiles: dict[str, dict] = {}
+        self._static: dict[str, StoredStaticData] = {}
+        self._profiles: dict[str, StoredPlayerProfile] = {}
         self._battletag_index: dict[str, str] = {}
 
     async def initialize(self) -> None:
@@ -33,7 +38,7 @@ class FakeStorage:
     # Static data
     # ------------------------------------------------------------------ #
 
-    async def get_static_data(self, key: str) -> dict | None:
+    async def get_static_data(self, key: str) -> StoredStaticData | None:
         return self._static.get(key)
 
     async def set_static_data(
@@ -44,20 +49,18 @@ class FakeStorage:
         data_version: int = 1,
     ) -> None:
         now = int(time.time())
-        existing = self._static.get(key)
         self._static[key] = {
             "data": data,
             "category": str(category),
             "data_version": data_version,
             "updated_at": now,
-            "created_at": existing["created_at"] if existing else now,
         }
 
     # ------------------------------------------------------------------ #
     # Player profiles
     # ------------------------------------------------------------------ #
 
-    async def get_player_profile(self, player_id: str) -> dict | None:
+    async def get_player_profile(self, player_id: str) -> StoredPlayerProfile | None:
         profile = self._profiles.get(player_id)
         if profile is None:
             return None
@@ -91,7 +94,6 @@ class FakeStorage:
             "name": name or (existing["name"] if existing else None),
             "last_updated_blizzard": last_updated_blizzard,
             "updated_at": now,
-            "created_at": existing["created_at"] if existing else now,
             "data_version": data_version,
         }
         if battletag:
@@ -122,7 +124,7 @@ class FakeStorage:
     # Statistics
     # ------------------------------------------------------------------ #
 
-    async def get_stats(self) -> dict:
+    async def get_stats(self) -> StorageStats:
         now = time.time()
         ages = sorted(now - p["updated_at"] for p in self._profiles.values())
         n = len(ages)
