@@ -116,6 +116,7 @@ class TestTransformPlayerSearchResults:
         """A result without 'avatar' is kept with avatar=None."""
         player = _make_player()
         del player["avatar"]
+
         result = transform_player_search_results([player], "Test")
 
         assert result[0]["avatar"] is None

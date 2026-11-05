@@ -312,6 +312,9 @@ class TestFetchPlayerHtml:
         [
             '<html lang="it-IT"><body></body></html>',
             '<html lang="en-GB"><body></body></html>',
+            "<html lang='it-IT'><body></body></html>",
+            "<html lang=it-IT><body></body></html>",
+            '<html lang = "it-IT"><body></body></html>',
         ],
     )
     async def test_non_english_page_is_rejected(self, html: str):
@@ -322,9 +325,11 @@ class TestFetchPlayerHtml:
 
         with (
             patch("httpx2.AsyncClient.get", return_value=mock_response),
-            pytest.raises(ParserParsingError, match="Unexpected page locale"),
+            pytest.raises(ParserParsingError) as exc_info,
         ):
             await fetch_player_html(BlizzardClient(), "TeKrop-2217")
+
+        assert "Unexpected page locale" in str(exc_info.value)
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -352,10 +357,10 @@ class TestFetchPlayerHtml:
         mock_response = Mock(
             status_code=status.HTTP_404_NOT_FOUND,
             url="https://example.com",
-            text="<html></html>",
+            text='<html lang="it-IT"></html>',
         )
 
         with patch("httpx2.AsyncClient.get", return_value=mock_response):
             html, _ = await fetch_player_html(BlizzardClient(), "TeKrop-2217")
 
-        assert html == "<html></html>"
+        assert html == '<html lang="it-IT"></html>'

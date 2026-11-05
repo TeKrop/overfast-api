@@ -54,12 +54,34 @@ PLATFORMS_DIV_MAPPING = {
     PlayerPlatform.CONSOLE: "controller-view",
 }
 EXPECTED_HTML_LANG = "en-us"
-HTML_LANG_PATTERN = re.compile(r"<html[^>]*\slang=\"([^\"]*)\"", re.IGNORECASE)
+HTML_LANG_PATTERN = re.compile(
+    r"""<html[^>]*\slang\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))""", re.IGNORECASE
+)
 
 GAMEMODES_DIV_MAPPING = {
     PlayerGamemode.QUICKPLAY: "quickPlay-view",
     PlayerGamemode.COMPETITIVE: "competitive-view",
 }
+
+
+def get_html_lang(html: str) -> str | None:
+    """Return the ``<html lang>`` value, or None when absent."""
+    match = HTML_LANG_PATTERN.search(html)
+    return next(g for g in match.groups() if g is not None) if match else None
+
+
+def is_expected_html_locale(html: str) -> bool:
+    """False only when a lang is present and isn't en-US (missing proves nothing)."""
+    lang = get_html_lang(html)
+    return lang is None or lang.lower() == EXPECTED_HTML_LANG
+
+
+def validate_html_locale(html: str) -> None:
+    """Blizzard occasionally serves a localized page despite the en-us URL; parsing
+    it would yield wrong keys/numbers, so reject it before it gets stored."""
+    if not is_expected_html_locale(html):
+        msg = f"Unexpected page locale: {get_html_lang(html)!r}"
+        raise ParserParsingError(msg)
 
 
 async def fetch_player_html(
@@ -89,14 +111,8 @@ async def fetch_player_html(
     response = await client.get(url)
     validate_response_status(response, valid_codes=[200, 404])
 
-    # Blizzard occasionally serves a localized page despite the en-us URL; parsing
-    # it would yield wrong keys/numbers, so reject it before it gets stored.
     if response.status_code == HTTPStatus.OK:
-        match = HTML_LANG_PATTERN.search(response.text)
-        # A missing lang is tolerated: it doesn't prove the page is localized.
-        if match and match[1].lower() != EXPECTED_HTML_LANG:
-            msg = f"Unexpected page locale: {match[1]!r}"
-            raise ParserParsingError(msg)
+        validate_html_locale(response.text)
 
     # Extract Blizzard ID from final URL (after redirect)
     blizzard_id = extract_blizzard_id_from_url(str(response.url))
