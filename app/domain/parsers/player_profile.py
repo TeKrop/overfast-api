@@ -7,6 +7,7 @@ This module handles parsing of player profile HTML including:
 - Career stats (detailed statistics per hero)
 """
 
+import re
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
@@ -52,6 +53,9 @@ PLATFORMS_DIV_MAPPING = {
     PlayerPlatform.PC: "mouseKeyboard-view",
     PlayerPlatform.CONSOLE: "controller-view",
 }
+EXPECTED_HTML_LANG = "en-us"
+HTML_LANG_PATTERN = re.compile(r"<html[^>]*\slang=\"([^\"]*)\"", re.IGNORECASE)
+
 GAMEMODES_DIV_MAPPING = {
     PlayerGamemode.QUICKPLAY: "quickPlay-view",
     PlayerGamemode.COMPETITIVE: "competitive-view",
@@ -84,6 +88,15 @@ async def fetch_player_html(
 
     response = await client.get(url)
     validate_response_status(response, valid_codes=[200, 404])
+
+    # Blizzard occasionally serves a localized page despite the en-us URL; parsing
+    # it would yield wrong keys/numbers, so reject it before it gets stored.
+    if response.status_code == HTTPStatus.OK:
+        match = HTML_LANG_PATTERN.search(response.text)
+        # A missing lang is tolerated: it doesn't prove the page is localized.
+        if match and match[1].lower() != EXPECTED_HTML_LANG:
+            msg = f"Unexpected page locale: {match[1]!r}"
+            raise ParserParsingError(msg)
 
     # Extract Blizzard ID from final URL (after redirect)
     blizzard_id = extract_blizzard_id_from_url(str(response.url))

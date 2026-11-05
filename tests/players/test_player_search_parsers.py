@@ -112,6 +112,14 @@ class TestTransformPlayerSearchResults:
         assert results[0]["player_id"] == "Test-0001"
         assert results[1]["player_id"] == "Test-0002"
 
+    def test_missing_avatar_is_none(self):
+        """A result without 'avatar' is kept with avatar=None."""
+        player = _make_player()
+        del player["avatar"]
+        result = transform_player_search_results([player], "Test")
+
+        assert result[0]["avatar"] is None
+
     def test_missing_required_field_raises_parser_parsing_error(self):
         """Missing 'url' key raises ParserParsingError."""
         player = {"name": "Test"}  # missing required fields
