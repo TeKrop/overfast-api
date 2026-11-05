@@ -2,7 +2,7 @@
 
 import time
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Never, cast
+from typing import TYPE_CHECKING, Never, TypedDict
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -23,6 +23,7 @@ from app.domain.parsers.player_profile import (
     fetch_player_html,
     filter_all_stats_data,
     filter_stats_by_query,
+    is_expected_html_locale,
     parse_player_profile_html,
 )
 from app.domain.parsers.player_search import parse_player_search
@@ -36,6 +37,16 @@ from app.domain.parsers.player_summary import (
 from app.domain.parsers.utils import is_blizzard_id
 from app.domain.services.base_service import BaseService
 from app.infrastructure.logger import logger
+
+
+class PlayerProfileCache(TypedDict):
+    """Stored player profile as returned by ``get_player_profile_cache``."""
+
+    profile: str
+    summary: dict
+    battletag: str | None
+    name: str | None
+    updated_at: int
 
 
 class PlayerService(BaseService):
@@ -282,7 +293,9 @@ class PlayerService(BaseService):
     # Profile caching helpers
     # ------------------------------------------------------------------
 
-    async def get_player_profile_cache(self, player_id: str) -> dict | None:
+    async def get_player_profile_cache(
+        self, player_id: str
+    ) -> PlayerProfileCache | None:
         """Get player profile from persistent storage."""
         profile = await self.storage.get_player_profile(player_id)
         if not profile:
@@ -338,7 +351,7 @@ class PlayerService(BaseService):
 
     async def _get_fresh_stored_profile(
         self, player_id: str
-    ) -> tuple[dict | None, int]:
+    ) -> tuple[PlayerProfileCache | None, int]:
         """Return ``(profile, age_seconds)`` if the stored profile was updated within
         ``player_staleness_threshold``, else ``(None, 0)``.
 
@@ -358,6 +371,10 @@ class PlayerService(BaseService):
 
         profile = await self.get_player_profile_cache(blizzard_id)
         if not profile:
+            return None, 0
+
+        # A localized profile stored before the locale check existed: force a refetch.
+        if not is_expected_html_locale(profile["profile"]):
             return None, 0
 
         age = int(time.time()) - profile["updated_at"]
@@ -406,11 +423,12 @@ class PlayerService(BaseService):
         player_cache = await self.get_player_profile_cache(effective_id)
         if (
             player_cache is not None
+            and is_expected_html_locale(player_cache["profile"])
             and identity.player_summary
             and player_cache["summary"].get("lastUpdated")
             == identity.player_summary.get("lastUpdated")
         ):
-            html = cast("str", player_cache["profile"])
+            html = player_cache["profile"]
             if force_update or (
                 identity.battletag_input and not player_cache.get("battletag")
             ):
