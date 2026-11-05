@@ -104,6 +104,7 @@ async def fetch_player_html(
 
     Raises:
         ParserBlizzardError: If player not found (404)
+        ParserParsingError: If the page is served in a non-English locale
     """
 
     url = build_blizzard_url(settings.career_path, player_id)
