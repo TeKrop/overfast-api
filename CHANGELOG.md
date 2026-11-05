@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v4.15.2 (2026-11-05)
+
+### Bug Fixes
+
+- **heroes**: Split hero stats parsing errors and log offending payload
+  ([#484](https://github.com/TeKrop/overfast-api/pull/484),
+  [`43372f7`](https://github.com/TeKrop/overfast-api/commit/43372f7bf5e8bcbb549bdcc6245b9afd9054f885))
+
+
 ## v4.15.1 (2026-11-05)
 
 ### Bug Fixes
