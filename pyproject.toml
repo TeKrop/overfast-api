@@ -33,7 +33,7 @@ dev = [
     "fakeredis[valkey]==2.40.*",
     "import-linter==2.15.*",
     "ipdb==0.13.*",
-    "pytest==9.1.*",
+    "pytest==9.2.*",
     "pytest-asyncio==1.4.*",
     "pytest-cov==7.1.*",
     "pytest-randomly==5.0.*",
