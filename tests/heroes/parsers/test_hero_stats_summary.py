@@ -264,3 +264,55 @@ def test_parse_hero_stats_json_logs_rate_entry_error_with_bad_entry():
     assert "rate entry" in message
     assert "tracer" in bad_entry
     assert "ana" not in bad_entry
+
+
+def test_parse_hero_stats_json_role_filter_ignores_excluded_malformed_entry():
+    excluded_bad = {"id": "tracer", "hero": {"role": "DAMAGE"}, "cells": []}
+    included_bad = {"id": "ana", "hero": {"role": "SUPPORT"}, "cells": []}
+    json_data = {
+        "rates": {
+            "selected": {"map": "all-maps", "rq": "0"},
+            "rates": [excluded_bad, included_bad],
+        }
+    }
+
+    with (
+        patch("app.domain.parsers.hero_stats_summary.logger.error") as error_mock,
+        pytest.raises(ParserParsingError),
+    ):
+        parse_hero_stats_json(
+            json_data, "all-maps", PlayerGamemode.QUICKPLAY, "0", role_filter="support"
+        )
+
+    assert "ana" in error_mock.call_args.args[2]
+
+
+def test_parse_hero_stats_json_non_iterable_rates_raises_parsing_error():
+    json_data = {"rates": {"selected": {"map": "all-maps", "rq": "0"}, "rates": 5}}
+
+    with (
+        patch("app.domain.parsers.hero_stats_summary.logger.error") as error_mock,
+        pytest.raises(ParserParsingError),
+    ):
+        parse_hero_stats_json(json_data, "all-maps", PlayerGamemode.QUICKPLAY, "0")
+
+    error_mock.assert_called_once()
+
+
+def test_parse_hero_stats_json_missing_banrate_in_competitive_logs_entry():
+    entry = {
+        "id": "ana",
+        "hero": {"role": "SUPPORT"},
+        "cells": {"pickrate": 1.0, "winrate": 2.0},
+    }
+    json_data = {
+        "rates": {"selected": {"map": "all-maps", "rq": "2"}, "rates": [entry]}
+    }
+
+    with (
+        patch("app.domain.parsers.hero_stats_summary.logger.error") as error_mock,
+        pytest.raises(ParserParsingError),
+    ):
+        parse_hero_stats_json(json_data, "all-maps", PlayerGamemode.COMPETITIVE, "2")
+
+    assert "ana" in error_mock.call_args.args[2]

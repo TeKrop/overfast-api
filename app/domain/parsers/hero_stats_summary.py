@@ -1,5 +1,6 @@
 """Stateless parser functions for hero stats summary (pickrate/winrate/banrate from Blizzard API)"""
 
+import reprlib
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Any
 
@@ -15,6 +16,9 @@ from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
     from app.domain.ports import BlizzardClientPort
+
+# Bounded repr for error logs: limits traversal/size before building the string
+_LOG_REPR = reprlib.Repr(maxlevel=6, maxdict=10, maxlist=6, maxstring=200, maxother=500)
 
 # Mappings for query parameters
 PLATFORM_MAPPING: dict[PlayerPlatform, str] = {
@@ -100,7 +104,7 @@ def parse_hero_stats_json(
             f"Unexpected Blizzard hero stats JSON structure (top-level, "
             f"map={map_filter}, gamemode={gamemode}, rq={gamemode_filter}): {error!r}"
         )
-        logger.error("{} | payload: {:.2000}", msg, repr(json_data))
+        logger.error("{} | payload: {}", msg, _LOG_REPR.repr(json_data))
         raise ParserParsingError(msg) from error
 
     # Validate gamemode filter against selected according to Blizzard response
@@ -122,35 +126,34 @@ def parse_hero_stats_json(
 
     # Filter by role and transform to simplified format; raise ParserParsingError on
     # unexpected per-entry shape.
+    hero_stats: list[dict[str, Any]] = []
+    culprit: Any = rates  # entry being processed when parsing fails (or rates itself)
     try:
-        hero_stats: list[dict[str, Any]] = [
-            rate
-            for rate in rates
-            if role_filter is None or rate["hero"]["role"].lower() == role_filter
-        ]
-        hero_stats = [
-            {
-                "hero": rate["id"],
-                "pickrate": _normalize_rate(rate["cells"]["pickrate"]),
-                "winrate": _normalize_rate(rate["cells"]["winrate"]),
-                # Blizzard doesn't track bans outside competitive; a rate would be 0.0
-                # for every hero there, which is not accurate data to expose.
-                "banrate": (
-                    _normalize_rate(rate["cells"]["banrate"])
-                    if gamemode == PlayerGamemode.COMPETITIVE
-                    else None
-                ),
-            }
-            for rate in hero_stats
-        ]
+        for rate in rates:
+            culprit = rate
+            if role_filter is not None and rate["hero"]["role"].lower() != role_filter:
+                continue
+            hero_stats.append(
+                {
+                    "hero": rate["id"],
+                    "pickrate": _normalize_rate(rate["cells"]["pickrate"]),
+                    "winrate": _normalize_rate(rate["cells"]["winrate"]),
+                    # Blizzard doesn't track bans outside competitive; a rate would
+                    # be 0.0 for every hero there, which is not accurate data to expose.
+                    "banrate": (
+                        _normalize_rate(rate["cells"]["banrate"])
+                        if gamemode == PlayerGamemode.COMPETITIVE
+                        else None
+                    ),
+                }
+            )
     except (KeyError, TypeError) as error:
         msg = (
             f"Unexpected Blizzard hero stats JSON structure (rate entry, "
             f"map={map_filter}, gamemode={gamemode}, rq={gamemode_filter}, "
             f"role={role_filter}): {error!r}"
         )
-        bad = next((r for r in rates if not _is_valid_rate(r)), None)
-        logger.error("{} | first bad entry: {:.1000}", msg, repr(bad))
+        logger.error("{} | offending entry: {}", msg, _LOG_REPR.repr(culprit))
         raise ParserParsingError(msg) from error
 
     # Apply ordering
@@ -167,15 +170,6 @@ def parse_hero_stats_json(
     )
 
     return hero_stats
-
-
-def _is_valid_rate(rate: Any) -> bool:
-    """Best-effort shape check, only used to pick an entry to log on failure"""
-    try:
-        rate["id"], rate["hero"]["role"]
-        return all(k in rate["cells"] for k in ("pickrate", "winrate"))
-    except KeyError, TypeError:
-        return False
 
 
 def _normalize_rate(rate: float) -> float:
