@@ -80,8 +80,10 @@ def validate_html_locale(html: str) -> None:
     """Blizzard occasionally serves a localized page despite the en-us URL; parsing
     it would yield wrong keys/numbers, so reject it before it gets stored."""
     if not is_expected_html_locale(html):
-        msg = f"Unexpected page locale: {get_html_lang(html)!r}"
-        raise ParserParsingError(msg)
+        raise ParserBlizzardError(
+            status_code=HTTPStatus.BAD_GATEWAY.value,
+            message=f"Unexpected page locale: {get_html_lang(html)!r}",
+        )
 
 
 async def fetch_player_html(
@@ -103,8 +105,8 @@ async def fetch_player_html(
         Tuple of (HTML content, Blizzard ID extracted from redirect URL)
 
     Raises:
-        ParserBlizzardError: If player not found (404)
-        ParserParsingError: If the page is served in a non-English locale
+        ParserBlizzardError: If player not found (404), or if the page is served
+            in a non-English locale (502, reported without an internal-error alert)
     """
 
     url = build_blizzard_url(settings.career_path, player_id)

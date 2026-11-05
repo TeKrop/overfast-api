@@ -7,7 +7,7 @@ from fastapi import status
 
 from app.adapters.blizzard import BlizzardClient
 from app.domain.enums import PlayerGamemode, PlayerPlatform
-from app.domain.exceptions import ParserBlizzardError, ParserParsingError
+from app.domain.exceptions import ParserBlizzardError
 from app.domain.parsers.player_profile import (
     fetch_player_html,
     filter_all_stats_data,
@@ -325,10 +325,11 @@ class TestFetchPlayerHtml:
 
         with (
             patch("httpx2.AsyncClient.get", return_value=mock_response),
-            pytest.raises(ParserParsingError) as exc_info,
+            pytest.raises(ParserBlizzardError) as exc_info,
         ):
             await fetch_player_html(BlizzardClient(), "TeKrop-2217")
 
+        assert exc_info.value.status_code == status.HTTP_502_BAD_GATEWAY
         assert "Unexpected page locale" in str(exc_info.value)
 
     @pytest.mark.asyncio
