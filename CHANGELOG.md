@@ -2,6 +2,53 @@
 
 <!-- version list -->
 
+## v4.15.1 (2026-11-05)
+
+### Bug Fixes
+
+- **players**: Reject non-English career pages and tolerate missing search avatar
+  ([#483](https://github.com/TeKrop/overfast-api/pull/483),
+  [`86a4849`](https://github.com/TeKrop/overfast-api/commit/86a4849ffe8fa16b622d7a069a098993ba87260b))
+
+### Build System
+
+- Upgrade to Python 3.15 and bump dependencies
+  ([#478](https://github.com/TeKrop/overfast-api/pull/478),
+  [`956070a`](https://github.com/TeKrop/overfast-api/commit/956070a050786f31aaba191059686d31320d9314))
+
+- **deps**: Bump aiohttp from 3.14.3 to 3.14.4
+  ([#474](https://github.com/TeKrop/overfast-api/pull/474),
+  [`80de26d`](https://github.com/TeKrop/overfast-api/commit/80de26d939155de68345ad0218dc99df411a0046))
+
+- **deps**: Bump astral-sh/setup-uv from 10.3.0 to 10.3.2
+  ([#479](https://github.com/TeKrop/overfast-api/pull/479),
+  [`70de77c`](https://github.com/TeKrop/overfast-api/commit/70de77cb4c40ee2b1102115cd6b6dc954525e32c))
+
+- **deps**: Bump astral-sh/setup-uv from 10.3.2 to 10.3.3
+  ([#481](https://github.com/TeKrop/overfast-api/pull/481),
+  [`236a243`](https://github.com/TeKrop/overfast-api/commit/236a2432814f9a74c9680615be37df3f1b66b49e))
+
+- **deps**: Bump certifi from 2026.7.22 to 2026.10.19
+  ([#476](https://github.com/TeKrop/overfast-api/pull/476),
+  [`bdee74f`](https://github.com/TeKrop/overfast-api/commit/bdee74f711206ee957051f1b3f066a286df2889c))
+
+- **deps**: Bump dnspython to 2.9.1 and refresh lockfile
+  ([#480](https://github.com/TeKrop/overfast-api/pull/480),
+  [`04e8089`](https://github.com/TeKrop/overfast-api/commit/04e8089a072be4cbcf182e5eaf8768d2a985980a))
+
+- **deps**: Bump filelock from 3.32.6 to 4.2.1
+  ([#477](https://github.com/TeKrop/overfast-api/pull/477),
+  [`6c49179`](https://github.com/TeKrop/overfast-api/commit/6c491795627e4f5c8b3470505fd53fc61703bd0a))
+
+- **deps**: Bump virtualenv from 21.7.13 to 21.14.13
+  ([#475](https://github.com/TeKrop/overfast-api/pull/475),
+  [`c42e499`](https://github.com/TeKrop/overfast-api/commit/c42e499cce8fdfb19c3001f2dd03cd250b872e61))
+
+- **deps-dev**: Bump the uv-deps group with 2 updates
+  ([#482](https://github.com/TeKrop/overfast-api/pull/482),
+  [`2e0f90f`](https://github.com/TeKrop/overfast-api/commit/2e0f90fd23200010af9851c84d514c4cc41a9864))
+
+
 ## v4.15.0 (2026-10-17)
 
 ### Bug Fixes
