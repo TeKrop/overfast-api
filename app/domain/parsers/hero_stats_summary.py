@@ -11,6 +11,7 @@ from app.domain.exceptions import (
     ParserParsingError,
 )
 from app.domain.parsers.utils import validate_response_status
+from app.infrastructure.logger import logger
 
 if TYPE_CHECKING:
     from app.domain.ports import BlizzardClientPort
@@ -95,7 +96,11 @@ def parse_hero_stats_json(
         selected_gamemode = rates_payload["selected"]["rq"]
         rates = rates_payload["rates"]
     except (KeyError, TypeError) as error:
-        msg = f"Unexpected Blizzard hero stats JSON structure: {error!r}"
+        msg = (
+            f"Unexpected Blizzard hero stats JSON structure (top-level, "
+            f"map={map_filter}, gamemode={gamemode}, rq={gamemode_filter}): {error!r}"
+        )
+        logger.error("{} | payload: {:.2000}", msg, repr(json_data))
         raise ParserParsingError(msg) from error
 
     # Validate gamemode filter against selected according to Blizzard response
@@ -139,7 +144,13 @@ def parse_hero_stats_json(
             for rate in hero_stats
         ]
     except (KeyError, TypeError) as error:
-        msg = f"Unexpected Blizzard hero stats JSON structure: {error!r}"
+        msg = (
+            f"Unexpected Blizzard hero stats JSON structure (rate entry, "
+            f"map={map_filter}, gamemode={gamemode}, rq={gamemode_filter}, "
+            f"role={role_filter}): {error!r}"
+        )
+        bad = next((r for r in rates if not _is_valid_rate(r)), None)
+        logger.error("{} | first bad entry: {:.1000}", msg, repr(bad))
         raise ParserParsingError(msg) from error
 
     # Apply ordering
@@ -156,6 +167,15 @@ def parse_hero_stats_json(
     )
 
     return hero_stats
+
+
+def _is_valid_rate(rate: Any) -> bool:
+    """Best-effort shape check, only used to pick an entry to log on failure"""
+    try:
+        rate["id"], rate["hero"]["role"]
+        return all(k in rate["cells"] for k in ("pickrate", "winrate"))
+    except KeyError, TypeError:
+        return False
 
 
 def _normalize_rate(rate: float) -> float:
