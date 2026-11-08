@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 # Profiling packages aren't installed on production environment
 with suppress(ModuleNotFoundError):
     import memray
-    import objgraph
+    import objgraph  # pyrefly: ignore
     import pyinstrument
 
 

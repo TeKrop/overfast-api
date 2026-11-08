@@ -583,7 +583,7 @@ def _get_heroes_options(
         return {}
 
     return {
-        f"{key_prefix}{option.attributes['value']}": str(option.attributes["option-id"])
+        f"{key_prefix}{option.attributes['value']}": option.attributes["option-id"]
         for option in options.iter()
         if option.attributes.get("option-id")
     }
@@ -625,7 +625,7 @@ def filter_stats_by_query(
         if possible_platforms:
             # Take the first one of the list, usually there will be only one.
             # If there are two, the PC stats should come first
-            platform_key = str(possible_platforms[0])
+            platform_key = possible_platforms[0]
         else:
             return {}
 
