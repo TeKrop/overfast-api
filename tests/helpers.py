@@ -1,8 +1,13 @@
+import inspect
 import json
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+from unittest.mock import Mock
 
 from app.config import settings
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
 
 
 def read_html_file(filepath: str) -> str | None:
@@ -32,3 +37,14 @@ players_ids = [
 
 # Non-existent player ID used for testing
 unknown_player_id = "Unknown-1234"
+
+
+def unwrapped(task: Callable[..., Any]) -> Callable[..., Awaitable[None]]:
+    """Return the undecorated coroutine function behind a taskiq task."""
+    return inspect.unwrap(task)
+
+
+def mock_of(obj: object) -> Mock:
+    """Narrow an injected dependency to the mock it is, to inspect calls."""
+    assert isinstance(obj, Mock)  # base of MagicMock and AsyncMock
+    return obj

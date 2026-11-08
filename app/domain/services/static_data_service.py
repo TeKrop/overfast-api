@@ -114,7 +114,9 @@ class StaticDataService(BaseService):
 
         return filtered, is_stale, age
 
-    async def _parse_stored(self, raw: str, config: StaticFetchConfig) -> Any:
+    async def _parse_stored(
+        self, raw: str, config: StaticFetchConfig
+    ) -> dict[str, Any] | list[Any]:
         """Produce structured data from ``raw`` stored source.
 
         - If ``config.parser`` is set: the stored ``raw`` is HTML (or a JSON-encoded
@@ -131,11 +133,15 @@ class StaticDataService(BaseService):
         return config.fetcher()
 
     @staticmethod
-    def _apply_filter(data: Any, result_filter: Callable[[Any], Any] | None) -> Any:
+    def _apply_filter(
+        data: dict[str, Any] | list[Any], result_filter: Callable[[Any], Any] | None
+    ) -> dict[str, Any] | list[Any]:
         """Apply ``result_filter`` to ``data`` if provided, otherwise return as-is."""
         return result_filter(data) if result_filter is not None else data
 
-    async def _fetch_and_store(self, config: StaticFetchConfig) -> Any:
+    async def _fetch_and_store(
+        self, config: StaticFetchConfig
+    ) -> dict[str, Any] | list[Any]:
         """Fetch from source, persist raw source to persistent storage, update Valkey, return filtered data."""
         if inspect.iscoroutinefunction(config.fetcher):
             raw = await config.fetcher()

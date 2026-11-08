@@ -7,7 +7,7 @@ worker executes the tasks using FastAPI's DI container.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Protocol
 
 from taskiq.kicker import AsyncKicker
 
@@ -15,6 +15,20 @@ from app.adapters.tasks.valkey_broker import broker
 from app.config import settings
 from app.infrastructure.logger import logger
 from app.monitoring.metrics import background_refresh_triggered_total
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable
+
+
+class _JobStore(Protocol):
+    """Subset of the async Valkey client used for job deduplication."""
+
+    def set(self, name: str, value: str, *, ex: int, nx: bool) -> Awaitable[object]: ...
+
+    def exists(self, *names: str) -> Awaitable[int]: ...
+
+    def delete(self, *names: str) -> Awaitable[object]: ...
+
 
 JOB_KEY_PREFIX = "worker:job:"
 
@@ -26,7 +40,7 @@ class ValkeyTaskQueue:
     exists the job is silently skipped.
     """
 
-    def __init__(self, valkey_server: Any) -> None:
+    def __init__(self, valkey_server: _JobStore) -> None:
         self._valkey = valkey_server
 
     async def enqueue(

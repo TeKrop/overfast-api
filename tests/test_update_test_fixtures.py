@@ -1,5 +1,4 @@
 import asyncio
-from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
@@ -53,7 +52,7 @@ home_calls = [("Updating {}{}...", test_data_path, "/home.html")]
         ),
     ],
 )
-def test_update_with_different_options(parameters: Any, expected_calls: list[str]):
+def test_update_with_different_options(parameters: Mock, expected_calls: list[str]):
     logger_info_mock = Mock()
     logger_error_mock = Mock()
 

@@ -1,6 +1,6 @@
 """Tests for ValkeyTaskQueue adapter"""
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import fakeredis
@@ -90,7 +90,8 @@ class TestIsJobPendingOrRunning:
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("kicker")
     async def test_independent_instances_share_redis_state(
-        self, fake_redis: fakeredis.FakeAsyncRedis
+        self,
+        fake_redis: fakeredis.FakeAsyncRedis,
     ):
         """Two queue instances using the same redis see each other's dedup keys."""
         q1 = ValkeyTaskQueue(fake_redis)
@@ -128,11 +129,15 @@ class TestEnqueueTaskDispatch:
 
     @pytest.mark.asyncio
     async def test_redis_exception_is_swallowed(
-        self, fake_redis: fakeredis.FakeAsyncRedis
+        self,
+        fake_redis: fakeredis.FakeAsyncRedis,
+        monkeypatch: pytest.MonkeyPatch,
     ):
         """If redis raises, enqueue swallows the exception and returns effective_id."""
         queue = ValkeyTaskQueue(fake_redis)
-        cast("Any", fake_redis).set = AsyncMock(side_effect=RuntimeError("redis down"))
+        monkeypatch.setattr(
+            fake_redis, "set", AsyncMock(side_effect=RuntimeError("redis down"))
+        )
 
         result = await queue.enqueue("refresh_heroes", job_id="boom")
 
@@ -142,12 +147,14 @@ class TestEnqueueTaskDispatch:
 class TestIsJobPendingOrRunningExceptionHandling:
     @pytest.mark.asyncio
     async def test_redis_exception_returns_false(
-        self, fake_redis: fakeredis.FakeAsyncRedis
+        self,
+        fake_redis: fakeredis.FakeAsyncRedis,
+        monkeypatch: pytest.MonkeyPatch,
     ):
         """If redis raises, is_job_pending_or_running returns False."""
         queue = ValkeyTaskQueue(fake_redis)
-        cast("Any", fake_redis).exists = AsyncMock(
-            side_effect=RuntimeError("redis down")
+        monkeypatch.setattr(
+            fake_redis, "exists", AsyncMock(side_effect=RuntimeError("redis down"))
         )
         result = await queue.is_job_pending_or_running("any-job")
 
@@ -184,11 +191,13 @@ class TestReleaseJob:
 
     @pytest.mark.asyncio
     async def test_redis_exception_is_swallowed(
-        self, fake_redis: fakeredis.FakeAsyncRedis
+        self,
+        fake_redis: fakeredis.FakeAsyncRedis,
+        monkeypatch: pytest.MonkeyPatch,
     ):
         """If redis raises during release, the exception is swallowed."""
         queue = ValkeyTaskQueue(fake_redis)
-        cast("Any", fake_redis).delete = AsyncMock(
-            side_effect=RuntimeError("redis down")
+        monkeypatch.setattr(
+            fake_redis, "delete", AsyncMock(side_effect=RuntimeError("redis down"))
         )
         await queue.release_job("any-job")

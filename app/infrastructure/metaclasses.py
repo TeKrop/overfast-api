@@ -8,10 +8,11 @@ class Singleton(type):
 
     _instances: ClassVar[dict[type, Any]] = {}
 
-    def __call__(cls, *args: Any, **kwargs: Any) -> Any:
-        if cls not in cls._instances:
-            cls._instances[cls] = super().__call__(*args, **kwargs)
-        return cls._instances[cls]
+    def __call__[T](cls: type[T], *args: object, **kwargs: object) -> T:
+        instances = Singleton._instances
+        if cls not in instances:
+            instances[cls] = type.__call__(cls, *args, **kwargs)
+        return instances[cls]
 
     @classmethod
     def clear_all(cls) -> None:

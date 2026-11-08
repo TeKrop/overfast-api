@@ -8,7 +8,7 @@ operations to avoid connection exhaustion.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, override
 
 import valkey.asyncio as aiovalkey
 from taskiq.abc.broker import AsyncBroker
@@ -46,7 +46,7 @@ class ValkeyListBroker(AsyncBroker):
         url: str,
         queue_name: str = _QUEUE_DEFAULT,
         max_pool_size: int = 10,
-        **connection_kwargs: Any,
+        **connection_kwargs: object,
     ) -> None:
         super().__init__()
         self._url = url

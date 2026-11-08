@@ -10,14 +10,16 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 
-def rate_limited(max_calls: int, interval: int):
+def rate_limited[**P, R](
+    max_calls: int, interval: int
+) -> Callable[[Callable[P, R]], Callable[P, R | None]]:
     """Put a rate limit on function call using specified parameters :
     X **max_calls** per *interval* seconds. It prevents too many calls of a
     given method with the exact same parameters, for example the Discord
     webhook if there is a critical parsing error.
     """
 
-    def _make_hashable(obj: Any) -> Any:
+    def _make_hashable(obj: object) -> object:
         """Convert unhashable types to hashable equivalents"""
         if isinstance(obj, dict):
             return tuple(sorted((k, _make_hashable(v)) for k, v in obj.items()))
@@ -25,11 +27,11 @@ def rate_limited(max_calls: int, interval: int):
             return tuple(_make_hashable(item) for item in obj)
         return obj
 
-    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-        call_history: dict[Any, Any] = {}
+    def decorator(func: Callable[P, R]) -> Callable[P, R | None]:
+        call_history: dict[Any, list[float]] = {}
 
         @wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R | None:
             # Define a unique key by using given parameters
             # Convert unhashable types (list, dict) to hashable ones
             hashable_args = tuple(_make_hashable(arg) for arg in args)

@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, cast
+from typing import Any, ClassVar
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -10,6 +10,7 @@ from app.domain.exceptions import (
     ParserParsingError,
 )
 from app.domain.services.hero_service import HeroService, dict_insert_value_before_key
+from tests.helpers import mock_of
 
 
 def _make_hero_service() -> HeroService:
@@ -137,7 +138,7 @@ class TestHeroServiceGamemodeFilterCaching:
     @pytest.mark.asyncio
     async def test_cached_filter_is_tried_first(self):
         svc = _make_hero_service()
-        cast("Any", svc.cache).get_gamemode_filter.return_value = "2"
+        mock_of(svc.cache).get_gamemode_filter.return_value = "2"
         expected = [{"hero": "ana"}]
 
         with patch(
@@ -153,7 +154,7 @@ class TestHeroServiceGamemodeFilterCaching:
     @pytest.mark.asyncio
     async def test_no_cache_writes_working_filter(self):
         svc = _make_hero_service()
-        cast("Any", svc.cache).get_gamemode_filter.return_value = None
+        mock_of(svc.cache).get_gamemode_filter.return_value = None
 
         with patch(
             "app.domain.services.hero_service.parse_hero_stats_summary",
@@ -161,14 +162,14 @@ class TestHeroServiceGamemodeFilterCaching:
         ):
             await svc.get_hero_stats(**self._base_kwargs)
 
-        cast("Any", svc.cache).set_gamemode_filter.assert_awaited_once_with(
+        mock_of(svc.cache).set_gamemode_filter.assert_awaited_once_with(
             PlayerGamemode.COMPETITIVE, "1"
         )
 
     @pytest.mark.asyncio
     async def test_stale_cached_filter_falls_back_and_updates_cache(self):
         svc = _make_hero_service()
-        cast("Any", svc.cache).get_gamemode_filter.return_value = "2"
+        mock_of(svc.cache).get_gamemode_filter.return_value = "2"
         expected = [{"hero": "ana"}]
 
         with patch(
@@ -182,14 +183,14 @@ class TestHeroServiceGamemodeFilterCaching:
 
         assert mock_parse.call_count == 2  # noqa: PLR2004
         assert data == expected
-        cast("Any", svc.cache).set_gamemode_filter.assert_awaited_once_with(
+        mock_of(svc.cache).set_gamemode_filter.assert_awaited_once_with(
             PlayerGamemode.COMPETITIVE, "1"
         )
 
     @pytest.mark.asyncio
     async def test_filter_written_to_cache_unconditionally(self):
         svc = _make_hero_service()
-        cast("Any", svc.cache).get_gamemode_filter.return_value = "1"
+        mock_of(svc.cache).get_gamemode_filter.return_value = "1"
 
         with patch(
             "app.domain.services.hero_service.parse_hero_stats_summary",
@@ -197,14 +198,14 @@ class TestHeroServiceGamemodeFilterCaching:
         ):
             await svc.get_hero_stats(**self._base_kwargs)
 
-        cast("Any", svc.cache).set_gamemode_filter.assert_awaited_once_with(
+        mock_of(svc.cache).set_gamemode_filter.assert_awaited_once_with(
             PlayerGamemode.COMPETITIVE, "1"
         )
 
     @pytest.mark.asyncio
     async def test_quickplay_single_filter_cached_and_written(self):
         svc = _make_hero_service()
-        cast("Any", svc.cache).get_gamemode_filter.return_value = None
+        mock_of(svc.cache).get_gamemode_filter.return_value = None
 
         with patch(
             "app.domain.services.hero_service.parse_hero_stats_summary",
@@ -221,7 +222,7 @@ class TestHeroServiceGamemodeFilterCaching:
                 cache_key="/heroes/stats",
             )
 
-        cast("Any", svc.cache).set_gamemode_filter.assert_awaited_once_with(
+        mock_of(svc.cache).set_gamemode_filter.assert_awaited_once_with(
             PlayerGamemode.QUICKPLAY, "0"
         )
 
@@ -239,7 +240,7 @@ def test_dict_insert_value_before_key_with_key_error(
     input_dict: dict[str, Any],
     key: str,
     new_key: str,
-    new_value: Any,
+    new_value: object,
 ):
     with pytest.raises(KeyError):
         dict_insert_value_before_key(input_dict, key, new_key, new_value)
@@ -278,7 +279,7 @@ def test_dict_insert_value_before_key_valid(
     input_dict: dict[str, Any],
     key: str,
     new_key: str,
-    new_value: Any,
+    new_value: object,
     result_dict: dict[str, Any],
 ):
     actual = dict_insert_value_before_key(input_dict, key, new_key, new_value)

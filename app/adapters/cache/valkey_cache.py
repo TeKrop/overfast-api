@@ -32,14 +32,16 @@ from app.infrastructure.logger import logger
 from app.infrastructure.metaclasses import Singleton
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Coroutine
 
     from app.domain.ports.cache import PlayerStatus
 
 
-def handle_valkey_error(
-    default_return: Any = None,
-) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+def handle_valkey_error[**P, R, D](
+    default_return: D = None,
+) -> Callable[
+    [Callable[P, Coroutine[Any, Any, R]]], Callable[P, Coroutine[Any, Any, R | D]]
+]:
     """
     Decorator to handle Valkey connection errors gracefully.
 
@@ -50,9 +52,11 @@ def handle_valkey_error(
         Decorated async function that catches ValkeyError and returns default_return
     """
 
-    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+    def decorator(
+        func: Callable[P, Coroutine[Any, Any, R]],
+    ) -> Callable[P, Coroutine[Any, Any, R | D]]:
         @wraps(func)
-        async def wrapper(*args: Any, **kwargs: Any) -> Any:
+        async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R | D:
             try:
                 return await func(*args, **kwargs)
             except valkey.ValkeyError as err:
@@ -260,7 +264,7 @@ class ValkeyCache(metaclass=Singleton):
         key = f"{settings.gamemode_filter_key_prefix}:{gamemode}"
         await self.valkey_server.set(key, filter_value.encode("utf-8"))
 
-    @handle_valkey_error(default_return=[])
+    @handle_valkey_error(default_return=list[str]())
     async def scan_keys(self, pattern: str) -> list[str]:
         """Return all Valkey keys matching *pattern* using SCAN iteration."""
         return [

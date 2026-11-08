@@ -15,7 +15,7 @@ class BlizzardResponse(Protocol):
     @property
     def url(self) -> object: ...
 
-    def json(self) -> Any: ...
+    def json(self) -> Any: ...  # noqa: ANN401  # mirrors httpx.Response.json()
 
 
 class BlizzardClientPort(Protocol):

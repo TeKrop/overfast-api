@@ -38,7 +38,7 @@ async def list_roles(
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
-) -> Any:
+) -> list[dict[str, Any]]:
     data, is_stale, age = await service.list_roles(
         locale=locale, cache_key=build_cache_key(request)
     )

@@ -42,7 +42,7 @@ async def list_maps(
             description="Filter maps available for a specific gamemode",
         ),
     ] = None,
-) -> Any:
+) -> list[dict[str, Any]]:
     data, is_stale, age = await service.list_maps(
         gamemode=gamemode, cache_key=build_cache_key(request)
     )

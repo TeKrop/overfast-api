@@ -338,7 +338,7 @@ def dict_insert_value_before_key(
     data: dict[str, Any],
     key: str,
     new_key: str,
-    new_value: Any,
+    new_value: object,
 ) -> dict[str, Any]:
     """Insert ``new_key: new_value`` before ``key`` in ``data``."""
     if key not in data:

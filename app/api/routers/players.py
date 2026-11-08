@@ -130,7 +130,7 @@ async def search_players(
     ] = "name:asc",
     offset: Annotated[int, Query(title="Offset of the results", ge=0)] = 0,
     limit: Annotated[int, Query(title="Limit of results per page", gt=0)] = 20,
-) -> Any:
+) -> dict[str, Any]:
     cache_key = build_cache_key(request)
     data = await service.search_players(
         name=name,
@@ -160,7 +160,7 @@ async def get_player_summary(
     response: Response,
     service: PlayerServiceDep,
     commons: CommonsPlayerDep,
-) -> Any:
+) -> dict[str, Any]:
     cache_key = build_cache_key(request)
     data, is_stale, age = await service.get_player_summary(
         player_id=commons["player_id"],
@@ -216,7 +216,7 @@ async def get_player_stats_summary(
             examples=["pc"],
         ),
     ] = None,
-) -> Any:
+) -> dict[str, Any]:
     cache_key = build_cache_key(request)
     data, is_stale, age = await service.get_player_stats_summary(
         player_id=commons["player_id"],
@@ -249,7 +249,7 @@ async def get_player_career_stats(
     response: Response,
     service: PlayerServiceDep,
     commons: CommonsPlayerCareerDep,
-) -> Any:
+) -> dict[str, Any]:
     cache_key = build_cache_key(request)
     data, is_stale, age = await service.get_player_career_stats(
         player_id=commons["player_id"],
@@ -281,7 +281,7 @@ async def get_player_stats(
     response: Response,
     service: PlayerServiceDep,
     commons: CommonsPlayerCareerDep,
-) -> Any:
+) -> dict[str, Any]:
     cache_key = build_cache_key(request)
     data, is_stale, age = await service.get_player_stats(
         player_id=commons["player_id"],
@@ -327,7 +327,7 @@ async def get_player_career(
             examples=["pc"],
         ),
     ] = None,
-) -> Any:
+) -> dict[str, Any]:
     cache_key = build_cache_key(request)
     data, is_stale, age = await service.get_player_career(
         player_id=commons["player_id"],

@@ -49,7 +49,7 @@ async def test_update_and_get_api_cache(
 
 
 @pytest.mark.asyncio
-async def test_valkey_connection_error(cache_manager: ValkeyCache, locale: Any):
+async def test_valkey_connection_error(cache_manager: ValkeyCache, locale: str):
     """Test that cache operations handle Valkey connection errors gracefully"""
     valkey_connection_error = ValkeyError(
         "Error 111 connecting to 127.0.0.1:6379. Connection refused.",

@@ -1,7 +1,6 @@
 """Unit tests for PlayerService domain service"""
 
 import time
-from typing import Any, cast
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -15,7 +14,7 @@ from app.domain.exceptions import (
 from app.domain.models.player import PlayerIdentity
 from app.domain.services.player_service import PlayerService
 from tests.fake_storage import FakeStorage
-from tests.helpers import read_html_file
+from tests.helpers import mock_of, read_html_file
 
 _TEKROP_HTML = read_html_file("players/TeKrop-2217.html") or ""
 _PLAYER_SUMMARY = {
@@ -237,7 +236,7 @@ class TestMarkPlayerUnknown:
         with patch("app.domain.services.player_service.settings") as s:
             s.unknown_players_cache_enabled = False
             await svc._mark_player_unknown("abc123", exc)
-        cast("Any", svc.cache).set_player_status.assert_not_awaited()
+        mock_of(svc.cache).set_player_status.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_non_404_is_noop(self):
@@ -248,7 +247,7 @@ class TestMarkPlayerUnknown:
         with patch("app.domain.services.player_service.settings") as s:
             s.unknown_players_cache_enabled = True
             await svc._mark_player_unknown("abc123", exc)
-        cast("Any", svc.cache).set_player_status.assert_not_awaited()
+        mock_of(svc.cache).set_player_status.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_404_marks_player(self):
@@ -354,7 +353,7 @@ class TestHandlePlayerExceptions:
             await svc._handle_player_exceptions(error, "TeKrop-2217", identity)
 
         assert exc_info.value is error
-        cast("Any", svc.cache).set_player_status.assert_not_awaited()
+        mock_of(svc.cache).set_player_status.assert_not_awaited()
 
     @pytest.mark.asyncio
     async def test_http_exception_non_404_reraises(self):

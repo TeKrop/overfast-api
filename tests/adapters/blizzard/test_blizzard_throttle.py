@@ -2,7 +2,7 @@
 
 import time
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, patch
 
 if TYPE_CHECKING:
@@ -108,7 +108,7 @@ class TestWaitBeforeRequest:
         self, throttle: BlizzardThrottle, mock_cache: AsyncMock
     ) -> None:
         # No penalty, last request was long ago
-        def get_side_effect(key: Any):
+        def get_side_effect(key: str):
             if "last_403" in key:
                 return None
             if "delay" in key:
@@ -127,7 +127,7 @@ class TestWaitBeforeRequest:
     async def test_sleeps_when_request_too_soon(
         self, throttle: BlizzardThrottle, mock_cache: AsyncMock
     ) -> None:
-        def get_side_effect(key: Any):
+        def get_side_effect(key: str):
             if "last_403" in key:
                 return None
             if "delay" in key:
@@ -193,7 +193,7 @@ class TestAdjustDelay:
         """In slow start (delay > ssthresh), delay halves every N successes."""
 
         # delay=4.0, ssthresh=1.0 (default min), streak reaching threshold
-        def get_side_effect(key: Any):
+        def get_side_effect(key: str):
             if key == _LAST_403_KEY:
                 return None
             if key == _DELAY_KEY:
@@ -220,7 +220,7 @@ class TestAdjustDelay:
     ) -> None:
         """In slow start, delay does not change if streak < N."""
 
-        def get_side_effect(key: Any):
+        def get_side_effect(key: str):
             if key == _LAST_403_KEY:
                 return None
             if key == _DELAY_KEY:
@@ -243,7 +243,7 @@ class TestAdjustDelay:
     ) -> None:
         """In AIMD phase (delay <= ssthresh), delay decreases by delta every M successes."""
 
-        def get_side_effect(key: Any):
+        def get_side_effect(key: str):
             if key == _LAST_403_KEY:
                 return None
             if key == _DELAY_KEY:
@@ -270,7 +270,7 @@ class TestAdjustDelay:
     ) -> None:
         """In AIMD phase, delay does not change if streak < M."""
 
-        def get_side_effect(key: Any):
+        def get_side_effect(key: str):
             if key == _LAST_403_KEY:
                 return None
             if key == _DELAY_KEY:
@@ -293,7 +293,7 @@ class TestAdjustDelay:
     ) -> None:
         """During penalty, 200 responses do not change delay or streak."""
 
-        def get_side_effect(key: Any):
+        def get_side_effect(key: str):
             if key == _LAST_403_KEY:
                 return str(time.time() - 5).encode()  # active penalty
             return b"10.0"
@@ -318,7 +318,7 @@ class TestAdjustDelay:
     ) -> None:
         """AIMD phase: delay never goes below throttle_min_delay."""
 
-        def get_side_effect(key: Any):
+        def get_side_effect(key: str):
             if key == _LAST_403_KEY:
                 return None
             if key == _DELAY_KEY:
