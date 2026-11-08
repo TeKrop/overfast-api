@@ -1,6 +1,6 @@
 """Stateless parser functions for Blizzard heroes data"""
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from app.config import settings
 from app.domain.enums import HeroGamemode, Locale
@@ -13,6 +13,7 @@ from app.domain.parsers.utils import (
 )
 
 if TYPE_CHECKING:
+    from app.domain.models.static import HeroEntry
     from app.domain.ports import BlizzardClientPort
 
 
@@ -33,7 +34,7 @@ async def fetch_heroes_html(
     return response.text
 
 
-def parse_heroes_html(html: str) -> list[dict[str, Any]]:
+def parse_heroes_html(html: str) -> list[HeroEntry]:
     """
     Parse heroes list HTML into structured data
 
@@ -49,7 +50,7 @@ def parse_heroes_html(html: str) -> list[dict[str, Any]]:
     try:
         root_tag = parse_html_root(html)
 
-        heroes = []
+        heroes: list[HeroEntry] = []
         for hero_element in root_tag.css("div.heroIndexWrapper blz-media-gallery a"):
             hero_url = safe_get_attribute(hero_element, "href")
             if not hero_url:
@@ -74,7 +75,7 @@ def parse_heroes_html(html: str) -> list[dict[str, Any]]:
                 }
             )
 
-        return sorted(heroes, key=lambda hero: str(hero["key"]))
+        return sorted(heroes, key=lambda hero: hero["key"])
 
     except (AttributeError, KeyError, IndexError, TypeError) as error:
         error_msg = f"Failed to parse heroes HTML: {error!r}"
@@ -82,8 +83,8 @@ def parse_heroes_html(html: str) -> list[dict[str, Any]]:
 
 
 def filter_heroes(
-    heroes: list[dict[str, Any]], role: str | None, gamemode: HeroGamemode | None
-) -> list[dict[str, Any]]:
+    heroes: list[HeroEntry], role: str | None, gamemode: HeroGamemode | None
+) -> list[HeroEntry]:
     """Filter heroes list by role and gamemode"""
     if role:
         heroes = [
@@ -101,7 +102,7 @@ async def parse_heroes(
     locale: Locale = Locale.ENGLISH_US,
     role: str | None = None,
     gamemode: HeroGamemode | None = None,
-) -> list[dict[str, Any]]:
+) -> list[HeroEntry]:
     """
     High-level function to fetch and parse heroes list
 

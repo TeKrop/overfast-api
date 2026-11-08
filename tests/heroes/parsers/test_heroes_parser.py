@@ -18,7 +18,8 @@ def test_parse_heroes_html_returns_all_heroes(heroes_html_data: str):
     result = parse_heroes_html(heroes_html_data)
 
     assert isinstance(result, list)
-    assert all(hero["key"] in iter(HeroKey) for hero in result)
+    hero_keys = {key.value for key in HeroKey}
+    assert all(hero["key"] in hero_keys for hero in result)
 
 
 def test_parse_heroes_html_entry_format(heroes_html_data: str):
