@@ -3,6 +3,7 @@
 import logging
 import sys
 from pathlib import Path
+from typing import override
 
 from loguru import logger as loguru_logger
 
@@ -14,6 +15,7 @@ class InterceptHandler(logging.Handler):
     to transform them into loguru logs.
     """
 
+    @override
     def emit(self, record: logging.LogRecord):  # pragma: no cover
         try:
             level = logger.level(record.levelname).name

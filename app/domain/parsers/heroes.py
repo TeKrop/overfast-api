@@ -1,6 +1,6 @@
 """Stateless parser functions for Blizzard heroes data"""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from app.config import settings
 from app.domain.enums import HeroGamemode, Locale
@@ -33,7 +33,7 @@ async def fetch_heroes_html(
     return response.text
 
 
-def parse_heroes_html(html: str) -> list[dict]:
+def parse_heroes_html(html: str) -> list[dict[str, Any]]:
     """
     Parse heroes list HTML into structured data
 
@@ -82,8 +82,8 @@ def parse_heroes_html(html: str) -> list[dict]:
 
 
 def filter_heroes(
-    heroes: list[dict], role: str | None, gamemode: HeroGamemode | None
-) -> list[dict]:
+    heroes: list[dict[str, Any]], role: str | None, gamemode: HeroGamemode | None
+) -> list[dict[str, Any]]:
     """Filter heroes list by role and gamemode"""
     if role:
         heroes = [
@@ -101,7 +101,7 @@ async def parse_heroes(
     locale: Locale = Locale.ENGLISH_US,
     role: str | None = None,
     gamemode: HeroGamemode | None = None,
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """
     High-level function to fetch and parse heroes list
 

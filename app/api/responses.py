@@ -1,6 +1,7 @@
 """Custom FastAPI response classes."""
 
 import json
+from typing import Any, override
 
 from fastapi.responses import JSONResponse
 
@@ -8,7 +9,8 @@ from fastapi.responses import JSONResponse
 class ASCIIJSONResponse(JSONResponse):
     """JSONResponse that always produces ASCII-safe output."""
 
-    def render(self, content) -> bytes:
+    @override
+    def render(self, content: Any) -> bytes:
         return json.dumps(
             content,
             ensure_ascii=True,

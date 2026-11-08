@@ -51,7 +51,7 @@ STATS_PLACEHOLDER: dict[str, Any] = {
 }
 
 
-def extract_heroes_stats_from_profile(profile_stats: dict) -> dict:
+def extract_heroes_stats_from_profile(profile_stats: dict[str, Any]) -> dict[str, Any]:
     """
     Extract and compute heroes stats from profile data
 
@@ -80,9 +80,9 @@ def extract_heroes_stats_from_profile(profile_stats: dict) -> dict:
     }
 
 
-def _compute_heroes_stats(raw_heroes_stats: dict) -> dict:
+def _compute_heroes_stats(raw_heroes_stats: dict[str, Any]) -> dict[str, Any]:
     """Compute heroes stats for every gamemode and platform"""
-    heroes_stats = {hero_key: defaultdict(dict) for hero_key in HeroKey}
+    heroes_stats: dict[str, Any] = {hero_key: defaultdict(dict) for hero_key in HeroKey}  # pyrefly: ignore
 
     for platform, platform_stats in raw_heroes_stats.items():
         platform_gamemodes_stats = {
@@ -115,7 +115,7 @@ def _compute_heroes_stats(raw_heroes_stats: dict) -> dict:
     return heroes_stats
 
 
-def _compute_hero_stats(hero_stats: list[dict]) -> dict:
+def _compute_hero_stats(hero_stats: list[dict[str, Any]]) -> dict[str, Any]:
     """Compute a single hero statistics"""
     game_stats = _get_category_stats("game", hero_stats)
     games_played = _get_stat_value("games_played", game_stats)
@@ -157,16 +157,18 @@ def _compute_hero_stats(hero_stats: list[dict]) -> dict:
     }
 
 
-def _get_category_stats(category: str, hero_stats: list[dict]) -> list[dict]:
+def _get_category_stats(
+    category: str, hero_stats: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     """Extract stats for a specific category"""
-    category_stats = filter(lambda x: x["category"] == category, hero_stats)
+    category_stats = (s for s in hero_stats if s["category"] == category)
     try:
         return next(category_stats)["stats"]
     except StopIteration:
         return []
 
 
-def _get_stat_value(stat_name: str, stats_list: list[dict]) -> int | float:
+def _get_stat_value(stat_name: str, stats_list: list[dict[str, Any]]) -> int | float:
     """Extract a specific stat value from stats list"""
     stat_value = filter(
         lambda x: get_plural_stat_key(x["key"]) == stat_name,
@@ -179,10 +181,10 @@ def _get_stat_value(stat_name: str, stats_list: list[dict]) -> int | float:
 
 
 def compute_heroes_data(
-    heroes_stats: dict,
+    heroes_stats: dict[str, Any],
     gamemodes: list[PlayerGamemode],
     platforms: list[PlayerPlatform],
-) -> dict | None:
+) -> dict[str, Any] | None:
     """
     Compute heroes data filtered by gamemodes and platforms
 
@@ -241,7 +243,7 @@ def compute_heroes_data(
     }
 
 
-def compute_roles_stats(heroes_stats: dict) -> dict:
+def compute_roles_stats(heroes_stats: dict[str, Any]) -> dict[str, Any]:
     """
     Aggregate heroes stats by role
 
@@ -278,7 +280,7 @@ def compute_roles_stats(heroes_stats: dict) -> dict:
     }
 
 
-def compute_general_stats(roles_stats: dict) -> dict:
+def compute_general_stats(roles_stats: dict[str, Any]) -> dict[str, Any]:
     """
     Aggregate role stats into general stats
 
@@ -305,14 +307,14 @@ def compute_general_stats(roles_stats: dict) -> dict:
     return general_stats
 
 
-def _calculate_winrate(stat: dict) -> float:
+def _calculate_winrate(stat: dict[str, Any]) -> float:
     """Calculate winrate percentage"""
     games_won = stat.get("games_won") or 0
     games_played = stat.get("games_played") or 0
     return 0 if games_played <= 0 else round((games_won / games_played) * 100, 2)
 
 
-def _calculate_kda(stat: dict) -> float:
+def _calculate_kda(stat: dict[str, Any]) -> float:
     """Calculate KDA ratio"""
     eliminations = stat["total"]["eliminations"] or 0
     assists = stat["total"]["assists"] or 0
@@ -320,7 +322,7 @@ def _calculate_kda(stat: dict) -> float:
     return round((eliminations + assists) / deaths, 2) if deaths > 0 else 0
 
 
-def _calculate_averages(stat: dict) -> dict:
+def _calculate_averages(stat: dict[str, Any]) -> dict[str, Any]:
     """Calculate per-10-minutes averages"""
     ten_minutes_played = stat["time_played"] / 600
     return {
@@ -334,10 +336,10 @@ def _calculate_averages(stat: dict) -> dict:
 
 
 def _process_player_stats_summary(
-    profile_data: dict,
+    profile_data: dict[str, Any],
     gamemode: PlayerGamemode | None = None,
     platform: PlayerPlatform | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """
     Common logic to compute player stats summary from profile data
 
@@ -374,10 +376,10 @@ def _process_player_stats_summary(
 
 def parse_player_stats_summary_from_html(
     html: str,
-    player_summary: dict | None = None,
+    player_summary: dict[str, Any] | None = None,
     gamemode: PlayerGamemode | None = None,
     platform: PlayerPlatform | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """
     Parse player stats summary from HTML (for Player Cache usage)
 

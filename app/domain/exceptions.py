@@ -1,7 +1,7 @@
 """Set of custom exceptions used in the API"""
 
 from http import HTTPStatus
-from typing import Any
+from typing import Any, override
 
 
 class RateLimitedError(Exception):
@@ -15,6 +15,7 @@ class RateLimitedError(Exception):
         self.retry_after = retry_after
         self.message = f"Blizzard rate limited — retry after {retry_after}s"
 
+    @override
     def __str__(self) -> str:
         return self.message
 
@@ -25,6 +26,7 @@ class OverfastError(Exception):
     status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
     message: str | dict[str, Any] = "OverFast API Error"
 
+    @override
     def __str__(self):
         return str(self.message)
 

@@ -2,7 +2,7 @@
 
 import re
 from http import HTTPStatus
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from app.config import settings
 from app.domain.parsers.utils import (
@@ -36,7 +36,7 @@ async def fetch_hero_html(
     return response.text
 
 
-def parse_hero_html(html: str, locale: Locale = Locale.ENGLISH_US) -> dict:
+def parse_hero_html(html: str, locale: Locale = Locale.ENGLISH_US) -> dict[str, Any]:
     """
     Parse single hero details from HTML
 
@@ -89,7 +89,7 @@ def parse_hero_html(html: str, locale: Locale = Locale.ENGLISH_US) -> dict:
         return hero_data
 
 
-def _parse_hero_summary(overview_section: LexborNode, locale: Locale) -> dict:
+def _parse_hero_summary(overview_section: LexborNode, locale: Locale) -> dict[str, Any]:
     """Parse hero summary section (name, role, location, birthday, age)"""
     header_section = css_first_or_raise(overview_section, "blz-header")
     extra_list_items = css_first_or_raise(overview_section, "blz-list").css(
@@ -164,7 +164,7 @@ def _parse_birthday_and_age(text: str, locale: Locale) -> tuple[str | None, int 
     return birthday, age
 
 
-def _parse_hero_abilities(abilities_section: LexborNode) -> list[dict]:
+def _parse_hero_abilities(abilities_section: LexborNode) -> list[dict[str, Any]]:
     """Parse hero abilities section"""
     carousel_section_div = css_first_or_raise(abilities_section, "blz-carousel-section")
     abilities_list_div = css_first_or_raise(carousel_section_div, "blz-carousel")
@@ -205,7 +205,7 @@ def _parse_hero_abilities(abilities_section: LexborNode) -> list[dict]:
     return abilities
 
 
-def _parse_hero_perks(perks_section: LexborNode) -> dict:
+def _parse_hero_perks(perks_section: LexborNode) -> dict[str, Any]:
     """Parse hero perks section"""
     return {
         "minor": _parse_perk_level(
@@ -217,7 +217,7 @@ def _parse_hero_perks(perks_section: LexborNode) -> dict:
     }
 
 
-def _parse_perk_level(perk_level_div: LexborNode) -> list[dict]:
+def _parse_perk_level(perk_level_div: LexborNode) -> list[dict[str, Any]]:
     return [
         _parse_perk_detail(css_first_or_raise(perk_level_div, "div.perk-details.left")),
         _parse_perk_detail(
@@ -226,7 +226,7 @@ def _parse_perk_level(perk_level_div: LexborNode) -> list[dict]:
     ]
 
 
-def _parse_perk_detail(perk_detail_div: LexborNode) -> dict:
+def _parse_perk_detail(perk_detail_div: LexborNode) -> dict[str, Any]:
     perk_icon = safe_get_attribute(perk_detail_div.css_first("img"), "src")
     perk_info_div = css_first_or_raise(perk_detail_div, "div.perk-info")
 
@@ -237,7 +237,7 @@ def _parse_perk_detail(perk_detail_div: LexborNode) -> dict:
     }
 
 
-def _parse_hero_story(lore_section: LexborNode) -> dict:
+def _parse_hero_story(lore_section: LexborNode) -> dict[str, Any]:
     """Parse hero story/lore section"""
     showcase_section = css_first_or_raise(lore_section, "blz-showcase")
 
@@ -253,7 +253,7 @@ def _parse_hero_story(lore_section: LexborNode) -> dict:
     }
 
 
-def _parse_hero_media(showcase_section: LexborNode) -> dict | None:
+def _parse_hero_media(showcase_section: LexborNode) -> dict[str, Any] | None:
     """Parse hero media (video, comic, or short story)"""
     # Check for YouTube video
     if video := showcase_section.css_first("blz-youtube-video"):
@@ -289,7 +289,7 @@ def _parse_hero_media(showcase_section: LexborNode) -> dict | None:
     return None
 
 
-def _parse_story_chapters(accordion: LexborNode) -> list[dict]:
+def _parse_story_chapters(accordion: LexborNode) -> list[dict[str, Any]]:
     """Parse hero story chapters from accordion"""
     # Parse chapter content
     chapters_content = [
@@ -317,7 +317,7 @@ def _parse_story_chapters(accordion: LexborNode) -> list[dict]:
     ]
 
 
-def _parse_hero_stadium_powers(stadium_wrapper: LexborNode) -> list[dict]:
+def _parse_hero_stadium_powers(stadium_wrapper: LexborNode) -> list[dict[str, Any]]:
     stadium_carousel = css_first_or_raise(
         stadium_wrapper, "blz-section#stadium blz-carousel-beta"
     )

@@ -5,7 +5,7 @@ import tracemalloc
 from abc import ABC, abstractmethod
 from contextlib import suppress
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, override
 
 from anyio import to_thread
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -24,8 +24,9 @@ with suppress(ModuleNotFoundError):
 
 
 class OverFastMiddleware(BaseHTTPMiddleware, ABC):  # pragma: no cover
+    @override
     async def dispatch(
-        self, request: Request, call_next: Callable
+        self, request: Request, call_next: Callable[..., Any]
     ) -> HTMLResponse | JSONResponse:
         # Don't make any profiling if query param is not here
         if not request.query_params.get("profile", False):
@@ -36,13 +37,15 @@ class OverFastMiddleware(BaseHTTPMiddleware, ABC):  # pragma: no cover
 
     @abstractmethod
     async def _dispatch(
-        self, request: Request, call_next: Callable
+        self, request: Request, call_next: Callable[..., Any]
     ) -> HTMLResponse | JSONResponse:
         """Concrete dispatch method"""
 
 
 class MemrayInMemoryMiddleware(OverFastMiddleware):  # pragma: no cover
-    async def _dispatch(self, request: Request, call_next: Callable) -> HTMLResponse:
+    async def _dispatch(
+        self, request: Request, call_next: Callable[..., Any]
+    ) -> HTMLResponse:
         # Create a temporary file path using an async-friendly thread call
         fd, tmp_bin_name = await to_thread.run_sync(
             lambda: tempfile.mkstemp(suffix=".bin")
@@ -88,7 +91,9 @@ class MemrayInMemoryMiddleware(OverFastMiddleware):  # pragma: no cover
 
 
 class PyInstrumentMiddleware(OverFastMiddleware):  # pragma: no cover
-    async def _dispatch(self, request: Request, call_next: Callable) -> HTMLResponse:
+    async def _dispatch(
+        self, request: Request, call_next: Callable[..., Any]
+    ) -> HTMLResponse:
         with pyinstrument.Profiler(interval=0.001, async_mode="enabled") as profiler:
             await call_next(request)
 
@@ -100,7 +105,9 @@ class TraceMallocMiddleware(OverFastMiddleware):  # pragma: no cover
         super().__init__(app)
         tracemalloc.start()
 
-    async def _dispatch(self, request: Request, call_next: Callable) -> JSONResponse:
+    async def _dispatch(
+        self, request: Request, call_next: Callable[..., Any]
+    ) -> JSONResponse:
         # Take a snapshot before the request
         snapshot_before = tracemalloc.take_snapshot()
 
@@ -129,7 +136,9 @@ class TraceMallocMiddleware(OverFastMiddleware):  # pragma: no cover
 
 
 class ObjGraphMiddleware(OverFastMiddleware):  # pragma: no cover
-    async def _dispatch(self, request: Request, call_next: Callable) -> JSONResponse:
+    async def _dispatch(
+        self, request: Request, call_next: Callable[..., Any]
+    ) -> JSONResponse:
         # Capture common object types before processing
         objects_before = objgraph.most_common_types(limit=10)
         objgraph_count_before = {obj[0]: obj[1] for obj in objects_before}

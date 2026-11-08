@@ -9,7 +9,7 @@ This module handles parsing of player profile HTML including:
 
 import re
 from http import HTTPStatus
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from app.config import settings
 from app.domain.exceptions import ParserBlizzardError, ParserParsingError
@@ -150,8 +150,8 @@ def extract_name_from_profile_html(html: str) -> str | None:
 
 def parse_player_profile_html(
     html: str,
-    player_summary: dict | None = None,
-) -> dict:
+    player_summary: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Parse player profile HTML into summary and stats
 
@@ -181,7 +181,9 @@ def parse_player_profile_html(
     }
 
 
-def _parse_summary(root_tag: LexborNode, player_summary: dict | None) -> dict:
+def _parse_summary(
+    root_tag: LexborNode, player_summary: dict[str, Any] | None
+) -> dict[str, Any]:
     """Parse player summary section (username, avatar, endorsement, ranks)"""
     player_summary = player_summary or {}
     error_msg_prefix = "Failed to parse player summary"
@@ -227,7 +229,7 @@ def _get_title(profile_div: LexborNode) -> str | None:
     return title_tag.text() or None
 
 
-def _get_endorsement(progression_div: LexborNode) -> dict | None:
+def _get_endorsement(progression_div: LexborNode) -> dict[str, Any] | None:
     """Extract endorsement level and frame"""
     endorsement_span = progression_div.css_first(
         "span.Profile-player--endorsementWrapper"
@@ -251,7 +253,7 @@ def _get_endorsement(progression_div: LexborNode) -> dict | None:
 def _get_competitive_ranks(
     root_tag: LexborNode,
     progression_div: LexborNode,
-) -> dict | None:
+) -> dict[str, Any] | None:
     """Extract competitive ranks for all platforms"""
     competitive_ranks = {
         platform.value: _get_platform_competitive_ranks(
@@ -270,7 +272,7 @@ def _get_platform_competitive_ranks(
     root_tag: LexborNode,
     progression_div: LexborNode,
     platform_class: str,
-) -> dict | None:
+) -> dict[str, Any] | None:
     """Extract competitive ranks for a specific platform"""
     last_season_played = _get_last_season_played(root_tag, platform_class)
 
@@ -341,7 +343,7 @@ def _get_role_icon(role_wrapper: LexborNode) -> str:
     return css_first_or_raise(role_svg, "use").attributes["xlink:href"] or ""
 
 
-def _parse_stats(root_tag: LexborNode) -> dict | None:
+def _parse_stats(root_tag: LexborNode) -> dict[str, Any] | None:
     """Parse stats for all platforms"""
     stats = {
         platform.value: _parse_platform_stats(root_tag, platform_class)
@@ -355,7 +357,7 @@ def _parse_stats(root_tag: LexborNode) -> dict | None:
 def _parse_platform_stats(
     root_tag: LexborNode,
     platform_class: str,
-) -> dict | None:
+) -> dict[str, Any] | None:
     """Parse stats for a specific platform"""
     statistics_section = _get_profile_view_section(root_tag, platform_class)
     gamemodes_infos = {
@@ -370,7 +372,7 @@ def _parse_platform_stats(
 def _parse_gamemode_stats(
     statistics_section: LexborNode | None,
     gamemode: PlayerGamemode,
-) -> dict | None:
+) -> dict[str, Any] | None:
     """Parse stats for a specific gamemode"""
     if not statistics_section or not statistics_section.first_child:
         return None
@@ -392,7 +394,7 @@ def _parse_gamemode_stats(
     }
 
 
-def _parse_heroes_comparisons(top_heroes_section: LexborNode) -> dict:
+def _parse_heroes_comparisons(top_heroes_section: LexborNode) -> dict[str, Any]:
     """Parse heroes comparisons (top heroes by category)"""
     categories = _get_heroes_options(top_heroes_section)
 
@@ -448,7 +450,7 @@ def _parse_heroes_comparisons(top_heroes_section: LexborNode) -> dict:
     return heroes_comparisons
 
 
-def _parse_stat_row(stat_row: LexborNode) -> dict | None:
+def _parse_stat_row(stat_row: LexborNode) -> dict[str, Any] | None:
     """Parse a single stat row and return stat dict or None if invalid."""
     if not stat_row.first_child or not stat_row.last_child:
         logger.warning("Missing stat name or value in {}", stat_row)
@@ -462,7 +464,7 @@ def _parse_stat_row(stat_row: LexborNode) -> dict | None:
     }
 
 
-def _parse_category_stats(content_div: LexborNode) -> list[dict]:
+def _parse_category_stats(content_div: LexborNode) -> list[dict[str, Any]]:
     """Parse all stat rows for a given category."""
     stats = []
     for stat_row in content_div.iter():
@@ -477,7 +479,7 @@ def _parse_category_stats(content_div: LexborNode) -> list[dict]:
     return stats
 
 
-def _parse_career_stats(career_stats_section: LexborNode) -> dict:
+def _parse_career_stats(career_stats_section: LexborNode) -> dict[str, Any]:
     """Parse detailed career stats per hero"""
     heroes_options = _get_heroes_options(career_stats_section, key_prefix="option-")
 
@@ -498,7 +500,7 @@ def _parse_career_stats(career_stats_section: LexborNode) -> dict:
 
         hero_key = get_hero_keyname(heroes_options[stats_hero_class])
 
-        career_stats[hero_key] = []
+        career_stats[hero_key] = []  # pyrefly: ignore
         # Hero container children are div with "category" class
         for card_stat in hero_container.iter():
             # Content div should be the only child ("content" class)
@@ -591,11 +593,11 @@ def _get_heroes_options(
 
 
 def filter_stats_by_query(
-    stats: dict | None,
+    stats: dict[str, Any] | None,
     gamemode: PlayerGamemode | str,
     platform: PlayerPlatform | str | None = None,
     hero: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """
     Filter career stats by query parameters
 
@@ -647,10 +649,10 @@ def filter_stats_by_query(
 
 
 def filter_all_stats_data(
-    stats: dict | None,
+    stats: dict[str, Any] | None,
     platform: PlayerPlatform | str | None = None,
     gamemode: PlayerGamemode | str | None = None,
-) -> dict | None:
+) -> dict[str, Any] | None:
     """
     Filter all stats data by platform and/or gamemode
 

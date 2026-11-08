@@ -1,5 +1,7 @@
 """Role domain service — roles list"""
 
+from typing import Any
+
 from app.config import settings
 from app.domain.enums import Locale
 from app.domain.exceptions import ParserInternalError, ParserParsingError
@@ -16,7 +18,7 @@ class RoleService(StaticDataService):
         async def _fetch() -> str:
             return await fetch_roles_html(self.blizzard_client, locale)
 
-        def _parse(html: str) -> list[dict]:
+        def _parse(html: str) -> list[dict[str, Any]]:
             try:
                 return parse_roles_html(html)
             except ParserParsingError as exc:
@@ -37,7 +39,7 @@ class RoleService(StaticDataService):
         self,
         locale: Locale,
         cache_key: str,
-    ) -> tuple[list[dict], bool, int]:
+    ) -> tuple[list[dict[str, Any]], bool, int]:
         """Return the roles list.
 
         Stores raw Blizzard HTML per locale so that parser changes take effect

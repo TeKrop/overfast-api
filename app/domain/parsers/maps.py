@@ -1,5 +1,7 @@
 """Stateless parser functions for maps data"""
 
+from typing import Any
+
 from app.config import settings
 from app.domain.utils.csv_reader import read_csv_file
 
@@ -9,7 +11,7 @@ def get_static_url_maps(key: str, extension: str = "jpg") -> str:
     return f"{settings.app_base_url}/static/maps/{key}.{extension}"
 
 
-def parse_maps_csv() -> list[dict]:
+def parse_maps_csv() -> list[dict[str, Any]]:
     """
     Parse maps list from CSV file
 

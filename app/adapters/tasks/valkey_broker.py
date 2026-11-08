@@ -8,7 +8,7 @@ operations to avoid connection exhaustion.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, override
 
 import valkey.asyncio as aiovalkey
 from taskiq.abc.broker import AsyncBroker
@@ -62,6 +62,7 @@ class ValkeyListBroker(AsyncBroker):
             raise RuntimeError(msg)
         return aiovalkey.Valkey(connection_pool=self._pool)
 
+    @override
     async def startup(self) -> None:
         """Create the connection pool and run taskiq startup hooks."""
         await super().startup()
@@ -79,6 +80,7 @@ class ValkeyListBroker(AsyncBroker):
             queue_size,
         )
 
+    @override
     async def shutdown(self) -> None:
         """Disconnect the pool and run taskiq shutdown hooks."""
         await super().shutdown()

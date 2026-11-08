@@ -1,5 +1,7 @@
 """Gamemode domain service — gamemodes list"""
 
+from typing import Any
+
 from app.config import settings
 from app.domain.parsers.gamemodes import parse_gamemodes_csv
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
@@ -11,7 +13,7 @@ class GamemodeService(StaticDataService):
     def _gamemodes_config(self, cache_key: str) -> StaticFetchConfig:
         """Build a StaticFetchConfig for the gamemodes list."""
 
-        def _fetch() -> list[dict]:
+        def _fetch() -> list[dict[str, Any]]:
             return parse_gamemodes_csv()
 
         return StaticFetchConfig(
@@ -26,7 +28,7 @@ class GamemodeService(StaticDataService):
     async def list_gamemodes(
         self,
         cache_key: str,
-    ) -> tuple[list[dict], bool, int]:
+    ) -> tuple[list[dict[str, Any]], bool, int]:
         """Return the gamemodes list."""
         return await self.get_or_fetch(self._gamemodes_config(cache_key))
 

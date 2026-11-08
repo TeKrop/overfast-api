@@ -2,7 +2,7 @@
 
 import time
 from functools import wraps
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from app.infrastructure.logger import logger
 
@@ -17,7 +17,7 @@ def rate_limited(max_calls: int, interval: int):
     webhook if there is a critical parsing error.
     """
 
-    def _make_hashable(obj):
+    def _make_hashable(obj: Any) -> Any:
         """Convert unhashable types to hashable equivalents"""
         if isinstance(obj, dict):
             return tuple(sorted((k, _make_hashable(v)) for k, v in obj.items()))
@@ -25,11 +25,11 @@ def rate_limited(max_calls: int, interval: int):
             return tuple(_make_hashable(item) for item in obj)
         return obj
 
-    def decorator(func: Callable) -> Callable:
-        call_history = {}
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        call_history: dict[Any, Any] = {}
 
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Define a unique key by using given parameters
             # Convert unhashable types (list, dict) to hashable ones
             hashable_args = tuple(_make_hashable(arg) for arg in args)
@@ -58,7 +58,7 @@ def rate_limited(max_calls: int, interval: int):
                 logger.warning(
                     "Rate limit exceeded for {} with the same "
                     "parameters. Try again later.",
-                    func.__name__,  # pyrefly: ignore
+                    func.__name__,
                 )
                 return None
 

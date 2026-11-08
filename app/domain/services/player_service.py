@@ -2,7 +2,7 @@
 
 import time
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Never
+from typing import TYPE_CHECKING, Any, Never
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -57,7 +57,7 @@ class PlayerService(BaseService):
         offset: int,
         limit: int,
         cache_key: str,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Search for players by name — Valkey-only cache, no persistent storage."""
         try:
             data = await parse_player_search(
@@ -87,10 +87,10 @@ class PlayerService(BaseService):
         self,
         player_id: str,
         cache_key: str,
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict[str, Any], bool, int]:
         """Return player summary (name, avatar, competitive ranks, …)."""
 
-        def extract(html: str, player_summary: dict) -> dict:
+        def extract(html: str, player_summary: dict[str, Any]) -> dict[str, Any]:
             return parse_player_profile_html(html, player_summary).get("summary") or {}
 
         return await self._execute_player_request(player_id, cache_key, extract)
@@ -105,10 +105,10 @@ class PlayerService(BaseService):
         gamemode: PlayerGamemode | None,
         platform: PlayerPlatform | None,
         cache_key: str,
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict[str, Any], bool, int]:
         """Return full player data: summary + stats."""
 
-        def extract(html: str, player_summary: dict) -> dict:
+        def extract(html: str, player_summary: dict[str, Any]) -> dict[str, Any]:
             profile = parse_player_profile_html(html, player_summary)
             return {
                 "summary": profile.get("summary") or {},
@@ -174,10 +174,10 @@ class PlayerService(BaseService):
         platform: PlayerPlatform | None,
         hero: HeroKeyCareerFilter | None,
         cache_key: str,
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict[str, Any], bool, int]:
         """Return player stats with category labels."""
 
-        def extract(html: str, player_summary: dict) -> dict:
+        def extract(html: str, player_summary: dict[str, Any]) -> dict[str, Any]:
             profile = parse_player_profile_html(html, player_summary)
             return filter_stats_by_query(
                 profile.get("stats") or {}, gamemode, platform, hero
@@ -195,10 +195,10 @@ class PlayerService(BaseService):
         gamemode: PlayerGamemode | None,
         platform: PlayerPlatform | None,
         cache_key: str,
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict[str, Any], bool, int]:
         """Return player statistics summary (winrate, kda, …)."""
 
-        def extract(html: str, player_summary: dict) -> dict:
+        def extract(html: str, player_summary: dict[str, Any]) -> dict[str, Any]:
             return parse_player_stats_summary_from_html(
                 html, player_summary, gamemode, platform
             )
@@ -216,10 +216,10 @@ class PlayerService(BaseService):
         platform: PlayerPlatform | None,
         hero: HeroKeyCareerFilter | None,
         cache_key: str,
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict[str, Any], bool, int]:
         """Return player career stats (no labels)."""
 
-        def extract(html: str, player_summary: dict) -> dict:
+        def extract(html: str, player_summary: dict[str, Any]) -> dict[str, Any]:
             return parse_player_career_stats_from_html(
                 html, gamemode, player_summary, platform, hero
             )
@@ -234,8 +234,8 @@ class PlayerService(BaseService):
         self,
         player_id: str,
         cache_key: str,
-        data_factory: Callable[[str, dict], dict],
-    ) -> tuple[dict, bool, int]:
+        data_factory: Callable[[str, dict[str, Any]], dict[str, Any]],
+    ) -> tuple[dict[str, Any], bool, int]:
         """Resolve identity → get HTML → compute data → update cache → return.
 
         Fast path: if persistent storage has a profile fresher than
@@ -244,7 +244,7 @@ class PlayerService(BaseService):
         """
         identity = PlayerIdentity()
         effective_id = player_id
-        data: dict = {}
+        data: dict[str, Any] = {}
         age: int = 0
         stored_at: int | None = None
 
@@ -302,7 +302,7 @@ class PlayerService(BaseService):
     async def update_player_profile_cache(
         self,
         player_id: str,
-        player_summary: dict,
+        player_summary: dict[str, Any],
         html: str,
         battletag: str | None = None,
         name: str | None = None,
@@ -489,7 +489,7 @@ class PlayerService(BaseService):
         return await self._resolve_via_redirect(player_id, battletag_input, search_json)
 
     async def _try_cached_blizzard_id(
-        self, battletag_input: str, player_id: str, search_json: list
+        self, battletag_input: str, player_id: str, search_json: list[Any]
     ) -> PlayerIdentity | None:
         """Check storage for a cached Blizzard ID and retry the search with it."""
         logger.info(
@@ -515,7 +515,7 @@ class PlayerService(BaseService):
         return None
 
     async def _resolve_via_redirect(
-        self, player_id: str, battletag_input: str, search_json: list
+        self, player_id: str, battletag_input: str, search_json: list[Any]
     ) -> PlayerIdentity:
         """Resolve identity as a last resort via Blizzard redirect HTML fetch."""
         logger.info("No cached mapping — resolving via Blizzard redirect")
@@ -541,7 +541,7 @@ class PlayerService(BaseService):
 
     async def _enrich_from_blizzard_id(
         self, blizzard_id: str
-    ) -> tuple[dict, str | None]:
+    ) -> tuple[dict[str, Any], str | None]:
         """Reverse-enrich: fetch HTML → extract name → search for summary."""
         html, _ = await fetch_player_html(self.blizzard_client, blizzard_id)
         if not html:

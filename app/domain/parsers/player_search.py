@@ -1,6 +1,6 @@
 """Stateless parser for player search endpoint"""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from app.config import settings
 from app.domain.exceptions import ParserParsingError
@@ -12,7 +12,9 @@ if TYPE_CHECKING:
     from app.domain.ports import BlizzardClientPort
 
 
-async def fetch_player_search_json(client: BlizzardClientPort, name: str) -> list[dict]:
+async def fetch_player_search_json(
+    client: BlizzardClientPort, name: str
+) -> list[dict[str, Any]]:
     """
     Fetch player search results from Blizzard
 
@@ -32,7 +34,9 @@ async def fetch_player_search_json(client: BlizzardClientPort, name: str) -> lis
     return response.json()
 
 
-def filter_players_by_name(json_data: list[dict], name: str) -> list[dict]:
+def filter_players_by_name(
+    json_data: list[dict[str, Any]], name: str
+) -> list[dict[str, Any]]:
     """
     Filter players by exact name match (case-sensitive, public only)
 
@@ -59,9 +63,9 @@ def filter_players_by_name(json_data: list[dict], name: str) -> list[dict]:
 
 
 def transform_player_search_results(
-    players: list[dict],
+    players: list[dict[str, Any]],
     search_nickname: str,
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """
     Transform Blizzard player data to OverFast API format
 
@@ -113,7 +117,9 @@ def transform_player_search_results(
         return transformed_players
 
 
-def apply_ordering(players: list[dict], order_by: str) -> list[dict]:
+def apply_ordering(
+    players: list[dict[str, Any]], order_by: str
+) -> list[dict[str, Any]]:
     """
     Sort players by specified field and direction
 
@@ -141,7 +147,9 @@ def apply_ordering(players: list[dict], order_by: str) -> list[dict]:
         return players
 
 
-def apply_pagination(players: list[dict], offset: int, limit: int) -> dict:
+def apply_pagination(
+    players: list[dict[str, Any]], offset: int, limit: int
+) -> dict[str, Any]:
     """
     Apply pagination to player results
 
@@ -165,7 +173,7 @@ async def parse_player_search(
     order_by: str = "name:asc",
     offset: int = 0,
     limit: int = 10,
-) -> dict:
+) -> dict[str, Any]:
     """
     High-level function to search for players
 

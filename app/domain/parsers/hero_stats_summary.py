@@ -35,7 +35,7 @@ async def fetch_hero_stats_json(
     region: PlayerRegion,
     map_filter: str = "all-maps",
     competitive_division: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Fetch hero stats JSON from Blizzard API
 
     As gamemode filter values are dynamically changing on Blizzard side,
@@ -67,13 +67,13 @@ async def fetch_hero_stats_json(
 
 
 def parse_hero_stats_json(
-    json_data: dict,
+    json_data: dict[str, Any],
     map_filter: str,
     gamemode: PlayerGamemode,
     gamemode_filter: str,
     role_filter: str | None = None,
     order_by: str = "hero:asc",
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """
     Parse and filter hero stats from JSON
 
@@ -191,7 +191,7 @@ async def parse_hero_stats_summary(
     map_filter: str | None = None,
     competitive_division: str | None = None,
     order_by: str = "hero:asc",
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """
     High-level function to fetch and parse hero stats summary
 

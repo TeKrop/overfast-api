@@ -252,9 +252,15 @@ upload_to_vcs_release = false
 [tool.pyrefly]
 project-includes = ["app", "tests"]
 python-version = "3.15"
+preset = "strict"
 
 # Enums are generated at import time from CSV, so pyrefly can't see their members
 [[tool.pyrefly.sub-config]]
 matches = "tests/**"
 [tool.pyrefly.sub-config.errors]
 missing-attribute = false
+implicit-any-type-argument = false
+implicit-any-parameter = false
+implicit-any-empty-container = false
+implicit-any-lambda = false
+missing-override-decorator = false

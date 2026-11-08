@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
 def handle_valkey_error(
     default_return: Any = None,
-) -> Callable[[Callable], Callable]:
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     Decorator to handle Valkey connection errors gracefully.
 
@@ -50,9 +50,9 @@ def handle_valkey_error(
         Decorated async function that catches ValkeyError and returns default_return
     """
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        async def wrapper(*args, **kwargs):
+        async def wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
                 return await func(*args, **kwargs)
             except valkey.ValkeyError as err:
@@ -80,14 +80,14 @@ class ValkeyCache(metaclass=Singleton):
         )
 
     @staticmethod
-    def _compress_json_value(value: dict | list) -> bytes:
+    def _compress_json_value(value: dict[str, Any] | list[Any]) -> bytes:
         """Helper method to transform a value into compressed JSON data using zstd"""
         json_str = json.dumps(value, separators=(",", ":"))
         # Use module-level function for better performance
         return zstd.compress(json_str.encode("utf-8"))
 
     @staticmethod
-    def _decompress_json_value(value: bytes) -> dict | list:
+    def _decompress_json_value(value: bytes) -> dict[str, Any] | list[Any]:
         """Helper method to retrieve a value from a compressed JSON data using zstd"""
         # Use module-level function for better performance
         return json.loads(zstd.decompress(value).decode("utf-8"))
@@ -122,7 +122,7 @@ class ValkeyCache(metaclass=Singleton):
 
     # Application-specific cache methods
     @handle_valkey_error(default_return=None)
-    async def get_api_cache(self, cache_key: str) -> dict | list | None:
+    async def get_api_cache(self, cache_key: str) -> dict[str, Any] | list[Any] | None:
         """Get the API Cache value associated with a given cache key."""
         api_cache_key = f"{settings.api_cache_key_prefix}:{cache_key}"
         api_cache = await self.valkey_server.get(api_cache_key)
@@ -137,7 +137,7 @@ class ValkeyCache(metaclass=Singleton):
     async def update_api_cache(
         self,
         cache_key: str,
-        value: dict | list,
+        value: dict[str, Any] | list[Any],
         expire: int,
         *,
         stored_at: int | None = None,
@@ -150,7 +150,7 @@ class ValkeyCache(metaclass=Singleton):
         Python's ``json.dumps``), so nginx/Lua can print it verbatim without
         re-encoding through cjson (which does not guarantee key ordering).
         """
-        envelope: dict = {
+        envelope: dict[str, Any] = {
             "data_json": json.dumps(value, separators=(",", ":")),
             "stored_at": stored_at if stored_at is not None else int(time.time()),
             "staleness_threshold": (

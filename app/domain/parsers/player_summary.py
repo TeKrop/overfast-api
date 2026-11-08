@@ -1,6 +1,6 @@
 """Stateless parser for player summary data from Blizzard search endpoint"""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from app.config import settings
 from app.domain.exceptions import ParserParsingError
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 async def fetch_player_summary_json(
     client: BlizzardClientPort, player_id: str
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """
     Fetch player summary data from Blizzard search endpoint
 
@@ -39,8 +39,8 @@ async def fetch_player_summary_json(
 
 
 def parse_player_summary_json(
-    json_data: list[dict], player_id: str, blizzard_id: str | None = None
-) -> dict:
+    json_data: list[dict[str, Any]], player_id: str, blizzard_id: str | None = None
+) -> dict[str, Any]:
     """
     Parse player summary from search endpoint JSON
 
@@ -114,7 +114,7 @@ def parse_player_summary_json(
 
 async def parse_player_summary(
     client: BlizzardClientPort, player_id: str, blizzard_id: str | None = None
-) -> dict:
+) -> dict[str, Any]:
     """
     High-level function to fetch and parse player summary
 
