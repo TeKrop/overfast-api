@@ -1,7 +1,6 @@
 """Tests for app/worker.py — task functions and helpers"""
 
 import contextlib
-from typing import Any, cast
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -18,6 +17,7 @@ from app.worker import (
     refresh_player_profile,
     refresh_roles,
 )
+from tests.helpers import unwrapped
 
 
 @pytest.fixture(autouse=True)
@@ -39,7 +39,9 @@ def mock_worker_metrics():
 
 class TestRunRefreshTask:
     @pytest.mark.asyncio
-    async def test_success_increments_completed_counter(self, mock_worker_metrics: Any):
+    async def test_success_increments_completed_counter(
+        self, mock_worker_metrics: tuple[MagicMock, MagicMock, MagicMock]
+    ):
         """On success, background_refresh_completed_total is incremented."""
         mock_completed, mock_failed, _ = mock_worker_metrics
         mock_queue = AsyncMock()
@@ -53,7 +55,7 @@ class TestRunRefreshTask:
 
     @pytest.mark.asyncio
     async def test_failure_increments_failed_counter_and_reraises(
-        self, mock_worker_metrics: Any
+        self, mock_worker_metrics: tuple[MagicMock, MagicMock, MagicMock]
     ):
         """On exception, background_refresh_failed_total is incremented and exception re-raised."""
         mock_completed, mock_failed, _ = mock_worker_metrics
@@ -72,7 +74,9 @@ class TestRunRefreshTask:
         mock_completed.labels.return_value.inc.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_duration_always_recorded(self, mock_worker_metrics: Any):
+    async def test_duration_always_recorded(
+        self, mock_worker_metrics: tuple[MagicMock, MagicMock, MagicMock]
+    ):
         """Duration histogram is observed regardless of success or failure."""
         _, _, mock_duration = mock_worker_metrics
         mock_obs = MagicMock()
@@ -125,9 +129,7 @@ class TestRefreshHeroes:
         mock_service = AsyncMock()
         mock_queue = AsyncMock()
 
-        await cast("Any", refresh_heroes).__wrapped__(
-            "heroes:en-us", mock_service, mock_queue
-        )
+        await unwrapped(refresh_heroes)("heroes:en-us", mock_service, mock_queue)
 
         mock_service.refresh_list.assert_awaited_once_with(Locale.ENGLISH_US)
 
@@ -139,7 +141,7 @@ class TestRefreshHero:
         mock_queue = AsyncMock()
         first_key = str(next(iter(HeroKey)))
 
-        await cast("Any", refresh_hero).__wrapped__(
+        await unwrapped(refresh_hero)(
             f"hero:{first_key}:en-us", mock_service, mock_queue
         )
 
@@ -154,9 +156,7 @@ class TestRefreshRoles:
         mock_service = AsyncMock()
         mock_queue = AsyncMock()
 
-        await cast("Any", refresh_roles).__wrapped__(
-            "roles:fr-fr", mock_service, mock_queue
-        )
+        await unwrapped(refresh_roles)("roles:fr-fr", mock_service, mock_queue)
 
         mock_service.refresh_list.assert_awaited_once_with(Locale.FRENCH)
 
@@ -167,9 +167,7 @@ class TestRefreshMaps:
         mock_service = AsyncMock()
         mock_queue = AsyncMock()
 
-        await cast("Any", refresh_maps).__wrapped__(
-            "maps:all", mock_service, mock_queue
-        )
+        await unwrapped(refresh_maps)("maps:all", mock_service, mock_queue)
 
         mock_service.refresh_list.assert_awaited_once()
 
@@ -180,9 +178,7 @@ class TestRefreshGamemodes:
         mock_service = AsyncMock()
         mock_queue = AsyncMock()
 
-        await cast("Any", refresh_gamemodes).__wrapped__(
-            "gamemodes:all", mock_service, mock_queue
-        )
+        await unwrapped(refresh_gamemodes)("gamemodes:all", mock_service, mock_queue)
 
         mock_service.refresh_list.assert_awaited_once()
 
@@ -193,9 +189,7 @@ class TestRefreshPlayerProfile:
         mock_service = AsyncMock()
         mock_queue = AsyncMock()
 
-        await cast("Any", refresh_player_profile).__wrapped__(
-            "Player-1234", mock_service, mock_queue
-        )
+        await unwrapped(refresh_player_profile)("Player-1234", mock_service, mock_queue)
 
         mock_service.refresh_player_profile.assert_awaited_once_with("Player-1234")
 
@@ -209,7 +203,7 @@ class TestCleanupStalePlayers:
         mock_storage = AsyncMock()
         with patch("app.worker.settings") as mock_settings:
             mock_settings.player_profile_max_age = 0
-            await cast("Any", cleanup_stale_players).__wrapped__(mock_storage)
+            await unwrapped(cleanup_stale_players)(mock_storage)
 
         mock_storage.delete_old_player_profiles.assert_not_awaited()
 
@@ -218,7 +212,7 @@ class TestCleanupStalePlayers:
         mock_storage = AsyncMock()
         with patch("app.worker.settings") as mock_settings:
             mock_settings.player_profile_max_age = 86400
-            await cast("Any", cleanup_stale_players).__wrapped__(mock_storage)
+            await unwrapped(cleanup_stale_players)(mock_storage)
 
         mock_storage.delete_old_player_profiles.assert_awaited_once_with(86400)
 
@@ -229,7 +223,7 @@ class TestCleanupStalePlayers:
         with patch("app.worker.settings") as mock_settings:
             mock_settings.player_profile_max_age = 3600
             # Should not propagate
-            await cast("Any", cleanup_stale_players).__wrapped__(mock_storage)
+            await unwrapped(cleanup_stale_players)(mock_storage)
 
 
 # ── check_new_hero ────────────────────────────────────────────────────────────
@@ -244,7 +238,7 @@ class TestCheckNewHero:
             patch("app.worker.fetch_heroes_html") as mock_fetch,
         ):
             mock_settings.discord_webhook_enabled = False
-            await cast("Any", check_new_hero).__wrapped__(mock_client)
+            await unwrapped(check_new_hero)(mock_client)
 
         mock_fetch.assert_not_awaited()
 
@@ -266,7 +260,7 @@ class TestCheckNewHero:
             patch("app.worker.send_discord_webhook_message") as mock_discord,
         ):
             mock_settings.discord_webhook_enabled = True
-            await cast("Any", check_new_hero).__wrapped__(mock_client)
+            await unwrapped(check_new_hero)(mock_client)
 
         mock_discord.assert_not_called()
 
@@ -290,7 +284,7 @@ class TestCheckNewHero:
             patch("app.worker.send_discord_webhook_message") as mock_discord,
         ):
             mock_settings.discord_webhook_enabled = True
-            await cast("Any", check_new_hero).__wrapped__(mock_client)
+            await unwrapped(check_new_hero)(mock_client)
 
         mock_discord.assert_called_once()
         call_kwargs = mock_discord.call_args.kwargs
@@ -308,6 +302,6 @@ class TestCheckNewHero:
             patch("app.worker.send_discord_webhook_message") as mock_discord,
         ):
             mock_settings.discord_webhook_enabled = True
-            await cast("Any", check_new_hero).__wrapped__(mock_client)
+            await unwrapped(check_new_hero)(mock_client)
 
         mock_discord.assert_not_called()

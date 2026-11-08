@@ -1,7 +1,5 @@
 """Tests for app/domain/parsers/player_search.py — error paths and edge cases"""
 
-from typing import Any
-
 import pytest
 
 from app.domain.exceptions import ParserParsingError
@@ -57,7 +55,7 @@ class TestFilterPlayersByName:
 # ── transform_player_search_results ──────────────────────────────────────────
 
 
-def _make_player(**overrides: Any) -> dict[str, Any]:
+def _make_player(**overrides: object) -> dict[str, object]:
     base = {
         "name": "Test",
         "url": "Test-1234",
@@ -68,8 +66,7 @@ def _make_player(**overrides: Any) -> dict[str, Any]:
         "isPublic": True,
         "portrait": None,
     }
-    base.update(overrides)
-    return base
+    return base | overrides
 
 
 class TestTransformPlayerSearchResults:

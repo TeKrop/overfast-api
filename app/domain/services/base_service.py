@@ -50,7 +50,7 @@ class BaseService:
     async def _update_api_cache(
         self,
         cache_key: str,
-        data: Any,
+        data: dict[str, Any] | list[Any],
         cache_ttl: int,
         *,
         stored_at: int | None = None,

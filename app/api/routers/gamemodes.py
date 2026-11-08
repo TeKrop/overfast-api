@@ -34,7 +34,7 @@ async def list_map_gamemodes(
     request: Request,
     response: Response,
     service: GamemodeServiceDep,
-) -> Any:
+) -> list[dict[str, Any]]:
     data, is_stale, age = await service.list_gamemodes(
         cache_key=build_cache_key(request)
     )

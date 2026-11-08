@@ -57,7 +57,7 @@ async def list_heroes(
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
     gamemode: Annotated[HeroGamemode | None, Query(title="Gamemode filter")] = None,
-) -> Any:
+) -> list[dict[str, Any]]:
     data, is_stale, age = await service.list_heroes(
         locale=locale, role=role, gamemode=gamemode, cache_key=build_cache_key(request)
     )
@@ -134,7 +134,7 @@ async def get_hero_stats(
             pattern=r"^(hero|winrate|pickrate|banrate):(asc|desc)$",
         ),
     ] = "hero:asc",
-) -> Any:
+) -> list[dict[str, Any]]:
     data, is_stale, age = await service.get_hero_stats(
         platform=platform,
         gamemode=gamemode,
@@ -180,7 +180,7 @@ async def get_hero(
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
-) -> Any:
+) -> dict[str, Any]:
     data, is_stale, age = await service.get_hero(
         hero_key=str(hero_key), locale=locale, cache_key=build_cache_key(request)
     )

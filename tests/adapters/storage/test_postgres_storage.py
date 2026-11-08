@@ -5,7 +5,6 @@ from __future__ import annotations
 import datetime as dt
 import json
 from contextlib import asynccontextmanager
-from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -15,7 +14,7 @@ from app.config import settings
 from app.domain.ports.storage import StaticDataCategory
 
 
-def _make_connection(fetchrow_result: Any = None, fetch_result: Any = None):
+def _make_connection(fetchrow_result: object = None, fetch_result: object = None):
     """Create a mock asyncpg connection."""
     conn = AsyncMock()
     conn.set_type_codec = AsyncMock()
@@ -25,7 +24,7 @@ def _make_connection(fetchrow_result: Any = None, fetch_result: Any = None):
     return conn
 
 
-def _make_pool(conn: Any = None):
+def _make_pool(conn: AsyncMock | None = None):
     """Create a mock asyncpg pool with acquire() context manager."""
     if conn is None:
         conn = _make_connection()
@@ -40,7 +39,7 @@ def _make_pool(conn: Any = None):
     return pool, conn
 
 
-def _make_storage(pool: Any = None) -> PostgresStorage:
+def _make_storage(pool: AsyncMock | None = None) -> PostgresStorage:
     """Create a PostgresStorage with an injected mock pool."""
     storage = PostgresStorage()
     if pool is not None:
@@ -345,7 +344,9 @@ class TestLookupMetrics:
         ("row", "expected"),
         [(None, "miss"), ({"player_id": "abc123|def456"}, "hit")],
     )
-    async def test_battletag_lookup_recorded(self, row: Any, expected: Any):
+    async def test_battletag_lookup_recorded(
+        self, row: dict[str, str] | None, expected: str
+    ):
         pool, conn = _make_pool()
         conn.fetchrow = AsyncMock(return_value=row)
         storage = _make_storage(pool=pool)

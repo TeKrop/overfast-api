@@ -258,7 +258,9 @@ def _record_metrics(table: str, operation: str, duration: float, status: str):
         ).inc()
 
 
-def track_storage_operation(table: str, operation: str):
+def track_storage_operation[**P](
+    table: str, operation: str
+) -> Callable[[Callable[P, Any]], Callable[P, Any]]:
     """
     Decorator to automatically track storage operation metrics.
 
@@ -280,12 +282,12 @@ def track_storage_operation(table: str, operation: str):
         - storage_slow_queries_total{table, operation, threshold}
     """
 
-    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+    def decorator(func: Callable[P, Any]) -> Callable[P, Any]:
         # Support both async and sync functions
         if inspect.iscoroutinefunction(func):
 
             @wraps(func)
-            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+            async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> object:
                 start_time = time.time()
                 status = "success"
 
@@ -300,7 +302,7 @@ def track_storage_operation(table: str, operation: str):
             return async_wrapper
 
         @wraps(func)
-        def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
+        def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> object:
             start_time = time.time()
             status = "success"
 

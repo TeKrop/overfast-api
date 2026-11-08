@@ -71,6 +71,7 @@ select = [
     "BLE",   # flake8-blind-except
     "B",     # flake8-bugbear
     "A",     # flake8-builtins
+    "ANN401", # flake8-annotations: no explicit Any in signatures
     "COM",   # flake8-commas
     "C4",    # flake8-comprehensions
     "DTZ",   # flake8-datetimez
@@ -142,6 +143,9 @@ allowed-confusables = ["（", "）", "："]
 "app/api/routers/**" = ["TC001"]  # Enums used in FastAPI path/query parameters need runtime import
 "app/api/dependencies.py" = ["TC001"]  # Port types needed at runtime for FastAPI Depends
 "app/domain/services/**" = ["TC001"]  # Locale/enums used in runtime method annotations
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"typing.cast".msg = "Avoid cast: narrow with isinstance/TypeGuard or fix the annotation"
 
 [tool.ruff.lint.isort]
 # Consider app as first-party for imports in tests

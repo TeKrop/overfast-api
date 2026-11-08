@@ -1,12 +1,16 @@
 """Tests for StaticDataService — get_or_fetch, _parse_stored, _store_in_storage"""
 
 import time
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
+from tests.helpers import mock_of
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def _make_service() -> StaticDataService:
@@ -20,13 +24,13 @@ def _make_service() -> StaticDataService:
 
 def _make_config(
     *,
-    fetcher: Any = None,
-    parser: Any = None,
-    result_filter: Any = None,
-    storage_key: Any = "heroes:en-us",
-    cache_key: Any = "/heroes",
-    entity_type: Any = "heroes",
-    staleness_threshold: Any = 3600,
+    fetcher: Callable[[], Any] | None = None,
+    parser: Callable[[Any], Any] | None = None,
+    result_filter: Callable[[Any], Any] | None = None,
+    storage_key: str = "heroes:en-us",
+    cache_key: str = "/heroes",
+    entity_type: str = "heroes",
+    staleness_threshold: int = 3600,
 ) -> StaticFetchConfig:
     if fetcher is None:
         fetcher = lambda: [{"key": "ana"}]  # noqa: E731
@@ -47,7 +51,7 @@ class TestGetOrFetch:
     async def test_cold_fetch_when_storage_miss(self):
         """When storage returns None, performs a cold fetch."""
         svc = _make_service()
-        cast("Any", svc.storage).get_static_data.return_value = None
+        mock_of(svc.storage).get_static_data.return_value = None
 
         parsed = [{"key": "ana"}]
         config = _make_config(fetcher=lambda: parsed)
@@ -63,7 +67,7 @@ class TestGetOrFetch:
         """Storage hit with fresh data returns is_stale=False."""
         svc = _make_service()
         now = int(time.time())
-        cast("Any", svc.storage).get_static_data.return_value = {
+        mock_of(svc.storage).get_static_data.return_value = {
             "data": "raw-html",
             "updated_at": now - 100,  # 100s old, threshold=3600 → fresh
         }
@@ -82,7 +86,7 @@ class TestGetOrFetch:
 
         # Age header correctness: stored_at must be the original updated_at (not now)
         # so that nginx/Lua computes Age from the true data age, not the Valkey write time.
-        call_kwargs = cast("Any", svc.cache).update_api_cache.call_args.kwargs
+        call_kwargs = mock_of(svc.cache).update_api_cache.call_args.kwargs
         assert call_kwargs["stored_at"] == now - 100
 
     @pytest.mark.asyncio
@@ -91,7 +95,7 @@ class TestGetOrFetch:
         svc = _make_service()
         now = int(time.time())
         updated_at = now - 7200  # 7200s old, threshold=3600 → stale
-        cast("Any", svc.storage).get_static_data.return_value = {
+        mock_of(svc.storage).get_static_data.return_value = {
             "data": "old-html",
             "updated_at": updated_at,
         }
@@ -107,22 +111,19 @@ class TestGetOrFetch:
 
         assert is_stale is True
         assert age >= 3600  # noqa: PLR2004
-        cast("Any", svc.task_queue).enqueue.assert_awaited_once()
+        mock_of(svc.task_queue).enqueue.assert_awaited_once()
 
         # Age header correctness: stored_at must be the original updated_at (not now),
         # and cache_ttl must be the full config.cache_ttl (not stale_cache_timeout).
-        call_kwargs = cast("Any", svc.cache).update_api_cache.call_args.kwargs
+        call_kwargs = mock_of(svc.cache).update_api_cache.call_args.kwargs
         assert call_kwargs["stored_at"] == updated_at
-        assert (
-            cast("Any", svc.cache).update_api_cache.call_args.args[2]
-            == config.cache_ttl
-        )
+        assert mock_of(svc.cache).update_api_cache.call_args.args[2] == config.cache_ttl
 
     @pytest.mark.asyncio
     async def test_result_filter_applied(self):
         """result_filter is called on the data before returning."""
         svc = _make_service()
-        cast("Any", svc.storage).get_static_data.return_value = None
+        mock_of(svc.storage).get_static_data.return_value = None
 
         all_heroes = [{"key": "ana"}, {"key": "mercy"}]
         filtered = [{"key": "ana"}]
@@ -183,12 +184,12 @@ class TestStoreInStorage:
         svc = _make_service()
         await svc._store_in_storage("heroes:en-us", "<html>", "heroes")
 
-        cast("Any", svc.storage).set_static_data.assert_awaited_once()
+        mock_of(svc.storage).set_static_data.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_exception_is_swallowed(self):
         """Storage write errors are logged and swallowed."""
         svc = _make_service()
-        cast("Any", svc.storage).set_static_data.side_effect = Exception("disk full")
+        mock_of(svc.storage).set_static_data.side_effect = Exception("disk full")
         # Should not raise
         await svc._store_in_storage("heroes:en-us", "<html>", "heroes")

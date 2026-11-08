@@ -1,7 +1,5 @@
 """Tests for monitoring/metrics.py — track_storage_operation decorator and _record_metrics"""
 
-from typing import Any
-
 import pytest
 from prometheus_client import REGISTRY
 
@@ -11,7 +9,7 @@ from app.monitoring.metrics import (
 )
 
 
-def _counter_value(name: str, **labels: Any) -> float:
+def _counter_value(name: str, **labels: str) -> float:
     """Read a prometheus counter value from the default registry."""
     try:
         return REGISTRY.get_sample_value(name + "_total", labels) or 0.0
@@ -19,7 +17,7 @@ def _counter_value(name: str, **labels: Any) -> float:
         return 0.0
 
 
-def _histogram_count(name: str, **labels: Any) -> float:
+def _histogram_count(name: str, **labels: str) -> float:
     """Read a prometheus histogram _count value from the default registry."""
     try:
         return REGISTRY.get_sample_value(name + "_count", labels) or 0.0
