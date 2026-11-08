@@ -1,4 +1,11 @@
-"""Typed shapes of the static-data lists (maps, gamemodes, roles, heroes)."""
+"""Typed shapes of the static-data lists (maps, gamemodes, roles, heroes).
+
+These mirror the Pydantic response models in ``app.api.models`` on purpose:
+the domain layer cannot import from ``api`` (dependencies flow inward only),
+so it needs its own typed shape. The API layer validates and serializes these
+dicts into the Pydantic models at the router boundary.
+``tests/domain/models/test_static_drift.py`` fails if the field names diverge.
+"""
 
 from typing import TYPE_CHECKING, TypedDict
 
