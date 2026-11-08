@@ -257,6 +257,7 @@ preset = "strict"
 # Promote warnings (hidden by default) to errors so none slip through
 [tool.pyrefly.errors]
 untyped-import = "error"
+unnecessary-type-conversion = "error"
 
 # Enums are generated at import time from CSV, so pyrefly can't see their members
 [[tool.pyrefly.sub-config]]
