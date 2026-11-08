@@ -11,7 +11,7 @@ All commands use `just` (or `make` as a fallback). Linting/type-checking run loc
 ```bash
 just build                                         # Build Docker images (required first)
 just start                                         # Run app with autoreload on localhost:8000
-just check                                         # Type check with ty (uv run ty check)
+just check                                         # Type check with pyrefly (uv run pyrefly check)
 just lint                                          # Ruff linter with --fix + import-linter contracts
 just format                                        # Ruff formatter
 just test                                          # All tests with coverage (-n auto)

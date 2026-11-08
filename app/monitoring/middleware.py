@@ -5,7 +5,7 @@ Only active when settings.prometheus_enabled is True.
 """
 
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 class PrometheusMiddleware(BaseHTTPMiddleware):
     """Middleware to collect Prometheus metrics for API requests"""
 
+    @override
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:

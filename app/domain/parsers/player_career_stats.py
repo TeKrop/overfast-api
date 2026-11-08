@@ -4,7 +4,7 @@ This module provides simplified access to career stats extracted
 from the full player profile data.
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from app.domain.parsers.player_profile import (
     filter_stats_by_query,
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from app.domain.enums import PlayerGamemode, PlayerPlatform
 
 
-def extract_career_stats_from_profile(profile_data: dict) -> dict:
+def extract_career_stats_from_profile(profile_data: dict[str, Any]) -> dict[str, Any]:
     """
     Extract career stats structure from full profile data
 
@@ -59,11 +59,11 @@ def extract_career_stats_from_profile(profile_data: dict) -> dict:
 
 
 def _process_career_stats(
-    profile_data: dict,
+    profile_data: dict[str, Any],
     gamemode: PlayerGamemode | str,
     platform: PlayerPlatform | str | None = None,
     hero: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """
     Common logic to extract and filter career stats from profile data
 
@@ -91,10 +91,10 @@ def _process_career_stats(
 def parse_player_career_stats_from_html(
     html: str,
     gamemode: PlayerGamemode | str,
-    player_summary: dict | None = None,
+    player_summary: dict[str, Any] | None = None,
     platform: PlayerPlatform | str | None = None,
     hero: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """
     Parse player career stats from HTML (for Player Cache usage)
 

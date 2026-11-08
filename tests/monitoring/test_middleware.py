@@ -1,5 +1,6 @@
 """Tests for Prometheus middleware"""
 
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -38,7 +39,7 @@ def test_app():
 
 
 @pytest.fixture
-def client(test_app):
+def client(test_app: Any):
     """Create test client with prometheus enabled"""
     # Mock prometheus_enabled to be True for all middleware tests
     with patch.object(config.settings, "prometheus_enabled", True):
@@ -54,7 +55,7 @@ def _get_in_progress_value(method: str, endpoint: str) -> float:
     return value or 0.0
 
 
-def test_prometheus_middleware_tracks_successful_requests(client):
+def test_prometheus_middleware_tracks_successful_requests(client: Any):
     """Test that middleware tracks successful requests"""
     # Make request
     response = client.get("/test")
@@ -71,7 +72,7 @@ def test_prometheus_middleware_tracks_successful_requests(client):
     assert metrics >= 1
 
 
-def test_prometheus_middleware_tracks_request_duration(client):
+def test_prometheus_middleware_tracks_request_duration(client: Any):
     """Test that middleware tracks request duration"""
     # Make request
     response = client.get("/test")
@@ -89,7 +90,7 @@ def test_prometheus_middleware_tracks_request_duration(client):
     assert count_metric >= 1
 
 
-def test_prometheus_middleware_tracks_failed_requests(client):
+def test_prometheus_middleware_tracks_failed_requests(client: Any):
     """Test that middleware tracks failed requests"""
     # Make request that will fail
     response = client.get("/error")
@@ -107,7 +108,7 @@ def test_prometheus_middleware_tracks_failed_requests(client):
     assert metrics >= 1
 
 
-def test_prometheus_middleware_normalizes_dynamic_paths(client):
+def test_prometheus_middleware_normalizes_dynamic_paths(client: Any):
     """Dynamic route metrics use normalized endpoint label"""
     # Hit a route with a path parameter
     response = client.get("/players/TeKrop-2217/summary")
@@ -128,7 +129,7 @@ def test_prometheus_middleware_normalizes_dynamic_paths(client):
     assert metrics >= 1
 
 
-def test_in_progress_gauge_resets_for_successful_request(client):
+def test_in_progress_gauge_resets_for_successful_request(client: Any):
     """Gauge is incremented and then decremented for successful requests."""
     endpoint_label = "/test"
     method = "GET"
@@ -145,7 +146,7 @@ def test_in_progress_gauge_resets_for_successful_request(client):
     assert after == before
 
 
-def test_in_progress_gauge_resets_for_failing_request(client):
+def test_in_progress_gauge_resets_for_failing_request(client: Any):
     """Gauge is incremented and then decremented even when the request fails."""
     endpoint_label = "/error"
     method = "GET"
@@ -164,7 +165,7 @@ def test_in_progress_gauge_resets_for_failing_request(client):
     assert after == before
 
 
-def test_prometheus_middleware_skips_metrics_endpoint(test_app):
+def test_prometheus_middleware_skips_metrics_endpoint(test_app: Any):
     """Test that middleware skips /metrics endpoint itself"""
 
     # Add a /metrics endpoint
@@ -199,7 +200,7 @@ def test_prometheus_middleware_skips_metrics_endpoint(test_app):
     assert after == before
 
 
-def test_register_prometheus_middleware_when_enabled(monkeypatch):
+def test_register_prometheus_middleware_when_enabled(monkeypatch: Any):
     """Test middleware registration when enabled"""
     monkeypatch.setattr(config.settings, "prometheus_enabled", True)
 
@@ -212,7 +213,7 @@ def test_register_prometheus_middleware_when_enabled(monkeypatch):
     assert len(app.user_middleware) == initial_middleware_count + 1
 
 
-def test_register_prometheus_middleware_when_disabled(monkeypatch):
+def test_register_prometheus_middleware_when_disabled(monkeypatch: Any):
     """Test middleware registration when disabled"""
     monkeypatch.setattr(config.settings, "prometheus_enabled", False)
 

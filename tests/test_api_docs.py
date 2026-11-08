@@ -69,7 +69,7 @@ class TestSetupCustomOpenapi:
 
         @test_app.get("/heroes")
         def get_heroes():
-            return []
+            return []  # pyrefly: ignore[implicit-any-empty-container]
 
         return test_app
 

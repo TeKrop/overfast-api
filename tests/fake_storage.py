@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from app.domain.ports.storage import (
@@ -79,7 +79,7 @@ class FakeStorage:
         self,
         player_id: str,
         html: str,
-        summary: dict | None = None,
+        summary: dict[str, Any] | None = None,
         battletag: str | None = None,
         name: str | None = None,
         last_updated_blizzard: int | None = None,

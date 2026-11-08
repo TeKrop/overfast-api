@@ -1,6 +1,7 @@
 import re
 import unicodedata
 from functools import cache
+from typing import Any
 
 from app.domain.enums import (
     CareerStatCategory,
@@ -18,7 +19,7 @@ INT_PATTERN = re.compile(r"^-?\d+(,\d+)*%?$")
 FLOAT_PATTERN = re.compile(r"^-?\d+(,\d+)*\.\d+$")
 
 
-def get_player_title(title: dict | str | None) -> str | None:
+def get_player_title(title: dict[str, Any] | str | None) -> str | None:
     """
     Get player title from string or dict extracted from Blizzard API.
     Handles:
@@ -112,7 +113,7 @@ def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:
         .upper()
     )
     return (
-        CompetitiveRole.DAMAGE
+        CompetitiveRole.DAMAGE  # pyrefly: ignore[missing-attribute]
         if icon_role_key == "OFFENSE"
         else CompetitiveRole[icon_role_key]
     )

@@ -1,5 +1,7 @@
 """Stateless parser functions for gamemodes data"""
 
+from typing import Any
+
 from app.config import settings
 from app.domain.utils.csv_reader import read_csv_file
 
@@ -9,7 +11,7 @@ def get_static_url_gamemodes(key: str, extension: str) -> str:
     return f"{settings.app_base_url}/static/gamemodes/{key}.{extension}"
 
 
-def parse_gamemodes_csv() -> list[dict]:
+def parse_gamemodes_csv() -> list[dict[str, Any]]:
     """
     Parse gamemodes list from CSV file
 

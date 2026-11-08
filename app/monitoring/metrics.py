@@ -7,8 +7,12 @@ Metrics collection is conditional on settings.prometheus_enabled flag.
 import inspect
 import time
 from functools import wraps
+from typing import TYPE_CHECKING, Any
 
 from prometheus_client import Counter, Gauge, Histogram
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 ##############
 # API Metrics
@@ -276,12 +280,12 @@ def track_storage_operation(table: str, operation: str):
         - storage_slow_queries_total{table, operation, threshold}
     """
 
-    def decorator(func):
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         # Support both async and sync functions
         if inspect.iscoroutinefunction(func):
 
             @wraps(func)
-            async def async_wrapper(*args, **kwargs):
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
                 start_time = time.time()
                 status = "success"
 
@@ -296,7 +300,7 @@ def track_storage_operation(table: str, operation: str):
             return async_wrapper
 
         @wraps(func)
-        def sync_wrapper(*args, **kwargs):
+        def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
             start_time = time.time()
             status = "success"
 

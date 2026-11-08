@@ -50,7 +50,7 @@ class HeroService(StaticDataService):
         async def _fetch() -> str:
             return await fetch_heroes_html(self.blizzard_client, locale)
 
-        def _parse(html: str) -> list[dict]:
+        def _parse(html: str) -> list[dict[str, Any]]:
             try:
                 return parse_heroes_html(html)
             except ParserParsingError as exc:
@@ -80,7 +80,7 @@ class HeroService(StaticDataService):
         role: Role | SubRole | None,
         gamemode: HeroGamemode | None,
         cache_key: str,
-    ) -> tuple[list[dict], bool, int]:
+    ) -> tuple[list[dict[str, Any]], bool, int]:
         """Return the heroes list (with optional role/gamemode filters).
 
         Stores raw Blizzard HTML per locale in persistent storage so that
@@ -123,7 +123,7 @@ class HeroService(StaticDataService):
                 separators=(",", ":"),
             )
 
-        def _parse(raw: str) -> dict:
+        def _parse(raw: str) -> dict[str, Any]:
             sources = json.loads(raw)
             try:
                 hero_data = parse_hero_html(sources["hero_html"], locale)
@@ -151,7 +151,7 @@ class HeroService(StaticDataService):
         hero_key: str,
         locale: Locale,
         cache_key: str,
-    ) -> tuple[dict, bool, int]:
+    ) -> tuple[dict[str, Any], bool, int]:
         """Return full hero details merged with portrait and hitpoints.
 
         Stores a JSON-encoded dict of raw HTML sources per ``hero_key:locale``
@@ -191,7 +191,7 @@ class HeroService(StaticDataService):
         competitive_division: CompetitiveDivisionFilter | None,
         order_by: str,
         cache_key: str,
-    ) -> tuple[list[dict], bool, int]:
+    ) -> tuple[list[dict[str, Any]], bool, int]:
         """Return hero usage statistics — Valkey-only cache, no persistent storage.
 
         Stats change frequently and have too many parameter combinations to
@@ -199,6 +199,9 @@ class HeroService(StaticDataService):
         is sufficient.
         """
 
+        gamemode_filter_exception = InvalidGamemodeFilterError(
+            "no gamemode filter candidates"
+        )
         for gamemode_filter in await self._get_hero_stats_gamemode_filters(gamemode):
             try:
                 data = await self._get_hero_stats(
@@ -220,7 +223,8 @@ class HeroService(StaticDataService):
             # All filter candidates exhausted without a successful call.
             blizzard_url = f"{settings.blizzard_host}{settings.hero_stats_path}"
             raise ParserInternalError(
-                blizzard_url, gamemode_filter_exception
+                blizzard_url,
+                gamemode_filter_exception,
             ) from gamemode_filter_exception
 
         await self.cache.set_gamemode_filter(gamemode, working_filter)
@@ -275,7 +279,7 @@ class HeroService(StaticDataService):
         map_filter: MapKey | None,
         competitive_division: CompetitiveDivisionFilter | None,
         order_by: str,
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         try:
             data = await parse_hero_stats_summary(
                 self.blizzard_client,
@@ -301,11 +305,11 @@ class HeroService(StaticDataService):
 
 
 def _merge_hero_data(
-    hero_data: dict,
-    heroes_list: list[dict],
-    heroes_hitpoints: dict,
+    hero_data: dict[str, Any],
+    heroes_list: list[dict[str, Any]],
+    heroes_hitpoints: dict[str, Any],
     hero_key: str,
-) -> dict:
+) -> dict[str, Any]:
     """Merge data from hero details, heroes list, and heroes hitpoints."""
     try:
         portrait_value = next(
@@ -331,11 +335,11 @@ def _merge_hero_data(
 
 
 def dict_insert_value_before_key(
-    data: dict,
+    data: dict[str, Any],
     key: str,
     new_key: str,
     new_value: Any,
-) -> dict:
+) -> dict[str, Any]:
     """Insert ``new_key: new_value`` before ``key`` in ``data``."""
     if key not in data:
         raise KeyError

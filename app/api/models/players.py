@@ -339,7 +339,7 @@ class HeroCareerStats(BaseModel):
     )
 
 
-CareerStats = create_model(  # ty: ignore[no-matching-overload]
+CareerStats = create_model(  # pyrefly: ignore[no-matching-overload]
     "CareerStats",
     __config__=ConfigDict(json_schema_extra={"example": CareerStatsExample}),
     all_heroes=(
@@ -376,7 +376,7 @@ class PlayerGamemodeStats(BaseModel):
             "in every statistic objects."
         ),
     )
-    career_stats: CareerStats = Field(
+    career_stats: CareerStats = Field(  # pyrefly: ignore[invalid-annotation]
         ...,
         description=(
             "List of career statistics for every hero the player played :"
@@ -506,7 +506,7 @@ class PlayerRolesStats(BaseModel):
     )
 
 
-PlayerHeroesStats = create_model(  # ty: ignore[no-matching-overload]
+PlayerHeroesStats = create_model(  # pyrefly: ignore[no-matching-overload]
     "PlayerHeroesStats",
     **{
         hero_key.name.lower(): (
@@ -538,14 +538,14 @@ class PlayerStatsSummary(BaseModel):
             "Sum of the stats of all the heroes played by the player, regrouped by roles"
         ),
     )
-    heroes: PlayerHeroesStats | None = Field(
+    heroes: PlayerHeroesStats | None = Field(  # pyrefly: ignore[invalid-annotation]
         None,
         description="Stats of all the heroes played by the player",
     )
 
 
 # Player career stats
-HeroPlayerCareerStats = create_model(  # ty: ignore[no-matching-overload]
+HeroPlayerCareerStats = create_model(  # pyrefly: ignore[no-matching-overload]
     "HeroPlayerCareerStats",
     **{
         stat_category.name.lower(): (
@@ -563,7 +563,7 @@ HeroPlayerCareerStats = create_model(  # ty: ignore[no-matching-overload]
 )
 
 
-PlayerCareerStats = create_model(  # ty: ignore[no-matching-overload]
+PlayerCareerStats = create_model(  # pyrefly: ignore[no-matching-overload]
     "PlayerCareerStats",
     __config__=ConfigDict(json_schema_extra={"example": PlayerCareerStatsExample}),
     all_heroes=(

@@ -33,7 +33,7 @@ start_testing:
 # run type checker
 check checker_args="":
     @echo {{ if checker_args != "" { "Running type checker on " + checker_args + "..." } else { "Running type checker..." } }}
-    {{ if checker_args != "" { "uv run ty check " + checker_args } else { "uv run ty check" } }}
+    {{ if checker_args != "" { "uv run pyrefly check " + checker_args } else { "uv run pyrefly check" } }}
 
 # run linter
 lint:

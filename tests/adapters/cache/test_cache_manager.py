@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -30,7 +31,7 @@ def locale():
 async def test_update_and_get_api_cache(
     cache_manager: ValkeyCache,
     cache_key: str,
-    value: list,
+    value: list[Any],
     expire: int,
     sleep_time: int,
     expected: str | None,
@@ -48,7 +49,7 @@ async def test_update_and_get_api_cache(
 
 
 @pytest.mark.asyncio
-async def test_valkey_connection_error(cache_manager: ValkeyCache, locale):
+async def test_valkey_connection_error(cache_manager: ValkeyCache, locale: Any):
     """Test that cache operations handle Valkey connection errors gracefully"""
     valkey_connection_error = ValkeyError(
         "Error 111 connecting to 127.0.0.1:6379. Connection refused.",

@@ -41,10 +41,10 @@ start_testing: ## Run OverFastAPI application (testing mode)
 check: ## Run type checker, CHECKER_ARGS can be specified
 ifdef CHECKER_ARGS
 	@echo "Running type checker on $(CHECKER_ARGS)..."
-	uv run ty check $(CHECKER_ARGS)
+	uv run pyrefly check $(CHECKER_ARGS)
 else
 	@echo "Running type checker..."
-	uv run ty check
+	uv run pyrefly check
 endif
 
 lint: ## Run linter

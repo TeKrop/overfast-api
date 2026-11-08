@@ -1,6 +1,6 @@
 """Cache port protocol for dependency injection"""
 
-from typing import NotRequired, Protocol, TypedDict
+from typing import Any, NotRequired, Protocol, TypedDict
 
 
 class PlayerStatus(TypedDict):
@@ -46,7 +46,7 @@ class CachePort(Protocol):
         ...
 
     # Application-specific cache methods
-    async def get_api_cache(self, cache_key: str) -> dict | list | None:
+    async def get_api_cache(self, cache_key: str) -> dict[str, Any] | list[Any] | None:
         """
         Get the API cache value associated with a given cache key.
 
@@ -57,7 +57,7 @@ class CachePort(Protocol):
     async def update_api_cache(
         self,
         cache_key: str,
-        value: dict | list,
+        value: dict[str, Any] | list[Any],
         expire: int,
         *,
         stored_at: int | None = None,

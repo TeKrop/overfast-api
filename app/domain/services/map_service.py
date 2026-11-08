@@ -1,5 +1,7 @@
 """Map domain service — maps list"""
 
+from typing import Any
+
 from app.config import settings
 from app.domain.parsers.maps import parse_maps_csv
 from app.domain.services.static_data_service import StaticDataService, StaticFetchConfig
@@ -13,10 +15,10 @@ class MapService(StaticDataService):
     ) -> StaticFetchConfig:
         """Build a StaticFetchConfig for the maps list."""
 
-        def _fetch() -> list[dict]:
+        def _fetch() -> list[dict[str, Any]]:
             return parse_maps_csv()
 
-        def _filter(data: list[dict]) -> list[dict]:
+        def _filter(data: list[dict[str, Any]]) -> list[dict[str, Any]]:
             if not gamemode:
                 return data
             gamemode_val = gamemode.value if hasattr(gamemode, "value") else gamemode
@@ -36,7 +38,7 @@ class MapService(StaticDataService):
         self,
         gamemode: str | None,
         cache_key: str,
-    ) -> tuple[list[dict], bool, int]:
+    ) -> tuple[list[dict[str, Any]], bool, int]:
         """Return the maps list (with optional gamemode filter).
 
         Stores the full (unfiltered) maps list in persistent storage.

@@ -20,13 +20,13 @@ def _make_service() -> StaticDataService:
 
 def _make_config(
     *,
-    fetcher=None,
-    parser=None,
-    result_filter=None,
-    storage_key="heroes:en-us",
-    cache_key="/heroes",
-    entity_type="heroes",
-    staleness_threshold=3600,
+    fetcher: Any = None,
+    parser: Any = None,
+    result_filter: Any = None,
+    storage_key: Any = "heroes:en-us",
+    cache_key: Any = "/heroes",
+    entity_type: Any = "heroes",
+    staleness_threshold: Any = 3600,
 ) -> StaticFetchConfig:
     if fetcher is None:
         fetcher = lambda: [{"key": "ana"}]  # noqa: E731
@@ -71,7 +71,7 @@ class TestGetOrFetch:
         parsed = [{"key": "ana"}]
         config = _make_config(
             fetcher=lambda: parsed,
-            parser=lambda _html: parsed,
+            parser=lambda _html: parsed,  # pyrefly: ignore[implicit-any-lambda]
             staleness_threshold=3600,
         )
 
@@ -99,7 +99,7 @@ class TestGetOrFetch:
         parsed = [{"key": "ana"}]
         config = _make_config(
             fetcher=lambda: parsed,
-            parser=lambda _html: parsed,
+            parser=lambda _html: parsed,  # pyrefly: ignore[implicit-any-lambda]
             staleness_threshold=3600,
         )
 
@@ -129,7 +129,7 @@ class TestGetOrFetch:
 
         config = _make_config(
             fetcher=lambda: all_heroes,
-            result_filter=lambda heroes: [h for h in heroes if h["key"] == "ana"],
+            result_filter=lambda heroes: [h for h in heroes if h["key"] == "ana"],  # pyrefly: ignore[implicit-any-lambda]
         )
 
         data, _, _ = await svc.get_or_fetch(config)

@@ -1,7 +1,7 @@
 """Storage port protocol for persistent data storage"""
 
 from enum import StrEnum
-from typing import Protocol, TypedDict
+from typing import Any, Protocol, TypedDict
 
 
 class StaticDataCategory(StrEnum):
@@ -27,7 +27,7 @@ class StoredPlayerProfile(TypedDict):
     """Player profile row as returned by ``get_player_profile``."""
 
     html: str
-    summary: dict
+    summary: dict[str, Any]
     battletag: str | None
     name: str | None
     last_updated_blizzard: int | None
@@ -99,7 +99,7 @@ class StoragePort(Protocol):
         self,
         player_id: str,
         html: str,
-        summary: dict | None = None,
+        summary: dict[str, Any] | None = None,
         battletag: str | None = None,
         name: str | None = None,
         last_updated_blizzard: int | None = None,

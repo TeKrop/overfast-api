@@ -52,7 +52,7 @@ async def get_player_common_parameters(
     return {"player_id": player_id}
 
 
-CommonsPlayerDep = Annotated[dict, Depends(get_player_common_parameters)]
+CommonsPlayerDep = Annotated[dict[str, Any], Depends(get_player_common_parameters)]
 
 
 async def get_player_career_common_parameters(
@@ -90,7 +90,9 @@ async def get_player_career_common_parameters(
     }
 
 
-CommonsPlayerCareerDep = Annotated[dict, Depends(get_player_career_common_parameters)]
+CommonsPlayerCareerDep = Annotated[
+    dict[str, Any], Depends(get_player_career_common_parameters)
+]
 
 router = APIRouter()
 

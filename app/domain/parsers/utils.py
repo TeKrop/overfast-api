@@ -1,6 +1,6 @@
 """Common utilities for Blizzard HTML/JSON parsing"""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from urllib.parse import quote
 
 from selectolax.lexbor import LexborHTMLParser, LexborNode
@@ -144,8 +144,8 @@ def is_blizzard_id(player_id: str) -> bool:
 
 
 def match_player_by_blizzard_id(
-    search_results: list[dict], blizzard_id: str
-) -> dict | None:
+    search_results: list[dict[str, Any]], blizzard_id: str
+) -> dict[str, Any] | None:
     """Match a player from search results by Blizzard ID.
 
     Used to resolve ambiguous BattleTags when multiple players share the same name.

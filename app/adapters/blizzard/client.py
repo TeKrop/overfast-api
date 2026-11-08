@@ -1,7 +1,7 @@
 """Blizzard HTTP client adapter implementing BlizzardClientPort"""
 
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import httpx2
 from fastapi import HTTPException, status
@@ -54,7 +54,7 @@ class BlizzardClient(metaclass=Singleton):
         if self.throttle:
             await self._throttle_wait()
 
-        kwargs: dict = {}
+        kwargs: dict[str, Any] = {}
         if headers:
             kwargs["headers"] = headers
         if params:
@@ -94,7 +94,7 @@ class BlizzardClient(metaclass=Singleton):
         self,
         url: str,
         normalized_endpoint: str,
-        kwargs: dict,
+        kwargs: dict[str, Any],
     ) -> httpx2.Response:
         """Execute the HTTP GET and record metrics."""
         start_time = time.perf_counter()

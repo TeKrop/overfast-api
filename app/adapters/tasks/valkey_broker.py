@@ -8,7 +8,7 @@ operations to avoid connection exhaustion.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, override
 
 import valkey.asyncio as aiovalkey
 from taskiq.abc.broker import AsyncBroker
@@ -62,6 +62,7 @@ class ValkeyListBroker(AsyncBroker):
             raise RuntimeError(msg)
         return aiovalkey.Valkey(connection_pool=self._pool)
 
+    @override
     async def startup(self) -> None:
         """Create the connection pool and run taskiq startup hooks."""
         await super().startup()
@@ -71,7 +72,7 @@ class ValkeyListBroker(AsyncBroker):
             **self._connection_kwargs,
         )
         async with self._get_client() as conn:
-            queue_size = await conn.llen(self.queue_name)  # ty: ignore[invalid-await]
+            queue_size = await conn.llen(self.queue_name)  # pyrefly: ignore[not-async]
         logger.info(
             "ValkeyListBroker started (url={}, queue={}, queue_size={})",
             self._url,
@@ -79,6 +80,7 @@ class ValkeyListBroker(AsyncBroker):
             queue_size,
         )
 
+    @override
     async def shutdown(self) -> None:
         """Disconnect the pool and run taskiq shutdown hooks."""
         await super().shutdown()
@@ -90,7 +92,7 @@ class ValkeyListBroker(AsyncBroker):
     async def kick(self, message: BrokerMessage) -> None:
         """Push a serialised task message to the left of the queue list."""
         async with self._get_client() as conn:
-            await conn.lpush(self.queue_name, message.message)  # ty: ignore[invalid-await]
+            await conn.lpush(self.queue_name, message.message)  # pyrefly: ignore[not-async]
 
     async def listen(self) -> AsyncGenerator[bytes]:
         """Block-pop messages from the right of the queue and yield raw bytes.
@@ -108,9 +110,9 @@ class ValkeyListBroker(AsyncBroker):
                 async with self._get_client() as conn:
                     delay = _RECONNECT_INITIAL_DELAY  # reset on successful connect
                     while True:
-                        result = await conn.brpop(
+                        result = await conn.brpop(  # pyrefly: ignore[not-async]
                             [self.queue_name], timeout=_BRPOP_TIMEOUT
-                        )  # ty: ignore[invalid-await]
+                        )
                         if result is not None:
                             _, data = result
                             yield data
