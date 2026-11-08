@@ -1,6 +1,6 @@
 """Stateless parser functions for roles data"""
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from app.config import settings
 from app.domain.enums import Locale
@@ -13,6 +13,7 @@ from app.domain.parsers.utils import (
 )
 
 if TYPE_CHECKING:
+    from app.domain.models.static import RoleEntry
     from app.domain.ports import BlizzardClientPort
 
 
@@ -32,7 +33,7 @@ async def fetch_roles_html(
     return response.text
 
 
-def parse_roles_html(html: str) -> list[dict[str, Any]]:
+def parse_roles_html(html: str) -> list[RoleEntry]:
     """
     Parse roles from Blizzard homepage HTML
 
@@ -65,7 +66,7 @@ def parse_roles_html(html: str) -> list[dict[str, Any]]:
         ]
 
         # Parse role details
-        roles = []
+        roles: list[RoleEntry] = []
         role_features = roles_container.css("blz-feature")
         for role_index, role_div in list(enumerate(role_features))[:3]:
             header = role_div.css_first("blz-header")
@@ -92,7 +93,7 @@ def parse_roles_html(html: str) -> list[dict[str, Any]]:
 async def parse_roles(
     client: BlizzardClientPort,
     locale: Locale = Locale.ENGLISH_US,
-) -> list[dict[str, Any]]:
+) -> list[RoleEntry]:
     """
     High-level function to fetch and parse roles
 

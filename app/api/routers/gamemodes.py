@@ -1,7 +1,5 @@
 """Gamemodes endpoints router : gamemodes list, etc."""
 
-from typing import Any
-
 from fastapi import APIRouter, Request, Response
 
 from app.api.dependencies import GamemodeServiceDep
@@ -14,6 +12,7 @@ from app.api.helpers import (
 )
 from app.api.models.gamemodes import GamemodeDetails
 from app.config import settings
+from app.domain.models.static import GamemodeEntry
 
 router = APIRouter()
 
@@ -34,7 +33,7 @@ async def list_map_gamemodes(
     request: Request,
     response: Response,
     service: GamemodeServiceDep,
-) -> list[dict[str, Any]]:
+) -> list[GamemodeEntry]:
     data, is_stale, age = await service.list_gamemodes(
         cache_key=build_cache_key(request)
     )

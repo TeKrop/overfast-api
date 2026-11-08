@@ -1,6 +1,6 @@
 """Maps endpoints router : maps list, etc."""
 
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Query, Request, Response
 
@@ -15,6 +15,7 @@ from app.api.helpers import (
 from app.api.models.maps import Map
 from app.config import settings
 from app.domain.enums import MapGamemode
+from app.domain.models.static import MapEntry
 
 router = APIRouter()
 
@@ -42,7 +43,7 @@ async def list_maps(
             description="Filter maps available for a specific gamemode",
         ),
     ] = None,
-) -> list[dict[str, Any]]:
+) -> list[MapEntry]:
     data, is_stale, age = await service.list_maps(
         gamemode=gamemode, cache_key=build_cache_key(request)
     )

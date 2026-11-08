@@ -31,7 +31,7 @@ def _make_config(
     cache_key: str = "/heroes",
     entity_type: str = "heroes",
     staleness_threshold: int = 3600,
-) -> StaticFetchConfig:
+) -> StaticFetchConfig[list[dict[str, Any]]]:
     if fetcher is None:
         fetcher = lambda: [{"key": "ana"}]  # noqa: E731
     return StaticFetchConfig(

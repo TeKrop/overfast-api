@@ -29,6 +29,7 @@ if TYPE_CHECKING:
         PlayerRegion,
         Role,
     )
+    from app.domain.models.static import HeroEntry
 
 
 class HeroService(StaticDataService):
@@ -44,13 +45,13 @@ class HeroService(StaticDataService):
         cache_key: str,
         role: Role | SubRole | None = None,
         gamemode: HeroGamemode | None = None,
-    ) -> StaticFetchConfig:
+    ) -> StaticFetchConfig[list[HeroEntry]]:
         """Build a StaticFetchConfig for the heroes list."""
 
         async def _fetch() -> str:
             return await fetch_heroes_html(self.blizzard_client, locale)
 
-        def _parse(html: str) -> list[dict[str, Any]]:
+        def _parse(html: str) -> list[HeroEntry]:
             try:
                 return parse_heroes_html(html)
             except ParserParsingError as exc:
@@ -80,7 +81,7 @@ class HeroService(StaticDataService):
         role: Role | SubRole | None,
         gamemode: HeroGamemode | None,
         cache_key: str,
-    ) -> tuple[list[dict[str, Any]], bool, int]:
+    ) -> tuple[list[HeroEntry], bool, int]:
         """Return the heroes list (with optional role/gamemode filters).
 
         Stores raw Blizzard HTML per locale in persistent storage so that
@@ -108,7 +109,7 @@ class HeroService(StaticDataService):
 
     def _hero_detail_config(
         self, hero_key: str, locale: Locale, cache_key: str
-    ) -> StaticFetchConfig:
+    ) -> StaticFetchConfig[dict[str, Any]]:
         """Build a StaticFetchConfig for a single hero detail."""
 
         async def _fetch() -> str:
@@ -306,7 +307,7 @@ class HeroService(StaticDataService):
 
 def _merge_hero_data(
     hero_data: dict[str, Any],
-    heroes_list: list[dict[str, Any]],
+    heroes_list: list[HeroEntry],
     heroes_hitpoints: dict[str, Any],
     hero_key: str,
 ) -> dict[str, Any]:

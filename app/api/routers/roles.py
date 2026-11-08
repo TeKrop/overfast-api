@@ -1,6 +1,6 @@
 """Roles endpoints router : roles list, etc."""
 
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Query, Request, Response
 
@@ -15,6 +15,7 @@ from app.api.helpers import (
 from app.api.models.roles import RoleDetail
 from app.config import settings
 from app.domain.enums import Locale
+from app.domain.models.static import RoleEntry
 
 router = APIRouter()
 
@@ -38,7 +39,7 @@ async def list_roles(
     locale: Annotated[
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
-) -> list[dict[str, Any]]:
+) -> list[RoleEntry]:
     data, is_stale, age = await service.list_roles(
         locale=locale, cache_key=build_cache_key(request)
     )

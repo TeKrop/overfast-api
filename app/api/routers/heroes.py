@@ -32,6 +32,7 @@ from app.domain.enums import (
     Role,
     SubRole,
 )
+from app.domain.models.static import HeroEntry
 
 router = APIRouter()
 
@@ -57,7 +58,7 @@ async def list_heroes(
         Locale, Query(title="Locale to be displayed")
     ] = Locale.ENGLISH_US,
     gamemode: Annotated[HeroGamemode | None, Query(title="Gamemode filter")] = None,
-) -> list[dict[str, Any]]:
+) -> list[HeroEntry]:
     data, is_stale, age = await service.list_heroes(
         locale=locale, role=role, gamemode=gamemode, cache_key=build_cache_key(request)
     )
