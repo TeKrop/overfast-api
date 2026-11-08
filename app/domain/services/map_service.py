@@ -15,7 +15,7 @@ class MapService(StaticDataService):
 
     def _maps_config(
         self, cache_key: str, gamemode: str | None = None
-    ) -> StaticFetchConfig:
+    ) -> StaticFetchConfig[list[MapEntry]]:
         """Build a StaticFetchConfig for the maps list."""
 
         def _fetch() -> list[MapEntry]:

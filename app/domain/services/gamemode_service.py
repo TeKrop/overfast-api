@@ -13,7 +13,9 @@ if TYPE_CHECKING:
 class GamemodeService(StaticDataService):
     """Domain service for gamemode data."""
 
-    def _gamemodes_config(self, cache_key: str) -> StaticFetchConfig:
+    def _gamemodes_config(
+        self, cache_key: str
+    ) -> StaticFetchConfig[list[GamemodeEntry]]:
         """Build a StaticFetchConfig for the gamemodes list."""
 
         def _fetch() -> list[GamemodeEntry]:

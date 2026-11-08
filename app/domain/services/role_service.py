@@ -15,7 +15,9 @@ if TYPE_CHECKING:
 class RoleService(StaticDataService):
     """Domain service for role data."""
 
-    def _roles_config(self, locale: Locale, cache_key: str) -> StaticFetchConfig:
+    def _roles_config(
+        self, locale: Locale, cache_key: str
+    ) -> StaticFetchConfig[list[RoleEntry]]:
         """Build a StaticFetchConfig for the roles list."""
 
         async def _fetch() -> str:

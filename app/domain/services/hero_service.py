@@ -45,7 +45,7 @@ class HeroService(StaticDataService):
         cache_key: str,
         role: Role | SubRole | None = None,
         gamemode: HeroGamemode | None = None,
-    ) -> StaticFetchConfig:
+    ) -> StaticFetchConfig[list[HeroEntry]]:
         """Build a StaticFetchConfig for the heroes list."""
 
         async def _fetch() -> str:
@@ -109,7 +109,7 @@ class HeroService(StaticDataService):
 
     def _hero_detail_config(
         self, hero_key: str, locale: Locale, cache_key: str
-    ) -> StaticFetchConfig:
+    ) -> StaticFetchConfig[dict[str, Any]]:
         """Build a StaticFetchConfig for a single hero detail."""
 
         async def _fetch() -> str:

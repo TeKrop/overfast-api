@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class StaticFetchConfig:
+class StaticFetchConfig[T: dict[str, Any] | list[Any]]:
     """Parameter object grouping all inputs needed for a static SWR fetch.
 
     Pass a single ``StaticFetchConfig`` to ``StaticDataService.get_or_fetch``
@@ -29,8 +29,8 @@ class StaticFetchConfig:
     cache_ttl: int
     staleness_threshold: int
     entity_type: str
-    parser: Callable[[Any], Any] | None = field(default=None)
-    result_filter: Callable[[Any], Any] | None = field(default=None)
+    parser: Callable[[Any], T] | None = field(default=None)
+    result_filter: Callable[[T], T] | None = field(default=None)
 
 
 class StaticDataService(BaseService):
@@ -45,7 +45,9 @@ class StaticDataService(BaseService):
     is reached; this service only ever *writes* to the API cache.
     """
 
-    async def get_or_fetch(self, config: StaticFetchConfig) -> tuple[Any, bool, int]:
+    async def get_or_fetch[T: dict[str, Any] | list[Any]](
+        self, config: StaticFetchConfig[T]
+    ) -> tuple[T, bool, int]:
         """SWR orchestration for static data.
 
         Returns:
@@ -59,9 +61,9 @@ class StaticDataService(BaseService):
 
         return await self._cold_fetch(config)
 
-    async def _serve_from_storage(
-        self, stored: StoredStaticData, config: StaticFetchConfig
-    ) -> tuple[Any, bool, int]:
+    async def _serve_from_storage[T: dict[str, Any] | list[Any]](
+        self, stored: StoredStaticData, config: StaticFetchConfig[T]
+    ) -> tuple[T, bool, int]:
         """Serve data from a persistent storage hit, triggering a background refresh if stale.
 
         The stored ``data`` value is always re-parsed with the current parser (for
@@ -114,9 +116,9 @@ class StaticDataService(BaseService):
 
         return filtered, is_stale, age
 
-    async def _parse_stored(
-        self, raw: str, config: StaticFetchConfig
-    ) -> dict[str, Any] | list[Any]:
+    async def _parse_stored[T: dict[str, Any] | list[Any]](
+        self, raw: str, config: StaticFetchConfig[T]
+    ) -> T:
         """Produce structured data from ``raw`` stored source.
 
         - If ``config.parser`` is set: the stored ``raw`` is HTML (or a JSON-encoded
@@ -133,15 +135,15 @@ class StaticDataService(BaseService):
         return config.fetcher()
 
     @staticmethod
-    def _apply_filter(
-        data: dict[str, Any] | list[Any], result_filter: Callable[[Any], Any] | None
-    ) -> dict[str, Any] | list[Any]:
+    def _apply_filter[T: dict[str, Any] | list[Any]](
+        data: T, result_filter: Callable[[T], T] | None
+    ) -> T:
         """Apply ``result_filter`` to ``data`` if provided, otherwise return as-is."""
         return result_filter(data) if result_filter is not None else data
 
-    async def _fetch_and_store(
-        self, config: StaticFetchConfig
-    ) -> dict[str, Any] | list[Any]:
+    async def _fetch_and_store[T: dict[str, Any] | list[Any]](
+        self, config: StaticFetchConfig[T]
+    ) -> T:
         """Fetch from source, persist raw source to persistent storage, update Valkey, return filtered data."""
         if inspect.iscoroutinefunction(config.fetcher):
             raw = await config.fetcher()
@@ -170,7 +172,9 @@ class StaticDataService(BaseService):
 
         return filtered
 
-    async def _cold_fetch(self, config: StaticFetchConfig) -> tuple[Any, bool, int]:
+    async def _cold_fetch[T: dict[str, Any] | list[Any]](
+        self, config: StaticFetchConfig[T]
+    ) -> tuple[T, bool, int]:
         """Fetch from source on cold start, persist to storage and Valkey."""
         logger.info(
             "[SWR] {} not in storage — fetching from source", config.entity_type
