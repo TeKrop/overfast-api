@@ -18,7 +18,7 @@ All commands use `just` (or `make` as an alternative). Linting/type-checking run
 just build                                                       # Build Docker images (required first)
 just start                                                       # Run app with autoreload on localhost:8000
 just down                                                        # Stop all containers
-just check                                                       # Run ty type checker (uv run ty check)
+just check                                                       # Run pyrefly type checker (uv run pyrefly check)
 just lint                                                        # Run ruff linter with --fix
 just format                                                      # Run ruff formatter
 just test                                                        # Run all tests with coverage (-n auto, parallel)
@@ -31,7 +31,7 @@ just exec "command"                                              # Execute arbit
 
 CI enforces **80% minimum coverage**. Always run `just check`, `just lint`, and `just test` before proposing changes.
 
-Pre-commit hooks (`ruff` lint + `ruff-format` + `ty` type checking) are configured in `.pre-commit-config.yaml`.
+Pre-commit hooks (`ruff` lint + `ruff-format` + `pyrefly` type checking) are configured in `.pre-commit-config.yaml`.
 
 ---
 
@@ -161,7 +161,7 @@ Router → get_* dependency (api/dependencies.py)
 ### Structural typing (Ports)
 
 - All port interfaces in `app/domain/ports/` are `typing.Protocol` classes.
-- Adapters do **not** inherit from ports — compliance is verified by `ty` at injection points.
+- Adapters do **not** inherit from ports — compliance is verified by `pyrefly` at injection points.
 - Port protocol methods have `...` as body.
 
 ### Singleton adapters

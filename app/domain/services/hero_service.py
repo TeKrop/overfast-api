@@ -199,6 +199,7 @@ class HeroService(StaticDataService):
         is sufficient.
         """
 
+        gamemode_filter_exception: InvalidGamemodeFilterError | None = None
         for gamemode_filter in await self._get_hero_stats_gamemode_filters(gamemode):
             try:
                 data = await self._get_hero_stats(
@@ -220,7 +221,8 @@ class HeroService(StaticDataService):
             # All filter candidates exhausted without a successful call.
             blizzard_url = f"{settings.blizzard_host}{settings.hero_stats_path}"
             raise ParserInternalError(
-                blizzard_url, gamemode_filter_exception
+                blizzard_url,
+                gamemode_filter_exception,  # pyrefly: ignore
             ) from gamemode_filter_exception
 
         await self.cache.set_gamemode_filter(gamemode, working_filter)

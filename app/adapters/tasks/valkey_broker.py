@@ -71,7 +71,7 @@ class ValkeyListBroker(AsyncBroker):
             **self._connection_kwargs,
         )
         async with self._get_client() as conn:
-            queue_size = await conn.llen(self.queue_name)  # ty: ignore[invalid-await]
+            queue_size = await conn.llen(self.queue_name)  # pyrefly: ignore
         logger.info(
             "ValkeyListBroker started (url={}, queue={}, queue_size={})",
             self._url,
@@ -90,7 +90,7 @@ class ValkeyListBroker(AsyncBroker):
     async def kick(self, message: BrokerMessage) -> None:
         """Push a serialised task message to the left of the queue list."""
         async with self._get_client() as conn:
-            await conn.lpush(self.queue_name, message.message)  # ty: ignore[invalid-await]
+            await conn.lpush(self.queue_name, message.message)  # pyrefly: ignore
 
     async def listen(self) -> AsyncGenerator[bytes]:
         """Block-pop messages from the right of the queue and yield raw bytes.
@@ -108,9 +108,9 @@ class ValkeyListBroker(AsyncBroker):
                 async with self._get_client() as conn:
                     delay = _RECONNECT_INITIAL_DELAY  # reset on successful connect
                     while True:
-                        result = await conn.brpop(
+                        result = await conn.brpop(  # pyrefly: ignore
                             [self.queue_name], timeout=_BRPOP_TIMEOUT
-                        )  # ty: ignore[invalid-await]
+                        )
                         if result is not None:
                             _, data = result
                             yield data

@@ -23,7 +23,7 @@ import json
 import time
 from compression import zstd
 from functools import wraps
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import valkey.asyncio as valkey
 
@@ -180,7 +180,10 @@ class ValkeyCache(metaclass=Singleton):
             pipe.get(cooldown_key)
             pipe.ttl(cooldown_key)
             pipe.get(status_key)
-            check_count_bytes, remaining_ttl, status_bytes = await pipe.execute()
+            results = await pipe.execute()
+        check_count_bytes = cast("bytes | None", results[0])
+        remaining_ttl = cast("int", results[1])
+        status_bytes = cast("bytes | None", results[2])
 
         if check_count_bytes is not None and remaining_ttl > 0:
             return {"check_count": int(check_count_bytes), "retry_after": remaining_ttl}

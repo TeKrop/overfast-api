@@ -58,7 +58,7 @@ def rate_limited(max_calls: int, interval: int):
                 logger.warning(
                     "Rate limit exceeded for {} with the same "
                     "parameters. Try again later.",
-                    func.__name__,  # ty: ignore[unresolved-attribute]
+                    func.__name__,  # pyrefly: ignore
                 )
                 return None
 

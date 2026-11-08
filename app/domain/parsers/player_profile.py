@@ -302,9 +302,9 @@ def _get_platform_competitive_ranks(
 
     for role in CompetitiveRole:
         if role.value not in competitive_ranks:
-            competitive_ranks[role.value] = None
+            competitive_ranks[role.value] = None  # pyrefly: ignore
 
-    competitive_ranks["season"] = last_season_played
+    competitive_ranks["season"] = last_season_played  # pyrefly: ignore
 
     return competitive_ranks
 
@@ -443,7 +443,7 @@ def _parse_heroes_comparisons(top_heroes_section: LexborNode) -> dict:
             category.value not in heroes_comparisons
             or not heroes_comparisons[category.value]["values"]
         ):
-            heroes_comparisons[category.value] = None  # ty: ignore[invalid-assignment]
+            heroes_comparisons[category.value] = None  # pyrefly: ignore
 
     return heroes_comparisons
 

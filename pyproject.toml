@@ -43,7 +43,7 @@ dev = [
     "pyinstrument==5.1.*",
     "memray==1.20.*",
     "objgraph==3.7.*",
-    "ty==0.0.*",
+    "pyrefly==1.*",
 ]
 
 [tool.uv]
@@ -248,3 +248,13 @@ exclude_commit_patterns = ['^chore: update uv\.lock for v\d+\.\d+\.\d+$']
 
 [tool.semantic_release.publish]
 upload_to_vcs_release = false
+
+[tool.pyrefly]
+project-includes = ["app", "tests"]
+python-version = "3.15"
+
+# Enums are generated at import time from CSV, so pyrefly can't see their members
+[[tool.pyrefly.sub-config]]
+matches = "tests/**"
+[tool.pyrefly.sub-config.errors]
+missing-attribute = false

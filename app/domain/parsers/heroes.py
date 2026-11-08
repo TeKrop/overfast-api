@@ -74,7 +74,7 @@ def parse_heroes_html(html: str) -> list[dict]:
                 }
             )
 
-        return sorted(heroes, key=lambda hero: hero["key"])
+        return sorted(heroes, key=lambda hero: str(hero["key"]))
 
     except (AttributeError, KeyError, IndexError, TypeError) as error:
         error_msg = f"Failed to parse heroes HTML: {error!r}"

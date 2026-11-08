@@ -75,10 +75,10 @@ Should you wish to customize according to your specific requirements, here is a 
 You likely won't need to modify other generic settings, but if you're curious about their functionality, consult the docstrings within the `app/config.py` file for further details.
 
 ### Code Quality
-The code quality is checked using `ruff` for linting and formatting, and `ty` for type checking. I'm also using `ruff format` for imports ordering and code formatting, enforcing PEP-8 convention on my code. To check the quality of the code, you just have to run the following commands :
+The code quality is checked using `ruff` for linting and formatting, and `pyrefly` for type checking. I'm also using `ruff format` for imports ordering and code formatting, enforcing PEP-8 convention on my code. To check the quality of the code, you just have to run the following commands :
 
 ```shell
-just check     # Run ty type checker
+just check     # Run pyrefly type checker
 just lint      # Run ruff linter
 just format    # Run ruff formatter
 ```
@@ -104,7 +104,7 @@ The project is using [pre-commit](https://pre-commit.com/) framework to ensure c
 The configuration can be found in the `.pre-commit-config.yaml` file. It runs the following checks on modified files before each commit:
 - `ruff` for linting and auto-fixing
 - `ruff format` for code formatting
-- `ty` for type checking
+- `pyrefly` for type checking
 
 ## 👨‍💻 Technical details
 

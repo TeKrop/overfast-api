@@ -15,9 +15,9 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
-      - id: ty
-        name: (ty) Type checking code
-        entry: uv run ty check .
+      - id: pyrefly
+        name: (pyrefly) Type checking code
+        entry: uv run pyrefly check
         language: system
         pass_filenames: false
         always_run: true
