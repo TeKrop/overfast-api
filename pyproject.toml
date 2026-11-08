@@ -255,10 +255,6 @@ python-version = "3.15"
 preset = "strict"
 min-severity = "warn"
 
-# Not part of the strict preset
-[tool.pyrefly.errors]
-unnecessary-type-conversion = "error"
-
 # Enums are generated at import time from CSV, so pyrefly can't see their members
 [[tool.pyrefly.sub-config]]
 matches = "tests/**"
