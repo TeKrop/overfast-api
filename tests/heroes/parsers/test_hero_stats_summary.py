@@ -1,3 +1,4 @@
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
@@ -107,7 +108,7 @@ def test_parse_hero_stats_json_order_by_banrate_outside_competitive_raises():
     ],
 )
 async def test_parse_hero_stats_summary(
-    extra_kwargs: dict,
+    extra_kwargs: dict[str, Any],
     raises_error: bool,
     hero_stats_response_mock: Mock,
 ):
@@ -194,7 +195,7 @@ async def test_parse_hero_stats_summary_invalid_map_error_message(
 
 
 def test_parse_hero_stats_json_raises_invalid_gamemode_filter_error():
-    json_data = {"rates": {"selected": {"map": "all-maps", "rq": "1"}, "rates": []}}
+    json_data = {"rates": {"selected": {"map": "all-maps", "rq": "1"}, "rates": []}}  # pyrefly: ignore
 
     with pytest.raises(InvalidGamemodeFilterError) as exc_info:
         parse_hero_stats_json(
@@ -218,7 +219,7 @@ def test_parse_hero_stats_json_raises_invalid_gamemode_filter_error():
     ],
 )
 def test_parse_hero_stats_json_raises_parsing_error_on_unexpected_structure(
-    json_data: dict,
+    json_data: dict[str, Any],
 ):
     with pytest.raises(ParserParsingError):
         parse_hero_stats_json(
@@ -230,7 +231,7 @@ def test_parse_hero_stats_json_raises_parsing_error_on_unexpected_structure(
 
 
 def test_parse_hero_stats_json_logs_top_level_error_with_payload():
-    json_data = {"rates": {"selected": [], "rates": []}}
+    json_data = {"rates": {"selected": [], "rates": []}}  # pyrefly: ignore
 
     with (
         patch("app.domain.parsers.hero_stats_summary.logger.error") as error_mock,

@@ -67,7 +67,7 @@ class TestHeroServiceGetHeroStatsParseError:
 
 
 class TestHeroServiceGetHeroStatsGamemodeFilter:
-    _base_kwargs: ClassVar[dict] = {
+    _base_kwargs: ClassVar[dict[str, Any]] = {
         "platform": PlayerPlatform.PC,
         "gamemode": PlayerGamemode.COMPETITIVE,
         "region": PlayerRegion.EUROPE,
@@ -123,7 +123,7 @@ class TestHeroServiceGetHeroStatsGamemodeFilter:
 
 
 class TestHeroServiceGamemodeFilterCaching:
-    _base_kwargs: ClassVar[dict] = {
+    _base_kwargs: ClassVar[dict[str, Any]] = {
         "platform": PlayerPlatform.PC,
         "gamemode": PlayerGamemode.COMPETITIVE,
         "region": PlayerRegion.EUROPE,
@@ -236,7 +236,7 @@ class TestHeroServiceGamemodeFilterCaching:
     ],
 )
 def test_dict_insert_value_before_key_with_key_error(
-    input_dict: dict,
+    input_dict: dict[str, Any],
     key: str,
     new_key: str,
     new_value: Any,
@@ -275,11 +275,11 @@ def test_dict_insert_value_before_key_with_key_error(
     ],
 )
 def test_dict_insert_value_before_key_valid(
-    input_dict: dict,
+    input_dict: dict[str, Any],
     key: str,
     new_key: str,
     new_value: Any,
-    result_dict: dict,
+    result_dict: dict[str, Any],
 ):
     actual = dict_insert_value_before_key(input_dict, key, new_key, new_value)
 

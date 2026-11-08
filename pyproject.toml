@@ -259,8 +259,3 @@ preset = "strict"
 matches = "tests/**"
 [tool.pyrefly.sub-config.errors]
 missing-attribute = false
-implicit-any-type-argument = false
-implicit-any-parameter = false
-implicit-any-empty-container = false
-implicit-any-lambda = false
-missing-override-decorator = false

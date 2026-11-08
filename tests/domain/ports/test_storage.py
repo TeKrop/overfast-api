@@ -1,5 +1,7 @@
 """Tests for the StoragePort contract — exercised via FakeStorage"""
 
+from typing import Any
+
 import pytest
 
 from app.domain.ports.storage import StaticDataCategory
@@ -9,7 +11,7 @@ class TestStaticData:
     """Test static data storage operations"""
 
     @pytest.mark.asyncio
-    async def test_set_and_get_static_data(self, storage_db):
+    async def test_set_and_get_static_data(self, storage_db: Any):
         test_data = {"key": "hero-ana", "name": "Ana", "role": "support"}
 
         await storage_db.set_static_data(
@@ -28,12 +30,12 @@ class TestStaticData:
         assert result["updated_at"] > 0
 
     @pytest.mark.asyncio
-    async def test_get_nonexistent_static_data(self, storage_db):
+    async def test_get_nonexistent_static_data(self, storage_db: Any):
         result = await storage_db.get_static_data("nonexistent-key")
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_update_static_data(self, storage_db):
+    async def test_update_static_data(self, storage_db: Any):
         await storage_db.set_static_data(
             key="hero-mercy",
             data={"version": 1},
@@ -59,7 +61,7 @@ class TestPlayerProfiles:
     """Test player profile storage operations"""
 
     @pytest.mark.asyncio
-    async def test_set_and_get_player_profile_with_summary(self, storage_db):
+    async def test_set_and_get_player_profile_with_summary(self, storage_db: Any):
         player_id = "TeKrop-2217"
         html = "<html>Player profile data</html>"
         summary = {
@@ -80,7 +82,7 @@ class TestPlayerProfiles:
         assert result["updated_at"] > 0
 
     @pytest.mark.asyncio
-    async def test_set_and_get_player_profile_without_summary(self, storage_db):
+    async def test_set_and_get_player_profile_without_summary(self, storage_db: Any):
         player_id = "Player-1234"
 
         await storage_db.set_player_profile(
@@ -94,12 +96,12 @@ class TestPlayerProfiles:
         assert result["last_updated_blizzard"] is None
 
     @pytest.mark.asyncio
-    async def test_get_nonexistent_player_profile(self, storage_db):
+    async def test_get_nonexistent_player_profile(self, storage_db: Any):
         result = await storage_db.get_player_profile("NonExistent-9999")
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_update_player_profile(self, storage_db):
+    async def test_update_player_profile(self, storage_db: Any):
         player_id = "UpdateTest-1111"
 
         await storage_db.set_player_profile(
@@ -121,7 +123,7 @@ class TestPlayerProfiles:
         assert updated["updated_at"] >= first["updated_at"]
 
     @pytest.mark.asyncio
-    async def test_get_player_id_by_battletag(self, storage_db):
+    async def test_get_player_id_by_battletag(self, storage_db: Any):
         player_id = "Player-1234"
         battletag = "TestPlayer-5678"
 
@@ -137,7 +139,7 @@ class TestPlayerProfiles:
         assert actual == player_id
 
     @pytest.mark.asyncio
-    async def test_get_player_id_by_battletag_not_found(self, storage_db):
+    async def test_get_player_id_by_battletag_not_found(self, storage_db: Any):
         actual = await storage_db.get_player_id_by_battletag("Unknown-9999")
 
         assert actual is None
@@ -147,7 +149,7 @@ class TestStorageStats:
     """Test storage statistics"""
 
     @pytest.mark.asyncio
-    async def test_get_stats_returns_counts(self, storage_db):
+    async def test_get_stats_returns_counts(self, storage_db: Any):
         await storage_db.set_static_data(
             key="map-ilios", data={"name": "Ilios"}, category=StaticDataCategory.MAPS
         )
@@ -161,7 +163,7 @@ class TestStorageStats:
         assert "size_bytes" in stats
 
     @pytest.mark.asyncio
-    async def test_get_stats_empty_database(self, storage_db):
+    async def test_get_stats_empty_database(self, storage_db: Any):
         stats = await storage_db.get_stats()
         assert stats["static_data_count"] == 0
         assert stats["player_profiles_count"] == 0
@@ -172,7 +174,7 @@ class TestDataIntegrity:
     """Test that data survives storage round-trips intact"""
 
     @pytest.mark.asyncio
-    async def test_large_html_integrity(self, storage_db):
+    async def test_large_html_integrity(self, storage_db: Any):
         large_html = "<html>" + ("x" * 10000) + "</html>"
         await storage_db.set_player_profile(
             player_id="LargeHTML-5555", html=large_html, summary={"name": "Large"}
@@ -181,7 +183,7 @@ class TestDataIntegrity:
         assert result["html"] == large_html
 
     @pytest.mark.asyncio
-    async def test_unicode_data_integrity(self, storage_db):
+    async def test_unicode_data_integrity(self, storage_db: Any):
         test_data = {
             "name": "Lúcio",
             "emoji": "🎵🎶",

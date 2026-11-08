@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from app.domain.enums import CompetitiveDivision, CompetitiveRole, HeroKey
@@ -331,7 +333,9 @@ def test_key_to_label(key: str, result_label: str):
         ),
     ],
 )
-def test_get_player_title(title: dict | str | None, resulting_title: str | None):
+def test_get_player_title(
+    title: dict[str, Any] | str | None, resulting_title: str | None
+):
     actual = helpers.get_player_title(title)
 
     assert actual == resulting_title

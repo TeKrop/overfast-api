@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Any
 
 from app.config import settings
 
@@ -14,7 +15,7 @@ def read_html_file(filepath: str) -> str | None:
         return html_file.read()
 
 
-def read_json_file(filepath: str) -> dict | list | None:
+def read_json_file(filepath: str) -> dict[str, Any] | list[Any] | None:
     """Helper method for retrieving fixture JSON file data"""
     with Path(f"{settings.test_fixtures_root_path}/json/{filepath}").open(
         encoding="utf-8",

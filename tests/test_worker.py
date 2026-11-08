@@ -39,7 +39,7 @@ def mock_worker_metrics():
 
 class TestRunRefreshTask:
     @pytest.mark.asyncio
-    async def test_success_increments_completed_counter(self, mock_worker_metrics):
+    async def test_success_increments_completed_counter(self, mock_worker_metrics: Any):
         """On success, background_refresh_completed_total is incremented."""
         mock_completed, mock_failed, _ = mock_worker_metrics
         mock_queue = AsyncMock()
@@ -53,7 +53,7 @@ class TestRunRefreshTask:
 
     @pytest.mark.asyncio
     async def test_failure_increments_failed_counter_and_reraises(
-        self, mock_worker_metrics
+        self, mock_worker_metrics: Any
     ):
         """On exception, background_refresh_failed_total is incremented and exception re-raised."""
         mock_completed, mock_failed, _ = mock_worker_metrics
@@ -72,7 +72,7 @@ class TestRunRefreshTask:
         mock_completed.labels.return_value.inc.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_duration_always_recorded(self, mock_worker_metrics):
+    async def test_duration_always_recorded(self, mock_worker_metrics: Any):
         """Duration histogram is observed regardless of success or failure."""
         _, _, mock_duration = mock_worker_metrics
         mock_obs = MagicMock()

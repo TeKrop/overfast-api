@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from unittest.mock import Mock
 
 import pytest
@@ -17,13 +17,15 @@ def player_html_data(request: SubRequest) -> str | None:
 
 
 @pytest.fixture(scope="package")
-def search_players_blizzard_json_data() -> list[dict]:
+def search_players_blizzard_json_data() -> list[dict[str, Any]]:
     json_data = read_json_file("search_players_blizzard_result.json")
     return json_data if isinstance(json_data, list) else []
 
 
 @pytest.fixture(scope="package")
-def player_search_response_mock(search_players_blizzard_json_data: list[dict]) -> Mock:
+def player_search_response_mock(
+    search_players_blizzard_json_data: list[dict[str, Any]],
+) -> Mock:
     return Mock(
         status_code=status.HTTP_200_OK,
         text=json.dumps(search_players_blizzard_json_data),
