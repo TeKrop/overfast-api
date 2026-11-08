@@ -195,7 +195,7 @@ async def test_parse_hero_stats_summary_invalid_map_error_message(
 
 
 def test_parse_hero_stats_json_raises_invalid_gamemode_filter_error():
-    json_data = {"rates": {"selected": {"map": "all-maps", "rq": "1"}, "rates": []}}  # pyrefly: ignore
+    json_data = {"rates": {"selected": {"map": "all-maps", "rq": "1"}, "rates": []}}  # pyrefly: ignore[implicit-any-empty-container]
 
     with pytest.raises(InvalidGamemodeFilterError) as exc_info:
         parse_hero_stats_json(
@@ -231,7 +231,7 @@ def test_parse_hero_stats_json_raises_parsing_error_on_unexpected_structure(
 
 
 def test_parse_hero_stats_json_logs_top_level_error_with_payload():
-    json_data = {"rates": {"selected": [], "rates": []}}  # pyrefly: ignore
+    json_data = {"rates": {"selected": [], "rates": []}}  # pyrefly: ignore[implicit-any-empty-container]
 
     with (
         patch("app.domain.parsers.hero_stats_summary.logger.error") as error_mock,

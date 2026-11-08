@@ -71,7 +71,7 @@ class TestGetOrFetch:
         parsed = [{"key": "ana"}]
         config = _make_config(
             fetcher=lambda: parsed,
-            parser=lambda _html: parsed,  # pyrefly: ignore
+            parser=lambda _html: parsed,  # pyrefly: ignore[implicit-any-lambda]
             staleness_threshold=3600,
         )
 
@@ -99,7 +99,7 @@ class TestGetOrFetch:
         parsed = [{"key": "ana"}]
         config = _make_config(
             fetcher=lambda: parsed,
-            parser=lambda _html: parsed,  # pyrefly: ignore
+            parser=lambda _html: parsed,  # pyrefly: ignore[implicit-any-lambda]
             staleness_threshold=3600,
         )
 
@@ -129,7 +129,7 @@ class TestGetOrFetch:
 
         config = _make_config(
             fetcher=lambda: all_heroes,
-            result_filter=lambda heroes: [h for h in heroes if h["key"] == "ana"],  # pyrefly: ignore
+            result_filter=lambda heroes: [h for h in heroes if h["key"] == "ana"],  # pyrefly: ignore[implicit-any-lambda]
         )
 
         data, _, _ = await svc.get_or_fetch(config)

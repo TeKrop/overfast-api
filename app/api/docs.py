@@ -146,4 +146,4 @@ def setup_custom_openapi(app: FastAPI, new_route_path: str | None = None) -> Non
         app.openapi_schema = openapi_schema
         return app.openapi_schema
 
-    app.openapi = _custom_openapi  # pyrefly: ignore
+    app.openapi = _custom_openapi  # pyrefly: ignore[method-assign]

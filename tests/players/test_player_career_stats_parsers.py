@@ -27,7 +27,7 @@ _PROFILE_WITH_STATS = {
     "stats": {
         PlayerPlatform.PC.value: {
             PlayerGamemode.QUICKPLAY.value: {
-                "heroes_comparisons": {},  # pyrefly: ignore
+                "heroes_comparisons": {},  # pyrefly: ignore[implicit-any-empty-container]
                 "career_stats": {"tracer": _MINIMAL_CAREER_STATS},
             },
             PlayerGamemode.COMPETITIVE.value: None,
@@ -75,8 +75,8 @@ class TestExtractCareerStatsFromProfile:
             "stats": {
                 PlayerPlatform.PC.value: {
                     PlayerGamemode.QUICKPLAY.value: {
-                        "heroes_comparisons": {},  # pyrefly: ignore
-                        "career_stats": {"tracer": None},  # pyrefly: ignore
+                        "heroes_comparisons": {},  # pyrefly: ignore[implicit-any-empty-container]
+                        "career_stats": {"tracer": None},  # pyrefly: ignore[implicit-any-empty-container]
                     }
                 },
                 PlayerPlatform.CONSOLE.value: None,

@@ -72,7 +72,7 @@ class MediaType(StrEnum):
 
 # Dynamically create the HeroKey enum by using the CSV File
 heroes_data = read_csv_file("heroes")
-HeroKey = StrEnum(  # pyrefly: ignore
+HeroKey = StrEnum(  # pyrefly: ignore[invalid-argument]
     "HeroKey",
     {
         hero_data["key"].upper().replace("-", "_"): hero_data["key"]
@@ -101,7 +101,7 @@ class MapUse(StrEnum):
 
 # Dynamically create the MapKey enum by using the CSV File
 maps_data = read_csv_file("maps")
-MapKey = StrEnum(  # pyrefly: ignore
+MapKey = StrEnum(  # pyrefly: ignore[invalid-argument]
     "MapKey",
     {
         map_data["key"].upper().replace("-", "_"): map_data["key"]
@@ -113,7 +113,7 @@ MapKey.__doc__ = "Map keys used to identify Overwatch maps in general"
 
 # Dynamically create the MapGamemode enum by using the CSV File
 gamemodes_data = read_csv_file("gamemodes")
-MapGamemode = StrEnum(  # pyrefly: ignore
+MapGamemode = StrEnum(  # pyrefly: ignore[invalid-argument]
     "MapGamemode",
     {
         gamemode["key"].upper().replace("-", "_"): gamemode["key"]
@@ -162,7 +162,7 @@ HeroKeyCareerFilter = StrEnum(
     "HeroKeyCareerFilter",
     {
         "ALL_HEROES": "all-heroes",
-        **{hero_key.name: hero_key.value for hero_key in HeroKey},  # pyrefly: ignore
+        **{hero_key.name: hero_key.value for hero_key in HeroKey},  # pyrefly: ignore[invalid-argument]
     },  # ty : ignore[invalid-argument-type]
 )
 HeroKeyCareerFilter.__doc__ = "Hero keys filter for career statistics endpoint"
@@ -173,7 +173,7 @@ HeroKeyCareerFilter.__doc__ = "Hero keys filter for career statistics endpoint"
 CompetitiveRole = StrEnum(
     "CompetitiveRole",
     {
-        **{role.name: role.value for role in Role},  # pyrefly: ignore
+        **{role.name: role.value for role in Role},  # pyrefly: ignore[invalid-argument]
         "OPEN": "open",
     },  # ty : ignore[invalid-argument-type]
 )
@@ -215,7 +215,7 @@ class PlayerRegion(StrEnum):
 
 
 # ULTIMATE competitive division doesn't exists in hero stats endpoint
-CompetitiveDivisionFilter = StrEnum(  # pyrefly: ignore
+CompetitiveDivisionFilter = StrEnum(  # pyrefly: ignore[invalid-argument]
     "CompetitiveDivisionFilter",
     {tier.name: tier.value for tier in CompetitiveDivision if tier.name != "ULTIMATE"},
 )

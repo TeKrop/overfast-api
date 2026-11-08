@@ -82,7 +82,7 @@ def extract_heroes_stats_from_profile(profile_stats: dict[str, Any]) -> dict[str
 
 def _compute_heroes_stats(raw_heroes_stats: dict[str, Any]) -> dict[str, Any]:
     """Compute heroes stats for every gamemode and platform"""
-    heroes_stats: dict[str, Any] = {hero_key: defaultdict(dict) for hero_key in HeroKey}  # pyrefly: ignore
+    heroes_stats: dict[str, Any] = {hero_key: defaultdict(dict) for hero_key in HeroKey}
 
     for platform, platform_stats in raw_heroes_stats.items():
         platform_gamemodes_stats = {

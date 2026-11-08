@@ -282,7 +282,7 @@ def _get_platform_competitive_ranks(
     if not role_wrappers and not last_season_played:
         return None
 
-    competitive_ranks = {}
+    competitive_ranks: dict[str, Any] = {}
 
     for role_wrapper in role_wrappers:
         role_icon = _get_role_icon(role_wrapper)
@@ -304,9 +304,9 @@ def _get_platform_competitive_ranks(
 
     for role in CompetitiveRole:
         if role.value not in competitive_ranks:
-            competitive_ranks[role.value] = None  # pyrefly: ignore
+            competitive_ranks[role.value] = None
 
-    competitive_ranks["season"] = last_season_played  # pyrefly: ignore
+    competitive_ranks["season"] = last_season_played
 
     return competitive_ranks
 
@@ -398,7 +398,7 @@ def _parse_heroes_comparisons(top_heroes_section: LexborNode) -> dict[str, Any]:
     """Parse heroes comparisons (top heroes by category)"""
     categories = _get_heroes_options(top_heroes_section)
 
-    heroes_comparisons = {
+    heroes_comparisons: dict[str, Any] = {
         string_to_snakecase(
             get_real_category_name(categories[category.attributes["data-category-id"]]),
         ): {
@@ -445,7 +445,7 @@ def _parse_heroes_comparisons(top_heroes_section: LexborNode) -> dict[str, Any]:
             category.value not in heroes_comparisons
             or not heroes_comparisons[category.value]["values"]
         ):
-            heroes_comparisons[category.value] = None  # pyrefly: ignore
+            heroes_comparisons[category.value] = None
 
     return heroes_comparisons
 
@@ -483,7 +483,7 @@ def _parse_career_stats(career_stats_section: LexborNode) -> dict[str, Any]:
     """Parse detailed career stats per hero"""
     heroes_options = _get_heroes_options(career_stats_section, key_prefix="option-")
 
-    career_stats = {}
+    career_stats: dict[str, Any] = {}
 
     for hero_container in career_stats_section.iter():
         # Hero container should be span with "stats-container" class
@@ -500,7 +500,7 @@ def _parse_career_stats(career_stats_section: LexborNode) -> dict[str, Any]:
 
         hero_key = get_hero_keyname(heroes_options[stats_hero_class])
 
-        career_stats[hero_key] = []  # pyrefly: ignore
+        career_stats[hero_key] = []
         # Hero container children are div with "category" class
         for card_stat in hero_container.iter():
             # Content div should be the only child ("content" class)

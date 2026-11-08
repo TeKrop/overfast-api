@@ -113,7 +113,7 @@ def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:
         .upper()
     )
     return (
-        CompetitiveRole.DAMAGE  # pyrefly: ignore
+        CompetitiveRole.DAMAGE  # pyrefly: ignore[missing-attribute]
         if icon_role_key == "OFFENSE"
         else CompetitiveRole[icon_role_key]
     )

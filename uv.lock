@@ -1116,6 +1116,7 @@ dev = [
     { name = "pytest-randomly" },
     { name = "pytest-xdist" },
     { name = "ruff" },
+    { name = "types-objgraph" },
 ]
 
 [package.metadata]
@@ -1149,6 +1150,7 @@ dev = [
     { name = "pytest-randomly", specifier = "==5.0.*" },
     { name = "pytest-xdist", specifier = "==3.8.*" },
     { name = "ruff", specifier = "==0.17.*" },
+    { name = "types-objgraph" },
 ]
 
 [[package]]
@@ -1790,6 +1792,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/03/51/d33db42cc72ffd8c30777547b42d01f0cbf9d95a770457698d0174b3ed71/typer-0.27.3.tar.gz", hash = "sha256:d0396f770a560ab1b0a8504e13b5f254b728cedb05c61cf0359e944e50ce8901", size = 205303, upload-time = "2026-10-06T17:24:16.61Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/07/ea/2e31b67051e91a133189e9c000c222502ddc6969856416de0d095de4c0b0/typer-0.27.3-py3-none-any.whl", hash = "sha256:e50022f28b82a86313e54501317a1db64bf8f8d036ff8cfe5ca7e47675454aff", size = 123312, upload-time = "2026-10-06T17:24:15.054Z" },
+]
+
+[[package]]
+name = "types-objgraph"
+version = "3.7.0.20261018"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a4/c1/add9dcbd444df42732a6a390a91cd147cb45f32b4128b38816d861e4a09e/types_objgraph-3.7.0.20261018.tar.gz", hash = "sha256:d2fcc2b9d8ab5d030aaa08b07016bd6c167d7dd05a2ff56d8c19b3ab9ed54568", size = 7891, upload-time = "2026-10-18T06:44:07.551Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e1/cf/8d39dee525a1039b864f346aea5617f1aaa246d0d4d31f4d7d908c750da0/types_objgraph-3.7.0.20261018-py3-none-any.whl", hash = "sha256:0fde724a04a84f2a0b212e5433e60aeb4bcf27d20f0cbd8d364da7524ab86de6", size = 8096, upload-time = "2026-10-18T06:44:06.616Z" },
 ]
 
 [[package]]

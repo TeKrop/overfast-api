@@ -35,7 +35,7 @@ _HERO_STATS = [
 _FULL_STATS = {
     _PC_KEY: {
         _QP_KEY: {
-            "heroes_comparisons": {},  # pyrefly: ignore
+            "heroes_comparisons": {},  # pyrefly: ignore[implicit-any-empty-container]
             "career_stats": {"tracer": _HERO_STATS, "genji": _HERO_STATS},
         },
         _COMP_KEY: None,
