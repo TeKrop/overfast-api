@@ -479,6 +479,67 @@ def _parse_category_stats(content_div: LexborNode) -> list[dict[str, Any]]:
     return stats
 
 
+def _parse_category_card(
+    card_stat: LexborNode,
+    hero_key: str,
+) -> dict[str, Any] | None:
+    """Parse one category card of a hero; return None if malformed"""
+    # Content div should be the only child ("content" class)
+    content_div = card_stat.first_child
+
+    # Ensure we have everything we need
+    if (
+        not content_div
+        or not content_div.first_child
+        or not content_div.first_child.first_child
+    ):
+        logger.warning("Missing content div for hero {}", hero_key)
+        return None
+
+    # Label should be the first div within content ("header" class)
+    category_label = content_div.first_child.first_child.text()
+
+    # Skip empty category labels (malformed HTML)
+    if not category_label or not category_label.strip():
+        logger.warning("Empty category label for hero {}, skipping", hero_key)
+        return None
+
+    # Normalize localized category names to English
+    normalized_category_label = normalize_career_stat_category_name(category_label)
+
+    # Skip if normalization resulted in empty string
+    if not normalized_category_label or not normalized_category_label.strip():
+        logger.warning(
+            "Category label normalized to empty for hero {} (original: {!r}), skipping",
+            hero_key,
+            category_label,
+        )
+        return None
+
+    # Convert to snake_case for category key
+    category_key = string_to_snakecase(normalized_category_label)
+
+    # Skip if snake_case conversion resulted in empty string
+    if not category_key:
+        logger.warning(
+            "Category key is empty after snake_case conversion for hero {}"
+            " (normalized label: {!r}, original: {!r}), skipping",
+            hero_key,
+            normalized_category_label,
+            category_label,
+        )
+        return None
+
+    # Parse all stats for this category
+    stats = _parse_category_stats(content_div)
+
+    return {
+        "category": category_key,
+        "label": normalized_category_label,
+        "stats": stats,
+    }
+
+
 def _parse_career_stats(career_stats_section: LexborNode) -> dict[str, Any]:
     """Parse detailed career stats per hero"""
     heroes_options = _get_heroes_options(career_stats_section, key_prefix="option-")
@@ -500,67 +561,11 @@ def _parse_career_stats(career_stats_section: LexborNode) -> dict[str, Any]:
 
         hero_key = get_hero_keyname(heroes_options[stats_hero_class])
 
-        career_stats[hero_key] = []
-        # Hero container children are div with "category" class
-        for card_stat in hero_container.iter():
-            # Content div should be the only child ("content" class)
-            content_div = card_stat.first_child
-
-            # Ensure we have everything we need
-            if (
-                not content_div
-                or not content_div.first_child
-                or not content_div.first_child.first_child
-            ):
-                logger.warning("Missing content div for hero {}", hero_key)
-                continue
-
-            # Label should be the first div within content ("header" class)
-            category_label = content_div.first_child.first_child.text()
-
-            # Skip empty category labels (malformed HTML)
-            if not category_label or not category_label.strip():
-                logger.warning("Empty category label for hero {}, skipping", hero_key)
-                continue
-
-            # Normalize localized category names to English
-            normalized_category_label = normalize_career_stat_category_name(
-                category_label
-            )
-
-            # Skip if normalization resulted in empty string
-            if not normalized_category_label or not normalized_category_label.strip():
-                logger.warning(
-                    "Category label normalized to empty for hero {} (original: {!r}), skipping",
-                    hero_key,
-                    category_label,
-                )
-                continue
-
-            # Convert to snake_case for category key
-            category_key = string_to_snakecase(normalized_category_label)
-
-            # Skip if snake_case conversion resulted in empty string
-            if not category_key:
-                logger.warning(
-                    "Category key is empty after snake_case conversion for hero {}"
-                    " (normalized label: {!r}, original: {!r}), skipping",
-                    hero_key,
-                    normalized_category_label,
-                    category_label,
-                )
-                continue
-
-            # Parse all stats for this category
-            stats = _parse_category_stats(content_div)
-
-            career_stats[hero_key].append(
-                {
-                    "category": category_key,
-                    "label": normalized_category_label,
-                    "stats": stats,
-                },
-            )
+        career_stats[hero_key] = [
+            category
+            for card_stat in hero_container.iter()
+            if (category := _parse_category_card(card_stat, hero_key))
+        ]
 
         # For a reason, sometimes the hero is in the dropdown but there
         # is no stat to show. In this case, remove it as if there was
