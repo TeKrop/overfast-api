@@ -135,13 +135,13 @@ class TestEnqueueTaskDispatch:
     ):
         """If redis raises, enqueue swallows the exception and returns effective_id."""
         queue = ValkeyTaskQueue(fake_redis)
-        monkeypatch.setattr(
-            fake_redis, "set", AsyncMock(side_effect=RuntimeError("redis down"))
-        )
+        failing = AsyncMock(side_effect=RuntimeError("redis down"))
+        monkeypatch.setattr(fake_redis, "set", failing)
 
         result = await queue.enqueue("refresh_heroes", job_id="boom")
 
         assert result == "boom"
+        failing.assert_awaited_once()
 
 
 class TestIsJobPendingOrRunningExceptionHandling:
@@ -153,12 +153,12 @@ class TestIsJobPendingOrRunningExceptionHandling:
     ):
         """If redis raises, is_job_pending_or_running returns False."""
         queue = ValkeyTaskQueue(fake_redis)
-        monkeypatch.setattr(
-            fake_redis, "exists", AsyncMock(side_effect=RuntimeError("redis down"))
-        )
+        failing = AsyncMock(side_effect=RuntimeError("redis down"))
+        monkeypatch.setattr(fake_redis, "exists", failing)
         result = await queue.is_job_pending_or_running("any-job")
 
         assert result is False
+        failing.assert_awaited_once()
 
 
 class TestReleaseJob:
@@ -197,7 +197,8 @@ class TestReleaseJob:
     ):
         """If redis raises during release, the exception is swallowed."""
         queue = ValkeyTaskQueue(fake_redis)
-        monkeypatch.setattr(
-            fake_redis, "delete", AsyncMock(side_effect=RuntimeError("redis down"))
-        )
+        failing = AsyncMock(side_effect=RuntimeError("redis down"))
+        monkeypatch.setattr(fake_redis, "delete", failing)
         await queue.release_job("any-job")
+
+        failing.assert_awaited_once()
