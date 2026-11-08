@@ -112,11 +112,7 @@ def get_role_key_from_icon(icon_url: str) -> CompetitiveRole:
         .split(".", maxsplit=1)[0]  # inline-SVG symbol ids: "TANK.<hash>.SVG#ICON"
         .upper()
     )
-    return (
-        CompetitiveRole.DAMAGE  # pyrefly: ignore[missing-attribute]
-        if icon_role_key == "OFFENSE"
-        else CompetitiveRole[icon_role_key]
-    )
+    return CompetitiveRole["DAMAGE" if icon_role_key == "OFFENSE" else icon_role_key]
 
 
 def get_stats_hero_class(hero_class: str | None) -> str:

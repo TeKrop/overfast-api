@@ -261,3 +261,11 @@ min-severity = "warn"
 matches = "tests/**"
 [tool.pyrefly.sub-config.errors]
 missing-attribute = false
+implicit-any-empty-container = false
+implicit-any-lambda = false
+
+# Functional StrEnum built from CSV: member list is dynamic by design
+[[tool.pyrefly.sub-config]]
+matches = "app/domain/enums.py"
+[tool.pyrefly.sub-config.errors]
+invalid-argument = false
