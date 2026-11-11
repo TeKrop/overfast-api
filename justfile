@@ -40,6 +40,7 @@ lint:
     @echo "Running linter..."
     uv run ruff check --fix --exit-non-zero-on-fix
     uv run lint-imports
+    uv run complexipy app -q
 
 # run formatter
 format:

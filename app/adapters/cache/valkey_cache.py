@@ -309,42 +309,43 @@ class ValkeyCache(metaclass=Singleton):
 
         _batch_size = 1000
         status_prefix = settings.unknown_player_status_key_prefix
-        pattern = f"{status_prefix}:*"
         evicted = 0
-
         batch: list[str] = []
 
-        async def _process_batch(keys: list[str]) -> int:
-            if not keys:
-                return 0
-            count = 0
-            values = await self.valkey_server.mget(*keys)
-            for key, value in zip(keys, values, strict=True):
-                if value is None:
-                    continue
-                status = json.loads(value)
-                if status.get("check_count", 0) < min_count:
-                    player_id = key.removeprefix(f"{status_prefix}:")
-                    await self.delete_player_status(player_id)
-                    count += 1
-            return count
-
         async for raw_key in self.valkey_server.scan_iter(
-            match=pattern, count=_batch_size
+            match=f"{status_prefix}:*", count=_batch_size
         ):
-            key_str = raw_key.decode("utf-8") if isinstance(raw_key, bytes) else raw_key
-            batch.append(key_str)
+            batch.append(
+                raw_key.decode("utf-8") if isinstance(raw_key, bytes) else raw_key
+            )
             if len(batch) >= _batch_size:
-                evicted += await _process_batch(batch)
+                evicted += await self._evict_low_count_batch(
+                    batch, status_prefix, min_count
+                )
                 batch.clear()
 
-        evicted += await _process_batch(batch)
+        evicted += await self._evict_low_count_batch(batch, status_prefix, min_count)
 
         logger.info(
             "Evicted {} unknown-player status entries with check_count < {}",
             evicted,
             min_count,
         )
+
+    async def _evict_low_count_batch(
+        self, keys: list[str], status_prefix: str, min_count: int
+    ) -> int:
+        """MGET a batch of status keys and delete those below min_count"""
+        if not keys:
+            return 0
+        count = 0
+        values = await self.valkey_server.mget(*keys)
+        for key, value in zip(keys, values, strict=True):
+            if value is None or json.loads(value).get("check_count", 0) >= min_count:
+                continue
+            await self.delete_player_status(key.removeprefix(f"{status_prefix}:"))
+            count += 1
+        return count
 
     @handle_valkey_error(default_return=None)
     async def bgsave(self) -> None:

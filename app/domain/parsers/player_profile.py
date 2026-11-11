@@ -8,6 +8,7 @@ This module handles parsing of player profile HTML including:
 """
 
 import re
+from enum import Enum
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Any
 
@@ -615,42 +616,30 @@ def filter_stats_by_query(
     Returns:
         Filtered dict of career stats
     """
-    filtered_data = stats or {}
+    stats = stats or {}
 
-    # Normalize platform to string key
-    if platform:
-        platform_key = str(platform.value if hasattr(platform, "value") else platform)
-    else:
-        # Determine platform if not specified
-        possible_platforms = [
-            pk
-            for pk, platform_data in filtered_data.items()
-            if platform_data is not None
-        ]
-        if possible_platforms:
-            # Take the first one of the list, usually there will be only one.
-            # If there are two, the PC stats should come first
-            platform_key = possible_platforms[0]
-        else:
-            return {}
-
-    filtered_data = filtered_data.get(platform_key) or {}
-    if not filtered_data:
+    # Without a platform filter, take the first available one (PC comes first)
+    platform_key = (
+        _to_key(platform)
+        if platform
+        else next((pk for pk, data in stats.items() if data is not None), None)
+    )
+    if platform_key is None:
         return {}
 
-    # Normalize gamemode to string key
-    gamemode_key = str(gamemode.value) if hasattr(gamemode, "value") else gamemode
-    filtered_data = filtered_data.get(gamemode_key) or {}
-    if not filtered_data:
-        return {}
-
-    filtered_data = filtered_data.get("career_stats") or {}
+    gamemodes = stats.get(platform_key) or {}
+    career_stats = (gamemodes.get(_to_key(gamemode)) or {}).get("career_stats") or {}
 
     return {
         hero_key: statistics
-        for hero_key, statistics in filtered_data.items()
+        for hero_key, statistics in career_stats.items()
         if not hero or hero == hero_key
     }
+
+
+def _to_key(value: Enum | str) -> str:
+    """Normalize an enum or string filter to its string key"""
+    return str(value.value) if isinstance(value, Enum) else value
 
 
 def filter_all_stats_data(
@@ -670,57 +659,35 @@ def filter_all_stats_data(
         Filtered stats dict (may set platforms/gamemodes to None if not matching),
         or None if no stats data exists
     """
-    # Return None if no stats data
-    if stats is None:
-        return None
-
-    # Check if stats dict is empty or all values are None
+    # No stats data, or all platforms empty
     if not stats or all(v is None for v in stats.values()):
         return None
 
-    stats_data = stats
-
-    # Return early if no filters (ensure both platform keys exist)
-    if not platform and not gamemode:
-        return {
-            PlayerPlatform.PC.value: stats_data.get(PlayerPlatform.PC.value),
-            PlayerPlatform.CONSOLE.value: stats_data.get(PlayerPlatform.CONSOLE.value),
-        }
-
-    # Normalize filters to string keys
-    platform_filter: str | None = None
-    if platform:
-        platform_filter = (
-            str(platform.value) if hasattr(platform, "value") else platform
-        )
-
-    gamemode_filter: str | None = None
-    if gamemode:
-        gamemode_filter = (
-            str(gamemode.value) if hasattr(gamemode, "value") else gamemode
-        )
+    platform_filter = _to_key(platform) if platform else None
+    gamemode_filter = _to_key(gamemode) if gamemode else None
 
     # Ensure both platform keys exist in output
-    filtered_data = {}
-    for platform_enum in PlayerPlatform:
-        platform_key = platform_enum.value
-        platform_data = stats_data.get(platform_key)
+    return {
+        platform_enum.value: _filter_platform_data(
+            stats.get(platform_enum.value),
+            platform_enum.value == platform_filter or platform_filter is None,
+            gamemode_filter,
+        )
+        for platform_enum in PlayerPlatform
+    }
 
-        if platform_filter and platform_key != platform_filter:
-            filtered_data[platform_key] = None
-            continue
 
-        if platform_data is None:
-            filtered_data[platform_key] = None
-            continue
-
-        if gamemode_filter is None:
-            filtered_data[platform_key] = platform_data
-            continue
-
-        filtered_data[platform_key] = {
-            gamemode_key: (gamemode_data if gamemode_key == gamemode_filter else None)
-            for gamemode_key, gamemode_data in platform_data.items()
-        }
-
-    return filtered_data
+def _filter_platform_data(
+    platform_data: dict[str, Any] | None,
+    platform_selected: bool,
+    gamemode_filter: str | None,
+) -> dict[str, Any] | None:
+    """Keep a platform's data if selected, nulling gamemodes not matching the filter"""
+    if platform_data is None or not platform_selected:
+        return None
+    if gamemode_filter is None:
+        return platform_data
+    return {
+        gamemode_key: gamemode_data if gamemode_key == gamemode_filter else None
+        for gamemode_key, gamemode_data in platform_data.items()
+    }

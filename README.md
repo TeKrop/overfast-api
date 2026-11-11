@@ -79,7 +79,7 @@ The code quality is checked using `ruff` for linting and formatting, and `pyrefl
 
 ```shell
 just check     # Run pyrefly type checker
-just lint      # Run ruff linter
+just lint      # Run ruff linter, import-linter contracts and complexipy complexity check
 just format    # Run ruff formatter
 ```
 

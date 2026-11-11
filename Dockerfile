@@ -29,8 +29,9 @@ COPY ./static /code/static
 # For dev image, copy the tests and install necessary dependencies
 FROM main AS dev
 # build-base needed as pyinstrument/memray have no musl wheels for 3.15 yet
+# complexipy has no musl wheel and its musl build fails to load on Alpine; it runs on the host/CI only
 RUN apk add --no-cache build-base \
-    && uv sync --frozen --no-cache \
+    && uv sync --frozen --no-cache --no-install-package complexipy \
     && apk del build-base \
     && apk add --no-cache libstdc++
 COPY ./tests /code/tests

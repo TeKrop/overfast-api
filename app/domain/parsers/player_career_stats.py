@@ -33,17 +33,7 @@ def extract_career_stats_from_profile(profile_data: dict[str, Any]) -> dict[str,
             platform: {
                 gamemode: {
                     "career_stats": {
-                        hero_key: (
-                            {
-                                stat_group["category"]: {
-                                    stat["key"]: stat["value"]
-                                    for stat in stat_group["stats"]
-                                }
-                                for stat_group in statistics
-                            }
-                            if statistics
-                            else None
-                        )
+                        hero_key: _flatten_statistics(statistics)
                         for hero_key, statistics in gamemode_stats[
                             "career_stats"
                         ].items()
@@ -55,6 +45,20 @@ def extract_career_stats_from_profile(profile_data: dict[str, Any]) -> dict[str,
             for platform, platform_stats in profile_data["stats"].items()
             if platform_stats
         },
+    }
+
+
+def _flatten_statistics(
+    statistics: list[dict[str, Any]] | None,
+) -> dict[str, Any] | None:
+    """Turn a hero's list of stat groups into {category: {key: value}}"""
+    if not statistics:
+        return None
+    return {
+        stat_group["category"]: {
+            stat["key"]: stat["value"] for stat in stat_group["stats"]
+        }
+        for stat_group in statistics
     }
 
 
