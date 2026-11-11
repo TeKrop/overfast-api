@@ -250,6 +250,22 @@ wheels = [
 ]
 
 [[package]]
+name = "complexipy"
+version = "8.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/84/04/b473a547aba2a1971315bd30ec720645ec1cf5a6df39d3271fd9dab7f4c7/complexipy-8.3.0.tar.gz", hash = "sha256:dff07395a875a3410a8ced2edbd8fc611c349b88f05f339c0b64f08bcac366c1", size = 239890, upload-time = "2026-10-27T04:59:13.569Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/59/59/eb0a32175878dad652de847230ea7d8a3a840fb50044bf2a118946ad54a6/complexipy-8.3.0-cp315-cp315-macosx_10_12_x86_64.whl", hash = "sha256:87bf06fd0141c4e917529d82b8c2ba0e7d3fceaae819ec7503f80931856efec0", size = 4525509, upload-time = "2026-10-27T04:58:07.319Z" },
+    { url = "https://files.pythonhosted.org/packages/97/be/f030c345f5832edc77ab75249be74b2415266f099a71083f8b8149c2304e/complexipy-8.3.0-cp315-cp315-macosx_11_0_arm64.whl", hash = "sha256:4d77344fcdb9da425ec2ad562c848cee836fa490057994941b5f07af9905981c", size = 4427029, upload-time = "2026-10-27T04:58:09.308Z" },
+    { url = "https://files.pythonhosted.org/packages/d5/34/28c7b238f66761d5157f54a17295d304ecb18dea8d839af9d6951b809be9/complexipy-8.3.0-cp315-cp315-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:aefcd3a167f341614a52f4132dbf23ba72c20fabc2fb27e724df388a52e899f3", size = 5162855, upload-time = "2026-10-27T04:58:10.991Z" },
+    { url = "https://files.pythonhosted.org/packages/93/10/6388c2b9ae72cd62df1e9360e9e28b2939eaf4de242761fabc7515dbbc68/complexipy-8.3.0-cp315-cp315-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8915a337042f1153ea841304907e28ab61685a51ac7f08775a4c010dd3c11810", size = 4814766, upload-time = "2026-10-27T04:58:12.814Z" },
+    { url = "https://files.pythonhosted.org/packages/5a/65/894044e63bc33be2cf83f2c1a9ed7739fdfd25d35c4e0240b00dd9485046/complexipy-8.3.0-cp315-cp315-win32.whl", hash = "sha256:8c64dcd7e4d13900133237e093e7790ae92c099fb8bb347ea4dad195c041b12f", size = 4018610, upload-time = "2026-10-27T04:58:14.398Z" },
+    { url = "https://files.pythonhosted.org/packages/6a/0d/4ea3fc3a983405d502f34e3d445f87afeb58fe42a4ffa4e298c2e4d181b2/complexipy-8.3.0-cp315-cp315-win_amd64.whl", hash = "sha256:b39d888273fad4f22de169433b2de5da6086069db5e602661f1cd01506e6792d", size = 4322693, upload-time = "2026-10-27T04:58:15.94Z" },
+    { url = "https://files.pythonhosted.org/packages/e4/1b/7d316aee5dce789cd57248cfd6bb2fd61fbd9ba1c103f137f560ed3004f1/complexipy-8.3.0-cp315-cp315t-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:347e876b6f2a5537669135881533a39f4cfd0ef5e9e2a00373be60a17153ca99", size = 5159908, upload-time = "2026-10-27T04:58:17.522Z" },
+    { url = "https://files.pythonhosted.org/packages/2c/f9/f094cdb3bd6334ceb5137c363a8ae49e8c90677d4c56595d710c7c9cc7ff/complexipy-8.3.0-cp315-cp315t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f5bb34c3f6b602a405edc86c0db607bf905d5cc7662b10f64d399b4489f665b0", size = 4810689, upload-time = "2026-10-27T04:58:19.112Z" },
+]
+
+[[package]]
 name = "coverage"
 version = "7.17.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1102,6 +1118,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "complexipy" },
     { name = "fakeredis", extra = ["valkey"] },
     { name = "import-linter" },
     { name = "ipdb" },
@@ -1136,6 +1153,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "complexipy", specifier = "==8.3.*" },
     { name = "fakeredis", extras = ["valkey"], specifier = "==2.40.*" },
     { name = "import-linter", specifier = "==2.15.*" },
     { name = "ipdb", specifier = "==0.13.*" },

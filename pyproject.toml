@@ -45,6 +45,7 @@ dev = [
     "objgraph==3.7.*",
     "pyrefly==1.*",
     "types-objgraph",
+    "complexipy==8.3.*",
 ]
 
 [tool.uv]
@@ -273,3 +274,8 @@ implicit-any-lambda = false
 matches = "app/domain/enums.py"
 [tool.pyrefly.sub-config.errors]
 invalid-argument = false
+
+# Cognitive complexity limit per function (checked by `just lint`, pre-commit, CI)
+[tool.complexipy]
+paths = ["app"]
+max-complexity-allowed = 15

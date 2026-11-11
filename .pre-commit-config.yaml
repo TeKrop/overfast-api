@@ -27,3 +27,9 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+      - id: complexipy
+        name: (complexipy) Checking cognitive complexity
+        entry: uv run complexipy app -q
+        language: system
+        pass_filenames: false
+        always_run: true

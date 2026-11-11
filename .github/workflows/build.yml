@@ -42,6 +42,9 @@ jobs:
       - name: Run import-linter
         run: uv run lint-imports
 
+      - name: Run complexipy
+        run: uv run complexipy app -q
+
       - name: Run pyrefly code analysis
         run: uv run pyrefly check
 

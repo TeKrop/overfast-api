@@ -142,3 +142,5 @@ dump.rdb
 
 # AI Agents
 .opencode
+
+.complexipy_cache/

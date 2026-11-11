@@ -8,7 +8,7 @@ This module computes aggregated player statistics with:
 
 from collections import defaultdict
 from copy import deepcopy
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from app.domain.enums import HeroKey, PlayerGamemode, PlayerPlatform, Role
 from app.domain.parsers.player_helpers import (
@@ -17,6 +17,9 @@ from app.domain.parsers.player_helpers import (
 )
 from app.domain.parsers.player_profile import parse_player_profile_html
 from app.infrastructure.logger import logger
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 # Stat names for aggregation
 GENERIC_STATS_NAMES = [
@@ -80,37 +83,36 @@ def extract_heroes_stats_from_profile(profile_stats: dict[str, Any]) -> dict[str
     }
 
 
+def _iter_career_stats(
+    raw_heroes_stats: dict[str, Any],
+) -> Iterator[tuple[str, str, str, list[dict[str, Any]]]]:
+    """Yield (platform, gamemode, hero_key, hero_stats) for every non-empty entry"""
+    for platform, platform_stats in raw_heroes_stats.items():
+        for gamemode, gamemode_stats in platform_stats.items():
+            if not gamemode_stats:
+                continue
+            for hero_key, hero_stats in gamemode_stats["career_stats"].items():
+                if hero_stats and hero_key != "all-heroes":
+                    yield platform, gamemode, hero_key, hero_stats
+
+
 def _compute_heroes_stats(raw_heroes_stats: dict[str, Any]) -> dict[str, Any]:
     """Compute heroes stats for every gamemode and platform"""
     heroes_stats: dict[str, Any] = {hero_key: defaultdict(dict) for hero_key in HeroKey}
 
-    for platform, platform_stats in raw_heroes_stats.items():
-        platform_gamemodes_stats = {
-            gamemode: gamemode_stats
-            for gamemode, gamemode_stats in platform_stats.items()
-            if gamemode_stats
-        }
-
-        for gamemode, gamemode_stats in platform_gamemodes_stats.items():
-            career_stats = {
-                hero_key: hero_stats
-                for hero_key, hero_stats in gamemode_stats["career_stats"].items()
-                if hero_stats and hero_key != "all-heroes"
-            }
-
-            for hero_key, hero_stats in career_stats.items():
-                if hero_key not in heroes_stats:
-                    logger.info(
-                        "Unknown hero '{}' in career stats, skipping"
-                        " (platform={}, gamemode={})",
-                        hero_key,
-                        platform,
-                        gamemode,
-                    )
-                    continue
-                heroes_stats[hero_key][platform][gamemode] = _compute_hero_stats(
-                    hero_stats
-                )
+    for platform, gamemode, hero_key, hero_stats in _iter_career_stats(
+        raw_heroes_stats
+    ):
+        if hero_key not in heroes_stats:
+            logger.info(
+                "Unknown hero '{}' in career stats, skipping"
+                " (platform={}, gamemode={})",
+                hero_key,
+                platform,
+                gamemode,
+            )
+            continue
+        heroes_stats[hero_key][platform][gamemode] = _compute_hero_stats(hero_stats)
 
     return heroes_stats
 
@@ -199,48 +201,44 @@ def compute_heroes_data(
     if not heroes_stats:
         return None
 
-    # Init heroes data by aggregating across platforms/gamemodes
-    computed_heroes_stats = {}
-
-    for hero_key, hero_stats in heroes_stats.items():
-        computed_heroes_stats[hero_key] = deepcopy(STATS_PLACEHOLDER)
-
-        # Retrieve raw data from heroes
-        hero_platforms = {platform for platform in platforms if platform in hero_stats}
-        for platform in hero_platforms:
-            hero_platform_gamemodes = {
-                gamemode for gamemode in gamemodes if gamemode in hero_stats[platform]
-            }
-
-            for gamemode in hero_platform_gamemodes:
-                for stat_name in GENERIC_STATS_NAMES:
-                    computed_heroes_stats[hero_key][stat_name] += hero_stats[platform][
-                        gamemode
-                    ][stat_name]
-                for stat_name in TOTAL_STATS_NAMES:
-                    computed_heroes_stats[hero_key]["total"][stat_name] += hero_stats[
-                        platform
-                    ][gamemode]["total"][stat_name]
-
-    # Calculate special values (winrate, kda, averages)
-    for hero_key, hero_stats in computed_heroes_stats.items():
-        # Ignore computation for heroes without stats
-        if (
-            not isinstance(hero_stats["time_played"], int)
-            or hero_stats["time_played"] <= 0
-        ):
-            continue
-
-        computed_heroes_stats[hero_key]["winrate"] = _calculate_winrate(hero_stats)
-        computed_heroes_stats[hero_key]["kda"] = _calculate_kda(hero_stats)
-        computed_heroes_stats[hero_key]["average"] = _calculate_averages(hero_stats)
-
-    # Only return the heroes for which we have stats
-    return {
-        hero_key: hero_stats
-        for hero_key, hero_stats in computed_heroes_stats.items()
-        if isinstance(hero_stats["time_played"], int) and hero_stats["time_played"] > 0
+    computed_heroes_stats = {
+        hero_key: _aggregate_hero_stats(hero_stats, gamemodes, platforms)
+        for hero_key, hero_stats in heroes_stats.items()
     }
+
+    # Only keep heroes with stats, and compute special values (winrate, kda, averages)
+    result = {}
+    for hero_key, hero_stats in computed_heroes_stats.items():
+        if not _has_playtime(hero_stats):
+            continue
+        hero_stats["winrate"] = _calculate_winrate(hero_stats)
+        hero_stats["kda"] = _calculate_kda(hero_stats)
+        hero_stats["average"] = _calculate_averages(hero_stats)
+        result[hero_key] = hero_stats
+    return result
+
+
+def _has_playtime(stat: dict[str, Any]) -> bool:
+    return isinstance(stat["time_played"], int) and stat["time_played"] > 0
+
+
+def _aggregate_hero_stats(
+    hero_stats: dict[str, Any],
+    gamemodes: list[PlayerGamemode],
+    platforms: list[PlayerPlatform],
+) -> dict[str, Any]:
+    """Sum a hero's raw stats across the selected platforms and gamemodes"""
+    aggregated = deepcopy(STATS_PLACEHOLDER)
+    for platform in platforms:
+        for gamemode in gamemodes:
+            raw = hero_stats.get(platform, {}).get(gamemode)
+            if raw is None:
+                continue
+            for stat_name in GENERIC_STATS_NAMES:
+                aggregated[stat_name] += raw[stat_name]
+            for stat_name in TOTAL_STATS_NAMES:
+                aggregated["total"][stat_name] += raw["total"][stat_name]
+    return aggregated
 
 
 def compute_roles_stats(heroes_stats: dict[str, Any]) -> dict[str, Any]:
