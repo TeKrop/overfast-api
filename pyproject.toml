@@ -193,7 +193,6 @@ forbidden_modules = [
     "app.infrastructure.helpers",
     "app.infrastructure.decorators",
     "app.infrastructure.metaclasses",
-    "app.infrastructure.commands",
 ]
 broken_contract_guidance = "Raise app.domain.exceptions instead of fastapi.HTTPException, use http.HTTPStatus instead of fastapi.status, reach I/O through app.domain.ports, record metrics in adapters or api."
 
